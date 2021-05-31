@@ -32,7 +32,7 @@ void generic_function::load_hash_list(bool exit_if_no_hash_list)
 
         hash_list_file.seekg(0, hash_list_file.end);
 
-        uint64_t hash_list_file_size = (uint64_t)hash_list_file.tellg();
+        uint64_t hash_list_file_size = hash_list_file.tellg();
 
         hash_list_file.seekg(0, hash_list_file.beg);
 
@@ -40,6 +40,24 @@ void generic_function::load_hash_list(bool exit_if_no_hash_list)
 
         hash_list_file.read(hash_list_data.data(), hash_list_file_size);
 
+        const auto* file_data = hash_list_data.data();
+    	
+        // Count approximate number of hashes.
+        uint64_t approximate_hash_count = 0;
+
+    	for (uint64_t i = 0; i < hash_list_file_size; ++i)
+    	{
+            if (file_data[i] == '\n')
+            {
+                ++approximate_hash_count;
+            }
+    	}
+
+    	// Reverse enough slots in the hash lists so we avoid unnecessary re-allocations.
+        hash_list_hash_file_names.reserve(approximate_hash_count);
+        hash_list_hash_value_strings.reserve(approximate_hash_count);
+        hash_list_hash_strings.reserve(approximate_hash_count);
+    	
         bool done = false;
         uint64_t position = 0;
         uint64_t last_position = 0;
@@ -47,43 +65,41 @@ void generic_function::load_hash_list(bool exit_if_no_hash_list)
 
         while (!done)
         {
-            if (hash_list_data.data()[position] == 0x0A)
+            if (file_data[position] == '\n')
             {
                 line_count++;
 
-                hash_list_data.data()[position] = 0x0;
-
                 if (line_count == 3)
                 {
-                    std::string temp_hash_string = std::string(reinterpret_cast<char*>(&hash_list_data.data()[last_position]));
+                    std::string_view temp_hash_string(&file_data[last_position], position - last_position);
 
                     size_t pos = temp_hash_string.find_first_of('=');
 
-                    std::string hash_list_version_string = temp_hash_string.substr((pos + 1));
+                    std::string_view hash_list_version_string = temp_hash_string.substr((pos + 1));
 
-                    hash_list_version = std::stoi(hash_list_version_string);
+                    hash_list_version = std::stoi(std::string(hash_list_version_string));
                 }
                 else if (line_count > 3)
                 {
-                    std::string temp_hash_string = std::string(reinterpret_cast<char*>(&hash_list_data.data()[last_position]));
+                    std::string_view temp_hash_string(&file_data[last_position], position - last_position);
 
                     size_t pos = temp_hash_string.find_first_of(',');
 
-                    temp_hash_string = util::to_lower_case(temp_hash_string);
+                    std::string_view hash = temp_hash_string.substr(0, (pos - 5));
 
-                    std::string hash = temp_hash_string.substr(0, (pos - 5));
+                    std::string_view hash_file_name = temp_hash_string.substr(0, pos);
 
-                    std::string hash_file_name = temp_hash_string.substr(0, pos);
+                    std::string_view hash_string = temp_hash_string.substr(pos + 1, temp_hash_string.length() - (pos + 1));
 
-                    std::string hash_string = temp_hash_string.substr(pos + 1, temp_hash_string.length() - (pos + 1));
+                    std::string hash_str = std::string(hash);
+                	
+                    hash_list_hash_file_names.push_back(std::string(hash_file_name));
 
-                    hash_list_hash_file_names.push_back(hash_file_name);
+                    hash_list_hash_value_strings.push_back(hash_str);
 
-                    hash_list_hash_value_strings.push_back(hash);
+                    hash_list_hash_strings.push_back(std::string(hash_string));
 
-                    hash_list_hash_strings.push_back(hash_string);
-
-                    hash_list_hash_map[std::strtoull(hash.c_str(), nullptr, 16)] = hash_list_hash_file_names.size() - 1;
+                    hash_list_hash_map[std::strtoull(hash_str.c_str(), nullptr, 16)] = hash_list_hash_file_names.size() - 1;
                 }
 
                 last_position = position + 1;
