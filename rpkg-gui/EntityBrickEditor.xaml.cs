@@ -1,22 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
+using System.Windows.Forms;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using System.IO;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
-using System.Threading;
+using System.Windows.Threading;
 using MahApps.Metro.Controls;
-using ControlzEx.Theming;
+using Ookii.Dialogs.Wpf;
+using Brushes = System.Windows.Media.Brushes;
+using Button = System.Windows.Controls.Button;
+using Color = System.Windows.Media.Color;
+using ComboBox = System.Windows.Controls.ComboBox;
+using Label = System.Windows.Controls.Label;
+using TextBox = System.Windows.Controls.TextBox;
 
 namespace rpkg
 {
@@ -34,13 +37,13 @@ namespace rpkg
         {
             if (currentThemeBrightness == "Dark")
             {
-                MainTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
-                MainTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
+                MainTreeView.ForeColor = ColorTranslator.FromHtml("#FFFFFF");
+                MainTreeView.BackColor = ColorTranslator.FromHtml("#252525");
             }
             else if (currentThemeBrightness == "Light")
             {
-                MainTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
-                MainTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+                MainTreeView.ForeColor = ColorTranslator.FromHtml("#000000");
+                MainTreeView.BackColor = ColorTranslator.FromHtml("#FFFFFF");
             }
 
             LoadLoadingWindow();
@@ -63,7 +66,7 @@ namespace rpkg
 
             if (loadingWindowTimer == null)
             {
-                loadingWindowTimer = new System.Windows.Threading.DispatcherTimer();
+                loadingWindowTimer = new DispatcherTimer();
 
                 loadingWindowTimer.Interval = TimeSpan.FromMilliseconds(400);
 
@@ -76,7 +79,7 @@ namespace rpkg
 
         private void LoadingWindowTimer_Tick(object sender, EventArgs e)
         {
-            var timer = (sender as System.Windows.Threading.DispatcherTimer);
+            var timer = (sender as DispatcherTimer);
 
             if (timer == null)
             {
@@ -94,13 +97,13 @@ namespace rpkg
             {
                 if (currentThemeBrightness == "Dark")
                 {
-                    MainTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
-                    MainTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
+                    MainTreeView.ForeColor = ColorTranslator.FromHtml("#FFFFFF");
+                    MainTreeView.BackColor = ColorTranslator.FromHtml("#252525");
                 }
                 else if (currentThemeBrightness == "Light")
                 {
-                    MainTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
-                    MainTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+                    MainTreeView.ForeColor = ColorTranslator.FromHtml("#000000");
+                    MainTreeView.BackColor = ColorTranslator.FromHtml("#FFFFFF");
                 }
 
                 LoadLoadingWindow();
@@ -121,7 +124,7 @@ namespace rpkg
             }
 
             visitedNodes = null;
-            visitedNodes = new List<System.Windows.Forms.TreeNode>();
+            visitedNodes = new List<TreeNode>();
 
             controls = null;
             controls = new List<string>();
@@ -134,7 +137,7 @@ namespace rpkg
             controlJSONPointersTypes = null;
             controlJSONPointersTypes = new List<string>();
             controlZGuids = null;
-            controlZGuids = new List<EntityBrickEditor.ZGuid>();
+            controlZGuids = new List<ZGuid>();
 
             controlCount = 0;
 
@@ -146,7 +149,7 @@ namespace rpkg
             MainTreeView.AfterSelect += MainTreeView_AfterSelect;
 
             {
-                var topItem = new System.Windows.Forms.TreeNode();
+                var topItem = new TreeNode();
 
                 topItem.Text = tempFileNameFull.Replace("(", "").Replace(")", "");
 
@@ -183,9 +186,9 @@ namespace rpkg
 
                         //MessageBoxShow(entryIndex.ToString() + ", " + entryNameLength.ToString() + ", " + entryName);
 
-                        var item = new System.Windows.Forms.TreeNode();
+                        var item = new TreeNode();
 
-                        item.Text = entryName + " (" + entryIndex.ToString() + ") (" + temps_index.ToString() + ")";
+                        item.Text = entryName + " (" + entryIndex + ") (" + temps_index + ")";
 
                         LoadTreeView(ref item);
 
@@ -194,7 +197,7 @@ namespace rpkg
                 }
 
                 int nodeCount = topItem.Nodes.Count;
-                System.Windows.Forms.TreeNode[] nodes = new System.Windows.Forms.TreeNode[nodeCount];
+                TreeNode[] nodes = new TreeNode[nodeCount];
                 topItem.Nodes.CopyTo(nodes, 0);
 
                 MainTreeView.Nodes.Add(topItem);
@@ -219,7 +222,7 @@ namespace rpkg
 
                         //MessageBoxShow(temp_index_hash_reference.ToString());
 
-                        var topItem = new System.Windows.Forms.TreeNode();
+                        var topItem = new TreeNode();
 
                         topItem.Text = brick;
 
@@ -256,9 +259,9 @@ namespace rpkg
 
                                 //MessageBoxShow(entryIndex.ToString() + ", " + entryNameLength.ToString() + ", " + entryName);
 
-                                var item = new System.Windows.Forms.TreeNode();
+                                var item = new TreeNode();
 
-                                item.Text = entryName + " (" + entryIndex.ToString() + ") (" + temp_index_hash_reference.ToString() + ")";
+                                item.Text = entryName + " (" + entryIndex + ") (" + temp_index_hash_reference + ")";
 
                                 LoadTreeView(ref item);
 
@@ -267,7 +270,7 @@ namespace rpkg
                         }
 
                         int nodeCount = topItem.Nodes.Count;
-                        System.Windows.Forms.TreeNode[] nodes = new System.Windows.Forms.TreeNode[nodeCount];
+                        TreeNode[] nodes = new TreeNode[nodeCount];
                         topItem.Nodes.CopyTo(nodes, 0);
 
                         MainTreeView.Nodes.Add(topItem);
@@ -277,7 +280,7 @@ namespace rpkg
             
             MainTreeView.EndUpdate();
 
-            treeViewBackup = new EntityBrickEditor.TreeViewBackup(MainTreeView.Nodes);
+            treeViewBackup = new TreeViewBackup(MainTreeView.Nodes);
 
             message.Close();
 
@@ -287,11 +290,11 @@ namespace rpkg
 
             if (temp_subentity_count != tblu_subentity_count)
             {
-                MessageBoxShow("Warning: There is a subEntities mismatch between the TEMP and TBLU files.\n\nThe TEMP file has " + temp_subentity_count.ToString() + " subEntities\n\nThe TBLU file has " + tblu_subentity_count.ToString() + " subEntities\n\nHaving mismatched subEntities (nodes in the treeview) counts can result in the nodes being misnamed.\n\nAlways look for the newest version of a TEMP file in the patch archives for a given chunk/dlc RPKG.");
+                MessageBoxShow("Warning: There is a subEntities mismatch between the TEMP and TBLU files.\n\nThe TEMP file has " + temp_subentity_count + " subEntities\n\nThe TBLU file has " + tblu_subentity_count + " subEntities\n\nHaving mismatched subEntities (nodes in the treeview) counts can result in the nodes being misnamed.\n\nAlways look for the newest version of a TEMP file in the patch archives for a given chunk/dlc RPKG.");
             }
         }
 
-        private void LoadTreeView(ref System.Windows.Forms.TreeNode masterTreeViewItem)
+        private void LoadTreeView(ref TreeNode masterTreeViewItem)
         {
             string[] header = masterTreeViewItem.Text.Replace("(", "").Replace(")", "").Split(' ');
 
@@ -348,9 +351,9 @@ namespace rpkg
 
                         //MessageBoxShow(entryIndex.ToString() + ", " + entryNameLength.ToString() + ", " + entryName);
 
-                        var itemHashReference = new System.Windows.Forms.TreeNode();
+                        var itemHashReference = new TreeNode();
 
-                        itemHashReference.Text = entryName + " (" + entryIndex.ToString() + ") (" + temp_index_hash_reference.ToString() + ")";
+                        itemHashReference.Text = entryName + " (" + entryIndex + ") (" + temp_index_hash_reference + ")";
 
                         LoadTreeView(ref itemHashReference);
 
@@ -382,9 +385,9 @@ namespace rpkg
 
                     //MessageBoxShow(entryIndex.ToString() + ", " + entryNameLength.ToString() + ", " + entryName);
 
-                    var item2 = new System.Windows.Forms.TreeNode();
+                    var item2 = new TreeNode();
 
-                    item2.Text = entryName + " (" + entryIndex.ToString() + ") (" + temp_temp_index.ToString() + ")";
+                    item2.Text = entryName + " (" + entryIndex + ") (" + temp_temp_index + ")";
 
                     LoadTreeView(ref item2);
 
@@ -429,7 +432,7 @@ namespace rpkg
 
             tempMessage.Show();
 
-            foreach (System.Windows.Forms.TreeNode node in MainTreeView.Nodes)
+            foreach (TreeNode node in MainTreeView.Nodes)
             {
                 if (!foundNode)
                 {
@@ -440,9 +443,9 @@ namespace rpkg
             tempMessage.Close();
         }
 
-        void GoToNode(System.Windows.Forms.TreeNode mainNode, ref string nodeName, ref bool foundNode)
+        void GoToNode(TreeNode mainNode, ref string nodeName, ref bool foundNode)
         {
-            foreach (System.Windows.Forms.TreeNode node in mainNode.Nodes)
+            foreach (TreeNode node in mainNode.Nodes)
             {
                 if (!foundNode)
                 {
@@ -475,7 +478,7 @@ namespace rpkg
             {
                 if (controlZGuids.Count > 0)
                 {
-                    foreach (EntityBrickEditor.ZGuid zguid in controlZGuids)
+                    foreach (ZGuid zguid in controlZGuids)
                     {
                         DependencyObject descendant = FindDescendant(EditorWindow, zguid.controlName);
 
@@ -643,7 +646,7 @@ namespace rpkg
         {
             if (visitedNodes.Count > 1)
             {
-                System.Windows.Forms.TreeNode node;
+                TreeNode node;
 
                 if (MainTreeView.SelectedNode == visitedNodes[visitedNodes.Count - 1] && visitedNodes.Count >= 2)
                 {
@@ -665,11 +668,11 @@ namespace rpkg
             }
         }
 
-        private void MainTreeView_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
+        private void MainTreeView_AfterSelect(object sender, TreeViewEventArgs e)
         {
             if (!hidden)
             {
-                System.Windows.Forms.TreeNode item = (e.Node as System.Windows.Forms.TreeNode);
+                TreeNode item = e.Node;
 
                 if (visitedNodes.Count == 0)
                 {
@@ -685,7 +688,7 @@ namespace rpkg
 
                 //item.IsSelected = true;
 
-                string header = item.Text.ToString();
+                string header = item.Text;
 
                 if (MainTreeView.Nodes.Count > 0)
                 {
@@ -711,7 +714,7 @@ namespace rpkg
                     controlJSONPointersTypes = null;
                     controlJSONPointersTypes = new List<string>();
                     controlZGuids = null;
-                    controlZGuids = new List<EntityBrickEditor.ZGuid>();
+                    controlZGuids = new List<ZGuid>();
 
                     controlCount = 0;
 
@@ -1456,7 +1459,7 @@ namespace rpkg
                                 button.Content = "  GO  ";
                                 button.Margin = new Thickness(4, 0, 4, 0);
                                 button.Background = Brushes.Red;
-                                button.Tag = temp_entity_name + " (" + propertyValueVals[propertyIndex][i] + ") (" + temp_index.ToString() + ")";
+                                button.Tag = temp_entity_name + " (" + propertyValueVals[propertyIndex][i] + ") (" + temp_index + ")";
                                 button.Click += GoToNode_Click;
                                 grid.Children.Add(button);
                                 Grid.SetRow(button, rowCount);
@@ -1840,7 +1843,7 @@ namespace rpkg
                 float.TryParse(propertyValueVals[propertyIndex][3], out a);
             }
 
-            MahApps.Metro.Controls.ColorCanvas colorCanvas = new ColorCanvas();
+            ColorCanvas colorCanvas = new ColorCanvas();
             colorCanvas.Name = "cc_" + colorPickerName;
 
             colorCanvas.R = FloatToByte(r);
@@ -2303,11 +2306,11 @@ namespace rpkg
                 Grid.SetColumn(label, 0);
 
                 TextBox textBox = new TextBox();
-                textBox.Name = "ZGuid" + controlZGuids.Count.ToString();
+                textBox.Name = "ZGuid" + controlZGuids.Count;
 
                 string zguidString = GenerateZGuid(ref propertyValueVals[propertyIndex]);
 
-                EntityBrickEditor.ZGuid zguid = new EntityBrickEditor.ZGuid();
+                ZGuid zguid = new ZGuid();
                 zguid.controlName = textBox.Name;
 
                 zguid.subControlNames = new string[11];
@@ -2389,7 +2392,7 @@ namespace rpkg
 
         private bool ProcessZGuid(string controlName, string zguidString)
         {
-            foreach (EntityBrickEditor.ZGuid zguid in controlZGuids)
+            foreach (ZGuid zguid in controlZGuids)
             {
                 if (zguid.controlName == controlName)
                 {
@@ -2399,7 +2402,7 @@ namespace rpkg
                     {
                         if (zguidData[0].Length == 8 && zguidData[1].Length == 4 && zguidData[2].Length == 4 && zguidData[3].Length == 4 && zguidData[4].Length == 12)
                         {
-                            bool return_value = UInt32.TryParse(zguidData[0], System.Globalization.NumberStyles.HexNumber, null, out zguid._a);
+                            bool return_value = UInt32.TryParse(zguidData[0], NumberStyles.HexNumber, null, out zguid._a);
 
                             if (!return_value)
                             {
@@ -2407,7 +2410,7 @@ namespace rpkg
                                 return false;
                             }
 
-                            return_value = UInt16.TryParse(zguidData[1], System.Globalization.NumberStyles.HexNumber, null, out zguid._b);
+                            return_value = UInt16.TryParse(zguidData[1], NumberStyles.HexNumber, null, out zguid._b);
 
                             if (!return_value)
                             {
@@ -2415,7 +2418,7 @@ namespace rpkg
                                 return false;
                             }
 
-                            return_value = UInt16.TryParse(zguidData[2], System.Globalization.NumberStyles.HexNumber, null, out zguid._c);
+                            return_value = UInt16.TryParse(zguidData[2], NumberStyles.HexNumber, null, out zguid._c);
 
                             if (!return_value)
                             {
@@ -2423,7 +2426,7 @@ namespace rpkg
                                 return false;
                             }
 
-                            return_value = byte.TryParse(zguidData[3].Substring(0,2), System.Globalization.NumberStyles.HexNumber, null, out zguid._d);
+                            return_value = byte.TryParse(zguidData[3].Substring(0,2), NumberStyles.HexNumber, null, out zguid._d);
 
                             if (!return_value)
                             {
@@ -2431,7 +2434,7 @@ namespace rpkg
                                 return false;
                             }
 
-                            return_value = byte.TryParse(zguidData[3].Substring(2, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._e);
+                            return_value = byte.TryParse(zguidData[3].Substring(2, 2), NumberStyles.HexNumber, null, out zguid._e);
 
                             if (!return_value)
                             {
@@ -2439,7 +2442,7 @@ namespace rpkg
                                 return false;
                             }
 
-                            return_value = byte.TryParse(zguidData[4].Substring(0, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._f);
+                            return_value = byte.TryParse(zguidData[4].Substring(0, 2), NumberStyles.HexNumber, null, out zguid._f);
 
                             if (!return_value)
                             {
@@ -2447,7 +2450,7 @@ namespace rpkg
                                 return false;
                             }
 
-                            return_value = byte.TryParse(zguidData[4].Substring(2, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._g);
+                            return_value = byte.TryParse(zguidData[4].Substring(2, 2), NumberStyles.HexNumber, null, out zguid._g);
 
                             if (!return_value)
                             {
@@ -2455,7 +2458,7 @@ namespace rpkg
                                 return false;
                             }
 
-                            return_value = byte.TryParse(zguidData[4].Substring(4, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._h);
+                            return_value = byte.TryParse(zguidData[4].Substring(4, 2), NumberStyles.HexNumber, null, out zguid._h);
 
                             if (!return_value)
                             {
@@ -2463,7 +2466,7 @@ namespace rpkg
                                 return false;
                             }
 
-                            return_value = byte.TryParse(zguidData[4].Substring(6, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._i);
+                            return_value = byte.TryParse(zguidData[4].Substring(6, 2), NumberStyles.HexNumber, null, out zguid._i);
 
                             if (!return_value)
                             {
@@ -2471,7 +2474,7 @@ namespace rpkg
                                 return false;
                             }
 
-                            return_value = byte.TryParse(zguidData[4].Substring(8, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._j);
+                            return_value = byte.TryParse(zguidData[4].Substring(8, 2), NumberStyles.HexNumber, null, out zguid._j);
 
                             if (!return_value)
                             {
@@ -2479,7 +2482,7 @@ namespace rpkg
                                 return false;
                             }
 
-                            return_value = byte.TryParse(zguidData[4].Substring(10, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._k);
+                            return_value = byte.TryParse(zguidData[4].Substring(10, 2), NumberStyles.HexNumber, null, out zguid._k);
 
                             if (!return_value)
                             {
@@ -2489,17 +2492,13 @@ namespace rpkg
 
                             return true;
                         }
-                        else
-                        {
-                            MessageBoxShow("Error: ZGuid value is not 36 characters long and in the format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX.\n\nWhere the Xs are in the range 0-9 and A-F.");
-                            return false;
-                        }
-                    }
-                    else
-                    {
+
                         MessageBoxShow("Error: ZGuid value is not 36 characters long and in the format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX.\n\nWhere the Xs are in the range 0-9 and A-F.");
                         return false;
                     }
+
+                    MessageBoxShow("Error: ZGuid value is not 36 characters long and in the format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX.\n\nWhere the Xs are in the range 0-9 and A-F.");
+                    return false;
                 }
             }
             return false;
@@ -2509,7 +2508,7 @@ namespace rpkg
         {
             string zguidString = "";
 
-            EntityBrickEditor.ZGuid zguid = new EntityBrickEditor.ZGuid();
+            ZGuid zguid = new ZGuid();
 
             bool return_value = UInt32.TryParse(zguidData[0], out zguid._a);
             zguidString += zguid._a.ToString("X2").PadLeft(8, '0') + "-";
@@ -2569,9 +2568,9 @@ namespace rpkg
 
         private string StringByteToStringFloat(byte input)
         {
-            int temp_int = (int)input;
+            int temp_int = input;
 
-            float temp_float = (float)temp_int / 255.0F;
+            float temp_float = temp_int / 255.0F;
 
             return temp_float.ToString();
         }
@@ -2586,7 +2585,7 @@ namespace rpkg
 
             controlsChanged.Add(false);
 
-            string control = "c_" + controlCount.ToString();
+            string control = "c_" + controlCount;
 
             controls.Add(control);
 
@@ -2689,7 +2688,7 @@ namespace rpkg
 
                             var itemHashReference = new TreeViewItem();
 
-                            itemHashReference.Header = entityNameHashReference + " (" + entryDataHashReference[0] + ") (" + temp_index_hash_reference.ToString() + ")";
+                            itemHashReference.Header = entityNameHashReference + " (" + entryDataHashReference[0] + ") (" + temp_index_hash_reference + ")";
 
                             itemHashReference.Expanded += Item_Expanded;
 
@@ -2718,7 +2717,7 @@ namespace rpkg
 
                         var item2 = new TreeViewItem();
 
-                        item2.Header = tempEntityName + " (" + tempEntryData[0] + ") (" + temp_index.ToString() + ")";
+                        item2.Header = tempEntityName + " (" + tempEntryData[0] + ") (" + temp_index + ")";
 
                         item2.Expanded += Item_Expanded;
 
@@ -2745,22 +2744,22 @@ namespace rpkg
                 int totalCount = RpkgLib.get_total_numer_of_temps();
 
                 MessageQuestion messageBox = new MessageQuestion();
-                messageBox.message.Content = "A total of " + changedCount.ToString() + " out of " + totalCount.ToString() + " TEMP files have been changed.\n\nWould you like to continue generating TEMP files for them all?";
+                messageBox.message.Content = "A total of " + changedCount + " out of " + totalCount + " TEMP files have been changed.\n\nWould you like to continue generating TEMP files for them all?";
                 messageBox.ShowDialog();
 
                 if (messageBox.buttonPressed == "OKButton")
                 {
                     MessageBoxShow("WARNING: When selecting the output folder on the next dialog window...\n\nDo not select the Hitman Runtime folder as the output folder otherwise your Hitman game RPKGs could be overwritten!");
 
-                    var folderDialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
+                    var folderDialog = new VistaFolderBrowserDialog();
 
                     folderDialog.Description = "Save Changes And Generate New TEMP file(s):";
 
                     folderDialog.UseDescriptionForTitle = true;
 
-                    if (!System.IO.Directory.Exists(outputFolder))
+                    if (!Directory.Exists(outputFolder))
                     {
-                        outputFolder = System.IO.Directory.GetCurrentDirectory();
+                        outputFolder = Directory.GetCurrentDirectory();
                     }
 
                     folderDialog.SelectedPath = outputFolder;
@@ -2807,22 +2806,22 @@ namespace rpkg
                 int totalCount = RpkgLib.get_total_numer_of_temps();
 
                 MessageQuestion messageBox = new MessageQuestion();
-                messageBox.message.Content = "A total of " + changedCount.ToString() + " out of " + totalCount.ToString() + " TEMP files have been changed.\n\nWould you like to continue generating RPKG files with them all?";
+                messageBox.message.Content = "A total of " + changedCount + " out of " + totalCount + " TEMP files have been changed.\n\nWould you like to continue generating RPKG files with them all?";
                 messageBox.ShowDialog();
 
                 if (messageBox.buttonPressed == "OKButton")
                 {
                     MessageBoxShow("WARNING: When selecting the output folder on the next dialog window...\n\nDo not select the Hitman Runtime folder as the output folder otherwise your Hitman game RPKGs could be overwritten!");
 
-                    var folderDialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
+                    var folderDialog = new VistaFolderBrowserDialog();
 
                     folderDialog.Description = "Save Changes And Generate New Patch RPKG File(s) From TEMP File(s):";
 
                     folderDialog.UseDescriptionForTitle = true;
 
-                    if (!System.IO.Directory.Exists(outputFolder))
+                    if (!Directory.Exists(outputFolder))
                     {
-                        outputFolder = System.IO.Directory.GetCurrentDirectory();
+                        outputFolder = Directory.GetCurrentDirectory();
                     }
 
                     folderDialog.SelectedPath = outputFolder;
@@ -2869,22 +2868,22 @@ namespace rpkg
                 int totalCount = RpkgLib.get_total_numer_of_temps();
 
                 MessageQuestion messageBox = new MessageQuestion();
-                messageBox.message.Content = "A total of " + changedCount.ToString() + " out of " + totalCount.ToString() + " TEMP files have been changed.\n\nWould you like to continue generating TEMP JSON files for them all?";
+                messageBox.message.Content = "A total of " + changedCount + " out of " + totalCount + " TEMP files have been changed.\n\nWould you like to continue generating TEMP JSON files for them all?";
                 messageBox.ShowDialog();
 
                 if (messageBox.buttonPressed == "OKButton")
                 {
                     MessageBoxShow("WARNING: When selecting the output folder on the next dialog window...\n\nDo not select the Hitman Runtime folder as the output folder otherwise your Hitman game RPKGs could be overwritten!");
 
-                    var folderDialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
+                    var folderDialog = new VistaFolderBrowserDialog();
 
                     folderDialog.Description = "Save Changes And Generate New TEMP JSON file(s):";
 
                     folderDialog.UseDescriptionForTitle = true;
 
-                    if (!System.IO.Directory.Exists(outputFolder))
+                    if (!Directory.Exists(outputFolder))
                     {
-                        outputFolder = System.IO.Directory.GetCurrentDirectory();
+                        outputFolder = Directory.GetCurrentDirectory();
                     }
 
                     folderDialog.SelectedPath = outputFolder;
@@ -2920,7 +2919,7 @@ namespace rpkg
         {
             if (searchTEMPsInputTimer == null)
             {
-                searchTEMPsInputTimer = new System.Windows.Threading.DispatcherTimer();
+                searchTEMPsInputTimer = new DispatcherTimer();
 
                 searchTEMPsInputTimer.Interval = TimeSpan.FromMilliseconds(600);
 
@@ -2934,7 +2933,7 @@ namespace rpkg
 
         private void SearchTEMPsTextBox_TimerTimeout(object sender, EventArgs e)
         {
-            var timer = (sender as System.Windows.Threading.DispatcherTimer);
+            var timer = (sender as DispatcherTimer);
 
             if (timer == null)
             {
@@ -2952,7 +2951,7 @@ namespace rpkg
                 string filter = FilterTextBox.Text.ToLower();
                 int childrenVisibleCount = 0;
 
-                foreach (System.Windows.Forms.TreeNode node in MainTreeView.Nodes)
+                foreach (TreeNode node in MainTreeView.Nodes)
                 {
                     FilterNodes(node, ref filter, childrenVisibleCount);
                 }
@@ -2961,7 +2960,7 @@ namespace rpkg
             MainTreeView.EndUpdate();
         }
 
-        private int FilterNodes(System.Windows.Forms.TreeNode parentNode, ref string filter, int childrenVisibleCount)
+        private int FilterNodes(TreeNode parentNode, ref string filter, int childrenVisibleCount)
         {
             int currentChildrenVisibleCount = 0;
 
@@ -2969,7 +2968,7 @@ namespace rpkg
             {
                 if (parentNode.Nodes.Count > 0)
                 {
-                    foreach (System.Windows.Forms.TreeNode node in parentNode.Nodes)
+                    foreach (TreeNode node in parentNode.Nodes)
                     {
                         currentChildrenVisibleCount += FilterNodes(node, ref filter, 0);
                     }
@@ -3023,22 +3022,22 @@ namespace rpkg
             MainTreeView.CollapseAll();
         }
 
-        public class TreeViewBackup : List<EntityBrickEditor.TreeViewBackup>
+        public class TreeViewBackup : List<TreeViewBackup>
         {
-            public System.Windows.Forms.TreeNode Parent { get; }
-            public System.Windows.Forms.TreeNodeCollection Children { get; }
+            public TreeNode Parent { get; }
+            public TreeNodeCollection Children { get; }
 
-            public TreeViewBackup(System.Windows.Forms.TreeNodeCollection children, System.Windows.Forms.TreeNode parent = null)
+            public TreeViewBackup(TreeNodeCollection children, TreeNode parent = null)
             {
                 Parent = parent;
                 Children = children;
-                AddRange(Children.Cast<System.Windows.Forms.TreeNode>().Select(child => new EntityBrickEditor.TreeViewBackup(child.Nodes, child)));
+                AddRange(Children.Cast<TreeNode>().Select(child => new TreeViewBackup(child.Nodes, child)));
             }
 
             public void Restore()
             {
                 Children.Clear();
-                this.ForEach(clone => clone.Restore());
+                ForEach(clone => clone.Restore());
                 Children.AddRange(this.Select(n => n.Parent).ToArray());
             }
         }
@@ -3047,7 +3046,7 @@ namespace rpkg
         {
             RpkgLib.clear_temp_tblu_data();
             hidden = true;
-            this.Hide();
+            Hide();
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -3056,7 +3055,7 @@ namespace rpkg
 
             RpkgLib.clear_temp_tblu_data();
             hidden = true;
-            this.Hide();
+            Hide();
         }
 
         private void MessageBoxShow(string messageBoxString)
@@ -3098,11 +3097,11 @@ namespace rpkg
         public List<UInt32> controlsTEMPIndexes;
         public List<string> controlJSONPointers;
         public List<string> controlJSONPointersTypes;
-        public List<EntityBrickEditor.ZGuid> controlZGuids;
-        public int controlCount = 0;
-        public UInt32 entity_index = 0;
-        public UInt32 temp_index = 0;
-        public UInt32 temps_index = 0;
+        public List<ZGuid> controlZGuids;
+        public int controlCount;
+        public UInt32 entity_index;
+        public UInt32 temp_index;
+        public UInt32 temps_index;
         public int temp_file_version = 0;
         public string tempFileName = "";
         public string tbluFileName = "";
@@ -3110,14 +3109,14 @@ namespace rpkg
         public string tempFileNameFull = "";
         public string inputFolder = "";
         public string outputFolder = "";
-        public bool hidden = false;
-        public bool textBoxesLoaded = false;
-        private System.Windows.Threading.DispatcherTimer searchTEMPsInputTimer;
-        private System.Windows.Threading.DispatcherTimer loadingWindowTimer;
+        public bool hidden;
+        public bool textBoxesLoaded;
+        private DispatcherTimer searchTEMPsInputTimer;
+        private DispatcherTimer loadingWindowTimer;
         public string currentThemeBrightness = "Dark";
-        public EntityBrickEditor.TreeViewBackup treeViewBackup;
+        public TreeViewBackup treeViewBackup;
         public Message message;
-        public List<System.Windows.Forms.TreeNode> visitedNodes;
+        public List<TreeNode> visitedNodes;
 
         enum RPKGStatus
         {
@@ -3142,20 +3141,20 @@ namespace rpkg
             PRIM_OBJECT_IS_NOT_A_MESH_TYPE,
             TEMP_VERSION_UNKNOWN,
             TBLU_VERSION_UNKNOWN
-        };
+        }
 
         struct vector2
         {
             public float x;
             public float y;
-        };
+        }
 
         struct vector3
         {
             public float x;
             public float y;
             public float z;
-        };
+        }
 
         struct vector4
         {
@@ -3163,14 +3162,14 @@ namespace rpkg
             public float y;
             public float z;
             public float w;
-        };
+        }
 
         struct matrix43
         {
-            public EntityBrickEditor.vector3 x_axis;
-            public EntityBrickEditor.vector3 y_axis;
-            public EntityBrickEditor.vector3 z_axis;
-            public EntityBrickEditor.vector3 transform;
-        };
+            public vector3 x_axis;
+            public vector3 y_axis;
+            public vector3 z_axis;
+            public vector3 transform;
+        }
     }
 }
