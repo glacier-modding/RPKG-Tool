@@ -126,6 +126,10 @@ struct main_variables
     bool mode_extract_all_wwes_to_ogg = false;
     bool mode_locr_to_json = false;
     bool mode_json_to_locr = false;
+    bool mode_rtlv_to_json = false;
+    bool mode_json_to_rtlv = false;
+    bool mode_dlge_to_json = false;
+    bool mode_json_to_dlge = false;
     bool mode_output_path = false;
     bool mode_compute_ioi_hash = false;
     bool mode_decrypt_packagedefinition_thumbs = false;
@@ -231,6 +235,58 @@ void xtea_encrypt_locr(uint32_t v[2])
 }
 
 void xtea_decrypt_locr(uint32_t v[2])
+{
+    const uint32_t key[4] = { 0x53527737, 0x7506499E, 0xBD39AEE3, 0xA59E7268 };
+    unsigned int num_rounds = 32;
+    uint32_t v0 = v[0], v1 = v[1], delta = 0x9E3779B9, sum = 0xC6EF3720;
+    for (uint64_t i = 0; i < num_rounds; i++) {
+        v1 -= (uint32_t)((uint32_t)((v0 << 4) ^ (v0 >> 5)) + v0 ^ (uint32_t)((uint32_t)sum + key[(sum >> 11) & 3]));
+        sum -= (uint32_t)delta;
+        v0 -= (uint32_t)((uint32_t)((v1 << 4) ^ (v1 >> 5)) + v1 ^ (uint32_t)((uint32_t)sum + key[sum & 3]));
+    }
+    v[0] = v0; v[1] = v1;
+}
+
+void xtea_encrypt_rtlv(uint32_t v[2])
+{
+    const uint32_t key[4] = { 0x53527737, 0x7506499E, 0xBD39AEE3, 0xA59E7268 };
+    unsigned int num_rounds = 32;
+    uint32_t v0 = v[0], v1 = v[1], sum = 0, delta = 0x9E3779B9;
+    for (uint64_t i = 0; i < num_rounds; i++) {
+        v0 += (((v1 << 4) ^ (v1 >> 5)) + v1) ^ (sum + key[sum & 3]);
+        sum += delta;
+        v1 += (((v0 << 4) ^ (v0 >> 5)) + v0) ^ (sum + key[(sum >> 11) & 3]);
+    }
+    v[0] = v0; v[1] = v1;
+}
+
+void xtea_decrypt_rtlv(uint32_t v[2])
+{
+    const uint32_t key[4] = { 0x53527737, 0x7506499E, 0xBD39AEE3, 0xA59E7268 };
+    unsigned int num_rounds = 32;
+    uint32_t v0 = v[0], v1 = v[1], delta = 0x9E3779B9, sum = 0xC6EF3720;
+    for (uint64_t i = 0; i < num_rounds; i++) {
+        v1 -= (uint32_t)((uint32_t)((v0 << 4) ^ (v0 >> 5)) + v0 ^ (uint32_t)((uint32_t)sum + key[(sum >> 11) & 3]));
+        sum -= (uint32_t)delta;
+        v0 -= (uint32_t)((uint32_t)((v1 << 4) ^ (v1 >> 5)) + v1 ^ (uint32_t)((uint32_t)sum + key[sum & 3]));
+    }
+    v[0] = v0; v[1] = v1;
+}
+
+void xtea_encrypt_dlge(uint32_t v[2])
+{
+    const uint32_t key[4] = { 0x53527737, 0x7506499E, 0xBD39AEE3, 0xA59E7268 };
+    unsigned int num_rounds = 32;
+    uint32_t v0 = v[0], v1 = v[1], sum = 0, delta = 0x9E3779B9;
+    for (uint64_t i = 0; i < num_rounds; i++) {
+        v0 += (((v1 << 4) ^ (v1 >> 5)) + v1) ^ (sum + key[sum & 3]);
+        sum += delta;
+        v1 += (((v0 << 4) ^ (v0 >> 5)) + v0) ^ (sum + key[(sum >> 11) & 3]);
+    }
+    v[0] = v0; v[1] = v1;
+}
+
+void xtea_decrypt_dlge(uint32_t v[2])
 {
     const uint32_t key[4] = { 0x53527737, 0x7506499E, 0xBD39AEE3, 0xA59E7268 };
     unsigned int num_rounds = 32;
@@ -725,6 +781,90 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
             if (argv[i] == std::string("-rebuild_locr_from_json_from"))
             {
                 main_data->mode_json_to_locr = true;
+
+                if (argc > (i + 1))
+                {
+                    main_data->input_rpkg_folder_path = argv[i + 1];
+
+                    if (main_data->input_rpkg_folder_path[0] == '-' || main_data->input_rpkg_folder_path == "")
+                    {
+                        std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
+                        std::exit(0);
+                    }
+                }
+                else
+                {
+                    std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
+                    std::exit(0);
+                }
+            }
+
+            if (argv[i] == std::string("-extract_rtlv_to_json_from"))
+            {
+                main_data->mode_rtlv_to_json = true;
+
+                if (argc > (i + 1))
+                {
+                    main_data->input_rpkg_folder_path = argv[i + 1];
+
+                    if (main_data->input_rpkg_folder_path[0] == '-' || main_data->input_rpkg_folder_path == "")
+                    {
+                        std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
+                        std::exit(0);
+                    }
+                }
+                else
+                {
+                    std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
+                    std::exit(0);
+                }
+            }
+
+            if (argv[i] == std::string("-rebuild_rtlv_from_json_from"))
+            {
+                main_data->mode_json_to_rtlv = true;
+
+                if (argc > (i + 1))
+                {
+                    main_data->input_rpkg_folder_path = argv[i + 1];
+
+                    if (main_data->input_rpkg_folder_path[0] == '-' || main_data->input_rpkg_folder_path == "")
+                    {
+                        std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
+                        std::exit(0);
+                    }
+                }
+                else
+                {
+                    std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
+                    std::exit(0);
+                }
+            }
+
+            if (argv[i] == std::string("-extract_dlge_to_json_from"))
+            {
+                main_data->mode_dlge_to_json = true;
+
+                if (argc > (i + 1))
+                {
+                    main_data->input_rpkg_folder_path = argv[i + 1];
+
+                    if (main_data->input_rpkg_folder_path[0] == '-' || main_data->input_rpkg_folder_path == "")
+                    {
+                        std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
+                        std::exit(0);
+                    }
+                }
+                else
+                {
+                    std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
+                    std::exit(0);
+                }
+            }
+
+            if (argv[i] == std::string("-rebuild_dlge_from_json_from"))
+            {
+                main_data->mode_json_to_dlge = true;
 
                 if (argc > (i + 1))
                 {
@@ -5084,7 +5224,7 @@ void extract_all_wwev(main_variables* main_data)
 
                         if (!output_file.good())
                         {
-                            std::cout << main_data->console_prefix << "Error: Meta data file " << current_path + "/" + main_data->rpkg_data.at(i).hash_file_name.at(j) + "/" + "meta" << " could not be created." << std::endl;
+                            std::cout << main_data->console_prefix << "Error: Meta data file " << current_path + "/" + main_data->rpkg_data.at(i).hash_file_name.at(j) + "." + "meta" << " could not be created." << std::endl;
                             std::exit(0);
                         }
 
@@ -6192,6 +6332,146 @@ void extract_all_wwes(main_variables* main_data)
                             output_file.close();
 
                             //std::cout << main_data->console_prefix << "ogg file created: " << ogg_file << std::endl;
+
+                            std::vector<char> meta_data;
+                            char char1[1];
+                            char char4[4];
+                            char char8[8];
+
+                            std::memcpy(&char8, &main_data->rpkg_data.at(i).hash.at(j), sizeof(uint64_t));
+                            for (uint64_t k = 0; k < sizeof(uint64_t); k++)
+                            {
+                                meta_data.push_back(char8[k]);
+                            }
+
+                            std::memcpy(&char8, &main_data->rpkg_data.at(i).hash_offset.at(j), sizeof(uint64_t));
+                            for (uint64_t k = 0; k < sizeof(uint64_t); k++)
+                            {
+                                meta_data.push_back(char8[k]);
+                            }
+
+                            std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_size.at(j), sizeof(uint32_t));
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data.push_back(char4[k]);
+                            }
+
+                            std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_resource_type.at(j), sizeof(uint32_t));
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data.push_back(char4[k]);
+                            }
+
+                            std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_reference_table_size.at(j), sizeof(uint32_t));
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data.push_back(char4[k]);
+                            }
+
+                            std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_reference_table_dummy.at(j), sizeof(uint32_t));
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data.push_back(char4[k]);
+                            }
+
+                            std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_size_final.at(j), sizeof(uint32_t));
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data.push_back(char4[k]);
+                            }
+
+                            std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_size_in_memory.at(j), sizeof(uint32_t));
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data.push_back(char4[k]);
+                            }
+
+                            std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_size_in_video_memory.at(j), sizeof(uint32_t));
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data.push_back(char4[k]);
+                            }
+
+                            if (main_data->rpkg_data.at(i).hash_reference_table_size.at(j) > 0)
+                            {
+                                uint32_t hash_reference_table_size_count = 0;
+                                uint32_t temp_hash_reference_count = main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference_count & 0x3FFFFFFF;
+
+                                std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference_count, sizeof(uint32_t));
+                                for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                                {
+                                    meta_data.push_back(char4[k]);
+                                }
+                                hash_reference_table_size_count += 4;
+
+                                for (uint64_t k = 0; k < temp_hash_reference_count; k++)
+                                {
+                                    std::memcpy(&char1, &main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference_type.at(k), sizeof(uint8_t));
+                                    for (uint64_t l = 0; l < sizeof(uint8_t); l++)
+                                    {
+                                        meta_data.push_back(char1[l]);
+                                    }
+                                    hash_reference_table_size_count += 1;
+                                }
+
+                                for (uint64_t k = 0; k < temp_hash_reference_count; k++)
+                                {
+                                    std::memcpy(&char8, &main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference.at(k), sizeof(uint64_t));
+                                    for (uint64_t l = 0; l < sizeof(uint64_t); l++)
+                                    {
+                                        meta_data.push_back(char8[l]);
+                                    }
+                                    hash_reference_table_size_count += 8;
+                                }
+
+                                if (hash_reference_table_size_count != main_data->rpkg_data.at(i).hash_reference_table_size.at(j))
+                                {
+                                    std::cout << main_data->console_prefix << "Error: Hash meta data for " << main_data->rpkg_data.at(i).hash_string.at(j) << " is corrupt." << std::endl;
+                                    std::exit(0);
+                                }
+                            }
+
+                            std::string output_meta_file_path = "";
+
+                            output_meta_file_path = remove_all_string_from_string(replace_slashes(main_data->input_output_path + "WWES" + "/" + fxas_wwes_ioi_path.at(it->second)), "\"");
+                            output_meta_file_path = remove_all_string_from_string(output_meta_file_path, "\'");
+
+                            if (output_meta_file_path.substr(output_meta_file_path.length() - 1, 1) == "/")
+                            {
+                                output_meta_file_path = output_meta_file_path.substr(0, output_meta_file_path.length() - 1);
+                            }
+
+                            pos = output_meta_file_path.find_last_of("\\/");
+
+                            if (pos != std::string::npos)
+                            {
+                                std::string metas_directory = output_meta_file_path.substr(0, pos + 1) + "/metas";
+
+                                if (!path_exists(metas_directory))
+                                {
+                                    if (!std::filesystem::create_directories(metas_directory))
+                                    {
+                                        std::cout << main_data->console_prefix << "Error: Couldn't create directory " << directory << std::endl;
+                                        std::exit(0);
+                                    }
+                                }
+
+                                output_file = std::ofstream(metas_directory + "/" + main_data->rpkg_data.at(i).hash_file_name.at(j) + "." + "meta", std::ifstream::binary);
+
+                                if (!output_file.good())
+                                {
+                                    std::cout << main_data->console_prefix << "Error: Meta data file " << metas_directory + "/" + main_data->rpkg_data.at(i).hash_file_name.at(j) + "/" + "meta" << " could not be created." << std::endl;
+                                    std::exit(0);
+                                }
+
+                                output_file.write(meta_data.data(), meta_data.size());
+
+                                output_file.close();
+                            }
+                            else
+                            {
+                                std::cout << main_data->console_prefix << "Error: Meta data file " << main_data->rpkg_data.at(i).hash_file_name.at(j) + "." + "meta" << " could not be created." << std::endl;
+                            }
                         }
                     }
                     else
@@ -6320,6 +6600,127 @@ void extract_all_wwes(main_variables* main_data)
                             output_file.close();
 
                             //std::cout << main_data->console_prefix << "ogg file created: " << ogg_file << std::endl;
+
+                            std::vector<char> meta_data;
+                            char char1[1];
+                            char char4[4];
+                            char char8[8];
+
+                            std::memcpy(&char8, &main_data->rpkg_data.at(i).hash.at(j), sizeof(uint64_t));
+                            for (uint64_t k = 0; k < sizeof(uint64_t); k++)
+                            {
+                                meta_data.push_back(char8[k]);
+                            }
+
+                            std::memcpy(&char8, &main_data->rpkg_data.at(i).hash_offset.at(j), sizeof(uint64_t));
+                            for (uint64_t k = 0; k < sizeof(uint64_t); k++)
+                            {
+                                meta_data.push_back(char8[k]);
+                            }
+
+                            std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_size.at(j), sizeof(uint32_t));
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data.push_back(char4[k]);
+                            }
+
+                            std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_resource_type.at(j), sizeof(uint32_t));
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data.push_back(char4[k]);
+                            }
+
+                            std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_reference_table_size.at(j), sizeof(uint32_t));
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data.push_back(char4[k]);
+                            }
+
+                            std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_reference_table_dummy.at(j), sizeof(uint32_t));
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data.push_back(char4[k]);
+                            }
+
+                            std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_size_final.at(j), sizeof(uint32_t));
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data.push_back(char4[k]);
+                            }
+
+                            std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_size_in_memory.at(j), sizeof(uint32_t));
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data.push_back(char4[k]);
+                            }
+
+                            std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_size_in_video_memory.at(j), sizeof(uint32_t));
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data.push_back(char4[k]);
+                            }
+
+                            if (main_data->rpkg_data.at(i).hash_reference_table_size.at(j) > 0)
+                            {
+                                uint32_t hash_reference_table_size_count = 0;
+                                uint32_t temp_hash_reference_count = main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference_count & 0x3FFFFFFF;
+
+                                std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference_count, sizeof(uint32_t));
+                                for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                                {
+                                    meta_data.push_back(char4[k]);
+                                }
+                                hash_reference_table_size_count += 4;
+
+                                for (uint64_t k = 0; k < temp_hash_reference_count; k++)
+                                {
+                                    std::memcpy(&char1, &main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference_type.at(k), sizeof(uint8_t));
+                                    for (uint64_t l = 0; l < sizeof(uint8_t); l++)
+                                    {
+                                        meta_data.push_back(char1[l]);
+                                    }
+                                    hash_reference_table_size_count += 1;
+                                }
+
+                                for (uint64_t k = 0; k < temp_hash_reference_count; k++)
+                                {
+                                    std::memcpy(&char8, &main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference.at(k), sizeof(uint64_t));
+                                    for (uint64_t l = 0; l < sizeof(uint64_t); l++)
+                                    {
+                                        meta_data.push_back(char8[l]);
+                                    }
+                                    hash_reference_table_size_count += 8;
+                                }
+
+                                if (hash_reference_table_size_count != main_data->rpkg_data.at(i).hash_reference_table_size.at(j))
+                                {
+                                    std::cout << main_data->console_prefix << "Error: Hash meta data for " << main_data->rpkg_data.at(i).hash_string.at(j) << " is corrupt." << std::endl;
+                                    std::exit(0);
+                                }
+                            }
+
+                            std::string metas_directory = directory + "/metas";
+
+                            if (!path_exists(metas_directory))
+                            {
+                                if (!std::filesystem::create_directories(metas_directory))
+                                {
+                                    std::cout << main_data->console_prefix << "Error: Couldn't create directory " << directory << std::endl;
+                                    std::exit(0);
+                                }
+                            }
+
+                            output_file = std::ofstream(metas_directory + "/" + main_data->rpkg_data.at(i).hash_file_name.at(j) + "." + "meta", std::ifstream::binary);
+
+                            if (!output_file.good())
+                            {
+                                std::cout << main_data->console_prefix << "Error: Meta data file " << metas_directory + "/" + main_data->rpkg_data.at(i).hash_file_name.at(j) + "." + "meta" << " could not be created." << std::endl;
+                                std::exit(0);
+                            }
+
+                            output_file.write(meta_data.data(), meta_data.size());
+
+                            output_file.close();
                         }
                     }
                 }
@@ -6960,8 +7361,35 @@ void rebuild_all_locr(main_variables* main_data)
             }
         }
 
+        start_time = std::chrono::high_resolution_clock::now();
+
+        console_update_rate = 1.0 / 2.0;
+        period_count = 1;
+
         for (uint64_t p = 0; p < json_file_paths.size(); p++)
         {
+            std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
+
+            double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+
+            if (time_in_seconds_from_start_time > console_update_rate)
+            {
+                start_time = end_time;
+
+                if (period_count > 3)
+                {
+                    period_count = 0;
+                }
+
+                ss.str(std::string());
+
+                ss << "Rebuilding JSON as LOCR" << std::string(period_count, '.');
+
+                std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ');
+
+                period_count++;
+            }
+
             if (path_exists(json_file_paths.at(p) + ".meta"))
             {
                 std::ifstream input_json_meta_file = std::ifstream(json_file_paths.at(p) + ".meta", std::ifstream::binary);
@@ -7034,7 +7462,7 @@ void rebuild_all_locr(main_variables* main_data)
 
                 if (input_json_meta_file_size == 0x19)
                 {
-                    std::cout << main_data->console_prefix << locr_file_names.at(p) << " is a Hitman 3 type LOCR." << std::endl;
+                    //std::cout << main_data->console_prefix << locr_file_names.at(p) << " is a Hitman 3 type LOCR." << std::endl;
 
                     std::vector<std::string> languages;
                     languages.push_back("xx");
@@ -7249,11 +7677,11 @@ void rebuild_all_locr(main_variables* main_data)
 
                     output_file.write(locr_data.data(), locr_data.size());
 
-                    std::cout << main_data->console_prefix << "Successfully rebuilt LOCR " << current_path + "/" + locr_file_names.at(p) << " from " << json_file_paths.at(p) << std::endl;
+                    //std::cout << main_data->console_prefix << "Successfully rebuilt LOCR " << current_path + "/" + locr_file_names.at(p) << " from " << json_file_paths.at(p) << std::endl;
                 }
                 else if (input_json_meta_file_size == 0x35)
                 {
-                    std::cout << main_data->console_prefix << locr_file_names.at(p) << " is a Hitman 2 type LOCR." << std::endl;
+                    //std::cout << main_data->console_prefix << locr_file_names.at(p) << " is a Hitman 2 type LOCR." << std::endl;
 
                     std::vector<std::string> languages;
                     languages.push_back("xx");
@@ -7475,7 +7903,7 @@ void rebuild_all_locr(main_variables* main_data)
 
                     output_file.write(locr_data.data(), locr_data.size());
 
-                    std::cout << main_data->console_prefix << "Successfully rebuilt LOCR " << current_path + "/" + locr_file_names.at(p) << " from " << json_file_paths.at(p) << std::endl;
+                    //std::cout << main_data->console_prefix << "Successfully rebuilt LOCR " << current_path + "/" + locr_file_names.at(p) << " from " << json_file_paths.at(p) << std::endl;
                 }
                 else
                 {
@@ -7491,10 +7919,2170 @@ void rebuild_all_locr(main_variables* main_data)
                 std::cout << main_data->console_prefix << "       Can not rebuild " << locr_file_names.at(p) << " from JSON file " << json_file_paths.at(p) << std::endl;
             }
         }
+
+        ss.str(std::string());
+
+        ss << "Rebuild JSON as LOCR: Done";
+
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
     }
     else
     {
         std::cout << main_data->console_prefix << "Error: The folder " << main_data->input_rpkg_folder_path << " to rebuild the LOCR files from does not exist." << std::endl;
+        std::exit(0);
+    }
+}
+
+void extract_all_rtlv(main_variables* main_data)
+{
+    main_data->input_rpkg_folder_path = remove_all_string_from_string(main_data->input_rpkg_folder_path, "\"");
+    main_data->input_rpkg_folder_path = remove_all_string_from_string(main_data->input_rpkg_folder_path, "\'");
+
+    if (main_data->input_rpkg_folder_path.substr(main_data->input_rpkg_folder_path.length() - 1, 1) == "\\")
+    {
+        main_data->input_rpkg_folder_path = main_data->input_rpkg_folder_path.substr(0, main_data->input_rpkg_folder_path.length() - 1);
+    }
+
+    if (main_data->input_rpkg_folder_path.substr(main_data->input_rpkg_folder_path.length() - 1, 1) == "/")
+    {
+        main_data->input_rpkg_folder_path = main_data->input_rpkg_folder_path.substr(0, main_data->input_rpkg_folder_path.length() - 1);
+    }
+
+    main_data->input_rpkg_folder_path.append("/");
+
+    if (path_exists(main_data->input_rpkg_folder_path))
+    {
+        rpkg_variables temp_rpkg_data;
+
+        std::vector<std::string> rpkg_file_names;
+        std::vector<std::string> rpkg_file_paths;
+
+        std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
+
+        double console_update_rate = 1.0 / 2.0;
+        int period_count = 1;
+
+        for (const auto& entry : std::filesystem::recursive_directory_iterator(main_data->input_rpkg_folder_path))
+        {
+            std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
+
+            double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+
+            if (time_in_seconds_from_start_time > console_update_rate)
+            {
+                start_time = end_time;
+
+                if (period_count > 3)
+                {
+                    period_count = 0;
+                }
+
+                std::stringstream ss;
+
+                ss << "Scanning folder" << std::string(period_count, '.');
+
+                std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ');
+
+                period_count++;
+            }
+
+            if (std::filesystem::is_regular_file(entry.path().string()))
+            {
+                std::size_t pos = entry.path().string().find_last_of("\\/");
+
+                std::string rpkg_file_name = "";
+                std::string hash = "";
+                std::string hash_resource_type = "";
+
+                if (pos != std::string::npos)
+                {
+                    rpkg_file_name = entry.path().string().substr(pos + 1, entry.path().string().length() - (pos + 1));
+                }
+                else
+                {
+                    rpkg_file_name = entry.path().string();
+                }
+
+                if (to_uppercase(rpkg_file_name.substr((rpkg_file_name.length() - 5), 5)) == ".RPKG")
+                {
+                    rpkg_file_paths.push_back(entry.path().string());
+                    rpkg_file_names.push_back(rpkg_file_name);
+
+                    if (main_data->debug)
+                    {
+                        std::cout << main_data->console_prefix << entry.path().string() << " is a valid RPKG file." << std::endl;
+                    }
+                }
+                else
+                {
+                    if (main_data->debug)
+                    {
+                        std::cout << main_data->console_prefix << entry.path().string() << " is not a valid RPKG file." << std::endl;
+                    }
+                }
+            }
+        }
+
+        std::stringstream ss;
+
+        ss << "Scanning folder: Done";
+
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+
+        if (main_data->debug)
+        {
+            for (uint64_t i = 0; i < rpkg_file_paths.size(); i++)
+            {
+                std::cout << main_data->console_prefix << "Found RPKG file: " << rpkg_file_paths.at(i) << std::endl;
+            }
+        }
+
+        for (uint64_t i = 0; i < rpkg_file_paths.size(); i++)
+        {
+            //if (rpkg_file_names.at(i) == "chunk0.rpkg")
+            import_rpkg_file_if_not_already(main_data, rpkg_file_paths.at(i), rpkg_file_names.at(i), true);
+        }
+
+        if (!path_exists(main_data->input_output_path + "RTLV"))
+        {
+            if (!std::filesystem::create_directories(main_data->input_output_path + "RTLV"))
+            {
+                std::cout << main_data->console_prefix << "Error: Couldn't create directory " << main_data->input_output_path + "RTLV" << std::endl;
+                std::exit(0);
+            }
+        }
+
+        start_time = std::chrono::high_resolution_clock::now();
+
+        console_update_rate = 1.0 / 2.0;
+        period_count = 1;
+
+        for (uint64_t i = 0; i < main_data->rpkg_data.size(); i++)
+        {
+            bool archive_folder_created = false;
+
+            for (uint64_t j = 0; j < main_data->rpkg_data.at(i).hash.size(); j++)
+            {
+                std::string hash_file_name = main_data->rpkg_data.at(i).hash_string.at(j) + "." + main_data->rpkg_data.at(i).hash_resource_type.at(j);
+
+                if (main_data->rpkg_data.at(i).hash_resource_type.at(j) == "RTLV")
+                {
+                    std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
+
+                    double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+
+                    if (time_in_seconds_from_start_time > console_update_rate)
+                    {
+                        start_time = end_time;
+
+                        if (period_count > 3)
+                        {
+                            period_count = 0;
+                        }
+
+                        ss.str(std::string());
+
+                        ss << "Extracting RTLV as JSON" << std::string(period_count, '.');
+
+                        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ');
+
+                        period_count++;
+                    }
+
+                    std::string current_path = main_data->input_output_path + "RTLV/" + main_data->rpkg_data.at(i).rpkg_file_name;
+
+                    if (!archive_folder_created)
+                    {
+                        if (!path_exists(current_path))
+                        {
+                            archive_folder_created = true;
+
+                            if (!std::filesystem::create_directories(current_path))
+                            {
+                                std::cout << main_data->console_prefix << "Error: Couldn't create directory " << current_path << std::endl;
+                                std::exit(0);
+                            }
+                        }
+                    }
+
+                    //std::cout << main_data->console_prefix << "RTLV resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
+
+                    uint64_t hash_size;
+
+                    if (main_data->rpkg_data.at(i).is_lz4ed.at(j) == 1)
+                    {
+                        hash_size = main_data->rpkg_data.at(i).hash_size.at(j);
+
+                        if (main_data->rpkg_data.at(i).is_xored.at(j) == 1)
+                        {
+                            hash_size &= 0x3FFFFFFF;
+                        }
+                    }
+                    else
+                    {
+                        hash_size = main_data->rpkg_data.at(i).hash_size_final.at(j);
+                    }
+
+                    std::unique_ptr<char[]> input_data;
+                    input_data = std::make_unique<char[]>(hash_size);
+
+                    std::ifstream file = std::ifstream(main_data->rpkg_data.at(i).rpkg_file_path, std::ifstream::binary);
+
+                    if (!file.good())
+                    {
+                        std::cout << main_data->console_prefix << "Error: RPKG file " << main_data->input_rpkg_file_path << " could not be read." << std::endl;
+                        std::exit(0);
+                    }
+
+                    file.seekg(main_data->rpkg_data.at(i).hash_offset.at(j), file.beg);
+                    file.read(input_data.get(), hash_size);
+                    file.close();
+
+                    if (main_data->rpkg_data.at(i).is_xored.at(j) == 1)
+                    {
+                        xor_data(input_data.get(), (uint32_t)hash_size);
+
+                        if (main_data->debug)
+                        {
+                            std::cout << main_data->console_prefix << "XORing input_file_data with a hashSize of " << hash_size << std::endl;
+                        }
+                    }
+
+                    uint32_t decompressed_size = main_data->rpkg_data.at(i).hash_size_final.at(j);
+
+                    std::unique_ptr<char[]> output_data;
+                    output_data = std::make_unique<char[]>(decompressed_size);
+
+                    std::unique_ptr<char[]>* rtlv_data;
+
+                    if (main_data->rpkg_data.at(i).is_lz4ed.at(j))
+                    {
+                        LZ4_decompress_safe(input_data.get(), output_data.get(), (int)hash_size, decompressed_size);
+
+                        rtlv_data = &output_data;
+
+                        if (main_data->debug)
+                        {
+                            std::cout << main_data->console_prefix << "LZ4 decompression complete." << std::endl;
+                        }
+                    }
+                    else
+                    {
+                        rtlv_data = &input_data;
+                    }
+
+                    uint32_t rtlv_data_size = 0;
+                    uint64_t rtlv_header_value = 0;
+                    uint32_t rtlv_identifier = 0;
+                    std::vector<char> rtlv_footer;
+                    uint32_t rtlv_header_data_size = 0;
+                    std::vector<char> rtlv_header;
+                    uint32_t languages_starting_offset = 0;
+                    uint32_t number_of_languages = 0;
+                    std::vector<uint32_t> language_offsets;
+                    std::vector<std::vector<char>> language_data;
+                    std::vector<uint16_t> language_data_sizes;
+                    std::vector<uint16_t> language_unknowns;
+                    std::vector<std::vector<std::string>> language_string;
+                    std::vector<std::set<std::pair<uint32_t, std::string>>> language_string_set;
+                    std::vector<std::string> languages;
+                    languages.push_back("xx");
+                    languages.push_back("en");
+                    languages.push_back("fr");
+                    languages.push_back("it");
+                    languages.push_back("de");
+                    languages.push_back("es");
+                    languages.push_back("ru");
+                    languages.push_back("mx");
+                    languages.push_back("br");
+                    languages.push_back("pl");
+                    languages.push_back("cn");
+                    languages.push_back("jp");
+                    languages.push_back("tc");
+
+                    std::vector<char> json_meta_data;
+
+                    json json_object;
+
+                    uint32_t position = 0;
+
+                    char char4[4] = "";
+                    uint8_t bytes1 = 0;
+                    uint16_t bytes2 = 0;
+                    uint32_t bytes4 = 0;
+                    uint64_t bytes8 = 0;
+
+                    position = 0x58;
+                    std::memcpy(&languages_starting_offset, (&rtlv_data->get()[0] + position), sizeof(bytes4));
+                    
+                    position = 0;
+                    std::memcpy(&rtlv_header_value, (&rtlv_data->get()[0] + position), sizeof(bytes8));
+
+                    for (uint64_t k = 0; k < sizeof(bytes8); k++)
+                    {
+                        json_meta_data.push_back(rtlv_data->get()[position + k]);
+                    }
+
+                    position += sizeof(bytes8);
+
+                    std::memcpy(&bytes4, (&rtlv_data->get()[0] + position), sizeof(bytes4));
+                    position += sizeof(bytes4);
+
+                    rtlv_data_size = ((bytes4 & 0x000000FF) << 0x18) + ((bytes4 & 0x0000FF00) << 0x8) + ((bytes4 & 0x00FF0000) >> 0x8) + ((bytes4 & 0xFF000000) >> 0x18);
+
+                    if (languages_starting_offset < rtlv_data_size)
+                    {
+                        languages_starting_offset += 0xC;
+
+                        rtlv_header_data_size = languages_starting_offset - position;
+
+                        std::memcpy(&char4, &rtlv_header_data_size, sizeof(bytes4));
+
+                        for (uint64_t k = 0; k < sizeof(bytes4); k++)
+                        {
+                            json_meta_data.push_back(char4[k]);
+                        }
+
+                        for (uint64_t k = 0; k < rtlv_header_data_size; k++)
+                        {
+                            rtlv_header.push_back(rtlv_data->get()[position]);
+
+                            json_meta_data.push_back(rtlv_data->get()[position]);
+
+                            position += 1;
+                        }
+
+                        std::memcpy(&number_of_languages, (&rtlv_data->get()[0] + position), sizeof(bytes4));
+
+                        for (uint64_t k = 0; k < sizeof(bytes4); k++)
+                        {
+                            json_meta_data.push_back(rtlv_data->get()[position + k]);
+                        }
+
+                        position += sizeof(bytes4);
+
+                        for (uint64_t k = 0; k < number_of_languages; k++)
+                        {
+                            uint16_t section_length = 0;
+
+                            std::memcpy(&section_length, (&rtlv_data->get()[0] + position), sizeof(bytes2));
+                            position += sizeof(bytes2);
+
+                            std::memcpy(&bytes2, (&rtlv_data->get()[0] + position), sizeof(bytes2));
+                            position += sizeof(bytes2);
+
+                            language_unknowns.push_back(bytes2);
+
+                            std::memcpy(&bytes4, (&rtlv_data->get()[0] + position), sizeof(bytes4));
+                            position += sizeof(bytes4);
+
+                            std::memcpy(&bytes4, (&rtlv_data->get()[0] + position), sizeof(bytes4));
+                            position += sizeof(bytes4);
+
+                            language_offsets.push_back(bytes4);
+
+                            std::memcpy(&bytes4, (&rtlv_data->get()[0] + position), sizeof(bytes4));
+                            position += sizeof(bytes4);
+                        }
+
+                        for (uint64_t k = 0; k < number_of_languages; k++)
+                        {
+                            json temp_language_json_object;
+
+                            temp_language_json_object["Language"] = languages.at(k);
+
+                            std::memcpy(&bytes4, (&rtlv_data->get()[0] + position), sizeof(bytes4));
+                            position += sizeof(bytes4);
+
+                            language_data_sizes.push_back(bytes4);
+
+                            std::vector<char> temp_string;
+
+                            if (language_data_sizes.back() == 0)
+                            {
+                                std::memcpy(&bytes4, (&rtlv_data->get()[0] + position), sizeof(bytes4));
+                                position += sizeof(bytes4);
+
+                                temp_language_json_object["String"] = "";
+                            }
+                            else
+                            {
+                                for (uint64_t l = 0; l < language_data_sizes.back(); l++)
+                                {
+                                    temp_string.push_back(rtlv_data->get()[position]);
+                                    position += 1;
+                                }
+
+                                if (language_data_sizes.back() % 8 != 0)
+                                {
+                                    std::cout << main_data->console_prefix << "Error: RTLV file " << hash_file_name << " in " << main_data->rpkg_data.at(i).rpkg_file_name << " is malformed." << std::endl;
+                                    std::exit(0);
+                                }
+
+                                for (uint32_t m = 0; m < language_data_sizes.back() / 8; m++)
+                                {
+                                    uint32_t data[2];
+                                    std::memcpy(data, &temp_string[(uint64_t)m * (uint64_t)8], sizeof(uint32_t));
+                                    std::memcpy(data + 1, &temp_string[(uint64_t)m * (uint64_t)8 + (uint64_t)4], sizeof(uint32_t));
+
+                                    xtea_decrypt_rtlv(data);
+
+                                    std::memcpy(&temp_string[(uint64_t)m * (uint64_t)8], data, sizeof(uint32_t));
+                                    std::memcpy(&temp_string[(uint64_t)m * (uint64_t)8 + (uint64_t)4], data + 1, sizeof(uint32_t));
+                                }
+
+                                uint32_t last_zero_position = (uint32_t)temp_string.size();
+
+                                if (temp_string.size() > 0)
+                                {
+                                    uint32_t m = (uint32_t)(temp_string.size() - 1);
+
+                                    while (m >= 0)
+                                    {
+                                        if (temp_string.at(m) != 0)
+                                        {
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            last_zero_position--;
+                                        }
+
+                                        m--;
+                                    }
+                                }
+
+                                std::string temp_string_with_zero_pad_removed = std::string(temp_string.begin(), temp_string.end()).substr(0, last_zero_position);
+
+                                temp_language_json_object["String"] = temp_string_with_zero_pad_removed;
+                            }
+
+                            json_object.push_back(temp_language_json_object);
+                        }
+
+                        if ((decompressed_size - position) > 0)
+                        {
+                            for (uint64_t k = 0; k < (decompressed_size - position); k++)
+                            {
+                                json_meta_data.push_back(rtlv_data->get()[position + k]);
+                            }
+                        }
+
+                        std::string json_path = current_path + "/" + hash_file_name + ".JSON";
+
+                        std::ofstream json_file = std::ofstream(json_path, std::ifstream::binary);
+
+                        if (!json_file.good())
+                        {
+                            std::cout << main_data->console_prefix << "Error: JSON file " << json_path << " could not be created." << std::endl;
+                            std::exit(0);
+                        }
+
+                        json_file << std::setw(4) << json_object << std::endl;
+
+                        json_file.close();
+
+                        std::string json_meta_path = current_path + "/" + hash_file_name + ".JSON.meta";
+
+                        std::ofstream json_meta_file = std::ofstream(json_meta_path, std::ifstream::binary);
+
+                        if (!json_meta_file.good())
+                        {
+                            std::cout << main_data->console_prefix << "Error: JSON meta file " << json_meta_path << " could not be created." << std::endl;
+                            std::exit(0);
+                        }
+
+                        json_meta_file.write(json_meta_data.data(), json_meta_data.size());
+
+                        json_meta_file.close();
+                    }
+                    else
+                    {
+                        //std::cout << main_data->console_prefix << "Error: RTLV file " << hash_file_name << " in " << main_data->rpkg_data.at(i).rpkg_file_name << " has no data to extract." << std::endl;
+                    }
+                }
+            }
+        }
+
+        ss.str(std::string());
+
+        ss << "Extracting RTLV as JSON: Done";
+
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+    }
+    else
+    {
+        std::cout << main_data->console_prefix << "Error: The folder " << main_data->input_rpkg_folder_path << " to generate the RPKG file does not exist." << std::endl;
+        std::exit(0);
+    }
+}
+
+void rebuild_all_rtlv(main_variables* main_data)
+{
+    main_data->input_rpkg_folder_path = remove_all_string_from_string(main_data->input_rpkg_folder_path, "\"");
+    main_data->input_rpkg_folder_path = remove_all_string_from_string(main_data->input_rpkg_folder_path, "\'");
+
+    if (main_data->input_rpkg_folder_path.substr(main_data->input_rpkg_folder_path.length() - 1, 1) == "\\")
+    {
+        main_data->input_rpkg_folder_path = main_data->input_rpkg_folder_path.substr(0, main_data->input_rpkg_folder_path.length() - 1);
+    }
+
+    if (main_data->input_rpkg_folder_path.substr(main_data->input_rpkg_folder_path.length() - 1, 1) == "/")
+    {
+        main_data->input_rpkg_folder_path = main_data->input_rpkg_folder_path.substr(0, main_data->input_rpkg_folder_path.length() - 1);
+    }
+
+    main_data->input_rpkg_folder_path.append("/");
+
+    if (path_exists(main_data->input_rpkg_folder_path))
+    {
+        rpkg_variables temp_rpkg_data;
+
+        std::vector<std::string> json_file_names;
+        std::vector<std::string> json_file_paths;
+        std::vector<std::string> json_file_base_paths;
+        std::vector<uint64_t> rtlv_hashes;
+        std::vector<std::string> rtlv_hash_strings;
+        std::vector<std::string> rtlv_file_names;
+
+        std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
+
+        double console_update_rate = 1.0 / 2.0;
+        int period_count = 1;
+
+        for (const auto& entry : std::filesystem::recursive_directory_iterator(main_data->input_rpkg_folder_path))
+        {
+            std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
+
+            double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+
+            if (time_in_seconds_from_start_time > console_update_rate)
+            {
+                start_time = end_time;
+
+                if (period_count > 3)
+                {
+                    period_count = 0;
+                }
+
+                std::stringstream ss;
+
+                ss << "Scanning folder" << std::string(period_count, '.');
+
+                std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ');
+
+                period_count++;
+            }
+
+            if (std::filesystem::is_regular_file(entry.path().string()))
+            {
+                std::size_t pos = entry.path().string().find_last_of("\\/");
+
+                std::string json_file_name = "";
+                std::string json_file_base_path = "";
+                std::string hash_file_name = "";
+                std::string hash_string = "";
+                std::string resource_type = "";
+
+                if (pos != std::string::npos)
+                {
+                    json_file_name = entry.path().string().substr(pos + 1, entry.path().string().length() - (pos + 1));
+                    json_file_base_path = entry.path().string().substr(0, pos);
+                }
+                else
+                {
+                    json_file_name = entry.path().string();
+                }
+
+                if (to_uppercase(json_file_name.substr((json_file_name.length() - 5), 5)) == ".JSON")
+                {
+                    hash_file_name = to_uppercase(json_file_name.substr(0, (json_file_name.length() - 5)));
+                }
+
+                pos = hash_file_name.find_last_of(".");
+
+                if (pos != std::string::npos)
+                {
+                    hash_string = hash_file_name.substr(0, pos);
+                    resource_type = hash_file_name.substr(pos + 1, hash_file_name.length() - (pos + 1));
+                }
+
+                if (main_data->debug)
+                {
+                    std::cout << main_data->console_prefix << entry.path().string() << "," << hash_file_name << "," << hash_string << "," << resource_type << std::endl;
+                }
+
+                bool is_rtlv_hash_file = true;
+
+                if (hash_string.length() != 16)
+                {
+                    is_rtlv_hash_file = false;
+                }
+
+                if (resource_type != "RTLV")
+                {
+                    is_rtlv_hash_file = false;
+                }
+
+                if (is_rtlv_hash_file)
+                {
+                    json_file_paths.push_back(entry.path().string());
+                    json_file_base_paths.push_back(json_file_base_path);
+                    json_file_names.push_back(json_file_name);
+                    rtlv_hashes.push_back(std::strtoll(hash_string.c_str(), nullptr, 16));
+                    rtlv_file_names.push_back(to_uppercase(hash_file_name));
+                    rtlv_hash_strings.push_back(to_uppercase(hash_string));
+
+                    if (main_data->debug)
+                    {
+                        std::cout << main_data->console_prefix << entry.path().string() << " is a valid JSON file." << std::endl;
+                    }
+                }
+                else
+                {
+                    if (main_data->debug)
+                    {
+                        std::cout << main_data->console_prefix << entry.path().string() << " is a not valid JSON file." << std::endl;
+                    }
+                }
+            }
+        }
+
+        std::stringstream ss;
+
+        ss << "Scanning folder: Done";
+
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+
+        if (main_data->debug)
+        {
+            for (uint64_t i = 0; i < json_file_paths.size(); i++)
+            {
+                std::cout << main_data->console_prefix << "Found JSON file: " << json_file_paths.at(i) << std::endl;
+            }
+        }
+
+        start_time = std::chrono::high_resolution_clock::now();
+
+        console_update_rate = 1.0 / 2.0;
+        period_count = 1;
+
+        for (uint64_t p = 0; p < json_file_paths.size(); p++)
+        {
+            if (path_exists(json_file_paths.at(p) + ".meta"))
+            {
+                std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
+
+                double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+
+                if (time_in_seconds_from_start_time > console_update_rate)
+                {
+                    start_time = end_time;
+
+                    if (period_count > 3)
+                    {
+                        period_count = 0;
+                    }
+
+                    ss.str(std::string());
+
+                    ss << "Rebuilding JSON as RTLV" << std::string(period_count, '.');
+
+                    std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ');
+
+                    period_count++;
+                }
+
+                std::ifstream input_json_meta_file = std::ifstream(json_file_paths.at(p) + ".meta", std::ifstream::binary);
+
+                if (!input_json_meta_file.good())
+                {
+                    std::cout << main_data->console_prefix << "Error: JSON meta file " << json_file_paths.at(p) + ".meta" << " could not be read." << std::endl;
+                    std::exit(0);
+                }
+
+                input_json_meta_file.seekg(0, input_json_meta_file.end);
+
+                uint64_t input_json_meta_file_size = input_json_meta_file.tellg();
+
+                input_json_meta_file.seekg(0, input_json_meta_file.beg);
+
+                std::vector<char> input_json_meta(input_json_meta_file_size, 0);
+
+                input_json_meta_file.read(input_json_meta.data(), input_json_meta_file_size);
+
+                input_json_meta_file.close();
+
+                std::ifstream input_json_file(json_file_paths.at(p));
+
+                if (!input_json_file.good())
+                {
+                    std::cout << main_data->console_prefix << "Error: JSON file " << json_file_paths.at(p) << " could not be read." << std::endl;
+                    std::exit(0);
+                }
+
+                json input_json;
+
+                input_json_file >> input_json;
+
+                input_json_file.close();
+
+                int language_count = 0;
+
+                for (const auto& it : input_json.items())
+                {
+                    //std::cout << main_data->console_prefix << it.key() << ", " << it.value() << std::endl << std::endl;
+
+                    bool language_found = false;
+
+                    if (it.value().contains("Language"))
+                    {
+                        language_found = true;
+
+                        language_count++;
+
+                        //std::cout << main_data->console_prefix << it.key() << ", " << it.value() << std::endl << std::endl;
+                    }
+
+                    if (!language_found)
+                    {
+                        std::cout << main_data->console_prefix << "Error: JSON file " << json_file_paths.at(p) << " is malformed and can not be rebuilt into a RTLV file/resource." << std::endl;
+                        std::exit(0);
+                    }
+                }
+
+                std::vector<char> rtlv_data;
+
+                char char2[2] = "";
+                char char4[4] = "";
+                char char8[8] = "";
+                uint32_t bytes4 = 0;
+                uint64_t bytes8 = 0;
+
+                uint32_t position = 0;
+
+                std::memcpy(&char8, &input_json_meta.data()[position], sizeof(uint64_t));
+                position += sizeof(uint64_t);
+
+                for (uint64_t j = 0; j < sizeof(uint64_t); j++)
+                {
+                    rtlv_data.push_back(char8[j]);
+                }
+
+                rtlv_data.push_back(0x0);
+                rtlv_data.push_back(0x0);
+                rtlv_data.push_back(0x0);
+                rtlv_data.push_back(0x0);
+
+                uint32_t rtlv_header_data_size = 0;
+
+                std::memcpy(&rtlv_header_data_size, &input_json_meta.data()[position], sizeof(uint32_t));
+                position += sizeof(uint32_t);
+
+                for (uint64_t j = 0; j < rtlv_header_data_size; j++)
+                {
+                    rtlv_data.push_back(input_json_meta.data()[position]);
+                    position += 0x1;
+                }
+
+                uint32_t number_of_languages = 0;
+
+                std::memcpy(&number_of_languages, &input_json_meta.data()[position], sizeof(uint32_t));
+                position += sizeof(uint32_t);
+
+                if (language_count != number_of_languages)
+                {
+                    std::cout << main_data->console_prefix << "Error: Number of language in the input RTLV JSON file do not match the number of languages in the meta file." << std::endl;
+                    std::exit(0);
+                }
+
+                std::memcpy(&char4, &number_of_languages, sizeof(uint32_t));
+
+                for (uint64_t j = 0; j < sizeof(uint32_t); j++)
+                {
+                    rtlv_data.push_back(char4[j]);
+                }
+
+                std::vector<std::string> language_strings;
+
+                uint32_t offset = (uint32_t)rtlv_data.size() + (uint32_t)number_of_languages * (uint32_t)0x10 - (uint32_t)0xC;
+
+                for (uint64_t i = 0; i < number_of_languages; i++)
+                {
+                    uint32_t key = 0;
+
+                    for (const auto& it : input_json.items())
+                    {
+                        if (key == i)
+                        {
+                            //std::cout << main_data->console_prefix << it.key() << ", " << it.value() << std::endl << std::endl;
+
+                            std::string temp_string = it.value()["String"];
+
+                            //std::cout << it.value()["String"] << std::endl << std::endl;
+
+                            uint32_t string_length = (uint32_t)temp_string.length();
+
+                            while (string_length % 8 != 0)
+                            {
+                                string_length++;
+
+                                temp_string.push_back(0x0);
+                            }
+
+                            uint32_t string_length_value = string_length | 0x40000000;
+
+                            std::memcpy(&char4, &string_length_value, sizeof(uint32_t));
+
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                rtlv_data.push_back(char4[k]);
+                            }
+
+                            rtlv_data.push_back(0x0);
+                            rtlv_data.push_back(0x0);
+                            rtlv_data.push_back(0x0);
+                            rtlv_data.push_back(0x0);
+
+                            std::memcpy(&char4, &offset, sizeof(uint32_t));
+
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                rtlv_data.push_back(char4[k]);
+                            }
+
+                            rtlv_data.push_back(0x0);
+                            rtlv_data.push_back(0x0);
+                            rtlv_data.push_back(0x0);
+                            rtlv_data.push_back(0x0);
+
+                            if (string_length == 0x0)
+                            {
+                                offset += (uint32_t)0x4 + (uint32_t)string_length + (uint32_t)0x4;
+                            }
+                            else
+                            {
+                                offset += (uint32_t)0x4 + (uint32_t)string_length;
+                            }
+
+                            /*for (uint32_t k = 0; k < string_length / 8; k++)
+                            {
+                                uint32_t data[2];
+                                std::memcpy(data, &temp_string[(uint64_t)k * (uint64_t)8], sizeof(uint32_t));
+                                std::memcpy(data + 1, &temp_string[(uint64_t)k * (uint64_t)8 + (uint64_t)4], sizeof(uint32_t));
+
+                                xtea_encrypt_rtlv(data);
+
+                                std::memcpy(&temp_string[(uint64_t)k * (uint64_t)8], data, sizeof(uint32_t));
+                                std::memcpy(&temp_string[(uint64_t)k * (uint64_t)8 + (uint64_t)4], data + 1, sizeof(uint32_t));
+                            }
+
+                            for (uint64_t k = 0; k < string_length; k++)
+                            {
+                                rtlv_data.push_back(temp_string[k]);
+                            }*/
+                        }
+
+                        key++;
+                    }
+                }
+
+                for (uint64_t i = 0; i < number_of_languages; i++)
+                {
+                    uint32_t key = 0;
+
+                    for (const auto& it : input_json.items())
+                    {
+                        if (key == i)
+                        {
+                            //std::cout << main_data->console_prefix << it.key() << ", " << it.value() << std::endl << std::endl;
+
+                            std::string temp_string = it.value()["String"];
+
+                            //std::cout << it.value()["String"] << std::endl << std::endl;
+
+                            uint32_t string_length = (uint32_t)temp_string.length();
+
+                            while (string_length % 8 != 0)
+                            {
+                                string_length++;
+
+                                temp_string.push_back(0x0);
+                            }
+
+                            std::memcpy(&char4, &string_length, sizeof(uint32_t));
+
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                rtlv_data.push_back(char4[k]);
+                            }
+
+                            if (string_length == 0x0)
+                            {
+                                rtlv_data.push_back(0x0);
+                                rtlv_data.push_back(0x0);
+                                rtlv_data.push_back(0x0);
+                                rtlv_data.push_back(0x0);
+                            }
+
+                            /*rtlv_data.push_back(0x0);
+                            rtlv_data.push_back(0x40);
+                            rtlv_data.push_back(0x0);
+                            rtlv_data.push_back(0x0);
+                            rtlv_data.push_back(0x0);
+                            rtlv_data.push_back(0x0);
+
+                            std::memcpy(&char4, &offset, sizeof(uint32_t));
+
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                rtlv_data.push_back(char4[k]);
+                            }
+
+                            rtlv_data.push_back(0x0);
+                            rtlv_data.push_back(0x0);
+                            rtlv_data.push_back(0x0);
+                            rtlv_data.push_back(0x0);
+
+                            offset += (uint32_t)0x4 + (uint32_t)string_length;*/
+
+                            for (uint32_t k = 0; k < string_length / 8; k++)
+                            {
+                                uint32_t data[2];
+                                std::memcpy(data, &temp_string[(uint64_t)k * (uint64_t)8], sizeof(uint32_t));
+                                std::memcpy(data + 1, &temp_string[(uint64_t)k * (uint64_t)8 + (uint64_t)4], sizeof(uint32_t));
+
+                                xtea_encrypt_rtlv(data);
+
+                                std::memcpy(&temp_string[(uint64_t)k * (uint64_t)8], data, sizeof(uint32_t));
+                                std::memcpy(&temp_string[(uint64_t)k * (uint64_t)8 + (uint64_t)4], data + 1, sizeof(uint32_t));
+                            }
+
+                            for (uint64_t k = 0; k < string_length; k++)
+                            {
+                                rtlv_data.push_back(temp_string[k]);
+                            }
+                        }
+
+                        key++;
+                    }
+                }
+
+                //std::cout << json_file_paths.at(p) << std::endl;
+
+                //std::cout << input_json_meta_file_size << ", " << position << std::endl << std::endl;
+
+                uint32_t file_size = (uint32_t)rtlv_data.size() - (uint32_t)0x10;
+
+                std::memcpy(&char4, &file_size, sizeof(uint32_t));
+
+                rtlv_data.at(0x8) = char4[3];
+                rtlv_data.at(0x9) = char4[2];
+                rtlv_data.at(0xA) = char4[1];
+                rtlv_data.at(0xB) = char4[0];
+
+                for (uint64_t k = 0; k < (input_json_meta_file_size - position); k++)
+                {
+                    rtlv_data.push_back(input_json_meta.data()[position + k]);
+                }
+
+                std::string current_path = json_file_base_paths.at(p) + "/RTLV.rebuilt";
+
+                if (!path_exists(current_path))
+                {
+                    if (!std::filesystem::create_directories(current_path))
+                    {
+                        std::cout << main_data->console_prefix << "Error: Couldn't create directory " << current_path << std::endl;
+                        std::exit(0);
+                    }
+                }
+
+                std::ofstream output_file = std::ofstream(current_path + "/" + rtlv_file_names.at(p), std::ifstream::binary);
+
+                if (!output_file.good())
+                {
+                    std::cout << main_data->console_prefix << "Error: Rebuilt RTLV file " << rtlv_file_names.at(p) << " could not be created." << std::endl;
+                    std::exit(0);
+                }
+
+                output_file.write(rtlv_data.data(), rtlv_data.size());
+
+                //std::cout << main_data->console_prefix << "Successfully rebuilt RTLV " << current_path + "/" + rtlv_file_names.at(p) << " from " << json_file_paths.at(p) << std::endl;
+
+                //std::cout << main_data->console_prefix << "Languages found: " << language_count << std::endl;
+            }
+            else
+            {
+                std::cout << main_data->console_prefix << "Error: JSON meta file " << json_file_paths.at(p) + ".meta" << " could not be found." << std::endl;
+                std::cout << main_data->console_prefix << "       Can not rebuild " << rtlv_file_names.at(p) << " from JSON file " << json_file_paths.at(p) << std::endl;
+            }
+        }
+
+        ss.str(std::string());
+
+        ss << "Rebuilding JSON as RTLV: Done";
+
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+    }
+    else
+    {
+        std::cout << main_data->console_prefix << "Error: The folder " << main_data->input_rpkg_folder_path << " to rebuild the RTLV files from does not exist." << std::endl;
+        std::exit(0);
+    }
+}
+
+void extract_all_dlge(main_variables* main_data)
+{
+    main_data->input_rpkg_folder_path = remove_all_string_from_string(main_data->input_rpkg_folder_path, "\"");
+    main_data->input_rpkg_folder_path = remove_all_string_from_string(main_data->input_rpkg_folder_path, "\'");
+
+    if (main_data->input_rpkg_folder_path.substr(main_data->input_rpkg_folder_path.length() - 1, 1) == "\\")
+    {
+        main_data->input_rpkg_folder_path = main_data->input_rpkg_folder_path.substr(0, main_data->input_rpkg_folder_path.length() - 1);
+    }
+
+    if (main_data->input_rpkg_folder_path.substr(main_data->input_rpkg_folder_path.length() - 1, 1) == "/")
+    {
+        main_data->input_rpkg_folder_path = main_data->input_rpkg_folder_path.substr(0, main_data->input_rpkg_folder_path.length() - 1);
+    }
+
+    main_data->input_rpkg_folder_path.append("/");
+
+    if (path_exists(main_data->input_rpkg_folder_path))
+    {
+        rpkg_variables temp_rpkg_data;
+
+        std::vector<std::string> rpkg_file_names;
+        std::vector<std::string> rpkg_file_paths;
+
+        std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
+
+        double console_update_rate = 1.0 / 2.0;
+        int period_count = 1;
+
+        for (const auto& entry : std::filesystem::recursive_directory_iterator(main_data->input_rpkg_folder_path))
+        {
+            std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
+
+            double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+
+            if (time_in_seconds_from_start_time > console_update_rate)
+            {
+                start_time = end_time;
+
+                if (period_count > 3)
+                {
+                    period_count = 0;
+                }
+
+                std::stringstream ss;
+
+                ss << "Scanning folder" << std::string(period_count, '.');
+
+                std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ');
+
+                period_count++;
+            }
+
+            if (std::filesystem::is_regular_file(entry.path().string()))
+            {
+                std::size_t pos = entry.path().string().find_last_of("\\/");
+
+                std::string rpkg_file_name = "";
+                std::string hash = "";
+                std::string hash_resource_type = "";
+
+                if (pos != std::string::npos)
+                {
+                    rpkg_file_name = entry.path().string().substr(pos + 1, entry.path().string().length() - (pos + 1));
+                }
+                else
+                {
+                    rpkg_file_name = entry.path().string();
+                }
+
+                if (to_uppercase(rpkg_file_name.substr((rpkg_file_name.length() - 5), 5)) == ".RPKG")
+                {
+                    rpkg_file_paths.push_back(entry.path().string());
+                    rpkg_file_names.push_back(rpkg_file_name);
+
+                    if (main_data->debug)
+                    {
+                        std::cout << main_data->console_prefix << entry.path().string() << " is a valid RPKG file." << std::endl;
+                    }
+                }
+                else
+                {
+                    if (main_data->debug)
+                    {
+                        std::cout << main_data->console_prefix << entry.path().string() << " is not a valid RPKG file." << std::endl;
+                    }
+                }
+            }
+        }
+
+        std::stringstream ss;
+
+        ss << "Scanning folder: Done";
+
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+
+        if (main_data->debug)
+        {
+            for (uint64_t i = 0; i < rpkg_file_paths.size(); i++)
+            {
+                std::cout << main_data->console_prefix << "Found RPKG file: " << rpkg_file_paths.at(i) << std::endl;
+            }
+        }
+
+        for (uint64_t i = 0; i < rpkg_file_paths.size(); i++)
+        {
+            //if (rpkg_file_names.at(i) == "chunk0.rpkg")
+            import_rpkg_file_if_not_already(main_data, rpkg_file_paths.at(i), rpkg_file_names.at(i), true);
+        }
+
+        if (!path_exists(main_data->input_output_path + "DLGE"))
+        {
+            if (!std::filesystem::create_directories(main_data->input_output_path + "DLGE"))
+            {
+                std::cout << main_data->console_prefix << "Error: Couldn't create directory " << main_data->input_output_path + "DLGE" << std::endl;
+                std::exit(0);
+            }
+        }
+
+        start_time = std::chrono::high_resolution_clock::now();
+
+        console_update_rate = 1.0 / 2.0;
+        period_count = 1;
+
+        for (uint64_t i = 0; i < main_data->rpkg_data.size(); i++)
+        {
+            bool archive_folder_created = false;
+
+            for (uint64_t j = 0; j < main_data->rpkg_data.at(i).hash.size(); j++)
+            {
+                std::string hash_file_name = main_data->rpkg_data.at(i).hash_string.at(j) + "." + main_data->rpkg_data.at(i).hash_resource_type.at(j);
+
+                if (main_data->rpkg_data.at(i).hash_resource_type.at(j) == "DLGE")
+                {
+                    std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
+
+                    double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+
+                    if (time_in_seconds_from_start_time > console_update_rate)
+                    {
+                        start_time = end_time;
+
+                        if (period_count > 3)
+                        {
+                            period_count = 0;
+                        }
+
+                        ss.str(std::string());
+
+                        ss << "Extracting DLGE as JSON" << std::string(period_count, '.');
+
+                        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ');
+
+                        period_count++;
+                    }
+
+                    std::string current_path = main_data->input_output_path + "DLGE/" + main_data->rpkg_data.at(i).rpkg_file_name;
+
+                    if (!archive_folder_created)
+                    {
+                        if (!path_exists(current_path))
+                        {
+                            archive_folder_created = true;
+
+                            if (!std::filesystem::create_directories(current_path))
+                            {
+                                std::cout << main_data->console_prefix << "Error: Couldn't create directory " << current_path << std::endl;
+                                std::exit(0);
+                            }
+                        }
+                    }
+
+                    //std::cout << main_data->console_prefix << "DLGE resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
+
+                    uint64_t hash_size;
+
+                    if (main_data->rpkg_data.at(i).is_lz4ed.at(j) == 1)
+                    {
+                        hash_size = main_data->rpkg_data.at(i).hash_size.at(j);
+
+                        if (main_data->rpkg_data.at(i).is_xored.at(j) == 1)
+                        {
+                            hash_size &= 0x3FFFFFFF;
+                        }
+                    }
+                    else
+                    {
+                        hash_size = main_data->rpkg_data.at(i).hash_size_final.at(j);
+                    }
+
+                    std::unique_ptr<char[]> input_data;
+                    input_data = std::make_unique<char[]>(hash_size);
+
+                    std::ifstream file = std::ifstream(main_data->rpkg_data.at(i).rpkg_file_path, std::ifstream::binary);
+
+                    if (!file.good())
+                    {
+                        std::cout << main_data->console_prefix << "Error: RPKG file " << main_data->input_rpkg_file_path << " could not be read." << std::endl;
+                        std::exit(0);
+                    }
+
+                    file.seekg(main_data->rpkg_data.at(i).hash_offset.at(j), file.beg);
+                    file.read(input_data.get(), hash_size);
+                    file.close();
+
+                    if (main_data->rpkg_data.at(i).is_xored.at(j) == 1)
+                    {
+                        xor_data(input_data.get(), (uint32_t)hash_size);
+
+                        if (main_data->debug)
+                        {
+                            std::cout << main_data->console_prefix << "XORing input_file_data with a hashSize of " << hash_size << std::endl;
+                        }
+                    }
+
+                    uint32_t decompressed_size = main_data->rpkg_data.at(i).hash_size_final.at(j);
+
+                    std::unique_ptr<char[]> output_data;
+                    output_data = std::make_unique<char[]>(decompressed_size);
+
+                    std::unique_ptr<char[]>* dlge_data;
+
+                    if (main_data->rpkg_data.at(i).is_lz4ed.at(j))
+                    {
+                        LZ4_decompress_safe(input_data.get(), output_data.get(), (int)hash_size, decompressed_size);
+
+                        dlge_data = &output_data;
+
+                        if (main_data->debug)
+                        {
+                            std::cout << main_data->console_prefix << "LZ4 decompression complete." << std::endl;
+                        }
+                    }
+                    else
+                    {
+                        dlge_data = &input_data;
+                    }
+
+                    uint32_t dlge_data_size = 0;
+                    uint32_t number_of_dlge_categories = 0;
+                    std::vector<uint32_t> dlge_categories;
+                    std::vector<uint32_t> dlge_identifiers;
+                    std::vector<uint64_t> dlge_section_metas;
+                    std::vector<char> dlge_footer;
+                    uint32_t number_of_languages = 0;
+                    std::vector<std::vector<std::string>> language_string;
+                    std::vector<std::vector<uint32_t>> language_string_sizes;
+                    std::vector<std::vector<uint64_t>> language_string_metas;
+                    std::vector<std::string> languages;
+                    languages.push_back("en");
+                    languages.push_back("fr");
+                    languages.push_back("it");
+                    languages.push_back("de");
+                    languages.push_back("es");
+                    languages.push_back("ru");
+                    languages.push_back("mx");
+                    languages.push_back("br");
+                    languages.push_back("pl");
+                    languages.push_back("cn");
+                    languages.push_back("jp");
+                    languages.push_back("tc");
+
+                    std::vector<char> json_meta_data;
+
+                    json json_object;
+
+                    uint32_t position = 0;
+
+                    uint8_t bytes1 = 0;
+                    uint16_t bytes2 = 0;
+                    uint32_t bytes4 = 0;
+                    uint64_t bytes8 = 0;
+
+                    std::memcpy(&bytes4, (&dlge_data->get()[0] + position), sizeof(bytes4));
+                    
+                    //for (uint64_t k = 0; k < sizeof(bytes4); k++)
+                    //{
+                        //json_meta_data.push_back(dlge_data->get()[position + k]);
+                    //}
+
+                    position += sizeof(bytes4);
+
+                    if (bytes4 != 0)
+                    {
+                        std::cout << main_data->console_prefix << "Error: DLGE file " << hash_file_name << " in " << main_data->rpkg_data.at(i).rpkg_file_name << " is malformed." << std::endl;
+                        break;
+                    }
+
+                    std::memcpy(&bytes4, (&dlge_data->get()[0] + position), sizeof(bytes4));
+                    
+                    //for (uint64_t k = 0; k < sizeof(bytes4); k++)
+                    //{
+                        //json_meta_data.push_back(dlge_data->get()[position + k]);
+                    //}
+
+                    position += sizeof(bytes4);
+
+                    if (bytes4 != 1)
+                    {
+                        std::cout << main_data->console_prefix << "Error: DLGE file " << hash_file_name << " in " << main_data->rpkg_data.at(i).rpkg_file_name << " is malformed." << std::endl;
+                        break;
+                    }
+
+                    uint8_t text_available = 0;
+
+                    std::memcpy(&bytes1, (&dlge_data->get()[0] + position), sizeof(bytes1));
+                    
+                    //for (uint64_t k = 0; k < sizeof(bytes1); k++)
+                    //{
+                        //json_meta_data.push_back(dlge_data->get()[position + k]);
+                    //}
+
+                    position += sizeof(bytes1);
+
+                    if (bytes1 == 1)
+                    {
+                        text_available = 1;
+                    }
+
+                    uint32_t text_count = 0;
+
+                    bool dlge_has_text = false;
+
+                    bool do_not_break = true;
+
+                    while (text_available)
+                    {
+                        number_of_dlge_categories++;
+
+                        std::memcpy(&bytes4, (&dlge_data->get()[0] + position), sizeof(bytes4));
+
+                        for (uint64_t k = 0; k < sizeof(bytes4); k++)
+                        {
+                            json_meta_data.push_back(dlge_data->get()[position + k]);
+                        }
+
+                        position += sizeof(bytes4);
+
+                        dlge_categories.push_back(bytes4);
+
+                        std::memcpy(&bytes4, (&dlge_data->get()[0] + position), sizeof(bytes4));
+
+                        for (uint64_t k = 0; k < sizeof(bytes4); k++)
+                        {
+                            json_meta_data.push_back(dlge_data->get()[position + k]);
+                        }
+
+                        position += sizeof(bytes4);
+
+                        dlge_identifiers.push_back(bytes4);
+
+                        std::memcpy(&bytes4, (&dlge_data->get()[0] + position), sizeof(bytes4));
+
+                        //for (uint64_t k = 0; k < sizeof(bytes4); k++)
+                        //{
+                            //json_meta_data.push_back(dlge_data->get()[position + k]);
+                        //}
+
+                        position += sizeof(bytes4);
+
+                        if (bytes4 != 0)
+                        {
+                            std::cout << main_data->console_prefix << "Error: DLGE file " << hash_file_name << " in " << main_data->rpkg_data.at(i).rpkg_file_name << " is malformed." << std::endl;
+                            do_not_break = false;
+                            break;
+                        }
+
+                        std::memcpy(&bytes8, (&dlge_data->get()[0] + position), sizeof(bytes8));
+
+                        //for (uint64_t k = 0; k < sizeof(bytes8); k++)
+                        //{
+                            //json_meta_data.push_back(dlge_data->get()[position + k]);
+                        //}
+
+                        position += sizeof(bytes8);
+
+                        if (bytes8 != 0xFFFFFFFFFFFFFFFF)
+                        {
+                            std::cout << main_data->console_prefix << "Error: DLGE file " << hash_file_name << " in " << main_data->rpkg_data.at(i).rpkg_file_name << " is malformed." << std::endl;
+                            do_not_break = false;
+                            break;
+                        }
+
+                        std::memcpy(&bytes4, (&dlge_data->get()[0] + position), sizeof(bytes4));
+
+                        //for (uint64_t k = 0; k < sizeof(bytes4); k++)
+                        //{
+                            //json_meta_data.push_back(dlge_data->get()[position + k]);
+                        //}
+
+                        position += sizeof(bytes4);
+
+                        if (bytes4 != 0)
+                        {
+                            std::cout << main_data->console_prefix << "Error: DLGE file " << hash_file_name << " in " << main_data->rpkg_data.at(i).rpkg_file_name << " is malformed." << std::endl;
+                            do_not_break = false;
+                            break;
+                        }
+
+                        uint32_t check_variable_1 = 0;
+                        uint32_t check_variable_2 = 0;
+
+                        std::memcpy(&check_variable_1, (&dlge_data->get()[0] + position), sizeof(bytes4));
+
+                        position += sizeof(bytes4);
+
+                        std::memcpy(&check_variable_2, (&dlge_data->get()[0] + position), sizeof(bytes4));
+
+                        position += sizeof(bytes4);
+
+                        position -= sizeof(bytes8);
+
+                        if ((check_variable_1 == 0xFFFFFFFF && check_variable_2 == 0xFFFFFFFF) || ((check_variable_1 + 1) == check_variable_2) || check_variable_2 == 0xFFFFFFFF)
+                        {
+                            std::memcpy(&bytes8, (&dlge_data->get()[0] + position), sizeof(bytes8));
+
+                            for (uint64_t k = 0; k < sizeof(bytes8); k++)
+                            {
+                                json_meta_data.push_back(dlge_data->get()[position + k]);
+                            }
+
+                            position += sizeof(bytes8);
+
+                            dlge_section_metas.push_back(bytes8);
+                        }
+                        else
+                        {
+                            std::cout << main_data->console_prefix << "Error: DLGE file " << hash_file_name << " in " << main_data->rpkg_data.at(i).rpkg_file_name << " is malformed." << std::endl;
+                            do_not_break = false;
+                            break;
+                        }
+
+                        bool done_scanning_languages = false;
+
+                        std::vector<uint32_t> temp_language_string_sizes;
+
+                        std::vector<uint64_t> temp_language_string_metas;
+
+                        number_of_languages = 0;
+
+                        while (!done_scanning_languages)
+                        {
+                            json temp_language_json_object;
+
+                            temp_language_json_object["Language"] = languages.at(number_of_languages);
+
+                            std::memcpy(&bytes4, (&dlge_data->get()[0] + position), sizeof(bytes4));
+                            position += sizeof(bytes4);
+
+                            temp_language_string_sizes.push_back(bytes4);
+
+                            std::vector<char> temp_string;
+
+                            for (uint64_t l = 0; l < temp_language_string_sizes.back(); l++)
+                            {
+                                temp_string.push_back(dlge_data->get()[position]);
+                                position += 1;
+                            }
+
+                            if (temp_language_string_sizes.back() % 8 != 0)
+                            {
+                                std::cout << main_data->console_prefix << "Error: DLGE file " << hash_file_name << " in " << main_data->rpkg_data.at(i).rpkg_file_name << " is malformed." << std::endl;
+                                do_not_break = false;
+                                break;
+                            }
+
+                            for (uint32_t m = 0; m < temp_language_string_sizes.back() / 8; m++)
+                            {
+                                uint32_t data[2];
+                                std::memcpy(data, &temp_string[(uint64_t)m * (uint64_t)8], sizeof(uint32_t));
+                                std::memcpy(data + 1, &temp_string[(uint64_t)m * (uint64_t)8 + (uint64_t)4], sizeof(uint32_t));
+
+                                xtea_decrypt_dlge(data);
+
+                                std::memcpy(&temp_string[(uint64_t)m * (uint64_t)8], data, sizeof(uint32_t));
+                                std::memcpy(&temp_string[(uint64_t)m * (uint64_t)8 + (uint64_t)4], data + 1, sizeof(uint32_t));
+
+                                dlge_has_text = true;
+                            }
+
+                            uint32_t last_zero_position = (uint32_t)temp_string.size();
+
+                            if (temp_string.size() > 0)
+                            {
+                                uint32_t m = (uint32_t)(temp_string.size() - 1);
+
+                                while (m >= 0)
+                                {
+                                    if (temp_string.at(m) != 0)
+                                    {
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        last_zero_position--;
+                                    }
+
+                                    m--;
+                                }
+                            }
+
+                            if (temp_string.size() > 0)
+                            {
+                                std::string temp_string_with_zero_pad_removed = std::string(temp_string.begin(), temp_string.end()).substr(0, last_zero_position);
+
+                                temp_language_json_object["String"] = temp_string_with_zero_pad_removed;
+                            }
+                            else
+                            {
+                                temp_language_json_object["String"] = "";
+                            }
+
+                            json_object.push_back(temp_language_json_object);
+
+                            if ((position + 0x8) <= decompressed_size)
+                            {
+                                std::memcpy(&check_variable_1, (&dlge_data->get()[0] + position), sizeof(bytes4));
+                                position += sizeof(bytes4);
+
+                                std::memcpy(&check_variable_2, (&dlge_data->get()[0] + position), sizeof(bytes4));
+                                position += sizeof(bytes4);
+
+                                position -= sizeof(bytes8);
+
+                                if ((check_variable_1 == 0xFFFFFFFF && check_variable_2 == 0xFFFFFFFF) || ((check_variable_1 + 1) == check_variable_2) || check_variable_2 == 0xFFFFFFFF)
+                                {
+                                    std::memcpy(&bytes8, (&dlge_data->get()[0] + position), sizeof(bytes8));
+
+                                    for (uint64_t k = 0; k < sizeof(bytes8); k++)
+                                    {
+                                        json_meta_data.push_back(dlge_data->get()[position + k]);
+                                    }
+
+                                    position += sizeof(bytes8);
+
+                                    temp_language_string_metas.push_back(bytes8);
+                                }
+                                else
+                                {
+                                    done_scanning_languages = true;
+                                }
+                            }
+                            else
+                            {
+                                done_scanning_languages = true;
+                            }
+
+                            number_of_languages++;
+                        }
+
+                        //std::cout << number_of_dlge_categories << "," << number_of_languages << std::endl;
+
+                        if ((position + 0x1) <= decompressed_size)
+                        {
+                            std::memcpy(&bytes1, (&dlge_data->get()[0] + position), sizeof(bytes1));
+
+                            //for (uint64_t k = 0; k < sizeof(bytes1); k++)
+                            //{
+                                //json_meta_data.push_back(dlge_data->get()[position + k]);
+                            //}
+
+                            if (bytes1 == 1)
+                            {
+                                text_available = 1;
+
+                                position += sizeof(bytes1);
+                            }
+                            else
+                            {
+                                text_available = 0;
+                            }
+                        }
+                        else
+                        {
+                            text_available = 0;
+                        }
+                        
+                        text_count++;
+                    }
+
+                    if ((decompressed_size - position) > 0)
+                    {
+                        for (uint64_t k = 0; k < (decompressed_size - position); k++)
+                        {
+                            json_meta_data.push_back(dlge_data->get()[position + k]);
+                        }
+                    }
+
+                    if (dlge_has_text && do_not_break)
+                    {
+                        std::string json_path = current_path + "/" + hash_file_name + ".JSON";
+
+                        std::ofstream json_file = std::ofstream(json_path, std::ifstream::binary);
+
+                        if (!json_file.good())
+                        {
+                            std::cout << main_data->console_prefix << "Error: JSON file " << json_path << " could not be created." << std::endl;
+                            std::exit(0);
+                        }
+
+                        json_file << std::setw(4) << json_object << std::endl;
+
+                        json_file.close();
+
+                        std::string json_meta_path = current_path + "/" + hash_file_name + ".JSON.meta";
+
+                        std::ofstream json_meta_file = std::ofstream(json_meta_path, std::ifstream::binary);
+
+                        if (!json_meta_file.good())
+                        {
+                            std::cout << main_data->console_prefix << "Error: JSON meta file " << json_meta_path << " could not be created." << std::endl;
+                            std::exit(0);
+                        }
+
+                        char char4[4];
+
+                        std::memcpy(&char4, &number_of_dlge_categories, sizeof(bytes4));
+                        json_meta_file.write(char4, sizeof(bytes4));
+
+                        std::memcpy(&char4, &number_of_languages, sizeof(bytes4));
+                        json_meta_file.write(char4, sizeof(bytes4));
+
+                        json_meta_file.write(json_meta_data.data(), json_meta_data.size());
+
+                        json_meta_file.close();
+
+                        std::vector<hash_depends_variables> hash_depends_data;
+
+                        uint64_t hash = main_data->rpkg_data.at(i).hash.at(j);
+
+                        for (uint64_t i = 0; i < main_data->rpkg_data.size(); i++)
+                        {
+                            std::map<uint64_t, uint64_t>::iterator it2 = main_data->rpkg_data.at(i).hash_map.find(hash);
+
+                            hash_depends_variables temp_hash_depends_data;
+
+                            temp_hash_depends_data.rpkg_file_name = main_data->rpkg_data.at(i).rpkg_file_name;
+
+                            if (it2 != main_data->rpkg_data.at(i).hash_map.end())
+                            {
+                                temp_hash_depends_data.hash = hash;
+
+                                temp_hash_depends_data.hash_string = hash;
+
+                                uint32_t temp_hash_reference_count = main_data->rpkg_data.at(i).hash_reference_data.at(it2->second).hash_reference_count & 0x3FFFFFFF;
+
+                                //std::cout << main_data->console_prefix << main_data->input_filter.at(z) << " has " << temp_hash_reference_count << " dependencies in " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
+
+                                if (temp_hash_reference_count > 0)
+                                {
+                                    for (uint64_t k = 0; k < temp_hash_reference_count; k++)
+                                    {
+                                        std::vector<std::string> dependency_in_rpkg_file;
+
+                                        bool found = false;
+
+                                        for (uint64_t j = 0; j < main_data->rpkg_data.size(); j++)
+                                        {
+                                            std::map<uint64_t, uint64_t>::iterator it3 = main_data->rpkg_data.at(j).hash_map.find(main_data->rpkg_data.at(i).hash_reference_data.at(it2->second).hash_reference.at(k));
+
+                                            if (it3 != main_data->rpkg_data.at(j).hash_map.end())
+                                            {
+                                                if (!found)
+                                                {
+                                                    temp_hash_depends_data.hash_dependency_file_name.push_back(main_data->rpkg_data.at(j).hash_file_name.at(it3->second));
+
+                                                    std::string hash_link_file_name = current_path + "/" + hash_file_name + "_" + main_data->rpkg_data.at(j).hash_file_name.at(it3->second);
+
+                                                    if (main_data->rpkg_data.at(j).hash_resource_type.at(it3->second) == "WWES")
+                                                    {
+                                                        if (!path_exists(hash_link_file_name))
+                                                        {
+                                                            std::ofstream json_meta_hash_link_file = std::ofstream(hash_link_file_name, std::ifstream::binary);
+
+                                                            if (!json_meta_hash_link_file.good())
+                                                            {
+                                                                std::cout << main_data->console_prefix << "Error: JSON meta file " << hash_link_file_name << " could not be created." << std::endl;
+                                                                std::exit(0);
+                                                            }
+
+                                                            json_meta_hash_link_file.close();
+                                                        }
+                                                    }
+                                                }
+
+                                                found = true;
+
+                                                dependency_in_rpkg_file.push_back(main_data->rpkg_data.at(j).rpkg_file_name);
+                                            }
+                                        }
+
+                                        if (!found)
+                                        {
+                                            temp_hash_depends_data.hash_dependency_file_name.push_back(main_data->rpkg_data.at(i).hash_reference_data.at(it2->second).hash_reference_string.at(k));
+                                        }
+
+                                        temp_hash_depends_data.hash_dependency_map[hash] = temp_hash_depends_data.hash_dependency_map.size();
+
+                                        temp_hash_depends_data.hash_dependency.push_back(uint64_t_to_hex_string(hash));
+
+                                        //tmpHashDependencyData.hashDependencyPatchList.push_back(hashPatchDeletionSearch(main_data->rpkg_data, hash));
+
+                                        temp_hash_depends_data.hash_dependency_in_rpkg.push_back(dependency_in_rpkg_file);
+                                    }
+                                }
+
+                                hash_depends_data.push_back(temp_hash_depends_data);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //std::cout << hash_file_name << "," << position << std::endl;
+                    }
+                }
+            }
+        }
+
+        ss.str(std::string());
+
+        ss << "Extracting DLGE as JSON: Done";
+
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+    }
+    else
+    {
+        std::cout << main_data->console_prefix << "Error: The folder " << main_data->input_rpkg_folder_path << " to generate the RPKG file does not exist." << std::endl;
+        std::exit(0);
+    }
+}
+
+void rebuild_all_dlge(main_variables* main_data)
+{
+    main_data->input_rpkg_folder_path = remove_all_string_from_string(main_data->input_rpkg_folder_path, "\"");
+    main_data->input_rpkg_folder_path = remove_all_string_from_string(main_data->input_rpkg_folder_path, "\'");
+
+    if (main_data->input_rpkg_folder_path.substr(main_data->input_rpkg_folder_path.length() - 1, 1) == "\\")
+    {
+        main_data->input_rpkg_folder_path = main_data->input_rpkg_folder_path.substr(0, main_data->input_rpkg_folder_path.length() - 1);
+    }
+
+    if (main_data->input_rpkg_folder_path.substr(main_data->input_rpkg_folder_path.length() - 1, 1) == "/")
+    {
+        main_data->input_rpkg_folder_path = main_data->input_rpkg_folder_path.substr(0, main_data->input_rpkg_folder_path.length() - 1);
+    }
+
+    main_data->input_rpkg_folder_path.append("/");
+
+    if (path_exists(main_data->input_rpkg_folder_path))
+    {
+        rpkg_variables temp_rpkg_data;
+
+        std::vector<std::string> json_file_names;
+        std::vector<std::string> json_file_paths;
+        std::vector<std::string> json_file_base_paths;
+        std::vector<uint64_t> dlge_hashes;
+        std::vector<std::string> dlge_hash_strings;
+        std::vector<std::string> dlge_file_names;
+
+        std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
+
+        double console_update_rate = 1.0 / 2.0;
+        int period_count = 1;
+
+        for (const auto& entry : std::filesystem::recursive_directory_iterator(main_data->input_rpkg_folder_path))
+        {
+            std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
+
+            double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+
+            if (time_in_seconds_from_start_time > console_update_rate)
+            {
+                start_time = end_time;
+
+                if (period_count > 3)
+                {
+                    period_count = 0;
+                }
+
+                std::stringstream ss;
+
+                ss << "Scanning folder" << std::string(period_count, '.');
+
+                std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ');
+
+                period_count++;
+            }
+
+            if (std::filesystem::is_regular_file(entry.path().string()))
+            {
+                std::size_t pos = entry.path().string().find_last_of("\\/");
+
+                std::string json_file_name = "";
+                std::string json_file_base_path = "";
+                std::string hash_file_name = "";
+                std::string hash_string = "";
+                std::string resource_type = "";
+
+                if (pos != std::string::npos)
+                {
+                    json_file_name = entry.path().string().substr(pos + 1, entry.path().string().length() - (pos + 1));
+                    json_file_base_path = entry.path().string().substr(0, pos);
+                }
+                else
+                {
+                    json_file_name = entry.path().string();
+                }
+
+                if (to_uppercase(json_file_name.substr((json_file_name.length() - 5), 5)) == ".JSON")
+                {
+                    hash_file_name = to_uppercase(json_file_name.substr(0, (json_file_name.length() - 5)));
+                }
+
+                pos = hash_file_name.find_last_of(".");
+
+                if (pos != std::string::npos)
+                {
+                    hash_string = hash_file_name.substr(0, pos);
+                    resource_type = hash_file_name.substr(pos + 1, hash_file_name.length() - (pos + 1));
+                }
+
+                if (main_data->debug)
+                {
+                    std::cout << main_data->console_prefix << entry.path().string() << "," << hash_file_name << "," << hash_string << "," << resource_type << std::endl;
+                }
+
+                bool is_dlge_hash_file = true;
+
+                if (hash_string.length() != 16)
+                {
+                    is_dlge_hash_file = false;
+                }
+
+                if (resource_type != "DLGE")
+                {
+                    is_dlge_hash_file = false;
+                }
+
+                if (is_dlge_hash_file)
+                {
+                    json_file_paths.push_back(entry.path().string());
+                    json_file_base_paths.push_back(json_file_base_path);
+                    json_file_names.push_back(json_file_name);
+                    dlge_hashes.push_back(std::strtoll(hash_string.c_str(), nullptr, 16));
+                    dlge_file_names.push_back(to_uppercase(hash_file_name));
+                    dlge_hash_strings.push_back(to_uppercase(hash_string));
+
+                    if (main_data->debug)
+                    {
+                        std::cout << main_data->console_prefix << entry.path().string() << " is a valid JSON file." << std::endl;
+                    }
+                }
+                else
+                {
+                    if (main_data->debug)
+                    {
+                        std::cout << main_data->console_prefix << entry.path().string() << " is a not valid JSON file." << std::endl;
+                    }
+                }
+            }
+        }
+
+        std::stringstream ss;
+
+        ss << "Scanning folder: Done";
+
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+
+        if (main_data->debug)
+        {
+            for (uint64_t i = 0; i < json_file_paths.size(); i++)
+            {
+                std::cout << main_data->console_prefix << "Found JSON file: " << json_file_paths.at(i) << std::endl;
+            }
+        }
+
+        start_time = std::chrono::high_resolution_clock::now();
+
+        console_update_rate = 1.0 / 2.0;
+        period_count = 1;
+
+        for (uint64_t p = 0; p < json_file_paths.size(); p++)
+        {
+            if (path_exists(json_file_paths.at(p) + ".meta"))
+            {
+                std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
+
+                double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+
+                if (time_in_seconds_from_start_time > console_update_rate)
+                {
+                    start_time = end_time;
+
+                    if (period_count > 3)
+                    {
+                        period_count = 0;
+                    }
+
+                    ss.str(std::string());
+
+                    ss << "Rebuilding JSON as DLGE" << std::string(period_count, '.');
+
+                    std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ');
+
+                    period_count++;
+                }
+
+                std::ifstream input_json_meta_file = std::ifstream(json_file_paths.at(p) + ".meta", std::ifstream::binary);
+
+                if (!input_json_meta_file.good())
+                {
+                    std::cout << main_data->console_prefix << "Error: JSON meta file " << json_file_paths.at(p) + ".meta" << " could not be read." << std::endl;
+                    std::exit(0);
+                }
+
+                input_json_meta_file.seekg(0, input_json_meta_file.end);
+
+                uint64_t input_json_meta_file_size = input_json_meta_file.tellg();
+
+                input_json_meta_file.seekg(0, input_json_meta_file.beg);
+
+                std::vector<char> input_json_meta(input_json_meta_file_size, 0);
+
+                input_json_meta_file.read(input_json_meta.data(), input_json_meta_file_size);
+
+                input_json_meta_file.close();
+
+                std::ifstream input_json_file(json_file_paths.at(p));
+
+                if (!input_json_file.good())
+                {
+                    std::cout << main_data->console_prefix << "Error: JSON file " << json_file_paths.at(p) << " could not be read." << std::endl;
+                    std::exit(0);
+                }
+
+                json input_json;
+
+                input_json_file >> input_json;
+
+                input_json_file.close();
+
+                int category_language_count = 0;
+
+                for (const auto& it : input_json.items())
+                {
+                    //std::cout << main_data->console_prefix << it.key() << ", " << it.value() << std::endl << std::endl;
+
+                    bool language_found = false;
+
+                    if (it.value().contains("Language"))
+                    {
+                        language_found = true;
+
+                        category_language_count++;
+
+                        //std::cout << main_data->console_prefix << it.key() << ", " << it.value() << std::endl << std::endl;
+                    }
+
+                    if (!language_found)
+                    {
+                        std::cout << main_data->console_prefix << "Error: JSON file " << json_file_paths.at(p) << " is malformed and can not be rebuilt into a DLGE file/resource." << std::endl;
+                        std::exit(0);
+                    }
+                }
+
+                std::vector<char> dlge_data;
+
+                char char4[4] = "";
+                uint32_t bytes4 = 0;
+
+                uint32_t position = 0;
+
+                uint32_t number_of_dlge_categories = 0;
+
+                std::memcpy(&number_of_dlge_categories, &input_json_meta.data()[position], sizeof(uint32_t));
+                position += sizeof(uint32_t);
+
+                uint32_t number_of_languages = 0;
+
+                std::memcpy(&number_of_languages, &input_json_meta.data()[position], sizeof(uint32_t));
+                position += sizeof(uint32_t);
+
+                if (category_language_count != (number_of_dlge_categories * number_of_languages))
+                {
+                    std::cout << main_data->console_prefix << "Error: Number of strings in the input DLGE JSON file do not match the number of strings in the meta file." << std::endl;
+                    std::exit(0);
+                }
+
+                dlge_data.push_back(0x0);
+                dlge_data.push_back(0x0);
+                dlge_data.push_back(0x0);
+                dlge_data.push_back(0x0);
+                dlge_data.push_back(0x1);
+                dlge_data.push_back(0x0);
+                dlge_data.push_back(0x0);
+                dlge_data.push_back(0x0);
+
+                for (uint64_t i = 0; i < number_of_dlge_categories; i++)
+                {
+                    dlge_data.push_back(0x1);
+
+                    std::memcpy(&char4, &input_json_meta.data()[position], sizeof(uint32_t));
+                    position += sizeof(uint32_t);
+
+                    for (uint64_t j = 0; j < sizeof(uint32_t); j++)
+                    {
+                        dlge_data.push_back(char4[j]);
+                    }
+
+                    std::memcpy(&char4, &input_json_meta.data()[position], sizeof(uint32_t));
+                    position += sizeof(uint32_t);
+
+                    for (uint64_t j = 0; j < sizeof(uint32_t); j++)
+                    {
+                        dlge_data.push_back(char4[j]);
+                    }
+
+                    dlge_data.push_back(0x0);
+                    dlge_data.push_back(0x0);
+                    dlge_data.push_back(0x0);
+                    dlge_data.push_back(0x0);
+                    dlge_data.push_back(0xFF);
+                    dlge_data.push_back(0xFF);
+                    dlge_data.push_back(0xFF);
+                    dlge_data.push_back(0xFF);
+                    dlge_data.push_back(0xFF);
+                    dlge_data.push_back(0xFF);
+                    dlge_data.push_back(0xFF);
+                    dlge_data.push_back(0xFF);
+                    dlge_data.push_back(0x0);
+                    dlge_data.push_back(0x0);
+                    dlge_data.push_back(0x0);
+                    dlge_data.push_back(0x0);
+
+                    uint32_t key_range_min = (i * number_of_languages);
+                    uint32_t key_range_max = key_range_min + number_of_languages;
+                    uint32_t key_current = 0;
+
+                    for (const auto& it : input_json.items())
+                    {
+                        if (key_current >= key_range_min && key_current < key_range_max)
+                        {
+                            //std::cout << main_data->console_prefix << it.key() << ", " << it.value() << std::endl << std::endl;
+
+                            std::memcpy(&char4, &input_json_meta.data()[position], sizeof(uint32_t));
+                            position += sizeof(uint32_t);
+
+                            for (uint64_t j = 0; j < sizeof(uint32_t); j++)
+                            {
+                                dlge_data.push_back(char4[j]);
+                            }
+
+                            std::memcpy(&char4, &input_json_meta.data()[position], sizeof(uint32_t));
+                            position += sizeof(uint32_t);
+
+                            for (uint64_t j = 0; j < sizeof(uint32_t); j++)
+                            {
+                                dlge_data.push_back(char4[j]);
+                            }
+
+                            std::string temp_string = it.value()["String"];
+
+                            //std::cout << it.value()["String"] << std::endl << std::endl;
+
+                            uint32_t string_length = (uint32_t)temp_string.length();
+
+                            while (string_length % 8 != 0)
+                            {
+                                string_length++;
+
+                                temp_string.push_back(0x0);
+                            }
+
+                            std::memcpy(&char4, &string_length, sizeof(uint32_t));
+
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                dlge_data.push_back(char4[k]);
+                            }
+
+                            for (uint32_t k = 0; k < string_length / 8; k++)
+                            {
+                                uint32_t data[2];
+                                std::memcpy(data, &temp_string[(uint64_t)k * (uint64_t)8], sizeof(uint32_t));
+                                std::memcpy(data + 1, &temp_string[(uint64_t)k * (uint64_t)8 + (uint64_t)4], sizeof(uint32_t));
+
+                                xtea_encrypt_dlge(data);
+
+                                std::memcpy(&temp_string[(uint64_t)k * (uint64_t)8], data, sizeof(uint32_t));
+                                std::memcpy(&temp_string[(uint64_t)k * (uint64_t)8 + (uint64_t)4], data + 1, sizeof(uint32_t));
+                            }
+
+                            for (uint64_t k = 0; k < string_length; k++)
+                            {
+                                dlge_data.push_back(temp_string[k]);
+                            }
+                        }
+
+                        key_current++;
+                    }
+                }
+
+                //std::cout << json_file_paths.at(p) << std::endl;
+
+                //std::cout << input_json_meta_file_size << ", " << position << std::endl << std::endl;
+
+                for (uint64_t k = 0; k < (input_json_meta_file_size - position); k++)
+                {
+                    dlge_data.push_back(input_json_meta.data()[position + k]);
+                }
+
+                std::string current_path = json_file_base_paths.at(p) + "/DLGE.rebuilt";
+
+                if (!path_exists(current_path))
+                {
+                    if (!std::filesystem::create_directories(current_path))
+                    {
+                        std::cout << main_data->console_prefix << "Error: Couldn't create directory " << current_path << std::endl;
+                        std::exit(0);
+                    }
+                }
+
+                std::ofstream output_file = std::ofstream(current_path + "/" + dlge_file_names.at(p), std::ifstream::binary);
+
+                if (!output_file.good())
+                {
+                    std::cout << main_data->console_prefix << "Error: Rebuilt DLGE file " << dlge_file_names.at(p) << " could not be created." << std::endl;
+                    std::exit(0);
+                }
+
+                output_file.write(dlge_data.data(), dlge_data.size());
+
+                //std::cout << main_data->console_prefix << "Successfully rebuilt DLGE " << current_path + "/" + dlge_file_names.at(p) << " from " << json_file_paths.at(p) << std::endl;
+                
+                //std::cout << main_data->console_prefix << "Languages found: " << language_count << std::endl;
+            }
+            else
+            {
+                std::cout << main_data->console_prefix << "Error: JSON meta file " << json_file_paths.at(p) + ".meta" << " could not be found." << std::endl;
+                std::cout << main_data->console_prefix << "       Can not rebuild " << dlge_file_names.at(p) << " from JSON file " << json_file_paths.at(p) << std::endl;
+            }
+        }
+
+        ss.str(std::string());
+
+        ss << "Rebuilding JSON as DLGE: Done";
+
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+    }
+    else
+    {
+        std::cout << main_data->console_prefix << "Error: The folder " << main_data->input_rpkg_folder_path << " to rebuild the DLGE files from does not exist." << std::endl;
         std::exit(0);
     }
 }
@@ -9251,7 +11839,7 @@ void execute_command_json(main_variables* main_data)
 
 void display_usage_info(main_variables* main_data)
 {
-    std::cout << main_data->console_prefix << "rpkg v1.21 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files." << std::endl;
+    std::cout << main_data->console_prefix << "rpkg v1.3 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files." << std::endl;
     std::cout << main_data->console_prefix << "--------------------------------------------------------------------------------" << std::endl;
     std::cout << main_data->console_prefix << "Note: All the information used to build this program was gleaned" << std::endl;
     std::cout << main_data->console_prefix << "      in a completely 'clean room' environment." << std::endl;
@@ -9287,8 +11875,16 @@ void display_usage_info(main_variables* main_data)
     std::cout << main_data->console_prefix << "        Extracts all hash linked files/resources of type WWEV to their" << std::endl;
     std::cout << main_data->console_prefix << "        partial IOI internal Wwise file paths / names. It also converts" << std::endl;
     std::cout << main_data->console_prefix << "        the WWEV (*.wem) files directly to *.ogg files for easy listening." << std::endl;
+    std::cout << main_data->console_prefix << "    -extract_dlge_to_json_from <path to folder containing RPKG files>" << std::endl;
+    std::cout << main_data->console_prefix << "        Extracts all hash linked files/resources of type DLGE from" << std::endl;
+    std::cout << main_data->console_prefix << "        all the RPKG files in a given directory and then decrypts" << std::endl;
+    std::cout << main_data->console_prefix << "        them in memory and outputs / formats them as JSON files." << std::endl;
     std::cout << main_data->console_prefix << "    -extract_locr_to_json_from <path to folder containing RPKG files>" << std::endl;
     std::cout << main_data->console_prefix << "        Extracts all hash linked files/resources of type LOCR from" << std::endl;
+    std::cout << main_data->console_prefix << "        all the RPKG files in a given directory and then decrypts" << std::endl;
+    std::cout << main_data->console_prefix << "        them in memory and outputs / formats them as JSON files." << std::endl;
+    std::cout << main_data->console_prefix << "    -extract_rtlv_to_json_from <path to folder containing RPKG files>" << std::endl;
+    std::cout << main_data->console_prefix << "        Extracts all hash linked files/resources of type RTLV from" << std::endl;
     std::cout << main_data->console_prefix << "        all the RPKG files in a given directory and then decrypts" << std::endl;
     std::cout << main_data->console_prefix << "        them in memory and outputs / formats them as JSON files." << std::endl;
     std::cout << main_data->console_prefix << "    -filter <hash filter>" << std::endl;
@@ -9312,15 +11908,21 @@ void display_usage_info(main_variables* main_data)
     std::cout << main_data->console_prefix << "        Specifices the hex string to find within hash files/resources." << std::endl;
     std::cout << main_data->console_prefix << "    -output_path <path to output folder>" << std::endl;
     std::cout << main_data->console_prefix << "        Specifies output folder path to use instead of the current directory." << std::endl;
-    std::cout << main_data->console_prefix << "    -rebuild_locr_from_json_from <path to folder containing JSON (LOCR) files>" << std::endl;
-    std::cout << main_data->console_prefix << "        Rebuilds LOCR files/resources from JSON (LOCR) files that were previously" << std::endl;
-    std::cout << main_data->console_prefix << "        extracted with (-extract_locr_to_json_from)." << std::endl;
     std::cout << main_data->console_prefix << "    -rebuild_all_wwev_in <path to folders containing wem files>" << std::endl;
     std::cout << main_data->console_prefix << "        Rebuilds sets of individual Wwise .wem files that were previously" << std::endl;
     std::cout << main_data->console_prefix << "        extracted with (-extract_all_wwev_from). The folder specified by the" << std::endl;
     std::cout << main_data->console_prefix << "        argument can contain any number of sub folders, where each subfolder's" << std::endl;
     std::cout << main_data->console_prefix << "        name is linked to an individual WWEV that will be built from the *.wem" << std::endl;
     std::cout << main_data->console_prefix << "        files in that folder." << std::endl;
+    std::cout << main_data->console_prefix << "    -rebuild_dlge_from_json_from <path to folder containing JSON (DLGE) files>" << std::endl;
+    std::cout << main_data->console_prefix << "        Rebuilds DLGE files/resources from JSON (DLGE) files that were previously" << std::endl;
+    std::cout << main_data->console_prefix << "        extracted with (-extract_dlge_to_json_from)." << std::endl;
+    std::cout << main_data->console_prefix << "    -rebuild_locr_from_json_from <path to folder containing JSON (LOCR) files>" << std::endl;
+    std::cout << main_data->console_prefix << "        Rebuilds LOCR files/resources from JSON (LOCR) files that were previously" << std::endl;
+    std::cout << main_data->console_prefix << "        extracted with (-extract_locr_to_json_from)." << std::endl;
+    std::cout << main_data->console_prefix << "    -rebuild_rtlv_from_json_from <path to folder containing JSON (RTLV) files>" << std::endl;
+    std::cout << main_data->console_prefix << "        Rebuilds RTLV files/resources from JSON (RTLV) files that were previously" << std::endl;
+    std::cout << main_data->console_prefix << "        extracted with (-extract_rtlv_to_json_from)." << std::endl;
     std::cout << main_data->console_prefix << "    -regex_search <regex>" << std::endl;
     std::cout << main_data->console_prefix << "        Specifies the regex which is used to find within hash files/resources." << std::endl;
     std::cout << main_data->console_prefix << "    -rpkg_command_json <path to rpkg command json file>" << std::endl;
@@ -9356,10 +11958,18 @@ void display_usage_info(main_variables* main_data)
     std::cout << main_data->console_prefix << "        rpkg.exe -extract_all_ores_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
     std::cout << main_data->console_prefix << "    Extracts all hash linked files/resources located in the ORES files from all the RPKG files in a given directory to an output folder:" << std::endl;
     std::cout << main_data->console_prefix << "        rpkg.exe -output_path \"R:\\my\\output\\path\" -extract_all_ores_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Extracts and decrypts (to JSON) all hash linked files/resources of type DLGE from all the RPKG files in a given directory:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -extract_dlge_to_json_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Extracts and decrypts (to JSON) all hash linked files/resources of type DLGE from all the RPKG files in a given directory to an output folder:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -output_path \"R:\\my\\output\\path\" -extract_dlge_to_json_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
     std::cout << main_data->console_prefix << "    Extracts and decrypts (to JSON) all hash linked files/resources of type LOCR from all the RPKG files in a given directory:" << std::endl;
     std::cout << main_data->console_prefix << "        rpkg.exe -extract_locr_to_json_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
     std::cout << main_data->console_prefix << "    Extracts and decrypts (to JSON) all hash linked files/resources of type LOCR from all the RPKG files in a given directory to an output folder:" << std::endl;
     std::cout << main_data->console_prefix << "        rpkg.exe -output_path \"R:\\my\\output\\path\" -extract_locr_to_json_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Extracts and decrypts (to JSON) all hash linked files/resources of type RTLV from all the RPKG files in a given directory:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -extract_rtlv_to_json_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Extracts and decrypts (to JSON) all hash linked files/resources of type RTLV from all the RPKG files in a given directory to an output folder:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -output_path \"R:\\my\\output\\path\" -extract_rtlv_to_json_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
     std::cout << main_data->console_prefix << "    Rebuilds sets LOCR files from JSON files that were previously created with (-extract_locr_to_json_from):" << std::endl;
     std::cout << main_data->console_prefix << "        rpkg.exe -rebuild_locr_from_json_from \"R:\\WWEV\"" << std::endl;
     std::cout << main_data->console_prefix << "    Rebuilds sets LOCR files from JSON files that were previously created with (-extract_locr_to_json_from) to an output folder:" << std::endl;
@@ -9447,9 +12057,9 @@ int main(int argc, char* argv[])
         {
             process_command_line(argc, argv, &main_data);
 
-            /*std::ifstream file = std::ifstream("R:\\rtlvtest", std::ifstream::binary);
+            std::ifstream file = std::ifstream("R:\\rtlvtest", std::ifstream::binary);
 
-            if (!file.good())
+            /*if (!file.good())
             {
                 std::cout << main_data.console_prefix << "Error: packagedefinitions.txt / thumbs.dat file " << "R:\\rtlvtest" << " could not be read." << std::endl;
                 std::exit(0);
@@ -9566,6 +12176,30 @@ int main(int argc, char* argv[])
                     std::cout << main_data.console_prefix << "Operation Mode: Rebuild all LOCR data from JSONs in folder" << std::endl;
 
                     rebuild_all_locr(&main_data);
+                }
+                else if (main_data.mode_rtlv_to_json)
+                {
+                    std::cout << main_data.console_prefix << "Operation Mode: Extract all RTLV data (to JSON) from RPKGs in folder" << std::endl;
+
+                    extract_all_rtlv(&main_data);
+                }
+                else if (main_data.mode_json_to_rtlv)
+                {
+                    std::cout << main_data.console_prefix << "Operation Mode: Rebuild all RTLV data from JSONs in folder" << std::endl;
+
+                    rebuild_all_rtlv(&main_data);
+                }
+                else if (main_data.mode_dlge_to_json)
+                {
+                    std::cout << main_data.console_prefix << "Operation Mode: Extract all DLGE data (to JSON) from RPKGs in folder" << std::endl;
+
+                    extract_all_dlge(&main_data);
+                }
+                else if (main_data.mode_json_to_dlge)
+                {
+                    std::cout << main_data.console_prefix << "Operation Mode: Rebuild all DLGE data from JSONs in folder" << std::endl;
+
+                    rebuild_all_dlge(&main_data);
                 }
                 else if (main_data.mode_hash_depends)
                 {
