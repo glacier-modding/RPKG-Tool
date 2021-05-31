@@ -22,6 +22,14 @@
 #include "packed_codebooks_aoTuV_603.h"
 #include "lib/json/json.hpp"
 
+#ifdef _WIN64
+#include <io.h>
+#else
+#include <unistd.h>
+#define _isatty isatty
+#define _fileno fileno
+#endif
+
 using json = nlohmann::ordered_json;
 
 extern "C" void MD5Init(struct MD5Context* ctx);
@@ -103,6 +111,7 @@ struct main_variables
     bool mode_use_lz4hc = true;
     bool mode_xor_bytes = false;
     bool mode_hash_depends = false;
+    bool mode_hash_probe = false;
     bool mode_search_rpkg = false;
     bool mode_text_search = false;
     bool mode_hex_search = false;
@@ -538,6 +547,27 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
                 }
             }
 
+            if (argv[i] == std::string("-hash_probe"))
+            {
+                main_data->mode_hash_probe = true;
+
+                if (argc > (i + 1))
+                {
+                    main_data->input_rpkg_folder_path = argv[i + 1];
+
+                    if (main_data->input_rpkg_folder_path[0] == '-' || main_data->input_rpkg_folder_path == "")
+                    {
+                        std::cout << "Error: Invalid RPKG file path." << std::endl;
+                        std::exit(0);
+                    }
+                }
+                else
+                {
+                    std::cout << "Error: Invalid RPKG file path." << std::endl;
+                    std::exit(0);
+                }
+            }
+
             if (argv[i] == std::string("-generate_rpkg_from"))
             {
                 main_data->mode_generate_rpkg_file = true;
@@ -792,7 +822,13 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
 
         if (main_data->mode_hash_depends && !main_data->mode_filter)
         {
-            std::cout << "Error: Hash filter must be specified when using hash depends mode." << std::endl;
+            std::cout << "Error: Filter (-filter) must be specified when using hash depends mode." << std::endl;
+            std::exit(0);
+        }
+
+        if (main_data->mode_hash_probe && !main_data->mode_filter)
+        {
+            std::cout << "Error: Filter (-filter) must be specified when using hash probe mode." << std::endl;
             std::exit(0);
         }
     }
@@ -2647,7 +2683,12 @@ void extract_from_rpkg(main_variables* main_data)
             start_time = std::chrono::high_resolution_clock::now();
             int stringstream_length = 80;
 
-            bool extracted = false;
+            std::vector<bool> extracted;
+
+            for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
+            {
+                extracted.push_back(false);
+            }
 
             uint64_t search_count = 0;
 
@@ -2662,6 +2703,8 @@ void extract_from_rpkg(main_variables* main_data)
 
                 bool found = false;
 
+                uint64_t input_filter_index = 0;
+
                 for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
                 {
                     std::size_t found_position = hash_file_name.find(main_data->input_filter.at(z));
@@ -2669,12 +2712,19 @@ void extract_from_rpkg(main_variables* main_data)
                     if (found_position != std::string::npos && main_data->input_filter.at(z) != "")
                     {
                         found = true;
+
+                        input_filter_index = z;
+
+                        break;
                     }
                 }
 
                 if (found || !main_data->mode_filter)
                 {
-                    extracted = true;
+                    if (main_data->input_filter.size() > 0)
+                    {
+                        extracted.at(input_filter_index) = true;
+                    }
 
                     uint64_t hash_size;
 
@@ -3086,9 +3136,12 @@ void extract_from_rpkg(main_variables* main_data)
                 }
             }
 
-            if (!extracted)
+            for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
             {
-                //std::cout << "Error: " << main_data->input_filter_string << " is not in " << main_data->input_rpkg_file_path << std::endl;
+                if (!extracted.at(z))
+                {
+                    std::cout << std::endl << "Error: " << main_data->input_filter.at(z) << " is not in " << main_data->input_rpkg_file_path << std::endl;
+                }
             }
 
             std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
@@ -7478,7 +7531,184 @@ void find_hash_depends(main_variables* main_data)
     }
     else
     {
-        std::cout << "Error: The folder " << main_data->input_rpkg_folder_path << " to generate the RPKG file does not exist." << std::endl;
+        std::cout << "Error: The folder " << main_data->input_rpkg_folder_path << " to search for RPKG files for hash depends mode does not exist." << std::endl;
+        std::exit(0);
+    }
+}
+
+void hash_probe(main_variables* main_data)
+{
+    main_data->input_rpkg_folder_path = remove_all_string_from_string(main_data->input_rpkg_folder_path, "\"");
+    main_data->input_rpkg_folder_path = remove_all_string_from_string(main_data->input_rpkg_folder_path, "\'");
+
+    if (main_data->input_rpkg_folder_path.substr(main_data->input_rpkg_folder_path.length() - 1, 1) == "\\")
+    {
+        main_data->input_rpkg_folder_path = main_data->input_rpkg_folder_path.substr(0, main_data->input_rpkg_folder_path.length() - 1);
+    }
+
+    if (main_data->input_rpkg_folder_path.substr(main_data->input_rpkg_folder_path.length() - 1, 1) == "/")
+    {
+        main_data->input_rpkg_folder_path = main_data->input_rpkg_folder_path.substr(0, main_data->input_rpkg_folder_path.length() - 1);
+    }
+
+    std::cout << main_data->input_rpkg_folder_path << std::endl;
+
+    if (path_exists(main_data->input_rpkg_folder_path))
+    {
+        std::vector<std::string> rpkg_file_names;
+        std::vector<std::string> rpkg_file_paths;
+
+        std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
+
+        double console_update_rate = 1.0 / 2.0;
+        int period_count = 1;
+
+        for (const auto& entry : std::filesystem::recursive_directory_iterator(main_data->input_rpkg_folder_path))
+        {
+            std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
+
+            double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+
+            if (time_in_seconds_from_start_time > console_update_rate)
+            {
+                start_time = end_time;
+
+                if (period_count > 3)
+                {
+                    period_count = 0;
+                }
+
+                std::stringstream ss;
+
+                ss << "Scanning folder" << std::string(period_count, '.');
+
+                std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ');
+
+                period_count++;
+            }
+
+            if (std::filesystem::is_regular_file(entry.path().string()))
+            {
+                std::size_t pos = entry.path().string().find_last_of("\\/");
+
+                std::string rpkg_files_name = "";
+                std::string hash = "";
+                std::string hash_resource_type = "";
+
+                if (pos != std::string::npos)
+                {
+                    rpkg_files_name = entry.path().string().substr(pos + 1, entry.path().string().length() - (pos + 1));
+                }
+                else
+                {
+                    rpkg_files_name = entry.path().string();
+                }
+
+                if (to_uppercase(rpkg_files_name.substr((rpkg_files_name.length() - 5), 5)) == ".RPKG")
+                {
+                    rpkg_file_paths.push_back(entry.path().string());
+                    rpkg_file_names.push_back(rpkg_files_name);
+                }
+            }
+        }
+
+        std::stringstream ss;
+
+        ss << "Scanning folder: Done";
+
+        std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+
+        if (main_data->debug)
+        {
+            for (uint64_t i = 0; i < rpkg_file_paths.size(); i++)
+            {
+                std::cout << "Found RPKG file: " << rpkg_file_paths.at(i) << std::endl;
+            }
+        }
+
+        for (uint64_t i = 0; i < rpkg_file_paths.size(); i++)
+        {
+            import_rpkg_file_if_not_already(main_data, rpkg_file_paths.at(i), rpkg_file_names.at(i), true);
+        }
+
+        bool found = false;
+
+        int found_count = 0;
+
+        ss.str(std::string());
+
+        for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
+        {
+            uint64_t hash = std::strtoull(main_data->input_filter.at(z).c_str(), nullptr, 16);
+
+            if (hash != 0)
+            {
+                std::cout << std::endl << "Searching RPKGs for input filter: " << main_data->input_filter.at(z) << std::endl;
+
+                for (uint64_t i = 0; i < main_data->rpkg_data.size(); i++)
+                {
+                    std::map<uint64_t, uint64_t>::iterator it2 = main_data->rpkg_data.at(i).hash_map.find(hash);
+
+                    if (it2 != main_data->rpkg_data.at(i).hash_map.end())
+                    {
+                        found = true;
+
+                        found_count++;
+
+                        ss << std::endl << main_data->input_filter.at(z) << " is in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
+                        ss << "  - Data offset: " << main_data->rpkg_data.at(i).hash_offset.at(it2->second) << std::endl;
+                        ss << "  - Data size: " << (main_data->rpkg_data.at(i).hash_size.at(it2->second) & 0x3FFFFFFF) << std::endl;
+
+                        if (main_data->rpkg_data.at(i).is_lz4ed.at(it2->second))
+                        {
+                            ss << "  - LZ4: True" << std::endl;
+                        }
+                        else
+                        {
+                            ss << "  - LZ4: False" << std::endl;
+                        }
+
+                        if (main_data->rpkg_data.at(i).is_xored.at(it2->second))
+                        {
+                            ss << "  - XOR: True" << std::endl;
+                        }
+                        else
+                        {
+                            ss << "  - XOR: False" << std::endl;
+                        }
+
+                        ss << "  - Resource type: " << main_data->rpkg_data.at(i).hash_resource_type.at(it2->second) << std::endl;
+                        ss << "  - Hash reference table size: " << main_data->rpkg_data.at(i).hash_reference_table_size.at(it2->second) << std::endl;
+                        ss << "  - Forward hash depends: " << (main_data->rpkg_data.at(i).hash_reference_data.at(it2->second).hash_reference_count & 0x3FFFFFFF) << std::endl;
+                        ss << "  - Final size: " << main_data->rpkg_data.at(i).hash_size_final.at(it2->second) << std::endl;
+                        ss << "  - Size in memory: " << main_data->rpkg_data.at(i).hash_size_in_memory.at(it2->second) << std::endl;
+                        ss << "  - Size in video memory: " << main_data->rpkg_data.at(i).hash_size_in_video_memory.at(it2->second) << std::endl << std::endl;
+
+                    }
+                }
+
+                if (found)
+                {
+                    std::cout << "Input filter \"" << main_data->input_filter.at(z) << "\" was found in " << found_count << " RPKG files." << std::endl;
+
+                    std::cout << ss.str() << std::endl;
+                }
+                else
+                {
+                    std::cout << "Input filter \"" << main_data->input_filter.at(z) << "\" was not found in any RPKG files." << std::endl;
+                }
+            }
+            else
+            {
+                std::cout << "Unable to probe RPKG files for \"" << main_data->input_filter.at(z) << "\"." << std::endl;
+                std::cout << "Input filter \"" << main_data->input_filter.at(z) << "\" is not a valid IOI hash identifier." << std::endl;
+                std::cout << "IOI uses 64 bit hash identifiers for all it's hash files/resources/runtimeids." << std::endl;
+            }
+        }
+    }
+    else
+    {
+        std::cout << "Error: The folder " << main_data->input_rpkg_folder_path << " to search for RPKG files for hash probe mode does not exist." << std::endl;
         std::exit(0);
     }
 }
@@ -7644,9 +7874,15 @@ int main(int argc, char* argv[])
     }
     else if (main_data.mode_hash_depends)
     {
-        std::cout << "Operation Mode: Find hash (file/resouce)'s depends" << std::endl;
+        std::cout << "Operation Mode: Find hash (file/resource)'s depends" << std::endl;
 
         find_hash_depends(&main_data);
+    }
+    else if (main_data.mode_hash_probe)
+    {
+        std::cout << "Operation Mode: Probe for hash file(s)/resource(s) in RPKG files" << std::endl;
+
+        hash_probe(&main_data);
     }
     else if (main_data.mode_compute_ioi_hash)
     {
@@ -7668,7 +7904,7 @@ int main(int argc, char* argv[])
     }
     else
     {
-        std::cout << "rpkg v1.1 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files." << std::endl;
+        std::cout << "rpkg v1.11 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files." << std::endl;
         std::cout << "--------------------------------------------------------------------------------" << std::endl;
         std::cout << "Note: All the information used to build this program was gleaned" << std::endl;
         std::cout << "      in a completely 'clean room' environment." << std::endl;
@@ -7711,6 +7947,10 @@ int main(int argc, char* argv[])
         std::cout << "        Lists the forward and reverse depends of a given hash file/resource." << std::endl;
         std::cout << "        Scans a directory, commonly Hitman's Runtime dir, and imports and" << std::endl;
         std::cout << "        scans all available RPKG files for dependency information and lists the results." << std::endl;
+        std::cout << "    -hash_probe <path to folder containing RPKG files>" << std::endl;
+        std::cout << "        Probes RPKG files for hash files/resources and displays key data points." << std::endl;
+        std::cout << "        Scans a directory, commonly Hitman's Runtime dir, and imports and" << std::endl;
+        std::cout << "        scans all available RPKG files for the existence of the hash file/resource." << std::endl;
         std::cout << "    -hex_search <hex string>" << std::endl;
         std::cout << "        Specifices the hex string to find within hash files/resources." << std::endl;
         std::cout << "    -output_path <path to output folder>" << std::endl;
@@ -7779,6 +8019,10 @@ int main(int argc, char* argv[])
         std::cout << "        rpkg.exe -filter 00123456789ABCDE -hash_depends \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
         std::cout << "    Lists the forward and reverse depends of two hash files/resources:" << std::endl;
         std::cout << "        rpkg.exe -filter 00123456789ABCDE,00123456789ABCDE -hash_depends \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
+        std::cout << "    Probes RPKG files for hash files/resources and displays key data points:" << std::endl;
+        std::cout << "        rpkg.exe -filter 00123456789ABCDE -hash_probe \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
+        std::cout << "    Probes RPKG files for hash files/resources and displays key data points:" << std::endl;
+        std::cout << "        rpkg.exe -filter 00123456789ABCDE,00123456789ABCDE -hash_probe \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
         std::cout << "    Search a RPKG file's hash files/resources by hex string:" << std::endl;
         std::cout << "        rpkg.exe -hex_search 00112233445566 -search_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
         std::cout << "    Search a RPKG file's hash files/resources by regex:" << std::endl;
