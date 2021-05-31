@@ -4234,6 +4234,8 @@ void extract_all_ores(main_variables* main_data)
 
                                                 extract_from_rpkg_with_map(main_data);
 
+                                                main_data->mode_filter = false;
+
                                                 main_data->input_filter.clear();
 
                                                 main_data->input_filter = current_input_filters;
@@ -9249,7 +9251,7 @@ void execute_command_json(main_variables* main_data)
 
 void display_usage_info(main_variables* main_data)
 {
-    std::cout << main_data->console_prefix << "rpkg v1.2 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files." << std::endl;
+    std::cout << main_data->console_prefix << "rpkg v1.21 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files." << std::endl;
     std::cout << main_data->console_prefix << "--------------------------------------------------------------------------------" << std::endl;
     std::cout << main_data->console_prefix << "Note: All the information used to build this program was gleaned" << std::endl;
     std::cout << main_data->console_prefix << "      in a completely 'clean room' environment." << std::endl;
