@@ -35,7 +35,7 @@ void rpkg_function::extract_prel_refs(std::string& input_path, std::string& filt
     {
         LOG("Loading Hash List...");
 
-        generic_function::load_hash_list();
+        generic_function::load_hash_list(true);
 
         LOG("Loading Hash List: Done");
 

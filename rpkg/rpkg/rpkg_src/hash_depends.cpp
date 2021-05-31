@@ -1,4 +1,5 @@
 #include "rpkg_function.h"
+#include "generic_function.h"
 #include "file.h"
 #include "global.h"
 #include "console.h"
@@ -18,6 +19,12 @@ void rpkg_function::hash_depends(std::string& input_path, std::string& filter, s
 
     if (file::path_exists(input_rpkg_folder_path))
     {
+        LOG("Loading Hash List...");
+
+        generic_function::load_hash_list(false);
+
+        LOG("Loading Hash List: Done");
+
         rpkg_function::import_rpkg_files_in_folder(input_rpkg_folder_path);
 
         std::stringstream ss;
@@ -122,11 +129,22 @@ void rpkg_function::hash_depends(std::string& input_path, std::string& filter, s
 
                         for (uint64_t j = 0; j < hash_depends_data.at(i).hash_dependency_file_name.size(); j++)
                         {
-                            LOG_NO_ENDL("Hash file/resource: " << hash_depends_data.at(i).hash_dependency_file_name.at(j));
+                            LOG("Hash file/resource: " << hash_depends_data.at(i).hash_dependency_file_name.at(j));
+
+                            std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(std::strtoull(hash_depends_data.at(i).hash_dependency_file_name.at(j).c_str(), nullptr, 16));
+
+                            if (it2 != hash_list_hash_map.end())
+                            {
+                                LOG("  - IOI String: " + hash_list_hash_strings.at(it2->second));
+                            }
+                            else
+                            {
+                                LOG("  - IOI String: ");
+                            }
 
                             if (hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).size() > 0)
                             {
-                                LOG_NO_ENDL(", Found in RPKG files: ");
+                                LOG_NO_ENDL("  - Found in RPKG files: ");
 
                                 for (uint64_t k = 0; k < hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).size(); k++)
                                 {
@@ -142,7 +160,7 @@ void rpkg_function::hash_depends(std::string& input_path, std::string& filter, s
                             }
                             else
                             {
-                                LOG(", Found in RPKG files: None");
+                                LOG("  - Found in RPKG files: None");
                             }
                         }
                     }
@@ -220,11 +238,22 @@ void rpkg_function::hash_depends(std::string& input_path, std::string& filter, s
 
                 for (uint64_t i = 0; i < reverse_dependency.size(); i++)
                 {
-                    LOG_NO_ENDL("Hash file/resource: " << reverse_dependency.at(i));
+                    LOG("Hash file/resource: " << reverse_dependency.at(i));
+
+                    std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(std::strtoull(reverse_dependency.at(i).c_str(), nullptr, 16));
+
+                    if (it2 != hash_list_hash_map.end())
+                    {
+                        LOG("  - IOI String: " + hash_list_hash_strings.at(it2->second));
+                    }
+                    else
+                    {
+                        LOG("  - IOI String: ");
+                    }
 
                     if (reverse_dependency_in_rpkg_file.at(i).size() > 0)
                     {
-                        LOG_NO_ENDL(", Found in RPKG files: ");
+                        LOG_NO_ENDL("  - Found in RPKG files: ");
 
                         for (uint64_t j = 0; j < reverse_dependency_in_rpkg_file.at(i).size(); j++)
                         {
@@ -240,7 +269,7 @@ void rpkg_function::hash_depends(std::string& input_path, std::string& filter, s
                     }
                     else
                     {
-                        LOG(", Found in RPKG files: None");
+                        LOG("  - Found in RPKG files: None");
                     }
                 }
             }

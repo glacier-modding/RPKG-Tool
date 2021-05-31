@@ -38,7 +38,7 @@ void rpkg_function::extract_wwes_to_ogg_from(std::string& input_path, std::strin
     {
         LOG("Loading Hash List...");
 
-        generic_function::load_hash_list();
+        generic_function::load_hash_list(true);
 
         LOG("Loading Hash List: Done");
 

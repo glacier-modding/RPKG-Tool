@@ -16,7 +16,7 @@ void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string
 {
     LOG("Loading Hash List...");
 
-    generic_function::load_hash_list();
+    generic_function::load_hash_list(true);
 
     LOG("Loading Hash List: Done");
 

@@ -50,6 +50,10 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     {
         rpkg_function::extract_prel_refs(input_path, filter, output_path);
     }
+    else if (command == "-extract_temp_from")
+    {
+        rpkg_function::extract_temp_from(input_path, filter, output_path);
+    }
     else if (command == "-extract_wwem_to_ogg_from")
     {
         rpkg_function::extract_wwem_to_ogg_from(input_path, filter, output_path);
@@ -216,6 +220,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                      "-extract_gfxf_from",
                                                      "-extract_ores_from",
                                                      "-extract_prel_refs",
+                                                     "-extract_temp_from",
                                                      "-extract_wwem_to_ogg_from",
                                                      "-extract_wwes_to_ogg_from",
                                                      "-extract_wwev_to_ogg_from",

@@ -21,6 +21,7 @@ void rpkg_function::extract_rpkg_meta(uint64_t i, std::string& hash_file_path)
     }
 
     std::vector<char> rpkg_meta_data;
+    char char1[1];
     char char4[4];
     char char8[8];
 
@@ -41,15 +42,12 @@ void rpkg_function::extract_rpkg_meta(uint64_t i, std::string& hash_file_path)
 
     if (rpkgs.at(i).rpkg_file_version == 2)
     {
-        rpkg_meta_data.push_back(0x01);
-        rpkg_meta_data.push_back(0x00);
-        rpkg_meta_data.push_back(0x00);
-        rpkg_meta_data.push_back(0x00);
-        rpkg_meta_data.push_back((char)rpkgs.at(i).rpkgv2_chunk_number);
-        rpkg_meta_data.push_back(0x00);
-        rpkg_meta_data.push_back(0x00);
-        rpkg_meta_data.push_back(0x78);
-        rpkg_meta_data.push_back(0x78);
+        for (uint64_t j = 0; j < rpkgs.at(i).rpkgv2_header.size(); j++)
+        {
+            std::memcpy(&char1, &rpkgs.at(i).rpkgv2_header.at(j), sizeof(uint8_t));
+
+            rpkg_meta_data.push_back(char1[0]);
+        }
     }
 
     std::memcpy(&char4, &rpkgs.at(i).rpkg_file_count, sizeof(uint32_t));

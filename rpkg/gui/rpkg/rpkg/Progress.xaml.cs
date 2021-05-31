@@ -65,12 +65,9 @@ namespace rpkg
 
                 task_multiple_status = get_task_multiple_status();
 
-                unsafe
-                {
-                    timing_string = Marshal.PtrToStringAnsi(get_timing_string());
+                timing_string = Marshal.PtrToStringAnsi(get_timing_string());
 
-                    task_status_string = Marshal.PtrToStringAnsi(get_task_status_string());
-                }
+                task_status_string = Marshal.PtrToStringAnsi(get_task_status_string());
 
                 (sender as BackgroundWorker).ReportProgress((int)percent);
 
@@ -81,7 +78,47 @@ namespace rpkg
                     task_done = true;
                 }
 
-                if (operation == (int)Operation.MASS_EXTRACT)
+                if (task_single_status == (int)RPKGStatus.TASK_EXITED)
+                {
+                    task_status = task_single_status;
+
+                    task_done = true;
+                }
+
+                if (operation == (int)Operation.TEMP_TBLU)
+                {
+                    if (task_multiple_status == (int)RPKGStatus.TASK_SUCCESSFUL)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                    else if (task_multiple_status == (int)RPKGStatus.TEMP_TBLU_NOT_FOUND_IN_DEPENDS)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                    else if (task_multiple_status == (int)RPKGStatus.TEMP_TBLU_NOT_FOUND_IN_RPKG)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                    else if (task_multiple_status == (int)RPKGStatus.TEMP_TBLU_TOO_MANY)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                    else if (task_multiple_status == (int)RPKGStatus.TEMP_HEADER_NOT_FOUND)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                }
+                else if (operation == (int)Operation.MASS_EXTRACT)
                 {
                     if (task_multiple_status == (int)RPKGStatus.TASK_SUCCESSFUL)
                     {
@@ -147,7 +184,8 @@ namespace rpkg
             IMPORT,
             GENERAL,
             MASS_EXTRACT,
-            DOWNLOAD
+            DOWNLOAD,
+            TEMP_TBLU
         };
 
         public enum RPKGStatus
@@ -162,7 +200,12 @@ namespace rpkg
             RPKG_ALREADY_IMPORTED,
             SCANNING_DIRECTORY,
             SCANNING_DIRECTORY_DONE,
-            ABORT_CURRENT_TASK
+            ABORT_CURRENT_TASK,
+            TEMP_TBLU_FOUND,
+            TEMP_TBLU_NOT_FOUND_IN_DEPENDS,
+            TEMP_TBLU_NOT_FOUND_IN_RPKG,
+            TEMP_TBLU_TOO_MANY,
+            TEMP_HEADER_NOT_FOUND
         };
 
         public string timing_string = "";
@@ -193,9 +236,9 @@ namespace rpkg
         public static extern int get_gui_control();
 
         [DllImport("rpkg.dll", EntryPoint = "get_timing_string", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe IntPtr get_timing_string();
+        public static extern IntPtr get_timing_string();
 
         [DllImport("rpkg.dll", EntryPoint = "get_task_status_string", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe IntPtr get_task_status_string();
+        public static extern IntPtr get_task_status_string();
     }
 }

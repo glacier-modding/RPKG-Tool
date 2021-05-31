@@ -44,7 +44,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -170,8 +170,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ColorPicker.xaml.cs">
+      <DependentUpon>ColorPicker.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DownloadExtractionProgress.xaml.cs">
       <DependentUpon>DownloadExtractionProgress.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EntityBrickEditor.xaml.cs">
+      <DependentUpon>EntityBrickEditor.xaml</DependentUpon>
     </Compile>
     <Compile Include="Filter.xaml.cs">
       <DependentUpon>Filter.xaml</DependentUpon>
@@ -189,7 +195,15 @@
       <DependentUpon>RightClickMenu.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserSettings.cs" />
+    <Page Include="ColorPicker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="DownloadExtractionProgress.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EntityBrickEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>-extract_from_rpkg "C:\Program Files\Epic Games\HITMAN3\Runtime\chunk0.rpkg"</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-filter 003FCA2D355765F6 -extract_temp_from "C:\Program Files\Epic Games\HITMAN3\Runtime\chunk26.rpkg"</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>

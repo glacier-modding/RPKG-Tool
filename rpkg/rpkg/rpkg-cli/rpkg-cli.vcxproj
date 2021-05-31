@@ -47,6 +47,7 @@
     <ClCompile Include="..\rpkg_src\extract_prel_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_rpkg_meta.cpp" />
     <ClCompile Include="..\rpkg_src\extract_rtlv_to_json_from.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_temp_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_wwem_to_ogg_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_wwes_to_ogg_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_wwev_to_ogg_from.cpp" />
@@ -63,6 +64,7 @@
     <ClCompile Include="..\rpkg_src\import_rpkg_files_in_folder.cpp" />
     <ClCompile Include="..\rpkg_src\import_rpkg_meta.cpp" />
     <ClCompile Include="..\rpkg_src\load_master_hash_list.cpp" />
+    <ClCompile Include="..\rpkg_src\load_temp_tblu_hash_depends.cpp" />
     <ClCompile Include="..\rpkg_src\main.cpp" />
     <ClCompile Include="..\rpkg_src\rebuild_dlge_from_json_from.cpp" />
     <ClCompile Include="..\rpkg_src\rebuild_gfxf_in.cpp" />

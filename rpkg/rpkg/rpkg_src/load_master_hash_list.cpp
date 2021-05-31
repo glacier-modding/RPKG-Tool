@@ -5,7 +5,7 @@
 #include <fstream>
 #include <iostream>
 
-void generic_function::load_hash_list()
+void generic_function::load_hash_list(bool exit_if_no_hash_list)
 {
     if (!hash_list_loaded)
     {
@@ -20,7 +20,14 @@ void generic_function::load_hash_list()
         }
         else
         {
-            LOG_AND_EXIT("\nError: hash_list.txt not found. Download the lastest hash_list.txt from hitmandb.notex.app/latest-hashes.7z\n");
+            if (exit_if_no_hash_list)
+            {
+                LOG_AND_EXIT("\nError: hash_list.txt not found. Download the lastest hash_list.txt from hitmandb.notex.app/latest-hashes.7z\n");
+            }
+            else
+            {
+                LOG_AND_RETURN("\nError: hash_list.txt not found. Download the lastest hash_list.txt from hitmandb.notex.app/latest-hashes.7z\n");
+            }
         }
 
         hash_list_file.seekg(0, hash_list_file.end);

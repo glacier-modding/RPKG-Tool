@@ -17,9 +17,38 @@
 #include <fstream>
 #include <iomanip>
 
+struct vector2
+{
+    float x = 0;
+    float y = 0;
+};
+
+struct vector3
+{
+    float x = 0;
+    float y = 0;
+    float z = 0;
+};
+
+struct vector4
+{
+    float w = 0;
+    float x = 0;
+    float y = 0;
+    float z = 0;
+};
+
+struct matrix43
+{
+    vector3 x_axis;
+    vector3 y_axis;
+    vector3 z_axis;
+    vector3 transform;
+};
+
 int load_hash_list()
 {
-    generic_function::load_hash_list();
+    generic_function::load_hash_list(true);
 
     return hash_list_version;
 }
@@ -1276,4 +1305,575 @@ int get_pcm_channels()
 char* get_wem_string()
 {
     return &extracted_wem_string[0];
+}
+
+int clear_temp_tblu_data()
+{
+    std::vector<uint32_t>().swap(temp_entry_index);
+    std::vector<uint32_t>().swap(temp_logicalParent);
+    std::vector<uint32_t>().swap(temp_entityTypeResourceIndex);
+    std::vector<uint32_t>().swap(temp_propertyValues_start_offsets);
+    std::vector<uint32_t>().swap(temp_propertyValues_end_offsets);
+    std::vector<uint32_t>().swap(temp_postInitPropertyValues_start_offsets);
+    std::vector<uint32_t>().swap(temp_postInitPropertyValues_end_offsets);
+    std::vector<uint32_t>().swap(temp_platformSpecificPropertyValues_start_offsets);
+    std::vector<uint32_t>().swap(temp_platformSpecificPropertyValues_end_offsets);
+    std::vector<std::string>().swap(temp_property_types);
+    std::vector<std::vector<bool>>().swap(temp_property_types_shared);
+    std::vector<std::vector<uint32_t>>().swap(temp_property_types_shared_count);
+    std::vector<std::vector<uint32_t>>().swap(temp_property_types_offsets);
+    std::vector<std::vector<std::string>>().swap(temp_property_types_values);
+    std::vector<std::map<uint32_t, uint32_t>>().swap(temp_property_types_offsets_map);
+    std::vector<std::vector<uint32_t>>().swap(property_crc32_values);
+    std::vector<std::vector<uint32_t>>().swap(property_type_indexes);
+    std::vector<std::vector<uint32_t>>().swap(property_offsets);
+    std::vector<std::vector<uint32_t>>().swap(property_pointer_offsets);
+    std::vector<uint32_t>().swap(tblu_entry_index);
+    std::vector<uint32_t>().swap(tblu_logicalParent);
+    std::vector<uint32_t>().swap(tblu_entityTypeResourceIndex);
+    std::vector<uint64_t>().swap(tblu_entityId);
+    std::vector<uint32_t>().swap(tblu_editorOnly);
+    std::vector<std::string>().swap(tblu_entityName);
+    std::vector<char>().swap(temp_input_data);
+    std::vector<char>().swap(temp_output_data);
+    std::vector<char>().swap(tblu_input_data);
+    std::vector<char>().swap(tblu_output_data);
+    std::vector<hash_depends_variables>().swap(temp_hash_depends_data);
+    std::vector<hash_depends_variables>().swap(tblu_hash_depends_data);
+
+    return 0;
+}
+
+char* get_entries_with_logical_parent(uint32_t logical_parent)
+{
+    response_string = "";
+
+    for (uint32_t e = 0; e < tblu_logicalParent.size(); e++)
+    {
+        if (tblu_logicalParent.at(e) == logical_parent)
+        {
+            response_string.append(util::uint32_t_to_string(tblu_entry_index.at(e)));
+            response_string.push_back('|');
+            response_string.append(tblu_entityName.at(e));
+            response_string.push_back(',');
+        }
+    }
+
+    return &response_string[0];
+}
+
+char* get_entries_data(uint32_t entry_index)
+{
+    response_string = "";
+
+    for (uint32_t e = 0; e < temp_entry_index.size(); e++)
+    {
+        if (temp_entry_index.at(e) == entry_index)
+        {
+            for (uint32_t p = 0; p < property_crc32_values.at(e).size(); p++)
+            {
+                response_string.append(util::uint32_t_to_string(property_crc32_values.at(e).at(p)));
+                response_string.push_back('|');
+
+                std::string property_string = "";
+
+                std::map<uint32_t, std::string>::iterator it = property_map.find(property_crc32_values.at(e).at(p));
+
+                if (it != property_map.end())
+                {
+                    property_string = it->second;
+                }
+
+                response_string.append(property_string);
+                response_string.push_back('|');
+                response_string.append(temp_property_types.at(property_type_indexes.at(e).at(p)));
+                response_string.push_back('|');
+                response_string.append(util::uint32_t_to_string(property_type_indexes.at(e).at(p)));
+                response_string.push_back('|');
+                response_string.append(util::uint32_t_to_string(p));
+                response_string.push_back('|');
+
+                uint32_t property_type_index = property_type_indexes.at(e).at(p);
+                uint32_t property_offset = property_offsets.at(e).at(p);
+
+                property_offset += 0x10;
+
+                response_string.append(util::uint32_t_to_string(property_offset));
+                response_string.push_back('|');
+
+                if (temp_logicalParent.at(e) < temp_entry_index.size())
+                {
+                    response_string.append(tblu_entityName.at(temp_logicalParent.at(e)));
+                    response_string.push_back('|');
+                }
+                else
+                {
+                    response_string.append(util::uint32_t_to_hex_string(temp_logicalParent.at(e)));
+                    response_string.push_back('|');
+                }
+
+                char input[1024];
+                uint8_t bytes1 = 0;
+                uint16_t bytes2 = 0;
+                uint32_t bytes4 = 0;
+                uint64_t bytes8 = 0;
+
+                if (temp_property_types.at(property_type_index) == "bool")
+                {
+                    std::memcpy(&bytes4, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+
+                    response_string.append(util::uint32_t_to_string((uint32_t)((bool)bytes4)));
+                }
+                else if (temp_property_types.at(property_type_index) == "uint8")
+                {
+                    std::memcpy(&bytes4, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+
+                    response_string.append(util::uint32_t_to_string(bytes4));
+                }
+                else if (temp_property_types.at(property_type_index) == "int32")
+                {
+                    int32_t temp_int32 = 0;
+
+                    std::memcpy(&temp_int32, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+
+                    response_string.append(util::int32_t_to_string(temp_int32));
+                }
+                else if (temp_property_types.at(property_type_index) == "uint32")
+                {
+                    std::memcpy(&bytes4, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+
+                    response_string.append(util::uint32_t_to_string(bytes4));
+                }
+                else if (temp_property_types.at(property_type_index) == "float32")
+                {
+                    float temp_float = 0;
+
+                    std::memcpy(&temp_float, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+
+                    response_string.append(util::float_to_string(temp_float));
+                }
+                else if (temp_property_types.at(property_type_index) == "SMatrix43")
+                {
+                    matrix43 temp_matrix43;
+
+                    std::memcpy(&temp_matrix43.x_axis.x, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+                    std::memcpy(&temp_matrix43.x_axis.y, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+                    std::memcpy(&temp_matrix43.x_axis.z, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+
+                    std::memcpy(&temp_matrix43.y_axis.x, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+                    std::memcpy(&temp_matrix43.y_axis.y, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+                    std::memcpy(&temp_matrix43.y_axis.z, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+
+                    std::memcpy(&temp_matrix43.z_axis.x, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+                    std::memcpy(&temp_matrix43.z_axis.y, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+                    std::memcpy(&temp_matrix43.z_axis.z, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+
+                    std::memcpy(&temp_matrix43.transform.x, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+                    std::memcpy(&temp_matrix43.transform.y, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+                    std::memcpy(&temp_matrix43.transform.z, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+
+                    response_string.append(util::float_to_string(temp_matrix43.x_axis.x));
+                    response_string.push_back('!');
+                    response_string.append(util::float_to_string(temp_matrix43.x_axis.y));
+                    response_string.push_back('!');
+                    response_string.append(util::float_to_string(temp_matrix43.x_axis.z));
+                    response_string.push_back('!');
+                    response_string.append(util::float_to_string(temp_matrix43.y_axis.x));
+                    response_string.push_back('!');
+                    response_string.append(util::float_to_string(temp_matrix43.y_axis.y));
+                    response_string.push_back('!');
+                    response_string.append(util::float_to_string(temp_matrix43.y_axis.z));
+                    response_string.push_back('!');
+                    response_string.append(util::float_to_string(temp_matrix43.z_axis.x));
+                    response_string.push_back('!');
+                    response_string.append(util::float_to_string(temp_matrix43.z_axis.y));
+                    response_string.push_back('!');
+                    response_string.append(util::float_to_string(temp_matrix43.z_axis.z));
+                    response_string.push_back('!');
+                    response_string.append(util::float_to_string(temp_matrix43.transform.x));
+                    response_string.push_back('!');
+                    response_string.append(util::float_to_string(temp_matrix43.transform.y));
+                    response_string.push_back('!');
+                    response_string.append(util::float_to_string(temp_matrix43.transform.z));
+                }
+                else if (temp_property_types.at(property_type_index) == "SVector2")
+                {
+                    vector2 temp_vector2;
+
+                    std::memcpy(&temp_vector2.x, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+                    std::memcpy(&temp_vector2.y, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+
+                    response_string.append(util::float_to_string(temp_vector2.x));
+                    response_string.push_back('!');
+                    response_string.append(util::float_to_string(temp_vector2.y));
+                }
+                else if (temp_property_types.at(property_type_index) == "SVector3")
+                {
+                    vector3 temp_vector3;
+
+                    std::memcpy(&temp_vector3.x, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+                    std::memcpy(&temp_vector3.y, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+                    std::memcpy(&temp_vector3.z, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+
+                    response_string.append(util::float_to_string(temp_vector3.x));
+                    response_string.push_back('!');
+                    response_string.append(util::float_to_string(temp_vector3.y));
+                    response_string.push_back('!');
+                    response_string.append(util::float_to_string(temp_vector3.z));
+                }
+                else if (temp_property_types.at(property_type_index) == "SVector4")
+                {
+                    vector4 temp_vector4;
+
+                    std::memcpy(&temp_vector4.w, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+                    std::memcpy(&temp_vector4.x, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+                    std::memcpy(&temp_vector4.y, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+                    std::memcpy(&temp_vector4.z, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+
+                    response_string.append(util::float_to_string(temp_vector4.w));
+                    response_string.push_back('!');
+                    response_string.append(util::float_to_string(temp_vector4.x));
+                    response_string.push_back('!');
+                    response_string.append(util::float_to_string(temp_vector4.y));
+                    response_string.push_back('!');
+                    response_string.append(util::float_to_string(temp_vector4.z));
+                }
+                else if (temp_property_types.at(property_type_index) == "ZGuid")
+                {
+                    uint32_t temp_ZGuid1;
+                    uint16_t temp_ZGuid2;
+                    uint16_t temp_ZGuid3;
+                    uint16_t temp_ZGuid4;
+                    uint16_t temp_ZGuid5;
+                    uint32_t temp_ZGuid6;
+                    char char2[2];
+                    char char4[4];
+
+                    std::memcpy(&temp_ZGuid1, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+                    std::memcpy(&temp_ZGuid2, &temp_data->data()[property_offset], sizeof(bytes2));
+                    property_offset += 0x2;
+                    std::memcpy(&temp_ZGuid3, &temp_data->data()[property_offset], sizeof(bytes2));
+                    property_offset += 0x2;
+                    std::memcpy(&input, &temp_data->data()[property_offset], sizeof(bytes2));
+                    property_offset += 0x2;
+                    char2[0] = input[1];
+                    char2[1] = input[0];
+                    std::memcpy(&temp_ZGuid4, &char2, sizeof(bytes2));
+                    std::memcpy(&input, &temp_data->data()[property_offset], sizeof(bytes2));
+                    property_offset += 0x2;
+                    char2[0] = input[1];
+                    char2[1] = input[0];
+                    std::memcpy(&temp_ZGuid5, &char2, sizeof(bytes2));
+                    std::memcpy(&input, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+                    char4[0] = input[3];
+                    char4[1] = input[2];
+                    char4[2] = input[1];
+                    char4[3] = input[0];
+                    std::memcpy(&temp_ZGuid6, &char4, sizeof(bytes4));
+
+                    std::string guid_string = util::uint32_t_to_hex_string(temp_ZGuid1);
+                    guid_string += "-" + util::uint16_t_to_hex_string(temp_ZGuid2);
+                    guid_string += "-" + util::uint16_t_to_hex_string(temp_ZGuid3);
+                    guid_string += "-" + util::uint16_t_to_hex_string(temp_ZGuid4);
+                    guid_string += "-" + util::uint16_t_to_hex_string(temp_ZGuid5);
+                    guid_string += util::uint32_t_to_hex_string(temp_ZGuid6);
+
+                    response_string.append(guid_string);
+                }
+                else if (temp_property_types.at(property_type_index) == "ZRuntimeResourceID")
+                {
+                    uint64_t temp_ZRuntimeResourceID;
+
+                    std::memcpy(&temp_ZRuntimeResourceID, &temp_data->data()[property_offset], sizeof(bytes8));
+                    property_offset += 0x8;
+
+                    response_string.append(util::uint64_t_to_hex_string(temp_ZRuntimeResourceID));
+                }
+                else if (temp_property_types.at(property_type_index) == "SColorRGB")
+                {
+                    vector3 temp_vector3;
+
+                    std::memcpy(&temp_vector3.x, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+                    std::memcpy(&temp_vector3.y, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+                    std::memcpy(&temp_vector3.z, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+
+                    response_string.append(util::float_to_string(temp_vector3.x));
+                    response_string.push_back('!');
+                    response_string.append(util::float_to_string(temp_vector3.y));
+                    response_string.push_back('!');
+                    response_string.append(util::float_to_string(temp_vector3.z));
+                }
+                else if (temp_property_types.at(property_type_index) == "ZString")
+                {
+                    property_offset += 0x10;
+
+                    std::memcpy(&bytes4, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+
+                    std::memcpy(&input, &temp_data->data()[property_offset], bytes4);
+                    property_offset += bytes4;
+
+                    response_string.append(std::string(input));
+                }
+
+                response_string.push_back(',');
+            }
+        }
+    }
+
+    return &response_string[0];
+}
+
+char* get_entries_hash_reference_data(uint32_t entry_index)
+{
+    response_string = "";
+
+    for (uint32_t e = 0; e < temp_entry_index.size(); e++)
+    {
+        if (temp_entry_index.at(e) == entry_index)
+        {
+            std::string hash_reference_string = "  - ";
+            hash_reference_string.append(temp_hash_depends_data.at(0).hash_dependency_file_name.at(temp_entityTypeResourceIndex.at(e)));
+            hash_reference_string.push_back(' ');
+            hash_reference_string.append(temp_hash_depends_data.at(0).hash_dependency_ioi_string.at(temp_entityTypeResourceIndex.at(e)));
+            hash_reference_string.append("\n  - ");
+            hash_reference_string.append(tblu_hash_depends_data.at(0).hash_dependency_file_name.at(tblu_entityTypeResourceIndex.at(e)));
+            hash_reference_string.push_back(' ');
+            hash_reference_string.append(tblu_hash_depends_data.at(0).hash_dependency_ioi_string.at(tblu_entityTypeResourceIndex.at(e)));
+
+            response_string.append(hash_reference_string);
+        }
+    }
+
+    return &response_string[0];
+}
+
+int update_temp_file(char* offset, char* type, char* value)
+{
+    std::string offset_string = std::string(offset);
+    std::string type_string = std::string(type);
+    std::string value_string = std::string(value);
+
+    uint32_t offset_value = std::strtoul(offset_string.c_str(), nullptr, 10);
+
+    if (type_string == "bool")
+    {
+        if (value_string == "True")
+        {
+            uint32_t uint32_temp = 0x1;
+
+            std::memcpy(&temp_data->data()[offset_value], &uint32_temp, 0x4);
+        }
+        else if (value_string == "False")
+        {
+            uint32_t uint32_temp = 0x0;
+
+            std::memcpy(&temp_data->data()[offset_value], &uint32_temp, 0x4);
+        }
+    }
+    else if (type_string == "uint8")
+    {
+        uint32_t uint32_temp = std::strtoul(value_string.c_str(), nullptr, 10);
+
+        std::memcpy(&temp_data->data()[offset_value], &uint32_temp, 0x4);
+    }
+    else if (type_string == "int32")
+    {
+        uint32_t uint32_temp = std::strtoul(value_string.c_str(), nullptr, 10);
+
+        int32_t int32_temp = (int32_t)uint32_temp;
+
+        std::memcpy(&temp_data->data()[offset_value], &int32_temp, 0x4);
+    }
+    else if (type_string == "uint32")
+    {
+        uint32_t uint32_temp = std::strtoul(value_string.c_str(), nullptr, 10);
+
+        std::memcpy(&temp_data->data()[offset_value], &uint32_temp, 0x4);
+    }
+    else if (type_string == "float32")
+    {
+        float temp_float = std::strtof(value_string.c_str(), nullptr);
+
+        std::memcpy(&temp_data->data()[offset_value], &temp_float, 0x4);
+    }
+
+    return 0;
+}
+
+int generate_temp_file_from_data(char* temp_file_path)
+{
+    std::string temp_path = std::string(temp_file_path);
+
+    std::ofstream temp_file = std::ofstream(temp_path, std::ofstream::binary);
+
+    if (!temp_file.good())
+    {
+        return 1;
+    }
+
+    temp_file.write(temp_data->data(), temp_data->size());
+
+    temp_file.close();
+
+    rpkg_function::extract_hash_meta(temp_rpkg_index_1, temp_rpkg_index_2, temp_path);
+
+    return 0;
+}
+
+int is_offset_shared(char* offset, char* property_type_index)
+{
+    std::string offset_string = std::string(offset);
+    std::string property_type_index_string = std::string(property_type_index);
+
+    uint32_t offset_value = std::strtoul(offset_string.c_str(), nullptr, 10);
+    uint32_t property_type_index_value = std::strtoul(property_type_index_string.c_str(), nullptr, 10);
+
+    std::map<uint32_t, uint32_t>::iterator it = temp_property_types_offsets_map.at(property_type_index_value).find(offset_value);
+
+    if (it != temp_property_types_offsets_map.at(property_type_index_value).end())
+    {
+        if (temp_property_types_shared.at(property_type_index_value).at(it->second))
+        {
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    return 2;
+}
+
+char* get_all_shared_values(char* offset, char* property_type_index)
+{
+    response_string = "";
+
+    std::string offset_string = std::string(offset);
+    std::string property_type_index_string = std::string(property_type_index);
+
+    uint32_t offset_value = std::strtoul(offset_string.c_str(), nullptr, 10);
+    uint32_t property_type_index_value = std::strtoul(property_type_index_string.c_str(), nullptr, 10);
+
+    for (uint32_t p = 0; p < temp_property_types_offsets.at(property_type_index_value).size(); p++)
+    {
+        if (temp_property_types_shared.at(property_type_index_value).at(p))
+        {
+            response_string.append(util::uint32_t_to_string(temp_property_types_offsets.at(property_type_index_value).at(p)));
+            response_string.push_back('|');
+            response_string.append(temp_property_types_values.at(property_type_index_value).at(p));
+            response_string.push_back(',');
+        }
+    }
+
+    return &response_string[0];
+}
+
+int get_shared_index(char* offset, char* property_type_index)
+{
+    response_string = "";
+
+    std::string offset_string = std::string(offset);
+    std::string property_type_index_string = std::string(property_type_index);
+
+    uint32_t offset_value = std::strtoul(offset_string.c_str(), nullptr, 10);
+    uint32_t property_type_index_value = std::strtoul(property_type_index_string.c_str(), nullptr, 10);
+
+    int index = 0;
+
+    for (uint32_t p = 0; p < temp_property_types_offsets.at(property_type_index_value).size(); p++)
+    {
+        if (temp_property_types_shared.at(property_type_index_value).at(p))
+        {
+            if (temp_property_types_offsets.at(property_type_index_value).at(p) == offset_value)
+            {
+                return index;
+            }
+
+            index++;
+        }
+    }
+
+    return 0;
+}
+
+int get_shared_count(char* offset, char* property_type_index)
+{
+    response_string = "";
+
+    std::string offset_string = std::string(offset);
+    std::string property_type_index_string = std::string(property_type_index);
+
+    uint32_t offset_value = std::strtoul(offset_string.c_str(), nullptr, 10);
+    uint32_t property_type_index_value = std::strtoul(property_type_index_string.c_str(), nullptr, 10);
+
+    for (uint32_t p = 0; p < temp_property_types_offsets.at(property_type_index_value).size(); p++)
+    {
+        if (temp_property_types_shared.at(property_type_index_value).at(p))
+        {
+            if (temp_property_types_offsets.at(property_type_index_value).at(p) == offset_value)
+            {
+                return temp_property_types_shared_count.at(property_type_index_value).at(p);
+            }
+        }
+    }
+
+    return 0;
+}
+
+int update_temp_file_pointer(char* entry_index, char* property_index, char* offset)
+{
+    std::string entry_index_string = std::string(entry_index);
+    std::string property_index_string = std::string(property_index);
+    std::string offset_string = std::string(offset);
+
+    uint32_t entry_index_value = std::strtoul(entry_index_string.c_str(), nullptr, 10);
+    uint32_t property_index_value = std::strtoul(property_index_string.c_str(), nullptr, 10);
+    uint32_t offset_value = std::strtoul(offset_string.c_str(), nullptr, 16);
+
+    offset_value -= 0x10;
+
+    for (uint32_t e = 0; e < temp_entry_index.size(); e++)
+    {
+        if (temp_entry_index.at(e) == entry_index_value)
+        {
+            property_offsets.at(e).at(property_index_value) = offset_value;
+
+            std::memcpy(&temp_data->data()[property_pointer_offsets.at(e).at(property_index_value)], &offset_value, 0x4);
+        }
+    }
+
+    return 0;
 }

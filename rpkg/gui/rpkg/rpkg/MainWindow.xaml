@@ -8,7 +8,7 @@
         xmlns:local="clr-namespace:rpkg"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
-        Title="RPKG v2.31" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
+        Title="RPKG v2.4" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -152,12 +152,12 @@
             </TabItem>
             <TabItem x:Name="FifthTabRight" Header="Audio Player" Visibility="Collapsed">
                 <Grid>
-                        <Grid.Resources>
+                    <Grid.Resources>
                         <Style TargetType="{x:Type iconPacks:PackIconMaterialDesign}">
                             <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.Accent}"/>
                             <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.ThemeBackground}"/>
                         </Style>
-                        </Grid.Resources>
+                    </Grid.Resources>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>

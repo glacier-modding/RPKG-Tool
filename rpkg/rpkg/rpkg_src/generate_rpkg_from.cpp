@@ -186,12 +186,14 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& fil
             LOG_AND_EXIT("Error: Temporary file " + temp_file_name + " could not be read.");
         }
 
-        LOG("Writing to temporary RPKG file: " << temp_file_name);
+        LOG("Writing to temporary RPKG file: " + temp_file_name);
+
+        timing_string = "Generating RPKG file: " + temp_file_name;
 
         start_time = std::chrono::high_resolution_clock::now();
         int stringstream_length = 80;
 
-        std::string message = "Writing RPKG data: ";
+        std::string message = "Generating RPKG file: ";
 
         bool found_all_meta_files = true;
 
@@ -419,8 +421,6 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& fil
 
         ss << message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
 
-        timing_string = ss.str();
-
         LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
 
         percent_progress = (uint32_t)100;
@@ -501,20 +501,12 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& fil
 
         if (rpkg_meta_data.rpkg_file_version == 2)
         {
-            char1[0] = 0x01;
-            file.write(char1, 0x1);
-            char1[0] = 0x00;
-            file.write(char1, 0x1);
-            file.write(char1, 0x1);
-            file.write(char1, 0x1);
-            char1[0] = rpkg_meta_data.rpkgv2_chunk_number;
-            file.write(char1, 0x1);
-            char1[0] = 0x00;
-            file.write(char1, 0x1);
-            file.write(char1, 0x1);
-            char1[0] = 0x78;
-            file.write(char1, 0x1);
-            file.write(char1, 0x1);
+            for (uint64_t j = 0; j < rpkg_meta_data.rpkgv2_header.size(); j++)
+            {
+                std::memcpy(&char1, &rpkg_meta_data.rpkgv2_header.at(j), sizeof(uint8_t));
+
+                file.write(char1, 0x1);
+            }
         }
 
         std::memcpy(&char4, &hash_count, sizeof(uint32_t));

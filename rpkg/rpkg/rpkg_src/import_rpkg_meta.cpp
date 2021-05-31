@@ -56,13 +56,24 @@ bool rpkg_function::import_rpkg_meta(rpkg& rpkg_meta_data, std::string& rpkg_met
 
         if (rpkg_meta_data.rpkg_file_version == 2)
         {
-            rpkg_meta_file.read(input, sizeof(bytes4));
-
             rpkg_meta_file.read(input, sizeof(bytes1));
-            std::memcpy(&bytes1, input, sizeof(bytes1));
-            rpkg_meta_data.rpkgv2_chunk_number = bytes1;
-
-            rpkg_meta_file.read(input, sizeof(bytes4));
+            rpkg_meta_data.rpkgv2_header.push_back(input[0]);
+            rpkg_meta_file.read(input, sizeof(bytes1));
+            rpkg_meta_data.rpkgv2_header.push_back(input[0]);
+            rpkg_meta_file.read(input, sizeof(bytes1));
+            rpkg_meta_data.rpkgv2_header.push_back(input[0]);
+            rpkg_meta_file.read(input, sizeof(bytes1));
+            rpkg_meta_data.rpkgv2_header.push_back(input[0]);
+            rpkg_meta_file.read(input, sizeof(bytes1));
+            rpkg_meta_data.rpkgv2_header.push_back(input[0]);
+            rpkg_meta_file.read(input, sizeof(bytes1));
+            rpkg_meta_data.rpkgv2_header.push_back(input[0]);
+            rpkg_meta_file.read(input, sizeof(bytes1));
+            rpkg_meta_data.rpkgv2_header.push_back(input[0]);
+            rpkg_meta_file.read(input, sizeof(bytes1));
+            rpkg_meta_data.rpkgv2_header.push_back(input[0]);
+            rpkg_meta_file.read(input, sizeof(bytes1));
+            rpkg_meta_data.rpkgv2_header.push_back(input[0]);
         }
 
         rpkg_meta_file.read(input, sizeof(bytes4));

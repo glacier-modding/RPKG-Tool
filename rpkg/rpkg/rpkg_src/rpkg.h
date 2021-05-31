@@ -14,6 +14,7 @@ public:
     int rpkg_file_version = 0;
     int rpkgv2_chunk_number = 0;
     int rpkgv2_chunk_patch_number = 0;
+    std::vector<char> rpkgv2_header;
     uint32_t rpkg_file_count = 0;
     uint32_t rpkg_table_offset = 0;
     uint32_t rpkg_table_size = 0;

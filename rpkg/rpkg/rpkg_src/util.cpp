@@ -89,3 +89,59 @@ std::string util::uint32_t_to_hex_string(uint32_t bytes4)
     ss << std::hex << std::setw(8) << std::setfill('0') << std::uppercase << bytes4;
     return ss.str();
 }
+
+std::string util::uint16_t_to_hex_string(uint16_t bytes2)
+{
+    std::stringstream ss;
+    ss << std::hex << std::setw(4) << std::setfill('0') << std::uppercase << bytes2;
+    return ss.str();
+}
+
+std::string util::uint8_t_to_hex_string(uint8_t bytes1)
+{
+    std::stringstream ss;
+    ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << bytes1;
+    return ss.str();
+}
+
+std::string util::uint64_t_to_string(uint64_t bytes8)
+{
+    std::stringstream ss;
+    ss << bytes8;
+    return ss.str();
+}
+
+std::string util::uint32_t_to_string(uint32_t bytes4)
+{
+    std::stringstream ss;
+    ss << bytes4;
+    return ss.str();
+}
+
+std::string util::uint16_t_to_string(uint16_t bytes2)
+{
+    std::stringstream ss;
+    ss << bytes2;
+    return ss.str();
+}
+
+std::string util::uint8_t_to_string(uint8_t bytes1)
+{
+    std::stringstream ss;
+    ss << bytes1;
+    return ss.str();
+}
+
+std::string util::int32_t_to_string(int32_t bytes4)
+{
+    std::stringstream ss;
+    ss << bytes4;
+    return ss.str();
+}
+
+std::string util::float_to_string(float bytes4)
+{
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(10) << bytes4;
+    return ss.str();
+}

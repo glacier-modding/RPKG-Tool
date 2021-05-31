@@ -82,13 +82,24 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path)
 
     if (temp_rpkg.rpkg_file_version == 2)
     {
-        file.read(input, sizeof(bytes4));
-
         file.read(input, sizeof(bytes1));
-        std::memcpy(&bytes1, input, sizeof(bytes1));
-        temp_rpkg.rpkgv2_chunk_number = bytes1;
-
-        file.read(input, sizeof(bytes4));
+        temp_rpkg.rpkgv2_header.push_back(input[0]);
+        file.read(input, sizeof(bytes1));
+        temp_rpkg.rpkgv2_header.push_back(input[0]);
+        file.read(input, sizeof(bytes1));
+        temp_rpkg.rpkgv2_header.push_back(input[0]);
+        file.read(input, sizeof(bytes1));
+        temp_rpkg.rpkgv2_header.push_back(input[0]);
+        file.read(input, sizeof(bytes1));
+        temp_rpkg.rpkgv2_header.push_back(input[0]);
+        file.read(input, sizeof(bytes1));
+        temp_rpkg.rpkgv2_header.push_back(input[0]);
+        file.read(input, sizeof(bytes1));
+        temp_rpkg.rpkgv2_header.push_back(input[0]);
+        file.read(input, sizeof(bytes1));
+        temp_rpkg.rpkgv2_header.push_back(input[0]);
+        file.read(input, sizeof(bytes1));
+        temp_rpkg.rpkgv2_header.push_back(input[0]);
     }
 
     file.read(input, sizeof(file_count));
@@ -387,13 +398,6 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path)
 
         if (temp_hash.hash_reference_table_size != 0x0)
         {
-            bool reference_table_normal = true;
-
-            if (input_file_data[position + (uint64_t)temp_hash.hash_reference_table_size - (uint64_t)0x1] != 0x0)
-            {
-                reference_table_normal = false;
-            }
-
             temp_hash_reference_data.hash_value = temp_hash.hash_value;
 
             std::memcpy(&bytes4, &input_file_data[position], sizeof(bytes4));
@@ -402,16 +406,33 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path)
 
             uint32_t temp_hash_reference_count = temp_hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
+            bool reference_table_normal = true;
+
+            int zero_count = 0;
+
+            for (uint64_t j = 0; j < temp_hash_reference_count; j++)
+            {
+                if (input_file_data[position + (uint64_t)j * (uint64_t)0x8 + (uint64_t)0x7] == 0x0)
+                {
+                    zero_count++;
+                }
+            }
+
+            if (zero_count == temp_hash_reference_count)
+            {
+                reference_table_normal = false;
+            }
+
             if (reference_table_normal)
             {
-                for (uint64_t i = 0; i < temp_hash_reference_count; i++)
+                for (uint64_t j = 0; j < temp_hash_reference_count; j++)
                 {
                     std::memcpy(&bytes1, &input_file_data[position], sizeof(bytes1));
                     position += sizeof(bytes1);
                     temp_hash_reference_data.hash_reference_type.push_back(bytes1);
                 }
 
-                for (uint64_t i = 0; i < temp_hash_reference_count; i++)
+                for (uint64_t j = 0; j < temp_hash_reference_count; j++)
                 {
                     std::memcpy(&bytes8, &input_file_data[position], sizeof(bytes8));
                     position += sizeof(bytes8);
@@ -430,7 +451,7 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path)
             }
             else
             {
-                for (uint64_t i = 0; i < temp_hash_reference_count; i++)
+                for (uint64_t j = 0; j < temp_hash_reference_count; j++)
                 {
                     std::memcpy(&bytes8, &input_file_data[position], sizeof(bytes8));
                     position += sizeof(bytes8);
@@ -447,7 +468,7 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path)
                     }
                 }
 
-                for (uint64_t i = 0; i < temp_hash_reference_count; i++)
+                for (uint64_t j = 0; j < temp_hash_reference_count; j++)
                 {
                     std::memcpy(&bytes1, &input_file_data[position], sizeof(bytes1));
                     position += sizeof(bytes1);

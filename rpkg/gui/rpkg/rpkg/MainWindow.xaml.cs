@@ -197,6 +197,31 @@ namespace rpkg
             SearchRPKGsTreeView.SelectedItemChanged += MainTreeView_SelectedItemChanged;
 
             SearchHashListTreeView.SelectedItemChanged += SearchHashListTreeView_SelectedItemChanged;
+
+            RightTabControl.SelectionChanged += RightTabControl_SelectionChanged;
+        }
+
+        private void RightTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            TabControl tab = (sender as TabControl);
+
+            //MessageBoxShow(tab.SelectedIndex.ToString());
+
+            if (tab.SelectedIndex == 1)
+            {
+                LoadHexEditor();
+            }
+        }
+
+        private void LoadHexEditor()
+        {
+            HexViewerTextBox.Text = "Hex view of " + currentHash + ":\n\n";
+
+            string[] hashDetails = currentHash.Split('.');
+
+            string hash = hashDetails[0];
+
+            HexViewerTextBox.Text += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(currentRPKGFilePath, hash));
         }
 
         private void SearchHashListTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -249,55 +274,45 @@ namespace rpkg
 
                             string identifier = rpkgHashFilePath + hash;
 
-                            if (!detailsTextBoxText.ContainsKey(identifier))
+                            DetailsTextBox.Text += hash + " in RPKG file " + rpkgHashFilePath + ":\n";
+
+                            DetailsTextBox.Text += Marshal.PtrToStringAnsi(get_hash_details(rpkgHashFilePath, hash));
+
+                            DetailsTextBox.Text += "\n\n";
+
+                            //HexViewerTextBox.Text = "Hex view of " + header[0] + ":\n\n";
+
+                            LocalizationTextBox.Text = "";
+
+                            //HexViewerTextBox.Text += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgHashFilePath, hash));
+
+                            if (RightTabControl.SelectedIndex == 1)
                             {
-                                DetailsTextBox.Text += hash + " in RPKG file " + rpkgHashFilePath + ":\n";
+                                LoadHexEditor();
+                            }
 
-                                DetailsTextBox.Text += Marshal.PtrToStringAnsi(get_hash_details(rpkgHashFilePath, hash));
+                            currentRPKGFilePath = rpkgHashFilePath;
+                            currentHash = header[0];
 
-                                DetailsTextBox.Text += "\n\n";
+                            if (resourceType == "LOCR" || resourceType == "DLGE" || resourceType == "RTLV")
+                            {
+                                UInt32 localization_data_size = generate_localization_string(rpkgHashFilePath, hash, resourceType);
 
-                                HexViewerTextBox.Text = "Hex view of " + header[0] + ":\n\n";
+                                byte[] localization_data = new byte[localization_data_size];
 
-                                LocalizationTextBox.Text = "";
+                                Marshal.Copy(get_localization_string(), localization_data, 0, (int)localization_data_size);
 
-                                unsafe
+                                if (localization_data_size > 0)
                                 {
-                                    HexViewerTextBox.Text += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgHashFilePath, hash));
+                                    LocalizationTextBox.Text = Encoding.UTF8.GetString(localization_data);
                                 }
 
-                                if (resourceType == "LOCR" || resourceType == "DLGE" || resourceType == "RTLV")
+                                if (localization_data_size > 0)
                                 {
-                                    UInt32 localization_data_size = generate_localization_string(rpkgHashFilePath, hash, resourceType);
-
-                                    unsafe
+                                    if (ThirdTabRight.Visibility == Visibility.Collapsed)
                                     {
-                                        byte[] localization_data = new byte[localization_data_size];
-
-                                        Marshal.Copy(get_localization_string(), localization_data, 0, (int)localization_data_size);
-
-                                        if (localization_data_size > 0)
-                                        {
-                                            LocalizationTextBox.Text = Encoding.UTF8.GetString(localization_data);
-                                        }
+                                        ThirdTabRight.Visibility = Visibility.Visible;
                                     }
-
-                                    if (localization_data_size > 0)
-                                    {
-                                        if (ThirdTabRight.Visibility == Visibility.Collapsed)
-                                        {
-                                            ThirdTabRight.Visibility = Visibility.Visible;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (ThirdTabRight.Visibility == Visibility.Visible)
-                                        {
-                                            ThirdTabRight.Visibility = Visibility.Collapsed;
-                                        }
-                                    }
-
-                                    localizationTextBoxText.Add(identifier, LocalizationTextBox.Text);
                                 }
                                 else
                                 {
@@ -305,42 +320,27 @@ namespace rpkg
                                     {
                                         ThirdTabRight.Visibility = Visibility.Collapsed;
                                     }
-
-                                    if (FourthTabRight.Visibility == Visibility.Visible)
-                                    {
-                                        FourthTabRight.Visibility = Visibility.Collapsed;
-                                    }
-
-                                    if (FifthTabRight.Visibility == Visibility.Visible)
-                                    {
-                                        FifthTabRight.Visibility = Visibility.Collapsed;
-                                    }
                                 }
-
-                                int return_value = clear_hash_data_vector();
-
-                                detailsTextBoxText.Add(identifier, DetailsTextBox.Text);
-                                hexViewerTextBoxText.Add(identifier, HexViewerTextBox.Text);
                             }
                             else
                             {
-                                string details = "";
-                                detailsTextBoxText.TryGetValue(identifier, out details);
-                                DetailsTextBox.Text = details;
-
-                                string hex = "";
-                                hexViewerTextBoxText.TryGetValue(identifier, out hex);
-                                HexViewerTextBox.Text = hex;
-
-                                LocalizationTextBox.Text = "";
-
-                                if (resourceType == "LOCR" || resourceType == "DLGE" || resourceType == "RTLV")
+                                if (ThirdTabRight.Visibility == Visibility.Visible)
                                 {
-                                    string localization = "";
-                                    localizationTextBoxText.TryGetValue(identifier, out localization);
-                                    LocalizationTextBox.Text = localization;
+                                    ThirdTabRight.Visibility = Visibility.Collapsed;
+                                }
+
+                                if (FourthTabRight.Visibility == Visibility.Visible)
+                                {
+                                    FourthTabRight.Visibility = Visibility.Collapsed;
+                                }
+
+                                if (FifthTabRight.Visibility == Visibility.Visible)
+                                {
+                                    FifthTabRight.Visibility = Visibility.Collapsed;
                                 }
                             }
+
+                            int return_value = clear_hash_data_vector();
                         }
                     }
                     else
@@ -461,55 +461,45 @@ namespace rpkg
                         string hash = hashDetails[0];
                         string resourceType = hashDetails[1];
 
-                        string identifier = rpkgFilePath + hash;
+                        DetailsTextBox.Text = hash + " in RPKG file " + rpkgFilePath + ":\n";
 
-                        if (!detailsTextBoxText.ContainsKey(identifier))
+                        DetailsTextBox.Text += Marshal.PtrToStringAnsi(get_hash_details(rpkgFilePath, hash));
+
+                        //HexViewerTextBox.Text = "Hex view of " + header[0] + ":\n\n";
+                        //HexViewerTextBoxTextString = "Hex view of " + header[0] + ":\n\n";
+
+                        LocalizationTextBox.Text = "";
+
+                        //HexViewerTextBox.Text += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgFilePath, hash));
+                        //HexViewerTextBoxTextString += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgFilePath, hash));
+
+                        if (RightTabControl.SelectedIndex == 1)
                         {
-                            DetailsTextBox.Text = hash + " in RPKG file " + rpkgFilePath + ":\n";
+                            LoadHexEditor();
+                        }
 
-                            DetailsTextBox.Text += Marshal.PtrToStringAnsi(get_hash_details(rpkgFilePath, hash));
+                        currentRPKGFilePath = rpkgFilePath;
+                        currentHash = header[0];
 
-                            HexViewerTextBox.Text = "Hex view of " + header[0] + ":\n\n";
+                        if (resourceType == "LOCR" || resourceType == "DLGE" || resourceType == "RTLV")
+                        {
+                            UInt32 localization_data_size = generate_localization_string(rpkgFilePath, hash, resourceType);
 
-                            LocalizationTextBox.Text = "";
+                                byte[] localization_data = new byte[localization_data_size];
 
-                            unsafe
-                            {
-                                HexViewerTextBox.Text += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgFilePath, hash));
-                            }
-
-                            if (resourceType == "LOCR" || resourceType == "DLGE" || resourceType == "RTLV")
-                            {
-                                UInt32 localization_data_size = generate_localization_string(rpkgFilePath, hash, resourceType);
-
-                                unsafe
-                                {
-                                    byte[] localization_data = new byte[localization_data_size];
-
-                                    Marshal.Copy(get_localization_string(), localization_data, 0, (int)localization_data_size);
-
-                                    if (localization_data_size > 0)
-                                    {
-                                        LocalizationTextBox.Text = Encoding.UTF8.GetString(localization_data);
-                                    }
-                                }
+                                Marshal.Copy(get_localization_string(), localization_data, 0, (int)localization_data_size);
 
                                 if (localization_data_size > 0)
                                 {
-                                    if (ThirdTabRight.Visibility == Visibility.Collapsed)
-                                    {
-                                        ThirdTabRight.Visibility = Visibility.Visible;
-                                    }
-                                }
-                                else
-                                {
-                                    if (ThirdTabRight.Visibility == Visibility.Visible)
-                                    {
-                                        ThirdTabRight.Visibility = Visibility.Collapsed;
-                                    }
+                                    LocalizationTextBox.Text = Encoding.UTF8.GetString(localization_data);
                                 }
 
-                                localizationTextBoxText.Add(identifier, LocalizationTextBox.Text);
+                            if (localization_data_size > 0)
+                            {
+                                if (ThirdTabRight.Visibility == Visibility.Collapsed)
+                                {
+                                    ThirdTabRight.Visibility = Visibility.Visible;
+                                }
                             }
                             else
                             {
@@ -517,57 +507,27 @@ namespace rpkg
                                 {
                                     ThirdTabRight.Visibility = Visibility.Collapsed;
                                 }
-
-                                if (FourthTabRight.Visibility == Visibility.Visible)
-                                {
-                                    FourthTabRight.Visibility = Visibility.Collapsed;
-                                }
-
-                                if (FifthTabRight.Visibility == Visibility.Visible)
-                                {
-                                    FifthTabRight.Visibility = Visibility.Collapsed;
-                                }
                             }
-
-                            int return_value = clear_hash_data_vector();
-
-                            detailsTextBoxText.Add(identifier, DetailsTextBox.Text);
-                            hexViewerTextBoxText.Add(identifier, HexViewerTextBox.Text);
                         }
                         else
                         {
-                            string details = "";
-                            detailsTextBoxText.TryGetValue(identifier, out details);
-                            DetailsTextBox.Text = details;
-
-                            string hex = "";
-                            hexViewerTextBoxText.TryGetValue(identifier, out hex);
-                            HexViewerTextBox.Text = hex;
-
-                            LocalizationTextBox.Text = "";
-
-                            if (resourceType == "LOCR" || resourceType == "DLGE" || resourceType == "RTLV")
+                            if (ThirdTabRight.Visibility == Visibility.Visible)
                             {
-                                string localization = "";
-                                localizationTextBoxText.TryGetValue(identifier, out localization);
-                                LocalizationTextBox.Text = localization;
+                                ThirdTabRight.Visibility = Visibility.Collapsed;
+                            }
 
-                                if (LocalizationTextBox.Text.Length > 0)
-                                {
-                                    if (ThirdTabRight.Visibility == Visibility.Collapsed)
-                                    {
-                                        ThirdTabRight.Visibility = Visibility.Visible;
-                                    }
-                                }
-                                else
-                                {
-                                    if (ThirdTabRight.Visibility == Visibility.Visible)
-                                    {
-                                        ThirdTabRight.Visibility = Visibility.Collapsed;
-                                    }
-                                }
+                            if (FourthTabRight.Visibility == Visibility.Visible)
+                            {
+                                FourthTabRight.Visibility = Visibility.Collapsed;
+                            }
+
+                            if (FifthTabRight.Visibility == Visibility.Visible)
+                            {
+                                FifthTabRight.Visibility = Visibility.Collapsed;
                             }
                         }
+
+                        int return_value = clear_hash_data_vector();
 
                         if (resourceType == "GFXI")
                         {
@@ -579,10 +539,7 @@ namespace rpkg
 
                             byte[] hash_data = new byte[hash_size];
 
-                            unsafe
-                            {
-                                Marshal.Copy(get_hash_in_rpkg_data(rpkgFilePath, hash), hash_data, 0, (int)hash_size);
-                            }
+                            Marshal.Copy(get_hash_in_rpkg_data(rpkgFilePath, hash), hash_data, 0, (int)hash_size);
 
                             MemoryStream memoryStream = new MemoryStream(hash_data);
 
@@ -647,7 +604,7 @@ namespace rpkg
                                 FifthTabRight.Visibility = Visibility.Visible;
                             }
 
-                            int return_value = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hash, 0, 0);
+                            return_value = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hash, 0, 0);
 
                             string currentDirectory = System.IO.Directory.GetCurrentDirectory();
 
@@ -726,7 +683,7 @@ namespace rpkg
                                     FifthTabRight.Visibility = Visibility.Visible;
                                 }
 
-                                int return_value = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hash, 1, 0);
+                                return_value = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hash, 1, 0);
 
                                 string currentDirectory = System.IO.Directory.GetCurrentDirectory();
 
@@ -811,10 +768,7 @@ namespace rpkg
 
             byte[] hash_data = new byte[hash_size];
 
-            unsafe
-            {
-                Marshal.Copy(get_hash_in_rpkg_data(rpkgFilePath, hash), hash_data, 0, (int)hash_size);
-            }
+            Marshal.Copy(get_hash_in_rpkg_data(rpkgFilePath, hash), hash_data, 0, (int)hash_size);
 
             int return_value = clear_hash_data_vector();
         }
@@ -880,10 +834,7 @@ namespace rpkg
 
             for (UInt32 i = 0; i < resourceTypeCount; i++)
             {
-                unsafe
-                {
-                    resourceTypes.Add(Marshal.PtrToStringAnsi(get_resource_types_at(rpkgFilePath, i)));
-                }
+                resourceTypes.Add(Marshal.PtrToStringAnsi(get_resource_types_at(rpkgFilePath, i)));
             }
 
             resourceTypes.Sort();
@@ -957,10 +908,7 @@ namespace rpkg
                 {
                     string hash = "";
 
-                    unsafe
-                    {
-                        hash = Marshal.PtrToStringAnsi(get_hash_based_on_resource_type_at(rpkgFilePath, resourceType, i));
-                    }
+                    hash = Marshal.PtrToStringAnsi(get_hash_based_on_resource_type_at(rpkgFilePath, resourceType, i));
 
                     string[] temp_test = hash.Split('.');
 
@@ -1334,7 +1282,15 @@ namespace rpkg
 
                     int buttonCount = 0;
 
-                    if (hashType == "WWEM" || hashType == "WWES" || hashType == "WWEV")
+                    if (hashType == "TEMP")
+                    {
+                        string[] buttons = { "Extract " + rightClickedOnName, "Edit " + rightClickedOnName + " in Brick/Entity Editor", "Cancel" };
+
+                        buttonCount = 3;
+
+                        rightClickMenu = new RightClickMenu(buttons);
+                    }
+                    else if (hashType == "WWEM" || hashType == "WWES" || hashType == "WWEV")
                     {
                         string[] buttons = { "Extract " + rightClickedOnName, "Extract " + rightClickedOnName + " To OGG (IOI Path)", "Cancel" };
 
@@ -1427,7 +1383,129 @@ namespace rpkg
                     }
                     else if (rightClickMenu.buttonPressed == "button1" && buttonCount == 3)
                     {
-                        if (hashType == "WWEM")
+                        if (hashType == "TEMP")
+                        {
+                            string rpkgFileBackup = rpkgFilePath;
+
+                            string rpkgFile = rpkgFilePath.Substring(rpkgFilePath.LastIndexOf("\\") + 1);
+
+                            string rpkgUpperName = rpkgFile.ToUpper();
+
+                            if (rpkgUpperName.Contains("PATCH"))
+                            {
+                                string baseFileName = rpkgFile.Substring(0, rpkgUpperName.IndexOf("PATCH")).ToUpper();
+
+                                string folderPath = rpkgFilePath.Substring(0, rpkgFilePath.LastIndexOf("\\") + 1);
+
+                                List<string> rpkgFiles = new List<string>();
+
+                                foreach (var filePath in Directory.GetFiles(folderPath))
+                                {
+                                    if (filePath.ToUpper().EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase) && filePath.ToUpper().Contains(baseFileName))
+                                    {
+                                        rpkgFiles.Add(filePath);
+                                    }
+                                }
+
+                                rpkgFiles.Sort(new NaturalStringComparer());
+
+                                bool anyRPKGImported = false;
+
+                                foreach (string filePath in rpkgFiles)
+                                {
+                                    ImportRPKGFile(filePath);
+
+                                    anyRPKGImported = true;
+                                }
+
+                                if (anyRPKGImported)
+                                {
+                                    LoadHashDependsMap();
+                                }
+                            }
+
+                            int temp_return_value = clear_temp_tblu_data();
+
+                            rpkgFilePath = rpkgFileBackup;
+
+                            string temp_command = "-extract_temp_from";
+                            string temp_input_path = rpkgFilePath;
+                            string temp_filter = rightClickedOnName;
+                            string temp_search = "";
+                            string temp_search_type = "";
+                            string temp_output_path = "";
+
+                            temp_return_value = reset_task_status();
+
+                            execute_task temp_rpkgExecute = task_execute;
+
+                            IAsyncResult temp_ar = temp_rpkgExecute.BeginInvoke(temp_command, temp_input_path, temp_filter, temp_search, temp_search_type, temp_output_path, null, null);
+
+                            Progress temp_progress = new Progress();
+
+                            temp_progress.message.Content = "Analyzing Entity/Brick (TEMP/TBLU)...";
+
+                            temp_progress.operation = (int)Progress.Operation.TEMP_TBLU;
+
+                            temp_progress.ShowDialog();
+
+                            if (temp_progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
+                            {
+                                if (temp_progress.task_status == (int)Progress.RPKGStatus.TEMP_TBLU_NOT_FOUND_IN_DEPENDS)
+                                {
+                                    MessageBoxShow("Error: " + rightClickedOnName + " file has no TBLU hash depends.");
+                                }
+                                else if (temp_progress.task_status == (int)Progress.RPKGStatus.TEMP_TBLU_NOT_FOUND_IN_RPKG)
+                                {
+                                    if (rpkgUpperName.Contains("PATCH"))
+                                    {
+                                        string rpkgBaseName = rpkgFile.Substring(0, rpkgUpperName.IndexOf("PATCH")) + ".rpkg";
+
+                                        MessageBoxShow("Error: TBLU file linked to " + rightClickedOnName + " file is missing.\n\nMake sure you you import the base archives if you are trying to edit a TEMP file residing in a patch RPKG.\n\nTry importing " + rpkgBaseName + " and trying to edit " + rightClickedOnName + " again.\n\nThis should be done before trying to launch the Brick/Entity Editor.");
+                                    }
+                                    else
+                                    {
+                                        MessageBoxShow("Error: TBLU file linked to " + rightClickedOnName + " file is missing.\n\nMake sure you you import the base archives if you are trying to edit a TEMP file residing in a patch RPKG.");
+                                    }
+                                }
+                                else if (temp_progress.task_status == (int)Progress.RPKGStatus.TEMP_TBLU_TOO_MANY)
+                                {
+                                    MessageBoxShow("Error: " + rightClickedOnName + " file has too many TBLU hash depends.");
+                                }
+                                else if (temp_progress.task_status == (int)Progress.RPKGStatus.TEMP_HEADER_NOT_FOUND)
+                                {
+                                    MessageBoxShow("Error: " + rightClickedOnName + " file is an empty TEMP file, missing it's resource type header/footer.");
+                                }
+
+                                temp_return_value = clear_temp_tblu_data();
+                            }
+                            else
+                            {
+                                if (entityBrickEditor == null)
+                                {
+                                    entityBrickEditor = new EntityBrickEditor();
+                                }
+
+                                entityBrickEditor.inputFolder = userSettings.InputFolder;
+                                entityBrickEditor.outputFolder = userSettings.OutputFolder;
+
+                                entityBrickEditor.tempFileName = rightClickedOnName;
+                                entityBrickEditor.rpkgFilePath = rpkgFilePath;
+
+                                entityBrickEditor.ShowDialog();
+
+                                GC.Collect();
+                                GC.WaitForPendingFinalizers();
+                                GC.Collect();
+                            }
+
+                            rightClickedOn = 0;
+
+                            rightClickedOnFirst = true;
+
+                            return;
+                        }
+                        else if (hashType == "WWEM")
                         {
                             command = "-extract_wwem_to_ogg_from";
 
@@ -1970,7 +2048,7 @@ namespace rpkg
 
                 Progress progress = new Progress();
 
-                progress.message.Content = "Importing RPKG file " + rpkgFile + "...";
+                progress.message.Content = "Generating RPKG file " + rpkgFile + "...";
 
                 progress.ShowDialog();
             }
@@ -2250,9 +2328,6 @@ namespace rpkg
             Close();
         }
 
-        private Dictionary<string, string> detailsTextBoxText = new Dictionary<string, string>();
-        private Dictionary<string, string> hexViewerTextBoxText = new Dictionary<string, string>();
-        private Dictionary<string, string> localizationTextBoxText = new Dictionary<string, string>();
         private UserSettings userSettings;
         public string rpkgFilePath = "";
         private bool rightClickedOnFirst = true;
@@ -2260,6 +2335,8 @@ namespace rpkg
         private string rightClickedOnName = "";
         private string rightClickedOnFullName = "";
         private bool oneOrMoreRPKGsHaveBeenImported = false;
+        private string currentRPKGFilePath = "";
+        private string currentHash = "";
         private System.Windows.Threading.DispatcherTimer searchRPKGsInputTimer;
         private System.Windows.Threading.DispatcherTimer searchHashListInputTimer;
         private System.Windows.Threading.DispatcherTimer OGGPlayerTimer;
@@ -2268,6 +2345,7 @@ namespace rpkg
         private int pcmSampleSize;
         private int pcmSampleRate;
         private int pcmChannels;
+        EntityBrickEditor entityBrickEditor;
 
         private enum OggPlayerState
         {
@@ -2308,7 +2386,7 @@ namespace rpkg
         public static extern  UInt32 get_resource_types_count(string rpkg_file);
 
         [DllImport("rpkg.dll", EntryPoint = "get_resource_types_at", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe IntPtr get_resource_types_at(string rpkg_file, UInt32 at_index);
+        public static extern IntPtr get_resource_types_at(string rpkg_file, UInt32 at_index);
 
         [DllImport("rpkg.dll", EntryPoint = "get_resource_types_data_size", CallingConvention = CallingConvention.Cdecl)]
         public static extern UInt64 get_resource_types_data_size(string rpkg_file, string resource_type);
@@ -2317,22 +2395,22 @@ namespace rpkg
         public static extern UInt32 get_hash_based_on_resource_type_count(string rpkg_file, string resource_type);
 
         [DllImport("rpkg.dll", EntryPoint = "get_hash_based_on_resource_type_at", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe IntPtr get_hash_based_on_resource_type_at(string rpkg_file, string resource_type, UInt32 at_index);
+        public static extern IntPtr get_hash_based_on_resource_type_at(string rpkg_file, string resource_type, UInt32 at_index);
 
         [DllImport("rpkg.dll", EntryPoint = "get_all_hashes_in_rpkg_count", CallingConvention = CallingConvention.Cdecl)]
         public static extern UInt32 get_all_hashes_in_rpkg_count(string rpkg_file);
 
         [DllImport("rpkg.dll", EntryPoint = "get_all_hashes_in_rpkg_at", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe IntPtr get_all_hashes_in_rpkg_at(string rpkg_file, UInt32 at_index);
+        public static extern IntPtr get_all_hashes_in_rpkg_at(string rpkg_file, UInt32 at_index);
 
         [DllImport("rpkg.dll", EntryPoint = "get_hash_details", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe IntPtr get_hash_details(string rpkg_file, string hash_string);
+        public static extern IntPtr get_hash_details(string rpkg_file, string hash_string);
 
         [DllImport("rpkg.dll", EntryPoint = "get_hash_in_rpkg_size", CallingConvention = CallingConvention.Cdecl)]
         public static extern UInt32 get_hash_in_rpkg_size(string rpkg_file_name, string hash_string);
 
         [DllImport("rpkg.dll", EntryPoint = "get_hash_in_rpkg_data", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe IntPtr get_hash_in_rpkg_data(string rpkg_file_name, string hash_string);
+        public static extern IntPtr get_hash_in_rpkg_data(string rpkg_file_name, string hash_string);
 
         [DllImport("rpkg.dll", EntryPoint = "get_all_hashes_in_rpkg_data_size", CallingConvention = CallingConvention.Cdecl)]
         public static extern UInt64 get_all_hashes_in_rpkg_data_size(string rpkg_file);
@@ -2341,16 +2419,16 @@ namespace rpkg
         public static extern int clear_hash_data_vector();
 
         [DllImport("rpkg.dll", EntryPoint = "get_hash_in_rpkg_data_in_hex_view", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe IntPtr get_hash_in_rpkg_data_in_hex_view(string rpkg_file_name, string hash_string);
+        public static extern IntPtr get_hash_in_rpkg_data_in_hex_view(string rpkg_file_name, string hash_string);
 
         [DllImport("rpkg.dll", EntryPoint = "generate_localization_string", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe UInt32 generate_localization_string(string rpkg_file_name, string hash_string, string resource_type);
+        public static extern UInt32 generate_localization_string(string rpkg_file_name, string hash_string, string resource_type);
 
         [DllImport("rpkg.dll", EntryPoint = "get_localization_string", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe IntPtr get_localization_string();
+        public static extern IntPtr get_localization_string();
 
         [DllImport("rpkg.dll", EntryPoint = "get_hashes_with_no_reverse_depends", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe IntPtr get_hashes_with_no_reverse_depends();
+        public static extern IntPtr get_hashes_with_no_reverse_depends();
 
         [DllImport("rpkg.dll", EntryPoint = "load_hash_list", CallingConvention = CallingConvention.Cdecl)]
         public static extern int load_hash_list();
@@ -2359,16 +2437,16 @@ namespace rpkg
         public static extern IntPtr get_hash_list_string(string hash_string);
 
         [DllImport("rpkg.dll", EntryPoint = "get_hashes_with_no_reverse_depends", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe int get_hashes_with_no_reverse_depends(string rpkg_file);
+        public static extern int get_hashes_with_no_reverse_depends(string rpkg_file);
 
         [DllImport("rpkg.dll", EntryPoint = "get_hashes_with_no_reverse_depends_string", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe IntPtr get_hashes_with_no_reverse_depends_string();
+        public static extern IntPtr get_hashes_with_no_reverse_depends_string();
 
         [DllImport("rpkg.dll", EntryPoint = "get_direct_hash_depends", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe int get_direct_hash_depends(string rpkg_file, string hash_string);
+        public static extern int get_direct_hash_depends(string rpkg_file, string hash_string);
 
         [DllImport("rpkg.dll", EntryPoint = "get_direct_hash_depends_string", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe IntPtr get_direct_hash_depends_string();
+        public static extern IntPtr get_direct_hash_depends_string();
 
         [DllImport("rpkg.dll", EntryPoint = "get_patch_deletion_list", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr get_patch_deletion_list(string rpkg_file);
@@ -2402,6 +2480,9 @@ namespace rpkg
 
         [DllImport("rpkg.dll", EntryPoint = "get_pcm_channels", CallingConvention = CallingConvention.Cdecl)]
         public static extern int get_pcm_channels();
+
+        [DllImport("rpkg.dll", EntryPoint = "clear_temp_tblu_data", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int clear_temp_tblu_data();
 
 
         [SuppressUnmanagedCodeSecurity]
@@ -3010,6 +3091,26 @@ namespace rpkg
                     FirstTabRight.IsSelected = true;
                 }
             }
+        }
+
+        private void EntityBrickEditor_Click(object sender, RoutedEventArgs e)
+        {
+            if (entityBrickEditor == null)
+            {
+                entityBrickEditor = new EntityBrickEditor();
+            }
+
+            entityBrickEditor.inputFolder = userSettings.InputFolder;
+            entityBrickEditor.outputFolder = userSettings.OutputFolder;
+
+            entityBrickEditor.tempFileName = "00E9F09C3B030590.TEMP";
+            entityBrickEditor.rpkgFilePath = "C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk26patch1.rpkg";
+
+            entityBrickEditor.ShowDialog();
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
         }
     }
 }

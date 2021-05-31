@@ -10,6 +10,7 @@ struct hash_depends_variables
     std::string rpkg_file_name = "";
     std::vector<std::string> hash_dependency;
     std::vector<std::string> hash_dependency_file_name;
+    std::vector<std::string> hash_dependency_ioi_string;
     std::map<uint64_t, uint64_t> hash_dependency_map;
     std::vector<std::vector<std::string>> hash_dependency_in_rpkg;
     std::vector<std::vector<std::string>> hash_dependency_patch_list;

@@ -30,7 +30,12 @@ enum RPKGStatus
     RPKG_ALREADY_IMPORTED,
     SCANNING_DIRECTORY,
     SCANNING_DIRECTORY_DONE,
-    ABORT_CURRENT_TASK
+    ABORT_CURRENT_TASK,
+    TEMP_TBLU_FOUND,
+    TEMP_TBLU_NOT_FOUND_IN_DEPENDS,
+    TEMP_TBLU_NOT_FOUND_IN_RPKG,
+    TEMP_TBLU_TOO_MANY,
+    TEMP_HEADER_NOT_FOUND
 };
 
 extern std::vector<rpkg> rpkgs;
@@ -62,3 +67,41 @@ extern int pcm_sample_size;
 extern int pcm_sample_rate;
 extern int pcm_channels;
 extern std::string extracted_wem_string;
+extern std::map<uint32_t, std::string> property_map;
+extern std::vector<uint32_t> temp_entry_index;
+extern std::vector<uint32_t> temp_logicalParent;
+extern std::vector<uint32_t> temp_entityTypeResourceIndex;
+extern std::vector<uint32_t> temp_propertyValues_start_offsets;
+extern std::vector<uint32_t> temp_propertyValues_end_offsets;
+extern std::vector<uint32_t> temp_postInitPropertyValues_start_offsets;
+extern std::vector<uint32_t> temp_postInitPropertyValues_end_offsets;
+extern std::vector<uint32_t> temp_platformSpecificPropertyValues_start_offsets;
+extern std::vector<uint32_t> temp_platformSpecificPropertyValues_end_offsets;
+extern std::vector<std::string> temp_property_types;
+extern std::vector<std::vector<bool>> temp_property_types_shared;
+extern std::vector<std::vector<uint32_t>> temp_property_types_shared_count;
+extern std::vector<std::vector<uint32_t>> temp_property_types_offsets;
+extern std::vector<std::vector<std::string>> temp_property_types_values;
+extern std::vector<std::map<uint32_t, uint32_t>> temp_property_types_offsets_map;
+extern std::vector<std::vector<uint32_t>> property_crc32_values;
+extern std::vector<std::vector<uint32_t>> property_type_indexes;
+extern std::vector<std::vector<uint32_t>> property_offsets;
+extern std::vector<std::vector<uint32_t>> property_pointer_offsets;
+extern std::vector<uint32_t> tblu_entry_index;
+extern std::vector<uint32_t> tblu_logicalParent;
+extern std::vector<uint32_t> tblu_entityTypeResourceIndex;
+extern std::vector<uint64_t> tblu_entityId;
+extern std::vector<uint32_t> tblu_editorOnly;
+extern std::vector<std::string> tblu_entityName;
+extern std::vector<char> temp_input_data;
+extern std::vector<char> temp_output_data;
+extern std::vector<char>* temp_data;
+extern uint64_t temp_rpkg_index_1;
+extern uint64_t temp_rpkg_index_2;
+extern std::vector<char> tblu_input_data;
+extern std::vector<char> tblu_output_data;
+extern std::vector<char>* tblu_data;
+extern uint64_t tblu_rpkg_index_1;
+extern uint64_t tblu_rpkg_index_2;
+extern std::vector<hash_depends_variables> temp_hash_depends_data;
+extern std::vector<hash_depends_variables> tblu_hash_depends_data;

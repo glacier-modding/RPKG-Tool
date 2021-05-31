@@ -99,7 +99,7 @@ namespace rpkg
             }
             else if (operation == 2)
             {
-                HttpClient http = new HttpClient();
+                HttpClient http = new HttpClient() { Timeout = TimeSpan.FromSeconds(10) };
 
                 int.TryParse(http.GetAsync("https://hitmandb.notex.app/version").Result.Content.ReadAsStringAsync().Result, out currentVersionAvailable);
             }

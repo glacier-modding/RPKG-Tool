@@ -89,3 +89,25 @@ RPKG_EXPORT int get_pcm_sample_size();
 RPKG_EXPORT int get_pcm_sample_rate();
 
 RPKG_EXPORT int get_pcm_channels();
+
+RPKG_EXPORT int clear_temp_tblu_data();
+
+RPKG_EXPORT char* get_entries_with_logical_parent(uint32_t logical_parent);
+
+RPKG_EXPORT char* get_entries_data(uint32_t entry_index);
+
+RPKG_EXPORT char* get_entries_hash_reference_data(uint32_t entry_index);
+
+RPKG_EXPORT int update_temp_file(char* offset, char* type, char* value);
+
+RPKG_EXPORT int generate_temp_file_from_data(char* temp_file_path);
+
+RPKG_EXPORT int is_offset_shared(char* offset, char* property_type_index);
+
+RPKG_EXPORT char* get_all_shared_values(char* offset, char* property_type_index);
+
+RPKG_EXPORT int get_shared_index(char* offset, char* property_type_index);
+
+RPKG_EXPORT int get_shared_count(char* offset, char* property_type_index);
+
+RPKG_EXPORT int update_temp_file_pointer(char* entry_index, char* property_index, char* offset);
