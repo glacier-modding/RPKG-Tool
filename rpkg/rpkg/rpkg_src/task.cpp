@@ -73,6 +73,12 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     {
         rpkg_function::hash_depends(input_path, filter, output_path);
     }
+    else if (command == "-extract_direct_hash_depends")
+    {
+        std::vector<std::string> empty_vector;
+
+        rpkg_function::extract_direct_hash_depends(input_path, filter, output_path);
+    }
     else if (command == "-hash_probe")
     {
         rpkg_function::hash_probe(input_path, filter, output_path);
@@ -163,6 +169,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                      "-extract_rtlv_to_json_from",
                                                      "-generate_rpkg_from",
                                                      "-hash_depends",
+                                                     "-extract_direct_hash_depends",
                                                      "-hash_probe",
                                                      "-hash_probe_from_file",
                                                      "-rebuild_wwev_in",

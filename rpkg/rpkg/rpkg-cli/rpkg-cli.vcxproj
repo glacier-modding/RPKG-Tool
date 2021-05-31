@@ -27,6 +27,7 @@
     <ClCompile Include="..\rpkg_src\crypto.cpp" />
     <ClCompile Include="..\rpkg_src\decrypt_packagedefinition_thumbs.cpp" />
     <ClCompile Include="..\rpkg_src\encrypt_packagedefinition_thumbs.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_direct_hash_depends.cpp" />
     <ClCompile Include="..\rpkg_src\extract_dlge_to_json_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_from_rpkg.cpp" />
     <ClCompile Include="..\rpkg_src\extract_from_rpkg_with_map.cpp" />
@@ -180,7 +181,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\rpkg_src\thirdparty\ogg\include;..\rpkg_src\thirdparty\vorbis\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\ninja\source\repos\rpkg\new\rpkg\rpkg_src\thirdparty\ogg\include;C:\Users\ninja\source\repos\rpkg\new\rpkg\rpkg_src\thirdparty\vorbis\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>

@@ -81,6 +81,11 @@ void rpkg_function::extract_from_rpkg_with_map(rpkg_extraction_vars& rpkg_vars)
 
                 final_path = hash_file_path + "\\" + rpkgs.at(i).hash.at(it->second).hash_resource_type;
 
+                if (!rpkg_vars.search_mode && !rpkg_vars.ores_mode)
+                {
+                    file::create_directories(final_path);
+                }
+
                 std::vector<char>* output_data;
                 uint64_t output_data_size;
 

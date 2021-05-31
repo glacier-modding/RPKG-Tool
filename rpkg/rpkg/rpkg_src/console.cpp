@@ -358,7 +358,7 @@ void console::display_usage_info()
     LOG("");
     LOG("");
     LOG("");
-    LOG("rpkg-cli v2.0 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files.");
+    LOG("rpkg-cli v2.01 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files.");
     LOG("--------------------------------------------------------------------------------");
     LOG("Note: All the information used to build this program was gleaned");
     LOG("      in a completely 'clean room' environment.");
@@ -381,6 +381,10 @@ void console::display_usage_info()
     LOG("        Decrypts packagedefinitions.txt / thumbs.dat files.");
     LOG("    -encrypt_packagedefinition_thumbs <path to file>");
     LOG("        Encrypts packagedefinitions.txt / thumbs.dat files.");
+    LOG("    -extract_direct_hash_depends <path to folder containing RPKG files>");
+    LOG("        Lists and extracts the forward depends of a given hash file/resource.");
+    LOG("        Scans a directory, commonly Hitman's Runtime dir, and imports and");
+    LOG("        scans all available RPKG files for dependency information.");
     LOG("    -extract_from_rpkg <path to rpkg file>");
     LOG("        Extracts all hash linked files/resources from an RPKG file.");
     LOG("    -extract_ores_from <path to folder containing RPKG files>");
@@ -521,6 +525,10 @@ void console::display_usage_info()
     LOG("        rpkg.exe -rebuild_wwev_in \"R:\\WWEV\"");
     LOG("    Rebuilds sets of individual Wwise .wem files that were previously extracted with (-extract_wwev_from) to an output folder:");
     LOG("        rpkg.exe -output_path \"R:\\my\\output\\path\" -rebuild_wwev_in \"R:\\WWEV\"");
+    LOG("    Lists and extracts the forward depends of a given hash file/resource:");
+    LOG("        rpkg.exe -filter 00123456789ABCDE -extract_direct_hash_depends \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"");
+    LOG("    Lists and extracts the forward depends of two hash files/resources:");
+    LOG("        rpkg.exe -filter 00123456789ABCDE,00123456789ABCDE -extract_direct_hash_depends \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"");
     LOG("    Lists the forward and reverse depends of a given hash file/resource:");
     LOG("        rpkg.exe -filter 00123456789ABCDE -hash_depends \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"");
     LOG("    Lists the forward and reverse depends of two hash files/resources:");

@@ -22,6 +22,7 @@ using System.Text.Json.Serialization;
 using Ookii.Dialogs.Wpf;
 using System.Net.Http;
 using System.Diagnostics;
+using System.Security;
 
 namespace rpkg
 {
@@ -52,6 +53,36 @@ namespace rpkg
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            if (!File.Exists("rpkg.json"))
+            {
+                SetColorTheme("Dark", "Red");
+
+                var options = new JsonSerializerOptions { WriteIndented = true };
+
+                userSettings = new UserSettings();
+
+                userSettings.ColorTheme = "Dark/Red";
+                userSettings.InputFolder = System.IO.Directory.GetCurrentDirectory();
+                userSettings.OutputFolder = System.IO.Directory.GetCurrentDirectory();
+
+                string jsonString = JsonSerializer.Serialize(userSettings, options);
+
+                File.WriteAllText("rpkg.json", jsonString);
+            }
+            else
+            {
+                string jsonString = File.ReadAllText("rpkg.json");
+
+                userSettings = JsonSerializer.Deserialize<UserSettings>(jsonString);
+
+                string[] theme = userSettings.ColorTheme.Split('/');
+
+                string brightness = theme[0];
+                string color = theme[1];
+
+                SetColorTheme(brightness, color);
+            }
+
             if (!File.Exists("hash_list.txt"))
             {
                 MessageQuestion messageBox = new MessageQuestion();
@@ -159,34 +190,6 @@ namespace rpkg
             MainTreeView.SelectedItemChanged += MainTreeView_SelectedItemChanged;
 
             HashMapTreeView.SelectedItemChanged += MainTreeView_SelectedItemChanged;
-
-            if (!File.Exists("rpkg.json"))
-            {
-                var options = new JsonSerializerOptions { WriteIndented = true };
-
-                userSettings = new UserSettings();
-
-                userSettings.ColorTheme = "Light/Blue";
-                userSettings.InputFolder = System.IO.Directory.GetCurrentDirectory();
-                userSettings.OutputFolder = System.IO.Directory.GetCurrentDirectory();
-
-                string jsonString = JsonSerializer.Serialize(userSettings, options);
-
-                File.WriteAllText("rpkg.json", jsonString);
-            }
-            else
-            {
-                string jsonString = File.ReadAllText("rpkg.json");
-
-                userSettings = JsonSerializer.Deserialize<UserSettings>(jsonString);
-
-                string[] theme = userSettings.ColorTheme.Split('/');
-
-                string brightness = theme[0];
-                string color = theme[1];
-
-                SetColorTheme(brightness, color);
-            }
         }
 
         private void MainTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -208,6 +211,8 @@ namespace rpkg
                         itemHeader = treeview.SelectedItem.ToString();
                     }
 
+                    //MessageBoxShow(itemHeader);
+
                     if (itemHeader.Length == 4)
                     {
                         string resourceType = itemHeader;
@@ -227,9 +232,9 @@ namespace rpkg
                     {
                         string rpkgFile = itemHeader.Substring(itemHeader.LastIndexOf("\\") + 1);
 
-                        UInt32 allHashesInRPKGCount = get_all_hashes_in_rpkg_count(rpkgFilePath);
+                        UInt32 allHashesInRPKGCount = get_all_hashes_in_rpkg_count(itemHeader);
 
-                        UInt64 allHashesInRPKGDataSize = get_all_hashes_in_rpkg_data_size(rpkgFilePath);
+                        UInt64 allHashesInRPKGDataSize = get_all_hashes_in_rpkg_data_size(itemHeader);
 
                         DetailsTextBox.Text = rpkgFile + " has " + allHashesInRPKGCount.ToString("N0") + " hash files/resources,\n";
                         DetailsTextBox.Text += "having a combined total data size of " + allHashesInRPKGDataSize.ToString("N0") + " bytes";
@@ -1196,16 +1201,25 @@ namespace rpkg
                 return;
             }
 
-            bool anyRPKGImported = false;
+            List<string> rpkgFiles = new List<string>();
 
             foreach (var filePath in Directory.GetFiles(inputFolder))
             {
                 if (filePath.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
                 {
-                    ImportRPKGFile(filePath);
-
-                    anyRPKGImported = true;
+                    rpkgFiles.Add(filePath);
                 }
+            }
+
+            rpkgFiles.Sort(new NaturalStringComparer());
+
+            bool anyRPKGImported = false;
+
+            foreach (string filePath in rpkgFiles)
+            {
+                ImportRPKGFile(filePath);
+
+                anyRPKGImported = true;
             }
 
             if (anyRPKGImported)
@@ -1388,16 +1402,25 @@ namespace rpkg
 
             if (inputFolder != "")
             {
-                bool anyRPKGImported = false;
+                List<string> rpkgFiles = new List<string>();
 
                 foreach (var filePath in Directory.GetFiles(inputFolder))
                 {
                     if (filePath.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
                     {
-                        ImportRPKGFile(filePath);
-
-                        anyRPKGImported = true;
+                        rpkgFiles.Add(filePath);
                     }
+                }
+
+                rpkgFiles.Sort(new NaturalStringComparer());
+
+                bool anyRPKGImported = false;
+
+                foreach (string filePath in rpkgFiles)
+                {
+                    ImportRPKGFile(filePath);
+
+                    anyRPKGImported = true;
                 }
 
                 if (anyRPKGImported)
@@ -1805,6 +1828,29 @@ namespace rpkg
 
         [DllImport("rpkg.dll", EntryPoint = "get_direct_hash_depends_string", CallingConvention = CallingConvention.Cdecl)]
         public static extern unsafe IntPtr get_direct_hash_depends_string();
+
+        [SuppressUnmanagedCodeSecurity]
+        internal static class SafeNativeMethods
+        {
+            [DllImport("shlwapi.dll", CharSet = CharSet.Unicode)]
+            public static extern int StrCmpLogicalW(string psz1, string psz2);
+        }
+
+        public sealed class NaturalStringComparer : IComparer<string>
+        {
+            public int Compare(string a, string b)
+            {
+                return SafeNativeMethods.StrCmpLogicalW(a, b);
+            }
+        }
+
+        public sealed class NaturalFileInfoNameComparer : IComparer<FileInfo>
+        {
+            public int Compare(FileInfo a, FileInfo b)
+            {
+                return SafeNativeMethods.StrCmpLogicalW(a.Name, b.Name);
+            }
+        }
 
         protected override void OnClosed(EventArgs e)
         {

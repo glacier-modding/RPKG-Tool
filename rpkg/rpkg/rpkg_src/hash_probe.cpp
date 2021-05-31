@@ -28,14 +28,14 @@ void rpkg_function::hash_probe(std::string& input_path, std::string& filter, std
 
         std::vector<std::string> filters = util::parse_input_filter(filter);
 
-        bool found = false;
-
-        int found_count = 0;
-
-        ss.str(std::string());
-
         for (uint64_t z = 0; z < filters.size(); z++)
         {
+            bool found = false;
+
+            int found_count = 0;
+
+            ss.str(std::string());
+
             uint64_t hash = std::strtoull(filters.at(z).c_str(), nullptr, 16);
 
             if (hash != 0)

@@ -27,6 +27,7 @@
     <ClCompile Include="..\rpkg_src\crypto.cpp" />
     <ClCompile Include="..\rpkg_src\decrypt_packagedefinition_thumbs.cpp" />
     <ClCompile Include="..\rpkg_src\encrypt_packagedefinition_thumbs.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_direct_hash_depends.cpp" />
     <ClCompile Include="..\rpkg_src\extract_dlge_to_json_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_from_rpkg.cpp" />
     <ClCompile Include="..\rpkg_src\extract_from_rpkg_with_map.cpp" />

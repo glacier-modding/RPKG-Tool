@@ -6,7 +6,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:rpkg"
         mc:Ignorable="d"
-        Loaded="Window_Loaded" Closed="Window_Closed"
+        Loaded="Window_Loaded"
         Title="RPKG v2.0" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>

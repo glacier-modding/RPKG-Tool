@@ -189,16 +189,20 @@ char* get_hash_based_on_resource_type_at(char* rpkg_file, char* resource_type, u
 
 uint32_t get_all_hashes_in_rpkg_count(char* rpkg_file)
 {
+    uint32_t all_hashes_in_rpkg_count = 0;
+
     for (uint64_t i = 0; i < rpkgs.size(); i++)
     {
         if (rpkgs.at(i).rpkg_file_path == rpkg_file)
         {
             for (uint64_t j = 0; j < rpkgs.at(i).hash_resource_types.size(); j++)
             {
-                return (uint32_t)rpkgs.at(i).hash.size();
+                all_hashes_in_rpkg_count += (uint32_t)rpkgs.at(i).hashes_based_on_resource_types.at(j).size();
             }
         }
     }
+
+    return all_hashes_in_rpkg_count;
 }
 
 char* get_all_hashes_in_rpkg_at(char* rpkg_file, uint32_t at_index)
