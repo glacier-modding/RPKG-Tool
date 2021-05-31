@@ -1173,7 +1173,7 @@ void generate_rpkg_file(main_variables* main_data)
             }
             else
             {
-                std::cout << "Error: " << main_data->input_rpkg_file_path << " is not a valid RPKG file." << std::endl;
+                std::cout << "Error: " << rpkg_meta_file_path << " is not a valid RPKG file." << std::endl;
                 exit(0);
             }
 
@@ -1216,6 +1216,78 @@ void generate_rpkg_file(main_variables* main_data)
             {
                 std::cout << "rpkg_meta_data.rpkg_table_size: " << rpkg_meta_data.rpkg_table_size << std::endl;
             }
+
+            uint64_t position = rpkg_meta_file.tellg();
+
+            rpkg_meta_file.read(input, sizeof(bytes4));
+            memcpy(&rpkg_meta_data.patch_entry_count, input, sizeof(bytes4));
+
+            if (main_data->debug)
+            {
+                std::cout << "patch_entry_count: " << rpkg_meta_data.patch_entry_count << std::endl;
+                std::cout << "file.tellg(): " << rpkg_meta_file.tellg() << std::endl;
+            }
+
+            if (rpkg_meta_data.rpkg_file_version == 1 && ((uint64_t)rpkg_meta_data.patch_entry_count * (uint64_t)0x8 + (uint64_t)0x14 + (uint64_t)0x10) >= rpkg_meta_file_size)
+            {
+                rpkg_meta_data.is_patch_file = false;
+
+                std::cout << "RPKGv1 file " << rpkg_meta_file_path << " is not a patch file." << std::endl;
+            }
+            else if (rpkg_meta_data.rpkg_file_version == 2 && ((uint64_t)rpkg_meta_data.patch_entry_count * (uint64_t)0x8 + (uint64_t)0x1D + (uint64_t)0x10) >= rpkg_meta_file_size)
+            {
+                rpkg_meta_data.is_patch_file = false;
+
+                std::cout << "RPKGv2 file " << rpkg_meta_file_path << " is not a patch file." << std::endl;
+            }
+            else
+            {
+                char patchZeroTest = 0;
+                uint64_t patchValue = 0;
+
+                if (rpkg_meta_data.rpkg_file_version == 1)
+                {
+                    rpkg_meta_file.seekg(((uint64_t)rpkg_meta_data.patch_entry_count * (uint64_t)0x8 + (uint64_t)0x14), rpkg_meta_file.beg);
+                }
+                else
+                {
+                    rpkg_meta_file.seekg(((uint64_t)rpkg_meta_data.patch_entry_count * (uint64_t)0x8 + (uint64_t)0x1D), rpkg_meta_file.beg);
+                }
+
+                rpkg_meta_file.read(input, 0x7);
+                rpkg_meta_file.read(input, sizeof(bytes1));
+                memcpy(&patchZeroTest, input, sizeof(bytes1));
+                rpkg_meta_file.read(input, sizeof(bytes8));
+                memcpy(&patchValue, input, sizeof(bytes8));
+
+                if (rpkg_meta_data.rpkg_file_version == 1 && patchValue == ((uint64_t)rpkg_meta_data.rpkg_table_offset + (uint64_t)rpkg_meta_data.rpkg_table_size + (uint64_t)rpkg_meta_data.patch_entry_count * (uint64_t)0x8 + (uint64_t)0x14) && patchZeroTest == 0x0)
+                {
+                    rpkg_meta_data.is_patch_file = true;
+
+                    std::cout << "RPKGv1 file " << rpkg_meta_file_path << " is a patch file." << std::endl;
+                }
+                else if (rpkg_meta_data.rpkg_file_version == 2 && patchValue == ((uint64_t)rpkg_meta_data.rpkg_table_offset + (uint64_t)rpkg_meta_data.rpkg_table_size + (uint64_t)rpkg_meta_data.patch_entry_count * (uint64_t)0x8 + (uint64_t)0x1D) && patchZeroTest == 0x0)
+                {
+                    rpkg_meta_data.is_patch_file = true;
+
+                    std::cout << "RPKGv2 file " << rpkg_meta_file_path << " is a patch file." << std::endl;
+                }
+                else
+                {
+                    rpkg_meta_data.is_patch_file = false;
+
+                    if (rpkg_meta_data.rpkg_file_version == 1)
+                    {
+                        std::cout << "RPKGv1 file " << rpkg_meta_file_path << " is not a patch file." << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "RPKGv2 file " << rpkg_meta_file_path << " is not a patch file." << std::endl;
+                    }
+                }
+            }
+
+            rpkg_meta_file.seekg(position, rpkg_meta_file.beg);
 
             if (rpkg_meta_data.is_patch_file)
             {
@@ -2055,11 +2127,14 @@ void generate_rpkg_file(main_variables* main_data)
 
             uint32_t temp_hash_reference_count = temp_rpkg_data.hash_reference_data.at(i).hash_reference_count & 0x3FFFFFFF;
 
-            if (temp_hash_reference_count > 0)
+            if (temp_rpkg_data.hash_reference_table_size.at(i) > 0)
             {
                 memcpy(&char4, &temp_rpkg_data.hash_reference_data.at(i).hash_reference_count, sizeof(uint32_t));
                 file.write(char4, sizeof(uint32_t));
+            }
 
+            if (temp_hash_reference_count > 0)
+            {
                 for (uint64_t j = 0; j < temp_hash_reference_count; j++)
                 {
                     memcpy(&char1, &temp_rpkg_data.hash_reference_data.at(i).hash_reference_type.at(j), sizeof(uint8_t));
@@ -4314,7 +4389,7 @@ void find_hash_depends(main_variables* main_data)
                                             {
                                                 main_data->input_filter.clear();
 
-                                                main_data->input_filter.push_back(hash_depends_data.at(i).hash_string);
+                                                main_data->input_filter.push_back(hash_depends_data.at(i).hash_dependency_file_name.at(j));
                                                 main_data->mode_filter = true;
                                                 main_data->input_rpkg_file_name = main_data->rpkg_data.at(x).rpkg_file_name;
                                                 main_data->input_rpkg_file_path = main_data->rpkg_data.at(x).rpkg_file_path;
@@ -4493,7 +4568,7 @@ int main(int argc, char* argv[])
     }
     else
     {
-        std::cout << "rpkg v1.02 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files." << std::endl;
+        std::cout << "rpkg v1.03 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files." << std::endl;
         std::cout << "--------------------------------------------------------------------------------" << std::endl;
         std::cout << "Note: All the information used to build this program was gleaned" << std::endl;
         std::cout << "      in a completely 'clean room' environment." << std::endl;
