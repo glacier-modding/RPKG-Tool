@@ -2011,6 +2011,8 @@ void initialize_type_map()
         (*type_map)["TArray<STemplateEntityFactory>/nPropertyID"] = TYPE_UINT32;
         (*type_map)["STemplateEntityFactory/value"] = TYPE_ZVARIANT;
         (*type_map)["TArray<STemplateEntityFactory>/value"] = TYPE_ZVARIANT;
+        (*type_map)["STemplateEntityFactory/TArray<int32>"] = TYPE_INT32;
+        (*type_map)["TArray<STemplateEntityFactory>/TArray<int32>"] = TYPE_INT32;
         (*type_map)["SColorRGB/r"] = TYPE_FLOAT32;
         (*type_map)["TArray<SColorRGB>/r"] = TYPE_FLOAT32;
         (*type_map)["SColorRGB/g"] = TYPE_FLOAT32;

@@ -158,7 +158,7 @@ void dev_function::dev_resource_tool(std::string& input_path, std::string& filte
         }
         else
         {
-            rpkg_function::import_rpkg(input_path);
+            rpkg_function::import_rpkg(input_path, true);
         }
 
         std::stringstream ss;
@@ -193,7 +193,7 @@ void dev_function::dev_resource_tool(std::string& input_path, std::string& filte
 
                     std::vector<uint32_t> temps_indexes;
 
-                    rpkg_function::recursive_temp_loader(rpkg_index, it->second, parents_map, temps_indexes, 0, 0, 0);
+                    rpkg_function::recursive_temp_loader(rpkg_index, it->second, 3, parents_map, temps_indexes, 0, 0, 0);
 
                     for (uint64_t t = 0; t < temps.size(); t++)
                     {

@@ -8,7 +8,7 @@
 #include <fstream>
 #include <sstream>
 
-void rpkg_function::import_rpkg(std::string& rpkg_file_path)
+void rpkg_function::import_rpkg(std::string& rpkg_file_path, bool with_timing)
 {
     bool found = false;
 
@@ -248,9 +248,12 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path)
 
     for (uint64_t i = 0; i < file_count; i++)
     {
-        if (((i * (uint64_t)100000) / (uint64_t)file_count) % (uint64_t)100 == 0 && i > 0)
+        if (with_timing)
         {
-            stringstream_length = console::update_console(message, file_count, i, start_time, stringstream_length);
+            if (((i * (uint64_t)100000) / (uint64_t)file_count) % (uint64_t)100 == 0 && i > 0)
+            {
+                stringstream_length = console::update_console(message, file_count, i, start_time, stringstream_length);
+            }
         }
 
         hash temp_hash;
@@ -502,15 +505,18 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path)
 
     file.close();
 
-    std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
+    if (with_timing)
+    {
+        std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
 
-    std::stringstream ss;
+        std::stringstream ss;
 
-    ss << message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
+        ss << message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
 
-    LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+        LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
 
-    percent_progress = (uint32_t)100;
+        percent_progress = (uint32_t)100;
+    }
 
     task_single_status = TASK_SUCCESSFUL;
 }

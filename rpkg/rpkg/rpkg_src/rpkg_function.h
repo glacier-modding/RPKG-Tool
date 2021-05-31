@@ -34,7 +34,7 @@ public:
 	static void extract_all_text_from(std::string& input_path, std::string& filter, std::string& output_path);
 	static void extract_text_from(std::string& input_path, std::string& filter, std::string& output_path);
 	static void extract_all_prim_of_temp_from(std::string& input_path, std::string& filter, std::string& output_path, int type);
-	static void recursive_temp_loader(uint32_t rpkgs_index, uint32_t hash_index, std::map<uint32_t, uint32_t>& parents_map, std::vector<uint32_t> temps_indexes, uint32_t level, uint32_t level_max, uint32_t temps_max);
+	static void recursive_temp_loader(uint32_t rpkgs_index, uint32_t hash_index, uint32_t temp_version, std::map<uint32_t, uint32_t>& parents_map, std::vector<uint32_t> temps_indexes, uint32_t level, uint32_t level_max, uint32_t temps_max);
 	static void extract_all_prim_from(std::string& input_path, std::string& filter, std::string& output_path, int type);
 	static void extract_prim_from(std::string& input_path, std::string& filter, std::string& output_path, int type);
 	static int load_temp_tblu_hash_depends(uint64_t rpkg_index, uint64_t hash_index);
@@ -67,6 +67,6 @@ public:
 	static void extract_hash_meta(uint64_t i, uint64_t j, std::string& final_path);
 	static void extract_rpkg_meta(uint64_t i, std::string& hash_file_path);
 	static bool import_rpkg_meta(rpkg& rpkg_meta_data, std::string& rpkg_meta_file_path, std::string& input_rpkg_folder_path);
-	static void import_rpkg(std::string& rpkg_file_name);
+	static void import_rpkg(std::string& rpkg_file_name, bool with_timing);
 	static void extract_from_rpkg(rpkg_extraction_vars& rpkg_vars);
 };

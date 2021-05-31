@@ -48,6 +48,11 @@ namespace rpkg
 
         private void LoadLoadingWindow()
         {
+            if (temp_file_version == 0)
+            {
+                MessageBoxShow("Error: Could not determine the TEMP/TBLU file version.");
+            }
+
             message = new Message();
 
             message.message.Content = "Loading Entity/Brick (TEMP/TBLU) Editor Treeview Nodes.\n\nThe GUI will seem frozen for a short time while the nodes are loaded.\n\nThe more recursive TEMP/TBLU files found, the longer the loading time will be.\n\nThis window will disappear once all the nodes have been loaded.";
@@ -608,7 +613,91 @@ namespace rpkg
 
                     controlCount = 0;
 
-                    if (item.Text.Contains("("))
+                    if (item.Text.Contains(".TEMP "))
+                    {
+                        string[] headerData = item.Text.Replace("(", "").Replace(")", "").Split(' ');
+
+                        string hashFileName = headerData[0];
+
+                        string ioiString = "";
+
+                        for (int i = 1; i < headerData.Length; i++)
+                        {
+                            ioiString += headerData[i];
+
+                            if (i != (headerData.Length - 1))
+                            {
+                                ioiString += " ";
+                            }
+                        }
+
+                        temp_index = (UInt32)get_temp_index(hashFileName);
+
+                        Label label1 = new Label();
+                        label1.Content = hashFileName + "'s Data:";
+                        label1.FontSize = 18;
+                        label1.FontWeight = FontWeights.Bold;
+
+                        MainStackPanel.Children.Add(label1);
+
+                        label1 = new Label();
+                        label1.Content = "IOI String:";
+                        label1.FontSize = 16;
+                        label1.FontWeight = FontWeights.Bold;
+
+                        MainStackPanel.Children.Add(label1);
+
+                        Label label2 = new Label();
+                        label2.Content = ioiString;
+
+                        MainStackPanel.Children.Add(label2);
+
+                        label1 = new Label();
+                        label1.Content = "Property data (subType):";
+                        label1.FontSize = 16;
+                        label1.FontWeight = FontWeights.Bold;
+
+                        MainStackPanel.Children.Add(label1);
+
+                        AppendInput_TEMP("subType", "int32");
+
+                        label1 = new Label();
+                        label1.Content = "Property data (blueprintIndexInResourceHeader):";
+                        label1.FontSize = 16;
+                        label1.FontWeight = FontWeights.Bold;
+
+                        MainStackPanel.Children.Add(label1);
+
+                        AppendInput_TEMP("blueprintIndexInResourceHeader", "int32");
+
+                        label1 = new Label();
+                        label1.Content = "Property data (rootEntityIndex):";
+                        label1.FontSize = 16;
+                        label1.FontWeight = FontWeights.Bold;
+
+                        MainStackPanel.Children.Add(label1);
+
+                        AppendInput_TEMP("rootEntityIndex", "int32");
+
+                        label1 = new Label();
+                        label1.Content = "Property data (propertyOverrides):";
+                        label1.FontSize = 16;
+                        label1.FontWeight = FontWeights.Bold;
+
+                        MainStackPanel.Children.Add(label1);
+
+                        AppendInput_TEMP("propertyOverrides", "TArray<SEntityTemplatePropertyOverride>");
+
+                        label1 = new Label();
+                        label1.Content = "Property data (externalSceneTypeIndicesInResourceHeader):";
+                        label1.FontSize = 16;
+                        label1.FontWeight = FontWeights.Bold;
+
+                        MainStackPanel.Children.Add(label1);
+
+                        AppendInput_TEMP("externalSceneTypeIndicesInResourceHeader", "TArray<int32>");
+                    }
+                    else if (item.Text.Contains("("))
                     {
                         string[] headerData = item.Text.Replace("(", "").Replace(")", "").Split(' ');
 
@@ -664,230 +753,451 @@ namespace rpkg
                         MainStackPanel.Children.Add(label2);
 
                         label1 = new Label();
-                        label1.Content = "Property data:";
+                        label1.Content = "Property data (propertyValues):";
                         label1.FontSize = 16;
                         label1.FontWeight = FontWeights.Bold;
 
                         MainStackPanel.Children.Add(label1);
 
-                        int entry_data_size = get_entries(temp_index, entryIndex);
+                        AppendInput(entryIndex, "propertyValues");
 
-                        string responseString = Marshal.PtrToStringAnsi(get_response_string());
+                        label1 = new Label();
+                        label1.Content = "Property data (postInitPropertyValues):";
+                        label1.FontSize = 16;
+                        label1.FontWeight = FontWeights.Bold;
 
-                        if (responseString != "")
+                        MainStackPanel.Children.Add(label1);
+
+                        AppendInput(entryIndex, "postInitPropertyValues");
+
+                        if (temp_file_version == 3)
                         {
-                            MessageBoxShow(responseString);
-                        }
-                        else
-                        {
-                            if (entry_data_size > 0)
-                            {
-                                byte[] entry_data = new byte[entry_data_size];
+                            label1 = new Label();
+                            label1.Content = "Property data (platformSpecificPropertyValues):";
+                            label1.FontSize = 16;
+                            label1.FontWeight = FontWeights.Bold;
 
-                                Marshal.Copy(get_entries_with_logical_parent_data(), entry_data, 0, entry_data_size);
+                            MainStackPanel.Children.Add(label1);
 
-                                int data_pointer = 0;
-
-                                List<string> propertyValuesNumbers = new List<string>();
-                                List<string> propertyValuePropertyIDs = new List<string>();
-                                List<string> propertyValueTypes = new List<string>();
-                                List<string> propertyValuePropertyIDsInput = new List<string>();
-                                List<string> propertyValueTypesInput = new List<string>();
-                                List<string> propertyValuesInput = new List<string>();
-
-                                while (data_pointer < entry_data_size)
-                                {
-                                    UInt32 entryDataLength = BitConverter.ToUInt32(entry_data, data_pointer);
-                                    data_pointer += 4;
-
-                                    string entryData = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryDataLength);
-                                    data_pointer += (int)entryDataLength;
-
-                                    //MessageBoxShow(entryDataLength.ToString() + ", " + entryData);
-
-                                    bool added = false;
-
-                                    if (!propertyValuesNumbers.Contains(entryData))
-                                    {
-                                        propertyValuesNumbers.Add(entryData);
-
-                                        added = true;
-                                    }
-
-                                    entryDataLength = BitConverter.ToUInt32(entry_data, data_pointer);
-                                    data_pointer += 4;
-
-                                    entryData = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryDataLength);
-                                    data_pointer += (int)entryDataLength;
-
-                                    //MessageBoxShow(entryDataLength.ToString() + ", " + entryData);
-
-                                    propertyValuePropertyIDsInput.Add(entryData);
-
-                                    if (added)
-                                    {
-                                        propertyValuePropertyIDs.Add(entryData);
-                                    }
-
-                                    entryDataLength = BitConverter.ToUInt32(entry_data, data_pointer);
-                                    data_pointer += 4;
-
-                                    entryData = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryDataLength);
-                                    data_pointer += (int)entryDataLength;
-
-                                    //MessageBoxShow(entryDataLength.ToString() + ", " + entryData);
-
-                                    propertyValueTypesInput.Add(entryData);
-
-                                    if (added)
-                                    {
-                                        propertyValueTypes.Add(entryData);
-                                    }
-
-                                    entryDataLength = BitConverter.ToUInt32(entry_data, data_pointer);
-                                    data_pointer += 4;
-
-                                    entryData = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryDataLength);
-                                    data_pointer += (int)entryDataLength;
-
-                                    //MessageBoxShow(entryDataLength.ToString() + ", " + entryData);
-
-                                    propertyValuesInput.Add(entryData);
-                                }
-
-                                List<string>[] propertyValues = new List<string>[propertyValuesNumbers.Count];
-                                List<string>[] propertyValueVals = new List<string>[propertyValuesNumbers.Count];
-                                List<string>[] propertyValueValNames = new List<string>[propertyValuesNumbers.Count];
-                                List<string>[] propertyValueJSONPointers = new List<string>[propertyValuesNumbers.Count];
-                                List<string>[] propertyValueJSONPointersTypes = new List<string>[propertyValuesNumbers.Count];
-
-                                for (int i = 0; i < propertyValuesNumbers.Count; i++)
-                                {
-                                    propertyValues[i] = new List<string>();
-                                    propertyValueVals[i] = new List<string>();
-                                    propertyValueValNames[i] = new List<string>();
-                                    propertyValueJSONPointers[i] = new List<string>();
-                                    propertyValueJSONPointersTypes[i] = new List<string>();
-                                }
-
-                                //string output = "";
-
-                                for (int i = 0; i < propertyValuesNumbers.Count; i++)
-                                {
-                                    for (int j = 0; j < propertyValuesInput.Count; j++)
-                                    {
-                                        string[] propertyValue = propertyValuesInput[j].Split(' ');
-
-                                        if (propertyValue.Length >= 3)
-                                        {
-                                            string propertyValuesString = "propertyValues/" + propertyValuesNumbers[i] + "/value/$val";
-
-                                            int position2 = propertyValue[0].IndexOf(propertyValuesString);
-
-                                            if (position2 >= 0)
-                                            {
-                                                propertyValues[i].Add(propertyValuesInput[j]);
-
-                                                propertyValueValNames[i].Add(propertyValue[0].Substring(position2 + propertyValuesString.Length));
-
-                                                propertyValueJSONPointers[i].Add(propertyValue[0]);
-
-                                                propertyValueJSONPointersTypes[i].Add(propertyValue[1]);
-
-                                                string valueString = "";
-
-                                                for (int k = 2; k < propertyValue.Length; k++)
-                                                {
-                                                    valueString += propertyValue[k];
-
-                                                    if (k != (propertyValue.Length - 1))
-                                                    {
-                                                        valueString += " ";
-                                                    }
-                                                }
-
-                                                propertyValueVals[i].Add(valueString);
-
-                                                string debugString = propertyValuePropertyIDs[i] + "\n";
-                                                debugString += propertyValueTypes[i] + "\n";
-                                                debugString += propertyValues[i][propertyValueValNames[i].Count - 1] + "\n";
-                                                debugString += propertyValueValNames[i][propertyValueValNames[i].Count - 1] + "\n";
-                                                debugString += propertyValueJSONPointers[i][propertyValueJSONPointers[i].Count - 1] + "\n";
-                                                debugString += propertyValueJSONPointersTypes[i][propertyValueJSONPointersTypes[i].Count - 1] + "\n";
-                                                debugString += propertyValueVals[i][propertyValueVals[i].Count - 1] + "\n";
-
-                                                //MessageBoxShow(debugString);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            MessageBoxShow("Error: Property value string is malformed: " + propertyValues[j]);
-                                        }
-                                    }
-                                }
-
-                                //MessageBoxShow(output);
-
-                                for (int i = 0; i < propertyValuesNumbers.Count; i++)
-                                {
-                                    if (propertyValueVals[i].Count > 0)
-                                    {
-                                        string enumValues = Marshal.PtrToStringAnsi(get_enum_values(temp_index, propertyValueTypes[i]));
-
-                                        if (enumValues != "")
-                                        {
-                                            AppendInput_enum(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes, ref enumValues);
-                                        }
-                                        else if (propertyValueTypes[i] == "bool")
-                                        {
-                                            AppendInput_bool(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
-                                        }
-                                        else if (propertyValueTypes[i] == "SColorRGB")
-                                        {
-                                            AppendInput_SColorRGB(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes, false);
-                                        }
-                                        else if (propertyValueTypes[i] == "SColorRGBA")
-                                        {
-                                            AppendInput_SColorRGB(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes, true);
-                                        }
-                                        else if (propertyValueTypes[i] == "SMatrix43")
-                                        {
-                                            AppendInput_SMatrix43(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
-                                        }
-                                        else if (propertyValueTypes[i] == "SVector2")
-                                        {
-                                            AppendInput_SVector2(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
-                                        }
-                                        else if (propertyValueTypes[i] == "SVector3")
-                                        {
-                                            AppendInput_SVector3(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
-                                        }
-                                        else if (propertyValueTypes[i] == "SVector4")
-                                        {
-                                            AppendInput_SVector4(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
-                                        }
-                                        else if (propertyValueTypes[i] == "ZGuid")
-                                        {
-                                            AppendInput_ZGuid(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
-                                        }
-                                        else
-                                        {
-                                            AppendInput_Default(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
-                                        }
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                label2 = new Label();
-                                label2.Content = "  None";
-
-                                MainStackPanel.Children.Add(label2);
-                            }
+                            AppendInput(entryIndex, "platformSpecificPropertyValues");
                         }
                     }
 
                     textBoxesLoaded = true;
+                }
+            }
+        }
+
+        private void AppendInput_TEMP(string valueType, string typeString)
+        {
+            int entry_data_size = get_temp_entries(temp_index, valueType, typeString);
+
+            string responseString = Marshal.PtrToStringAnsi(get_response_string());
+
+            if (responseString != "")
+            {
+                MessageBoxShow(responseString);
+            }
+            else
+            {
+                if (entry_data_size > 0)
+                {
+                    byte[] entry_data = new byte[entry_data_size];
+
+                    Marshal.Copy(get_entries_with_logical_parent_data(), entry_data, 0, entry_data_size);
+
+                    int data_pointer = 0;
+
+                    List<string> propertyValuesNumbers = new List<string>();
+                    List<string> propertyValuePropertyIDs = new List<string>();
+                    List<string> propertyValueTypes = new List<string>();
+                    List<string> propertyValuePropertyIDsInput = new List<string>();
+                    List<string> propertyValueTypesInput = new List<string>();
+                    List<string> propertyValuesInput = new List<string>();
+
+                    while (data_pointer < entry_data_size)
+                    {
+                        UInt32 entryDataLength = BitConverter.ToUInt32(entry_data, data_pointer);
+                        data_pointer += 4;
+
+                        string entryData = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryDataLength);
+                        data_pointer += (int)entryDataLength;
+
+                        //MessageBoxShow(entryDataLength.ToString() + ", " + entryData);
+
+                        bool added = false;
+
+                        if (!propertyValuesNumbers.Contains(entryData))
+                        {
+                            propertyValuesNumbers.Add(entryData);
+
+                            added = true;
+                        }
+
+                        entryDataLength = BitConverter.ToUInt32(entry_data, data_pointer);
+                        data_pointer += 4;
+
+                        entryData = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryDataLength);
+                        data_pointer += (int)entryDataLength;
+
+                        //MessageBoxShow(entryDataLength.ToString() + ", " + entryData);
+
+                        propertyValuePropertyIDsInput.Add(entryData);
+
+                        if (added)
+                        {
+                            propertyValuePropertyIDs.Add(entryData);
+                        }
+
+                        entryDataLength = BitConverter.ToUInt32(entry_data, data_pointer);
+                        data_pointer += 4;
+
+                        entryData = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryDataLength);
+                        data_pointer += (int)entryDataLength;
+
+                        //MessageBoxShow(entryDataLength.ToString() + ", " + entryData);
+
+                        propertyValueTypesInput.Add(entryData);
+
+                        if (added)
+                        {
+                            propertyValueTypes.Add(entryData);
+                        }
+
+                        entryDataLength = BitConverter.ToUInt32(entry_data, data_pointer);
+                        data_pointer += 4;
+
+                        entryData = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryDataLength);
+                        data_pointer += (int)entryDataLength;
+
+                        //MessageBoxShow(entryDataLength.ToString() + ", " + entryData);
+
+                        propertyValuesInput.Add(entryData);
+                    }
+
+                    List<string>[] propertyValues = new List<string>[propertyValuesNumbers.Count];
+                    List<string>[] propertyValueVals = new List<string>[propertyValuesNumbers.Count];
+                    List<string>[] propertyValueValNames = new List<string>[propertyValuesNumbers.Count];
+                    List<string>[] propertyValueJSONPointers = new List<string>[propertyValuesNumbers.Count];
+                    List<string>[] propertyValueJSONPointersTypes = new List<string>[propertyValuesNumbers.Count];
+
+                    for (int i = 0; i < propertyValuesNumbers.Count; i++)
+                    {
+                        propertyValues[i] = new List<string>();
+                        propertyValueVals[i] = new List<string>();
+                        propertyValueValNames[i] = new List<string>();
+                        propertyValueJSONPointers[i] = new List<string>();
+                        propertyValueJSONPointersTypes[i] = new List<string>();
+                    }
+
+                    //string output = "";
+
+                    for (int i = 0; i < propertyValuesNumbers.Count; i++)
+                    {
+                        for (int j = 0; j < propertyValuesInput.Count; j++)
+                        {
+                            string[] propertyValue = propertyValuesInput[j].Split(' ');
+
+                            if (propertyValue.Length >= 3)
+                            {
+                                string propertyValuesString = valueType;
+
+                                int position2 = propertyValue[0].IndexOf(propertyValuesString);
+
+                                if (position2 >= 0)
+                                {
+                                    propertyValues[i].Add(propertyValuesInput[j]);
+
+                                    propertyValueValNames[i].Add(propertyValue[0].Substring(position2 + propertyValuesString.Length));
+
+                                    propertyValueJSONPointers[i].Add(propertyValue[0]);
+
+                                    propertyValueJSONPointersTypes[i].Add(propertyValue[1]);
+
+                                    string valueString = "";
+
+                                    for (int k = 2; k < propertyValue.Length; k++)
+                                    {
+                                        valueString += propertyValue[k];
+
+                                        if (k != (propertyValue.Length - 1))
+                                        {
+                                            valueString += " ";
+                                        }
+                                    }
+
+                                    propertyValueVals[i].Add(valueString);
+
+                                    string debugString = propertyValuePropertyIDs[i] + "\n";
+                                    debugString += propertyValueTypes[i] + "\n";
+                                    debugString += propertyValues[i][propertyValueValNames[i].Count - 1] + "\n";
+                                    debugString += propertyValueValNames[i][propertyValueValNames[i].Count - 1] + "\n";
+                                    debugString += propertyValueJSONPointers[i][propertyValueJSONPointers[i].Count - 1] + "\n";
+                                    debugString += propertyValueJSONPointersTypes[i][propertyValueJSONPointersTypes[i].Count - 1] + "\n";
+                                    debugString += propertyValueVals[i][propertyValueVals[i].Count - 1] + "\n";
+
+                                    //MessageBoxShow(debugString);
+                                }
+                            }
+                            else
+                            {
+                                MessageBoxShow("Error: Property value string is malformed: " + propertyValues[j]);
+                            }
+                        }
+                    }
+
+                    //MessageBoxShow(output);
+
+                    for (int i = 0; i < propertyValuesNumbers.Count; i++)
+                    {
+                        if (propertyValueVals[i].Count > 0)
+                        {
+                            string enumValues = Marshal.PtrToStringAnsi(get_enum_values(temp_index, propertyValueTypes[i]));
+
+                            if (enumValues != "")
+                            {
+                                AppendInput_enum(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes, ref enumValues);
+                            }
+                            else if (propertyValueTypes[i] == "bool")
+                            {
+                                AppendInput_bool(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
+                            }
+                            else if (propertyValueTypes[i] == "ZGuid")
+                            {
+                                AppendInput_ZGuid(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
+                            }
+                            else
+                            {
+                                AppendInput_Default(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    Label label2 = new Label();
+                    label2.Content = "  None";
+
+                    MainStackPanel.Children.Add(label2);
+                }
+            }
+        }
+
+        private void AppendInput(UInt32 entryIndex, string valueType)
+        {
+            int entry_data_size = get_entries(temp_index, entryIndex, valueType);
+
+            string responseString = Marshal.PtrToStringAnsi(get_response_string());
+
+            if (responseString != "")
+            {
+                MessageBoxShow(responseString);
+            }
+            else
+            {
+                if (entry_data_size > 0)
+                {
+                    byte[] entry_data = new byte[entry_data_size];
+
+                    Marshal.Copy(get_entries_with_logical_parent_data(), entry_data, 0, entry_data_size);
+
+                    int data_pointer = 0;
+
+                    List<string> propertyValuesNumbers = new List<string>();
+                    List<string> propertyValuePropertyIDs = new List<string>();
+                    List<string> propertyValueTypes = new List<string>();
+                    List<string> propertyValuePropertyIDsInput = new List<string>();
+                    List<string> propertyValueTypesInput = new List<string>();
+                    List<string> propertyValuesInput = new List<string>();
+
+                    while (data_pointer < entry_data_size)
+                    {
+                        UInt32 entryDataLength = BitConverter.ToUInt32(entry_data, data_pointer);
+                        data_pointer += 4;
+
+                        string entryData = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryDataLength);
+                        data_pointer += (int)entryDataLength;
+
+                        //MessageBoxShow(entryDataLength.ToString() + ", " + entryData);
+
+                        bool added = false;
+
+                        if (!propertyValuesNumbers.Contains(entryData))
+                        {
+                            propertyValuesNumbers.Add(entryData);
+
+                            added = true;
+                        }
+
+                        entryDataLength = BitConverter.ToUInt32(entry_data, data_pointer);
+                        data_pointer += 4;
+
+                        entryData = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryDataLength);
+                        data_pointer += (int)entryDataLength;
+
+                        //MessageBoxShow(entryDataLength.ToString() + ", " + entryData);
+
+                        propertyValuePropertyIDsInput.Add(entryData);
+
+                        if (added)
+                        {
+                            propertyValuePropertyIDs.Add(entryData);
+                        }
+
+                        entryDataLength = BitConverter.ToUInt32(entry_data, data_pointer);
+                        data_pointer += 4;
+
+                        entryData = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryDataLength);
+                        data_pointer += (int)entryDataLength;
+
+                        //MessageBoxShow(entryDataLength.ToString() + ", " + entryData);
+
+                        propertyValueTypesInput.Add(entryData);
+
+                        if (added)
+                        {
+                            propertyValueTypes.Add(entryData);
+                        }
+
+                        entryDataLength = BitConverter.ToUInt32(entry_data, data_pointer);
+                        data_pointer += 4;
+
+                        entryData = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryDataLength);
+                        data_pointer += (int)entryDataLength;
+
+                        //MessageBoxShow(entryDataLength.ToString() + ", " + entryData);
+
+                        propertyValuesInput.Add(entryData);
+                    }
+
+                    List<string>[] propertyValues = new List<string>[propertyValuesNumbers.Count];
+                    List<string>[] propertyValueVals = new List<string>[propertyValuesNumbers.Count];
+                    List<string>[] propertyValueValNames = new List<string>[propertyValuesNumbers.Count];
+                    List<string>[] propertyValueJSONPointers = new List<string>[propertyValuesNumbers.Count];
+                    List<string>[] propertyValueJSONPointersTypes = new List<string>[propertyValuesNumbers.Count];
+
+                    for (int i = 0; i < propertyValuesNumbers.Count; i++)
+                    {
+                        propertyValues[i] = new List<string>();
+                        propertyValueVals[i] = new List<string>();
+                        propertyValueValNames[i] = new List<string>();
+                        propertyValueJSONPointers[i] = new List<string>();
+                        propertyValueJSONPointersTypes[i] = new List<string>();
+                    }
+
+                    //string output = "";
+
+                    for (int i = 0; i < propertyValuesNumbers.Count; i++)
+                    {
+                        for (int j = 0; j < propertyValuesInput.Count; j++)
+                        {
+                            string[] propertyValue = propertyValuesInput[j].Split(' ');
+
+                            if (propertyValue.Length >= 3)
+                            {
+                                string propertyValuesString = valueType + "/" + propertyValuesNumbers[i] + "/value/$val";
+
+                                int position2 = propertyValue[0].IndexOf(propertyValuesString);
+
+                                if (position2 >= 0)
+                                {
+                                    propertyValues[i].Add(propertyValuesInput[j]);
+
+                                    propertyValueValNames[i].Add(propertyValue[0].Substring(position2 + propertyValuesString.Length));
+
+                                    propertyValueJSONPointers[i].Add(propertyValue[0]);
+
+                                    propertyValueJSONPointersTypes[i].Add(propertyValue[1]);
+
+                                    string valueString = "";
+
+                                    for (int k = 2; k < propertyValue.Length; k++)
+                                    {
+                                        valueString += propertyValue[k];
+
+                                        if (k != (propertyValue.Length - 1))
+                                        {
+                                            valueString += " ";
+                                        }
+                                    }
+
+                                    propertyValueVals[i].Add(valueString);
+
+                                    string debugString = propertyValuePropertyIDs[i] + "\n";
+                                    debugString += propertyValueTypes[i] + "\n";
+                                    debugString += propertyValues[i][propertyValueValNames[i].Count - 1] + "\n";
+                                    debugString += propertyValueValNames[i][propertyValueValNames[i].Count - 1] + "\n";
+                                    debugString += propertyValueJSONPointers[i][propertyValueJSONPointers[i].Count - 1] + "\n";
+                                    debugString += propertyValueJSONPointersTypes[i][propertyValueJSONPointersTypes[i].Count - 1] + "\n";
+                                    debugString += propertyValueVals[i][propertyValueVals[i].Count - 1] + "\n";
+
+                                    //MessageBoxShow(debugString);
+                                }
+                            }
+                            else
+                            {
+                                MessageBoxShow("Error: Property value string is malformed: " + propertyValues[j]);
+                            }
+                        }
+                    }
+
+                    //MessageBoxShow(output);
+
+                    for (int i = 0; i < propertyValuesNumbers.Count; i++)
+                    {
+                        if (propertyValueVals[i].Count > 0)
+                        {
+                            string enumValues = Marshal.PtrToStringAnsi(get_enum_values(temp_index, propertyValueTypes[i]));
+
+                            if (enumValues != "")
+                            {
+                                AppendInput_enum(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes, ref enumValues);
+                            }
+                            else if (propertyValueTypes[i] == "bool")
+                            {
+                                AppendInput_bool(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
+                            }
+                            else if (propertyValueTypes[i] == "SColorRGB")
+                            {
+                                AppendInput_SColorRGB(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes, false);
+                            }
+                            else if (propertyValueTypes[i] == "SColorRGBA")
+                            {
+                                AppendInput_SColorRGB(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes, true);
+                            }
+                            else if (propertyValueTypes[i] == "SMatrix43")
+                            {
+                                AppendInput_SMatrix43(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
+                            }
+                            else if (propertyValueTypes[i] == "SVector2")
+                            {
+                                AppendInput_SVector2(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
+                            }
+                            else if (propertyValueTypes[i] == "SVector3")
+                            {
+                                AppendInput_SVector3(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
+                            }
+                            else if (propertyValueTypes[i] == "SVector4")
+                            {
+                                AppendInput_SVector4(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
+                            }
+                            else if (propertyValueTypes[i] == "ZGuid")
+                            {
+                                AppendInput_ZGuid(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
+                            }
+                            else
+                            {
+                                AppendInput_Default(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    Label label2 = new Label();
+                    label2.Content = "  None";
+
+                    MainStackPanel.Children.Add(label2);
                 }
             }
         }
@@ -2477,6 +2787,16 @@ namespace rpkg
             return childrenVisibleCount;
         }
 
+        private void ExpandAllNodes_Click(object sender, RoutedEventArgs e)
+        {
+            MainTreeView.ExpandAll();
+        }
+
+        private void CollapseAllNodes_Click(object sender, RoutedEventArgs e)
+        {
+            MainTreeView.CollapseAll();
+        }
+
         public class TreeViewBackup : List<TreeViewBackup>
         {
             public System.Windows.Forms.TreeNode Parent { get; }
@@ -2557,6 +2877,7 @@ namespace rpkg
         public UInt32 entity_index = 0;
         public UInt32 temp_index = 0;
         public UInt32 temps_index = 0;
+        public int temp_file_version = 0;
         public string tempFileName = "";
         public string tbluFileName = "";
         public string rpkgFilePath = "";
@@ -2649,8 +2970,11 @@ namespace rpkg
         [DllImport("rpkg.dll", EntryPoint = "get_entries_with_logical_parent_data", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr get_entries_with_logical_parent_data();
 
+        [DllImport("rpkg.dll", EntryPoint = "get_temp_entries", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int get_temp_entries(UInt32 temps_index, string value_type, string type_string);
+
         [DllImport("rpkg.dll", EntryPoint = "get_entries", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_entries(UInt32 temps_index, UInt32 entry_index);
+        public static extern int get_entries(UInt32 temps_index, UInt32 entry_index, string value_type);
 
         [DllImport("rpkg.dll", EntryPoint = "get_entries_data", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr get_entries_data();
@@ -2700,14 +3024,7 @@ namespace rpkg
         [DllImport("rpkg.dll", EntryPoint = "get_response_string", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr get_response_string();
 
-        private void ExpandAllNodes_Click(object sender, RoutedEventArgs e)
-        {
-            MainTreeView.ExpandAll();
-        }
-
-        private void CollapseAllNodes_Click(object sender, RoutedEventArgs e)
-        {
-            MainTreeView.CollapseAll();
-        }
+        [DllImport("rpkg.dll", EntryPoint = "get_temp_version", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int get_temp_version(UInt32 temps_index);
     }
 }

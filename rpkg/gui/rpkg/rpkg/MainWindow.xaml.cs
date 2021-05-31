@@ -1346,9 +1346,9 @@ namespace rpkg
                         }
                         else if (hashType == "TEMP")
                         {
-                            string[] buttons = { "Extract " + hashName, "Edit " + hashName + " in Brick/Entity Editor", "Extract PRIM Models linked to " + hashName + " To GLB/TGA File(s)", "Extract PRIMs linked to " + hashName + " To GLB File(s)", "Cancel" };
+                            string[] buttons = { "Extract " + hashName, "Edit " + hashName + " in Brick/Entity Editor (Recursive)", "Edit " + hashName + " in Brick/Entity Editor (Non-Recursive)", "Extract PRIM Models linked to " + hashName + " To GLB/TGA File(s)", "Extract PRIMs linked to " + hashName + " To GLB File(s)", "Cancel" };
 
-                            buttonCount = 5;
+                            buttonCount = 6;
 
                             rightClickMenu = new RightClickMenu(buttons);
                         }
@@ -1462,7 +1462,7 @@ namespace rpkg
                                     return;
                                 }
 
-                                List<string> rpkgFiles = new List<string>();
+                                /*List<string> rpkgFiles = new List<string>();
 
                                 foreach (var filePath in Directory.GetFiles(runtimeDirectory))
                                 {
@@ -1477,7 +1477,9 @@ namespace rpkg
                                 foreach (string filePath in rpkgFiles)
                                 {
                                     ImportRPKGFile(filePath);
-                                }
+                                }*/
+
+                                ImportRPKGFileFolder(runtimeDirectory);
 
                                 command = "-extract_prim_model_from";
 
@@ -1597,6 +1599,26 @@ namespace rpkg
                                     }
                                 }
 
+                                int temp_file_version = get_temp_version(hashName, rpkgFilePath);
+
+                                if (temp_file_version == 4)
+                                {
+                                    MessageQuestion messageBox = new MessageQuestion();
+                                    messageBox.message.Content = "The automatic TEMP/TBLU version check was unable to determine what version of Hitman (H2 or H3) these files are.\n\nPlease select the correct version of Hitman H2 or H3 below.";
+                                    messageBox.OKButton.Content = "Hitman 2";
+                                    messageBox.CancelButton.Content = "Hitman 3";
+                                    messageBox.ShowDialog();
+
+                                    if (messageBox.buttonPressed == "OKButton")
+                                    {
+                                        temp_file_version = 2;
+                                    }
+                                    else if (messageBox.buttonPressed == "CancelButton")
+                                    {
+                                        temp_file_version = 3;
+                                    }
+                                }
+
                                 int temp_return_value = clear_temp_tblu_data();
 
                                 //MessageBoxShow(hashName + ", " + rpkgFilePath);
@@ -1607,7 +1629,7 @@ namespace rpkg
 
                                 execute_load_recursive_temps load_recursive_temps_execute = load_recursive_temps;
 
-                                IAsyncResult temp_ar = load_recursive_temps_execute.BeginInvoke(hashName, rpkgFilePath, null, null);
+                                IAsyncResult temp_ar = load_recursive_temps_execute.BeginInvoke(hashName, rpkgFilePath, (UInt32)temp_file_version, null, null);
 
                                 Progress temp_progress = new Progress();
 
@@ -1674,6 +1696,7 @@ namespace rpkg
                                     entityBrickEditor.outputFolder = userSettings.OutputFolder;
 
                                     entityBrickEditor.temps_index = (UInt32)temp_index;
+                                    entityBrickEditor.temp_file_version = temp_file_version;
                                     entityBrickEditor.tempFileName = hashName;
                                     entityBrickEditor.rpkgFilePath = rpkgFilePath;
                                     entityBrickEditor.tempFileNameFull = header;
@@ -1780,6 +1803,182 @@ namespace rpkg
                             }
                             else if (hashType == "TEMP")
                             {
+                                string rpkgFileBackup = rpkgFilePath;
+
+                                string rpkgFile = rpkgFilePath.Substring(rpkgFilePath.LastIndexOf("\\") + 1);
+
+                                string rpkgUpperName = rpkgFile.ToUpper();
+
+                                if (rpkgUpperName.Contains("PATCH"))
+                                {
+                                    string baseFileName = rpkgFile.Substring(0, rpkgUpperName.IndexOf("PATCH")).ToUpper();
+
+                                    string folderPath = rpkgFilePath.Substring(0, rpkgFilePath.LastIndexOf("\\") + 1);
+
+                                    List<string> rpkgFiles = new List<string>();
+
+                                    foreach (var filePath in Directory.GetFiles(folderPath))
+                                    {
+                                        if (filePath.ToUpper().EndsWith(".RPKG"))
+                                        {
+                                            if (filePath.ToUpper().Contains("\\" + baseFileName.ToUpper() + ".RPKG"))
+                                            {
+                                                rpkgFiles.Add(filePath);
+                                            }
+                                            else if (filePath.ToUpper().Contains("\\" + baseFileName.ToUpper() + "PATCH"))
+                                            {
+                                                rpkgFiles.Add(filePath);
+                                            }
+                                        }
+                                    }
+
+                                    rpkgFiles.Sort(new NaturalStringComparer());
+
+                                    bool anyRPKGImported = false;
+
+                                    foreach (string filePath in rpkgFiles)
+                                    {
+                                        ImportRPKGFile(filePath);
+
+                                        anyRPKGImported = true;
+                                    }
+
+                                    if (anyRPKGImported)
+                                    {
+                                        //LoadHashDependsMap();
+                                    }
+                                }
+
+                                int temp_file_version = get_temp_version(hashName, rpkgFilePath);
+
+                                if (temp_file_version == 4)
+                                {
+                                    MessageQuestion messageBox = new MessageQuestion();
+                                    messageBox.message.Content = "The automatic TEMP/TBLU version check was unable to determine what version of Hitman (H2 or H3) these files are.\n\nPlease select the correct version of Hitman H2 or H3 below.";
+                                    messageBox.OKButton.Content = "Hitman 2";
+                                    messageBox.CancelButton.Content = "Hitman 3";
+                                    messageBox.ShowDialog();
+
+                                    if (messageBox.buttonPressed == "OKButton")
+                                    {
+                                        temp_file_version = 2;
+                                    }
+                                    else if (messageBox.buttonPressed == "CancelButton")
+                                    {
+                                        temp_file_version = 3;
+                                    }
+                                }
+
+                                int temp_return_value = clear_temp_tblu_data();
+
+                                //MessageBoxShow(hashName + ", " + rpkgFilePath);
+
+                                rpkgFilePath = rpkgFileBackup;
+
+                                temp_return_value = reset_task_status();
+
+                                execute_load_recursive_temps load_recursive_temps_execute = load_non_recursive_temps;
+
+                                IAsyncResult temp_ar = load_recursive_temps_execute.BeginInvoke(hashName, rpkgFilePath, (UInt32)temp_file_version, null, null);
+
+                                Progress temp_progress = new Progress();
+
+                                temp_progress.message.Content = "Analyzing Entity/Brick (TEMP/TBLU)...";
+
+                                temp_progress.operation = (int)Progress.Operation.TEMP_TBLU;
+
+                                temp_progress.ShowDialog();
+
+                                int temp_index = get_temp_index(hashName);
+
+                                //MessageBoxShow(temp_index.ToString());
+
+                                if (temp_progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
+                                {
+                                    if (temp_progress.task_status == (int)Progress.RPKGStatus.TEMP_TBLU_NOT_FOUND_IN_DEPENDS)
+                                    {
+                                        MessageBoxShow("Error: " + hashName + " file has no TBLU hash depends.");
+                                    }
+                                    else if (temp_progress.task_status == (int)Progress.RPKGStatus.TEMP_TBLU_NOT_FOUND_IN_RPKG)
+                                    {
+                                        if (rpkgUpperName.Contains("PATCH"))
+                                        {
+                                            string rpkgBaseName = rpkgFile.Substring(0, rpkgUpperName.IndexOf("PATCH")) + ".rpkg";
+
+                                            MessageBoxShow("Error: TBLU file linked to " + hashName + " file is missing.\n\nMake sure you you import the base archives if you are trying to edit a TEMP file residing in a patch RPKG.\n\nTry importing " + rpkgBaseName + " and trying to edit " + hashName + " again.\n\nThis should be done before trying to launch the Brick/Entity Editor.");
+                                        }
+                                        else
+                                        {
+                                            MessageBoxShow("Error: TBLU file linked to " + hashName + " file is missing.\n\nMake sure you you import the base archives if you are trying to edit a TEMP file residing in a patch RPKG.");
+                                        }
+                                    }
+                                    else if (temp_progress.task_status == (int)Progress.RPKGStatus.TEMP_TBLU_TOO_MANY)
+                                    {
+                                        MessageBoxShow("Error: " + hashName + " file has too many TBLU hash depends.");
+                                    }
+                                    else if (temp_progress.task_status == (int)Progress.RPKGStatus.TEMP_HEADER_NOT_FOUND)
+                                    {
+                                        MessageBoxShow("Error: " + hashName + " file is an empty TEMP file, missing it's resource type header/footer.");
+                                    }
+                                    else if (temp_progress.task_status == (int)Progress.RPKGStatus.TEMP_TBLU_ENTRY_COUNT_MISMATCH)
+                                    {
+                                        MessageBoxShow("Error: " + hashName + " file and TBLU file have mismatched entry/entity counts.");
+                                    }
+                                    else if (temp_progress.task_status == (int)Progress.RPKGStatus.TEMP_VERSION_UNKNOWN)
+                                    {
+                                        MessageBoxShow("Error: " + hashName + " file's version is unknown.");
+                                    }
+                                    else if (temp_progress.task_status == (int)Progress.RPKGStatus.TBLU_VERSION_UNKNOWN)
+                                    {
+                                        MessageBoxShow("Error: " + hashName + " file's TBLU file's version is unknown.");
+                                    }
+
+                                    temp_return_value = clear_temp_tblu_data();
+                                }
+                                else
+                                {
+                                    if (entityBrickEditor == null)
+                                    {
+                                        entityBrickEditor = new EntityBrickEditor();
+                                    }
+
+                                    entityBrickEditor.inputFolder = userSettings.InputFolder;
+                                    entityBrickEditor.outputFolder = userSettings.OutputFolder;
+
+                                    entityBrickEditor.temps_index = (UInt32)temp_index;
+                                    entityBrickEditor.temp_file_version = temp_file_version;
+                                    entityBrickEditor.tempFileName = hashName;
+                                    entityBrickEditor.rpkgFilePath = rpkgFilePath;
+                                    entityBrickEditor.tempFileNameFull = header;
+
+                                    string[] theme = userSettings.ColorTheme.Split('/');
+
+                                    entityBrickEditor.currentThemeBrightness = theme[0];
+                                    string color = theme[1];
+
+                                    entityBrickEditor.ShowDialog();
+
+                                    //GC.Collect();
+                                    GC.WaitForPendingFinalizers();
+                                    //GC.Collect();
+                                }
+
+                                return;
+                            }
+
+                            string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
+
+                            if (outputFolder == "")
+                            {
+                                return;
+                            }
+
+                            output_path = outputFolder;
+                        }
+                        else if (rightClickMenu.buttonPressed == "button3" && buttonCount == 6)
+                        {
+                            if (hashType == "TEMP")
+                            {
                                 string runtimeDirectory = rpkgFilePath.Substring(0, rpkgFilePath.LastIndexOf("\\"));
 
                                 if (!runtimeDirectory.EndsWith("runtime", StringComparison.OrdinalIgnoreCase))
@@ -1789,7 +1988,7 @@ namespace rpkg
                                     return;
                                 }
 
-                                List<string> rpkgFiles = new List<string>();
+                                /*List<string> rpkgFiles = new List<string>();
 
                                 foreach (var filePath in Directory.GetFiles(runtimeDirectory))
                                 {
@@ -1804,7 +2003,9 @@ namespace rpkg
                                 foreach (string filePath in rpkgFiles)
                                 {
                                     ImportRPKGFile(filePath);
-                                }
+                                }*/
+
+                                ImportRPKGFileFolder(runtimeDirectory);
 
                                 command = "-extract_all_prim_model_of_temp_from";
 
@@ -1852,7 +2053,7 @@ namespace rpkg
 
                             output_path = outputFolder;
                         }
-                        else if (rightClickMenu.buttonPressed == "button3" && buttonCount == 5)
+                        else if (rightClickMenu.buttonPressed == "button4" && buttonCount == 6)
                         {
                             if (hashType == "TEMP")
                             {
@@ -2580,8 +2781,6 @@ namespace rpkg
 
             MainTreeView.Nodes.Add(item);
 
-            Thread.Sleep(200);
-
             List<string> resourceTypes = new List<string>();
 
             UInt32 resourceTypeCount = get_resource_types_count(rpkgFilePath);
@@ -2604,6 +2803,111 @@ namespace rpkg
                 //item2.Collapsed += Item2_Collapsed;
 
                 item.Nodes.Add(item2);
+            }
+
+            oneOrMoreRPKGsHaveBeenImported = true;
+        }
+
+        private void ImportRPKGFileFolder(string folderPath)
+        {
+            List<string> rpkgFiles = new List<string>();
+
+            foreach (var filePath in Directory.GetFiles(folderPath))
+            {
+                if (filePath.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
+                {
+                    rpkgFiles.Add(filePath);
+                }
+            }
+
+            rpkgFiles.Sort(new NaturalStringComparer());
+
+            string rpkgListString = "";
+
+            List<string> rpkgList = new List<string>();
+
+            foreach (string filePath in rpkgFiles)
+            {
+                bool found = false;
+
+                foreach (System.Windows.Forms.TreeNode treeViewNode in MainTreeView.Nodes)
+                {
+                    if (filePath == (treeViewNode.Text as string))
+                    {
+                        found = true;
+                    }
+                }
+
+                if (!found)
+                {
+                    rpkgListString += filePath + ",";
+
+                    rpkgList.Add(filePath);
+                }
+            }
+
+            int return_value = reset_task_status();
+
+            execute_import_rpkgs temp_rpkgExecute = import_rpkgs;
+
+            IAsyncResult temp_ar = temp_rpkgExecute.BeginInvoke(folderPath, rpkgListString, null, null);
+
+            Progress progress = new Progress();
+
+            progress.message.Content = "Importing RPKG file(s) from " + folderPath + "...";
+
+            progress.operation = (int)Progress.Operation.MASS_EXTRACT;
+
+            progress.ShowDialog();
+
+            if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
+            {
+                //MessageBoxShow(progress.task_status_string);
+
+                return;
+            }
+
+            foreach (string filePath in rpkgList)
+            {
+                if (MainTreeView.Nodes.Count > 0)
+                {
+                    if ((MainTreeView.Nodes[0] as System.Windows.Forms.TreeNode).Text.ToString() == "Click")
+                    {
+                        MainTreeView.Nodes.Clear();
+                    }
+                }
+
+                MainTreeView.AfterExpand += MainTreeView_AfterExpand;
+
+                var item = new System.Windows.Forms.TreeNode();
+
+                item.Text = filePath;
+
+                MainTreeView.Nodes.Add(item);
+
+                List<string> resourceTypes = new List<string>();
+
+                UInt32 resourceTypeCount = get_resource_types_count(filePath);
+
+                for (UInt32 i = 0; i < resourceTypeCount; i++)
+                {
+                    resourceTypes.Add(Marshal.PtrToStringAnsi(get_resource_types_at(filePath, i)));
+                }
+
+                resourceTypes.Sort();
+
+                foreach (string resourceType in resourceTypes)
+                {
+                    var item2 = new System.Windows.Forms.TreeNode();
+
+                    item2.Text = resourceType;
+
+                    item2.Nodes.Add("");
+
+                    //item2.Collapsed += Item2_Collapsed;
+
+                    item.Nodes.Add(item2);
+                }
             }
 
             oneOrMoreRPKGsHaveBeenImported = true;
@@ -2761,7 +3065,7 @@ namespace rpkg
                 return;
             }
 
-            List<string> rpkgFiles = new List<string>();
+            /*List<string> rpkgFiles = new List<string>();
 
             foreach (var filePath in Directory.GetFiles(inputFolder))
             {
@@ -2785,7 +3089,9 @@ namespace rpkg
             if (anyRPKGImported)
             {
                 //LoadHashDependsMap();
-            }
+            }*/
+
+            ImportRPKGFileFolder(inputFolder);
 
             string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + massExtractName + " To:");
 
@@ -3228,7 +3534,9 @@ namespace rpkg
 
             if (inputFolder != "")
             {
-                List<string> rpkgFiles = new List<string>();
+                ImportRPKGFileFolder(inputFolder);
+
+                /*List<string> rpkgFiles = new List<string>();
 
                 foreach (var filePath in Directory.GetFiles(inputFolder))
                 {
@@ -3252,7 +3560,7 @@ namespace rpkg
                 if (anyRPKGImported)
                 {
                     //LoadHashDependsMap();
-                }
+                }*/
             }
         }
 
@@ -3535,7 +3843,8 @@ namespace rpkg
         WaveFormat waveFormat;
         NAudio.Wave.RawSourceWaveStream pcmSource;
 
-        public delegate int execute_load_recursive_temps(string temp_hash, string rpkg_file_path);
+        public delegate int execute_import_rpkgs(string rpkgs_path, string rpkgs_list);
+        public delegate int execute_load_recursive_temps(string temp_hash, string rpkg_file_path, UInt32 temp_version);
         public delegate int execute_get_hashes_with_no_reverse_depends(string rpkg_file);
         public delegate int execute_get_direct_hash_depends(string rpkg_file, string hash_string);
         public delegate int execute_task(string csharp_command, string csharp_input_path, string csharp_filter, string search, string search_type, string csharp_output_path);
@@ -3667,7 +3976,10 @@ namespace rpkg
         public static extern IntPtr get_matrix_data_from_godot_scene(string input_path);
 
         [DllImport("rpkg.dll", EntryPoint = "load_recursive_temps", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int load_recursive_temps(string temp_hash, string rpkg_file_path);
+        public static extern int load_recursive_temps(string temp_hash, string rpkg_file_path, UInt32 temp_version);
+
+        [DllImport("rpkg.dll", EntryPoint = "load_non_recursive_temps", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int load_non_recursive_temps(string temp_hash, string rpkg_file_path, UInt32 temp_version);
 
         [DllImport("rpkg.dll", EntryPoint = "get_temp_index", CallingConvention = CallingConvention.Cdecl)]
         public static extern int get_temp_index(string temp_hash_string);
@@ -3683,6 +3995,15 @@ namespace rpkg
 
         [DllImport("rpkg.dll", EntryPoint = "modify_hash_depends", CallingConvention = CallingConvention.Cdecl)]
         public static extern int modify_hash_depends(string rpkg_file, string hash_string, string hash_list, string hash_flag_list, UInt32 hash_count, UInt32 backup_rpkg);
+
+        [DllImport("rpkg.dll", EntryPoint = "get_temp_version", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int get_temp_version(string temp_hash, string rpkg_file_path);
+
+        [DllImport("rpkg.dll", EntryPoint = "set_temp_version", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int set_temp_version(UInt32 temps_index, UInt32 temp_version);
+
+        [DllImport("rpkg.dll", EntryPoint = "import_rpkgs", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int import_rpkgs(string rpkgs_path, string rpkgs_list);
 
 
         [SuppressUnmanagedCodeSecurity]
@@ -5900,6 +6221,13 @@ namespace rpkg
             {
                 MessageBoxShow("Error: Could not parse the hash value from the details textbox.");
             }
+        }
+
+        private void HashCalculator_Click(object sender, RoutedEventArgs e)
+        {
+            HashCalculator hashCalculator = new HashCalculator();
+
+            hashCalculator.ShowDialog();
         }
     }
 }

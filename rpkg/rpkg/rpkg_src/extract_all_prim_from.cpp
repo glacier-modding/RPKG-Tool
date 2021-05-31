@@ -39,7 +39,7 @@ void rpkg_function::extract_all_prim_from(std::string& input_path, std::string& 
         }
         else
         {
-            rpkg_function::import_rpkg(input_path);
+            rpkg_function::import_rpkg(input_path, true);
         }
 
         LOG("Loading Hash List...");

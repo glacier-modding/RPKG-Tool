@@ -1468,7 +1468,7 @@ int get_temp_index(char* temp_hash_string)
     return -1;
 }
 
-int load_recursive_temps(char* temp_hash, char* rpkg_file_path)
+int load_recursive_temps(char* temp_hash, char* rpkg_file_path, uint32_t temp_version)
 {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
@@ -1498,7 +1498,7 @@ int load_recursive_temps(char* temp_hash, char* rpkg_file_path)
 
                 std::vector<uint32_t> temps_indexes;
 
-                rpkg_function::recursive_temp_loader(rpkg_index, it->second, parents_map, temps_indexes, 0, 0, 0);
+                rpkg_function::recursive_temp_loader(rpkg_index, it->second, temp_version, parents_map, temps_indexes, 0, 0, 0);
 
                 std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
                 int stringstream_length = 80;
@@ -1511,7 +1511,8 @@ int load_recursive_temps(char* temp_hash, char* rpkg_file_path)
 
                 for (uint64_t t = 0; t < temps.size(); t++)
                 {
-                    if (((t * (uint64_t)100000) / (uint64_t)temps.size()) % (uint64_t)100 == 0 && t > 0)
+                    //if (((t * (uint64_t)100000) / (uint64_t)temps.size()) % (uint64_t)100 == 0 && t > 0)
+                    if (t > 0)
                     {
                         stringstream_length = console::update_console(message, temps.size(), t, start_time, stringstream_length);
                     }
@@ -1520,6 +1521,85 @@ int load_recursive_temps(char* temp_hash, char* rpkg_file_path)
                 }
 
                 timing_string = "Found " + util::uint32_t_to_string(temps.size()) + " TEMP/TBLU recursively linked file(s).\n\nLoading recursive TEMP/TBLU file data: 100% done";
+
+                percent_progress = 100;
+
+                if (temps.at(0).tblu_return_value == TEMP_TBLU_FOUND)
+                {
+                    task_multiple_status = TASK_SUCCESSFUL;
+                }
+                else
+                {
+                    task_multiple_status = temps.at(0).tblu_return_value;
+                }
+
+                task_single_status = TASK_SUCCESSFUL;
+
+                return 0;
+            }
+        }
+    }
+
+    task_single_status = TASK_SUCCESSFUL;
+    task_multiple_status = TASK_SUCCESSFUL;
+
+    return -1;
+}
+
+int load_non_recursive_temps(char* temp_hash, char* rpkg_file_path, uint32_t temp_version)
+{
+    task_single_status = TASK_EXECUTING;
+    task_multiple_status = TASK_EXECUTING;
+
+    //initialize_property_map();
+
+    initialize_enum_map();
+
+    std::string temp_hash_string = std::string(temp_hash);
+    std::string rpkg_file_path_string = std::string(rpkg_file_path);
+
+    timing_string = "Loading TEMP file " + temp_hash_string;
+
+    uint64_t temp_hash_value = std::strtoull(temp_hash_string.c_str(), nullptr, 16);
+
+    for (uint64_t i = 0; i < rpkgs.size(); i++)
+    {
+        uint32_t rpkg_index = i;
+
+        if (rpkgs.at(i).rpkg_file_path == rpkg_file_path_string)
+        {
+            std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+
+            if (it != rpkgs.at(rpkg_index).hash_map.end())
+            {
+                temps.emplace_back(temp(rpkg_index, it->second, temp_version));
+
+                uint64_t temps_index = temps.size() - 1;
+
+                temps.at(temps_index).temp_temps_index = temps_index;
+
+                temps_map[rpkgs.at(rpkg_index).hash.at(it->second).hash_value] = temps_index;
+
+                std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
+                int stringstream_length = 80;
+
+                timing_string = "Loading non-recursive TEMP/TBLU file data: 0% done";
+
+                percent_progress = 0;
+
+                std::string message = "Loading non-recursive TEMP/TBLU file data: ";
+
+                for (uint64_t t = 0; t < temps.size(); t++)
+                {
+                    if (t > 0)
+                    {
+                        stringstream_length = console::update_console(message, temps.size(), t, start_time, stringstream_length);
+                    }
+
+                    temps.at(t).load_data();
+                }
+
+                timing_string = "Loading non-recursive TEMP/TBLU file data: 100% done";
 
                 percent_progress = 100;
 
@@ -1728,13 +1808,30 @@ char* get_entries_hash_reference_data(uint32_t temps_index, uint32_t entry_index
     return &response_string[0];
 }
 
-int get_entries(uint32_t temps_index, uint32_t entry_index)
+int get_temp_entries(uint32_t temps_index, char* value_string, char* value_type)
 {
     response_string = "";
 
+    std::string value_string_string = std::string(value_string);
+    std::string value_type_string = std::string(value_type);
+
     if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND)
     {
-        temps.at(temps_index).get_entries_data(entry_index);
+        temps.at(temps_index).get_temp_entries_data(value_string_string, value_type_string);
+    }
+
+    return response_data.size();
+}
+
+int get_entries(uint32_t temps_index, uint32_t entry_index, char* value_type)
+{
+    response_string = "";
+
+    std::string value_type_string = std::string(value_type);
+
+    if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND)
+    {
+        temps.at(temps_index).get_entries_data(entry_index, value_type_string);
     }
 
     return response_data.size();
@@ -1785,6 +1882,42 @@ char* get_all_bricks(uint32_t temps_index)
     temps.at(temps_index).get_all_bricks();
 
     return &response_string[0];
+}
+
+int get_temp_version(char* temp_hash, char* rpkg_file_path)
+{
+    std::string temp_hash_string = std::string(temp_hash);
+    std::string rpkg_file_path_string = std::string(rpkg_file_path);
+
+    uint64_t temp_hash_value = std::strtoull(temp_hash_string.c_str(), nullptr, 16);
+
+    for (uint64_t i = 0; i < rpkgs.size(); i++)
+    {
+        uint32_t rpkg_index = i;
+
+        if (rpkgs.at(i).rpkg_file_path == rpkg_file_path_string)
+        {
+            std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+
+            if (it != rpkgs.at(rpkg_index).hash_map.end())
+            {
+                temp temp_temp(rpkg_index, it->second);
+
+                temp_temp.temp_version_check();
+
+                return temp_temp.temp_file_version;
+            }
+        }
+    }
+
+    return 0;
+}
+
+int set_temp_version(uint32_t temps_index, uint32_t temp_version)
+{
+    temps.at(temps_index).temp_file_version = temp_version;
+
+    return temps.at(temps_index).temp_file_version;
 }
 
 int generate_png_from_text(char* rpkg_file, char* hash_string, char* png_path)
@@ -2282,4 +2415,66 @@ char* get_prim_from_temp(uint32_t temps_index, uint32_t entry_index)
     temps.at(temps_index).get_prim_from_temp(entry_index);
 
     return &response_string[0];
+}
+
+int import_rpkgs(char* rpkgs_path, char* rpkgs_list)
+{
+    task_single_status = TASK_EXECUTING;
+    task_multiple_status = TASK_EXECUTING;
+
+    std::vector<std::string> rpkg_files;
+
+    std::string rpkgs_path_string = std::string(rpkgs_path);
+    std::string rpkgs_list_string = std::string(rpkgs_list);
+
+    std::string_view rpkgs_list_string_string_view(rpkgs_list_string.c_str(), rpkgs_list_string.length());
+
+    size_t pos1 = 0;
+    size_t pos2 = rpkgs_list_string_string_view.find(",");
+
+    while (pos2 != std::string::npos)
+    {
+        rpkg_files.push_back(std::string(rpkgs_list_string_string_view.substr(pos1, pos2)));
+
+        if (pos2 + 1 >= rpkgs_list_string.length())
+        {
+            pos2 = std::string::npos;
+        }
+        else
+        {
+            pos1 += pos2 + 1;
+
+            pos2 = rpkgs_list_string_string_view.substr(pos1).find(",");
+        }
+    }
+
+    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
+
+    int stringstream_length = 80;
+
+    std::string message = "Importing all RPKG file(s) from " + rpkgs_path_string + ": ";
+
+    timing_string = message + "0% done";
+
+    percent_progress = 0;
+
+    for (uint32_t i = 0; i < rpkg_files.size(); i++)
+    {
+        //if (((i * (uint64_t)1000) / (uint64_t)rpkg_files.size()) % (uint64_t)100 == 0 && i > 0)
+        if (i > 0)
+        {
+            stringstream_length = console::update_console(message, rpkg_files.size(), i, start_time, stringstream_length);
+        }
+
+        rpkg_function::import_rpkg(rpkg_files.at(i), false);
+    }
+
+    timing_string = "Importing all RPKG file(s) from " + rpkgs_path_string + ": 100% done";
+
+    percent_progress = 100;
+
+    task_single_status = TASK_SUCCESSFUL;
+    task_multiple_status = TASK_SUCCESSFUL;
+
+    return 0;
 }

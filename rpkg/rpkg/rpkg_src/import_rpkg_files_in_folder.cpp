@@ -60,7 +60,7 @@ void rpkg_function::import_rpkg_files_in_folder(std::string& input_rpkg_folder_p
             {
                 std::string rpkg_to_import = entry.path().string();
 
-                rpkg_function::import_rpkg(rpkg_to_import);
+                rpkg_function::import_rpkg(rpkg_to_import, true);
             }
         }
     }

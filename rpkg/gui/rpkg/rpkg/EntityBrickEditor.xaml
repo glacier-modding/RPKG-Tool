@@ -36,7 +36,6 @@
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Grid Grid.Row="0" Grid.ColumnSpan="2">
                         <Grid.RowDefinitions>
@@ -45,9 +44,13 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Label Grid.Row="0" Grid.Column="0" Content="Filter Nodes By String:"/>
+                        <Label Grid.Row="0" Grid.Column="0" Content="Filter Nodes By:"/>
                         <TextBox Grid.Row="0" Grid.Column="1" x:Name="FilterTextBox" TextChanged="SearchTEMPsTextBox_TextChanged" FontFamily="Consolas" TextWrapping="NoWrap"/>
+                        <Button Grid.Row="0" Grid.Column="2" x:Name="ExpandAllNodes" Click="ExpandAllNodes_Click" Content="Expand All Nodes"/>
+                        <Button Grid.Row="0" Grid.Column="3" x:Name="CollapseAllNodes" Click="CollapseAllNodes_Click" Content="Collapse All Nodes"/>
                     </Grid>
                     <WindowsFormsHost Grid.Row="2" Grid.ColumnSpan="2" x:Name="MainWindowsFormsHost">
                         <wf:TreeView x:Name="MainTreeView" Font="Consolas,10"/>

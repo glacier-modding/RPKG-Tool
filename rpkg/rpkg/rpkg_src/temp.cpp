@@ -43,6 +43,28 @@ temp::temp(uint64_t rpkgs_index, uint64_t hash_index)
     load_hash_depends();
 }
 
+temp::temp(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
+{
+    temp_file_version = temp_version;
+
+#ifdef RPKG_DLL
+    util::initialize_resource_tool();
+#endif
+
+    initialize_enum_map();
+
+    initialize_type_map();
+
+    temp_rpkg_index = rpkgs_index;
+    temp_hash_index = hash_index;
+
+    temp_file_name = rpkgs.at(rpkgs_index).hash.at(hash_index).hash_file_name;
+
+    tblu_return_value = TEMP_TBLU_NOT_FOUND_IN_DEPENDS;
+
+    load_hash_depends();
+}
+
 void temp::load_data()
 {
     load_temp_data();
@@ -163,6 +185,11 @@ void temp::load_temp_data()
     std::vector<char>().swap(temp_input_data);
 
     std::string type = "TEMP";
+
+    if (temp_file_version == 2)
+    {
+        type = "TEMPH2";
+    }
 
 #ifdef RPKG_DLL
     resource_tool_ConvertMemoryResourceToJson(&type[0], (void*)temp_data.data(), (uint64_t)temp_data.size());
@@ -576,6 +603,103 @@ void temp::get_prim_from_temp(uint32_t entry_index)
     }
 }
 
+void temp::temp_version_check()
+{
+    //std::cout << rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_file_name << std::endl;
+    //std::cout << rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_file_name << std::endl;
+
+    uint64_t temp_hash_size;
+
+    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).is_lz4ed == 1)
+    {
+        temp_hash_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_size;
+
+        if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).is_xored == 1)
+        {
+            temp_hash_size &= 0x3FFFFFFF;
+        }
+    }
+    else
+    {
+        temp_hash_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_size_final;
+    }
+
+    temp_input_data = std::vector<char>(temp_hash_size, 0);
+
+    std::ifstream file = std::ifstream(rpkgs.at(temp_rpkg_index).rpkg_file_path, std::ifstream::binary);
+
+    if (!file.good())
+    {
+        LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(temp_rpkg_index).rpkg_file_path + " could not be read.");
+    }
+
+    file.seekg(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_offset, file.beg);
+    file.read(temp_input_data.data(), temp_hash_size);
+    file.close();
+
+    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).is_xored == 1)
+    {
+        crypto::xor_data(temp_input_data.data(), (uint32_t)temp_hash_size);
+    }
+
+    uint32_t temp_decompressed_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_size_final;
+
+    temp_output_data = std::vector<char>(temp_decompressed_size, 0);
+
+    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).is_lz4ed)
+    {
+        LZ4_decompress_safe(temp_input_data.data(), temp_output_data.data(), (int)temp_hash_size, temp_decompressed_size);
+
+        temp_data = temp_output_data;
+    }
+    else
+    {
+        temp_data = temp_input_data;
+    }
+
+    std::vector<char>().swap(temp_output_data);
+    std::vector<char>().swap(temp_input_data);
+
+    uint64_t temp_position = 0;
+
+    uint32_t temp_sub_entity_table_offset = 0;
+    uint32_t temp_after_sub_entity_table_offset = 0;
+
+    temp_position = 0x20;
+
+    std::memcpy(&temp_sub_entity_table_offset, &temp_data.data()[temp_position], 0x4);
+
+    temp_position += 0x8;
+
+    std::memcpy(&temp_after_sub_entity_table_offset, &temp_data.data()[temp_position], 0x4);
+
+    uint32_t temp_version_check = temp_after_sub_entity_table_offset - temp_sub_entity_table_offset;
+
+    if ((temp_version_check % 0x58 == 0) && (temp_version_check % 0x70 == 0))
+    {
+        temp_file_version = 4;
+
+        LOG("TEMP version: Unknown");
+    }
+    else if (temp_version_check % 0x58 == 0)
+    {
+        temp_file_version = 2;
+
+        LOG("TEMP version: H1/H2");
+    }
+    else if (temp_version_check % 0x70 == 0)
+    {
+        temp_file_version = 3;
+
+        LOG("TEMP version: H3");
+    }
+}
+
+void temp::set_temp_version(uint32_t temp_version)
+{
+    temp_file_version = temp_version;
+}
+
 #ifdef RPKG_DLL
 void temp::get_top_level_logical_parents()
 {
@@ -706,7 +830,437 @@ void temp::get_entries_hash_reference_data(uint32_t entry_index)
     }
 }
 
-void temp::get_entries_data(uint32_t entry_index)
+void temp::get_temp_entries_data(std::string value_type, std::string type_string)
+{
+    std::vector<char>().swap(response_data);
+
+    std::string propertyValues_string = "0";
+
+    std::string nPropertyID_string = value_type;
+
+    rapidjson::Value::ConstMemberIterator it1 = temp_json_document.FindMember(value_type.c_str());
+
+    if (it1 != temp_json_document.MemberEnd())
+    {
+        if (it1->value.IsArray() || it1->value.IsObject())
+        {
+            json_temp_node_scan(it1->value, propertyValues_string, nPropertyID_string, type_string, "/" + value_type, type_string, type_string);
+        }
+        else
+        {
+            std::stringstream ss;
+
+            std::string json_pointer = "/" + value_type;
+
+            //std::cout << it4->value.GetString() << std::endl;
+
+            std::map<std::string, uint32_t>::iterator it = type_map->find("STemplateEntityFactory/" + type_string);
+
+            if (it != type_map->end())
+            {
+                //std::cout << "Type: " << it->second << std::endl;
+
+                if (it->second == TYPE_INT8)
+                {
+                    ss << json_pointer << " int8 " << it1->value.GetInt();
+                }
+                else if (it->second == TYPE_UINT8)
+                {
+                    ss << json_pointer << " uint8 " << it1->value.GetUint();
+                }
+                else if (it->second == TYPE_INT16)
+                {
+                    ss << json_pointer << " int16 " << it1->value.GetInt();
+                }
+                else if (it->second == TYPE_UINT16)
+                {
+                    ss << json_pointer << " uint16 " << it1->value.GetUint();
+                }
+                else if (it->second == TYPE_INT32)
+                {
+                    ss << json_pointer << " int32 " << it1->value.GetInt();
+                }
+                else if (it->second == TYPE_UINT32)
+                {
+                    ss << json_pointer << " uint32 " << it1->value.GetUint();
+                }
+                else if (it->second == TYPE_INT64)
+                {
+                    ss << json_pointer << " int64 " << it1->value.GetInt64();
+                }
+                else if (it->second == TYPE_UINT64)
+                {
+                    ss << json_pointer << " uint64 " << it1->value.GetUint64();
+                }
+                else if (it->second == TYPE_FLOAT32)
+                {
+                    ss << json_pointer << " float32 " << it1->value.GetFloat();
+                }
+                else if (it->second == TYPE_FLOAT64)
+                {
+                    ss << json_pointer << " float64 " << it1->value.GetDouble();
+                }
+                else if (it->second == TYPE_BOOL)
+                {
+                    ss << json_pointer << " bool " << it1->value.GetBool();
+                }
+                else if (it->second == TYPE_ZSTRING)
+                {
+                    ss << json_pointer << " ZString " << it1->value.GetString();
+                }
+                else if (it->second == TYPE_ENUM)
+                {
+                    ss << json_pointer << " enum " << it1->value.GetString();
+                }
+                else
+                {
+                    ss << json_pointer << " none none";
+
+                    response_string += util::uint32_t_to_string(it->second) + "Error: The type for " + json_pointer + " could not be determined.\n";
+                }
+                /*if (it->second == 12)
+                {
+                    ss << json_pointer << " ZVariant " << node.GetBool();
+                }
+                if (it->second == 13)
+                {
+                    ss << json_pointer << " enum " << node.GetBool();
+                }*/
+            }
+            else if (type_string.find("ZCurve") != std::string::npos)
+            {
+                ss << json_pointer << " float32 " << it1->value.GetFloat();
+            }
+            else
+            {
+                if (it1->value.IsInt64())
+                {
+                    ss << json_pointer << " int64 " << it1->value.GetInt64();
+                }
+                else if (it1->value.IsUint64())
+                {
+                    ss << json_pointer << " uint64 " << it1->value.GetUint64();
+                }
+                else if (it1->value.IsDouble())
+                {
+                    ss << json_pointer << " float64 " << it1->value.GetDouble();
+                }
+                else if (it1->value.IsInt())
+                {
+                    ss << json_pointer << " int32 " << it1->value.GetInt();
+                }
+                else if (it1->value.IsUint())
+                {
+                    ss << json_pointer << " uint32 " << it1->value.GetUint();
+                }
+                else if (it1->value.IsFloat())
+                {
+                    ss << json_pointer << " float32 " << it1->value.GetFloat();
+                }
+                else if (it1->value.IsBool())
+                {
+                    ss << json_pointer << " bool " << it1->value.GetBool();
+                }
+                else if (it1->value.IsString())
+                {
+                    ss << json_pointer << " ZString " << it1->value.GetString();
+                }
+                else if (it1->value.IsString())
+                {
+                    ss << json_pointer << " enum " << it1->value.GetString();
+                }
+                else
+                {
+                    ss << json_pointer << " none none";
+
+                    response_string += "Error: The type for " + json_pointer + " could not be determined.\n";
+                }
+            }
+
+            char char4[4];
+
+            uint32_t string_length = propertyValues_string.length();
+
+            std::memcpy(&char4, &string_length, 0x4);
+
+            for (uint32_t i = 0; i < 0x4; i++)
+            {
+                response_data.push_back(char4[i]);
+            }
+
+            for (uint32_t i = 0; i < string_length; i++)
+            {
+                response_data.push_back(propertyValues_string[i]);
+            }
+
+            string_length = nPropertyID_string.length();
+
+            std::memcpy(&char4, &string_length, 0x4);
+
+            for (uint32_t i = 0; i < 0x4; i++)
+            {
+                response_data.push_back(char4[i]);
+            }
+
+            for (uint32_t i = 0; i < string_length; i++)
+            {
+                response_data.push_back(nPropertyID_string[i]);
+            }
+
+            string_length = type_string.length();
+
+            std::memcpy(&char4, &string_length, 0x4);
+
+            for (uint32_t i = 0; i < 0x4; i++)
+            {
+                response_data.push_back(char4[i]);
+            }
+
+            for (uint32_t i = 0; i < string_length; i++)
+            {
+                response_data.push_back(type_string[i]);
+            }
+
+            std::string ss_string = ss.str();
+
+            string_length = ss_string.length();
+
+            std::memcpy(&char4, &string_length, 0x4);
+
+            for (uint32_t i = 0; i < 0x4; i++)
+            {
+                response_data.push_back(char4[i]);
+            }
+
+            for (uint32_t i = 0; i < string_length; i++)
+            {
+                response_data.push_back(ss_string[i]);
+            }
+        }
+    }
+    else
+    {
+        response_string += "Error: " + value_type + " could not be found.";
+    }
+}
+
+void temp::json_temp_node_scan(const rapidjson::Value& node, std::string& propertyValues_string, std::string& nPropertyID_string, std::string& type_string, std::string json_pointer, std::string json_type, std::string last_name)
+{
+    bool output = true;
+
+    std::stringstream ss;
+
+    if (node.IsArray())
+    {
+        output = false;
+
+        for (rapidjson::SizeType i = 0; i < node.Size(); ++i)
+        {
+            json_temp_node_scan(node[i], propertyValues_string, nPropertyID_string, type_string, json_pointer + "/" + std::to_string(i), json_type, last_name);
+        }
+    }
+    else if (node.IsObject())
+    {
+        output = false;
+
+        for (rapidjson::Value::ConstMemberIterator it = node.MemberBegin(); it != node.MemberEnd(); it++)
+        {
+            json_temp_node_scan(it->value, propertyValues_string, nPropertyID_string, type_string, json_pointer + "/" + it->name.GetString(), json_type, it->name.GetString());
+        }
+    }
+    else
+    {
+        //std::cout << json_type << "/" << last_name << std::endl;
+
+        std::map<std::string, uint32_t>::iterator it = type_map->find("STemplateEntityFactory/" + last_name);
+
+        if (it != type_map->end())
+        {
+            //std::cout << "Type: " << it->second << std::endl;
+
+            if (it->second == TYPE_INT8)
+            {
+                ss << json_pointer << " int8 " << node.GetInt();
+            }
+            else if (it->second == TYPE_UINT8)
+            {
+                ss << json_pointer << " uint8 " << node.GetUint();
+            }
+            else if (it->second == TYPE_INT16)
+            {
+                ss << json_pointer << " int16 " << node.GetInt();
+            }
+            else if (it->second == TYPE_UINT16)
+            {
+                ss << json_pointer << " uint16 " << node.GetUint();
+            }
+            else if (it->second == TYPE_INT32)
+            {
+                ss << json_pointer << " int32 " << node.GetInt();
+            }
+            else if (it->second == TYPE_UINT32)
+            {
+                ss << json_pointer << " uint32 " << node.GetUint();
+            }
+            else if (it->second == TYPE_INT64)
+            {
+                ss << json_pointer << " int64 " << node.GetInt64();
+            }
+            else if (it->second == TYPE_UINT64)
+            {
+                ss << json_pointer << " uint64 " << node.GetUint64();
+            }
+            else if (it->second == TYPE_FLOAT32)
+            {
+                ss << json_pointer << " float32 " << node.GetFloat();
+            }
+            else if (it->second == TYPE_FLOAT64)
+            {
+                ss << json_pointer << " float64 " << node.GetDouble();
+            }
+            else if (it->second == TYPE_BOOL)
+            {
+                ss << json_pointer << " bool " << node.GetBool();
+            }
+            else if (it->second == TYPE_ZSTRING)
+            {
+                ss << json_pointer << " ZString " << node.GetString();
+            }
+            else if (it->second == TYPE_ENUM)
+            {
+                ss << json_pointer << " enum " << node.GetString();
+            }
+            else
+            {
+                ss << json_pointer << " none none";
+
+                response_string += util::uint32_t_to_string(it->second) + "Error: The type for " + json_pointer + " could not be determined.\n";
+            }
+            /*if (it->second == 12)
+            {
+                ss << json_pointer << " ZVariant " << node.GetBool();
+            }
+            if (it->second == 13)
+            {
+                ss << json_pointer << " enum " << node.GetBool();
+            }*/
+        }
+        else if (json_type.find("ZCurve") != std::string::npos)
+        {
+            ss << json_pointer << " float32 " << node.GetFloat();
+        }
+        else
+        {
+            if (node.IsInt64())
+            {
+                ss << json_pointer << " int64 " << node.GetInt64();
+            }
+            else if (node.IsUint64())
+            {
+                ss << json_pointer << " uint64 " << node.GetUint64();
+            }
+            else if (node.IsDouble())
+            {
+                ss << json_pointer << " float64 " << node.GetDouble();
+            }
+            else if (node.IsInt())
+            {
+                ss << json_pointer << " int32 " << node.GetInt();
+            }
+            else if (node.IsUint())
+            {
+                ss << json_pointer << " uint32 " << node.GetUint();
+            }
+            else if (node.IsFloat())
+            {
+                ss << json_pointer << " float32 " << node.GetFloat();
+            }
+            else if (node.IsBool())
+            {
+                ss << json_pointer << " bool " << node.GetBool();
+            }
+            else if (node.IsString())
+            {
+                ss << json_pointer << " ZString " << node.GetString();
+            }
+            else if (node.IsString())
+            {
+                ss << json_pointer << " enum " << node.GetString();
+            }
+            else
+            {
+                ss << json_pointer << " none none";
+
+                response_string += "Error: The type for " + json_pointer + " could not be determined.\n";
+            }
+        }
+
+        if (output)
+        {
+            char char4[4];
+
+            uint32_t string_length = propertyValues_string.length();
+
+            std::memcpy(&char4, &string_length, 0x4);
+
+            for (uint32_t i = 0; i < 0x4; i++)
+            {
+                response_data.push_back(char4[i]);
+            }
+
+            for (uint32_t i = 0; i < string_length; i++)
+            {
+                response_data.push_back(propertyValues_string[i]);
+            }
+
+            string_length = nPropertyID_string.length();
+
+            std::memcpy(&char4, &string_length, 0x4);
+
+            for (uint32_t i = 0; i < 0x4; i++)
+            {
+                response_data.push_back(char4[i]);
+            }
+
+            for (uint32_t i = 0; i < string_length; i++)
+            {
+                response_data.push_back(nPropertyID_string[i]);
+            }
+
+            string_length = type_string.length();
+
+            std::memcpy(&char4, &string_length, 0x4);
+
+            for (uint32_t i = 0; i < 0x4; i++)
+            {
+                response_data.push_back(char4[i]);
+            }
+
+            for (uint32_t i = 0; i < string_length; i++)
+            {
+                response_data.push_back(type_string[i]);
+            }
+
+            std::string ss_string = ss.str();
+
+            string_length = ss_string.length();
+
+            std::memcpy(&char4, &string_length, 0x4);
+
+            for (uint32_t i = 0; i < 0x4; i++)
+            {
+                response_data.push_back(char4[i]);
+            }
+
+            for (uint32_t i = 0; i < string_length; i++)
+            {
+                response_data.push_back(ss_string[i]);
+            }
+        }
+    }
+}
+
+void temp::get_entries_data(uint32_t entry_index, std::string value_type)
 {
     std::vector<char>().swap(response_data);
 
@@ -718,7 +1272,7 @@ void temp::get_entries_data(uint32_t entry_index)
 
     const rapidjson::Value& temp_json_subEntities = temp_json_document["subEntities"];
 
-    rapidjson::Value::ConstMemberIterator it1 = temp_json_subEntities[entry_index].FindMember("propertyValues");
+    rapidjson::Value::ConstMemberIterator it1 = temp_json_subEntities[entry_index].FindMember(value_type.c_str());
 
     if (it1 != temp_json_subEntities[entry_index].MemberEnd())
     {
@@ -744,12 +1298,12 @@ void temp::get_entries_data(uint32_t entry_index)
                 }
                 else
                 {
-                    response_string += "Error: nPropertyID's type for propertyValues (" + util::uint32_t_to_string(p) + ") could not be determined.";
+                    response_string += "Error: nPropertyID's type for " + value_type + " (" + util::uint32_t_to_string(p) + ") could not be determined.";
                 }
             }
             else
             {
-                response_string += "Error: nPropertyID for propertyValues (" + util::uint32_t_to_string(p) + ") could not be found.";
+                response_string += "Error: nPropertyID for " + value_type + " (" + util::uint32_t_to_string(p) + ") could not be found.";
             }
 
             rapidjson::Value::ConstMemberIterator it3 = it1->value[p].FindMember("value");
@@ -766,7 +1320,7 @@ void temp::get_entries_data(uint32_t entry_index)
                 }
                 else
                 {
-                    response_string += "Error: $type for propertyValues (" + util::uint32_t_to_string(p) + ") could not be found.";
+                    response_string += "Error: $type for " + value_type + " (" + util::uint32_t_to_string(p) + ") could not be found.";
                 }
 
                 rapidjson::Value::ConstMemberIterator it5 = it3->value.FindMember("$val");
@@ -775,13 +1329,13 @@ void temp::get_entries_data(uint32_t entry_index)
                 {
                     if (it5->value.IsArray() || it5->value.IsObject())
                     {
-                        json_node_scan(it5->value, propertyValues_string, nPropertyID_string, type_string, "/subEntities/" + std::to_string(entry_index) + "/propertyValues/" + std::to_string(p) + "/value/$val", type_string, "");
+                        json_node_scan(it5->value, propertyValues_string, nPropertyID_string, type_string, "/subEntities/" + std::to_string(entry_index) + "/" + value_type + "/" + std::to_string(p) + "/value/$val", type_string, "");
                     }
                     else
                     {
                         std::stringstream ss;
 
-                        std::string json_pointer = "/subEntities/" + std::to_string(entry_index) + "/propertyValues/" + std::to_string(p) + "/value/$val";
+                        std::string json_pointer = "/subEntities/" + std::to_string(entry_index) + "/" + value_type + "/" + std::to_string(p) + "/value/$val";
 
                         //std::cout << it4->value.GetString() << std::endl;
 
@@ -971,18 +1525,18 @@ void temp::get_entries_data(uint32_t entry_index)
                 }
                 else
                 {
-                    response_string += "Error: $val for propertyValues (" + util::uint32_t_to_string(p) + ") could not be found.";
+                    response_string += "Error: $val for " + value_type + " (" + util::uint32_t_to_string(p) + ") could not be found.";
                 }
             }
             else
             {
-                response_string += "Error: value for propertyValues (" + util::uint32_t_to_string(p) + ") could not be found.";
+                response_string += "Error: value for " + value_type + " (" + util::uint32_t_to_string(p) + ") could not be found.";
             }
         }
     }
     else
     {
-        response_string += "Error: propertyValues for subEntities (" + util::uint32_t_to_string(entry_index) + ") could not be found.";
+        response_string += "Error: propertyValues for " + value_type + " (" + util::uint32_t_to_string(entry_index) + ") could not be found.";
     }
 }
 

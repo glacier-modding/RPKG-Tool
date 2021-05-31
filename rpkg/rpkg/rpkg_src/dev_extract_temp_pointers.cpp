@@ -44,7 +44,7 @@ void dev_function::dev_extract_temp_pointers(std::string& input_path, std::strin
         }
         else
         {
-            rpkg_function::import_rpkg(input_path);
+            rpkg_function::import_rpkg(input_path, true);
         }
 
         std::stringstream ss;

@@ -160,7 +160,7 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     }
     else if (command == "-import_rpkg")
     {
-        rpkg_function::import_rpkg(input_path);
+        rpkg_function::import_rpkg(input_path, true);
     }
     else if (command == "-rebuild_prim_model_in")
     {

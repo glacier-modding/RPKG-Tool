@@ -13,18 +13,23 @@ class temp
 public:
 	temp();
 	temp(uint64_t rpkgs_index, uint64_t hash_index);
+	temp(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version);
 
 	void load_data();
 	void load_hash_depends();
 	void load_temp_data();
 	void load_tblu_data();
 	void get_prim_from_temp(uint32_t entry_index);
+	void temp_version_check();
+	void set_temp_version(uint32_t temp_version);
 #ifdef RPKG_DLL
 	void get_top_level_logical_parents();
 	void get_entries_with_logical_parent(uint32_t logical_parent);
 	void get_entries_hash_references(uint32_t entry_index);
 	void get_entries_hash_reference_data(uint32_t entry_index);
-	void get_entries_data(uint32_t entry_index);
+	void get_temp_entries_data(std::string value_type, std::string type_string);
+	void json_temp_node_scan(const rapidjson::Value& node, std::string& propertyValues_string, std::string& nPropertyID_string, std::string& type_string, std::string json_pointer, std::string json_type, std::string last_name);
+	void get_entries_data(uint32_t entry_index, std::string value_type);
 	void json_node_scan(const rapidjson::Value& node, std::string& propertyValues_string, std::string& nPropertyID_string, std::string& type_string, std::string json_pointer, std::string json_type, std::string last_name);
 	void get_enum_values(std::string& property_type_string);
 	void update_temp_file(uint32_t entry_index, char* update_data, uint32_t update_data_size);
@@ -39,6 +44,7 @@ public:
 	uint32_t temp_hash_index = 0;
 	uint32_t tblu_rpkg_index = 0;
 	uint32_t tblu_hash_index = 0;
+	uint32_t temp_file_version = 0;
 	uint32_t parent = 0;
 	std::vector<uint32_t> parents;
 	std::vector<uint32_t> children;

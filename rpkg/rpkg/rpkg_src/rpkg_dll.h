@@ -101,7 +101,9 @@ RPKG_EXPORT int get_entries_with_logical_parent(uint32_t temps_index, uint32_t l
 
 RPKG_EXPORT char* get_entries_with_logical_parent_data();
 
-RPKG_EXPORT int get_entries(uint32_t temps_index, uint32_t entry_index);
+RPKG_EXPORT int get_temp_entries(uint32_t temps_index, char* value_string, char* value_type);
+
+RPKG_EXPORT int get_entries(uint32_t temps_index, uint32_t entry_index, char* value_type);
 
 RPKG_EXPORT char* get_entries_data();
 
@@ -119,7 +121,9 @@ RPKG_EXPORT char* get_prim_from_temp(uint32_t temps_index, uint32_t entry_index)
 
 RPKG_EXPORT int get_temp_index(char* temp_hash_string);
 
-RPKG_EXPORT int load_recursive_temps(char* temp_hash, char* rpkg_file_path);
+RPKG_EXPORT int load_recursive_temps(char* temp_hash, char* rpkg_file_path, uint32_t temp_version);
+
+RPKG_EXPORT int load_non_recursive_temps(char* temp_hash, char* rpkg_file_path, uint32_t temp_version);
 
 RPKG_EXPORT int get_number_of_changed_temps();
 
@@ -148,3 +152,9 @@ RPKG_EXPORT int modify_patch_deletion_list(char* rpkg_file, char* patch_list, ui
 RPKG_EXPORT int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, char* hash_flag_list, uint32_t hash_count, uint32_t backup_rpkg);
 
 RPKG_EXPORT char* get_response_string();
+
+RPKG_EXPORT int get_temp_version(char* temp_hash, char* rpkg_file_path);
+
+RPKG_EXPORT int set_temp_version(uint32_t temps_index, uint32_t temp_version);
+
+RPKG_EXPORT int import_rpkgs(char* rpkgs_path, char* rpkgs_list);

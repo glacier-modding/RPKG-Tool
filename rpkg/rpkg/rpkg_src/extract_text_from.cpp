@@ -47,7 +47,7 @@ void rpkg_function::extract_text_from(std::string& input_path, std::string& filt
         }
         else
         {
-            rpkg_function::import_rpkg(input_path);
+            rpkg_function::import_rpkg(input_path, true);
         }
 
         std::stringstream ss;

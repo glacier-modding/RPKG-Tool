@@ -9,7 +9,7 @@
 #include <iostream>
 #include <map>
 
-void rpkg_function::recursive_temp_loader(uint32_t rpkgs_index, uint32_t hash_index, std::map<uint32_t, uint32_t>& parents_map, std::vector<uint32_t> temps_indexes, uint32_t level, uint32_t level_max, uint32_t temps_max)
+void rpkg_function::recursive_temp_loader(uint32_t rpkgs_index, uint32_t hash_index, uint32_t temp_version, std::map<uint32_t, uint32_t>& parents_map, std::vector<uint32_t> temps_indexes, uint32_t level, uint32_t level_max, uint32_t temps_max)
 {
 	if ((level <= level_max || level_max == 0) && (temps.size() <= temps_max || temps_max == 0))
 	{
@@ -17,7 +17,7 @@ void rpkg_function::recursive_temp_loader(uint32_t rpkgs_index, uint32_t hash_in
 
 		if (it == parents_map.end())
 		{
-			temps.emplace_back(temp(rpkgs_index, hash_index));
+			temps.emplace_back(temp(rpkgs_index, hash_index, temp_version));
 
 			uint64_t temps_index = temps.size() - 1;
 
@@ -49,7 +49,7 @@ void rpkg_function::recursive_temp_loader(uint32_t rpkgs_index, uint32_t hash_in
 			{
 				//std::cout << temps.back().temp_depends_file_name.at(i) << std::endl;
 
-				recursive_temp_loader(temps.at(temps_index).temp_depends_rpkg_index.at(i).at(temps.at(temps_index).temp_depends_rpkg_index_index.at(i)), temps.at(temps_index).temp_depends_hash_index.at(i).at(temps.at(temps_index).temp_depends_hash_index_index.at(i)), parents_map, temps_indexes, level + 1, level_max, temps_max);
+				recursive_temp_loader(temps.at(temps_index).temp_depends_rpkg_index.at(i).at(temps.at(temps_index).temp_depends_rpkg_index_index.at(i)), temps.at(temps_index).temp_depends_hash_index.at(i).at(temps.at(temps_index).temp_depends_hash_index_index.at(i)), temp_version, parents_map, temps_indexes, level + 1, level_max, temps_max);
 
 				//for (uint64_t j = 0; j < temps.at(temps_index).temp_depends_in_rpkgs.at(i).size(); j++)
 				//{

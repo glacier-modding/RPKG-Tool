@@ -107,7 +107,7 @@ void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string
 
                 std::cout << "Importing RPKG SUPERMETA:\n  - " << supermeta_file_paths.at(i).at(j) << std::endl;
 
-                rpkg_function::import_rpkg(supermeta_file_paths.at(i).at(j));
+                rpkg_function::import_rpkg(supermeta_file_paths.at(i).at(j), true);
             }
 
             for (uint64_t x = 0; x < rpkgs.size(); x++)

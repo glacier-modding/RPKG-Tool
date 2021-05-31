@@ -34,7 +34,7 @@ void rpkg_function::extract_from_rpkg(rpkg_extraction_vars& rpkg_vars)
         LOG("Extract: All hash files");
     }
 
-    rpkg_function::import_rpkg(rpkg_vars.input_path);
+    rpkg_function::import_rpkg(rpkg_vars.input_path, true);
 
     std::string rpkg_file_name = file::get_base_file_name(rpkg_vars.input_path);
 
