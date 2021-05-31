@@ -53,7 +53,6 @@ public:
 	uint32_t pointers_count = 0;
 	std::vector<uint32_t> pointers;
 	std::map<uint32_t, uint32_t> pointers_map;
-	std::multimap<uint32_t, uint32_t> pointers_multimap;
 	std::vector<uint32_t> temp_entry_index;
 	std::vector<uint32_t> temp_logicalParent;
 	std::vector<bool> temp_logicalParent_is_entityId;
@@ -66,7 +65,6 @@ public:
 	std::vector<uint32_t> temp_platformSpecificPropertyValues_start_offsets;
 	std::vector<uint32_t> temp_platformSpecificPropertyValues_end_offsets;
 	std::vector<std::string> temp_property_types;
-	std::vector<uint8_t> temp_property_types_header;
 	std::vector<std::vector<bool>> temp_property_types_shared;
 	std::vector<std::vector<uint32_t>> temp_property_types_shared_count;
 	std::vector<std::vector<uint32_t>> temp_property_types_offsets;

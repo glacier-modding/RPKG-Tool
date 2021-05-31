@@ -31,7 +31,7 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path)
 
     std::ifstream file = std::ifstream(rpkg_file_path, std::ifstream::binary);
     char input[1024];
-    char bytes1 = 0;
+    uint8_t bytes1 = 0;
     uint32_t bytes4 = 0, file_count = 0, table_offset = 0, table_size = 0, patch_entry_count = 0;
     uint64_t bytes8 = 0, offset1 = 0, offset2 = 0, rpkg_file_size = 0;
     std::string message = "Importing RPKG file data: ";

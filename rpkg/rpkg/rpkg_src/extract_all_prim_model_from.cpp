@@ -251,14 +251,14 @@ void rpkg_function::extract_all_prim_model_from(std::string& input_path, std::st
                                 {
                                     std::string prim_output_dir = file::output_path_append(rpkgs.at(i).rpkg_file_name, output_path);
 
-                                    file::create_directories(output_path);
+                                    file::create_directories(prim_output_dir);
 
                                     if (filters.size() > 0)
                                     {
                                         extracted.at(input_filter_index) = true;
                                     }
 
-                                    std::cout << "rpkg_function::extract_prim_model_from(" << rpkgs.at(i).rpkg_file_path << ", " << rpkgs.at(i).hash.at(hash_index).hash_string << ", " << prim_output_dir << ");" << std::endl;
+                                    //std::cout << "rpkg_function::extract_prim_model_from(" << rpkgs.at(i).rpkg_file_path << ", " << rpkgs.at(i).hash.at(hash_index).hash_string << ", " << prim_output_dir << ");" << std::endl;
 
                                     rpkg_function::extract_prim_model_from(rpkgs.at(i).rpkg_file_path, rpkgs.at(i).hash.at(hash_index).hash_string, prim_output_dir);
 

@@ -9,7 +9,7 @@
         xmlns:local="clr-namespace:rpkg"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
-        Title="RPKG v2.9" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
+        Title="RPKG v2.10" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -145,7 +145,30 @@
         <GridSplitter HorizontalAlignment="Right" VerticalAlignment="Stretch" Grid.Row="1"  Grid.Column="1" ResizeBehavior="PreviousAndNext" Width="5"/>
         <TabControl x:Name="RightTabControl" Grid.Row="1" Grid.Column="2">
             <TabItem x:Name="FirstTabRight" Header="Details">
-                <TextBox x:Name="DetailsTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap" TextChanged="DetailsTextBox_TextChanged"/>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Row="0" Grid.Column="0" Click="EditPatchDeletionListButton_Click" x:Name="EditPatchDeletionListButton" Content="Edit Patch Deletion List" Visibility="Collapsed"/>
+                    <Button Grid.Row="0" Grid.Column="0" Click="SaveChangesToPatchDeletionListButton_Click" x:Name="SaveChangesToPatchDeletionListButton" Content="Save Changes To Patch Deletion List" Visibility="Collapsed"/>
+                    <Button Grid.Row="0" Grid.Column="1" Click="DiscardChangesToPatchDeletionListButton_Click" x:Name="DiscardChangesToPatchDeletionListButton" Content="Discard Changes To Patch Deletion List" Visibility="Collapsed"/>
+                    <Button Grid.Row="0" Grid.Column="0" Click="EditHashDependsButton_Click" x:Name="EditHashDependsButton" Content="Edit Hash Depends" Visibility="Collapsed"/>
+                    <Button Grid.Row="0" Grid.Column="0" Click="SaveChangesToHashDependsButton_Click" x:Name="SaveChangesToHashDependsButton" Content="Save Changes To Hash Depends" Visibility="Collapsed"/>
+                    <Button Grid.Row="0" Grid.Column="1" Click="DiscardChangesToHashDependsButton_Click" x:Name="DiscardChangesToHashDependsButton" Content="Discard Changes To Hash Depends" Visibility="Collapsed"/>
+                    <Button Grid.Row="0" Grid.Column="1" Click="ExtractHashDependsButton_Click" x:Name="ExtractHashDependsButton" Content="Extract Hash Depends" Visibility="Collapsed"/>
+                    <TextBox Grid.Row="1" Grid.ColumnSpan="3" x:Name="DetailsTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap" TextChanged="DetailsTextBox_TextChanged"/>
+                    <ScrollViewer Grid.Row="1" Grid.ColumnSpan="3" x:Name="MainScrollViewer" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+                        <StackPanel x:Name="MainStackPanel" Visibility="Collapsed">
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
             </TabItem>
             <TabItem x:Name="SecondTabRight" Header="Hex Viewer">
                 <TextBox x:Name="HexViewerTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap"/>

@@ -134,11 +134,21 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     {
         rpkg_function::hash_depends(input_path, filter, output_path);
     }
-    else if (command == "-extract_direct_hash_depends")
+    else if (command == "-extract_all_hash_depends_from")
     {
-        std::vector<std::string> empty_vector;
-
-        rpkg_function::extract_direct_hash_depends(input_path, filter, output_path);
+        rpkg_function::extract_all_hash_depends_from(input_path, filter, output_path, false);
+    }
+    else if (command == "-extract_all_hash_depends_prim_models_from")
+    {
+        rpkg_function::extract_all_hash_depends_from(input_path, filter, output_path, true);
+    }
+    else if (command == "-extract_direct_hash_depends_from")
+    {
+        rpkg_function::extract_direct_hash_depends_from(input_path, filter, output_path, false);
+    }
+    else if (command == "-extract_direct_hash_depends_prim_models_from")
+    {
+        rpkg_function::extract_direct_hash_depends_from(input_path, filter, output_path, true);
     }
     else if (command == "-hash_probe")
     {
@@ -233,6 +243,10 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     {
         dev_function::dev_extract_wwise_ids(input_path, filter, output_path);
     }
+    else if (command == "-dev_extract_temp_pointers")
+    {
+        dev_function::dev_extract_temp_pointers(input_path, filter, output_path);
+    }
     else if (command == "-dev_extract_ores_strings")
     {
         dev_function::dev_extract_ores_strings(input_path, filter, output_path);
@@ -280,6 +294,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                      "-dev_extract_rpkg_supermetas",
                                                      "-dev_extract_all_strings",
                                                      "-dev_extract_all_entity_ids",
+                                                     "-dev_extract_temp_pointers",
                                                      "-dev_extract_ores_strings",
                                                      "-dev_extract_materials_textures_strings",
                                                      "-dev_extract_wwem_strings",
@@ -309,7 +324,10 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                      "-extract_rtlv_to_json_from",
                                                      "-generate_rpkg_from",
                                                      "-hash_depends",
-                                                     "-extract_direct_hash_depends",
+                                                     "-extract_all_hash_depends_from",
+                                                     "-extract_all_hash_depends_prim_models_from",
+                                                     "-extract_direct_hash_depends_from",
+                                                     "-extract_direct_hash_depends_prim_models_from",
                                                      "-hash_probe",
                                                      "-hash_probe_from_file",
                                                      "-rebuild_prim_model_in",

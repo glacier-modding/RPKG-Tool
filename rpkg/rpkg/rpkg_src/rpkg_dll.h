@@ -146,3 +146,9 @@ RPKG_EXPORT int search_temp_files(uint32_t temps_index, char* search_str, int ma
 RPKG_EXPORT char* get_search_temp_files();
 
 RPKG_EXPORT int generate_png_from_text(char* rpkg_file, char* hash_string, char* png_path);
+
+RPKG_EXPORT int unload_rpkg(char* rpkg_file);
+
+RPKG_EXPORT int modify_patch_deletion_list(char* rpkg_file, char* patch_list, uint32_t patch_count, uint32_t backup_rpkg);
+
+RPKG_EXPORT int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, char* hash_flag_list, uint32_t hash_count, uint32_t backup_rpkg);

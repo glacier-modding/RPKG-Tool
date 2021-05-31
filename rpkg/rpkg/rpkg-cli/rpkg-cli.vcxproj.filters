@@ -258,9 +258,6 @@
     <ClCompile Include="..\rpkg_src\get_unique_name.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\rpkg_src\extract_direct_hash_depends.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\rpkg_src\dev_compute_ioi_hash.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -505,6 +502,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\rpkg_src\extract_all_prim_model_of_temp_from.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\dev_extract_temp_pointers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\extract_all_hash_depends_from.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\extract_direct_hash_depends_from.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
