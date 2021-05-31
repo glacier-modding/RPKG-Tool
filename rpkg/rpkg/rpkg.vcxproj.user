@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>-filter 00DC74E8041C8EA7 -hash_depends "C:\Program Files\Epic Games\HITMAN3\Runtime"</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-filter "053EC203A10258F.WWEV ,    000F433C2F033F31.GFXI,004F111E93D4C461.GFXI,0007C2B9A0580F50.GFXV" -extract_from_rpkg "C:\Program Files\Epic Games\HITMAN3\Runtime\chunk0.rpkg"</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
