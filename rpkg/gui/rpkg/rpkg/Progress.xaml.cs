@@ -123,6 +123,18 @@ namespace rpkg
 
                         task_done = true;
                     }
+                    else if (task_multiple_status == (int)RPKGStatus.TEMP_VERSION_UNKNOWN)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                    else if (task_multiple_status == (int)RPKGStatus.TBLU_VERSION_UNKNOWN)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
                 }
                 else if (operation == (int)Operation.PRIM)
                 {
@@ -236,7 +248,9 @@ namespace rpkg
             TEMP_HEADER_NOT_FOUND,
             TEMP_TBLU_ENTRY_COUNT_MISMATCH,
             PRIM_UV_CHANNEL_COUNT_GREATER_THAN_1,
-            PRIM_OBJECT_IS_NOT_A_MESH_TYPE
+            PRIM_OBJECT_IS_NOT_A_MESH_TYPE,
+            TEMP_VERSION_UNKNOWN,
+            TBLU_VERSION_UNKNOWN
         };
 
         public string timing_string = "";

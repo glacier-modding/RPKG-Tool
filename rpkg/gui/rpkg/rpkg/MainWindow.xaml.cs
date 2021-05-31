@@ -203,7 +203,21 @@ namespace rpkg
 
             SearchHashListTreeView.SelectedItemChanged += SearchHashListTreeView_SelectedItemChanged;
 
+            LeftTabControl.SelectionChanged += LeftTabControl_SelectionChanged;
+
             RightTabControl.SelectionChanged += RightTabControl_SelectionChanged;
+        }
+
+        private void LeftTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            TabControl tab = (sender as TabControl);
+
+            //MessageBoxShow(tab.SelectedIndex.ToString());
+
+            if (tab.SelectedIndex == 1)
+            {
+                LoadHashDependsMap();
+            }
         }
 
         private void RightTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -501,7 +515,35 @@ namespace rpkg
                         currentRPKGFilePath = rpkgFilePath;
                         currentHash = header[0];
 
-                        if (resourceType == "LOCR" || resourceType == "DLGE" || resourceType == "RTLV")
+                        if (resourceType == "JSON")
+                        {
+                            UInt32 json_data_size = generate_json_string(rpkgFilePath, hash);
+
+                            byte[] json_data = new byte[json_data_size];
+
+                            Marshal.Copy(get_json_string(), json_data, 0, (int)json_data_size);
+
+                            if (json_data_size > 0)
+                            {
+                                LocalizationTextBox.Text = Encoding.UTF8.GetString(json_data);
+                            }
+
+                            if (json_data_size > 0)
+                            {
+                                if (ThirdTabRight.Visibility == Visibility.Collapsed)
+                                {
+                                    ThirdTabRight.Visibility = Visibility.Visible;
+                                }
+                            }
+                            else
+                            {
+                                if (ThirdTabRight.Visibility == Visibility.Visible)
+                                {
+                                    ThirdTabRight.Visibility = Visibility.Collapsed;
+                                }
+                            }
+                        }
+                        else if (resourceType == "LOCR" || resourceType == "DLGE" || resourceType == "RTLV")
                         {
                             UInt32 localization_data_size = generate_localization_string(rpkgFilePath, hash, resourceType);
 
@@ -556,7 +598,7 @@ namespace rpkg
 
                         if (resourceType == "PRIM")
                         {
-                            string command = "-extract_prim_to_obj_from";
+                            string command = "-extract_prim_to_obj_single_from";
                             string input_path = rpkgFilePath;
                             string filter = hash;
                             string search = "";
@@ -983,7 +1025,7 @@ namespace rpkg
             {
                 ImportRPKGFile(fileDialog.FileName);
 
-                LoadHashDependsMap();
+                //LoadHashDependsMap();
             }
         }
 
@@ -1381,7 +1423,7 @@ namespace rpkg
 
                     if (hashType == "PRIM")
                     {
-                        string[] buttons = { "Extract " + rightClickedOnName, "Extract " + rightClickedOnName + " To OBJ File(s)", "Cancel" };
+                        string[] buttons = { "Extract " + rightClickedOnName, "Extract " + rightClickedOnName + " To GLB File", "Cancel" };
 
                         buttonCount = 3;
 
@@ -1389,9 +1431,9 @@ namespace rpkg
                     }
                     else if (hashType == "TEMP")
                     {
-                        string[] buttons = { "Extract " + rightClickedOnName, "Edit " + rightClickedOnName + " in Brick/Entity Editor", "Cancel" };
+                        string[] buttons = { "Extract " + rightClickedOnName, "Edit " + rightClickedOnName + " in Brick/Entity Editor", "Extract PRIMs linked to " + rightClickedOnName + " To GLB File(s)", "Cancel" };
 
-                        buttonCount = 3;
+                        buttonCount = 4;
 
                         rightClickMenu = new RightClickMenu(buttons);
                     }
@@ -1486,15 +1528,17 @@ namespace rpkg
 
                         output_path = outputFolder;
                     }
-                    else if (rightClickMenu.buttonPressed == "button1" && buttonCount == 3)
+                    else if (rightClickMenu.buttonPressed == "button1" && buttonCount >= 3)
                     {
                         if (hashType == "PRIM")
                         {
-                            command = "-extract_prim_to_obj_from";
+                            command = "-extract_prim_to_glb_single_from";
+
+                            progress.operation = (int)Progress.Operation.GENERAL;
 
                             filter = hashValue;
 
-                            progress.message.Content = "Extracting " + rightClickedOnName + " To OBJ File(s)...";
+                            progress.message.Content = "Extracting " + rightClickedOnName + " To GLB File...";
                         }
                         else if (hashType == "TEMP")
                         {
@@ -1514,9 +1558,16 @@ namespace rpkg
 
                                 foreach (var filePath in Directory.GetFiles(folderPath))
                                 {
-                                    if (filePath.ToUpper().EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase) && filePath.ToUpper().Contains(baseFileName))
+                                    if (filePath.ToUpper().EndsWith(".RPKG"))
                                     {
-                                        rpkgFiles.Add(filePath);
+                                        if (filePath.ToUpper().Contains("\\" + baseFileName.ToUpper() + ".RPKG"))
+                                        {
+                                            rpkgFiles.Add(filePath);
+                                        }
+                                        else if (filePath.ToUpper().Contains("\\" + baseFileName.ToUpper() + "PATCH"))
+                                        {
+                                            rpkgFiles.Add(filePath);
+                                        }
                                     }
                                 }
 
@@ -1533,26 +1584,21 @@ namespace rpkg
 
                                 if (anyRPKGImported)
                                 {
-                                    LoadHashDependsMap();
+                                    //LoadHashDependsMap();
                                 }
                             }
 
                             int temp_return_value = clear_temp_tblu_data();
 
-                            rpkgFilePath = rpkgFileBackup;
+                            //MessageBoxShow(rightClickedOnName + ", " + rpkgFilePath);
 
-                            string temp_command = "-extract_temp_from";
-                            string temp_input_path = rpkgFilePath;
-                            string temp_filter = rightClickedOnName;
-                            string temp_search = "";
-                            string temp_search_type = "";
-                            string temp_output_path = "";
+                            rpkgFilePath = rpkgFileBackup;
 
                             temp_return_value = reset_task_status();
 
-                            execute_task temp_rpkgExecute = task_execute;
+                            execute_load_recursive_temps load_recursive_temps_execute = load_recursive_temps;
 
-                            IAsyncResult temp_ar = temp_rpkgExecute.BeginInvoke(temp_command, temp_input_path, temp_filter, temp_search, temp_search_type, temp_output_path, null, null);
+                            IAsyncResult temp_ar = load_recursive_temps_execute.BeginInvoke(rightClickedOnName, rpkgFilePath, null, null);
 
                             Progress temp_progress = new Progress();
 
@@ -1561,6 +1607,10 @@ namespace rpkg
                             temp_progress.operation = (int)Progress.Operation.TEMP_TBLU;
 
                             temp_progress.ShowDialog();
+
+                            int temp_index = get_temp_index(rightClickedOnName);
+
+                            //MessageBoxShow(temp_index.ToString());
 
                             if (temp_progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
                             {
@@ -1593,6 +1643,14 @@ namespace rpkg
                                 {
                                     MessageBoxShow("Error: " + rightClickedOnName + " file and TBLU file have mismatched entry/entity counts.");
                                 }
+                                else if (temp_progress.task_status == (int)Progress.RPKGStatus.TEMP_VERSION_UNKNOWN)
+                                {
+                                    MessageBoxShow("Error: " + rightClickedOnName + " file's version is unknown.");
+                                }
+                                else if (temp_progress.task_status == (int)Progress.RPKGStatus.TBLU_VERSION_UNKNOWN)
+                                {
+                                    MessageBoxShow("Error: " + rightClickedOnName + " file's TBLU file's version is unknown.");
+                                }
 
                                 temp_return_value = clear_temp_tblu_data();
                             }
@@ -1606,8 +1664,10 @@ namespace rpkg
                                 entityBrickEditor.inputFolder = userSettings.InputFolder;
                                 entityBrickEditor.outputFolder = userSettings.OutputFolder;
 
+                                entityBrickEditor.temps_index = (UInt32)temp_index;
                                 entityBrickEditor.tempFileName = rightClickedOnName;
                                 entityBrickEditor.rpkgFilePath = rpkgFilePath;
+                                entityBrickEditor.tempFileNameFull = rightClickedOnFullName;
 
                                 entityBrickEditor.ShowDialog();
 
@@ -1687,6 +1747,29 @@ namespace rpkg
                             progress.message.Content = "Extracting " + rightClickedOnName + " To JSON To IOI Path...";
                         }
 
+                        string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + rightClickedOnName + " To:");
+
+                        if (outputFolder == "")
+                        {
+                            rightClickedOn = 0;
+
+                            rightClickedOnFirst = true;
+
+                            return;
+                        }
+
+                        output_path = outputFolder;
+                    }
+                    else if (rightClickMenu.buttonPressed == "button2" && buttonCount == 4)
+                    {
+                        if (hashType == "TEMP")
+                        {
+                            command = "-extract_all_prim_of_temp_from";
+
+                            filter = hashValue;
+
+                            progress.message.Content = "Extracting PRIMs linked to " + rightClickedOnName + " To GLB File(s)...";
+                        }
                         string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + rightClickedOnName + " To:");
 
                         if (outputFolder == "")
@@ -1792,7 +1875,7 @@ namespace rpkg
             {
                 ImportRPKGFile(fileDialog.FileName);
 
-                LoadHashDependsMap();
+                //LoadHashDependsMap();
             }
             else
             {
@@ -1908,7 +1991,7 @@ namespace rpkg
 
             if (anyRPKGImported)
             {
-                LoadHashDependsMap();
+                //LoadHashDependsMap();
             }
 
             string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + massExtractName + " To:");
@@ -2137,7 +2220,7 @@ namespace rpkg
 
                 if (anyRPKGImported)
                 {
-                    LoadHashDependsMap();
+                    //LoadHashDependsMap();
                 }
             }
         }
@@ -2483,6 +2566,7 @@ namespace rpkg
         WaveFormat waveFormat;
         NAudio.Wave.RawSourceWaveStream pcmSource;
 
+        public delegate int execute_load_recursive_temps(string temp_hash, string rpkg_file_path);
         public delegate int execute_get_hashes_with_no_reverse_depends(string rpkg_file);
         public delegate int execute_get_direct_hash_depends(string rpkg_file, string hash_string);
         public delegate int execute_task(string csharp_command, string csharp_input_path, string csharp_filter, string search, string search_type, string csharp_output_path);
@@ -2544,6 +2628,12 @@ namespace rpkg
         [DllImport("rpkg.dll", EntryPoint = "get_localization_string", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr get_localization_string();
 
+        [DllImport("rpkg.dll", EntryPoint = "generate_json_string", CallingConvention = CallingConvention.Cdecl)]
+        public static extern UInt32 generate_json_string(string rpkg_file_name, string hash_string);
+
+        [DllImport("rpkg.dll", EntryPoint = "get_json_string", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr get_json_string();
+
         [DllImport("rpkg.dll", EntryPoint = "get_hashes_with_no_reverse_depends", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr get_hashes_with_no_reverse_depends();
 
@@ -2600,6 +2690,18 @@ namespace rpkg
 
         [DllImport("rpkg.dll", EntryPoint = "clear_temp_tblu_data", CallingConvention = CallingConvention.Cdecl)]
         public static extern int clear_temp_tblu_data();
+
+        [DllImport("resourcetool.dll", EntryPoint = "convert_temp_to_json", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int convert_temp_to_json(string input_path, string output_path, string operating_mode);
+
+        [DllImport("rpkg.dll", EntryPoint = "get_matrix_data_from_godot_scene", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr get_matrix_data_from_godot_scene(string input_path);
+
+        [DllImport("rpkg.dll", EntryPoint = "load_recursive_temps", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int load_recursive_temps(string temp_hash, string rpkg_file_path);
+
+        [DllImport("rpkg.dll", EntryPoint = "get_temp_index", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int get_temp_index(string temp_hash_string);
 
 
         [SuppressUnmanagedCodeSecurity]
@@ -3228,6 +3330,14 @@ namespace rpkg
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
+        }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            string input_path = "R:\\testing\\00E9F09C3B030590.TEMP";
+            string output_path = "R:\\testing\\00E9F09C3B030590.OUTPUT.TEMP";
+
+            //int return_value = convert_temp_to_json(input_path, output_path, "convert");
         }
     }
 }

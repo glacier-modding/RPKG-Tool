@@ -21,8 +21,12 @@ struct rpkg_extraction_vars
 class rpkg_function
 {
 public:
-	static void extract_prim_to_obj_from(std::string& input_path, std::string& filter, std::string& output_path);
+	static void extract_all_prim_of_temp_from(std::string& input_path, std::string& filter, std::string& output_path, int type);
+	static void recursive_temp_loader(uint32_t rpkgs_index, uint32_t hash_index, std::map<uint32_t, uint32_t>& parents_map, std::vector<uint32_t> temps_indexes, uint32_t level, uint32_t level_max, uint32_t temps_max);
+	static void extract_all_prim_from(std::string& input_path, std::string& filter, std::string& output_path, int type);
+	static void extract_prim_from(std::string& input_path, std::string& filter, std::string& output_path, int type);
 	static int load_temp_tblu_hash_depends(uint64_t rpkg_index, uint64_t hash_index);
+	static void dev_extract_temp_from(std::string& input_path, std::string& filter, std::string& output_path);
 	static void extract_temp_from(std::string& input_path, std::string& filter, std::string& output_path);
 	static void extract_prel_refs(std::string& input_path, std::string& filter, std::string& output_path);
 	static void get_unique_name(std::map<std::string, uint32_t>& wwem_name_map, std::string& wem_base_name);

@@ -10,7 +10,7 @@
 
 int rpkg_function::load_temp_tblu_hash_depends(uint64_t rpkg_index, uint64_t hash_index)
 {
-    hash_depends_variables temporary_temp_hash_depends_data;
+    /*hash_depends_variables temporary_temp_hash_depends_data;
 
     temporary_temp_hash_depends_data.rpkg_file_name = rpkgs.at(rpkg_index).rpkg_file_name;
 
@@ -94,7 +94,6 @@ int rpkg_function::load_temp_tblu_hash_depends(uint64_t rpkg_index, uint64_t has
     std::string tblu_in_rpkg = "";
 
     bool temp_tblu_depends_found = false;
-    int temp_tblu_depends_count = 0;
 
     for (uint64_t x = 0; x < temp_hash_depends_data.size(); x++)
     {
@@ -114,6 +113,8 @@ int rpkg_function::load_temp_tblu_hash_depends(uint64_t rpkg_index, uint64_t has
 
                     if (temp_hash_depends_data.at(x).hash_dependency_in_rpkg.at(y).size() > 0)
                     {
+                        int temp_tblu_depends_count = 0;
+
                         if (temp_hash_depends_data.at(x).hash_dependency_file_name.at(y).substr((temp_hash_depends_data.at(x).hash_dependency_file_name.at(y).length() - 4), 4) == "TBLU")
                         {
                             if (temp_tblu_depends_count == 0)
@@ -326,5 +327,7 @@ int rpkg_function::load_temp_tblu_hash_depends(uint64_t rpkg_index, uint64_t has
         }
     }
 
-    return TEMP_TBLU_FOUND;
+    return TEMP_TBLU_FOUND;*/
+
+    return 0;
 }

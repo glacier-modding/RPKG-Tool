@@ -1,5 +1,6 @@
 #pragma once
 #include "rpkg.h"
+#include "temp.h"
 #include <string>
 #include <vector>
 #include <stdint.h>
@@ -38,7 +39,94 @@ enum RPKGStatus
     TEMP_HEADER_NOT_FOUND,
     TEMP_TBLU_ENTRY_COUNT_MISMATCH,
     PRIM_UV_CHANNEL_COUNT_GREATER_THAN_1,
-    PRIM_OBJECT_IS_NOT_A_MESH_TYPE
+    PRIM_OBJECT_IS_NOT_A_MESH_TYPE,
+    TEMP_VERSION_UNKNOWN,
+    TBLU_VERSION_UNKNOWN
+};
+
+enum FileType3D
+{
+    GLB_MULTIPLE,
+    GLB_SINGLE,
+    GLTF_MULTIPLE,
+    GLTF_SINGLE,
+    OBJ_MULTIPLE,
+    OBJ_SINGLE
+};
+
+struct vector2
+{
+    float x = 0;
+    float y = 0;
+};
+
+struct vector3
+{
+    float x = 0;
+    float y = 0;
+    float z = 0;
+};
+
+struct vector4
+{
+    float x = 0;
+    float y = 0;
+    float z = 0;
+    float w = 0;
+};
+
+struct vector6
+{
+    float a = 0;
+    float b = 0;
+    float c = 0;
+    float d = 0;
+    float e = 0;
+    float f = 0;
+};
+
+struct rgba
+{
+    uint8_t r = 0;
+    uint8_t g = 0;
+    uint8_t b = 0;
+    uint8_t a = 0;
+};
+
+struct uint8_t_6
+{
+    uint8_t a = 0;
+    uint8_t b = 0;
+    uint8_t c = 0;
+    uint8_t d = 0;
+    uint8_t e = 0;
+    uint8_t f = 0;
+};
+
+struct matrix43
+{
+    vector3 x_axis;
+    vector3 y_axis;
+    vector3 z_axis;
+    vector3 transform;
+};
+
+struct asset3d
+{
+    std::vector<uint16_t>* indexes;
+    std::vector<vector4>* vertexes;
+    std::vector<vector4>* normals;
+    std::vector<vector2>* uvs;
+    std::vector<rgba>* colors;
+};
+
+struct asset3ds
+{
+    std::vector<std::vector<uint16_t>>* indexes;
+    std::vector<std::vector<vector4>>* vertexes;
+    std::vector<std::vector<vector4>>* normals;
+    std::vector<std::vector<vector2>>* uvs;
+    std::vector<std::vector<rgba>>* colors;
 };
 
 extern std::vector<rpkg> rpkgs;
@@ -76,40 +164,36 @@ extern void initialize_property_map();
 extern void initialize_enum_map();
 extern bool property_map_initialized;
 extern bool enum_map_initialized;
-extern std::vector<uint32_t> temp_entry_index;
-extern std::vector<uint32_t> temp_logicalParent;
-extern std::vector<uint32_t> temp_entityTypeResourceIndex;
-extern std::vector<uint32_t> temp_propertyValues_start_offsets;
-extern std::vector<uint32_t> temp_propertyValues_end_offsets;
-extern std::vector<uint32_t> temp_postInitPropertyValues_start_offsets;
-extern std::vector<uint32_t> temp_postInitPropertyValues_end_offsets;
-extern std::vector<uint32_t> temp_platformSpecificPropertyValues_start_offsets;
-extern std::vector<uint32_t> temp_platformSpecificPropertyValues_end_offsets;
-extern std::vector<std::string> temp_property_types;
-extern std::vector<std::vector<bool>> temp_property_types_shared;
-extern std::vector<std::vector<uint32_t>> temp_property_types_shared_count;
-extern std::vector<std::vector<uint32_t>> temp_property_types_offsets;
-extern std::vector<std::vector<std::string>> temp_property_types_values;
-extern std::vector<std::map<uint32_t, uint32_t>> temp_property_types_offsets_map;
-extern std::vector<std::vector<uint32_t>> property_crc32_values;
-extern std::vector<std::vector<uint32_t>> property_type_indexes;
-extern std::vector<std::vector<uint32_t>> property_offsets;
-extern std::vector<std::vector<uint32_t>> property_pointer_offsets;
-extern std::vector<uint32_t> tblu_entry_index;
-extern std::vector<uint32_t> tblu_logicalParent;
-extern std::vector<uint32_t> tblu_entityTypeResourceIndex;
-extern std::vector<uint64_t> tblu_entityId;
-extern std::vector<uint32_t> tblu_editorOnly;
-extern std::vector<std::string> tblu_entityName;
-extern std::vector<char> temp_input_data;
-extern std::vector<char> temp_output_data;
-extern std::vector<char>* temp_data;
-extern uint64_t temp_rpkg_index_1;
-extern uint64_t temp_rpkg_index_2;
-extern std::vector<char> tblu_input_data;
-extern std::vector<char> tblu_output_data;
-extern std::vector<char>* tblu_data;
-extern uint64_t tblu_rpkg_index_1;
-extern uint64_t tblu_rpkg_index_2;
-extern std::vector<hash_depends_variables> temp_hash_depends_data;
-extern std::vector<hash_depends_variables> tblu_hash_depends_data;
+extern std::vector<temp> temps;
+extern std::map<uint64_t, uint32_t> temps_map;
+extern std::vector<matrix43> temp_world_coordinates;
+extern std::vector<std::string> temp_world_coordinates_property_names;
+extern std::map<uint32_t, uint32_t> temp_world_coordinates_map;
+extern std::vector<std::string> prim_asset_file_names;
+extern uint32_t prim_asset_file_count;
+extern std::string map_editor_output_path;
+extern std::vector<std::string> map_editor_parents;
+extern std::vector<std::string> map_editor_property_names;
+extern std::vector<std::string> map_editor_matrixes;
+extern std::vector<std::vector<std::string>> map_editor_glb_file_names;
+extern std::map<std::string, uint32_t> map_editor_prim_file_names;
+extern std::map<std::string, uint32_t> map_editor_resource_map;
+extern std::string map_editor_godot_resources;
+extern std::string map_editor_godot_nodes;
+extern std::string map_editor_temp_matrix;
+extern std::vector<std::string> map_editor_godot_import_property_strings;
+extern std::map<std::string, uint32_t> map_editor_godot_import_property_strings_map;
+extern std::vector<matrix43> map_editor_godot_import_matrixes;
+extern std::vector<uint64_t> entity_id_master_list;
+extern std::map<uint64_t, uint64_t> entity_id_master_list_map;
+extern std::vector<uint32_t> entity_id_tblu_index;
+extern std::vector<uint32_t> entity_id_temps_index;
+extern std::vector<uint32_t> entity_id_logicalParent;
+extern std::vector<std::string> entity_id_logicalParent_string;
+extern std::vector<uint64_t> entity_id_m_eidParent;
+extern std::vector<bool> entity_id_has_matrix;
+//extern void find_all_world_coordinates(std::string entry_name, uint32_t entry_index, matrix43 matrix43_value);
+//extern void extract_world_coordinates_and_gltfs(std::string entry_name, uint32_t entry_index, matrix43 matrix43_value, std::string& output_path, std::ofstream& output_file);
+//extern void extract_glbs_and_return_coordinates_for_entry(uint32_t entry_index);
+//extern void extract_glb_and_return_coords(uint32_t entry_index, std::string parent_string);
+//extern void get_entry_name_string(uint32_t entry_index);

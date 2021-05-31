@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>.\rpkg-cli.exe -filter 00E77F54A7BFA60F.PRIM -extract_prim_to_obj_from "C:\Program Files\Epic Games\HITMAN3\Runtime\chunk21.rpkg"</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-output_path R:\testing -filter 00A174594116D971 -extract_all_prim_of_temp_from "C:\Program Files\Epic Games\HITMAN3\Runtime\chunk21.rpkg"</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>

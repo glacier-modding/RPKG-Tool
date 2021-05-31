@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <string>
 
 #define RPKG_EXPORT extern "C" __declspec(dllexport)
 
@@ -60,6 +61,10 @@ RPKG_EXPORT uint32_t generate_localization_string(char* rpkg_file, char* hash_st
 
 RPKG_EXPORT char* get_localization_string();
 
+RPKG_EXPORT uint32_t generate_json_string(char* rpkg_file, char* hash_string);
+
+RPKG_EXPORT char* get_json_string();
+
 RPKG_EXPORT int get_hashes_with_no_reverse_depends(char* rpkg_file);
 
 RPKG_EXPORT char* get_hashes_with_no_reverse_depends_string();
@@ -92,24 +97,46 @@ RPKG_EXPORT int get_pcm_channels();
 
 RPKG_EXPORT int clear_temp_tblu_data();
 
-RPKG_EXPORT char* get_entries_with_logical_parent(uint32_t logical_parent);
+RPKG_EXPORT char* get_entries_with_logical_parent(uint32_t temps_index, uint32_t logical_parent);
 
-RPKG_EXPORT char* get_entries_data(uint32_t entry_index);
+RPKG_EXPORT char* get_entries_data(uint32_t temps_index, uint32_t entry_index);
 
-RPKG_EXPORT char* get_entries_hash_reference_data(uint32_t entry_index);
+RPKG_EXPORT char* get_entries_hash_reference_data(uint32_t temps_index, uint32_t entry_index);
 
-RPKG_EXPORT int update_temp_file(char* offset, char* type, char* value);
+RPKG_EXPORT char* get_entries_hash_references(uint32_t temps_index, uint32_t entry_index);
 
-RPKG_EXPORT int generate_temp_file_from_data(char* temp_file_path);
+RPKG_EXPORT int update_temp_file(uint32_t temps_index, char* offset, char* type, char* value);
 
-RPKG_EXPORT int is_offset_shared(char* offset, char* property_type_index);
+RPKG_EXPORT int generate_temp_file_from_data(uint32_t temps_index, char* temp_file_path);
 
-RPKG_EXPORT char* get_all_shared_values(char* offset, char* property_type_index);
+RPKG_EXPORT int is_offset_shared(uint32_t temps_index, char* offset, char* property_type_index);
 
-RPKG_EXPORT int get_shared_index(char* offset, char* property_type_index);
+RPKG_EXPORT char* get_all_shared_values(uint32_t temps_index, char* offset, char* property_type_index);
 
-RPKG_EXPORT int get_shared_count(char* offset, char* property_type_index);
+RPKG_EXPORT int get_shared_index(uint32_t temps_index, char* offset, char* property_type_index);
 
-RPKG_EXPORT int update_temp_file_pointer(char* entry_index, char* property_index, char* offset);
+RPKG_EXPORT int get_shared_count(uint32_t temps_index, char* offset, char* property_type_index);
 
-RPKG_EXPORT char* get_enum_values(char* property_type);
+RPKG_EXPORT int update_temp_file_pointer(uint32_t temps_index, char* entry_index, char* property_index, char* offset);
+
+RPKG_EXPORT char* get_enum_values(uint32_t temps_index, char* property_type);
+
+RPKG_EXPORT char* get_prim_from_temp(uint32_t temps_index, uint32_t entry_index);
+
+RPKG_EXPORT int get_temp_index(char* temp_hash_string);
+
+RPKG_EXPORT int load_recursive_temps(char* temp_hash, char* rpkg_file_path);
+
+RPKG_EXPORT int get_number_of_changed_temps();
+
+RPKG_EXPORT char* get_changed_temp_data(uint32_t temp_changed_index);
+
+RPKG_EXPORT int generate_temp_files_from_data(char* temp_path);
+
+RPKG_EXPORT int get_total_numer_of_temps();
+
+RPKG_EXPORT int generate_rpkg_files_from_data(char* temp_path);
+
+RPKG_EXPORT char* get_top_level_logical_parents(uint32_t temps_index);
+
+RPKG_EXPORT char* get_all_bricks(uint32_t temps_index);

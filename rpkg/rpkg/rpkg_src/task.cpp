@@ -38,6 +38,10 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
 
         rpkg_function::extract_from_rpkg(rpkg_vars);
     }
+    else if (command == "-dev_extract_temp_from")
+    {
+        rpkg_function::dev_extract_temp_from(input_path, filter, output_path);
+    }
     else if (command == "-extract_gfxf_from")
     {
         rpkg_function::extract_gfxf_from(input_path, filter, output_path);
@@ -46,9 +50,57 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     {
         rpkg_function::extract_ores_from(input_path, filter, output_path);
     }
-    else if (command == "-extract_prim_to_obj_from")
+    else if (command == "-extract_all_prim_of_temp_from")
     {
-        rpkg_function::extract_prim_to_obj_from(input_path, filter, output_path);
+        rpkg_function::extract_all_prim_of_temp_from(input_path, filter, output_path, GLB_SINGLE);
+    }
+    else if (command == "-extract_all_prim_to_glb_multiple_from")
+    {
+        rpkg_function::extract_all_prim_from(input_path, filter, output_path, GLB_MULTIPLE);
+    }
+    else if (command == "-extract_all_prim_to_glb_single_from")
+    {
+        rpkg_function::extract_all_prim_from(input_path, filter, output_path, GLB_SINGLE);
+    }
+    else if (command == "-extract_all_prim_to_gltf_multiple_from")
+    {
+        rpkg_function::extract_all_prim_from(input_path, filter, output_path, GLTF_MULTIPLE);
+    }
+    else if (command == "-extract_all_prim_to_gltf_single_from")
+    {
+        rpkg_function::extract_all_prim_from(input_path, filter, output_path, GLTF_SINGLE);
+    }
+    else if (command == "-extract_all_prim_to_obj_multiple_from")
+    {
+        rpkg_function::extract_all_prim_from(input_path, filter, output_path, OBJ_MULTIPLE);
+    }
+    else if (command == "-extract_all_prim_to_obj_single_from")
+    {
+        rpkg_function::extract_all_prim_from(input_path, filter, output_path, OBJ_SINGLE);
+    }
+    else if (command == "-extract_prim_to_glb_multiple_from")
+    {
+        rpkg_function::extract_prim_from(input_path, filter, output_path, GLB_MULTIPLE);
+    }
+    else if (command == "-extract_prim_to_glb_single_from")
+    {
+        rpkg_function::extract_prim_from(input_path, filter, output_path, GLB_SINGLE);
+    }
+    else if (command == "-extract_prim_to_gltf_multiple_from")
+    {
+        rpkg_function::extract_prim_from(input_path, filter, output_path, GLTF_MULTIPLE);
+    }
+    else if (command == "-extract_prim_to_gltf_single_from")
+    {
+        rpkg_function::extract_prim_from(input_path, filter, output_path, GLTF_SINGLE);
+    }
+    else if (command == "-extract_prim_to_obj_multiple_from")
+    {
+        rpkg_function::extract_prim_from(input_path, filter, output_path, OBJ_MULTIPLE);
+    }
+    else if (command == "-extract_prim_to_obj_single_from")
+    {
+        rpkg_function::extract_prim_from(input_path, filter, output_path, OBJ_SINGLE);
     }
     else if (command == "-extract_temp_from")
     {
@@ -173,6 +225,14 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     {
         dev_function::dev_extract_wwise_ids(input_path, filter, output_path);
     }
+    else if (command == "-dev_extract_ores_strings")
+    {
+        dev_function::dev_extract_ores_strings(input_path, filter, output_path);
+    }
+    else if (command == "-dev_extract_all_entity_ids")
+    {
+        dev_function::dev_extract_all_entity_ids(input_path, filter, output_path);
+    }
 }
 
 void task::process_and_execute_files_draged_and_dropped(std::vector<std::string>& dragged_and_dropped_files)
@@ -207,9 +267,12 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
     std::vector<std::string> commands_without_paths = { "-compute_ioi_hash" };
     std::vector<std::string> commands_with_paths = { "-compute_ioi_hash_from_file",
                                                      "-decrypt_packagedefinition_thumbs",
+                                                     "-dev_extract_temp_from",
                                                      "-dev_diff_rpkg_supermetas",
                                                      "-dev_extract_rpkg_supermetas",
                                                      "-dev_extract_all_strings",
+                                                     "-dev_extract_all_entity_ids",
+                                                     "-dev_extract_ores_strings",
                                                      "-dev_extract_materials_textures_strings",
                                                      "-dev_extract_wwem_strings",
                                                      "-dev_extract_wwes_strings",
@@ -220,7 +283,19 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                      "-extract_gfxf_from",
                                                      "-extract_ores_from",
                                                      "-extract_prel_refs",
-                                                     "-extract_prim_to_obj_from",
+                                                     "-extract_all_prim_of_temp_from",
+                                                     "-extract_all_prim_to_glb_multiple_from",
+                                                     "-extract_all_prim_to_glb_single_from",
+                                                     "-extract_all_prim_to_gltf_multiple_from",
+                                                     "-extract_all_prim_to_gltf_single_from",
+                                                     "-extract_all_prim_to_obj_multiple_from",
+                                                     "-extract_all_prim_to_obj_single_from",
+                                                     "-extract_prim_to_glb_multiple_from",
+                                                     "-extract_prim_to_glb_single_from",
+                                                     "-extract_prim_to_gltf_multiple_from",
+                                                     "-extract_prim_to_gltf_single_from",
+                                                     "-extract_prim_to_obj_multiple_from",
+                                                     "-extract_prim_to_obj_single_from",
                                                      "-extract_temp_from",
                                                      "-extract_wwem_to_ogg_from",
                                                      "-extract_wwes_to_ogg_from",

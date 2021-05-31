@@ -28,14 +28,19 @@
     <ClCompile Include="..\rpkg_src\decrypt_packagedefinition_thumbs.cpp" />
     <ClCompile Include="..\rpkg_src\dev_compute_ioi_hash.cpp" />
     <ClCompile Include="..\rpkg_src\dev_diff_rpkg_supermetas.cpp" />
+    <ClCompile Include="..\rpkg_src\dev_extract_all_entity_ids.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_all_strings.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_materials_textures_strings.cpp" />
+    <ClCompile Include="..\rpkg_src\dev_extract_ores_strings.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_rpkg_supermetas.cpp" />
+    <ClCompile Include="..\rpkg_src\dev_extract_temp_from.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_wwem_strings.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_wwes_strings.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_wwev_strings.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_wwise_ids.cpp" />
     <ClCompile Include="..\rpkg_src\encrypt_packagedefinition_thumbs.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_all_prim_from.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_all_prim_of_temp_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_direct_hash_depends.cpp" />
     <ClCompile Include="..\rpkg_src\extract_dlge_to_json_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_from_rpkg.cpp" />
@@ -45,7 +50,7 @@
     <ClCompile Include="..\rpkg_src\extract_locr_to_json_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_ores_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_prel_from.cpp" />
-    <ClCompile Include="..\rpkg_src\extract_prim_to_obj_from.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_prim_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_rpkg_meta.cpp" />
     <ClCompile Include="..\rpkg_src\extract_rtlv_to_json_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_temp_from.cpp" />
@@ -56,6 +61,7 @@
     <ClCompile Include="..\rpkg_src\generate_rpkg_from.cpp" />
     <ClCompile Include="..\rpkg_src\get_unique_name.cpp" />
     <ClCompile Include="..\rpkg_src\global.cpp" />
+    <ClCompile Include="..\rpkg_src\gltf.cpp" />
     <ClCompile Include="..\rpkg_src\hash.cpp" />
     <ClCompile Include="..\rpkg_src\hash_depends.cpp" />
     <ClCompile Include="..\rpkg_src\hash_probe.cpp" />
@@ -67,14 +73,17 @@
     <ClCompile Include="..\rpkg_src\load_master_hash_list.cpp" />
     <ClCompile Include="..\rpkg_src\load_temp_tblu_hash_depends.cpp" />
     <ClCompile Include="..\rpkg_src\main.cpp" />
+    <ClCompile Include="..\rpkg_src\obj.cpp" />
     <ClCompile Include="..\rpkg_src\rebuild_dlge_from_json_from.cpp" />
     <ClCompile Include="..\rpkg_src\rebuild_gfxf_in.cpp" />
     <ClCompile Include="..\rpkg_src\rebuild_locr_from_json_from.cpp" />
     <ClCompile Include="..\rpkg_src\rebuild_rtlv_from_json_from.cpp" />
     <ClCompile Include="..\rpkg_src\rebuild_wwev_in.cpp" />
+    <ClCompile Include="..\rpkg_src\recursive_temp_loader.cpp" />
     <ClCompile Include="..\rpkg_src\rpkg.cpp" />
     <ClCompile Include="..\rpkg_src\search_hash_data.cpp" />
     <ClCompile Include="..\rpkg_src\task.cpp" />
+    <ClCompile Include="..\rpkg_src\temp.cpp" />
     <ClCompile Include="..\rpkg_src\thirdparty\lz4\lz4.c" />
     <ClCompile Include="..\rpkg_src\thirdparty\lz4\lz4hc.c" />
     <ClCompile Include="..\rpkg_src\thirdparty\lz4\xxhash.c" />
@@ -119,11 +128,14 @@
     <ClInclude Include="..\rpkg_src\framework.h" />
     <ClInclude Include="..\rpkg_src\generic_function.h" />
     <ClInclude Include="..\rpkg_src\global.h" />
+    <ClInclude Include="..\rpkg_src\gltf.h" />
     <ClInclude Include="..\rpkg_src\hash.h" />
+    <ClInclude Include="..\rpkg_src\obj.h" />
     <ClInclude Include="..\rpkg_src\rpkg.h" />
     <ClInclude Include="..\rpkg_src\rpkg_dll.h" />
     <ClInclude Include="..\rpkg_src\rpkg_function.h" />
     <ClInclude Include="..\rpkg_src\task.h" />
+    <ClInclude Include="..\rpkg_src\temp.h" />
     <ClInclude Include="..\rpkg_src\thirdparty\json\json.hpp" />
     <ClInclude Include="..\rpkg_src\thirdparty\lz4\lz4.h" />
     <ClInclude Include="..\rpkg_src\thirdparty\lz4\lz4hc.h" />
@@ -163,6 +175,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -170,6 +183,8 @@
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>
+    </PreferredToolArchitecture>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -238,6 +253,7 @@
       <PreprocessorDefinitions>RPKG_CLI;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -253,6 +269,7 @@
       <PreprocessorDefinitions>RPKG_CLI;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

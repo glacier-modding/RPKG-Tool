@@ -15,38 +15,9 @@
 #include <regex>
 #include <filesystem>
 
-struct vector2
-{
-    float x = 0;
-    float y = 0;
-};
-
-struct vector3
-{
-    float x = 0;
-    float y = 0;
-    float z = 0;
-};
-
-struct vector4
-{
-    float w = 0;
-    float x = 0;
-    float y = 0;
-    float z = 0;
-};
-
-struct matrix43
-{
-    vector3 x_axis;
-    vector3 y_axis;
-    vector3 z_axis;
-    vector3 transform;
-};
-
 void rpkg_function::extract_temp_from(std::string& input_path, std::string& filter, std::string& output_path)
 {
-    task_single_status = TASK_EXECUTING;
+    /*task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
     initialize_property_map();
@@ -85,7 +56,7 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
 
         LOG("Loading Hash List...");
 
-        generic_function::load_hash_list(true);
+        //generic_function::load_hash_list(true);
 
         LOG("Loading Hash List: Done");
 
@@ -267,10 +238,16 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
                             uint32_t temp_entry_size = 0xA8;
                             uint32_t tblu_entry_size = 0x70;
 
+                            uint32_t temp_after_header_table_offset = 0;
                             uint32_t temp_footer_offset = 0;
 
+                            uint32_t tblu_header_table_offset = 0;
+
+                            uint32_t temp_file_version = 0;
+                            uint32_t tblu_file_version = 0;
+
                             temp_position = 0x8;
-                            tblu_position = 0xDC;
+                            tblu_position = 0x18;
 
                             std::memcpy(&input, &temp_data->data()[temp_position], sizeof(bytes4));
                             char4[0] = input[3];
@@ -278,7 +255,13 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
                             char4[2] = input[1];
                             char4[3] = input[0];
                             std::memcpy(&temp_footer_offset, &char4, sizeof(bytes4));
-                            temp_position += 0x64;
+                            //temp_position += 0x64;
+                            temp_position += 0x20;
+
+                            std::memcpy(&temp_after_header_table_offset, &temp_data->data()[temp_position], sizeof(bytes4));
+                            temp_position += 0x44;
+
+                            temp_after_header_table_offset += 0x10;
 
                             temp_footer_offset += 0x10;
 
@@ -288,14 +271,36 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
 
                             LOG("TEMP entry count: " + util::uint32_t_to_string(temp_entry_count));
 
+                            std::memcpy(&tblu_header_table_offset, &tblu_data->data()[tblu_position], sizeof(bytes4));
+
+                            if (tblu_header_table_offset == 0xA0)
+                            {
+                                tblu_file_version = 0;
+
+                                tblu_position = 0xAC;
+
+                                LOG("TEMP version: H1");
+                            }
+                            else if (tblu_header_table_offset == 0xD0)
+                            {
+                                tblu_file_version = 1;
+
+                                tblu_position = 0xDC;
+
+                                LOG("TEMP version: H2/H3");
+                            }
+                            else
+                            {
+                                LOG_AND_EXIT_NOP("Error: TBLU_VERSION_UNKNOWN");
+
+                                task_multiple_status = TBLU_VERSION_UNKNOWN;
+
+                                return;
+                            }
+
                             std::memcpy(&tblu_entry_count, &tblu_data->data()[tblu_position], sizeof(bytes4));
 
                             LOG("TBLU entry count: " + util::uint32_t_to_string(tblu_entry_count));
-
-                            if (temp_entry_count != tblu_entry_count)
-                            {
-                                LOG_AND_EXIT("Error: TEMP and TBLU files have mismatched entry counts.");
-                            }
 
                             if (temp_entry_count != tblu_entry_count)
                             {
@@ -306,17 +311,45 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
                                 return;
                             }
 
+                            uint32_t temp_version_check = (temp_after_header_table_offset - 0x70) / temp_entry_count;
+
+                            if (temp_version_check == 0x58)
+                            {
+                                temp_file_version = 0;
+
+                                LOG("TEMP version: H1/H2");
+                            }
+                            else if (temp_version_check == 0x70)
+                            {
+                                temp_file_version = 1;
+
+                                LOG("TEMP version: H3");
+                            }
+                            else
+                            {
+                                LOG_AND_EXIT_NOP("Error: TEMP_VERSION_UNKNOWN");
+
+                                task_multiple_status = TEMP_VERSION_UNKNOWN;
+
+                                return;
+                            }
+
                             temp_position += 0x4;
-                            tblu_position += 0x4;
+                            tblu_position += 0x4;*/
 
                             /*
+                            H1/H2 TEMP:
+                                SEntityTemplateReference logicalParent; // 0x0
+                                int32 entityTypeResourceIndex; // 0x20
+                                TArray<SEntityTemplateProperty> propertyValues; // 0x28
+                                TArray<SEntityTemplateProperty> postInitPropertyValues; // 0x40
                             H3 TEMP:
                                 SEntityTemplateReference logicalParent; // 0x0
                                 int32 entityTypeResourceIndex; // 0x20
                                 TArray<SEntityTemplateProperty> propertyValues; // 0x28
                                 TArray<SEntityTemplateProperty> postInitPropertyValues; // 0x40
                                 TArray<SEntityTemplatePlatformSpecificProperty> platformSpecificPropertyValues; // 0x58
-                            H3 TBLU:
+                            H1/H2/H3 TBLU:
                                 SEntityTemplateReference logicalParent; // 0x0
                                 int32 entityTypeResourceIndex; // 0x20
                                 uint64 entityId; // 0x28
@@ -328,7 +361,7 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
                                 TArray<TPair<ZString, SEntityTemplateEntitySubset>> entitySubsets; // 0x90
                             */
 
-                            for (uint32_t e = 0; e < tblu_entry_count; e++)
+                            /*(for (uint32_t e = 0; e < tblu_entry_count; e++)
                             {
                                 tblu_entry_index.push_back((uint32_t)e);
 
@@ -357,12 +390,15 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
 
                                 LOG("tblu_entityId: " + util::uint64_t_to_hex_string(tblu_entityId.back()));
 
-                                std::memcpy(&bytes4, &tblu_data->data()[tblu_position], sizeof(bytes4));
-                                tblu_position += 0x8;
+                                if (tblu_file_version == 1)
+                                {
+                                    std::memcpy(&bytes4, &tblu_data->data()[tblu_position], sizeof(bytes4));
+                                    tblu_position += 0x8;
 
-                                tblu_editorOnly.push_back(bytes4);
+                                    tblu_editorOnly.push_back(bytes4);
 
-                                LOG("tblu_editorOnly: " + util::uint32_t_to_hex_string(tblu_editorOnly.back()));
+                                    LOG("tblu_editorOnly: " + util::uint32_t_to_hex_string(tblu_editorOnly.back()));                                    
+                                }
 
                                 uint32_t string_size = 0;
                                 uint32_t string_position = 0;
@@ -445,19 +481,22 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
 
                                 LOG("temp_postInitPropertyValues_end_offsets: " + util::uint32_t_to_hex_string(temp_postInitPropertyValues_end_offsets.back()));
 
-                                std::memcpy(&bytes4, &temp_data->data()[temp_position], sizeof(bytes4));
-                                temp_position += 0x8;
+                                if (temp_file_version == 1)
+                                {
+                                    std::memcpy(&bytes4, &temp_data->data()[temp_position], sizeof(bytes4));
+                                    temp_position += 0x8;
 
-                                temp_platformSpecificPropertyValues_start_offsets.push_back(bytes4);
+                                    temp_platformSpecificPropertyValues_start_offsets.push_back(bytes4);
 
-                                LOG("temp_platformSpecificPropertyValues_start_offsets: " + util::uint32_t_to_hex_string(temp_platformSpecificPropertyValues_start_offsets.back()));
+                                    LOG("temp_platformSpecificPropertyValues_start_offsets: " + util::uint32_t_to_hex_string(temp_platformSpecificPropertyValues_start_offsets.back()));
 
-                                std::memcpy(&bytes4, &temp_data->data()[temp_position], sizeof(bytes4));
-                                temp_position += 0x10;
+                                    std::memcpy(&bytes4, &temp_data->data()[temp_position], sizeof(bytes4));
+                                    temp_position += 0x10;
 
-                                temp_platformSpecificPropertyValues_end_offsets.push_back(bytes4);
+                                    temp_platformSpecificPropertyValues_end_offsets.push_back(bytes4);
 
-                                LOG("temp_platformSpecificPropertyValues_end_offsets: " + util::uint32_t_to_hex_string(temp_platformSpecificPropertyValues_end_offsets.back()));
+                                    LOG("temp_platformSpecificPropertyValues_end_offsets: " + util::uint32_t_to_hex_string(temp_platformSpecificPropertyValues_end_offsets.back()));
+                                }
                             }
 
                             temp_position = temp_footer_offset;
@@ -974,10 +1013,13 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
                                         start_offset += 0x10;
                                         end_offset += 0x10;
 
-                                        start_offset = temp_platformSpecificPropertyValues_start_offsets.at(e);
-                                        end_offset = temp_platformSpecificPropertyValues_end_offsets.at(e);
-                                        start_offset += 0x10;
-                                        end_offset += 0x10;
+                                        if (temp_file_version == 1)
+                                        {
+                                            start_offset = temp_platformSpecificPropertyValues_start_offsets.at(e);
+                                            end_offset = temp_platformSpecificPropertyValues_end_offsets.at(e);
+                                            start_offset += 0x10;
+                                            end_offset += 0x10;
+                                        }
                                     }
 
                                     property_crc32_values.push_back(temp_property_crc32_values);
@@ -1019,5 +1061,5 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
     else
     {
         LOG_AND_EXIT("Error: The folder " + input_path + " to with the input RPKGs does not exist.");
-    }
+    }*/
 }

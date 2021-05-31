@@ -152,3 +152,48 @@ std::string util::float_to_string(float bytes4)
     ss << std::fixed << std::setprecision(10) << bytes4;
     return ss.str();
 }
+
+void util::replace_all_string_in_string(std::string& input, const std::string& to_replace, const std::string& replace_with)
+{
+    std::string new_string;
+    new_string.reserve(input.length());
+
+    std::string::size_type last_pos = 0;
+    std::string::size_type find_pos;
+
+    while (std::string::npos != (find_pos = input.find(to_replace, last_pos)))
+    {
+        new_string.append(input, last_pos, find_pos - last_pos);
+        new_string += replace_with;
+        last_pos = find_pos + to_replace.length();
+    }
+
+    new_string += input.substr(last_pos);
+
+    input.swap(new_string);
+}
+
+bool util::float_equal(float float_existing, float float_new, float tolerance)
+{
+    float float_new_abs = std::abs(float_new);
+    float float_existing_abs = std::abs(float_existing);
+    float difference = 0;
+
+    if (float_new_abs > float_existing_abs)
+    {
+        difference = float_new_abs * tolerance;
+    }
+    else
+    {
+        difference = float_existing_abs * tolerance;
+    }
+
+    if (std::abs(float_new - float_existing) > difference)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}

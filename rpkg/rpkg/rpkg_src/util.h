@@ -20,4 +20,6 @@ public:
     static std::string int32_t_to_string(int32_t bytes4);
     static std::string float_to_string(float bytes4);
     static std::string short_to_string(short bytes2);
+    static bool float_equal(float float_existing, float float_new, float tolerance);
+    static void replace_all_string_in_string(std::string& input, const std::string& to_replace, const std::string& replace_with);
 };

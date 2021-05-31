@@ -334,4 +334,8 @@
     <Error Condition="!Exists('..\packages\Fody.6.0.0\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.6.0.0\build\Fody.targets'))" />
     <Error Condition="!Exists('..\packages\Costura.Fody.4.1.0\build\Costura.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Costura.Fody.4.1.0\build\Costura.Fody.props'))" />
   </Target>
+  <PropertyGroup>
+    <PreBuildEvent>copy C:\Users\ninja\source\repos\rpkg\new\rpkg\x64\Release\rpkg.dll C:\Users\ninja\source\repos\rpkg\gui\rpkg\rpkg\Costura64\rpkg.dll
+copy C:\Users\ninja\source\repos\rpkg\new\rpkg\x64\Release\rpkg.dll C:\Users\ninja\source\repos\rpkg\gui\rpkg\rpkg\bin\Debug\rpkg.dll</PreBuildEvent>
+  </PropertyGroup>
 </Project>
