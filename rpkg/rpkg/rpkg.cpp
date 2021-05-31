@@ -82,6 +82,7 @@ struct main_variables
     std::string input_hex_search = "";
     std::string input_regex_search = "";
     std::string input_ores_path = "";
+    std::string input_output_path = "";
     bool mode_filter = false;
     bool mode_extract_from_rpkg = false;
     bool mode_generate_rpkg_file = false;
@@ -94,6 +95,7 @@ struct main_variables
     bool mode_regex_search = false;
     bool mode_extract_all_ores = false;
     bool mode_extract_all_wwev = false;
+    bool mode_output_path = false;
     bool suppress_console_output = false;
     bool debug = false;
 };
@@ -130,7 +132,7 @@ bool path_exists(const std::string& s)
 
 std::string to_uppercase(std::string s)
 {
-    for (uint32_t i = 0; i < s.length(); i++)
+    for (uint64_t i = 0; i < s.length(); i++)
     {
         s[i] = std::toupper(s[i]);
     }
@@ -171,7 +173,7 @@ void xor_data(char* input_data, uint32_t input_data_length)
     unsigned char xor_array[] = { 0xDC, 0x45, 0xA6, 0x9C, 0xD3, 0x72, 0x4C, 0xAB };
     int xor_length = sizeof(xor_array);
 
-    for (uint32_t i = 0; i < input_data_length; i++)
+    for (uint64_t i = 0; i < input_data_length; i++)
     {
         input_data[i] ^= xor_array[i % xor_length];
     }
@@ -448,6 +450,98 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
                     exit(0);
                 }
             }
+
+            if (argv[i] == std::string("-output_path"))
+            {
+                main_data->mode_output_path = true;
+
+                main_data->input_output_path = argv[i + 1];
+
+                if (argc > (i + 1))
+                {
+                    if (main_data->input_output_path != "-" && main_data->input_output_path != "")
+                    {
+                        main_data->input_output_path = remove_all_string_from_string(main_data->input_output_path, "\"");
+                        main_data->input_output_path = remove_all_string_from_string(main_data->input_output_path, "\'");
+                        main_data->input_output_path = replace_slashes(main_data->input_output_path);
+
+                        if (main_data->input_output_path.substr(main_data->input_output_path.length() - 1, 1) == "\\")
+                        {
+                            main_data->input_output_path = main_data->input_output_path.substr(0, main_data->input_output_path.length() - 1);
+                        }
+
+                        if (main_data->input_output_path.substr(main_data->input_output_path.length() - 1, 1) == "/")
+                        {
+                            main_data->input_output_path = main_data->input_output_path.substr(0, main_data->input_output_path.length() - 1);
+                        }
+
+                        //std::cout << "input: " << main_data->input_output_path << std::endl;
+
+                        if (!path_exists(main_data->input_output_path))
+                        {
+                            std::vector<std::string> output_file_path_elements;
+
+                            //std::cout << "does not exist: " << main_data->input_output_path << std::endl;
+
+                            std::smatch m;
+                            std::regex re("^([^\\/]+)\\/");
+                            std::regex_search(main_data->input_output_path, m, re);
+
+                            if (m.size() > 0)
+                            {
+                                output_file_path_elements.push_back(m[1].str());
+
+                                std::smatch m2;
+                                re.assign("\\/([^\\/]+)");
+                                std::string output_path = main_data->input_output_path;
+
+                                while (std::regex_search(output_path, m2, re))
+                                {
+                                    output_file_path_elements.push_back(m2[1].str());
+
+                                    output_path = m2.suffix().str();
+                                }
+                            }
+                            else
+                            {
+                                output_file_path_elements.push_back(main_data->input_output_path);
+                            }
+
+                            std::string path = "";
+
+                            for (uint64_t l = 0; l < output_file_path_elements.size(); l++)
+                            {
+                                path.append(output_file_path_elements.at(l));
+
+                                if (!path_exists(path))
+                                {
+                                    if (!std::filesystem::create_directories(path))
+                                    {
+                                        std::cout << "Error: Couldn't create directory " << path << std::endl;
+                                        exit(0);
+                                    }
+                                }
+
+                                path.append("/");
+
+                                //std::cout << "directory: " << path << std::endl;
+                            }
+                        }
+
+                        main_data->input_output_path.append("/");
+                    }
+                    else
+                    {
+                        std::cout << "Error: Invalid RPKG file path." << std::endl;
+                        exit(0);
+                    }
+                }
+                else
+                {
+                    std::cout << "Error: Invalid RPKG file path." << std::endl;
+                    exit(0);
+                }
+            }
         }
 
         if (main_data->mode_extract_from_rpkg && main_data->mode_search_rpkg)
@@ -692,7 +786,7 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
             std::cout << "file.tellg(): " << file.tellg() << std::endl;
         }
 
-        for (uint32_t i = 0; i < patch_entry_count; i++)
+        for (uint64_t i = 0; i < patch_entry_count; i++)
         {
             file.read(input, sizeof(bytes8));
             memcpy(&bytes8, input, sizeof(bytes8));
@@ -747,9 +841,9 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
     std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
     std::chrono::time_point last_start_time = start_time;
 
-    for (uint32_t i = 0; i < file_count; i++)
+    for (uint64_t i = 0; i < file_count; i++)
     {
-        if (i % (file_count / 100) == 0)
+        if (((i * (uint64_t)10000) / (uint64_t)file_count) % (uint64_t)100 == 0 && i > 0)
         {
             last_start_time = update_console(message, file_count, i, start_time, last_start_time);
         }
@@ -905,7 +999,7 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
             uint32_t temp_hash_reference_count = temp_hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
-            for (uint32_t i = 0; i < temp_hash_reference_count; i++)
+            for (uint64_t i = 0; i < temp_hash_reference_count; i++)
             {
                 memcpy(&bytes1, (input_file_data.get() + position), sizeof(bytes1));
                 position += sizeof(bytes1);
@@ -917,7 +1011,7 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
                 }
             }
 
-            for (uint32_t i = 0; i < temp_hash_reference_count; i++)
+            for (uint64_t i = 0; i < temp_hash_reference_count; i++)
             {
                 memcpy(&bytes8, (input_file_data.get() + position), sizeof(bytes8));
                 position += sizeof(bytes8);
@@ -966,7 +1060,7 @@ void import_rpkg_file_if_not_already(main_variables* main_data, std::string rpkg
 {
     bool found = false;
 
-    for (uint32_t j = 0; j < main_data->rpkg_data.size(); j++)
+    for (uint64_t j = 0; j < main_data->rpkg_data.size(); j++)
     {
         if (main_data->rpkg_data.at(j).rpkg_file_name == rpkg_file_name)
         {
@@ -1133,7 +1227,7 @@ void generate_rpkg_file(main_variables* main_data)
                     std::cout << "rpkg_meta_data.patch_entry_count: " << rpkg_meta_data.patch_entry_count << std::endl;
                 }
 
-                for (uint32_t i = 0; i < rpkg_meta_data.patch_entry_count; i++)
+                for (uint64_t i = 0; i < rpkg_meta_data.patch_entry_count; i++)
                 {
                     rpkg_meta_file.read(input, sizeof(bytes8));
                     memcpy(&bytes8, input, sizeof(bytes8));
@@ -1146,7 +1240,7 @@ void generate_rpkg_file(main_variables* main_data)
                 }
             }
 
-            for (uint32_t i = 0; i < rpkg_meta_data.rpkg_file_count; i++)
+            for (uint64_t i = 0; i < rpkg_meta_data.rpkg_file_count; i++)
             {
                 rpkg_meta_file.read(input, sizeof(bytes8));
                 memcpy(&bytes8, input, sizeof(bytes8));
@@ -1307,7 +1401,7 @@ void generate_rpkg_file(main_variables* main_data)
 
         if (main_data->debug)
         {
-            for (uint32_t i = 0; i < files.size(); i++)
+            for (uint64_t i = 0; i < files.size(); i++)
             {
                 std::cout << "  File: " << files.at(i) << std::endl;
                 std::cout << "    Hash file name: " << hash_file_names.at(i) << std::endl;
@@ -1318,7 +1412,7 @@ void generate_rpkg_file(main_variables* main_data)
         std::vector<uint64_t> input_data_length;
         std::vector<uint64_t> output_data_length;
 
-        std::string temp_file_name = rpkg_file_name + ".tmp";
+        std::string temp_file_name = main_data->input_output_path + rpkg_file_name + ".tmp";
 
         std::ofstream temp_file_output = std::ofstream(temp_file_name, std::ofstream::binary);
 
@@ -1341,7 +1435,7 @@ void generate_rpkg_file(main_variables* main_data)
 
         if (use_rpkg_file_meta_data)
         {
-            for (uint32_t i = 0; i < rpkg_meta_data.hash.size(); i++)
+            for (uint64_t i = 0; i < rpkg_meta_data.hash.size(); i++)
             {
                 std::map<uint64_t, uint64_t>::iterator it = hash_map.find(rpkg_meta_data.hash.at(i));
 
@@ -1356,7 +1450,7 @@ void generate_rpkg_file(main_variables* main_data)
             }
         }
 
-        for (uint32_t i = 0; i < hashes.size(); i++)
+        for (uint64_t i = 0; i < hashes.size(); i++)
         {
             //std::cout << files.at(i) << ", " << hashes.at(i) << ", " << hash_in_rpkg_meta.at(i) << std::endl;
 
@@ -1366,14 +1460,14 @@ void generate_rpkg_file(main_variables* main_data)
             }
         }
 
-        //for (uint32_t i = 0; i < files_index.size(); i++)
+        //for (uint64_t i = 0; i < files_index.size(); i++)
         //{
             //std::cout << "files_index.at(" << i << "): " << files_index.at(i) << ", files.at(" << files_index.at(i) << "): " << files.at(files_index.at(i)) << ", hashes.at(" << files_index.at(i) << "): " << uint64_t_to_hex_string(hashes.at(files_index.at(i))) << std::endl;
         //}
 
-        for (uint32_t i = 0; i < files_index.size(); i++)
+        for (uint64_t i = 0; i < files_index.size(); i++)
         {
-            if (i % (files_index.size() / 100) == 0)
+            if (((i * (uint64_t)10000) / (uint64_t)files_index.size()) % (uint64_t)100 == 0 && i > 0)
             {
                 last_start_time = update_console(message, files_index.size(), i, start_time, last_start_time);
             }
@@ -1514,7 +1608,7 @@ void generate_rpkg_file(main_variables* main_data)
 
                     uint32_t temp_hash_reference_count = temp_hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
-                    for (uint32_t j = 0; j < temp_hash_reference_count; j++)
+                    for (uint64_t j = 0; j < temp_hash_reference_count; j++)
                     {
                         meta_file.read(input, sizeof(bytes1));
                         memcpy(&bytes1, input, sizeof(bytes1));
@@ -1526,7 +1620,7 @@ void generate_rpkg_file(main_variables* main_data)
                         }
                     }
 
-                    for (uint32_t j = 0; j < temp_hash_reference_count; j++)
+                    for (uint64_t j = 0; j < temp_hash_reference_count; j++)
                     {
                         meta_file.read(input, sizeof(bytes8));
                         memcpy(&bytes8, input, sizeof(bytes8));
@@ -1777,7 +1871,7 @@ void generate_rpkg_file(main_variables* main_data)
 
         table_size = 0x0;
 
-        for (uint32_t j = 0; j < temp_rpkg_data.hash.size(); j++)
+        for (uint64_t j = 0; j < temp_rpkg_data.hash.size(); j++)
         {
             table_size += 0x18;
             table_size += temp_rpkg_data.hash_reference_table_size.at(j);
@@ -1815,7 +1909,7 @@ void generate_rpkg_file(main_variables* main_data)
             std::cout << "total_hash_size: " << total_hash_size << std::endl;
         }
 
-        std::ofstream file = std::ofstream(rpkg_file_name, std::ifstream::binary);
+        std::ofstream file = std::ofstream(main_data->input_output_path + rpkg_file_name, std::ifstream::binary);
 
         if (!file.good())
         {
@@ -1872,7 +1966,7 @@ void generate_rpkg_file(main_variables* main_data)
             memcpy(&char4, &rpkg_meta_data.patch_entry_count, sizeof(uint32_t));
             file.write(char4, sizeof(uint32_t));
 
-            for (uint32_t i = 0; i < rpkg_meta_data.patch_entry_count; i++)
+            for (uint64_t i = 0; i < rpkg_meta_data.patch_entry_count; i++)
             {
                 memcpy(&char8, &rpkg_meta_data.patch_entry_list.at(i), sizeof(uint64_t));
                 file.write(char8, sizeof(uint64_t));
@@ -1891,9 +1985,9 @@ void generate_rpkg_file(main_variables* main_data)
         start_time = std::chrono::high_resolution_clock::now();
         last_start_time = start_time;
 
-        for (uint32_t i = 0; i < temp_rpkg_data.hash.size(); i++)
+        for (uint64_t i = 0; i < temp_rpkg_data.hash.size(); i++)
         {
-            if (i % (temp_rpkg_data.hash.size() / 100) == 0)
+            if (((i * (uint64_t)10000) / (uint64_t)temp_rpkg_data.hash.size()) % (uint64_t)100 == 0 && i > 0)
             {
                 last_start_time = update_console(message, temp_rpkg_data.hash.size(), i, start_time, last_start_time);
             }
@@ -1936,9 +2030,9 @@ void generate_rpkg_file(main_variables* main_data)
         start_time = std::chrono::high_resolution_clock::now();
         last_start_time = start_time;
 
-        for (uint32_t i = 0; i < temp_rpkg_data.hash.size(); i++)
+        for (uint64_t i = 0; i < temp_rpkg_data.hash.size(); i++)
         {
-            if (i % (temp_rpkg_data.hash.size() / 100) == 0)
+            if (((i * (uint64_t)10000) / temp_rpkg_data.hash.size()) % (uint64_t)100 == 0 && i > 0)
             {
                 last_start_time = update_console(message, temp_rpkg_data.hash.size(), i, start_time, last_start_time);
             }
@@ -1966,13 +2060,13 @@ void generate_rpkg_file(main_variables* main_data)
                 memcpy(&char4, &temp_rpkg_data.hash_reference_data.at(i).hash_reference_count, sizeof(uint32_t));
                 file.write(char4, sizeof(uint32_t));
 
-                for (uint32_t j = 0; j < temp_hash_reference_count; j++)
+                for (uint64_t j = 0; j < temp_hash_reference_count; j++)
                 {
                     memcpy(&char1, &temp_rpkg_data.hash_reference_data.at(i).hash_reference_type.at(j), sizeof(uint8_t));
                     file.write(char1, sizeof(uint8_t));
                 }
 
-                for (uint32_t j = 0; j < temp_hash_reference_count; j++)
+                for (uint64_t j = 0; j < temp_hash_reference_count; j++)
                 {
                     memcpy(&char8, &temp_rpkg_data.hash_reference_data.at(i).hash_reference.at(j), sizeof(uint64_t));
                     file.write(char8, sizeof(uint64_t));
@@ -2075,11 +2169,11 @@ void extract_from_rpkg(main_variables* main_data)
         exit(0);
     }
 
-    for (uint32_t i = 0; i < main_data->rpkg_data.size(); i++)
+    for (uint64_t i = 0; i < main_data->rpkg_data.size(); i++)
     {
         if (main_data->rpkg_data.at(i).rpkg_file_name == main_data->input_rpkg_file_name)
         {
-            std::string hash_file_path = rpkg_base_name;
+            std::string hash_file_path = main_data->input_output_path + rpkg_base_name;
             std::string final_path;
 
             std::ofstream rpkg_meta_data_file;
@@ -2143,21 +2237,21 @@ void extract_from_rpkg(main_variables* main_data)
             
             memcpy(&char4, &main_data->rpkg_data.at(i).rpkg_file_count, sizeof(uint32_t));
 
-            for (uint32_t j = 0; j < sizeof(uint32_t); j++)
+            for (uint64_t j = 0; j < sizeof(uint32_t); j++)
             {
                 rpkg_meta_data.push_back(char4[j]);
             }
 
             memcpy(&char4, &main_data->rpkg_data.at(i).rpkg_table_offset, sizeof(uint32_t));
 
-            for (uint32_t j = 0; j < sizeof(uint32_t); j++)
+            for (uint64_t j = 0; j < sizeof(uint32_t); j++)
             {
                 rpkg_meta_data.push_back(char4[j]);
             }
 
             memcpy(&char4, &main_data->rpkg_data.at(i).rpkg_table_size, sizeof(uint32_t));
 
-            for (uint32_t j = 0; j < sizeof(uint32_t); j++)
+            for (uint64_t j = 0; j < sizeof(uint32_t); j++)
             {
                 rpkg_meta_data.push_back(char4[j]);
             }
@@ -2173,7 +2267,7 @@ void extract_from_rpkg(main_variables* main_data)
             {
                 memcpy(&char4, &main_data->rpkg_data.at(i).patch_entry_count, sizeof(uint32_t));
 
-                for (uint32_t j = 0; j < sizeof(uint32_t); j++)
+                for (uint64_t j = 0; j < sizeof(uint32_t); j++)
                 {
                     rpkg_meta_data.push_back(char4[j]);
                 }
@@ -2187,10 +2281,10 @@ void extract_from_rpkg(main_variables* main_data)
                 {
                     uint32_t patchEntryCount = 0;
 
-                    for (uint32_t j = 0; j < main_data->rpkg_data.at(i).patch_entry_count; j++)
+                    for (uint64_t j = 0; j < main_data->rpkg_data.at(i).patch_entry_count; j++)
                     {
                         memcpy(&char8, &main_data->rpkg_data.at(i).patch_entry_list.at(j), sizeof(uint64_t));
-                        for (uint32_t k = 0; k < sizeof(uint64_t); k++)
+                        for (uint64_t k = 0; k < sizeof(uint64_t); k++)
                         {
                             rpkg_meta_data.push_back(char8[k]);
                         }
@@ -2211,25 +2305,25 @@ void extract_from_rpkg(main_variables* main_data)
                 }
             }
 
-            for (uint32_t j = 0; j < main_data->rpkg_data.at(i).hash.size(); j++)
+            for (uint64_t j = 0; j < main_data->rpkg_data.at(i).hash.size(); j++)
             {
                 memcpy(&char8, &main_data->rpkg_data.at(i).hash.at(j), sizeof(uint64_t));
 
-                for (uint32_t j = 0; j < sizeof(uint64_t); j++)
+                for (uint64_t j = 0; j < sizeof(uint64_t); j++)
                 {
                     rpkg_meta_data.push_back(char8[j]);
                 }
 
                 memcpy(&char8, &main_data->rpkg_data.at(i).hash_offset.at(j), sizeof(uint64_t));
 
-                for (uint32_t j = 0; j < sizeof(uint64_t); j++)
+                for (uint64_t j = 0; j < sizeof(uint64_t); j++)
                 {
                     rpkg_meta_data.push_back(char8[j]);
                 }
 
                 memcpy(&char4, &main_data->rpkg_data.at(i).hash_size.at(j), sizeof(uint32_t));
 
-                for (uint32_t j = 0; j < sizeof(uint32_t); j++)
+                for (uint64_t j = 0; j < sizeof(uint32_t); j++)
                 {
                     rpkg_meta_data.push_back(char4[j]);
                 }
@@ -2249,430 +2343,437 @@ void extract_from_rpkg(main_variables* main_data)
 
             uint64_t search_count = 0;
 
-            for (uint32_t j = 0; j < main_data->rpkg_data.at(i).hash.size(); j++)
+            for (uint64_t j = 0; j < main_data->rpkg_data.at(i).hash.size(); j++)
             {
-                if (j % (main_data->rpkg_data.at(i).hash.size() / 100) == 0)
+                if (((j * (uint64_t)10000) / main_data->rpkg_data.at(i).hash.size()) % (uint64_t)100 == 0 && j > 0)
                 {
                     last_start_time = update_console(message, main_data->rpkg_data.at(i).hash.size(), j, start_time, last_start_time);
                 }
 
                 std::string hash_file_name = main_data->rpkg_data.at(i).hash_string.at(j) + "." + main_data->rpkg_data.at(i).hash_resource_type.at(j);
 
-                for (uint32_t z = 0; z < main_data->input_filter.size(); z++)
+                bool found = false;
+
+                for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
                 {
                     std::size_t found_position = hash_file_name.find(main_data->input_filter.at(z));
 
-                    if ((found_position != std::string::npos && main_data->input_filter.at(z) != "") || !main_data->mode_filter)
+                    if (found_position != std::string::npos && main_data->input_filter.at(z) != "")
                     {
-                        extracted = true;
+                        found = true;
+                    }
+                }
 
-                        uint64_t hash_size;
+                if (found || !main_data->mode_filter)
+                {
+                    extracted = true;
 
-                        if (main_data->rpkg_data.at(i).is_lz4ed.at(j) == 1)
-                        {
-                            hash_size = main_data->rpkg_data.at(i).hash_size.at(j);
+                    uint64_t hash_size;
 
-                            if (main_data->rpkg_data.at(i).is_xored.at(j) == 1)
-                            {
-                                hash_size &= 0x3FFFFFFF;
-                            }
-                        }
-                        else
-                        {
-                            hash_size = main_data->rpkg_data.at(i).hash_size_final.at(j);
-                        }
-
-                        std::vector<char> input_data(hash_size, 0);
-                        std::ifstream file = std::ifstream(main_data->input_rpkg_file_path, std::ifstream::binary);
-
-                        if (!file.good())
-                        {
-                            std::cout << "Error: RPKG file " << main_data->input_rpkg_file_path << " could not be read." << std::endl;
-                            exit(0);
-                        }
-
-                        file.seekg(main_data->rpkg_data.at(i).hash_offset.at(j), file.beg);
-                        file.read(input_data.data(), hash_size);
+                    if (main_data->rpkg_data.at(i).is_lz4ed.at(j) == 1)
+                    {
+                        hash_size = main_data->rpkg_data.at(i).hash_size.at(j);
 
                         if (main_data->rpkg_data.at(i).is_xored.at(j) == 1)
                         {
-                            xor_data(input_data.data(), (uint32_t)hash_size);
-
-                            if (main_data->debug)
-                            {
-                                std::cout << "XORing input_data with a hashSize of " << hash_size << std::endl;
-                            }
+                            hash_size &= 0x3FFFFFFF;
                         }
+                    }
+                    else
+                    {
+                        hash_size = main_data->rpkg_data.at(i).hash_size_final.at(j);
+                    }
 
-                        if (!(main_data->mode_text_search || main_data->mode_hex_search || main_data->mode_regex_search || main_data->mode_extract_all_ores))
+                    std::vector<char> input_data(hash_size, 0);
+                    std::ifstream file = std::ifstream(main_data->input_rpkg_file_path, std::ifstream::binary);
+
+                    if (!file.good())
+                    {
+                        std::cout << "Error: RPKG file " << main_data->input_rpkg_file_path << " could not be read." << std::endl;
+                        exit(0);
+                    }
+
+                    file.seekg(main_data->rpkg_data.at(i).hash_offset.at(j), file.beg);
+                    file.read(input_data.data(), hash_size);
+
+                    if (main_data->rpkg_data.at(i).is_xored.at(j) == 1)
+                    {
+                        xor_data(input_data.data(), (uint32_t)hash_size);
+
+                        if (main_data->debug)
                         {
-                            hash_file_path = rpkg_base_name;
-
-                            if (!path_exists(hash_file_path))
-                            {
-                                final_path = replace_slashes(hash_file_path);
-                                if (!std::filesystem::create_directories(final_path))
-                                {
-                                    std::cout << "Error: Couldn't create directory " << hash_file_path << std::endl;
-                                    exit(0);
-                                }
-                            }
-
-                            hash_file_path.append("/" + main_data->rpkg_data.at(i).hash_resource_type.at(j));
-
-                            if (!path_exists(hash_file_path))
-                            {
-                                final_path = replace_slashes(hash_file_path);
-                                if (!std::filesystem::create_directories(final_path))
-                                {
-                                    std::cout << "Error: Couldn't create directory " << hash_file_path << std::endl;
-                                    exit(0);
-                                }
-                            }
+                            std::cout << "XORing input_data with a hashSize of " << hash_size << std::endl;
                         }
+                    }
 
-                        std::vector<char>* search_data;
-                        uint32_t search_size;
+                    if (!(main_data->mode_text_search || main_data->mode_hex_search || main_data->mode_regex_search || main_data->mode_extract_all_ores))
+                    {
+                        hash_file_path = main_data->input_output_path + rpkg_base_name;
 
-                        uint32_t decompressed_size = main_data->rpkg_data.at(i).hash_size_final.at(j);
-                        std::vector<char> output_data(decompressed_size, 0);
-
-                        if (main_data->rpkg_data.at(i).is_lz4ed.at(j))
+                        if (!path_exists(hash_file_path))
                         {
-                            LZ4_decompress_safe(input_data.data(), output_data.data(), (int)hash_size, decompressed_size);
-
-                            if (main_data->debug)
-                            {
-                                std::cout << "LZ4 decompression complete." << std::endl;
-                            }
-
-                            hash_file_path.append("/" + hash_file_name);
                             final_path = replace_slashes(hash_file_path);
-
-                            if (!(main_data->mode_text_search || main_data->mode_hex_search || main_data->mode_regex_search))
+                            if (!std::filesystem::create_directories(final_path))
                             {
-                                if (main_data->mode_extract_all_ores)
-                                {
-                                    final_path = main_data->input_ores_path;
-                                }
-
-                                std::ofstream output_file = std::ofstream(final_path, std::ifstream::binary);
-
-                                if (!output_file.good())
-                                {
-                                    std::cout << "Error: Hash file " << final_path << " could not be created." << std::endl;
-                                    exit(0);
-                                }
-
-                                output_file.write(output_data.data(), decompressed_size);
-
-                                output_file.close();
-                            }
-
-                            search_data = &output_data;
-                            search_size = decompressed_size;
-
-                            if (main_data->debug)
-                            {
-                                std::cout << "Extracted " << main_data->rpkg_data.at(i).hash_string.at(j) << " to " << hash_file_path << std::endl;
-                            }
-                        }
-                        else
-                        {
-                            hash_file_path.append("/" + hash_file_name);
-                            final_path = replace_slashes(hash_file_path);
-
-                            if (!(main_data->mode_text_search || main_data->mode_hex_search || main_data->mode_regex_search))
-                            {
-                                if (main_data->mode_extract_all_ores)
-                                {
-                                    final_path = main_data->input_ores_path;
-                                }
-
-                                std::ofstream output_file = std::ofstream(final_path, std::ifstream::binary);
-
-                                if (!output_file.good())
-                                {
-                                    std::cout << "Error: Hash file " << final_path << " could not be created." << std::endl;
-                                    exit(0);
-                                }
-
-                                output_file.write(input_data.data(), hash_size);
-
-                                output_file.close();
-                            }
-
-                            search_data = &input_data;
-                            search_size = hash_size;
-
-                            if (main_data->debug)
-                            {
-                                std::cout << "Extracted " << main_data->rpkg_data.at(i).hash_string.at(j) << " to " << hash_file_path << std::endl;
-                            }
-                        }
-
-                        if (main_data->mode_text_search)
-                        {
-                            uint64_t position = 0;
-
-                            bool done_searching = false;
-
-                            while (!done_searching)
-                            {
-                                if ((position + main_data->input_text_search.length()) > search_size)
-                                {
-                                    done_searching = true;
-                                    break;
-                                }
-
-                                for (uint32_t k = 0; k < main_data->input_text_search.length(); k++)
-                                {
-                                    if (std::tolower(search_data->data()[position + k]) == std::tolower(main_data->input_text_search[k]))
-                                    {
-                                        if (k == (main_data->input_text_search.length() - 1))
-                                        {
-                                            search_count++;
-
-                                            std::cout << "Found text string \"" << main_data->input_text_search << "\" in hash file/resouce " << main_data->rpkg_data.at(i).hash_file_name.at(j) << " at offset 0x" << std::hex << std::uppercase << (position - 1) << std::endl;
-
-                                            bool done_searching_start = false;
-
-                                            uint64_t position_start = position;
-
-                                            while (!done_searching_start)
-                                            {
-                                                if (position_start == 0)
-                                                {
-                                                    done_searching_start = true;
-                                                    break;
-                                                }
-
-                                                if (search_data->data()[position_start] < 0x20 || search_data->data()[position_start] > 0x7E)
-                                                {
-                                                    done_searching_start = true;
-                                                    break;
-                                                }
-
-                                                position_start--;
-                                            }
-
-                                            std::cout << "Text string \"" << main_data->input_text_search << "\" is contained in string: " << std::string(search_data->data() + position_start + 1) << std::endl;
-
-                                            break;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        break;
-                                    }
-                                }
-
-                                position++;
-                            }
-                        }
-                        else if (main_data->mode_hex_search)
-                        {
-                            uint64_t position = 0;
-
-                            bool done_searching = false;
-
-                            std::vector<char> hex_search;
-
-                            if (main_data->input_hex_search.length() % 2 != 0)
-                            {
-                                main_data->input_hex_search = "0" + main_data->input_hex_search;
-                            }
-
-                            for (uint64_t i = 0; i < (main_data->input_hex_search.length() / 2); i++)
-                            {
-                                hex_search.push_back((char)strtoul(main_data->input_hex_search.substr(i * 2, 2).c_str(), nullptr, 16));
-                            }
-
-                            while (!done_searching && hash_size > 0)
-                            {
-                                if ((position + hex_search.size()) > search_size)
-                                {
-                                    done_searching = true;
-                                    break;
-                                }
-
-                                for (uint32_t k = 0; k < hex_search.size(); k++)
-                                {
-                                    if (search_data->data()[position + k] == hex_search.at(k))
-                                    {
-                                        if (k == (hex_search.size() - 1))
-                                        {
-                                            search_count++;
-
-                                            std::cout << "Found hex string \"";
-
-                                            for (uint32_t k = 0; k < hex_search.size(); k++)
-                                            {
-                                                std::cout << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)(unsigned char)hex_search.at(k);
-                                            }
-
-                                            std::cout << "\" in hash file/resouce " << main_data->rpkg_data.at(i).hash_file_name.at(j) << " at offset 0x" << std::hex << std::uppercase << (position - 1) << std::endl;
-
-                                            break;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        break;
-                                    }
-                                }
-
-                                position++;
-                            }
-                        }
-                        else if (main_data->mode_regex_search)
-                        {
-                            std::smatch m;
-                            std::regex re(main_data->input_regex_search);
-                            std::string data_string;
-                            data_string.reserve((uint64_t)search_size * (uint64_t)6);
-
-                            for (uint64_t k = 0; k < search_size; k++)
-                            {
-                                if (search_data->data()[k] >= 0x20 && search_data->data()[k] <= 0x7E)
-                                {
-                                    data_string += search_data->data()[k];
-                                }
-                                else
-                                {
-                                    char value[5];
-                                    sprintf_s(value, "\\x%02X", (int)(unsigned char)search_data->data()[k]);
-                                    data_string += value;
-                                }
-                            }
-
-                            //std::cout << data_string << std::endl;
-
-                            uint64_t position = 0;
-
-                            while (std::regex_search(data_string, m, re))
-                            {
-                                position += m.position();
-
-                                std::cout << "Regex search with regex \"" << main_data->input_regex_search << "\" returned result in hash file/resouce " << main_data->rpkg_data.at(i).hash_file_name.at(j) << std::endl;// << " at offset 0x" << std::hex << std::uppercase << position << std::endl;
-
-                                for (size_t k = 0; k < m.size(); k++)
-                                {
-                                    std::cout << "Match[" << k << "]: " << m[k].str() << std::endl;
-                                }
-
-                                data_string = m.suffix().str();
-                            }
-                        }
-
-                        std::vector<char> meta_data;
-
-                        memcpy(&char8, &main_data->rpkg_data.at(i).hash.at(j), sizeof(uint64_t));
-                        for (uint32_t k = 0; k < sizeof(uint64_t); k++)
-                        {
-                            meta_data.push_back(char8[k]);
-                        }
-
-                        memcpy(&char8, &main_data->rpkg_data.at(i).hash_offset.at(j), sizeof(uint64_t));
-                        for (uint32_t k = 0; k < sizeof(uint64_t); k++)
-                        {
-                            meta_data.push_back(char8[k]);
-                        }
-
-                        memcpy(&char4, &main_data->rpkg_data.at(i).hash_size.at(j), sizeof(uint32_t));
-                        for (uint32_t k = 0; k < sizeof(uint32_t); k++)
-                        {
-                            meta_data.push_back(char4[k]);
-                        }
-
-                        memcpy(&char4, &main_data->rpkg_data.at(i).hash_resource_type.at(j), sizeof(uint32_t));
-                        for (uint32_t k = 0; k < sizeof(uint32_t); k++)
-                        {
-                            meta_data.push_back(char4[k]);
-                        }
-
-                        memcpy(&char4, &main_data->rpkg_data.at(i).hash_reference_table_size.at(j), sizeof(uint32_t));
-                        for (uint32_t k = 0; k < sizeof(uint32_t); k++)
-                        {
-                            meta_data.push_back(char4[k]);
-                        }
-
-                        memcpy(&char4, &main_data->rpkg_data.at(i).hash_reference_table_dummy.at(j), sizeof(uint32_t));
-                        for (uint32_t k = 0; k < sizeof(uint32_t); k++)
-                        {
-                            meta_data.push_back(char4[k]);
-                        }
-
-                        memcpy(&char4, &main_data->rpkg_data.at(i).hash_size_final.at(j), sizeof(uint32_t));
-                        for (uint32_t k = 0; k < sizeof(uint32_t); k++)
-                        {
-                            meta_data.push_back(char4[k]);
-                        }
-
-                        memcpy(&char4, &main_data->rpkg_data.at(i).hash_size_in_memory.at(j), sizeof(uint32_t));
-                        for (uint32_t k = 0; k < sizeof(uint32_t); k++)
-                        {
-                            meta_data.push_back(char4[k]);
-                        }
-
-                        memcpy(&char4, &main_data->rpkg_data.at(i).hash_size_in_video_memory.at(j), sizeof(uint32_t));
-                        for (uint32_t k = 0; k < sizeof(uint32_t); k++)
-                        {
-                            meta_data.push_back(char4[k]);
-                        }
-
-                        if (main_data->rpkg_data.at(i).hash_reference_table_size.at(j) > 0)
-                        {
-                            uint32_t hash_reference_table_size_count = 0;
-                            uint32_t temp_hash_reference_count = main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference_count & 0x3FFFFFFF;
-
-                            memcpy(&char4, &main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference_count, sizeof(uint32_t));
-                            for (uint32_t k = 0; k < sizeof(uint32_t); k++)
-                            {
-                                meta_data.push_back(char4[k]);
-                            }
-                            hash_reference_table_size_count += 4;
-
-                            for (uint32_t k = 0; k < temp_hash_reference_count; k++)
-                            {
-                                memcpy(&char1, &main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference_type.at(k), sizeof(uint8_t));
-                                for (uint32_t l = 0; l < sizeof(uint8_t); l++)
-                                {
-                                    meta_data.push_back(char1[l]);
-                                }
-                                hash_reference_table_size_count += 1;
-                            }
-
-                            for (uint32_t k = 0; k < temp_hash_reference_count; k++)
-                            {
-                                memcpy(&char8, &main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference.at(k), sizeof(uint64_t));
-                                for (uint32_t l = 0; l < sizeof(uint64_t); l++)
-                                {
-                                    meta_data.push_back(char8[l]);
-                                }
-                                hash_reference_table_size_count += 8;
-                            }
-
-                            if (hash_reference_table_size_count != main_data->rpkg_data.at(i).hash_reference_table_size.at(j))
-                            {
-                                std::cout << "Error: Hash meta data for " << main_data->rpkg_data.at(i).hash_string.at(j) << " is corrupt." << std::endl;
+                                std::cout << "Error: Couldn't create directory " << hash_file_path << std::endl;
                                 exit(0);
                             }
                         }
 
-                        if (!(main_data->mode_text_search || main_data->mode_hex_search || main_data->mode_regex_search || main_data->mode_extract_all_ores))
+                        hash_file_path.append("/" + main_data->rpkg_data.at(i).hash_resource_type.at(j));
+
+                        if (!path_exists(hash_file_path))
                         {
-                            final_path += ".meta";
+                            final_path = replace_slashes(hash_file_path);
+                            if (!std::filesystem::create_directories(final_path))
+                            {
+                                std::cout << "Error: Couldn't create directory " << hash_file_path << std::endl;
+                                exit(0);
+                            }
+                        }
+                    }
+
+                    std::vector<char>* search_data;
+                    uint32_t search_size;
+
+                    uint32_t decompressed_size = main_data->rpkg_data.at(i).hash_size_final.at(j);
+                    std::vector<char> output_data(decompressed_size, 0);
+
+                    if (main_data->rpkg_data.at(i).is_lz4ed.at(j))
+                    {
+                        LZ4_decompress_safe(input_data.data(), output_data.data(), (int)hash_size, decompressed_size);
+
+                        if (main_data->debug)
+                        {
+                            std::cout << "LZ4 decompression complete." << std::endl;
+                        }
+
+                        hash_file_path.append("/" + hash_file_name);
+                        final_path = replace_slashes(hash_file_path);
+
+                        if (!(main_data->mode_text_search || main_data->mode_hex_search || main_data->mode_regex_search))
+                        {
+                            if (main_data->mode_extract_all_ores)
+                            {
+                                final_path = main_data->input_ores_path;
+                            }
+
                             std::ofstream output_file = std::ofstream(final_path, std::ifstream::binary);
 
                             if (!output_file.good())
                             {
-                                std::cout << "Error: Meta data file " << final_path << " could not be created." << std::endl;
+                                std::cout << "Error: Hash file " << final_path << " could not be created." << std::endl;
                                 exit(0);
                             }
 
-                            output_file.write(meta_data.data(), meta_data.size());
+                            output_file.write(output_data.data(), decompressed_size);
+
+                            output_file.close();
                         }
+
+                        search_data = &output_data;
+                        search_size = decompressed_size;
+
+                        if (main_data->debug)
+                        {
+                            std::cout << "Extracted " << main_data->rpkg_data.at(i).hash_string.at(j) << " to " << hash_file_path << std::endl;
+                        }
+                    }
+                    else
+                    {
+                        hash_file_path.append("/" + hash_file_name);
+                        final_path = replace_slashes(hash_file_path);
+
+                        if (!(main_data->mode_text_search || main_data->mode_hex_search || main_data->mode_regex_search))
+                        {
+                            if (main_data->mode_extract_all_ores)
+                            {
+                                final_path = main_data->input_ores_path;
+                            }
+
+                            std::ofstream output_file = std::ofstream(final_path, std::ifstream::binary);
+
+                            if (!output_file.good())
+                            {
+                                std::cout << "Error: Hash file " << final_path << " could not be created." << std::endl;
+                                exit(0);
+                            }
+
+                            output_file.write(input_data.data(), hash_size);
+
+                            output_file.close();
+                        }
+
+                        search_data = &input_data;
+                        search_size = hash_size;
+
+                        if (main_data->debug)
+                        {
+                            std::cout << "Extracted " << main_data->rpkg_data.at(i).hash_string.at(j) << " to " << hash_file_path << std::endl;
+                        }
+                    }
+
+                    if (main_data->mode_text_search)
+                    {
+                        uint64_t position = 0;
+
+                        bool done_searching = false;
+
+                        while (!done_searching)
+                        {
+                            if ((position + main_data->input_text_search.length()) > search_size)
+                            {
+                                done_searching = true;
+                                break;
+                            }
+
+                            for (uint64_t k = 0; k < main_data->input_text_search.length(); k++)
+                            {
+                                if (std::tolower(search_data->data()[position + k]) == std::tolower(main_data->input_text_search[k]))
+                                {
+                                    if (k == (main_data->input_text_search.length() - 1))
+                                    {
+                                        search_count++;
+
+                                        std::cout << "Found text string \"" << main_data->input_text_search << "\" in hash file/resouce " << main_data->rpkg_data.at(i).hash_file_name.at(j) << " at offset 0x" << std::hex << std::uppercase << (position - 1) << std::endl;
+
+                                        bool done_searching_start = false;
+
+                                        uint64_t position_start = position;
+
+                                        while (!done_searching_start)
+                                        {
+                                            if (position_start == 0)
+                                            {
+                                                done_searching_start = true;
+                                                break;
+                                            }
+
+                                            if (search_data->data()[position_start] < 0x20 || search_data->data()[position_start] > 0x7E)
+                                            {
+                                                done_searching_start = true;
+                                                break;
+                                            }
+
+                                            position_start--;
+                                        }
+
+                                        std::cout << "Text string \"" << main_data->input_text_search << "\" is contained in string: " << std::string(search_data->data() + position_start + 1) << std::endl;
+
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+
+                            position++;
+                        }
+                    }
+                    else if (main_data->mode_hex_search)
+                    {
+                        uint64_t position = 0;
+
+                        bool done_searching = false;
+
+                        std::vector<char> hex_search;
+
+                        if (main_data->input_hex_search.length() % 2 != 0)
+                        {
+                            main_data->input_hex_search = "0" + main_data->input_hex_search;
+                        }
+
+                        for (uint64_t i = 0; i < (main_data->input_hex_search.length() / 2); i++)
+                        {
+                            hex_search.push_back((char)strtoul(main_data->input_hex_search.substr(i * 2, 2).c_str(), nullptr, 16));
+                        }
+
+                        while (!done_searching && hash_size > 0)
+                        {
+                            if ((position + hex_search.size()) > search_size)
+                            {
+                                done_searching = true;
+                                break;
+                            }
+
+                            for (uint64_t k = 0; k < hex_search.size(); k++)
+                            {
+                                if (search_data->data()[position + k] == hex_search.at(k))
+                                {
+                                    if (k == (hex_search.size() - 1))
+                                    {
+                                        search_count++;
+
+                                        std::cout << "Found hex string \"";
+
+                                        for (uint64_t k = 0; k < hex_search.size(); k++)
+                                        {
+                                            std::cout << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)(unsigned char)hex_search.at(k);
+                                        }
+
+                                        std::cout << "\" in hash file/resouce " << main_data->rpkg_data.at(i).hash_file_name.at(j) << " at offset 0x" << std::hex << std::uppercase << (position - 1) << std::endl;
+
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+
+                            position++;
+                        }
+                    }
+                    else if (main_data->mode_regex_search)
+                    {
+                        std::smatch m;
+                        std::regex re(main_data->input_regex_search);
+                        std::string data_string;
+                        data_string.reserve((uint64_t)search_size * (uint64_t)6);
+
+                        for (uint64_t k = 0; k < search_size; k++)
+                        {
+                            if (search_data->data()[k] >= 0x20 && search_data->data()[k] <= 0x7E)
+                            {
+                                data_string += search_data->data()[k];
+                            }
+                            else
+                            {
+                                char value[5];
+                                sprintf_s(value, "\\x%02X", (int)(unsigned char)search_data->data()[k]);
+                                data_string += value;
+                            }
+                        }
+
+                        //std::cout << data_string << std::endl;
+
+                        uint64_t position = 0;
+
+                        while (std::regex_search(data_string, m, re))
+                        {
+                            position += m.position();
+
+                            std::cout << "Regex search with regex \"" << main_data->input_regex_search << "\" returned result in hash file/resouce " << main_data->rpkg_data.at(i).hash_file_name.at(j) << std::endl;// << " at offset 0x" << std::hex << std::uppercase << position << std::endl;
+
+                            for (size_t k = 0; k < m.size(); k++)
+                            {
+                                std::cout << "Match[" << k << "]: " << m[k].str() << std::endl;
+                            }
+
+                            data_string = m.suffix().str();
+                        }
+                    }
+
+                    std::vector<char> meta_data;
+
+                    memcpy(&char8, &main_data->rpkg_data.at(i).hash.at(j), sizeof(uint64_t));
+                    for (uint64_t k = 0; k < sizeof(uint64_t); k++)
+                    {
+                        meta_data.push_back(char8[k]);
+                    }
+
+                    memcpy(&char8, &main_data->rpkg_data.at(i).hash_offset.at(j), sizeof(uint64_t));
+                    for (uint64_t k = 0; k < sizeof(uint64_t); k++)
+                    {
+                        meta_data.push_back(char8[k]);
+                    }
+
+                    memcpy(&char4, &main_data->rpkg_data.at(i).hash_size.at(j), sizeof(uint32_t));
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                    {
+                        meta_data.push_back(char4[k]);
+                    }
+
+                    memcpy(&char4, &main_data->rpkg_data.at(i).hash_resource_type.at(j), sizeof(uint32_t));
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                    {
+                        meta_data.push_back(char4[k]);
+                    }
+
+                    memcpy(&char4, &main_data->rpkg_data.at(i).hash_reference_table_size.at(j), sizeof(uint32_t));
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                    {
+                        meta_data.push_back(char4[k]);
+                    }
+
+                    memcpy(&char4, &main_data->rpkg_data.at(i).hash_reference_table_dummy.at(j), sizeof(uint32_t));
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                    {
+                        meta_data.push_back(char4[k]);
+                    }
+
+                    memcpy(&char4, &main_data->rpkg_data.at(i).hash_size_final.at(j), sizeof(uint32_t));
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                    {
+                        meta_data.push_back(char4[k]);
+                    }
+
+                    memcpy(&char4, &main_data->rpkg_data.at(i).hash_size_in_memory.at(j), sizeof(uint32_t));
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                    {
+                        meta_data.push_back(char4[k]);
+                    }
+
+                    memcpy(&char4, &main_data->rpkg_data.at(i).hash_size_in_video_memory.at(j), sizeof(uint32_t));
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                    {
+                        meta_data.push_back(char4[k]);
+                    }
+
+                    if (main_data->rpkg_data.at(i).hash_reference_table_size.at(j) > 0)
+                    {
+                        uint32_t hash_reference_table_size_count = 0;
+                        uint32_t temp_hash_reference_count = main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference_count & 0x3FFFFFFF;
+
+                        memcpy(&char4, &main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference_count, sizeof(uint32_t));
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                        {
+                            meta_data.push_back(char4[k]);
+                        }
+                        hash_reference_table_size_count += 4;
+
+                        for (uint64_t k = 0; k < temp_hash_reference_count; k++)
+                        {
+                            memcpy(&char1, &main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference_type.at(k), sizeof(uint8_t));
+                            for (uint64_t l = 0; l < sizeof(uint8_t); l++)
+                            {
+                                meta_data.push_back(char1[l]);
+                            }
+                            hash_reference_table_size_count += 1;
+                        }
+
+                        for (uint64_t k = 0; k < temp_hash_reference_count; k++)
+                        {
+                            memcpy(&char8, &main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference.at(k), sizeof(uint64_t));
+                            for (uint64_t l = 0; l < sizeof(uint64_t); l++)
+                            {
+                                meta_data.push_back(char8[l]);
+                            }
+                            hash_reference_table_size_count += 8;
+                        }
+
+                        if (hash_reference_table_size_count != main_data->rpkg_data.at(i).hash_reference_table_size.at(j))
+                        {
+                            std::cout << "Error: Hash meta data for " << main_data->rpkg_data.at(i).hash_string.at(j) << " is corrupt." << std::endl;
+                            exit(0);
+                        }
+                    }
+
+                    if (!(main_data->mode_text_search || main_data->mode_hex_search || main_data->mode_regex_search || main_data->mode_extract_all_ores))
+                    {
+                        final_path += ".meta";
+                        std::ofstream output_file = std::ofstream(final_path, std::ifstream::binary);
+
+                        if (!output_file.good())
+                        {
+                            std::cout << "Error: Meta data file " << final_path << " could not be created." << std::endl;
+                            exit(0);
+                        }
+
+                        output_file.write(meta_data.data(), meta_data.size());
                     }
                 }
             }
@@ -2732,11 +2833,11 @@ void extract_from_rpkg_with_map(main_variables* main_data)
         exit(0);
     }
 
-    for (uint32_t i = 0; i < main_data->rpkg_data.size(); i++)
+    for (uint64_t i = 0; i < main_data->rpkg_data.size(); i++)
     {
         if (main_data->rpkg_data.at(i).rpkg_file_name == main_data->input_rpkg_file_name)
         {
-            std::string hash_file_path = rpkg_base_name;
+            std::string hash_file_path = main_data->input_output_path + rpkg_base_name;
             std::string final_path;
 
             std::ofstream rpkg_meta_data_file;
@@ -2800,21 +2901,21 @@ void extract_from_rpkg_with_map(main_variables* main_data)
 
             memcpy(&char4, &main_data->rpkg_data.at(i).rpkg_file_count, sizeof(uint32_t));
 
-            for (uint32_t j = 0; j < sizeof(uint32_t); j++)
+            for (uint64_t j = 0; j < sizeof(uint32_t); j++)
             {
                 rpkg_meta_data.push_back(char4[j]);
             }
 
             memcpy(&char4, &main_data->rpkg_data.at(i).rpkg_table_offset, sizeof(uint32_t));
 
-            for (uint32_t j = 0; j < sizeof(uint32_t); j++)
+            for (uint64_t j = 0; j < sizeof(uint32_t); j++)
             {
                 rpkg_meta_data.push_back(char4[j]);
             }
 
             memcpy(&char4, &main_data->rpkg_data.at(i).rpkg_table_size, sizeof(uint32_t));
 
-            for (uint32_t j = 0; j < sizeof(uint32_t); j++)
+            for (uint64_t j = 0; j < sizeof(uint32_t); j++)
             {
                 rpkg_meta_data.push_back(char4[j]);
             }
@@ -2830,7 +2931,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
             {
                 memcpy(&char4, &main_data->rpkg_data.at(i).patch_entry_count, sizeof(uint32_t));
 
-                for (uint32_t j = 0; j < sizeof(uint32_t); j++)
+                for (uint64_t j = 0; j < sizeof(uint32_t); j++)
                 {
                     rpkg_meta_data.push_back(char4[j]);
                 }
@@ -2844,10 +2945,10 @@ void extract_from_rpkg_with_map(main_variables* main_data)
                 {
                     uint32_t patchEntryCount = 0;
 
-                    for (uint32_t j = 0; j < main_data->rpkg_data.at(i).patch_entry_count; j++)
+                    for (uint64_t j = 0; j < main_data->rpkg_data.at(i).patch_entry_count; j++)
                     {
                         memcpy(&char8, &main_data->rpkg_data.at(i).patch_entry_list.at(j), sizeof(uint64_t));
-                        for (uint32_t k = 0; k < sizeof(uint64_t); k++)
+                        for (uint64_t k = 0; k < sizeof(uint64_t); k++)
                         {
                             rpkg_meta_data.push_back(char8[k]);
                         }
@@ -2868,25 +2969,25 @@ void extract_from_rpkg_with_map(main_variables* main_data)
                 }
             }
 
-            for (uint32_t j = 0; j < main_data->rpkg_data.at(i).hash.size(); j++)
+            for (uint64_t j = 0; j < main_data->rpkg_data.at(i).hash.size(); j++)
             {
                 memcpy(&char8, &main_data->rpkg_data.at(i).hash.at(j), sizeof(uint64_t));
 
-                for (uint32_t j = 0; j < sizeof(uint64_t); j++)
+                for (uint64_t j = 0; j < sizeof(uint64_t); j++)
                 {
                     rpkg_meta_data.push_back(char8[j]);
                 }
 
                 memcpy(&char8, &main_data->rpkg_data.at(i).hash_offset.at(j), sizeof(uint64_t));
 
-                for (uint32_t j = 0; j < sizeof(uint64_t); j++)
+                for (uint64_t j = 0; j < sizeof(uint64_t); j++)
                 {
                     rpkg_meta_data.push_back(char8[j]);
                 }
 
                 memcpy(&char4, &main_data->rpkg_data.at(i).hash_size.at(j), sizeof(uint32_t));
 
-                for (uint32_t j = 0; j < sizeof(uint32_t); j++)
+                for (uint64_t j = 0; j < sizeof(uint32_t); j++)
                 {
                     rpkg_meta_data.push_back(char4[j]);
                 }
@@ -2903,7 +3004,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
 
             uint64_t search_count = 0;
 
-            for (uint32_t z = 0; z < main_data->input_filter.size(); z++)
+            for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
             {
                 uint64_t hash = std::strtoull(main_data->input_filter.at(z).c_str(), nullptr, 16);
 
@@ -2957,7 +3058,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
 
                     if (!(main_data->mode_text_search || main_data->mode_hex_search || main_data->mode_regex_search || main_data->mode_extract_all_ores))
                     {
-                        hash_file_path = rpkg_base_name;
+                        hash_file_path = main_data->input_output_path + rpkg_base_name;
 
                         if (!path_exists(hash_file_path))
                         {
@@ -3076,7 +3177,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
                                 break;
                             }
 
-                            for (uint32_t k = 0; k < main_data->input_text_search.length(); k++)
+                            for (uint64_t k = 0; k < main_data->input_text_search.length(); k++)
                             {
                                 if (std::tolower(search_data->data()[position + k]) == std::tolower(main_data->input_text_search[k]))
                                 {
@@ -3147,7 +3248,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
                                 break;
                             }
 
-                            for (uint32_t k = 0; k < hex_search.size(); k++)
+                            for (uint64_t k = 0; k < hex_search.size(); k++)
                             {
                                 if (search_data->data()[position + k] == hex_search.at(k))
                                 {
@@ -3157,7 +3258,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
 
                                         std::cout << "Found hex string \"";
 
-                                        for (uint32_t k = 0; k < hex_search.size(); k++)
+                                        for (uint64_t k = 0; k < hex_search.size(); k++)
                                         {
                                             std::cout << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)(unsigned char)hex_search.at(k);
                                         }
@@ -3219,55 +3320,55 @@ void extract_from_rpkg_with_map(main_variables* main_data)
                     std::vector<char> meta_data;
 
                     memcpy(&char8, &main_data->rpkg_data.at(i).hash.at(it->second), sizeof(uint64_t));
-                    for (uint32_t k = 0; k < sizeof(uint64_t); k++)
+                    for (uint64_t k = 0; k < sizeof(uint64_t); k++)
                     {
                         meta_data.push_back(char8[k]);
                     }
 
                     memcpy(&char8, &main_data->rpkg_data.at(i).hash_offset.at(it->second), sizeof(uint64_t));
-                    for (uint32_t k = 0; k < sizeof(uint64_t); k++)
+                    for (uint64_t k = 0; k < sizeof(uint64_t); k++)
                     {
                         meta_data.push_back(char8[k]);
                     }
 
                     memcpy(&char4, &main_data->rpkg_data.at(i).hash_size.at(it->second), sizeof(uint32_t));
-                    for (uint32_t k = 0; k < sizeof(uint32_t); k++)
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
                     {
                         meta_data.push_back(char4[k]);
                     }
 
                     memcpy(&char4, &main_data->rpkg_data.at(i).hash_resource_type.at(it->second), sizeof(uint32_t));
-                    for (uint32_t k = 0; k < sizeof(uint32_t); k++)
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
                     {
                         meta_data.push_back(char4[k]);
                     }
 
                     memcpy(&char4, &main_data->rpkg_data.at(i).hash_reference_table_size.at(it->second), sizeof(uint32_t));
-                    for (uint32_t k = 0; k < sizeof(uint32_t); k++)
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
                     {
                         meta_data.push_back(char4[k]);
                     }
 
                     memcpy(&char4, &main_data->rpkg_data.at(i).hash_reference_table_dummy.at(it->second), sizeof(uint32_t));
-                    for (uint32_t k = 0; k < sizeof(uint32_t); k++)
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
                     {
                         meta_data.push_back(char4[k]);
                     }
 
                     memcpy(&char4, &main_data->rpkg_data.at(i).hash_size_final.at(it->second), sizeof(uint32_t));
-                    for (uint32_t k = 0; k < sizeof(uint32_t); k++)
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
                     {
                         meta_data.push_back(char4[k]);
                     }
 
                     memcpy(&char4, &main_data->rpkg_data.at(i).hash_size_in_memory.at(it->second), sizeof(uint32_t));
-                    for (uint32_t k = 0; k < sizeof(uint32_t); k++)
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
                     {
                         meta_data.push_back(char4[k]);
                     }
 
                     memcpy(&char4, &main_data->rpkg_data.at(i).hash_size_in_video_memory.at(it->second), sizeof(uint32_t));
-                    for (uint32_t k = 0; k < sizeof(uint32_t); k++)
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
                     {
                         meta_data.push_back(char4[k]);
                     }
@@ -3278,26 +3379,26 @@ void extract_from_rpkg_with_map(main_variables* main_data)
                         uint32_t temp_hash_reference_count = main_data->rpkg_data.at(i).hash_reference_data.at(it->second).hash_reference_count & 0x3FFFFFFF;
 
                         memcpy(&char4, &main_data->rpkg_data.at(i).hash_reference_data.at(it->second).hash_reference_count, sizeof(uint32_t));
-                        for (uint32_t k = 0; k < sizeof(uint32_t); k++)
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
                         {
                             meta_data.push_back(char4[k]);
                         }
                         hash_reference_table_size_count += 4;
 
-                        for (uint32_t k = 0; k < temp_hash_reference_count; k++)
+                        for (uint64_t k = 0; k < temp_hash_reference_count; k++)
                         {
                             memcpy(&char1, &main_data->rpkg_data.at(i).hash_reference_data.at(it->second).hash_reference_type.at(k), sizeof(uint8_t));
-                            for (uint32_t l = 0; l < sizeof(uint8_t); l++)
+                            for (uint64_t l = 0; l < sizeof(uint8_t); l++)
                             {
                                 meta_data.push_back(char1[l]);
                             }
                             hash_reference_table_size_count += 1;
                         }
 
-                        for (uint32_t k = 0; k < temp_hash_reference_count; k++)
+                        for (uint64_t k = 0; k < temp_hash_reference_count; k++)
                         {
                             memcpy(&char8, &main_data->rpkg_data.at(i).hash_reference_data.at(it->second).hash_reference.at(k), sizeof(uint64_t));
-                            for (uint32_t l = 0; l < sizeof(uint64_t); l++)
+                            for (uint64_t l = 0; l < sizeof(uint64_t); l++)
                             {
                                 meta_data.push_back(char8[l]);
                             }
@@ -3361,6 +3462,8 @@ void extract_all_ores(main_variables* main_data)
         main_data->input_rpkg_folder_path = main_data->input_rpkg_folder_path.substr(0, main_data->input_rpkg_folder_path.length() - 1);
     }
 
+    main_data->input_rpkg_folder_path.append("/");
+
     if (path_exists(main_data->input_rpkg_folder_path))
     {
         rpkg_variables temp_rpkg_data;
@@ -3443,197 +3546,205 @@ void extract_all_ores(main_variables* main_data)
 
         if (main_data->debug)
         {
-            for (uint32_t i = 0; i < rpkg_file_paths.size(); i++)
+            for (uint64_t i = 0; i < rpkg_file_paths.size(); i++)
             {
                 std::cout << "Found RPKG file: " << rpkg_file_paths.at(i) << std::endl;
             }
         }
 
-        for (uint32_t i = 0; i < rpkg_file_paths.size(); i++)
+        for (uint64_t i = 0; i < rpkg_file_paths.size(); i++)
         {
             //if (rpkg_file_names.at(i) == "chunk0.rpkg")
             import_rpkg_file_if_not_already(main_data, rpkg_file_paths.at(i), rpkg_file_names.at(i), true);
         }
 
-        for (uint32_t i = 0; i < main_data->rpkg_data.size(); i++)
+        bool found_ores = false;
+
+        for (uint64_t i = 0; i < main_data->rpkg_data.size(); i++)
         {
-            for (uint32_t j = 0; j < main_data->rpkg_data.at(i).hash.size(); j++)
+            for (uint64_t j = 0; j < main_data->rpkg_data.at(i).hash.size(); j++)
             {
                 std::string hash_file_name = main_data->rpkg_data.at(i).hash_string.at(j) + "." + main_data->rpkg_data.at(i).hash_resource_type.at(j);
 
-                for (uint32_t z = 0; z < main_data->input_filter.size(); z++)
+                if (hash_file_name == "00858D45F5F9E3CA.ORES") //main_data->rpkg_data.at(i).hash_resource_type.at(j) == "ORES")
                 {
-                    std::size_t found_position = hash_file_name.find(main_data->input_filter.at(z));
+                    found_ores = true;
 
-                    if (hash_file_name == "00858D45F5F9E3CA.ORES") //main_data->rpkg_data.at(i).hash_resource_type.at(j) == "ORES")
+                    std::cout << "ORES resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
+
+                    uint64_t hash_size;
+
+                    if (main_data->rpkg_data.at(i).is_lz4ed.at(j) == 1)
                     {
-                        std::cout << "ORES resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
-
-                        uint64_t hash_size;
-
-                        if (main_data->rpkg_data.at(i).is_lz4ed.at(j) == 1)
-                        {
-                            hash_size = main_data->rpkg_data.at(i).hash_size.at(j);
-
-                            if (main_data->rpkg_data.at(i).is_xored.at(j) == 1)
-                            {
-                                hash_size &= 0x3FFFFFFF;
-                            }
-                        }
-                        else
-                        {
-                            hash_size = main_data->rpkg_data.at(i).hash_size_final.at(j);
-                        }
-
-                        std::unique_ptr<char[]> input_data;
-                        input_data = std::make_unique<char[]>(hash_size);
-
-                        std::ifstream file = std::ifstream(main_data->rpkg_data.at(i).rpkg_file_path, std::ifstream::binary);
-
-                        if (!file.good())
-                        {
-                            std::cout << "Error: RPKG file " << main_data->input_rpkg_file_path << " could not be read." << std::endl;
-                            exit(0);
-                        }
-
-                        file.seekg(main_data->rpkg_data.at(i).hash_offset.at(j), file.beg);
-                        file.read(input_data.get(), hash_size);
-                        file.close();
+                        hash_size = main_data->rpkg_data.at(i).hash_size.at(j);
 
                         if (main_data->rpkg_data.at(i).is_xored.at(j) == 1)
                         {
-                            xor_data(input_data.get(), (uint32_t)hash_size);
+                            hash_size &= 0x3FFFFFFF;
+                        }
+                    }
+                    else
+                    {
+                        hash_size = main_data->rpkg_data.at(i).hash_size_final.at(j);
+                    }
 
-                            if (main_data->debug)
-                            {
-                                std::cout << "XORing input_file_data with a hashSize of " << hash_size << std::endl;
-                            }
+                    std::unique_ptr<char[]> input_data;
+                    input_data = std::make_unique<char[]>(hash_size);
+
+                    std::ifstream file = std::ifstream(main_data->rpkg_data.at(i).rpkg_file_path, std::ifstream::binary);
+
+                    if (!file.good())
+                    {
+                        std::cout << "Error: RPKG file " << main_data->input_rpkg_file_path << " could not be read." << std::endl;
+                        exit(0);
+                    }
+
+                    file.seekg(main_data->rpkg_data.at(i).hash_offset.at(j), file.beg);
+                    file.read(input_data.get(), hash_size);
+                    file.close();
+
+                    if (main_data->rpkg_data.at(i).is_xored.at(j) == 1)
+                    {
+                        xor_data(input_data.get(), (uint32_t)hash_size);
+
+                        if (main_data->debug)
+                        {
+                            std::cout << "XORing input_file_data with a hashSize of " << hash_size << std::endl;
+                        }
+                    }
+
+                    uint32_t decompressed_size = main_data->rpkg_data.at(i).hash_size_final.at(j);
+
+                    std::unique_ptr<char[]> output_data;
+                    output_data = std::make_unique<char[]>(decompressed_size);
+
+                    std::unique_ptr<char[]>* ores_data;
+
+                    if (main_data->rpkg_data.at(i).is_lz4ed.at(j))
+                    {
+                        LZ4_decompress_safe(input_data.get(), output_data.get(), (int)hash_size, decompressed_size);
+
+                        ores_data = &output_data;
+
+                        if (main_data->debug)
+                        {
+                            std::cout << "LZ4 decompression complete." << std::endl;
+                        }
+                    }
+                    else
+                    {
+                        ores_data = &input_data;
+                    }
+
+                    std::vector<uint64_t> ores_hash_resource;
+                    std::vector<std::string> ores_hash_resource_file_path;
+                    std::vector<std::vector<std::string>> ores_hash_resource_file_path_elements;
+
+                    uint32_t ores_hash_resource_file_count = 0;
+
+                    uint32_t position = 0x10;
+
+                    char input[1024];
+                    uint8_t bytes1 = 0;
+                    uint32_t bytes4 = 0;
+                    uint64_t bytes8 = 0;
+
+                    memcpy(&bytes4, (&ores_data->get()[0] + position), sizeof(bytes4));
+                    position = bytes4 + 0xC;
+
+                    memcpy(&ores_hash_resource_file_count, (&ores_data->get()[0] + position), sizeof(bytes4));
+                    position += 0x4;
+
+                    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
+                    std::chrono::time_point last_start_time = start_time;
+
+                    std::string message = "Extracting ORES linked files: ";
+
+                    for (uint64_t k = 0; k < ores_hash_resource_file_count; k++)
+                    {
+                        if (((k * (uint64_t)10000) / (uint64_t)ores_hash_resource_file_count) % (uint64_t)100 == 0 && k > 0)
+                        {
+                            last_start_time = update_console(message, ores_hash_resource_file_count, k, start_time, last_start_time);
                         }
 
-                        uint32_t decompressed_size = main_data->rpkg_data.at(i).hash_size_final.at(j);
+                        uint32_t string_offset = 0;
+                        uint8_t string_length = 0;
+                        uint64_t hash_lsb = 0;
+                        uint64_t hash_msb = 0;
+                        uint64_t hash = 0;
 
-                        std::unique_ptr<char[]> output_data;
-                        output_data = std::make_unique<char[]>(decompressed_size);
+                        memcpy(&string_length, (&ores_data->get()[0] + position), sizeof(bytes1));
+                        position += 0x8;
 
-                        std::unique_ptr<char[]>* ores_data;
+                        memcpy(&string_offset, (&ores_data->get()[0] + position), sizeof(bytes4));
+                        string_offset += 0x10;
+                        position += 0x8;
 
-                        if (main_data->rpkg_data.at(i).is_lz4ed.at(j))
+                        memcpy(&hash_lsb, (&ores_data->get()[0] + position), sizeof(bytes4));
+                        position += 0x4;
+
+                        memcpy(&hash_msb, (&ores_data->get()[0] + position), sizeof(bytes4));
+                        position += 0x4;
+
+                        hash = (hash_lsb << 32) | hash_msb;
+
+                        //std::cout << "String length: " << string_length << std::endl;
+                        //std::cout << "String offset: " << string_offset << std::endl;
+                        //std::cout << "Hash: " << uint64_t_to_hex_string(hash) << std::endl;
+                        //std::cout << "Hash linked ORES file path: " << std::string((&ores_data->get()[0] + string_offset)) << std::endl;
+
+                        ores_hash_resource.push_back(hash);
+
+                        ores_hash_resource_file_path.push_back(std::string((&ores_data->get()[0] + string_offset)));
+
+                        std::size_t pos = ores_hash_resource_file_path.back().find("attractionscreen");
+
+                        replace_slashes(ores_hash_resource_file_path.back());
+
+                        std::vector<std::string> temp_ores_file_path_elements;
+
+                        std::smatch m;
+                        std::regex re("^([^\\/]+)\\/");
+                        std::regex_search(ores_hash_resource_file_path.back(), m, re);
+
+                        if (m.size() > 0)
                         {
-                            LZ4_decompress_safe(input_data.get(), output_data.get(), (int)hash_size, decompressed_size);
+                            temp_ores_file_path_elements.push_back(m[1].str());
 
-                            ores_data = &output_data;
+                            std::smatch m2;
+                            re.assign("\\/([^\\/]+)");
+                            std::string ores_path = ores_hash_resource_file_path.back();
 
-                            if (main_data->debug)
+                            while (std::regex_search(ores_path, m2, re))
                             {
-                                std::cout << "LZ4 decompression complete." << std::endl;
+                                temp_ores_file_path_elements.push_back(m2[1].str());
+
+                                ores_path = m2.suffix().str();
                             }
                         }
                         else
                         {
-                            ores_data = &input_data;
+                            temp_ores_file_path_elements.push_back(ores_hash_resource_file_path.back());
                         }
 
-                        std::vector<uint64_t> ores_hash_resource;
-                        std::vector<std::string> ores_hash_resource_file_path;
-                        std::vector<std::vector<std::string>> ores_hash_resource_file_path_elements;
+                        std::string path = main_data->input_output_path;
 
-                        uint32_t ores_hash_resource_file_count = 0;
-
-                        uint32_t position = 0x10;
-
-                        char input[1024];
-                        uint8_t bytes1 = 0;
-                        uint32_t bytes4 = 0;
-                        uint64_t bytes8 = 0;
-
-                        memcpy(&bytes4, (&ores_data->get()[0] + position), sizeof(bytes4));
-                        position = bytes4 + 0xC;
-
-                        memcpy(&ores_hash_resource_file_count, (&ores_data->get()[0] + position), sizeof(bytes4));
-                        position += 0x4;
-
-                        std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-                        std::chrono::time_point last_start_time = start_time;
-
-                        std::string message = "Extracting ORES linked files: ";
-
-                        for (uint32_t k = 0; k < ores_hash_resource_file_count; k++)
+                        for (uint64_t l = 0; l < temp_ores_file_path_elements.size(); l++)
                         {
-                            if (k % (ores_hash_resource_file_count / 100) == 0 && k > 0)
+                            if (l == (temp_ores_file_path_elements.size() - 1))
                             {
-                                last_start_time = update_console(message, ores_hash_resource_file_count, k, start_time, last_start_time);
-                            }
+                                bool ores_file_already_found = false;
 
-                            uint32_t string_offset = 0;
-                            uint8_t string_length = 0;
-                            uint64_t hash_lsb = 0;
-                            uint64_t hash_msb = 0;
-                            uint64_t hash = 0;
-
-                            memcpy(&string_length, (&ores_data->get()[0] + position), sizeof(bytes1));
-                            position += 0x8;
-
-                            memcpy(&string_offset, (&ores_data->get()[0] + position), sizeof(bytes4));
-                            string_offset += 0x10;
-                            position += 0x8;
-
-                            memcpy(&hash_lsb, (&ores_data->get()[0] + position), sizeof(bytes4));
-                            position += 0x4;
-
-                            memcpy(&hash_msb, (&ores_data->get()[0] + position), sizeof(bytes4));
-                            position += 0x4;
-
-                            hash = (hash_lsb << 32) | hash_msb;
-
-                            //std::cout << "String length: " << string_length << std::endl;
-                            //std::cout << "String offset: " << string_offset << std::endl;
-                            //std::cout << "Hash: " << uint64_t_to_hex_string(hash) << std::endl;
-                            //std::cout << "Hash linked ORES file path: " << std::string((&ores_data->get()[0] + string_offset)) << std::endl;
-
-                            ores_hash_resource.push_back(hash);
-
-                            ores_hash_resource_file_path.push_back(std::string((&ores_data->get()[0] + string_offset)));
-
-                            replace_slashes(ores_hash_resource_file_path.back());
-
-                            std::vector<std::string> temp_ores_file_path_elements;
-
-                            std::smatch m;
-                            std::regex re("^([^\\/]+)\\/");
-                            std::regex_search(ores_hash_resource_file_path.back(), m, re);
-
-                            if (m.size() > 0)
-                            {
-                                temp_ores_file_path_elements.push_back(m[1].str());
-
-                                std::smatch m2;
-                                re.assign("\\/([^\\/]+)");
-                                std::string ores_path = ores_hash_resource_file_path.back();
-
-                                while (std::regex_search(ores_path, m2, re))
+                                for (uint64_t x = 0; x < main_data->rpkg_data.size(); x++)
                                 {
-                                    temp_ores_file_path_elements.push_back(m2[1].str());
-
-                                    ores_path = m2.suffix().str();
-                                }
-                            }
-                            else
-                            {
-                                temp_ores_file_path_elements.push_back(ores_hash_resource_file_path.back());
-                            }
-
-                            std::string path = "";
-
-                            for (uint32_t l = 0; l < temp_ores_file_path_elements.size(); l++)
-                            {
-                                if (l == (temp_ores_file_path_elements.size() - 1))
-                                {
-                                    for (uint32_t x = 0; x < main_data->rpkg_data.size(); x++)
+                                    if (!ores_file_already_found)
                                     {
                                         std::map<uint64_t, uint64_t>::iterator it = main_data->rpkg_data.at(x).hash_map.find(hash);
 
                                         if (it != main_data->rpkg_data.at(x).hash_map.end())
                                         {
+                                            ores_file_already_found = true;
+
                                             //std::cout << "Extracting " << ores_hash_resource_file_path.back() << "(" << uint64_t_to_hex_string(hash) << ") from RPKG file " << main_data->rpkg_data.at(x).rpkg_file_name << std::endl;
 
                                             path.append(temp_ores_file_path_elements.at(l));
@@ -3652,39 +3763,45 @@ void extract_all_ores(main_variables* main_data)
                                             //std::cout << std::endl;
                                         }
                                     }
-
-                                    //std::cout << "file name: " << temp_ores_file_path_elements.at(l) << std::endl;
                                 }
-                                else
+
+                                //std::cout << "file name: " << temp_ores_file_path_elements.at(l) << std::endl;
+                            }
+                            else
+                            {
+                                path.append(temp_ores_file_path_elements.at(l));
+
+                                if (!path_exists(path))
                                 {
-                                    path.append(temp_ores_file_path_elements.at(l));
-
-                                    if (!path_exists(path))
+                                    if (!std::filesystem::create_directories(path))
                                     {
-                                        if (!std::filesystem::create_directories(path))
-                                        {
-                                            std::cout << "Error: Couldn't create directory " << path << std::endl;
-                                            exit(0);
-                                        }
+                                        std::cout << "Error: Couldn't create directory " << path << std::endl;
+                                        exit(0);
                                     }
-
-                                    path.append("/");
-
-                                    //std::cout << "directory: " << path << std::endl;
                                 }
+
+                                path.append("/");
+
+                                //std::cout << "directory: " << path << std::endl;
                             }
                         }
-
-                        std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-                        std::stringstream ss;
-
-                        ss << message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
-
-                        std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
                     }
+
+                    std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
+
+                    std::stringstream ss;
+
+                    ss << message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
+
+                    std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
                 }
             }
+        }
+
+        if (!found_ores)
+        {
+            std::cout << "Error: The folder " << main_data->input_rpkg_folder_path << " does not contain a RPKG file that contains 00858D45F5F9E3CA.ORES" << std::endl;
+            exit(0);
         }
     }
     else
@@ -3709,6 +3826,8 @@ void extract_all_wwev(main_variables* main_data)
         main_data->input_rpkg_folder_path = main_data->input_rpkg_folder_path.substr(0, main_data->input_rpkg_folder_path.length() - 1);
     }
 
+    main_data->input_rpkg_folder_path.append("/");
+
     if (path_exists(main_data->input_rpkg_folder_path))
     {
         rpkg_variables temp_rpkg_data;
@@ -3791,49 +3910,169 @@ void extract_all_wwev(main_variables* main_data)
 
         if (main_data->debug)
         {
-            for (uint32_t i = 0; i < rpkg_file_paths.size(); i++)
+            for (uint64_t i = 0; i < rpkg_file_paths.size(); i++)
             {
                 std::cout << "Found RPKG file: " << rpkg_file_paths.at(i) << std::endl;
             }
         }
 
-        for (uint32_t i = 0; i < rpkg_file_paths.size(); i++)
+        for (uint64_t i = 0; i < rpkg_file_paths.size(); i++)
         {
             //if (rpkg_file_names.at(i) == "chunk2.rpkg")
             import_rpkg_file_if_not_already(main_data, rpkg_file_paths.at(i), rpkg_file_names.at(i), true);
         }
 
-        if (!path_exists("WWEV"))
+        if (!path_exists(main_data->input_output_path + "WWEV"))
         {
-            if (!std::filesystem::create_directories("WWEV"))
+            if (!std::filesystem::create_directories(main_data->input_output_path + "WWEV"))
             {
-                std::cout << "Error: Couldn't create directory " << "WWEV" << std::endl;
+                std::cout << "Error: Couldn't create directory " << main_data->input_output_path + "WWEV" << std::endl;
                 exit(0);
             }
         }
 
-        for (uint32_t i = 0; i < main_data->rpkg_data.size(); i++)
+        for (uint64_t i = 0; i < main_data->rpkg_data.size(); i++)
         {
             bool archive_folder_created = false;
 
-            for (uint32_t j = 0; j < main_data->rpkg_data.at(i).hash.size(); j++)
+            for (uint64_t j = 0; j < main_data->rpkg_data.at(i).hash.size(); j++)
             {
                 std::string hash_file_name = main_data->rpkg_data.at(i).hash_string.at(j) + "." + main_data->rpkg_data.at(i).hash_resource_type.at(j);
                 
-                for (uint32_t z = 0; z < main_data->input_filter.size(); z++)
+                if (main_data->rpkg_data.at(i).hash_resource_type.at(j) == "WWEV")
                 {
-                    std::size_t found_position = hash_file_name.find(main_data->input_filter.at(z));
+                    std::string current_path = main_data->input_output_path + "WWEV/" + main_data->rpkg_data.at(i).rpkg_file_name;
 
-                    if (main_data->rpkg_data.at(i).hash_resource_type.at(j) == "WWEV")
+                    if (!archive_folder_created)
                     {
-                        std::string current_path = "WWEV/" + main_data->rpkg_data.at(i).rpkg_file_name;
-
-                        if (!archive_folder_created)
+                        if (!path_exists(current_path))
                         {
+                            archive_folder_created = true;
+
+                            if (!std::filesystem::create_directories(current_path))
+                            {
+                                std::cout << "Error: Couldn't create directory " << current_path << std::endl;
+                                exit(0);
+                            }
+                        }
+                    }
+
+                    std::cout << "WWEV resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
+
+                    uint64_t hash_size;
+
+                    if (main_data->rpkg_data.at(i).is_lz4ed.at(j) == 1)
+                    {
+                        hash_size = main_data->rpkg_data.at(i).hash_size.at(j);
+
+                        if (main_data->rpkg_data.at(i).is_xored.at(j) == 1)
+                        {
+                            hash_size &= 0x3FFFFFFF;
+                        }
+                    }
+                    else
+                    {
+                        hash_size = main_data->rpkg_data.at(i).hash_size_final.at(j);
+                    }
+
+                    std::unique_ptr<char[]> input_data;
+                    input_data = std::make_unique<char[]>(hash_size);
+
+                    std::ifstream file = std::ifstream(main_data->rpkg_data.at(i).rpkg_file_path, std::ifstream::binary);
+
+                    if (!file.good())
+                    {
+                        std::cout << "Error: RPKG file " << main_data->input_rpkg_file_path << " could not be read." << std::endl;
+                        exit(0);
+                    }
+
+                    file.seekg(main_data->rpkg_data.at(i).hash_offset.at(j), file.beg);
+                    file.read(input_data.get(), hash_size);
+                    file.close();
+
+                    if (main_data->rpkg_data.at(i).is_xored.at(j) == 1)
+                    {
+                        xor_data(input_data.get(), (uint32_t)hash_size);
+
+                        if (main_data->debug)
+                        {
+                            std::cout << "XORing input_file_data with a hashSize of " << hash_size << std::endl;
+                        }
+                    }
+
+                    uint32_t decompressed_size = main_data->rpkg_data.at(i).hash_size_final.at(j);
+
+                    std::unique_ptr<char[]> output_data;
+                    output_data = std::make_unique<char[]>(decompressed_size);
+
+                    std::unique_ptr<char[]>* wwev_data;
+
+                    if (main_data->rpkg_data.at(i).is_lz4ed.at(j))
+                    {
+                        LZ4_decompress_safe(input_data.get(), output_data.get(), (int)hash_size, decompressed_size);
+
+                        wwev_data = &output_data;
+
+                        if (main_data->debug)
+                        {
+                            std::cout << "LZ4 decompression complete." << std::endl;
+                        }
+                    }
+                    else
+                    {
+                        wwev_data = &input_data;
+                    }
+
+                    uint32_t wwev_file_name_length = 0;
+                    uint32_t wwev_file_count = 0;
+
+                    uint32_t position = 0;
+
+                    char input[1024];
+                    uint8_t bytes1 = 0;
+                    uint32_t bytes4 = 0;
+                    uint64_t bytes8 = 0;
+
+                    memcpy(&wwev_file_name_length, (&wwev_data->get()[0] + position), sizeof(bytes4));
+                    position += 0x4;
+
+                    std::unique_ptr<char[]> wwev_file_name;
+                    wwev_file_name = std::make_unique<char[]>((uint64_t)wwev_file_name_length + (uint64_t)1);
+                    wwev_file_name[wwev_file_name_length] = 0;
+
+                    memcpy(wwev_file_name.get(), (&wwev_data->get()[0] + position), wwev_file_name_length);
+                    position += wwev_file_name_length;
+                    position += 0x4;
+
+                    memcpy(&wwev_file_count, (&wwev_data->get()[0] + position), sizeof(bytes4));
+                    position += 0x4;
+
+                    bool sfx_folder_created = false;
+
+                    for (uint64_t k = 0; k < wwev_file_count; k++)
+                    {
+                        position += 0x4;
+
+                        uint32_t wem_size;
+
+                        memcpy(&wem_size, (&wwev_data->get()[0] + position), sizeof(bytes4));
+                        position += 0x4;
+
+                        std::unique_ptr<char[]> wwev_file_data;
+                        wwev_file_data = std::make_unique<char[]>(wem_size);
+
+                        memcpy(wwev_file_data.get(), (&wwev_data->get()[0] + position), wem_size);
+                        position += wem_size;
+
+                        if (!sfx_folder_created)
+                        {
+                            sfx_folder_created = true;
+
+                            current_path.append("/");
+                            current_path.append(std::string(wwev_file_name.get()));
+
                             if (!path_exists(current_path))
                             {
-                                archive_folder_created = true;
-
                                 if (!std::filesystem::create_directories(current_path))
                                 {
                                     std::cout << "Error: Couldn't create directory " << current_path << std::endl;
@@ -3842,144 +4081,19 @@ void extract_all_wwev(main_variables* main_data)
                             }
                         }
 
-                        std::cout << "WWEV resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
+                        std::ofstream output_file = std::ofstream(current_path + "/" + std::to_string(k) + ".wem", std::ifstream::binary);
 
-                        uint64_t hash_size;
-
-                        if (main_data->rpkg_data.at(i).is_lz4ed.at(j) == 1)
+                        if (!output_file.good())
                         {
-                            hash_size = main_data->rpkg_data.at(i).hash_size.at(j);
-
-                            if (main_data->rpkg_data.at(i).is_xored.at(j) == 1)
-                            {
-                                hash_size &= 0x3FFFFFFF;
-                            }
-                        }
-                        else
-                        {
-                            hash_size = main_data->rpkg_data.at(i).hash_size_final.at(j);
-                        }
-
-                        std::unique_ptr<char[]> input_data;
-                        input_data = std::make_unique<char[]>(hash_size);
-
-                        std::ifstream file = std::ifstream(main_data->rpkg_data.at(i).rpkg_file_path, std::ifstream::binary);
-
-                        if (!file.good())
-                        {
-                            std::cout << "Error: RPKG file " << main_data->input_rpkg_file_path << " could not be read." << std::endl;
+                            std::cout << "Error: Hash file " << current_path + "/" + std::to_string(k) + ".wem" << " could not be created." << std::endl;
                             exit(0);
                         }
 
-                        file.seekg(main_data->rpkg_data.at(i).hash_offset.at(j), file.beg);
-                        file.read(input_data.get(), hash_size);
-                        file.close();
+                        output_file.write(wwev_file_data.get(), wem_size);
 
-                        if (main_data->rpkg_data.at(i).is_xored.at(j) == 1)
-                        {
-                            xor_data(input_data.get(), (uint32_t)hash_size);
+                        output_file.close();
 
-                            if (main_data->debug)
-                            {
-                                std::cout << "XORing input_file_data with a hashSize of " << hash_size << std::endl;
-                            }
-                        }
-
-                        uint32_t decompressed_size = main_data->rpkg_data.at(i).hash_size_final.at(j);
-
-                        std::unique_ptr<char[]> output_data;
-                        output_data = std::make_unique<char[]>(decompressed_size);
-
-                        std::unique_ptr<char[]>* wwev_data;
-
-                        if (main_data->rpkg_data.at(i).is_lz4ed.at(j))
-                        {
-                            LZ4_decompress_safe(input_data.get(), output_data.get(), (int)hash_size, decompressed_size);
-
-                            wwev_data = &output_data;
-
-                            if (main_data->debug)
-                            {
-                                std::cout << "LZ4 decompression complete." << std::endl;
-                            }
-                        }
-                        else
-                        {
-                            wwev_data = &input_data;
-                        }
-
-                        uint32_t wwev_file_name_length = 0;
-                        uint32_t wwev_file_count = 0;
-
-                        uint32_t position = 0;
-
-                        char input[1024];
-                        uint8_t bytes1 = 0;
-                        uint32_t bytes4 = 0;
-                        uint64_t bytes8 = 0;
-
-                        memcpy(&wwev_file_name_length, (&wwev_data->get()[0] + position), sizeof(bytes4));
-                        position += 0x4;
-
-                        std::unique_ptr<char[]> wwev_file_name;
-                        wwev_file_name = std::make_unique<char[]>((uint64_t)wwev_file_name_length + (uint64_t)1);
-                        wwev_file_name[wwev_file_name_length] = 0;
-
-                        memcpy(wwev_file_name.get(), (&wwev_data->get()[0] + position), wwev_file_name_length);
-                        position += wwev_file_name_length;
-                        position += 0x4;
-
-                        memcpy(&wwev_file_count, (&wwev_data->get()[0] + position), sizeof(bytes4));
-                        position += 0x4;
-
-                        bool sfx_folder_created = false;
-
-                        for (uint32_t k = 0; k < wwev_file_count; k++)
-                        {
-                            position += 0x4;
-
-                            uint32_t wem_size;
-
-                            memcpy(&wem_size, (&wwev_data->get()[0] + position), sizeof(bytes4));
-                            position += 0x4;
-
-                            std::unique_ptr<char[]> wwev_file_data;
-                            wwev_file_data = std::make_unique<char[]>(wem_size);
-
-                            memcpy(wwev_file_data.get(), (&wwev_data->get()[0] + position), wem_size);
-                            position += wem_size;
-
-                            if (!sfx_folder_created)
-                            {
-                                sfx_folder_created = true;
-
-                                current_path.append("/");
-                                current_path.append(std::string(wwev_file_name.get()));
-
-                                if (!path_exists(current_path))
-                                {
-                                    if (!std::filesystem::create_directories(current_path))
-                                    {
-                                        std::cout << "Error: Couldn't create directory " << current_path << std::endl;
-                                        exit(0);
-                                    }
-                                }
-                            }
-
-                            std::ofstream output_file = std::ofstream(current_path + "/" + std::to_string(k) + ".wem", std::ifstream::binary);
-
-                            if (!output_file.good())
-                            {
-                                std::cout << "Error: Hash file " << current_path + "/" + std::to_string(k) + ".wem" << " could not be created." << std::endl;
-                                exit(0);
-                            }
-
-                            output_file.write(wwev_file_data.get(), wem_size);
-
-                            output_file.close();
-
-                            std::cout << "WWEV file name: " << current_path + "/" + std::to_string(k) + ".wem" << std::endl;
-                        }
+                        std::cout << "WWEV file name: " << current_path + "/" + std::to_string(k) + ".wem" << std::endl;
                     }
                 }
             }
@@ -4077,24 +4191,24 @@ void find_hash_depends(main_variables* main_data)
 
         if (main_data->debug)
         {
-            for (uint32_t i = 0; i < rpkg_file_paths.size(); i++)
+            for (uint64_t i = 0; i < rpkg_file_paths.size(); i++)
             {
                 std::cout << "Found RPKG file: " << rpkg_file_paths.at(i) << std::endl;
             }
         }
 
-        for (uint32_t i = 0; i < rpkg_file_paths.size(); i++)
+        for (uint64_t i = 0; i < rpkg_file_paths.size(); i++)
         {
             import_rpkg_file_if_not_already(main_data, rpkg_file_paths.at(i), rpkg_file_names.at(i), true);
         }
 
-        for (uint32_t z = 0; z < main_data->input_filter.size(); z++)
+        for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
         {
             std::vector<hash_depends_variables> hash_depends_data;
 
             uint64_t hash = std::strtoull(main_data->input_filter.at(z).c_str(), nullptr, 16);
 
-            for (uint32_t i = 0; i < main_data->rpkg_data.size(); i++)
+            for (uint64_t i = 0; i < main_data->rpkg_data.size(); i++)
             {
                 std::map<uint64_t, uint64_t>::iterator it2 = main_data->rpkg_data.at(i).hash_map.find(hash);
 
@@ -4114,13 +4228,13 @@ void find_hash_depends(main_variables* main_data)
 
                     if (temp_hash_reference_count > 0)
                     {
-                        for (uint32_t k = 0; k < temp_hash_reference_count; k++)
+                        for (uint64_t k = 0; k < temp_hash_reference_count; k++)
                         {
                             std::vector<std::string> dependency_in_rpkg_file;
 
                             bool found = false;
 
-                            for (uint32_t j = 0; j < main_data->rpkg_data.size(); j++)
+                            for (uint64_t j = 0; j < main_data->rpkg_data.size(); j++)
                             {
                                 std::map<uint64_t, uint64_t>::iterator it3 = main_data->rpkg_data.at(j).hash_map.find(main_data->rpkg_data.at(i).hash_reference_data.at(it2->second).hash_reference.at(k));
 
@@ -4158,7 +4272,7 @@ void find_hash_depends(main_variables* main_data)
 
             int rpkg_dependency_count = 0;
 
-            for (uint32_t i = 0; i < hash_depends_data.size(); i++)
+            for (uint64_t i = 0; i < hash_depends_data.size(); i++)
             {
                 if (hash_depends_data.at(i).hash_dependency.size() > 0)
                 {
@@ -4168,7 +4282,7 @@ void find_hash_depends(main_variables* main_data)
 
             std::cout << main_data->input_filter.at(z) << " has dependencies in " << rpkg_dependency_count << " RPKG files:" << std::endl << std::endl;
 
-            for (uint32_t i = 0; i < hash_depends_data.size(); i++)
+            for (uint64_t i = 0; i < hash_depends_data.size(); i++)
             {
                 if (hash_depends_data.at(i).hash_dependency.size() > 0)
                 {
@@ -4178,7 +4292,7 @@ void find_hash_depends(main_variables* main_data)
                     {
                         std::cout << main_data->input_filter.at(z) << "'s dependencies:" << std::endl;
 
-                        for (uint32_t j = 0; j < hash_depends_data.at(i).hash_dependency_file_name.size(); j++)
+                        for (uint64_t j = 0; j < hash_depends_data.at(i).hash_dependency_file_name.size(); j++)
                         {
                             std::cout << "Hash file/resource: " << hash_depends_data.at(i).hash_dependency_file_name.at(j);
 
@@ -4186,7 +4300,7 @@ void find_hash_depends(main_variables* main_data)
                             {
                                 std::cout << ", Found in RPKG files: ";
 
-                                for (uint32_t k = 0; k < hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).size(); k++)
+                                for (uint64_t k = 0; k < hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).size(); k++)
                                 {
                                     std::cout << hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).at(k);
 
@@ -4194,7 +4308,7 @@ void find_hash_depends(main_variables* main_data)
                                     {
                                         std::cout << ", ";
 
-                                        for (uint32_t x = 0; x < main_data->rpkg_data.size(); x++)
+                                        for (uint64_t x = 0; x < main_data->rpkg_data.size(); x++)
                                         {
                                             if (main_data->rpkg_data.at(x).rpkg_file_name == hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).at(k))
                                             {
@@ -4231,13 +4345,13 @@ void find_hash_depends(main_variables* main_data)
             std::vector<std::string> reverse_dependency;
             std::vector<std::vector<std::string>> reverse_dependency_in_rpkg_file;
 
-            for (uint32_t i = 0; i < main_data->rpkg_data.size(); i++)
+            for (uint64_t i = 0; i < main_data->rpkg_data.size(); i++)
             {
-                for (uint32_t j = 0; j < main_data->rpkg_data.at(i).hash.size(); j++)
+                for (uint64_t j = 0; j < main_data->rpkg_data.at(i).hash.size(); j++)
                 {
                     uint32_t temp_hash_reference_count = main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference_count & 0x3FFFFFFF;
 
-                    for (uint32_t k = 0; k < temp_hash_reference_count; k++)
+                    for (uint64_t k = 0; k < temp_hash_reference_count; k++)
                     {
                         if (main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference.at(k) == hash)
                         {
@@ -4249,7 +4363,7 @@ void find_hash_depends(main_variables* main_data)
                             {
                                 bool found = false;
 
-                                for (uint32_t k = 0; k < reverse_dependency.size(); k++)
+                                for (uint64_t k = 0; k < reverse_dependency.size(); k++)
                                 {
                                     if (reverse_dependency.at(k) == rd)
                                     {
@@ -4291,7 +4405,7 @@ void find_hash_depends(main_variables* main_data)
             {
                 std::cout << main_data->input_filter.at(z) << "'s reverse dependencies:" << std::endl;
 
-                for (uint32_t i = 0; i < reverse_dependency.size(); i++)
+                for (uint64_t i = 0; i < reverse_dependency.size(); i++)
                 {
                     std::cout << "Hash file/resource: " << reverse_dependency.at(i);
 
@@ -4299,7 +4413,7 @@ void find_hash_depends(main_variables* main_data)
                     {
                         std::cout << ", Found in RPKG files: ";
 
-                        for (uint32_t j = 0; j < reverse_dependency_in_rpkg_file.at(i).size(); j++)
+                        for (uint64_t j = 0; j < reverse_dependency_in_rpkg_file.at(i).size(); j++)
                         {
                             std::cout << reverse_dependency_in_rpkg_file.at(i).at(j);
 
@@ -4379,7 +4493,7 @@ int main(int argc, char* argv[])
     }
     else
     {
-        std::cout << "rpkg v1.01 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files." << std::endl;
+        std::cout << "rpkg v1.02 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files." << std::endl;
         std::cout << "--------------------------------------------------------------------------------" << std::endl;
         std::cout << "Note: All the information used to build this program was gleaned" << std::endl;
         std::cout << "      in a completely 'clean room' environment." << std::endl;
@@ -4410,6 +4524,8 @@ int main(int argc, char* argv[])
         std::cout << "        scans all available RPKG files for dependency information and lists the results." << std::endl;
         std::cout << "    -hex_search <hex string>" << std::endl;
         std::cout << "        Specifices the hex string to find within hash files/resources." << std::endl;
+        std::cout << "    -output_path <path to output folder>" << std::endl;
+        std::cout << "        Specifies output folder path to use instead of the current directory." << std::endl;
         std::cout << "    -regex_search <regex>" << std::endl;
         std::cout << "        Specifies the regex which is used to find within hash files/resources." << std::endl;
         std::cout << "    -search_rpkg <path to rpkg file>" << std::endl;
@@ -4419,6 +4535,8 @@ int main(int argc, char* argv[])
         std::cout << "  Examples:" << std::endl;
         std::cout << "    Extracts all hash linked files/resources from an RPKG file:" << std::endl;
         std::cout << "        rpkg.exe -extract_from_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
+        std::cout << "    Extracts all hash linked files/resources from an RPKG file to an output folder:" << std::endl;
+        std::cout << "        rpkg.exe -output_path \"R:\\my\\output\\path\" -extract_from_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
         std::cout << "    Extracts one hash linked files/resources from an RPKG file by hash filter:" << std::endl;
         std::cout << "        rpkg.exe -filter 00123456789ABCDE -extract_from_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
         std::cout << "    Extracts multiple hash linked files/resources from an RPKG file by hash filter:" << std::endl;
@@ -4431,8 +4549,12 @@ int main(int argc, char* argv[])
         std::cout << "        rpkg.exe -generate_rpkg_from chunk0patch1" << std::endl;
         std::cout << "    Extracts all hash linked files/resources located in the ORES files from all the RPKG files in a given directory:" << std::endl;
         std::cout << "        rpkg.exe -extract_all_ores_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
+        std::cout << "    Extracts all hash linked files/resources located in the ORES files from all the RPKG files in a given directory to an output folder:" << std::endl;
+        std::cout << "        rpkg.exe -output_path \"R:\\my\\output\\path\" -extract_all_ores_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
         std::cout << "    Extracts all hash linked files/resources of type WWEV from all the RPKG files in a given directory:" << std::endl;
         std::cout << "        rpkg.exe -extract_all_wwev_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
+        std::cout << "    Extracts all hash linked files/resources of type WWEV from all the RPKG files in a given directory to an output folder:" << std::endl;
+        std::cout << "        rpkg.exe -output_path \"R:\\my\\output\\path\" -extract_all_wwev_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
         std::cout << "    Lists the forward and reverse depends of a given hash file/resource:" << std::endl;
         std::cout << "        rpkg.exe -filter 00123456789ABCDE -hash_depends \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime" << std::endl;
         std::cout << "    Lists the forward and reverse depends of two hash files/resources:" << std::endl;
