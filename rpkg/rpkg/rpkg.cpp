@@ -97,6 +97,8 @@ struct main_variables
     std::string input_rpkg_folder_path = "";
     std::vector<std::string> input_filter;
     std::string input_filter_string;
+    std::string input_command_json_file_path = "";
+    std::string input_command_json_file_name = "";
     std::string input_text_search = "";
     std::string input_hex_search = "";
     std::string input_regex_search = "";
@@ -105,9 +107,11 @@ struct main_variables
     std::string input_to_ioi_hash = "";
     std::string input_packagedefinitions_thumbs_file_path = "";
     std::string input_packagedefinitions_thumbs_file_name = "";
+    std::string console_prefix = "";
     bool mode_filter = false;
     bool mode_extract_from_rpkg = false;
     bool mode_generate_rpkg_file = false;
+    bool mode_command_json = false;
     bool mode_use_lz4hc = true;
     bool mode_xor_bytes = false;
     bool mode_hash_depends = false;
@@ -143,7 +147,7 @@ int update_console(std::string& message, uint64_t indexMax, uint64_t index, std:
     {
         if (ss.str().length() > stringstream_length)
         {
-            stringstream_length = ss.str().length();
+            stringstream_length = (int)ss.str().length();
         }
 
         std::cout << "\r" << ss.str() << std::string((stringstream_length - ss.str().length()), ' ') << std::flush;
@@ -275,8 +279,6 @@ void parse_rpkg_file_input(std::string input, main_variables* main_data)
         main_data->input_rpkg_file_path = main_data->input_rpkg_file_path.substr(0, main_data->input_rpkg_file_path.length() - 1);
     }
 
-    std::cout << main_data->input_rpkg_file_path << std::endl;
-
     size_t pos = main_data->input_rpkg_file_path.find_last_of("\\/");
 
     if (pos != std::string::npos)
@@ -290,7 +292,7 @@ void parse_rpkg_file_input(std::string input, main_variables* main_data)
 
     if (to_uppercase(main_data->input_rpkg_file_name.substr((main_data->input_rpkg_file_name.length() - 5), 5)) != ".RPKG")
     {
-        std::cout << "Error: Invalid RPKG file path." << std::endl;
+        std::cout << main_data->console_prefix << "Error: Invalid RPKG file path." << std::endl;
         std::exit(0);
     }
 }
@@ -305,8 +307,6 @@ void parse_packagedefinitions_thumbs_file_input(std::string input, main_variable
         main_data->input_packagedefinitions_thumbs_file_path = main_data->input_packagedefinitions_thumbs_file_path.substr(0, main_data->input_packagedefinitions_thumbs_file_path.length() - 1);
     }
 
-    std::cout << main_data->input_packagedefinitions_thumbs_file_path << std::endl;
-
     size_t pos = main_data->input_packagedefinitions_thumbs_file_path.find_last_of("\\/");
 
     if (pos != std::string::npos)
@@ -316,6 +316,34 @@ void parse_packagedefinitions_thumbs_file_input(std::string input, main_variable
     else
     {
         main_data->input_packagedefinitions_thumbs_file_name = main_data->input_packagedefinitions_thumbs_file_path;
+    }
+}
+
+void parse_command_json_file_input(std::string input, main_variables* main_data)
+{
+    main_data->input_command_json_file_path = remove_all_string_from_string(replace_slashes(input), "\"");
+    main_data->input_command_json_file_path = remove_all_string_from_string(main_data->input_command_json_file_path, "\'");
+
+    if (main_data->input_command_json_file_path.substr(main_data->input_command_json_file_path.length() - 1, 1) == "/")
+    {
+        main_data->input_command_json_file_path = main_data->input_command_json_file_path.substr(0, main_data->input_command_json_file_path.length() - 1);
+    }
+
+    size_t pos = main_data->input_command_json_file_path.find_last_of("\\/");
+
+    if (pos != std::string::npos)
+    {
+        main_data->input_command_json_file_name = main_data->input_command_json_file_path.substr(pos + 1, main_data->input_command_json_file_path.length() - (pos + 1));
+    }
+    else
+    {
+        main_data->input_command_json_file_name = main_data->input_command_json_file_path;
+    }
+
+    if (to_uppercase(main_data->input_command_json_file_name.substr((main_data->input_command_json_file_name.length() - 5), 5)) != ".JSON")
+    {
+        std::cout << main_data->console_prefix << "Error: Invalid rpkg.exe command JSON file path." << std::endl;
+        std::exit(0);
     }
 }
 
@@ -335,13 +363,13 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
 
                     if (argv[i + 1][0] == '-' || main_data->input_rpkg_file_path == "" || main_data->input_rpkg_file_name == "")
                     {
-                        std::cout << "Error: Invalid RPKG file path." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: Invalid RPKG file path." << std::endl;
                         std::exit(0);
                     }
                 }
                 else
                 {
-                    std::cout << "Error: Invalid RPKG file path." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: Invalid RPKG file path." << std::endl;
                     std::exit(0);
                 }
             }
@@ -364,7 +392,7 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
                         {
                             main_data->input_filter_string = input;
 
-                            //std::cout << m[1].str() << std::endl;
+                            //std::cout << main_data->console_prefix << m[1].str() << std::endl;
 
                             main_data->input_filter.push_back(m[1].str());
 
@@ -377,7 +405,7 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
 
                                 input = m2.suffix().str();
 
-                                //std::cout << m2[1].str() << std::endl;
+                                //std::cout << main_data->console_prefix << m2[1].str() << std::endl;
                             }
                         }
                         else
@@ -390,7 +418,7 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
                 }
                 else
                 {
-                    std::cout << "Error: Invalid filter." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: Invalid filter." << std::endl;
                     std::exit(0);
                 }
             }
@@ -403,13 +431,13 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
 
                     if (argv[i + 1][0] == '-' || main_data->input_rpkg_file_path == "" || main_data->input_rpkg_file_name == "")
                     {
-                        std::cout << "Error: Invalid RPKG file path." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: Invalid RPKG file path." << std::endl;
                         std::exit(0);
                     }
                 }
                 else
                 {
-                    std::cout << "Error: Invalid RPKG file path." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: Invalid RPKG file path." << std::endl;
                     std::exit(0);
                 }
             }
@@ -424,13 +452,34 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
 
                     if (main_data->input_to_ioi_hash[0] == '-' || main_data->input_to_ioi_hash == "")
                     {
-                        std::cout << "Error: No text search string specified." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: No input string to hash specified." << std::endl;
                         std::exit(0);
                     }
                 }
                 else
                 {
-                    std::cout << "Error: No text search string specified." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: No input string to hash specified." << std::endl;
+                    std::exit(0);
+                }
+            }
+
+            if (argv[i] == std::string("-rpkg_command_json"))
+            {
+                main_data->mode_command_json = true;
+
+                if (argc > (i + 1))
+                {
+                    parse_command_json_file_input(std::string(argv[i + 1]), main_data);
+
+                    if (argv[i + 1][0] == '-' || main_data->input_command_json_file_path == "" || main_data->input_command_json_file_name == "")
+                    {
+                        std::cout << main_data->console_prefix << "Error: Invalid rpkg.exe command JSON file path." << std::endl;
+                        std::exit(0);
+                    }
+                }
+                else
+                {
+                    std::cout << main_data->console_prefix << "Error: Invalid rpkg.exe command JSON file path." << std::endl;
                     std::exit(0);
                 }
             }
@@ -452,13 +501,13 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
 
                     if (argv[i + 1][0] == '-' || main_data->input_packagedefinitions_thumbs_file_path == "" || main_data->input_packagedefinitions_thumbs_file_name == "")
                     {
-                        std::cout << "Error: Invalid packagedefinitions.txt / thumbs.dat file path." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: Invalid packagedefinitions.txt / thumbs.dat file path." << std::endl;
                         std::exit(0);
                     }
                 }
                 else
                 {
-                    std::cout << "Error: Invalid packagedefinitions.txt / thumbs.dat file path." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: Invalid packagedefinitions.txt / thumbs.dat file path." << std::endl;
                     std::exit(0);
                 }
             }
@@ -473,13 +522,13 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
 
                     if (main_data->input_text_search[0] == '-' || main_data->input_text_search == "")
                     {
-                        std::cout << "Error: No text search string specified." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: No text search string specified." << std::endl;
                         std::exit(0);
                     }
                 }
                 else
                 {
-                    std::cout << "Error: No text search string specified." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: No text search string specified." << std::endl;
                     std::exit(0);
                 }
             }
@@ -494,13 +543,13 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
 
                     if (main_data->input_hex_search[0] == '-' || main_data->input_hex_search == "")
                     {
-                        std::cout << "Error: No hex search string specified." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: No hex search string specified." << std::endl;
                         std::exit(0);
                     }
                 }
                 else
                 {
-                    std::cout << "Error: No hex search string specified." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: No hex search string specified." << std::endl;
                     std::exit(0);
                 }
             }
@@ -515,13 +564,13 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
 
                     if (main_data->input_regex_search[0] == '-' || main_data->input_regex_search == "")
                     {
-                        std::cout << "Error: No regex search string specified." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: No regex search string specified." << std::endl;
                         std::exit(0);
                     }
                 }
                 else
                 {
-                    std::cout << "Error: No regex search string specified." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: No regex search string specified." << std::endl;
                     std::exit(0);
                 }
             }
@@ -536,13 +585,13 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
 
                     if (main_data->input_rpkg_folder_path[0] == '-' || main_data->input_rpkg_folder_path == "")
                     {
-                        std::cout << "Error: Invalid RPKG file path." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
                         std::exit(0);
                     }
                 }
                 else
                 {
-                    std::cout << "Error: Invalid RPKG file path." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
                     std::exit(0);
                 }
             }
@@ -557,13 +606,13 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
 
                     if (main_data->input_rpkg_folder_path[0] == '-' || main_data->input_rpkg_folder_path == "")
                     {
-                        std::cout << "Error: Invalid RPKG file path." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
                         std::exit(0);
                     }
                 }
                 else
                 {
-                    std::cout << "Error: Invalid RPKG file path." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
                     std::exit(0);
                 }
             }
@@ -578,13 +627,13 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
 
                     if (main_data->input_rpkg_folder_path[0] == '-' || main_data->input_rpkg_folder_path == "")
                     {
-                        std::cout << "Error: Invalid RPKG file path." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
                         std::exit(0);
                     }
                 }
                 else
                 {
-                    std::cout << "Error: Invalid RPKG file path." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
                     std::exit(0);
                 }
             }
@@ -599,13 +648,13 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
 
                     if (main_data->input_rpkg_folder_path[0] == '-' || main_data->input_rpkg_folder_path == "")
                     {
-                        std::cout << "Error: Invalid RPKG file path." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
                         std::exit(0);
                     }
                 }
                 else
                 {
-                    std::cout << "Error: Invalid RPKG file path." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
                     std::exit(0);
                 }
             }
@@ -620,13 +669,13 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
 
                     if (main_data->input_rpkg_folder_path[0] == '-' || main_data->input_rpkg_folder_path == "")
                     {
-                        std::cout << "Error: Invalid RPKG file path." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
                         std::exit(0);
                     }
                 }
                 else
                 {
-                    std::cout << "Error: Invalid RPKG file path." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
                     std::exit(0);
                 }
             }
@@ -641,13 +690,13 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
 
                     if (main_data->input_rpkg_folder_path[0] == '-' || main_data->input_rpkg_folder_path == "")
                     {
-                        std::cout << "Error: Invalid RPKG file path." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
                         std::exit(0);
                     }
                 }
                 else
                 {
-                    std::cout << "Error: Invalid RPKG file path." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
                     std::exit(0);
                 }
             }
@@ -662,13 +711,13 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
 
                     if (main_data->input_rpkg_folder_path[0] == '-' || main_data->input_rpkg_folder_path == "")
                     {
-                        std::cout << "Error: Invalid RPKG file path." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
                         std::exit(0);
                     }
                 }
                 else
                 {
-                    std::cout << "Error: Invalid RPKG file path." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
                     std::exit(0);
                 }
             }
@@ -683,13 +732,13 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
 
                     if (main_data->input_rpkg_folder_path[0] == '-' || main_data->input_rpkg_folder_path == "")
                     {
-                        std::cout << "Error: Invalid RPKG file path." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
                         std::exit(0);
                     }
                 }
                 else
                 {
-                    std::cout << "Error: Invalid RPKG file path." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
                     std::exit(0);
                 }
             }
@@ -704,13 +753,13 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
 
                     if (main_data->input_rpkg_folder_path[0] == '-' || main_data->input_rpkg_folder_path == "")
                     {
-                        std::cout << "Error: Invalid RPKG file path." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
                         std::exit(0);
                     }
                 }
                 else
                 {
-                    std::cout << "Error: Invalid RPKG file path." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: Invalid RPKG folder path." << std::endl;
                     std::exit(0);
                 }
             }
@@ -739,13 +788,13 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
                             main_data->input_output_path = main_data->input_output_path.substr(0, main_data->input_output_path.length() - 1);
                         }
 
-                        //std::cout << "input: " << main_data->input_output_path << std::endl;
+                        //std::cout << main_data->console_prefix << "input: " << main_data->input_output_path << std::endl;
 
                         if (!path_exists(main_data->input_output_path))
                         {
                             std::vector<std::string> output_file_path_elements;
 
-                            //std::cout << "does not exist: " << main_data->input_output_path << std::endl;
+                            //std::cout << main_data->console_prefix << "does not exist: " << main_data->input_output_path << std::endl;
 
                             std::smatch m;
                             std::regex re("^([^\\/]+)\\/");
@@ -781,14 +830,14 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
                                 {
                                     if (!std::filesystem::create_directories(path))
                                     {
-                                        std::cout << "Error: Couldn't create directory " << path << std::endl;
+                                        std::cout << main_data->console_prefix << "Error: Couldn't create directory " << path << std::endl;
                                         std::exit(0);
                                     }
                                 }
 
                                 path.append("/");
 
-                                //std::cout << "directory: " << path << std::endl;
+                                //std::cout << main_data->console_prefix << "directory: " << path << std::endl;
                             }
                         }
 
@@ -796,13 +845,13 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
                     }
                     else
                     {
-                        std::cout << "Error: Invalid RPKG file path." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: Invalid RPKG file path." << std::endl;
                         std::exit(0);
                     }
                 }
                 else
                 {
-                    std::cout << "Error: Invalid RPKG file path." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: Invalid RPKG file path." << std::endl;
                     std::exit(0);
                 }
             }
@@ -810,25 +859,25 @@ void process_command_line(int argc, char* argv[], main_variables* main_data)
 
         if (main_data->mode_extract_from_rpkg && main_data->mode_search_rpkg)
         {
-            std::cout << "Error: RPKG extraction and search can not be used together." << std::endl;
+            std::cout << main_data->console_prefix << "Error: RPKG extraction and search can not be used together." << std::endl;
             std::exit(0);
         }
 
         if (main_data->mode_extract_from_rpkg && main_data->mode_generate_rpkg_file)
         {
-            std::cout << "Error: RPKG extraction and generate can not be used together." << std::endl;
+            std::cout << main_data->console_prefix << "Error: RPKG extraction and generate can not be used together." << std::endl;
             std::exit(0);
         }
 
         if (main_data->mode_hash_depends && !main_data->mode_filter)
         {
-            std::cout << "Error: Filter (-filter) must be specified when using hash depends mode." << std::endl;
+            std::cout << main_data->console_prefix << "Error: Filter (-filter) must be specified when using hash depends mode." << std::endl;
             std::exit(0);
         }
 
         if (main_data->mode_hash_probe && !main_data->mode_filter)
         {
-            std::cout << "Error: Filter (-filter) must be specified when using hash probe mode." << std::endl;
+            std::cout << main_data->console_prefix << "Error: Filter (-filter) must be specified when using hash probe mode." << std::endl;
             std::exit(0);
         }
     }
@@ -842,11 +891,11 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
     uint32_t bytes4 = 0, file_count, table_offset, table_size, patch_entry_count;
     uint64_t bytes8 = 0, offset1 = 0, offset2 = 0, fileSize = 0;
     std::string value;
-    std::string message = "Importing RPKG file data: ";
+    std::string message = main_data->console_prefix + "Importing RPKG file data: ";
 
     if (!file.good())
     {
-        std::cout << "Error: RPKG file " << rpkg_file_path << " could not be read." << std::endl;
+        std::cout << main_data->console_prefix << "Error: RPKG file " << rpkg_file_path << " could not be read." << std::endl;
         std::exit(0);
     }
 
@@ -858,12 +907,12 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
     {
         if (continue_on_failure)
         {
-            std::cout << "Error: " << rpkg_file_path << " is not a valid RPKG file." << std::endl;
+            std::cout << main_data->console_prefix << "Error: " << rpkg_file_path << " is not a valid RPKG file." << std::endl;
             return;
         }
         else
         {
-            std::cout << "Error: " << rpkg_file_path << " is not a valid RPKG file." << std::endl;
+            std::cout << main_data->console_prefix << "Error: " << rpkg_file_path << " is not a valid RPKG file." << std::endl;
             std::exit(0);
         }
     }
@@ -879,24 +928,24 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
     {
         temp_rpkg_data.rpkg_file_version = 1;
 
-        std::cout << "Valid RPKGv1 file magic signature found." << std::endl;
+        std::cout << main_data->console_prefix << "Valid RPKGv1 file magic signature found." << std::endl;
     }
     else if (std::string(input) == "2KPR")
     {
         temp_rpkg_data.rpkg_file_version = 2;
 
-        std::cout << "Valid RPKGv2 file magic signature found." << std::endl;
+        std::cout << main_data->console_prefix << "Valid RPKGv2 file magic signature found." << std::endl;
     }
     else
     {
         if (continue_on_failure)
         {
-            std::cout << "Error: " << main_data->input_rpkg_file_path << " is not a valid RPKG file." << std::endl;
+            std::cout << main_data->console_prefix << "Error: " << main_data->input_rpkg_file_path << " is not a valid RPKG file." << std::endl;
             return;
         }
         else
         {
-            std::cout << "Error: " << main_data->input_rpkg_file_path << " is not a valid RPKG file." << std::endl;
+            std::cout << main_data->console_prefix << "Error: " << main_data->input_rpkg_file_path << " is not a valid RPKG file." << std::endl;
             std::exit(0);
         }
     }
@@ -905,12 +954,12 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
     {
         if (continue_on_failure)
         {
-            std::cout << "Error: " << main_data->input_rpkg_file_path << " is a empty RPKG file." << std::endl;
+            std::cout << main_data->console_prefix << "Error: " << main_data->input_rpkg_file_path << " is a empty RPKG file." << std::endl;
             return;
         }
         else
         {
-            std::cout << "Error: " << main_data->input_rpkg_file_path << " is a empty RPKG file." << std::endl;
+            std::cout << main_data->console_prefix << "Error: " << main_data->input_rpkg_file_path << " is a empty RPKG file." << std::endl;
             std::exit(0);
         }
     }
@@ -925,7 +974,7 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
         if (main_data->debug)
         {
-            std::cout << "rpkgv2_chunk_number: " << bytes1 << std::endl;
+            std::cout << main_data->console_prefix << "rpkgv2_chunk_number: " << bytes1 << std::endl;
         }
 
         file.read(input, sizeof(bytes4));
@@ -937,7 +986,7 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
     if (main_data->debug)
     {
-        std::cout << "file_count: " << file_count << std::endl;
+        std::cout << main_data->console_prefix << "file_count: " << file_count << std::endl;
     }
 
     file.read(input, sizeof(table_offset));
@@ -946,7 +995,7 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
     if (main_data->debug)
     {
-        std::cout << "table_offset: " << table_offset << std::endl;
+        std::cout << main_data->console_prefix << "table_offset: " << table_offset << std::endl;
     }
 
     file.read(input, sizeof(table_size));
@@ -955,7 +1004,7 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
     if (main_data->debug)
     {
-        std::cout << "table_size: " << table_size << std::endl;
+        std::cout << main_data->console_prefix << "table_size: " << table_size << std::endl;
     }
 
     uint64_t position = file.tellg();
@@ -967,21 +1016,21 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
     if (main_data->debug)
     {
-        std::cout << "patch_entry_count: " << patch_entry_count << std::endl;
-        std::cout << "file.tellg(): " << file.tellg() << std::endl;
+        std::cout << main_data->console_prefix << "patch_entry_count: " << patch_entry_count << std::endl;
+        std::cout << main_data->console_prefix << "file.tellg(): " << file.tellg() << std::endl;
     }
 
     if (temp_rpkg_data.rpkg_file_version == 1 && ((uint64_t)patch_entry_count * (uint64_t)0x8 + (uint64_t)0x14 + (uint64_t)0x10) >= fileSize)
     {
         temp_rpkg_data.is_patch_file = false;
 
-        std::cout << "RPKGv1 file " << temp_rpkg_data.rpkg_file_name << " is not a patch file." << std::endl;
+        std::cout << main_data->console_prefix << "RPKGv1 file " << temp_rpkg_data.rpkg_file_name << " is not a patch file." << std::endl;
     }
     else if (temp_rpkg_data.rpkg_file_version == 2 && ((uint64_t)patch_entry_count * (uint64_t)0x8 + (uint64_t)0x1D + (uint64_t)0x10) >= fileSize)
     {
         temp_rpkg_data.is_patch_file = false;
 
-        std::cout << "RPKGv2 file " << temp_rpkg_data.rpkg_file_name << " is not a patch file." << std::endl;
+        std::cout << main_data->console_prefix << "RPKGv2 file " << temp_rpkg_data.rpkg_file_name << " is not a patch file." << std::endl;
     }
     else
     {
@@ -1007,13 +1056,13 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
         {
             temp_rpkg_data.is_patch_file = true;
 
-            std::cout << "RPKGv1 file " << temp_rpkg_data.rpkg_file_name << " is a patch file." << std::endl;
+            std::cout << main_data->console_prefix << "RPKGv1 file " << temp_rpkg_data.rpkg_file_name << " is a patch file." << std::endl;
         }
         else if (temp_rpkg_data.rpkg_file_version == 2 && patchValue == ((uint64_t)table_offset + (uint64_t)table_size + (uint64_t)patch_entry_count * (uint64_t)0x8 + (uint64_t)0x1D) && patchZeroTest == 0x0)
         {
             temp_rpkg_data.is_patch_file = true;
 
-            std::cout << "RPKGv2 file " << temp_rpkg_data.rpkg_file_name << " is a patch file." << std::endl;
+            std::cout << main_data->console_prefix << "RPKGv2 file " << temp_rpkg_data.rpkg_file_name << " is a patch file." << std::endl;
         }
         else
         {
@@ -1021,11 +1070,11 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
             if (temp_rpkg_data.rpkg_file_version == 1)
             {
-                std::cout << "RPKGv1 file " << temp_rpkg_data.rpkg_file_name << " is not a patch file." << std::endl;
+                std::cout << main_data->console_prefix << "RPKGv1 file " << temp_rpkg_data.rpkg_file_name << " is not a patch file." << std::endl;
             }
             else
             {
-                std::cout << "RPKGv2 file " << temp_rpkg_data.rpkg_file_name << " is not a patch file." << std::endl;
+                std::cout << main_data->console_prefix << "RPKGv2 file " << temp_rpkg_data.rpkg_file_name << " is not a patch file." << std::endl;
             }
         }
     }
@@ -1039,11 +1088,11 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
     {
         if (temp_rpkg_data.rpkg_file_version == 1)
         {
-            std::cout << "Importing index from RPKGv1 file: " << temp_rpkg_data.rpkg_file_name << std::endl;
+            std::cout << main_data->console_prefix << "Importing index from RPKGv1 file: " << temp_rpkg_data.rpkg_file_name << std::endl;
         }
         else
         {
-            std::cout << "Importing index from RPKGv2 file: " << temp_rpkg_data.rpkg_file_name << std::endl;
+            std::cout << main_data->console_prefix << "Importing index from RPKGv2 file: " << temp_rpkg_data.rpkg_file_name << std::endl;
         }
 
         file.read(input, sizeof(patch_entry_count));
@@ -1052,8 +1101,8 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
         if (main_data->debug)
         {
-            std::cout << "patch_entry_count: " << patch_entry_count << std::endl;
-            std::cout << "file.tellg(): " << file.tellg() << std::endl;
+            std::cout << main_data->console_prefix << "patch_entry_count: " << patch_entry_count << std::endl;
+            std::cout << main_data->console_prefix << "file.tellg(): " << file.tellg() << std::endl;
         }
 
         for (uint64_t i = 0; i < patch_entry_count; i++)
@@ -1064,7 +1113,7 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
             if (main_data->debug)
             {
-                std::cout << "patchEntryList(" << i << "): " << bytes8 << std::endl;
+                std::cout << main_data->console_prefix << "patchEntryList(" << i << "): " << bytes8 << std::endl;
             }
         }
 
@@ -1083,19 +1132,19 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
         {
             input_file_size = (uint64_t)table_offset + (uint64_t)table_size + (uint64_t)0x10;
 
-            std::cout << "Importing index from RPKGv1 file: " << temp_rpkg_data.rpkg_file_name << std::endl;
+            std::cout << main_data->console_prefix << "Importing index from RPKGv1 file: " << temp_rpkg_data.rpkg_file_name << std::endl;
         }
         else
         {
             input_file_size = (uint64_t)table_offset + (uint64_t)table_size + (uint64_t)0x19;
 
-            std::cout << "Importing index from RPKGv2 file: " << temp_rpkg_data.rpkg_file_name << std::endl;
+            std::cout << main_data->console_prefix << "Importing index from RPKGv2 file: " << temp_rpkg_data.rpkg_file_name << std::endl;
         }
     }
 
     if (main_data->debug)
     {
-        std::cout << "input_file_size: " << input_file_size << std::endl;
+        std::cout << main_data->console_prefix << "input_file_size: " << input_file_size << std::endl;
     }
 
     position = (uint64_t)file.tellg();
@@ -1127,7 +1176,7 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
         if (main_data->debug)
         {
-            std::cout << "hash: " << value << std::endl;
+            std::cout << main_data->console_prefix << "hash: " << value << std::endl;
         }
 
         std::memcpy(&bytes8, (input_file_data.get() + position), sizeof(bytes8));
@@ -1136,7 +1185,7 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
         if (main_data->debug)
         {
-            std::cout << "hashOffset: " << bytes8 << std::endl;
+            std::cout << main_data->console_prefix << "hashOffset: " << bytes8 << std::endl;
         }
 
         std::memcpy(&bytes4, (input_file_data.get() + position), sizeof(bytes4));
@@ -1145,7 +1194,7 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
         if (main_data->debug)
         {
-            std::cout << "hashSize: " << bytes4 << std::endl;
+            std::cout << main_data->console_prefix << "hashSize: " << bytes4 << std::endl;
         }
 
         if ((temp_rpkg_data.hash_size.back() & 0x3FFFFFFF) != 0)
@@ -1154,8 +1203,8 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
             if (main_data->debug)
             {
-                std::cout << "LZ4ed." << std::endl;
-                std::cout << "hashSize: " << temp_rpkg_data.hash_size.back() << std::endl;
+                std::cout << main_data->console_prefix << "LZ4ed." << std::endl;
+                std::cout << main_data->console_prefix << "hashSize: " << temp_rpkg_data.hash_size.back() << std::endl;
             }
         }
         else
@@ -1164,8 +1213,8 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
             if (main_data->debug)
             {
-                std::cout << "Not LZ4ed." << std::endl;
-                std::cout << "hashSize: " << temp_rpkg_data.hash_size.back() << std::endl;
+                std::cout << main_data->console_prefix << "Not LZ4ed." << std::endl;
+                std::cout << main_data->console_prefix << "hashSize: " << temp_rpkg_data.hash_size.back() << std::endl;
             }
         }
 
@@ -1175,8 +1224,8 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
             if (main_data->debug)
             {
-                std::cout << "XORed." << std::endl;
-                std::cout << "hashSize: " << temp_rpkg_data.hash_size.back() << std::endl;
+                std::cout << main_data->console_prefix << "XORed." << std::endl;
+                std::cout << main_data->console_prefix << "hashSize: " << temp_rpkg_data.hash_size.back() << std::endl;
             }
         }
         else
@@ -1185,8 +1234,8 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
             if (main_data->debug)
             {
-                std::cout << "Not XORed." << std::endl;
-                std::cout << "hashSize: " << temp_rpkg_data.hash_size.back() << std::endl;
+                std::cout << main_data->console_prefix << "Not XORed." << std::endl;
+                std::cout << main_data->console_prefix << "hashSize: " << temp_rpkg_data.hash_size.back() << std::endl;
             }
         }
 
@@ -1204,7 +1253,7 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
         if (main_data->debug)
         {
-            std::cout << "fileType: " << temp_rpkg_data.hash_file_name.back() << std::endl;
+            std::cout << main_data->console_prefix << "fileType: " << temp_rpkg_data.hash_file_name.back() << std::endl;
         }
 
         std::memcpy(&bytes4, (input_file_data.get() + position), sizeof(bytes4));
@@ -1213,7 +1262,7 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
         if (main_data->debug)
         {
-            std::cout << "chunkSize1: " << bytes4 << std::endl;
+            std::cout << main_data->console_prefix << "chunkSize1: " << bytes4 << std::endl;
         }
 
         std::memcpy(&bytes4, (input_file_data.get() + position), sizeof(bytes4));
@@ -1222,7 +1271,7 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
         if (main_data->debug)
         {
-            std::cout << "chunkSize2: " << bytes4 << std::endl;
+            std::cout << main_data->console_prefix << "chunkSize2: " << bytes4 << std::endl;
         }
 
         std::memcpy(&bytes4, (input_file_data.get() + position), sizeof(bytes4));
@@ -1231,7 +1280,7 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
         if (main_data->debug)
         {
-            std::cout << "sizeFinal: " << bytes4 << std::endl;
+            std::cout << main_data->console_prefix << "sizeFinal: " << bytes4 << std::endl;
         }
 
         std::memcpy(&bytes4, (input_file_data.get() + position), sizeof(bytes4));
@@ -1240,7 +1289,7 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
         if (main_data->debug)
         {
-            std::cout << "sizeMem: " << bytes4 << std::endl;
+            std::cout << main_data->console_prefix << "sizeMem: " << bytes4 << std::endl;
         }
 
         std::memcpy(&bytes4, (input_file_data.get() + position), sizeof(bytes4));
@@ -1249,7 +1298,7 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
         if (main_data->debug)
         {
-            std::cout << "sizeVideoMem: " << bytes4 << std::endl;
+            std::cout << main_data->console_prefix << "sizeVideoMem: " << bytes4 << std::endl;
         }
 
         hash_reference_variables temp_hash_reference_data;
@@ -1264,7 +1313,7 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
             if (main_data->debug)
             {
-                std::cout << "hashLinkCount: " << bytes4 << std::endl;
+                std::cout << main_data->console_prefix << "hashLinkCount: " << bytes4 << std::endl;
             }
 
             uint32_t temp_hash_reference_count = temp_hash_reference_data.hash_reference_count & 0x3FFFFFFF;
@@ -1277,7 +1326,7 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
                 if (main_data->debug)
                 {
-                    std::cout << "hashLinkTypes(" << i << "): " << bytes1 << std::endl;
+                    std::cout << main_data->console_prefix << "hashLinkTypes(" << i << "): " << bytes1 << std::endl;
                 }
             }
 
@@ -1292,8 +1341,8 @@ void import_rpkg_file(main_variables* main_data, std::string rpkg_file_path, std
 
                 if (main_data->debug)
                 {
-                    std::cout << "hashLinks(" << i << "): " << bytes8 << std::endl;
-                    std::cout << "hashLinkNames(" << i << "): " << value << std::endl;
+                    std::cout << main_data->console_prefix << "hashLinks(" << i << "): " << bytes8 << std::endl;
+                    std::cout << main_data->console_prefix << "hashLinkNames(" << i << "): " << value << std::endl;
                 }
             }
 
@@ -1410,13 +1459,13 @@ void generate_rpkg_file(main_variables* main_data)
 
         if (path_exists(rpkg_meta_file_path))
         {
-            std::cout << "Using RPKG meta file: " << rpkg_meta_file_name << std::endl;
+            std::cout << main_data->console_prefix << "Using RPKG meta file: " << rpkg_meta_file_name << std::endl;
 
             std::ifstream rpkg_meta_file = std::ifstream(rpkg_meta_file_path, std::ifstream::binary);
 
             if (!rpkg_meta_file.good())
             {
-                std::cout << "Error: RPKG meta file " << rpkg_meta_file_path << " could not be read." << std::endl;
+                std::cout << main_data->console_prefix << "Error: RPKG meta file " << rpkg_meta_file_path << " could not be read." << std::endl;
                 std::exit(0);
             }
 
@@ -1433,17 +1482,17 @@ void generate_rpkg_file(main_variables* main_data)
             {
                 rpkg_meta_data.rpkg_file_version = 1;
 
-                std::cout << "Valid RPKGv1 file magic signature found." << std::endl;
+                std::cout << main_data->console_prefix << "Valid RPKGv1 file magic signature found." << std::endl;
             }
             else if (std::string(input) == "2KPR")
             {
                 rpkg_meta_data.rpkg_file_version = 2;
 
-                std::cout << "Valid RPKGv2 file magic signature found." << std::endl;
+                std::cout << main_data->console_prefix << "Valid RPKGv2 file magic signature found." << std::endl;
             }
             else
             {
-                std::cout << "Error: " << rpkg_meta_file_path << " is not a valid RPKG file." << std::endl;
+                std::cout << main_data->console_prefix << "Error: " << rpkg_meta_file_path << " is not a valid RPKG file." << std::endl;
                 std::exit(0);
             }
 
@@ -1457,7 +1506,7 @@ void generate_rpkg_file(main_variables* main_data)
 
                 if (main_data->debug)
                 {
-                    std::cout << "rpkgv2_chunk_number: " << bytes1 << std::endl;
+                    std::cout << main_data->console_prefix << "rpkgv2_chunk_number: " << bytes1 << std::endl;
                 }
 
                 rpkg_meta_file.read(input, sizeof(bytes4));
@@ -1468,7 +1517,7 @@ void generate_rpkg_file(main_variables* main_data)
 
             if (main_data->debug)
             {
-                std::cout << "rpkg_meta_data.rpkg_file_count: " << rpkg_meta_data.rpkg_file_count << std::endl;
+                std::cout << main_data->console_prefix << "rpkg_meta_data.rpkg_file_count: " << rpkg_meta_data.rpkg_file_count << std::endl;
             }
 
             rpkg_meta_file.read(input, sizeof(bytes4));
@@ -1476,7 +1525,7 @@ void generate_rpkg_file(main_variables* main_data)
 
             if (main_data->debug)
             {
-                std::cout << "rpkg_meta_data.rpkg_table_offset: " << rpkg_meta_data.rpkg_table_offset << std::endl;
+                std::cout << main_data->console_prefix << "rpkg_meta_data.rpkg_table_offset: " << rpkg_meta_data.rpkg_table_offset << std::endl;
             }
 
             rpkg_meta_file.read(input, sizeof(bytes4));
@@ -1484,7 +1533,7 @@ void generate_rpkg_file(main_variables* main_data)
 
             if (main_data->debug)
             {
-                std::cout << "rpkg_meta_data.rpkg_table_size: " << rpkg_meta_data.rpkg_table_size << std::endl;
+                std::cout << main_data->console_prefix << "rpkg_meta_data.rpkg_table_size: " << rpkg_meta_data.rpkg_table_size << std::endl;
             }
 
             uint64_t position = rpkg_meta_file.tellg();
@@ -1494,21 +1543,21 @@ void generate_rpkg_file(main_variables* main_data)
 
             if (main_data->debug)
             {
-                std::cout << "patch_entry_count: " << rpkg_meta_data.patch_entry_count << std::endl;
-                std::cout << "file.tellg(): " << rpkg_meta_file.tellg() << std::endl;
+                std::cout << main_data->console_prefix << "patch_entry_count: " << rpkg_meta_data.patch_entry_count << std::endl;
+                std::cout << main_data->console_prefix << "file.tellg(): " << rpkg_meta_file.tellg() << std::endl;
             }
 
             if (rpkg_meta_data.rpkg_file_version == 1 && ((uint64_t)rpkg_meta_data.patch_entry_count * (uint64_t)0x8 + (uint64_t)0x14 + (uint64_t)0x10) >= rpkg_meta_file_size)
             {
                 rpkg_meta_data.is_patch_file = false;
 
-                std::cout << "RPKGv1 file " << rpkg_meta_file_path << " is not a patch file." << std::endl;
+                std::cout << main_data->console_prefix << "RPKGv1 file " << rpkg_meta_file_path << " is not a patch file." << std::endl;
             }
             else if (rpkg_meta_data.rpkg_file_version == 2 && ((uint64_t)rpkg_meta_data.patch_entry_count * (uint64_t)0x8 + (uint64_t)0x1D + (uint64_t)0x10) >= rpkg_meta_file_size)
             {
                 rpkg_meta_data.is_patch_file = false;
 
-                std::cout << "RPKGv2 file " << rpkg_meta_file_path << " is not a patch file." << std::endl;
+                std::cout << main_data->console_prefix << "RPKGv2 file " << rpkg_meta_file_path << " is not a patch file." << std::endl;
             }
             else
             {
@@ -1534,13 +1583,13 @@ void generate_rpkg_file(main_variables* main_data)
                 {
                     rpkg_meta_data.is_patch_file = true;
 
-                    std::cout << "RPKGv1 file " << rpkg_meta_file_path << " is a patch file." << std::endl;
+                    std::cout << main_data->console_prefix << "RPKGv1 file " << rpkg_meta_file_path << " is a patch file." << std::endl;
                 }
                 else if (rpkg_meta_data.rpkg_file_version == 2 && patchValue == ((uint64_t)rpkg_meta_data.rpkg_table_offset + (uint64_t)rpkg_meta_data.rpkg_table_size + (uint64_t)rpkg_meta_data.patch_entry_count * (uint64_t)0x8 + (uint64_t)0x1D) && patchZeroTest == 0x0)
                 {
                     rpkg_meta_data.is_patch_file = true;
 
-                    std::cout << "RPKGv2 file " << rpkg_meta_file_path << " is a patch file." << std::endl;
+                    std::cout << main_data->console_prefix << "RPKGv2 file " << rpkg_meta_file_path << " is a patch file." << std::endl;
                 }
                 else
                 {
@@ -1548,11 +1597,11 @@ void generate_rpkg_file(main_variables* main_data)
 
                     if (rpkg_meta_data.rpkg_file_version == 1)
                     {
-                        std::cout << "RPKGv1 file " << rpkg_meta_file_path << " is not a patch file." << std::endl;
+                        std::cout << main_data->console_prefix << "RPKGv1 file " << rpkg_meta_file_path << " is not a patch file." << std::endl;
                     }
                     else
                     {
-                        std::cout << "RPKGv2 file " << rpkg_meta_file_path << " is not a patch file." << std::endl;
+                        std::cout << main_data->console_prefix << "RPKGv2 file " << rpkg_meta_file_path << " is not a patch file." << std::endl;
                     }
                 }
             }
@@ -1566,7 +1615,7 @@ void generate_rpkg_file(main_variables* main_data)
 
                 if (main_data->debug)
                 {
-                    std::cout << "rpkg_meta_data.patch_entry_count: " << rpkg_meta_data.patch_entry_count << std::endl;
+                    std::cout << main_data->console_prefix << "rpkg_meta_data.patch_entry_count: " << rpkg_meta_data.patch_entry_count << std::endl;
                 }
 
                 for (uint64_t i = 0; i < rpkg_meta_data.patch_entry_count; i++)
@@ -1577,7 +1626,7 @@ void generate_rpkg_file(main_variables* main_data)
 
                     if (main_data->debug)
                     {
-                        std::cout << "rpkg_meta_data.patch_entry_list(" << i << "): " << rpkg_meta_data.patch_entry_list.back() << std::endl;
+                        std::cout << main_data->console_prefix << "rpkg_meta_data.patch_entry_list(" << i << "): " << rpkg_meta_data.patch_entry_list.back() << std::endl;
                     }
                 }
             }
@@ -1591,7 +1640,7 @@ void generate_rpkg_file(main_variables* main_data)
 
                 if (main_data->debug)
                 {
-                    std::cout << "rpkg_meta_data.hash: " << rpkg_meta_data.hash.back() << std::endl;
+                    std::cout << main_data->console_prefix << "rpkg_meta_data.hash: " << rpkg_meta_data.hash.back() << std::endl;
                 }
 
                 rpkg_meta_file.read(input, sizeof(bytes8));
@@ -1600,7 +1649,7 @@ void generate_rpkg_file(main_variables* main_data)
 
                 if (main_data->debug)
                 {
-                    std::cout << "rpkg_meta_data.hash_offset: " << rpkg_meta_data.hash_offset.back() << std::endl;
+                    std::cout << main_data->console_prefix << "rpkg_meta_data.hash_offset: " << rpkg_meta_data.hash_offset.back() << std::endl;
                 }
 
                 rpkg_meta_file.read(input, sizeof(bytes4));
@@ -1609,7 +1658,7 @@ void generate_rpkg_file(main_variables* main_data)
 
                 if (main_data->debug)
                 {
-                    std::cout << "rpkg_meta_data.hash_size: " << rpkg_meta_data.hash_size.back() << std::endl;
+                    std::cout << main_data->console_prefix << "rpkg_meta_data.hash_size: " << rpkg_meta_data.hash_size.back() << std::endl;
                 }
             }
         }
@@ -1618,11 +1667,11 @@ void generate_rpkg_file(main_variables* main_data)
             rpkg_meta_data.is_patch_file = true;
             rpkg_meta_data.patch_entry_count = 0x0;
 
-            std::cout << "RPKG meta file matching the name of the folder was not found" << std::endl;
-            std::cout << "   in it's root:" << main_data->input_rpkg_folder_path << std::endl;
-            std::cout << "Defaulting to RPKGv1 patch file creation settings:" << std::endl;
-            std::cout << "  - Patch entry (deletion list) count is set to 0" << std::endl;
-            std::cout << "  - No patch entries (deletion entries) will be appended" << std::endl;
+            std::cout << main_data->console_prefix << "RPKG meta file matching the name of the folder was not found" << std::endl;
+            std::cout << main_data->console_prefix << "   in it's root:" << main_data->input_rpkg_folder_path << std::endl;
+            std::cout << main_data->console_prefix << "Defaulting to RPKGv1 patch file creation settings:" << std::endl;
+            std::cout << main_data->console_prefix << "  - Patch entry (deletion list) count is set to 0" << std::endl;
+            std::cout << main_data->console_prefix << "  - No patch entries (deletion entries) will be appended" << std::endl;
         }
 
         std::vector<std::string> files;
@@ -1657,7 +1706,7 @@ void generate_rpkg_file(main_variables* main_data)
 
                 ss << "Scanning folder" << std::string(period_count, '.');
 
-                std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ');
+                std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ');
 
                 period_count++;
             }
@@ -1689,7 +1738,7 @@ void generate_rpkg_file(main_variables* main_data)
 
                 if (main_data->debug)
                 {
-                    std::cout << entry.path().string() << "," << hash_file_name << "," << hash_string << "," << resource_type << std::endl;
+                    std::cout << main_data->console_prefix << entry.path().string() << "," << hash_file_name << "," << hash_string << "," << resource_type << std::endl;
                 }
 
                 bool is_hash_file = true;
@@ -1716,14 +1765,14 @@ void generate_rpkg_file(main_variables* main_data)
 
                     if (main_data->debug)
                     {
-                        std::cout << entry.path().string() << " is a valid hash file for RPKG patch file generation." << std::endl;
+                        std::cout << main_data->console_prefix << entry.path().string() << " is a valid hash file for RPKG patch file generation." << std::endl;
                     }
                 }
                 else
                 {
                     if (main_data->debug)
                     {
-                        std::cout << entry.path().string() << " is not a valid hash file for RPKG patch file generation." << std::endl;
+                        std::cout << main_data->console_prefix << entry.path().string() << " is not a valid hash file for RPKG patch file generation." << std::endl;
                     }
                 }
             }
@@ -1733,20 +1782,20 @@ void generate_rpkg_file(main_variables* main_data)
 
         ss << "Scanning folder: Done";
 
-        std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
 
         if (main_data->debug)
         {
-            std::cout << "RPKG patch file " << rpkg_file_name << " will include these files: " << std::endl;
+            std::cout << main_data->console_prefix << "RPKG patch file " << rpkg_file_name << " will include these files: " << std::endl;
         }
 
         if (main_data->debug)
         {
             for (uint64_t i = 0; i < files.size(); i++)
             {
-                std::cout << "  File: " << files.at(i) << std::endl;
-                std::cout << "    Hash file name: " << hash_file_names.at(i) << std::endl;
-                std::cout << "    Resource type: " << hash_resource_types.at(i) << std::endl;
+                std::cout << main_data->console_prefix << "  File: " << files.at(i) << std::endl;
+                std::cout << main_data->console_prefix << "    Hash file name: " << hash_file_names.at(i) << std::endl;
+                std::cout << main_data->console_prefix << "    Resource type: " << hash_resource_types.at(i) << std::endl;
             }
         }
 
@@ -1759,20 +1808,20 @@ void generate_rpkg_file(main_variables* main_data)
 
         if (!temp_file_output.good())
         {
-            std::cout << "Error: Temporary file " << temp_file_name << " could not be read." << std::endl;
+            std::cout << main_data->console_prefix << "Error: Temporary file " << temp_file_name << " could not be read." << std::endl;
             std::exit(0);
         }
 
-        std::cout << "Writing to temporary RPKG file: " << temp_file_name << std::endl;
+        std::cout << main_data->console_prefix << "Writing to temporary RPKG file: " << temp_file_name << std::endl;
 
         start_time = std::chrono::high_resolution_clock::now();
         int stringstream_length = 80;
 
-        std::string message = "Writing RPKG data: ";
+        std::string message = main_data->console_prefix + "Writing RPKG data: ";
 
         bool found_all_meta_files = true;
 
-        std::vector<uint32_t> files_index;
+        std::vector<uint64_t> files_index;
 
         if (use_rpkg_file_meta_data)
         {
@@ -1786,14 +1835,14 @@ void generate_rpkg_file(main_variables* main_data)
 
                     hash_in_rpkg_meta.at(it->second) = true;
 
-                    //std::cout << uint64_t_to_hex_string(rpkg_meta_data.hash.at(i)) << " found at index " << it->second << " of hash_map" << std::endl;
+                    //std::cout << main_data->console_prefix << uint64_t_to_hex_string(rpkg_meta_data.hash.at(i)) << " found at index " << it->second << " of hash_map" << std::endl;
                 }
             }
         }
 
         for (uint64_t i = 0; i < hashes.size(); i++)
         {
-            //std::cout << files.at(i) << ", " << hashes.at(i) << ", " << hash_in_rpkg_meta.at(i) << std::endl;
+            //std::cout << main_data->console_prefix << files.at(i) << ", " << hashes.at(i) << ", " << hash_in_rpkg_meta.at(i) << std::endl;
 
             if (!hash_in_rpkg_meta.at(i))
             {
@@ -1803,7 +1852,7 @@ void generate_rpkg_file(main_variables* main_data)
 
         //for (uint64_t i = 0; i < files_index.size(); i++)
         //{
-            //std::cout << "files_index.at(" << i << "): " << files_index.at(i) << ", files.at(" << files_index.at(i) << "): " << files.at(files_index.at(i)) << ", hashes.at(" << files_index.at(i) << "): " << uint64_t_to_hex_string(hashes.at(files_index.at(i))) << std::endl;
+            //std::cout << main_data->console_prefix << "files_index.at(" << i << "): " << files_index.at(i) << ", files.at(" << files_index.at(i) << "): " << files.at(files_index.at(i)) << ", hashes.at(" << files_index.at(i) << "): " << uint64_t_to_hex_string(hashes.at(files_index.at(i))) << std::endl;
         //}
 
         for (uint64_t i = 0; i < files_index.size(); i++)
@@ -1819,7 +1868,7 @@ void generate_rpkg_file(main_variables* main_data)
 
             if (!file.good())
             {
-                std::cout << "Error: Hash file " << files.at(files_index.at(i)) << " could not be read." << std::endl;
+                std::cout << main_data->console_prefix << "Error: Hash file " << files.at(files_index.at(i)) << " could not be read." << std::endl;
                 std::exit(0);
             }
 
@@ -1846,7 +1895,7 @@ void generate_rpkg_file(main_variables* main_data)
 
                 if (!meta_file.good())
                 {
-                    std::cout << "Error: Hash meta file " << files.at(files_index.at(i)) + ".meta" << " could not be read." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: Hash meta file " << files.at(files_index.at(i)) + ".meta" << " could not be read." << std::endl;
                     std::exit(0);
                 }
 
@@ -1872,8 +1921,8 @@ void generate_rpkg_file(main_variables* main_data)
 
                     if (main_data->debug)
                     {
-                        std::cout << "LZ4ed." << std::endl;
-                        std::cout << "hashSize: " << meta_data.hash_size.back() << std::endl;
+                        std::cout << main_data->console_prefix << "LZ4ed." << std::endl;
+                        std::cout << main_data->console_prefix << "hashSize: " << meta_data.hash_size.back() << std::endl;
                     }
                 }
                 else
@@ -1882,8 +1931,8 @@ void generate_rpkg_file(main_variables* main_data)
 
                     if (main_data->debug)
                     {
-                        std::cout << "Not LZ4ed." << std::endl;
-                        std::cout << "hashSize: " << meta_data.hash_size.back() << std::endl;
+                        std::cout << main_data->console_prefix << "Not LZ4ed." << std::endl;
+                        std::cout << main_data->console_prefix << "hashSize: " << meta_data.hash_size.back() << std::endl;
                     }
                 }
 
@@ -1893,8 +1942,8 @@ void generate_rpkg_file(main_variables* main_data)
 
                     if (main_data->debug)
                     {
-                        std::cout << "XORed." << std::endl;
-                        std::cout << "hashSize: " << meta_data.hash_size.back() << std::endl;
+                        std::cout << main_data->console_prefix << "XORed." << std::endl;
+                        std::cout << main_data->console_prefix << "hashSize: " << meta_data.hash_size.back() << std::endl;
                     }
                 }
                 else
@@ -1903,8 +1952,8 @@ void generate_rpkg_file(main_variables* main_data)
 
                     if (main_data->debug)
                     {
-                        std::cout << "Not XORed." << std::endl;
-                        std::cout << "hashSize: " << meta_data.hash_size.back() << std::endl;
+                        std::cout << main_data->console_prefix << "Not XORed." << std::endl;
+                        std::cout << main_data->console_prefix << "hashSize: " << meta_data.hash_size.back() << std::endl;
                     }
                 }
 
@@ -1944,7 +1993,7 @@ void generate_rpkg_file(main_variables* main_data)
 
                     if (main_data->debug)
                     {
-                        std::cout << "temp_hash_reference_data.hash_reference_count: " << temp_hash_reference_data.hash_reference_count << std::endl;
+                        std::cout << main_data->console_prefix << "temp_hash_reference_data.hash_reference_count: " << temp_hash_reference_data.hash_reference_count << std::endl;
                     }
 
                     uint32_t temp_hash_reference_count = temp_hash_reference_data.hash_reference_count & 0x3FFFFFFF;
@@ -1957,7 +2006,7 @@ void generate_rpkg_file(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << "temp_hash_reference_data.hash_reference_type(" << j << "): " << temp_hash_reference_data.hash_reference_type.back() << std::endl;
+                            std::cout << main_data->console_prefix << "temp_hash_reference_data.hash_reference_type(" << j << "): " << temp_hash_reference_data.hash_reference_type.back() << std::endl;
                         }
                     }
 
@@ -1971,8 +2020,8 @@ void generate_rpkg_file(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << "temp_hash_reference_data.hash_reference(" << j << "): " << temp_hash_reference_data.hash_reference.back() << std::endl;
-                            std::cout << "temp_hash_reference_data.hash_reference_string(" << j << "): " << temp_hash_reference_data.hash_reference_string.back() << std::endl;
+                            std::cout << main_data->console_prefix << "temp_hash_reference_data.hash_reference(" << j << "): " << temp_hash_reference_data.hash_reference.back() << std::endl;
+                            std::cout << main_data->console_prefix << "temp_hash_reference_data.hash_reference_string(" << j << "): " << temp_hash_reference_data.hash_reference_string.back() << std::endl;
                         }
                     }
                 }
@@ -2000,7 +2049,7 @@ void generate_rpkg_file(main_variables* main_data)
 
             if (main_data->debug)
             {
-                std::cout << "Adding " << hash_file_names.at(i) << " to " << rpkg_file_name << std::endl;
+                std::cout << main_data->console_prefix << "Adding " << hash_file_names.at(i) << " to " << rpkg_file_name << std::endl;
             }
 
             if (meta_data.is_lz4ed.back())
@@ -2026,16 +2075,16 @@ void generate_rpkg_file(main_variables* main_data)
 
                 if (main_data->debug)
                 {
-                    std::cout << "LZ4_compressBound: " << compressed_size << std::endl;
-                    std::cout << "LZ4_compress_default: " << compressed_size_final << std::endl;
+                    std::cout << main_data->console_prefix << "LZ4_compressBound: " << compressed_size << std::endl;
+                    std::cout << main_data->console_prefix << "LZ4_compress_default: " << compressed_size_final << std::endl;
                 }
 
                 if (main_data->debug)
                 {
-                    std::cout << hash_file_names.at(files_index.at(i)) << " has been LZ4 compressed." << std::endl;
-                    std::cout << "Original size of " << hash_file_names.at(files_index.at(i)) << ": " << input_file_size << std::endl;
-                    std::cout << "LZ4 compressed size of " << hash_file_names.at(files_index.at(i)) << ": " << compressed_size_final << std::endl;
-                    std::cout << "LZ4 compression ratio: " << ((double)input_file_size / (double)compressed_size_final) << std::endl;
+                    std::cout << main_data->console_prefix << hash_file_names.at(files_index.at(i)) << " has been LZ4 compressed." << std::endl;
+                    std::cout << main_data->console_prefix << "Original size of " << hash_file_names.at(files_index.at(i)) << ": " << input_file_size << std::endl;
+                    std::cout << main_data->console_prefix << "LZ4 compressed size of " << hash_file_names.at(files_index.at(i)) << ": " << compressed_size_final << std::endl;
+                    std::cout << main_data->console_prefix << "LZ4 compression ratio: " << ((double)input_file_size / (double)compressed_size_final) << std::endl;
                 }
 
                 if (meta_data.is_xored.back())
@@ -2044,7 +2093,7 @@ void generate_rpkg_file(main_variables* main_data)
 
                     if (main_data->debug)
                     {
-                        std::cout << "XORing output_file_data with a input_file_size of " << input_file_size << std::endl;
+                        std::cout << main_data->console_prefix << "XORing output_file_data with a input_file_size of " << input_file_size << std::endl;
                     }
 
                     temp_rpkg_data.is_xored.push_back(1);
@@ -2111,7 +2160,7 @@ void generate_rpkg_file(main_variables* main_data)
 
                     if (main_data->debug)
                     {
-                        std::cout << "XORing output_file_data with a input_file_size of " << input_file_size << std::endl;
+                        std::cout << main_data->console_prefix << "XORing output_file_data with a input_file_size of " << input_file_size << std::endl;
                     }
 
                     temp_rpkg_data.is_xored.push_back(1);
@@ -2166,22 +2215,22 @@ void generate_rpkg_file(main_variables* main_data)
 
             if (main_data->debug)
             {
-                std::cout << "Writing to temporary file: " << temp_file_name << std::endl;
+                std::cout << main_data->console_prefix << "Writing to temporary file: " << temp_file_name << std::endl;
             }
 
             if (main_data->debug)
             {
-                std::cout << "hash: " << temp_rpkg_data.hash.back() << std::endl;
-                std::cout << "hashString: " << temp_rpkg_data.hash_string.back() << std::endl;
-                std::cout << "hashSize: " << temp_rpkg_data.hash_size.back() << std::endl;
-                std::cout << "isLZ4ed: " << temp_rpkg_data.is_lz4ed.back() << std::endl;
-                std::cout << "isXORed: " << temp_rpkg_data.is_xored.back() << std::endl;
-                std::cout << "fileType: " << temp_rpkg_data.hash_resource_type.back() << std::endl;
-                std::cout << "chunkSize1: " << temp_rpkg_data.hash_reference_table_size.back() << std::endl;
-                std::cout << "chunkSize2: " << temp_rpkg_data.hash_reference_table_dummy.back() << std::endl;
-                std::cout << "sizeFinal: " << temp_rpkg_data.hash_size_final.back() << std::endl;
-                std::cout << "sizeMem: " << temp_rpkg_data.hash_size_in_memory.back() << std::endl;
-                std::cout << "sizeVideoMem: " << temp_rpkg_data.hash_size_in_video_memory.back() << std::endl;
+                std::cout << main_data->console_prefix << "hash: " << temp_rpkg_data.hash.back() << std::endl;
+                std::cout << main_data->console_prefix << "hashString: " << temp_rpkg_data.hash_string.back() << std::endl;
+                std::cout << main_data->console_prefix << "hashSize: " << temp_rpkg_data.hash_size.back() << std::endl;
+                std::cout << main_data->console_prefix << "isLZ4ed: " << temp_rpkg_data.is_lz4ed.back() << std::endl;
+                std::cout << main_data->console_prefix << "isXORed: " << temp_rpkg_data.is_xored.back() << std::endl;
+                std::cout << main_data->console_prefix << "fileType: " << temp_rpkg_data.hash_resource_type.back() << std::endl;
+                std::cout << main_data->console_prefix << "chunkSize1: " << temp_rpkg_data.hash_reference_table_size.back() << std::endl;
+                std::cout << main_data->console_prefix << "chunkSize2: " << temp_rpkg_data.hash_reference_table_dummy.back() << std::endl;
+                std::cout << main_data->console_prefix << "sizeFinal: " << temp_rpkg_data.hash_size_final.back() << std::endl;
+                std::cout << main_data->console_prefix << "sizeMem: " << temp_rpkg_data.hash_size_in_memory.back() << std::endl;
+                std::cout << main_data->console_prefix << "sizeVideoMem: " << temp_rpkg_data.hash_size_in_video_memory.back() << std::endl;
             }
         }
 
@@ -2195,11 +2244,11 @@ void generate_rpkg_file(main_variables* main_data)
 
         if (!found_all_meta_files)
         {
-            std::cout << "Some hash files did not have meta files." << std::endl;
-            std::cout << "When a hash file does not have a meta file the defaults used are:" << std::endl;
-            std::cout << "  - The hash file is XORed and LZ4ed" << std::endl;
-            std::cout << "  - The hash file's ref table is set to 0, meaning the hash file's" << std::endl;
-            std::cout << "    reference data linking to other hashes will not be included." << std::endl;
+            std::cout << main_data->console_prefix << "Some hash files did not have meta files." << std::endl;
+            std::cout << main_data->console_prefix << "When a hash file does not have a meta file the defaults used are:" << std::endl;
+            std::cout << main_data->console_prefix << "  - The hash file is XORed and LZ4ed" << std::endl;
+            std::cout << main_data->console_prefix << "  - The hash file's ref table is set to 0, meaning the hash file's" << std::endl;
+            std::cout << main_data->console_prefix << "    reference data linking to other hashes will not be included." << std::endl;
         }
 
         temp_file_output.close();
@@ -2243,18 +2292,18 @@ void generate_rpkg_file(main_variables* main_data)
 
         if (main_data->debug)
         {
-            std::cout << "hash_count: " << hash_count << std::endl;
-            std::cout << "table_offset: " << table_offset << std::endl;
-            std::cout << "table_size: " << table_size << std::endl;
-            std::cout << "hash_offset: " << hash_offset << std::endl;
-            std::cout << "total_hash_size: " << total_hash_size << std::endl;
+            std::cout << main_data->console_prefix << "hash_count: " << hash_count << std::endl;
+            std::cout << main_data->console_prefix << "table_offset: " << table_offset << std::endl;
+            std::cout << main_data->console_prefix << "table_size: " << table_size << std::endl;
+            std::cout << main_data->console_prefix << "hash_offset: " << hash_offset << std::endl;
+            std::cout << main_data->console_prefix << "total_hash_size: " << total_hash_size << std::endl;
         }
 
         std::ofstream file = std::ofstream(main_data->input_output_path + rpkg_file_name, std::ifstream::binary);
 
         if (!file.good())
         {
-            std::cout << "Error: RPKG file " << rpkg_file_name << " could not be created." << std::endl;
+            std::cout << main_data->console_prefix << "Error: RPKG file " << rpkg_file_name << " could not be created." << std::endl;
             std::exit(0);
         }
 
@@ -2430,17 +2479,17 @@ void generate_rpkg_file(main_variables* main_data)
 
         if (!temp_file_input.good())
         {
-            std::cout << "Error: Temporary file " << temp_file_name << " could not be read." << std::endl;
+            std::cout << main_data->console_prefix << "Error: Temporary file " << temp_file_name << " could not be read." << std::endl;
             std::exit(0);
         }
 
         if (rpkg_meta_data.rpkg_file_version == 1)
         {
-            std::cout << "Merging RPKGv1 file and temporary RPKG files..." << std::endl;
+            std::cout << main_data->console_prefix << "Merging RPKGv1 file and temporary RPKG files..." << std::endl;
         }
         else
         {
-            std::cout << "Merging RPKGv2 file and temporary RPKG files..." << std::endl;
+            std::cout << main_data->console_prefix << "Merging RPKGv2 file and temporary RPKG files..." << std::endl;
         }
 
         start_time = std::chrono::high_resolution_clock::now();
@@ -2451,11 +2500,11 @@ void generate_rpkg_file(main_variables* main_data)
 
         if (rpkg_meta_data.rpkg_file_version == 1)
         {
-            std::cout << "Merged RPKGv1 file and temporary RPKGv1 file in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s" << std::endl;
+            std::cout << main_data->console_prefix << "Merged RPKGv1 file and temporary RPKGv1 file in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s" << std::endl;
         }
         else
         {
-            std::cout << "Merged RPKGv2 file and temporary RPKGv2 file in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s" << std::endl;
+            std::cout << main_data->console_prefix << "Merged RPKGv2 file and temporary RPKGv2 file in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s" << std::endl;
         }
 
         temp_file_input.close();
@@ -2466,16 +2515,16 @@ void generate_rpkg_file(main_variables* main_data)
 
         if (rpkg_meta_data.rpkg_file_version == 1)
         {
-            std::cout << "Successfully generated RPKGv1 file: " << rpkg_file_name << std::endl;
+            std::cout << main_data->console_prefix << "Successfully generated RPKGv1 file: " << rpkg_file_name << std::endl;
         }
         else
         {
-            std::cout << "Successfully generated RPKGv2 file: " << rpkg_file_name << std::endl;
+            std::cout << main_data->console_prefix << "Successfully generated RPKGv2 file: " << rpkg_file_name << std::endl;
         }
     }
     else
     {
-        std::cout << "Error: The folder " << main_data->input_rpkg_folder_path << " to generate the RPKG file does not exist." << std::endl;
+        std::cout << main_data->console_prefix << "Error: The folder " << main_data->input_rpkg_folder_path << " to generate the RPKG file does not exist." << std::endl;
         std::exit(0);
     }
 }
@@ -2484,17 +2533,17 @@ void extract_from_rpkg(main_variables* main_data)
 {
     std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
 
-    std::cout << "Extract from RPKG file: " << main_data->input_rpkg_file_name << std::endl;
+    std::cout << main_data->console_prefix << "Extract from RPKG file: " << main_data->input_rpkg_file_name << std::endl;
 
-    std::string message = "Extracting from RPKG: ";
+    std::string message = main_data->console_prefix + "Extracting from RPKG: ";
 
     if (main_data->mode_filter)
     {
-        std::cout << "Extract: All hash files with filter \"" << main_data->input_filter_string << "\"" << std::endl;
+        std::cout << main_data->console_prefix << "Extract: All hash files with filter \"" << main_data->input_filter_string << "\"" << std::endl;
     }
     else
     {
-        std::cout << "Extract: All hash files" << std::endl;
+        std::cout << main_data->console_prefix << "Extract: All hash files" << std::endl;
     }
 
     import_rpkg_file_if_not_already(main_data, main_data->input_rpkg_file_path, main_data->input_rpkg_file_name, true);
@@ -2509,7 +2558,7 @@ void extract_from_rpkg(main_variables* main_data)
     }
     else
     {
-        std::cout << "Error: RPKG file name " << main_data->input_rpkg_file_name << " does not end in .rpkg" << std::endl;
+        std::cout << main_data->console_prefix << "Error: RPKG file name " << main_data->input_rpkg_file_name << " does not end in .rpkg" << std::endl;
         std::exit(0);
     }
 
@@ -2530,7 +2579,7 @@ void extract_from_rpkg(main_variables* main_data)
 
                     if (!std::filesystem::create_directories(final_path))
                     {
-                        std::cout << "Error: Couldn't create directory " << hash_file_path << std::endl;
+                        std::cout << main_data->console_prefix << "Error: Couldn't create directory " << hash_file_path << std::endl;
                         std::exit(0);
                     }
                 }
@@ -2541,7 +2590,7 @@ void extract_from_rpkg(main_variables* main_data)
 
                 if (!rpkg_meta_data_file.good())
                 {
-                    std::cout << "Error: Meta data file " << final_path << " could not be created." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: Meta data file " << final_path << " could not be created." << std::endl;
                     std::exit(0);
                 }
             }
@@ -2602,9 +2651,9 @@ void extract_from_rpkg(main_variables* main_data)
 
             if (main_data->debug)
             {
-                std::cout << "main_data->rpkg_data.at(i).fileCount: " << main_data->rpkg_data.at(i).rpkg_file_count << std::endl;
-                std::cout << "main_data->rpkg_data.at(i).tableOffset: " << main_data->rpkg_data.at(i).rpkg_table_offset << std::endl;
-                std::cout << "main_data->rpkg_data.at(i).tableSize: " << main_data->rpkg_data.at(i).rpkg_table_size << std::endl;
+                std::cout << main_data->console_prefix << "main_data->rpkg_data.at(i).fileCount: " << main_data->rpkg_data.at(i).rpkg_file_count << std::endl;
+                std::cout << main_data->console_prefix << "main_data->rpkg_data.at(i).tableOffset: " << main_data->rpkg_data.at(i).rpkg_table_offset << std::endl;
+                std::cout << main_data->console_prefix << "main_data->rpkg_data.at(i).tableSize: " << main_data->rpkg_data.at(i).rpkg_table_size << std::endl;
             }
 
             if (main_data->rpkg_data.at(i).is_patch_file)
@@ -2618,7 +2667,7 @@ void extract_from_rpkg(main_variables* main_data)
 
                 if (main_data->debug)
                 {
-                    std::cout << "main_data->rpkg_data.at(" << i << ").patch_entry_count: " << main_data->rpkg_data.at(i).patch_entry_count << std::endl;
+                    std::cout << main_data->console_prefix << "main_data->rpkg_data.at(" << i << ").patch_entry_count: " << main_data->rpkg_data.at(i).patch_entry_count << std::endl;
                 }
 
                 if (main_data->rpkg_data.at(i).patch_entry_count > 0)
@@ -2635,7 +2684,7 @@ void extract_from_rpkg(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << "main_data->rpkg_data.at(" << i << ").patch_entry_list.at(" << j << "): " << main_data->rpkg_data.at(i).patch_entry_list.at(j) << std::endl;
+                            std::cout << main_data->console_prefix << "main_data->rpkg_data.at(" << i << ").patch_entry_list.at(" << j << "): " << main_data->rpkg_data.at(i).patch_entry_list.at(j) << std::endl;
                         }
 
                         patchEntryCount++;
@@ -2643,7 +2692,7 @@ void extract_from_rpkg(main_variables* main_data)
 
                     if (patchEntryCount != main_data->rpkg_data.at(i).patch_entry_count)
                     {
-                        std::cout << "Error: Hash meta data for " << main_data->rpkg_data.at(i).rpkg_file_name << " is corrupt." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: Hash meta data for " << main_data->rpkg_data.at(i).rpkg_file_name << " is corrupt." << std::endl;
                         std::exit(0);
                     }
                 }
@@ -2747,7 +2796,7 @@ void extract_from_rpkg(main_variables* main_data)
 
                     if (!file.good())
                     {
-                        std::cout << "Error: RPKG file " << main_data->input_rpkg_file_path << " could not be read." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: RPKG file " << main_data->input_rpkg_file_path << " could not be read." << std::endl;
                         std::exit(0);
                     }
 
@@ -2760,7 +2809,7 @@ void extract_from_rpkg(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << "XORing input_data with a hashSize of " << hash_size << std::endl;
+                            std::cout << main_data->console_prefix << "XORing input_data with a hashSize of " << hash_size << std::endl;
                         }
                     }
 
@@ -2773,7 +2822,7 @@ void extract_from_rpkg(main_variables* main_data)
                             final_path = replace_slashes(hash_file_path);
                             if (!std::filesystem::create_directories(final_path))
                             {
-                                std::cout << "Error: Couldn't create directory " << hash_file_path << std::endl;
+                                std::cout << main_data->console_prefix << "Error: Couldn't create directory " << hash_file_path << std::endl;
                                 std::exit(0);
                             }
                         }
@@ -2785,14 +2834,14 @@ void extract_from_rpkg(main_variables* main_data)
                             final_path = replace_slashes(hash_file_path);
                             if (!std::filesystem::create_directories(final_path))
                             {
-                                std::cout << "Error: Couldn't create directory " << hash_file_path << std::endl;
+                                std::cout << main_data->console_prefix << "Error: Couldn't create directory " << hash_file_path << std::endl;
                                 std::exit(0);
                             }
                         }
                     }
 
                     std::vector<char>* search_data;
-                    uint32_t search_size;
+                    uint64_t search_size;
 
                     uint32_t decompressed_size = main_data->rpkg_data.at(i).hash_size_final.at(j);
                     std::vector<char> output_data(decompressed_size, 0);
@@ -2803,7 +2852,7 @@ void extract_from_rpkg(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << "LZ4 decompression complete." << std::endl;
+                            std::cout << main_data->console_prefix << "LZ4 decompression complete." << std::endl;
                         }
 
                         hash_file_path.append("/" + hash_file_name);
@@ -2820,7 +2869,7 @@ void extract_from_rpkg(main_variables* main_data)
 
                             if (!output_file.good())
                             {
-                                std::cout << "Error: Hash file " << final_path << " could not be created." << std::endl;
+                                std::cout << main_data->console_prefix << "Error: Hash file " << final_path << " could not be created." << std::endl;
                                 std::exit(0);
                             }
 
@@ -2834,7 +2883,7 @@ void extract_from_rpkg(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << "Extracted " << main_data->rpkg_data.at(i).hash_string.at(j) << " to " << hash_file_path << std::endl;
+                            std::cout << main_data->console_prefix << "Extracted " << main_data->rpkg_data.at(i).hash_string.at(j) << " to " << hash_file_path << std::endl;
                         }
                     }
                     else
@@ -2853,7 +2902,7 @@ void extract_from_rpkg(main_variables* main_data)
 
                             if (!output_file.good())
                             {
-                                std::cout << "Error: Hash file " << final_path << " could not be created." << std::endl;
+                                std::cout << main_data->console_prefix << "Error: Hash file " << final_path << " could not be created." << std::endl;
                                 std::exit(0);
                             }
 
@@ -2867,7 +2916,7 @@ void extract_from_rpkg(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << "Extracted " << main_data->rpkg_data.at(i).hash_string.at(j) << " to " << hash_file_path << std::endl;
+                            std::cout << main_data->console_prefix << "Extracted " << main_data->rpkg_data.at(i).hash_string.at(j) << " to " << hash_file_path << std::endl;
                         }
                     }
 
@@ -2893,7 +2942,7 @@ void extract_from_rpkg(main_variables* main_data)
                                     {
                                         search_count++;
 
-                                        std::cout << "Found text string \"" << main_data->input_text_search << "\" in hash file/resouce " << main_data->rpkg_data.at(i).hash_file_name.at(j) << " at offset 0x" << std::hex << std::uppercase << (position - 1) << std::endl;
+                                        std::cout << main_data->console_prefix << "Found text string \"" << main_data->input_text_search << "\" in hash file/resouce " << main_data->rpkg_data.at(i).hash_file_name.at(j) << " at offset 0x" << std::hex << std::uppercase << (position - 1) << std::endl;
 
                                         bool done_searching_start = false;
 
@@ -2916,7 +2965,7 @@ void extract_from_rpkg(main_variables* main_data)
                                             position_start--;
                                         }
 
-                                        std::cout << "Text string \"" << main_data->input_text_search << "\" is contained in string: " << std::string(search_data->data() + position_start + 1) << std::endl;
+                                        std::cout << main_data->console_prefix << "Text string \"" << main_data->input_text_search << "\" is contained in string: " << std::string(search_data->data() + position_start + 1) << std::endl;
 
                                         break;
                                     }
@@ -2964,14 +3013,14 @@ void extract_from_rpkg(main_variables* main_data)
                                     {
                                         search_count++;
 
-                                        std::cout << "Found hex string \"";
+                                        std::cout << main_data->console_prefix << "Found hex string \"";
 
                                         for (uint64_t k = 0; k < hex_search.size(); k++)
                                         {
-                                            std::cout << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)(unsigned char)hex_search.at(k);
+                                            std::cout << main_data->console_prefix << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)(unsigned char)hex_search.at(k);
                                         }
 
-                                        std::cout << "\" in hash file/resouce " << main_data->rpkg_data.at(i).hash_file_name.at(j) << " at offset 0x" << std::hex << std::uppercase << (position - 1) << std::endl;
+                                        std::cout << main_data->console_prefix << "\" in hash file/resouce " << main_data->rpkg_data.at(i).hash_file_name.at(j) << " at offset 0x" << std::hex << std::uppercase << (position - 1) << std::endl;
 
                                         break;
                                     }
@@ -3006,7 +3055,7 @@ void extract_from_rpkg(main_variables* main_data)
                             }
                         }
 
-                        //std::cout << data_string << std::endl;
+                        //std::cout << main_data->console_prefix << data_string << std::endl;
 
                         uint64_t position = 0;
 
@@ -3014,11 +3063,11 @@ void extract_from_rpkg(main_variables* main_data)
                         {
                             position += m.position();
 
-                            std::cout << "Regex search with regex \"" << main_data->input_regex_search << "\" returned result in hash file/resouce " << main_data->rpkg_data.at(i).hash_file_name.at(j) << std::endl;// << " at offset 0x" << std::hex << std::uppercase << position << std::endl;
+                            std::cout << main_data->console_prefix << "Regex search with regex \"" << main_data->input_regex_search << "\" returned result in hash file/resouce " << main_data->rpkg_data.at(i).hash_file_name.at(j) << std::endl;// << " at offset 0x" << std::hex << std::uppercase << position << std::endl;
 
                             for (size_t k = 0; k < m.size(); k++)
                             {
-                                std::cout << "Match[" << k << "]: " << m[k].str() << std::endl;
+                                std::cout << main_data->console_prefix << "Match[" << k << "]: " << m[k].str() << std::endl;
                             }
 
                             data_string = m.suffix().str();
@@ -3115,7 +3164,7 @@ void extract_from_rpkg(main_variables* main_data)
 
                         if (hash_reference_table_size_count != main_data->rpkg_data.at(i).hash_reference_table_size.at(j))
                         {
-                            std::cout << "Error: Hash meta data for " << main_data->rpkg_data.at(i).hash_string.at(j) << " is corrupt." << std::endl;
+                            std::cout << main_data->console_prefix << "Error: Hash meta data for " << main_data->rpkg_data.at(i).hash_string.at(j) << " is corrupt." << std::endl;
                             std::exit(0);
                         }
                     }
@@ -3127,7 +3176,7 @@ void extract_from_rpkg(main_variables* main_data)
 
                         if (!output_file.good())
                         {
-                            std::cout << "Error: Meta data file " << final_path << " could not be created." << std::endl;
+                            std::cout << main_data->console_prefix << "Error: Meta data file " << final_path << " could not be created." << std::endl;
                             std::exit(0);
                         }
 
@@ -3140,18 +3189,18 @@ void extract_from_rpkg(main_variables* main_data)
             {
                 if (!extracted.at(z))
                 {
-                    std::cout << std::endl << "Error: " << main_data->input_filter.at(z) << " is not in " << main_data->input_rpkg_file_path << std::endl;
+                    std::cout << std::endl << main_data->console_prefix << "Error: " << main_data->input_filter.at(z) << " is not in " << main_data->input_rpkg_file_path << std::endl;
                 }
             }
-
-            std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-            std::stringstream ss;
-
-            ss << message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
-
-            std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ');
         }
+
+        std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
+
+        std::stringstream ss;
+
+        ss << message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
+
+        std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ');
     }
 }
 
@@ -3161,20 +3210,20 @@ void extract_from_rpkg_with_map(main_variables* main_data)
 
     if (!main_data->suppress_console_output)
     {
-        std::cout << "Extract from RPKG file: " << main_data->input_rpkg_file_name << std::endl;
+        std::cout << main_data->console_prefix << "Extract from RPKG file: " << main_data->input_rpkg_file_name << std::endl;
     }
 
-    std::string message = "Extracting from RPKG: ";
+    std::string message = main_data->console_prefix + "Extracting from RPKG: ";
 
     if (!main_data->suppress_console_output)
     {
         if (main_data->mode_filter)
         {
-            std::cout << "Extract: All hash files with filter \"" << main_data->input_filter_string << "\"" << std::endl;
+            std::cout << main_data->console_prefix << "Extract: All hash files with filter \"" << main_data->input_filter_string << "\"" << std::endl;
         }
         else
         {
-            std::cout << "Extract: All hash files" << std::endl;
+            std::cout << main_data->console_prefix << "Extract: All hash files" << std::endl;
         }
     }
 
@@ -3190,7 +3239,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
     }
     else
     {
-        std::cout << "Error: RPKG file name " << main_data->input_rpkg_file_name << " does not end in .rpkg" << std::endl;
+        std::cout << main_data->console_prefix << "Error: RPKG file name " << main_data->input_rpkg_file_name << " does not end in .rpkg" << std::endl;
         std::exit(0);
     }
 
@@ -3211,7 +3260,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
 
                     if (!std::filesystem::create_directories(final_path))
                     {
-                        std::cout << "Error: Couldn't create directory " << hash_file_path << std::endl;
+                        std::cout << main_data->console_prefix << "Error: Couldn't create directory " << hash_file_path << std::endl;
                         std::exit(0);
                     }
                 }
@@ -3222,7 +3271,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
 
                 if (!rpkg_meta_data_file.good())
                 {
-                    std::cout << "Error: Meta data file " << final_path << " could not be created." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: Meta data file " << final_path << " could not be created." << std::endl;
                     std::exit(0);
                 }
             }
@@ -3283,9 +3332,9 @@ void extract_from_rpkg_with_map(main_variables* main_data)
 
             if (main_data->debug)
             {
-                std::cout << "main_data->rpkg_data.at(i).fileCount: " << main_data->rpkg_data.at(i).rpkg_file_count << std::endl;
-                std::cout << "main_data->rpkg_data.at(i).tableOffset: " << main_data->rpkg_data.at(i).rpkg_table_offset << std::endl;
-                std::cout << "main_data->rpkg_data.at(i).tableSize: " << main_data->rpkg_data.at(i).rpkg_table_size << std::endl;
+                std::cout << main_data->console_prefix << "main_data->rpkg_data.at(i).fileCount: " << main_data->rpkg_data.at(i).rpkg_file_count << std::endl;
+                std::cout << main_data->console_prefix << "main_data->rpkg_data.at(i).tableOffset: " << main_data->rpkg_data.at(i).rpkg_table_offset << std::endl;
+                std::cout << main_data->console_prefix << "main_data->rpkg_data.at(i).tableSize: " << main_data->rpkg_data.at(i).rpkg_table_size << std::endl;
             }
 
             if (main_data->rpkg_data.at(i).is_patch_file)
@@ -3299,7 +3348,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
 
                 if (main_data->debug)
                 {
-                    std::cout << "main_data->rpkg_data.at(" << i << ").patch_entry_count: " << main_data->rpkg_data.at(i).patch_entry_count << std::endl;
+                    std::cout << main_data->console_prefix << "main_data->rpkg_data.at(" << i << ").patch_entry_count: " << main_data->rpkg_data.at(i).patch_entry_count << std::endl;
                 }
 
                 if (main_data->rpkg_data.at(i).patch_entry_count > 0)
@@ -3316,7 +3365,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << "main_data->rpkg_data.at(" << i << ").patch_entry_list.at(" << j << "): " << main_data->rpkg_data.at(i).patch_entry_list.at(j) << std::endl;
+                            std::cout << main_data->console_prefix << "main_data->rpkg_data.at(" << i << ").patch_entry_list.at(" << j << "): " << main_data->rpkg_data.at(i).patch_entry_list.at(j) << std::endl;
                         }
 
                         patchEntryCount++;
@@ -3324,7 +3373,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
 
                     if (patchEntryCount != main_data->rpkg_data.at(i).patch_entry_count)
                     {
-                        std::cout << "Error: Hash meta data for " << main_data->rpkg_data.at(i).rpkg_file_name << " is corrupt." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: Hash meta data for " << main_data->rpkg_data.at(i).rpkg_file_name << " is corrupt." << std::endl;
                         std::exit(0);
                     }
                 }
@@ -3385,13 +3434,13 @@ void extract_from_rpkg_with_map(main_variables* main_data)
 
                         if (!ores_meta_hash_file.good())
                         {
-                            std::cout << "Error: meta file " << main_data->input_ores_path + "-" + hash_file_name + "/" + "meta" << " could not be created." << std::endl;
+                            std::cout << main_data->console_prefix << "Error: meta file " << main_data->input_ores_path + "-" + hash_file_name + "/" + "meta" << " could not be created." << std::endl;
                             std::exit(0);
                         }
 
                         ores_meta_hash_file.close();
                     }
-                    
+
                     uint64_t hash_size;
 
                     if (main_data->rpkg_data.at(i).is_lz4ed.at(it->second) == 1)
@@ -3413,7 +3462,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
 
                     if (!file.good())
                     {
-                        std::cout << "Error: RPKG file " << main_data->input_rpkg_file_path << " could not be read." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: RPKG file " << main_data->input_rpkg_file_path << " could not be read." << std::endl;
                         std::exit(0);
                     }
 
@@ -3426,7 +3475,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << "XORing input_data with a hashSize of " << hash_size << std::endl;
+                            std::cout << main_data->console_prefix << "XORing input_data with a hashSize of " << hash_size << std::endl;
                         }
                     }
 
@@ -3439,7 +3488,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
                             final_path = replace_slashes(hash_file_path);
                             if (!std::filesystem::create_directories(final_path))
                             {
-                                std::cout << "Error: Couldn't create directory " << hash_file_path << std::endl;
+                                std::cout << main_data->console_prefix << "Error: Couldn't create directory " << hash_file_path << std::endl;
                                 std::exit(0);
                             }
                         }
@@ -3451,14 +3500,14 @@ void extract_from_rpkg_with_map(main_variables* main_data)
                             final_path = replace_slashes(hash_file_path);
                             if (!std::filesystem::create_directories(final_path))
                             {
-                                std::cout << "Error: Couldn't create directory " << hash_file_path << std::endl;
+                                std::cout << main_data->console_prefix << "Error: Couldn't create directory " << hash_file_path << std::endl;
                                 std::exit(0);
                             }
                         }
                     }
 
                     std::vector<char>* search_data;
-                    uint32_t search_size;
+                    uint64_t search_size;
 
                     uint32_t decompressed_size = main_data->rpkg_data.at(i).hash_size_final.at(it->second);
                     std::vector<char> output_data(decompressed_size, 0);
@@ -3469,7 +3518,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << "LZ4 decompression complete." << std::endl;
+                            std::cout << main_data->console_prefix << "LZ4 decompression complete." << std::endl;
                         }
 
                         hash_file_path.append("/" + hash_file_name);
@@ -3486,7 +3535,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
 
                             if (!output_file.good())
                             {
-                                std::cout << "Error: Hash file " << final_path << " could not be created." << std::endl;
+                                std::cout << main_data->console_prefix << "Error: Hash file " << final_path << " could not be created." << std::endl;
                                 std::exit(0);
                             }
 
@@ -3500,7 +3549,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << "Extracted " << main_data->rpkg_data.at(i).hash_string.at(it->second) << " to " << hash_file_path << std::endl;
+                            std::cout << main_data->console_prefix << "Extracted " << main_data->rpkg_data.at(i).hash_string.at(it->second) << " to " << hash_file_path << std::endl;
                         }
                     }
                     else
@@ -3519,7 +3568,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
 
                             if (!output_file.good())
                             {
-                                std::cout << "Error: Hash file " << final_path << " could not be created." << std::endl;
+                                std::cout << main_data->console_prefix << "Error: Hash file " << final_path << " could not be created." << std::endl;
                                 std::exit(0);
                             }
 
@@ -3533,7 +3582,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << "Extracted " << main_data->rpkg_data.at(i).hash_string.at(it->second) << " to " << hash_file_path << std::endl;
+                            std::cout << main_data->console_prefix << "Extracted " << main_data->rpkg_data.at(i).hash_string.at(it->second) << " to " << hash_file_path << std::endl;
                         }
                     }
 
@@ -3559,7 +3608,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
                                     {
                                         search_count++;
 
-                                        std::cout << "Found text string \"" << main_data->input_text_search << "\" in hash file/resouce " << main_data->rpkg_data.at(i).hash_file_name.at(it->second) << " at offset 0x" << std::hex << std::uppercase << (position - 1) << std::endl;
+                                        std::cout << main_data->console_prefix << "Found text string \"" << main_data->input_text_search << "\" in hash file/resouce " << main_data->rpkg_data.at(i).hash_file_name.at(it->second) << " at offset 0x" << std::hex << std::uppercase << (position - 1) << std::endl;
 
                                         bool done_searching_start = false;
 
@@ -3582,7 +3631,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
                                             position_start--;
                                         }
 
-                                        std::cout << "Text string \"" << main_data->input_text_search << "\" is contained in string: " << std::string(search_data->data() + position_start + 1) << std::endl;
+                                        std::cout << main_data->console_prefix << "Text string \"" << main_data->input_text_search << "\" is contained in string: " << std::string(search_data->data() + position_start + 1) << std::endl;
 
                                         break;
                                     }
@@ -3630,14 +3679,14 @@ void extract_from_rpkg_with_map(main_variables* main_data)
                                     {
                                         search_count++;
 
-                                        std::cout << "Found hex string \"";
+                                        std::cout << main_data->console_prefix << "Found hex string \"";
 
                                         for (uint64_t k = 0; k < hex_search.size(); k++)
                                         {
-                                            std::cout << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)(unsigned char)hex_search.at(k);
+                                            std::cout << main_data->console_prefix << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)(unsigned char)hex_search.at(k);
                                         }
 
-                                        std::cout << "\" in hash file/resouce " << main_data->rpkg_data.at(i).hash_file_name.at(it->second) << " at offset 0x" << std::hex << std::uppercase << (position - 1) << std::endl;
+                                        std::cout << main_data->console_prefix << "\" in hash file/resouce " << main_data->rpkg_data.at(i).hash_file_name.at(it->second) << " at offset 0x" << std::hex << std::uppercase << (position - 1) << std::endl;
 
                                         break;
                                     }
@@ -3672,7 +3721,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
                             }
                         }
 
-                        //std::cout << data_string << std::endl;
+                        //std::cout << main_data->console_prefix << data_string << std::endl;
 
                         uint64_t position = 0;
 
@@ -3680,11 +3729,11 @@ void extract_from_rpkg_with_map(main_variables* main_data)
                         {
                             position += m.position();
 
-                            std::cout << "Regex search with regex \"" << main_data->input_regex_search << "\" returned result in hash file/resouce " << main_data->rpkg_data.at(i).hash_file_name.at(it->second) << std::endl;// << " at offset 0x" << std::hex << std::uppercase << position << std::endl;
+                            std::cout << main_data->console_prefix << "Regex search with regex \"" << main_data->input_regex_search << "\" returned result in hash file/resouce " << main_data->rpkg_data.at(i).hash_file_name.at(it->second) << std::endl;// << " at offset 0x" << std::hex << std::uppercase << position << std::endl;
 
                             for (size_t k = 0; k < m.size(); k++)
                             {
-                                std::cout << "Match[" << k << "]: " << m[k].str() << std::endl;
+                                std::cout << main_data->console_prefix << "Match[" << k << "]: " << m[k].str() << std::endl;
                             }
 
                             data_string = m.suffix().str();
@@ -3781,7 +3830,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
 
                         if (hash_reference_table_size_count != main_data->rpkg_data.at(i).hash_reference_table_size.at(it->second))
                         {
-                            std::cout << "Error: Hash meta data for " << main_data->rpkg_data.at(i).hash_string.at(it->second) << " is corrupt." << std::endl;
+                            std::cout << main_data->console_prefix << "Error: Hash meta data for " << main_data->rpkg_data.at(i).hash_string.at(it->second) << " is corrupt." << std::endl;
                             std::exit(0);
                         }
                     }
@@ -3793,7 +3842,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
 
                         if (!output_file.good())
                         {
-                            std::cout << "Error: Meta data file " << final_path << " could not be created." << std::endl;
+                            std::cout << main_data->console_prefix << "Error: Meta data file " << final_path << " could not be created." << std::endl;
                             std::exit(0);
                         }
 
@@ -3803,7 +3852,7 @@ void extract_from_rpkg_with_map(main_variables* main_data)
 
                 if (!extracted)
                 {
-                    std::cout << "Error: " << main_data->input_filter_string << " is not in " << main_data->input_rpkg_file_path << std::endl;
+                    std::cout << main_data->console_prefix << "Error: " << main_data->input_filter_string << " is not in " << main_data->input_rpkg_file_path << std::endl;
                 }
 
                 if (!main_data->suppress_console_output)
@@ -3869,7 +3918,7 @@ void extract_all_ores(main_variables* main_data)
 
                 ss << "Scanning folder" << std::string(period_count, '.');
 
-                std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ');
+                std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ');
 
                 period_count++;
             }
@@ -3898,14 +3947,14 @@ void extract_all_ores(main_variables* main_data)
 
                     if (main_data->debug)
                     {
-                        std::cout << entry.path().string() << " is a valid RPKG file." << std::endl;
+                        std::cout << main_data->console_prefix << entry.path().string() << " is a valid RPKG file." << std::endl;
                     }
                 }
                 else
                 {
                     if (main_data->debug)
                     {
-                        std::cout << entry.path().string() << " is not a valid RPKG file." << std::endl;
+                        std::cout << main_data->console_prefix << entry.path().string() << " is not a valid RPKG file." << std::endl;
                     }
                 }
             }
@@ -3915,13 +3964,13 @@ void extract_all_ores(main_variables* main_data)
 
         ss << "Scanning folder: Done";
 
-        std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
 
         if (main_data->debug)
         {
             for (uint64_t i = 0; i < rpkg_file_paths.size(); i++)
             {
-                std::cout << "Found RPKG file: " << rpkg_file_paths.at(i) << std::endl;
+                std::cout << main_data->console_prefix << "Found RPKG file: " << rpkg_file_paths.at(i) << std::endl;
             }
         }
 
@@ -3931,10 +3980,36 @@ void extract_all_ores(main_variables* main_data)
             import_rpkg_file_if_not_already(main_data, rpkg_file_paths.at(i), rpkg_file_names.at(i), true);
         }
 
+        if (!path_exists(main_data->input_output_path + "ORES"))
+        {
+            if (!std::filesystem::create_directories(main_data->input_output_path + "ORES"))
+            {
+                std::cout << main_data->console_prefix << "Error: Couldn't create directory " << main_data->input_output_path + "ORES" << std::endl;
+                std::exit(0);
+            }
+        }
+
         bool found_ores = false;
+
+        std::vector<std::string> found_in;
+        std::vector<std::string> not_found_in;
+
+        for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
+        {
+            found_in.push_back("");
+
+            not_found_in.push_back("");
+        }
 
         for (uint64_t i = 0; i < main_data->rpkg_data.size(); i++)
         {
+            std::vector<bool> extracted;
+
+            for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
+            {
+                extracted.push_back(false);
+            }
+
             for (uint64_t j = 0; j < main_data->rpkg_data.at(i).hash.size(); j++)
             {
                 std::string hash_file_name = main_data->rpkg_data.at(i).hash_string.at(j) + "." + main_data->rpkg_data.at(i).hash_resource_type.at(j);
@@ -3943,7 +4018,7 @@ void extract_all_ores(main_variables* main_data)
                 {
                     found_ores = true;
 
-                    std::cout << "ORES resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
+                    std::cout << main_data->console_prefix << "ORES resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
 
                     uint64_t hash_size;
 
@@ -3968,7 +4043,7 @@ void extract_all_ores(main_variables* main_data)
 
                     if (!file.good())
                     {
-                        std::cout << "Error: RPKG file " << main_data->input_rpkg_file_path << " could not be read." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: RPKG file " << main_data->input_rpkg_file_path << " could not be read." << std::endl;
                         std::exit(0);
                     }
 
@@ -3982,7 +4057,7 @@ void extract_all_ores(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << "XORing input_file_data with a hashSize of " << hash_size << std::endl;
+                            std::cout << main_data->console_prefix << "XORing input_file_data with a hashSize of " << hash_size << std::endl;
                         }
                     }
 
@@ -4001,7 +4076,7 @@ void extract_all_ores(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << "LZ4 decompression complete." << std::endl;
+                            std::cout << main_data->console_prefix << "LZ4 decompression complete." << std::endl;
                         }
                     }
                     else
@@ -4017,7 +4092,6 @@ void extract_all_ores(main_variables* main_data)
 
                     uint32_t position = 0x10;
 
-                    char input[1024];
                     uint8_t bytes1 = 0;
                     uint32_t bytes4 = 0;
                     uint64_t bytes8 = 0;
@@ -4031,7 +4105,7 @@ void extract_all_ores(main_variables* main_data)
                     std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
                     int stringstream_length = 80;
 
-                    std::string message = "Extracting ORES linked files: ";
+                    std::string message = main_data->console_prefix + "Extracting ORES linked files: ";
 
                     for (uint64_t k = 0; k < ores_hash_resource_file_count; k++)
                     {
@@ -4061,101 +4135,133 @@ void extract_all_ores(main_variables* main_data)
 
                         hash = (hash_lsb << 32) | hash_msb;
 
-                        //std::cout << "String length: " << string_length << std::endl;
-                        //std::cout << "String offset: " << string_offset << std::endl;
-                        //std::cout << "Hash: " << uint64_t_to_hex_string(hash) << std::endl;
-                        //std::cout << "Hash linked ORES file path: " << std::string((&ores_data->get()[0] + string_offset)) << std::endl;
+                        //std::cout << main_data->console_prefix << "String length: " << string_length << std::endl;
+                        //std::cout << main_data->console_prefix << "String offset: " << string_offset << std::endl;
+                        //std::cout << main_data->console_prefix << "Hash: " << uint64_t_to_hex_string(hash) << std::endl;
+                        //std::cout << main_data->console_prefix << "Hash linked ORES file path: " << std::string((&ores_data->get()[0] + string_offset)) << std::endl;
 
                         ores_hash_resource.push_back(hash);
 
                         ores_hash_resource_file_path.push_back(std::string((&ores_data->get()[0] + string_offset)));
 
-                        std::size_t pos = ores_hash_resource_file_path.back().find("attractionscreen");
-
                         replace_slashes(ores_hash_resource_file_path.back());
 
-                        std::vector<std::string> temp_ores_file_path_elements;
+                        bool found = false;
 
-                        std::smatch m;
-                        std::regex re("^([^\\/]+)\\/");
-                        std::regex_search(ores_hash_resource_file_path.back(), m, re);
+                        uint64_t input_filter_index = 0;
 
-                        if (m.size() > 0)
+                        for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
                         {
-                            temp_ores_file_path_elements.push_back(m[1].str());
+                            std::size_t found_position_hash = hash_file_name.find(main_data->input_filter.at(z));
 
-                            std::smatch m2;
-                            re.assign("\\/([^\\/]+)");
-                            std::string ores_path = ores_hash_resource_file_path.back();
+                            std::size_t found_position_ores = to_uppercase(ores_hash_resource_file_path.back()).find(to_uppercase(main_data->input_filter.at(z)));
 
-                            while (std::regex_search(ores_path, m2, re))
+                            if ((found_position_hash != std::string::npos && main_data->input_filter.at(z) != "") || (found_position_ores != std::string::npos && main_data->input_filter.at(z) != ""))
                             {
-                                temp_ores_file_path_elements.push_back(m2[1].str());
+                                found = true;
 
-                                ores_path = m2.suffix().str();
+                                input_filter_index = z;
+
+                                break;
                             }
                         }
-                        else
-                        {
-                            temp_ores_file_path_elements.push_back(ores_hash_resource_file_path.back());
-                        }
 
-                        std::string path = main_data->input_output_path;
-
-                        for (uint64_t l = 0; l < temp_ores_file_path_elements.size(); l++)
+                        if (found || !main_data->mode_filter)
                         {
-                            if (l == (temp_ores_file_path_elements.size() - 1))
+                            if (main_data->input_filter.size() > 0)
                             {
-                                bool ores_file_already_found = false;
+                                extracted.at(input_filter_index) = true;
+                            }
 
-                                for (uint64_t x = 0; x < main_data->rpkg_data.size(); x++)
+                            std::vector<std::string> temp_ores_file_path_elements;
+
+                            std::smatch m;
+                            std::regex re("^([^\\/]+)\\/");
+                            std::regex_search(ores_hash_resource_file_path.back(), m, re);
+
+                            if (m.size() > 0)
+                            {
+                                temp_ores_file_path_elements.push_back(m[1].str());
+
+                                std::smatch m2;
+                                re.assign("\\/([^\\/]+)");
+                                std::string ores_path = ores_hash_resource_file_path.back();
+
+                                while (std::regex_search(ores_path, m2, re))
                                 {
-                                    if (!ores_file_already_found)
-                                    {
-                                        std::map<uint64_t, uint64_t>::iterator it = main_data->rpkg_data.at(x).hash_map.find(hash);
+                                    temp_ores_file_path_elements.push_back(m2[1].str());
 
-                                        if (it != main_data->rpkg_data.at(x).hash_map.end())
-                                        {
-                                            ores_file_already_found = true;
-
-                                            //std::cout << "Extracting " << ores_hash_resource_file_path.back() << "(" << uint64_t_to_hex_string(hash) << ") from RPKG file " << main_data->rpkg_data.at(x).rpkg_file_name << std::endl;
-
-                                            path.append(temp_ores_file_path_elements.at(l));
-
-                                            main_data->input_filter.clear();
-
-                                            main_data->input_filter.push_back(uint64_t_to_hex_string(hash));
-                                            main_data->mode_filter = true;
-                                            main_data->input_rpkg_file_name = main_data->rpkg_data.at(x).rpkg_file_name;
-                                            main_data->input_rpkg_file_path = main_data->rpkg_data.at(x).rpkg_file_path;
-                                            main_data->input_ores_path = path;
-                                            main_data->suppress_console_output = true;
-
-                                            extract_from_rpkg_with_map(main_data);
-
-                                            //std::cout << std::endl;
-                                        }
-                                    }
+                                    ores_path = m2.suffix().str();
                                 }
-
-                                //std::cout << "file name: " << temp_ores_file_path_elements.at(l) << std::endl;
                             }
                             else
                             {
-                                path.append(temp_ores_file_path_elements.at(l));
+                                temp_ores_file_path_elements.push_back(ores_hash_resource_file_path.back());
+                            }
 
-                                if (!path_exists(path))
+                            std::string path = main_data->input_output_path + "ORES/";
+
+                            for (uint64_t l = 0; l < temp_ores_file_path_elements.size(); l++)
+                            {
+                                if (l == (temp_ores_file_path_elements.size() - 1))
                                 {
-                                    if (!std::filesystem::create_directories(path))
+                                    bool ores_file_already_found = false;
+
+                                    for (uint64_t x = 0; x < main_data->rpkg_data.size(); x++)
                                     {
-                                        std::cout << "Error: Couldn't create directory " << path << std::endl;
-                                        std::exit(0);
+                                        if (!ores_file_already_found)
+                                        {
+                                            std::map<uint64_t, uint64_t>::iterator it = main_data->rpkg_data.at(x).hash_map.find(hash);
+
+                                            if (it != main_data->rpkg_data.at(x).hash_map.end())
+                                            {
+                                                ores_file_already_found = true;
+
+                                                //std::cout << main_data->console_prefix << "Extracting " << ores_hash_resource_file_path.back() << "(" << uint64_t_to_hex_string(hash) << ") from RPKG file " << main_data->rpkg_data.at(x).rpkg_file_name << std::endl;
+
+                                                path.append(temp_ores_file_path_elements.at(l));
+
+                                                std::vector<std::string> current_input_filters = main_data->input_filter;
+
+                                                main_data->input_filter.clear();
+
+                                                main_data->input_filter.push_back(uint64_t_to_hex_string(hash));
+                                                main_data->mode_filter = true;
+                                                main_data->input_rpkg_file_name = main_data->rpkg_data.at(x).rpkg_file_name;
+                                                main_data->input_rpkg_file_path = main_data->rpkg_data.at(x).rpkg_file_path;
+                                                main_data->input_ores_path = path;
+                                                main_data->suppress_console_output = true;
+
+                                                extract_from_rpkg_with_map(main_data);
+
+                                                main_data->input_filter.clear();
+
+                                                main_data->input_filter = current_input_filters;
+
+                                                //std::cout << std::endl;
+                                            }
+                                        }
                                     }
+
+                                    //std::cout << main_data->console_prefix << "file name: " << temp_ores_file_path_elements.at(l) << std::endl;
                                 }
+                                else
+                                {
+                                    path.append(temp_ores_file_path_elements.at(l));
 
-                                path.append("/");
+                                    if (!path_exists(path))
+                                    {
+                                        if (!std::filesystem::create_directories(path))
+                                        {
+                                            std::cout << main_data->console_prefix << "Error: Couldn't create directory " << path << std::endl;
+                                            std::exit(0);
+                                        }
+                                    }
 
-                                //std::cout << "directory: " << path << std::endl;
+                                    path.append("/");
+
+                                    //std::cout << main_data->console_prefix << "directory: " << path << std::endl;
+                                }
                             }
                         }
                     }
@@ -4169,17 +4275,56 @@ void extract_all_ores(main_variables* main_data)
                     std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
                 }
             }
+
+            for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
+            {
+                if (extracted.at(z))
+                {
+                    if (found_in.at(z) == "")
+                    {
+                        found_in.at(z).append(main_data->rpkg_data.at(i).rpkg_file_name);
+                    }
+                    else
+                    {
+                        found_in.at(z).append(", " + main_data->rpkg_data.at(i).rpkg_file_name);
+                    }
+                }
+                else
+                {
+                    if (not_found_in.at(z) == "")
+                    {
+                        not_found_in.at(z).append(main_data->rpkg_data.at(i).rpkg_file_name);
+                    }
+                    else
+                    {
+                        not_found_in.at(z).append(", " + main_data->rpkg_data.at(i).rpkg_file_name);
+                    }
+                }
+            }
         }
+
+        ss.str(std::string());
+
+        ss << "Extracting ORES linked files: Done";
+
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
 
         if (!found_ores)
         {
-            std::cout << "Error: The folder " << main_data->input_rpkg_folder_path << " does not contain a RPKG file that contains 00858D45F5F9E3CA.ORES" << std::endl;
+            std::cout << main_data->console_prefix << "Error: The folder " << main_data->input_rpkg_folder_path << " does not contain a RPKG file that contains 00858D45F5F9E3CA.ORES" << std::endl;
             std::exit(0);
+        }
+
+        for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
+        {
+            std::cout << std::endl << main_data->console_prefix << "\"" << main_data->input_filter.at(z) << "\" was found in and extracted from: " << found_in.at(z) << std::endl;
+
+            std::cout << std::endl << main_data->console_prefix << "\"" << main_data->input_filter.at(z) << "\" was not found in RPKG file(s): " << not_found_in.at(z) << std::endl;
         }
     }
     else
     {
-        std::cout << "Error: The folder " << main_data->input_rpkg_folder_path << " to generate the RPKG file does not exist." << std::endl;
+        std::cout << main_data->console_prefix << "Error: The folder " << main_data->input_rpkg_folder_path << " to generate the RPKG file does not exist." << std::endl;
         std::exit(0);
     }
 }
@@ -4232,7 +4377,7 @@ void extract_all_wwev(main_variables* main_data)
 
                 ss << "Scanning folder" << std::string(period_count, '.');
 
-                std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ');
+                std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ');
 
                 period_count++;
             }
@@ -4261,14 +4406,14 @@ void extract_all_wwev(main_variables* main_data)
 
                     if (main_data->debug)
                     {
-                        std::cout << entry.path().string() << " is a valid RPKG file." << std::endl;
+                        std::cout << main_data->console_prefix << entry.path().string() << " is a valid RPKG file." << std::endl;
                     }
                 }
                 else
                 {
                     if (main_data->debug)
                     {
-                        std::cout << entry.path().string() << " is not a valid RPKG file." << std::endl;
+                        std::cout << main_data->console_prefix << entry.path().string() << " is not a valid RPKG file." << std::endl;
                     }
                 }
             }
@@ -4278,13 +4423,13 @@ void extract_all_wwev(main_variables* main_data)
 
         ss << "Scanning folder: Done";
 
-        std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
 
         if (main_data->debug)
         {
             for (uint64_t i = 0; i < rpkg_file_paths.size(); i++)
             {
-                std::cout << "Found RPKG file: " << rpkg_file_paths.at(i) << std::endl;
+                std::cout << main_data->console_prefix << "Found RPKG file: " << rpkg_file_paths.at(i) << std::endl;
             }
         }
 
@@ -4298,7 +4443,7 @@ void extract_all_wwev(main_variables* main_data)
         {
             if (!std::filesystem::create_directories(main_data->input_output_path + "WWEV"))
             {
-                std::cout << "Error: Couldn't create directory " << main_data->input_output_path + "WWEV" << std::endl;
+                std::cout << main_data->console_prefix << "Error: Couldn't create directory " << main_data->input_output_path + "WWEV" << std::endl;
                 std::exit(0);
             }
         }
@@ -4334,7 +4479,7 @@ void extract_all_wwev(main_variables* main_data)
 
                         ss << "Scanning RPKGs for WWEV files" << std::string(period_count, '.');
 
-                        std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ');
+                        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ');
 
                         period_count++;
                     }
@@ -4350,7 +4495,7 @@ void extract_all_wwev(main_variables* main_data)
 
         ss << "Scanning RPKGs for WWEV files: Done";
 
-        std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
 
         start_time = std::chrono::high_resolution_clock::now();
         int stringstream_length = 80;
@@ -4358,16 +4503,38 @@ void extract_all_wwev(main_variables* main_data)
         console_update_rate = 1.0 / 2.0;
         period_count = 1;
 
-        std::cout << "Extracting WWEV to *.wem/*.ogg files to path: " << main_data->input_output_path + "WWEV" << std::endl;
+        std::cout << main_data->console_prefix << "Extracting WWEV to *.wem/*.ogg files to path: " << main_data->input_output_path + "WWEV" << std::endl;
 
-        std::string message = "Extracting WWEV files: ";
+        std::string message = main_data->console_prefix + "Extracting WWEV files: ";
+
+        if (main_data->mode_filter)
+        {
+            std::cout << main_data->console_prefix << "Extracting WWEV to *.wem/*.ogg files with filter \"" << main_data->input_filter_string << "\"" << std::endl;
+        }
 
         uint64_t wwev_count_current = 0;
         uint64_t wwev_hash_size_current = 0;
 
+        std::vector<std::string> found_in;
+        std::vector<std::string> not_found_in;
+
+        for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
+        {
+            found_in.push_back("");
+
+            not_found_in.push_back("");
+        }
+
         for (uint64_t i = 0; i < main_data->rpkg_data.size(); i++)
         {
             bool archive_folder_created = false;
+
+            std::vector<bool> extracted;
+
+            for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
+            {
+                extracted.push_back(false);
+            }
 
             for (uint64_t j = 0; j < main_data->rpkg_data.at(i).hash.size(); j++)
             {
@@ -4386,21 +4553,7 @@ void extract_all_wwev(main_variables* main_data)
 
                     std::string current_path = main_data->input_output_path + "WWEV/" + main_data->rpkg_data.at(i).rpkg_file_name;
 
-                    if (!archive_folder_created)
-                    {
-                        if (!path_exists(current_path))
-                        {
-                            archive_folder_created = true;
-
-                            if (!std::filesystem::create_directories(current_path))
-                            {
-                                std::cout << "Error: Couldn't create directory " << current_path << std::endl;
-                                std::exit(0);
-                            }
-                        }
-                    }
-
-                    //std::cout << "WWEV resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
+                    //std::cout << main_data->console_prefix << "WWEV resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
 
                     uint64_t hash_size;
 
@@ -4425,7 +4578,7 @@ void extract_all_wwev(main_variables* main_data)
 
                     if (!file.good())
                     {
-                        std::cout << "Error: RPKG file " << main_data->input_rpkg_file_path << " could not be read." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: RPKG file " << main_data->input_rpkg_file_path << " could not be read." << std::endl;
                         std::exit(0);
                     }
 
@@ -4439,7 +4592,7 @@ void extract_all_wwev(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << "XORing input_file_data with a hashSize of " << hash_size << std::endl;
+                            std::cout << main_data->console_prefix << "XORing input_file_data with a hashSize of " << hash_size << std::endl;
                         }
                     }
 
@@ -4458,7 +4611,7 @@ void extract_all_wwev(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << "LZ4 decompression complete." << std::endl;
+                            std::cout << main_data->console_prefix << "LZ4 decompression complete." << std::endl;
                         }
                     }
                     else
@@ -4511,305 +4664,490 @@ void extract_all_wwev(main_variables* main_data)
 
                     std::memcpy(&wwev_file_count_test, (&wwev_data->get()[0] + position), sizeof(bytes4));
 
-                    //std::cout << "WWEV resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
+                    //std::cout << main_data->console_prefix << "WWEV resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
 
-                    current_path.append("/");
-                    current_path.append(std::string(wwev_file_name.get()));
+                    bool found = false;
 
-                    if (!path_exists(current_path))
+                    uint64_t input_filter_index = 0;
+
+                    for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
                     {
-                        if (!std::filesystem::create_directories(current_path))
+                        std::size_t found_position_hash = hash_file_name.find(main_data->input_filter.at(z));
+
+                        std::size_t found_position_wwev = to_uppercase(std::string(wwev_file_name.get())).find(to_uppercase(main_data->input_filter.at(z)));
+
+                        if ((found_position_hash != std::string::npos && main_data->input_filter.at(z) != "") || (found_position_wwev != std::string::npos && main_data->input_filter.at(z) != ""))
                         {
-                            std::cout << "Error: Couldn't create directory " << current_path << std::endl;
-                            std::exit(0);
+                            found = true;
+
+                            input_filter_index = z;
+
+                            break;
                         }
                     }
 
-                    std::string wem_path = current_path + "/wem";
-
-                    if (!path_exists(wem_path))
+                    if (found || !main_data->mode_filter)
                     {
-                        if (!std::filesystem::create_directories(wem_path))
+                        if (main_data->input_filter.size() > 0)
                         {
-                            std::cout << "Error: Couldn't create directory " << wem_path << std::endl;
-                            std::exit(0);
+                            extracted.at(input_filter_index) = true;
                         }
-                    }
 
-                    std::string ogg_path = current_path + "/ogg";
-
-                    if (!path_exists(ogg_path))
-                    {
-                        if (!std::filesystem::create_directories(ogg_path))
+                        if (!archive_folder_created)
                         {
-                            std::cout << "Error: Couldn't create directory " << ogg_path << std::endl;
-                            std::exit(0);
-                        }
-                    }
-
-                    std::ofstream wwev_meta_data_file = std::ofstream(current_path + "/" + "meta", std::ifstream::binary);
-
-                    if (!wwev_meta_data_file.good())
-                    {
-                        std::cout << "Error: meta file " << current_path + "/" + "meta" << " could not be created." << std::endl;
-                        std::exit(0);
-                    }
-
-                    if (wwev_file_count > 0)
-                    {
-                        for (uint64_t k = 0; k < wwev_file_count; k++)
-                        {
-                            std::memcpy(&input, (&wwev_data->get()[0] + position), 0x8);
-                            for (uint64_t l = 0; l < 0x8; l++)
+                            if (!path_exists(current_path))
                             {
-                                wwev_meta_data.push_back(input[l]);
+                                archive_folder_created = true;
+
+                                if (!std::filesystem::create_directories(current_path))
+                                {
+                                    std::cout << main_data->console_prefix << "Error: Couldn't create directory " << current_path << std::endl;
+                                    std::exit(0);
+                                }
                             }
+                        }
 
-                            position += 0x4;
+                        current_path.append("/");
+                        current_path.append(std::string(wwev_file_name.get()));
 
-                            uint32_t wem_size;
-
-                            std::memcpy(&wem_size, (&wwev_data->get()[0] + position), sizeof(bytes4));
-                            position += 0x4;
-
-                            std::unique_ptr<char[]> wwev_file_data;
-                            wwev_file_data = std::make_unique<char[]>(wem_size);
-
-                            std::memcpy(wwev_file_data.get(), (&wwev_data->get()[0] + position), wem_size);
-                            position += wem_size;
-
-                            std::string wem_file = wem_path + "/" + std::to_string(k) + ".wem";
-
-                            std::ofstream output_file = std::ofstream(wem_file, std::ifstream::binary);
-
-                            if (!output_file.good())
+                        if (!path_exists(current_path))
+                        {
+                            if (!std::filesystem::create_directories(current_path))
                             {
-                                std::cout << "Error: wem file " << wem_file << " could not be created." << std::endl;
+                                std::cout << main_data->console_prefix << "Error: Couldn't create directory " << current_path << std::endl;
                                 std::exit(0);
                             }
+                        }
 
-                            output_file.write(wwev_file_data.get(), wem_size);
+                        std::string wem_path = current_path + "/wem";
 
-                            output_file.close();
-
-                            //std::cout << "wem file created: " << wem_file << std::endl;
-
-                            if (main_data->mode_extract_all_wwev_to_ogg)
+                        if (!path_exists(wem_path))
+                        {
+                            if (!std::filesystem::create_directories(wem_path))
                             {
-                                if (!path_exists("packed_codebooks_aoTuV_603.bin"))
+                                std::cout << main_data->console_prefix << "Error: Couldn't create directory " << wem_path << std::endl;
+                                std::exit(0);
+                            }
+                        }
+
+                        std::string ogg_path = current_path + "/ogg";
+
+                        if (!path_exists(ogg_path))
+                        {
+                            if (!std::filesystem::create_directories(ogg_path))
+                            {
+                                std::cout << main_data->console_prefix << "Error: Couldn't create directory " << ogg_path << std::endl;
+                                std::exit(0);
+                            }
+                        }
+
+                        std::ofstream wwev_meta_data_file = std::ofstream(current_path + "/" + "meta", std::ifstream::binary);
+
+                        if (!wwev_meta_data_file.good())
+                        {
+                            std::cout << main_data->console_prefix << "Error: meta file " << current_path + "/" + "meta" << " could not be created." << std::endl;
+                            std::exit(0);
+                        }
+
+                        if (wwev_file_count > 0)
+                        {
+                            for (uint64_t k = 0; k < wwev_file_count; k++)
+                            {
+                                std::memcpy(&input, (&wwev_data->get()[0] + position), 0x8);
+                                for (uint64_t l = 0; l < 0x8; l++)
                                 {
-                                    std::cout << "Error: Missing packed_codebooks_aoTuV_603.bin file." << std::endl;
-                                    std::cout << "       Attempting to create the packed_codebooks_aoTuV_603.bin file." << std::endl;
-
-                                    output_file = std::ofstream("packed_codebooks_aoTuV_603.bin", std::ifstream::binary);
-
-                                    if (!output_file.good())
-                                    {
-                                        std::cout << "Error: packed_codebooks_aoTuV_603.bin file packed_codebooks_aoTuV_603.bin could not be created." << std::endl;
-                                        std::cout << "       A packed_codebooks_aoTuV_603.bin must be in the same directory as rpkg.exe" << std::endl;
-                                        std::exit(0);
-                                    }
-
-                                    output_file.write((const char*)codebook, sizeof(codebook));
+                                    wwev_meta_data.push_back(input[l]);
                                 }
 
-                                std::string ogg_file = ogg_path + "/" + std::to_string(k) + ".ogg";
+                                position += 0x4;
 
-                                output_file = std::ofstream(ogg_file, std::ifstream::binary);
+                                uint32_t wem_size;
+
+                                std::memcpy(&wem_size, (&wwev_data->get()[0] + position), sizeof(bytes4));
+                                position += 0x4;
+
+                                std::unique_ptr<char[]> wwev_file_data;
+                                wwev_file_data = std::make_unique<char[]>(wem_size);
+
+                                std::memcpy(wwev_file_data.get(), (&wwev_data->get()[0] + position), wem_size);
+                                position += wem_size;
+
+                                std::string wem_file = wem_path + "/" + std::to_string(k) + ".wem";
+
+                                std::ofstream output_file = std::ofstream(wem_file, std::ifstream::binary);
 
                                 if (!output_file.good())
                                 {
-                                    std::cout << "Error: ogg file " << ogg_file << " could not be created." << std::endl;
+                                    std::cout << main_data->console_prefix << "Error: wem file " << wem_file << " could not be created." << std::endl;
                                     std::exit(0);
                                 }
 
-                                try
-                                {
-                                    Wwise_RIFF_Vorbis ww(wem_file, "packed_codebooks_aoTuV_603.bin", false, false, kNoForcePacketFormat);
-
-                                    ww.generate_ogg(output_file);
-                                }
-                                catch (const Parse_error& pe)
-                                {
-                                    std::cout << "WWEV resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
-                                    std::cout << "Error parsing ogg file " << wem_file << " could not be created." << std::endl;
-                                    std::cout << "Error: " << pe << std::endl;
-                                }
+                                output_file.write(wwev_file_data.get(), wem_size);
 
                                 output_file.close();
 
-                                //std::cout << "ogg file created: " << ogg_file << std::endl;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        std::memcpy(&bytes4, (&wwev_data->get()[0] + position), 0x4);
+                                //std::cout << main_data->console_prefix << "wem file created: " << wem_file << std::endl;
 
-                        if (bytes4 == 0)
-                        {
-                            std::memcpy(&input, (&wwev_data->get()[0] + position), 0x4);
-                            for (uint64_t k = 0; k < 0x4; k++)
-                            {
-                                wwev_meta_data.push_back(input[k]);
-                            }
-                        }
-                        else
-                        {
-                            std::memcpy(&input, (&wwev_data->get()[0] + position), 0x4);
-                            for (uint64_t k = 0; k < 0x4; k++)
-                            {
-                                wwev_meta_data.push_back(input[k]);
-                            }
-
-                            std::memcpy(&bytes4, (&wwev_data->get()[0] + position), 0x4);
-
-                            position += 0x4;
-
-                            for (uint64_t k = 0; k < bytes4; k++)
-                            {
-                                std::memcpy(&input, (&wwev_data->get()[0] + position), 0x4);
-                                for (uint64_t l = 0; l < 0x4; l++)
+                                if (main_data->mode_extract_all_wwev_to_ogg)
                                 {
-                                    wwev_meta_data.push_back(input[l]);
+                                    if (!path_exists("packed_codebooks_aoTuV_603.bin"))
+                                    {
+                                        std::cout << main_data->console_prefix << "Error: Missing packed_codebooks_aoTuV_603.bin file." << std::endl;
+                                        std::cout << main_data->console_prefix << "       Attempting to create the packed_codebooks_aoTuV_603.bin file." << std::endl;
+
+                                        output_file = std::ofstream("packed_codebooks_aoTuV_603.bin", std::ifstream::binary);
+
+                                        if (!output_file.good())
+                                        {
+                                            std::cout << main_data->console_prefix << "Error: packed_codebooks_aoTuV_603.bin file packed_codebooks_aoTuV_603.bin could not be created." << std::endl;
+                                            std::cout << main_data->console_prefix << "       A packed_codebooks_aoTuV_603.bin must be in the same directory as rpkg.exe" << std::endl;
+                                            std::exit(0);
+                                        }
+
+                                        output_file.write((const char*)codebook, sizeof(codebook));
+                                    }
+
+                                    std::string ogg_file = ogg_path + "/" + std::to_string(k) + ".ogg";
+
+                                    output_file = std::ofstream(ogg_file, std::ifstream::binary);
+
+                                    if (!output_file.good())
+                                    {
+                                        std::cout << main_data->console_prefix << "Error: ogg file " << ogg_file << " could not be created." << std::endl;
+                                        std::exit(0);
+                                    }
+
+                                    try
+                                    {
+                                        Wwise_RIFF_Vorbis ww(wem_file, "packed_codebooks_aoTuV_603.bin", false, false, kNoForcePacketFormat);
+
+                                        ww.generate_ogg(output_file);
+                                    }
+                                    catch (const Parse_error& pe)
+                                    {
+                                        std::cout << main_data->console_prefix << "WWEV resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
+                                        std::cout << main_data->console_prefix << "Error parsing ogg file " << wem_file << " could not be created." << std::endl;
+                                        std::cout << main_data->console_prefix << "Error: " << pe << std::endl;
+                                    }
+
+                                    output_file.close();
+
+                                    //std::cout << main_data->console_prefix << "ogg file created: " << ogg_file << std::endl;
                                 }
-
-                                position += 0x4;
-
-                                std::memcpy(&input, (&wwev_data->get()[0] + position), 0x4);
-                                for (uint64_t l = 0; l < 0x4; l++)
-                                {
-                                    wwev_meta_data.push_back(input[l]);
-                                }
-
-                                position += 0x4;
-
-                                uint32_t wem_size;
-
-                                std::memcpy(&wem_size, (&wwev_data->get()[0] + position), sizeof(bytes4));
-
-                                std::memcpy(&input, (&wwev_data->get()[0] + position), 0x4);
-                                for (uint64_t l = 0; l < 0x4; l++)
-                                {
-                                    wwev_meta_data.push_back(input[l]);
-                                }
-
-                                position += 0x4;
-
-                                //std::memcpy(&input, (&wwev_data->get()[0] + position), 0x4);
-                                //for (uint64_t l = 0; l < wem_size; l++)
-                                //{
-                                    //wwev_meta_data.push_back(wwev_data->get()[position + l]);
-                                //}
-
-                                position += wem_size;
-                            }
-                        }
-                    }
-
-                    if ((position + 0x4) <= decompressed_size)
-                    {
-                        std::memcpy(&bytes4, (&wwev_data->get()[0] + position), 0x4);
-
-                        if (bytes4 == 0)
-                        {
-                            std::memcpy(&input, (&wwev_data->get()[0] + position), 0x4);
-                            for (uint64_t k = 0; k < 0x4; k++)
-                            {
-                                wwev_meta_data.push_back(input[k]);
                             }
                         }
                         else
                         {
-                            std::memcpy(&input, (&wwev_data->get()[0] + position), 0x4);
-                            for (uint64_t k = 0; k < 0x4; k++)
-                            {
-                                wwev_meta_data.push_back(input[k]);
-                            }
-
                             std::memcpy(&bytes4, (&wwev_data->get()[0] + position), 0x4);
 
-                            position += 0x4;
-
-                            for (uint64_t k = 0; k < bytes4; k++)
+                            if (bytes4 == 0)
                             {
                                 std::memcpy(&input, (&wwev_data->get()[0] + position), 0x4);
-                                for (uint64_t l = 0; l < 0x4; l++)
+                                for (uint64_t k = 0; k < 0x4; k++)
                                 {
-                                    wwev_meta_data.push_back(input[l]);
+                                    wwev_meta_data.push_back(input[k]);
                                 }
-
-                                position += 0x4;
-
+                            }
+                            else
+                            {
                                 std::memcpy(&input, (&wwev_data->get()[0] + position), 0x4);
-                                for (uint64_t l = 0; l < 0x4; l++)
+                                for (uint64_t k = 0; k < 0x4; k++)
                                 {
-                                    wwev_meta_data.push_back(input[l]);
+                                    wwev_meta_data.push_back(input[k]);
                                 }
+
+                                std::memcpy(&bytes4, (&wwev_data->get()[0] + position), 0x4);
 
                                 position += 0x4;
 
-                                uint32_t wem_size;
-
-                                std::memcpy(&wem_size, (&wwev_data->get()[0] + position), sizeof(bytes4));
-
-                                std::memcpy(&input, (&wwev_data->get()[0] + position), 0x4);
-                                for (uint64_t l = 0; l < 0x4; l++)
+                                for (uint64_t k = 0; k < bytes4; k++)
                                 {
-                                    wwev_meta_data.push_back(input[l]);
+                                    std::memcpy(&input, (&wwev_data->get()[0] + position), 0x4);
+                                    for (uint64_t l = 0; l < 0x4; l++)
+                                    {
+                                        wwev_meta_data.push_back(input[l]);
+                                    }
+
+                                    position += 0x4;
+
+                                    std::memcpy(&input, (&wwev_data->get()[0] + position), 0x4);
+                                    for (uint64_t l = 0; l < 0x4; l++)
+                                    {
+                                        wwev_meta_data.push_back(input[l]);
+                                    }
+
+                                    position += 0x4;
+
+                                    uint32_t wem_size;
+
+                                    std::memcpy(&wem_size, (&wwev_data->get()[0] + position), sizeof(bytes4));
+
+                                    std::memcpy(&input, (&wwev_data->get()[0] + position), 0x4);
+                                    for (uint64_t l = 0; l < 0x4; l++)
+                                    {
+                                        wwev_meta_data.push_back(input[l]);
+                                    }
+
+                                    position += 0x4;
+
+                                    //std::memcpy(&input, (&wwev_data->get()[0] + position), 0x4);
+                                    //for (uint64_t l = 0; l < wem_size; l++)
+                                    //{
+                                        //wwev_meta_data.push_back(wwev_data->get()[position + l]);
+                                    //}
+
+                                    position += wem_size;
                                 }
-
-                                position += 0x4;
-
-                                //std::memcpy(&input, (&wwev_data->get()[0] + position), 0x4);
-                                //for (uint64_t l = 0; l < wem_size; l++)
-                                //{
-                                    //wwev_meta_data.push_back(wwev_data->get()[position + l]);
-                                //}
-
-                                position += wem_size;
                             }
                         }
-                    }
-                    else if (position == decompressed_size)
-                    {
-                        //std::cout << hash_file_name << "'s size is odd: " << ((position + 0x4) - decompressed_size) << std::endl;
-                    }
-                    else
-                    {
-                        std::cout << (position + 0x4) << "," << decompressed_size << std::endl;
 
-                        std::cout << hash_file_name << "'s size is odd: " << ((position + 0x4) - decompressed_size) << std::endl;
-                    }
-
-                    wwev_meta_data_file.write(wwev_meta_data.data(), wwev_meta_data.size());
-
-                    wwev_meta_data_file.close();
-
-                    /*uint32_t temp_hash_reference_count = main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference_count & 0x3FFFFFFF;
-
-                    std::cout << main_data->rpkg_data.at(i).hash_file_name.at(j) << " has " << temp_hash_reference_count << " dependencies in " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
-
-                    if (temp_hash_reference_count > 0)
-                    {
-                        for (uint64_t k = 0; k < temp_hash_reference_count; k++)
+                        if ((position + 0x4) <= decompressed_size)
                         {
-                            std::cout << main_data->rpkg_data.at(i).hash_file_name.at(j) << " is linked to " << main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference_string.at(k) << std::endl;
+                            std::memcpy(&bytes4, (&wwev_data->get()[0] + position), 0x4);
+
+                            if (bytes4 == 0)
+                            {
+                                std::memcpy(&input, (&wwev_data->get()[0] + position), 0x4);
+                                for (uint64_t k = 0; k < 0x4; k++)
+                                {
+                                    wwev_meta_data.push_back(input[k]);
+                                }
+                            }
+                            else
+                            {
+                                std::memcpy(&input, (&wwev_data->get()[0] + position), 0x4);
+                                for (uint64_t k = 0; k < 0x4; k++)
+                                {
+                                    wwev_meta_data.push_back(input[k]);
+                                }
+
+                                std::memcpy(&bytes4, (&wwev_data->get()[0] + position), 0x4);
+
+                                position += 0x4;
+
+                                for (uint64_t k = 0; k < bytes4; k++)
+                                {
+                                    std::memcpy(&input, (&wwev_data->get()[0] + position), 0x4);
+                                    for (uint64_t l = 0; l < 0x4; l++)
+                                    {
+                                        wwev_meta_data.push_back(input[l]);
+                                    }
+
+                                    position += 0x4;
+
+                                    std::memcpy(&input, (&wwev_data->get()[0] + position), 0x4);
+                                    for (uint64_t l = 0; l < 0x4; l++)
+                                    {
+                                        wwev_meta_data.push_back(input[l]);
+                                    }
+
+                                    position += 0x4;
+
+                                    uint32_t wem_size;
+
+                                    std::memcpy(&wem_size, (&wwev_data->get()[0] + position), sizeof(bytes4));
+
+                                    std::memcpy(&input, (&wwev_data->get()[0] + position), 0x4);
+                                    for (uint64_t l = 0; l < 0x4; l++)
+                                    {
+                                        wwev_meta_data.push_back(input[l]);
+                                    }
+
+                                    position += 0x4;
+
+                                    //std::memcpy(&input, (&wwev_data->get()[0] + position), 0x4);
+                                    //for (uint64_t l = 0; l < wem_size; l++)
+                                    //{
+                                        //wwev_meta_data.push_back(wwev_data->get()[position + l]);
+                                    //}
+
+                                    position += wem_size;
+                                }
+                            }
                         }
-                    }*/
+                        else if (position == decompressed_size)
+                        {
+                            //std::cout << main_data->console_prefix << hash_file_name << "'s size is odd: " << ((position + 0x4) - decompressed_size) << std::endl;
+                        }
+                        else
+                        {
+                            std::cout << main_data->console_prefix << (position + 0x4) << "," << decompressed_size << std::endl;
+
+                            std::cout << main_data->console_prefix << hash_file_name << "'s size is odd: " << ((position + 0x4) - decompressed_size) << std::endl;
+                        }
+
+                        wwev_meta_data_file.write(wwev_meta_data.data(), wwev_meta_data.size());
+
+                        wwev_meta_data_file.close();
+
+                        std::vector<char> meta_data;
+                        char char1[1];
+                        char char4[4];
+                        char char8[8];
+
+                        std::memcpy(&char8, &main_data->rpkg_data.at(i).hash.at(j), sizeof(uint64_t));
+                        for (uint64_t k = 0; k < sizeof(uint64_t); k++)
+                        {
+                            meta_data.push_back(char8[k]);
+                        }
+
+                        std::memcpy(&char8, &main_data->rpkg_data.at(i).hash_offset.at(j), sizeof(uint64_t));
+                        for (uint64_t k = 0; k < sizeof(uint64_t); k++)
+                        {
+                            meta_data.push_back(char8[k]);
+                        }
+
+                        std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_size.at(j), sizeof(uint32_t));
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                        {
+                            meta_data.push_back(char4[k]);
+                        }
+
+                        std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_resource_type.at(j), sizeof(uint32_t));
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                        {
+                            meta_data.push_back(char4[k]);
+                        }
+
+                        std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_reference_table_size.at(j), sizeof(uint32_t));
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                        {
+                            meta_data.push_back(char4[k]);
+                        }
+
+                        std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_reference_table_dummy.at(j), sizeof(uint32_t));
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                        {
+                            meta_data.push_back(char4[k]);
+                        }
+
+                        std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_size_final.at(j), sizeof(uint32_t));
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                        {
+                            meta_data.push_back(char4[k]);
+                        }
+
+                        std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_size_in_memory.at(j), sizeof(uint32_t));
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                        {
+                            meta_data.push_back(char4[k]);
+                        }
+
+                        std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_size_in_video_memory.at(j), sizeof(uint32_t));
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                        {
+                            meta_data.push_back(char4[k]);
+                        }
+
+                        if (main_data->rpkg_data.at(i).hash_reference_table_size.at(j) > 0)
+                        {
+                            uint32_t hash_reference_table_size_count = 0;
+                            uint32_t temp_hash_reference_count = main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference_count & 0x3FFFFFFF;
+
+                            std::memcpy(&char4, &main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference_count, sizeof(uint32_t));
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data.push_back(char4[k]);
+                            }
+                            hash_reference_table_size_count += 4;
+
+                            for (uint64_t k = 0; k < temp_hash_reference_count; k++)
+                            {
+                                std::memcpy(&char1, &main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference_type.at(k), sizeof(uint8_t));
+                                for (uint64_t l = 0; l < sizeof(uint8_t); l++)
+                                {
+                                    meta_data.push_back(char1[l]);
+                                }
+                                hash_reference_table_size_count += 1;
+                            }
+
+                            for (uint64_t k = 0; k < temp_hash_reference_count; k++)
+                            {
+                                std::memcpy(&char8, &main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference.at(k), sizeof(uint64_t));
+                                for (uint64_t l = 0; l < sizeof(uint64_t); l++)
+                                {
+                                    meta_data.push_back(char8[l]);
+                                }
+                                hash_reference_table_size_count += 8;
+                            }
+
+                            if (hash_reference_table_size_count != main_data->rpkg_data.at(i).hash_reference_table_size.at(j))
+                            {
+                                std::cout << main_data->console_prefix << "Error: Hash meta data for " << main_data->rpkg_data.at(i).hash_string.at(j) << " is corrupt." << std::endl;
+                                std::exit(0);
+                            }
+                        }
+
+                        std::ofstream output_file = std::ofstream(current_path + "/" + main_data->rpkg_data.at(i).hash_file_name.at(j) + "." + "meta", std::ifstream::binary);
+
+                        if (!output_file.good())
+                        {
+                            std::cout << main_data->console_prefix << "Error: Meta data file " << current_path + "/" + main_data->rpkg_data.at(i).hash_file_name.at(j) + "/" + "meta" << " could not be created." << std::endl;
+                            std::exit(0);
+                        }
+
+                        output_file.write(meta_data.data(), meta_data.size());
+
+                        output_file.close();
+
+                        /*uint32_t temp_hash_reference_count = main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference_count & 0x3FFFFFFF;
+
+                        std::cout << main_data->console_prefix << main_data->rpkg_data.at(i).hash_file_name.at(j) << " has " << temp_hash_reference_count << " dependencies in " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
+
+                        if (temp_hash_reference_count > 0)
+                        {
+                            for (uint64_t k = 0; k < temp_hash_reference_count; k++)
+                            {
+                                std::cout << main_data->console_prefix << main_data->rpkg_data.at(i).hash_file_name.at(j) << " is linked to " << main_data->rpkg_data.at(i).hash_reference_data.at(j).hash_reference_string.at(k) << std::endl;
+                            }
+                        }*/
+                    }
                 }
             }
 
-            ss.str(std::string());
+            for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
+            {
+                if (extracted.at(z))
+                {
+                    if (found_in.at(z) == "")
+                    {
+                        found_in.at(z).append(main_data->rpkg_data.at(i).rpkg_file_name);
+                    }
+                    else
+                    {
+                        found_in.at(z).append(", " + main_data->rpkg_data.at(i).rpkg_file_name);
+                    }
+                }
+                else
+                {
+                    if (not_found_in.at(z) == "")
+                    {
+                        not_found_in.at(z).append(main_data->rpkg_data.at(i).rpkg_file_name);
+                    }
+                    else
+                    {
+                        not_found_in.at(z).append(", " + main_data->rpkg_data.at(i).rpkg_file_name);
+                    }
+                }
+            }
+        }
 
-            ss << "Extracting WWEV to *.wem/*.ogg files: Done";
+        ss.str(std::string());
 
-            std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+        ss << "Extracting WWEV to *.wem/*.ogg files: Done";
+
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+
+        for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
+        {
+            std::cout << std::endl << main_data->console_prefix << "\"" << main_data->input_filter.at(z) << "\" was found in and extracted from: " << found_in.at(z) << std::endl;
+
+            std::cout << std::endl << main_data->console_prefix << "\"" << main_data->input_filter.at(z) << "\" was not found in RPKG file(s): " << not_found_in.at(z) << std::endl;
         }
     }
     else
     {
-        std::cout << "Error: The folder " << main_data->input_rpkg_folder_path << " to generate the RPKG file does not exist." << std::endl;
+        std::cout << main_data->console_prefix << "Error: The folder " << main_data->input_rpkg_folder_path << " to generate the RPKG file does not exist." << std::endl;
         std::exit(0);
     }
 }
@@ -4840,6 +5178,37 @@ void rebuild_all_wwev(main_variables* main_data)
 
         std::vector<std::string> wwev_folders;
 
+        std::string input_folder = replace_slashes(main_data->input_rpkg_folder_path);
+
+        //std::cout << main_data->console_prefix << input_folder << std::endl;
+
+        if (input_folder.substr(input_folder.length() - 1, 1) == "/")
+        {
+            input_folder = input_folder.substr(0, input_folder.length() - 1);
+        }
+
+        //std::cout << main_data->console_prefix << input_folder << std::endl;
+
+        if (to_uppercase(input_folder.substr((input_folder.length() - 4), 4)) != "/OGG" && to_uppercase(input_folder.substr((input_folder.length() - 4), 4)) != "/WEM" && path_exists(input_folder + "/meta") && path_exists(input_folder + "/wem"))
+        {
+            //std::cout << main_data->console_prefix << "WWEV folder found: " << input_folder << std::endl;
+
+            bool wwev_folder_found = false;
+
+            for (uint64_t i = 0; i < wwev_folders.size(); i++)
+            {
+                if (input_folder == wwev_folders.at(i))
+                {
+                    wwev_folder_found = true;
+                }
+            }
+
+            if (!wwev_folder_found)
+            {
+                wwev_folders.push_back(input_folder);
+            }
+        }
+
         for (const auto& entry : std::filesystem::recursive_directory_iterator(main_data->input_rpkg_folder_path))
         {
             std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
@@ -4859,27 +5228,27 @@ void rebuild_all_wwev(main_variables* main_data)
 
                 ss << "Scanning folder" << std::string(period_count, '.');
 
-                std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ');
+                std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ');
 
                 period_count++;
             }
 
             if (std::filesystem::is_directory(entry.path().string()))
             {
-                std::string input_folder = replace_slashes(entry.path().string());
+                input_folder = replace_slashes(entry.path().string());
 
-                //std::cout << input_folder << std::endl;
+                //std::cout << main_data->console_prefix << input_folder << std::endl;
 
                 if (input_folder.substr(input_folder.length() - 1, 1) == "/")
                 {
                     input_folder = input_folder.substr(0, input_folder.length() - 1);
                 }
 
-                //std::cout << input_folder << std::endl;
+                //std::cout << main_data->console_prefix << input_folder << std::endl;
 
                 if (to_uppercase(input_folder.substr((input_folder.length() - 4), 4)) != "/OGG" && to_uppercase(input_folder.substr((input_folder.length() - 4), 4)) != "/WEM" && path_exists(input_folder + "/meta") && path_exists(input_folder + "/wem"))
                 {
-                    //std::cout << "WWEV folder found: " << input_folder << std::endl;
+                    //std::cout << main_data->console_prefix << "WWEV folder found: " << input_folder << std::endl;
 
                     bool wwev_folder_found = false;
 
@@ -4903,12 +5272,12 @@ void rebuild_all_wwev(main_variables* main_data)
 
         ss << "Scanning folder: Done";
 
-        std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
 
         start_time = std::chrono::high_resolution_clock::now();
         int stringstream_length = 80;
 
-        std::string message = "Rebuilding WWEV files from: ";
+        std::string message = main_data->console_prefix + "Rebuilding WWEV files from: ";
 
         for (uint64_t i = 0; i < wwev_folders.size(); i++)
         {
@@ -4917,7 +5286,7 @@ void rebuild_all_wwev(main_variables* main_data)
                 stringstream_length = update_console(message, wwev_folders.size(), i, start_time, stringstream_length);
             }
 
-            //std::cout << wwev_folders.at(i) << std::endl;
+            //std::cout << main_data->console_prefix << wwev_folders.at(i) << std::endl;
 
             std::vector<std::string> wem_file_names;
             std::vector<std::string> wem_file_paths;
@@ -4954,14 +5323,14 @@ void rebuild_all_wwev(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << entry.path().string() << " is a valid wem file." << std::endl;
+                            std::cout << main_data->console_prefix << entry.path().string() << " is a valid wem file." << std::endl;
                         }
                     }
                     else
                     {
                         if (main_data->debug)
                         {
-                            std::cout << entry.path().string() << " is not a valid wem file." << std::endl;
+                            std::cout << main_data->console_prefix << entry.path().string() << " is not a valid wem file." << std::endl;
                         }
                     }
                 }
@@ -4973,13 +5342,13 @@ void rebuild_all_wwev(main_variables* main_data)
             {
                 if (path_exists(wwev_folders.at(i) + "/wem/" + std::to_string(j) + ".wem"))
                 {
-                    //std::cout << std::to_string(j) + ".wem" << " found." << std::endl;
+                    //std::cout << main_data->console_prefix << std::to_string(j) + ".wem" << " found." << std::endl;
                 }
                 else
                 {
                     all_wems_found = false;
 
-                    std::cout << std::to_string(j) + ".wem" << " is missing." << std::endl;
+                    std::cout << main_data->console_prefix << std::to_string(j) + ".wem" << " is missing." << std::endl;
                 }
             }
 
@@ -4989,7 +5358,7 @@ void rebuild_all_wwev(main_variables* main_data)
 
                 if (!meta_file.good())
                 {
-                    std::cout << "Error: meta file " << wwev_folders.at(i) + "/meta" << " could not be opened." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: meta file " << wwev_folders.at(i) + "/meta" << " could not be opened." << std::endl;
                     std::exit(0);
                 }
 
@@ -5041,9 +5410,9 @@ void rebuild_all_wwev(main_variables* main_data)
 
                 if (wwev_file_count != wem_file_paths.size())
                 {
-                    wwev_file_count = wem_file_paths.size();
+                    wwev_file_count = (uint32_t)wem_file_paths.size();
 
-                    std::cout << "Error: Mismatch between meta WWEV file count and number of wem files in directory: " << wwev_folders.at(i) << std::endl;
+                    std::cout << main_data->console_prefix << "Error: Mismatch between meta WWEV file count and number of wem files in directory: " << wwev_folders.at(i) << std::endl;
                 }
 
                 std::vector<uint32_t> wem_hashes;
@@ -5070,7 +5439,7 @@ void rebuild_all_wwev(main_variables* main_data)
 
                 if (!wwev_file.good())
                 {
-                    std::cout << "Error: WWEV file " << wwev_hash_file_name << " could not be created." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: WWEV file " << wwev_hash_file_name << " could not be created." << std::endl;
                     std::exit(0);
                 }
 
@@ -5093,7 +5462,7 @@ void rebuild_all_wwev(main_variables* main_data)
 
                     if (!wem_file.good())
                     {
-                        std::cout << "Error: wem file " << wem_file_name << " could not be opened." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: wem file " << wem_file_name << " could not be opened." << std::endl;
                         std::exit(0);
                     }
 
@@ -5128,7 +5497,7 @@ void rebuild_all_wwev(main_variables* main_data)
             }
             else
             {
-                std::cout << "Can't create WWEV from path: " << wwev_folders.at(i) << std::endl;
+                std::cout << main_data->console_prefix << "Can't create WWEV from path: " << wwev_folders.at(i) << std::endl;
             }
         }
 
@@ -5142,7 +5511,7 @@ void rebuild_all_wwev(main_variables* main_data)
     }
     else
     {
-        std::cout << "Error: The folder " << main_data->input_rpkg_folder_path << " to rebuild the WWEVs does not exist." << std::endl;
+        std::cout << main_data->console_prefix << "Error: The folder " << main_data->input_rpkg_folder_path << " to rebuild the WWEVs does not exist." << std::endl;
         std::exit(0);
     }
 }
@@ -5195,7 +5564,7 @@ void extract_all_wwes(main_variables* main_data)
 
                 ss << "Scanning folder" << std::string(period_count, '.');
 
-                std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ');
+                std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ');
 
                 period_count++;
             }
@@ -5224,14 +5593,14 @@ void extract_all_wwes(main_variables* main_data)
 
                     if (main_data->debug)
                     {
-                        std::cout << entry.path().string() << " is a valid RPKG file." << std::endl;
+                        std::cout << main_data->console_prefix << entry.path().string() << " is a valid RPKG file." << std::endl;
                     }
                 }
                 else
                 {
                     if (main_data->debug)
                     {
-                        std::cout << entry.path().string() << " is not a valid RPKG file." << std::endl;
+                        std::cout << main_data->console_prefix << entry.path().string() << " is not a valid RPKG file." << std::endl;
                     }
                 }
             }
@@ -5241,13 +5610,13 @@ void extract_all_wwes(main_variables* main_data)
 
         ss << "Scanning folder: Done";
 
-        std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
 
         if (main_data->debug)
         {
             for (uint64_t i = 0; i < rpkg_file_paths.size(); i++)
             {
-                std::cout << "Found RPKG file: " << rpkg_file_paths.at(i) << std::endl;
+                std::cout << main_data->console_prefix << "Found RPKG file: " << rpkg_file_paths.at(i) << std::endl;
             }
         }
 
@@ -5261,7 +5630,7 @@ void extract_all_wwes(main_variables* main_data)
         {
             if (!std::filesystem::create_directories(main_data->input_output_path + "WWES"))
             {
-                std::cout << "Error: Couldn't create directory " << main_data->input_output_path + "WWES" << std::endl;
+                std::cout << main_data->console_prefix << "Error: Couldn't create directory " << main_data->input_output_path + "WWES" << std::endl;
                 std::exit(0);
             }
         }
@@ -5309,12 +5678,12 @@ void extract_all_wwes(main_variables* main_data)
 
                         ss << "Importing IOI paths from FXAS files/resources" << std::string(period_count, '.');
 
-                        std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ');
+                        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ');
 
                         period_count++;
                     }
 
-                    //std::cout << "FXAS resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
+                    //std::cout << main_data->console_prefix << "FXAS resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
 
                     uint64_t hash_size;
 
@@ -5339,7 +5708,7 @@ void extract_all_wwes(main_variables* main_data)
 
                     if (!file.good())
                     {
-                        std::cout << "Error: RPKG file " << main_data->input_rpkg_file_path << " could not be read." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: RPKG file " << main_data->input_rpkg_file_path << " could not be read." << std::endl;
                         std::exit(0);
                     }
 
@@ -5353,7 +5722,7 @@ void extract_all_wwes(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << "XORing input_file_data with a hashSize of " << hash_size << std::endl;
+                            std::cout << main_data->console_prefix << "XORing input_file_data with a hashSize of " << hash_size << std::endl;
                         }
                     }
 
@@ -5372,7 +5741,7 @@ void extract_all_wwes(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << "LZ4 decompression complete." << std::endl;
+                            std::cout << main_data->console_prefix << "LZ4 decompression complete." << std::endl;
                         }
                     }
                     else
@@ -5402,7 +5771,7 @@ void extract_all_wwes(main_variables* main_data)
                             {
                                 if (k == (main_data->input_text_search.length() - 1))
                                 {
-                                    //std::cout << "Found text string \"" << main_data->input_text_search << "\" in hash file/resouce " << main_data->rpkg_data.at(i).hash_file_name.at(j) << " at offset 0x" << std::hex << std::uppercase << position << std::endl;
+                                    //std::cout << main_data->console_prefix << "Found text string \"" << main_data->input_text_search << "\" in hash file/resouce " << main_data->rpkg_data.at(i).hash_file_name.at(j) << " at offset 0x" << std::hex << std::uppercase << position << std::endl;
 
                                     bool done_searching_start = false;
 
@@ -5456,17 +5825,17 @@ void extract_all_wwes(main_variables* main_data)
 
                                             fxas_to_wwes_ioi_path_map[lowercase] = (fxas_wwes_ioi_path.size() - 1);
 
-                                            //std::cout << "Text string \"" << main_data->input_text_search << "\" is contained in string: " << fxas_string << std::endl;
+                                            //std::cout << main_data->console_prefix << "Text string \"" << main_data->input_text_search << "\" is contained in string: " << fxas_string << std::endl;
                                         }
                                         else
                                         {
-                                            std::cout << "Error: Could not parse FXAS IOI path name." << std::endl;
+                                            std::cout << main_data->console_prefix << "Error: Could not parse FXAS IOI path name." << std::endl;
                                             std::exit(0);
                                         }
                                     }
                                     else
                                     {
-                                        std::cout << "Error: Could not find FXAS IOI path name." << std::endl;
+                                        std::cout << main_data->console_prefix << "Error: Could not find FXAS IOI path name." << std::endl;
                                         std::exit(0);
                                     }
 
@@ -5489,18 +5858,40 @@ void extract_all_wwes(main_variables* main_data)
 
         ss << "Importing IOI paths from FXAS files/resources: Done";
 
-        std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
 
         start_time = std::chrono::high_resolution_clock::now();
         int stringstream_length = 80;
 
         uint64_t wwes_count_current = 0;
 
-        std::string message = "Extracting WWES to IOI Paths: ";
+        std::string message = main_data->console_prefix + "Extracting WWES to IOI Paths: ";
+
+        if (main_data->mode_filter)
+        {
+            std::cout << main_data->console_prefix << "Extracting WWES to *.wem/*.ogg files with filter \"" << main_data->input_filter_string << "\"" << std::endl;
+        }
+
+        std::vector<std::string> found_in;
+        std::vector<std::string> not_found_in;
+
+        for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
+        {
+            found_in.push_back("");
+
+            not_found_in.push_back("");
+        }
 
         for (uint64_t i = 0; i < main_data->rpkg_data.size(); i++)
         {
             bool archive_folder_created = false;
+
+            std::vector<bool> extracted;
+
+            for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
+            {
+                extracted.push_back(false);
+            }
 
             for (uint64_t j = 0; j < main_data->rpkg_data.at(i).hash.size(); j++)
             {
@@ -5515,7 +5906,7 @@ void extract_all_wwes(main_variables* main_data)
 
                     wwes_count_current++;
 
-                    //std::cout << "WWES resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
+                    //std::cout << main_data->console_prefix << "WWES resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
 
                     uint64_t hash_size;
 
@@ -5540,7 +5931,7 @@ void extract_all_wwes(main_variables* main_data)
 
                     if (!file.good())
                     {
-                        std::cout << "Error: RPKG file " << main_data->input_rpkg_file_path << " could not be read." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: RPKG file " << main_data->input_rpkg_file_path << " could not be read." << std::endl;
                         std::exit(0);
                     }
 
@@ -5554,7 +5945,7 @@ void extract_all_wwes(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << "XORing input_file_data with a hashSize of " << hash_size << std::endl;
+                            std::cout << main_data->console_prefix << "XORing input_file_data with a hashSize of " << hash_size << std::endl;
                         }
                     }
 
@@ -5573,7 +5964,7 @@ void extract_all_wwes(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << "LZ4 decompression complete." << std::endl;
+                            std::cout << main_data->console_prefix << "LZ4 decompression complete." << std::endl;
                         }
                     }
                     else
@@ -5617,7 +6008,7 @@ void extract_all_wwes(main_variables* main_data)
                         }
                     }
 
-                    position += adtllabl.length();
+                    position += (uint32_t)adtllabl.length();
 
                     std::memcpy(&wwes_file_name_length, (&wwes_data->get()[0] + position), sizeof(bytes4));
                     position += 0x8;
@@ -5641,237 +6032,319 @@ void extract_all_wwes(main_variables* main_data)
                         lowercase.push_back(std::tolower(wwes_string[z]));
                     }
 
-                    //std::cout << "WWES string: " << lowercase << std::endl;
+                    //std::cout << main_data->console_prefix << "WWES string: " << lowercase << std::endl;
 
                     std::map<std::string, uint64_t>::iterator it = fxas_to_wwes_ioi_path_map.find(lowercase);
 
                     if (it != fxas_to_wwes_ioi_path_map.end())
                     {
-                        //std::cout << lowercase << " was found in " << fxas_wwes_ioi_path.at(it->second) << std::endl;
-                        //std::cout << "Located in FXAS file: " << fxas_file_name.at(it->second) << std::endl;
+                        bool found = false;
 
-                        total_wwes_fxas_linked++;
+                        uint64_t input_filter_index = 0;
 
-                        std::size_t pos = fxas_wwes_ioi_path.at(it->second).find_last_of("\\/");
-
-                        std::string directory = main_data->input_output_path + "WWES" + "/";
-
-                        if (pos != std::string::npos)
+                        for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
                         {
-                            directory.append(fxas_wwes_ioi_path.at(it->second).substr(0, pos));
-                        }
-                        else
-                        {
-                            std::cout << "Error: Couldn't parse directory from FXAS IOI path." << std::endl;
-                            std::exit(0);
-                        }
+                            std::size_t found_position_hash = hash_file_name.find(main_data->input_filter.at(z));
 
-                        if (!path_exists(directory))
-                        {
-                            if (!std::filesystem::create_directories(directory))
+                            std::size_t found_position_wwes = to_uppercase(lowercase).find(to_uppercase(main_data->input_filter.at(z)));
+
+                            if ((found_position_hash != std::string::npos && main_data->input_filter.at(z) != "") || (found_position_wwes != std::string::npos && main_data->input_filter.at(z) != ""))
                             {
-                                std::cout << "Error: Couldn't create directory " << directory << std::endl;
-                                std::exit(0);
+                                found = true;
+
+                                input_filter_index = z;
+
+                                break;
                             }
                         }
 
-                        std::string wem_file_name = main_data->input_output_path + "WWES" + "/" + fxas_wwes_ioi_path.at(it->second) + ".wem";
-
-                        std::ofstream wem_file = std::ofstream(wem_file_name, std::ifstream::binary);
-
-                        if (!wem_file.good())
+                        if (found || !main_data->mode_filter)
                         {
-                            std::cout << "Error: wem file " << wem_file_name << " could not be created." << std::endl;
-                            std::exit(0);
-                        }
+                            if (main_data->input_filter.size() > 0)
+                            {
+                                extracted.at(input_filter_index) = true;
+                            }
 
-                        wem_file.write(wwes_data->get(), decompressed_size);
+                            //std::cout << main_data->console_prefix << lowercase << " was found in " << fxas_wwes_ioi_path.at(it->second) << std::endl;
+                            //std::cout << main_data->console_prefix << "Located in FXAS file: " << fxas_file_name.at(it->second) << std::endl;
 
-                        wem_file.close();
+                            total_wwes_fxas_linked++;
 
-                        std::ofstream wwes_meta_data_file = std::ofstream(main_data->input_output_path + "WWES" + "/" + fxas_wwes_ioi_path.at(it->second) + "_" + hash_file_name, std::ifstream::binary);
+                            std::size_t pos = fxas_wwes_ioi_path.at(it->second).find_last_of("\\/");
 
-                        if (!wwes_meta_data_file.good())
-                        {
-                            std::cout << "Error: meta file " << main_data->input_output_path + "WWES" + "/" + fxas_wwes_ioi_path.at(it->second) + "_" + hash_file_name << " could not be created." << std::endl;
-                            std::exit(0);
-                        }
+                            std::string directory = main_data->input_output_path + "WWES" + "/";
 
-                        /*std::ofstream wwes_meta_data_file = std::ofstream(main_data->input_output_path + "WWES" + "/" + fxas_wwes_ioi_path.at(it->second) + ".meta", std::ifstream::binary);
+                            if (pos != std::string::npos)
+                            {
+                                directory.append(fxas_wwes_ioi_path.at(it->second).substr(0, pos));
+                            }
+                            else
+                            {
+                                std::cout << main_data->console_prefix << "Error: Couldn't parse directory from FXAS IOI path." << std::endl;
+                                std::exit(0);
+                            }
 
-                        if (!wwes_meta_data_file.good())
-                        {
-                            std::cout << "Error: meta file " << main_data->input_output_path + "WWES" + "/" + fxas_wwes_ioi_path.at(it->second) + ".meta" << " could not be created." << std::endl;
-                            std::exit(0);
-                        }
+                            if (!path_exists(directory))
+                            {
+                                if (!std::filesystem::create_directories(directory))
+                                {
+                                    std::cout << main_data->console_prefix << "Error: Couldn't create directory " << directory << std::endl;
+                                    std::exit(0);
+                                }
+                            }
 
-                        std::vector<char> wwes_meta_data;
+                            std::string wem_file_name = main_data->input_output_path + "WWES" + "/" + fxas_wwes_ioi_path.at(it->second) + ".wem";
 
-                        char hash[8];
+                            std::ofstream wem_file = std::ofstream(wem_file_name, std::ifstream::binary);
 
-                        std::memcpy(&hash, &main_data->rpkg_data.at(i).hash.at(j), 0x8);
+                            if (!wem_file.good())
+                            {
+                                std::cout << main_data->console_prefix << "Error: wem file " << wem_file_name << " could not be created." << std::endl;
+                                std::exit(0);
+                            }
 
-                        for (int z = 0; z < 0x8; z++)
-                        {
-                            wwes_meta_data.push_back(hash[z]);
-                        }
+                            wem_file.write(wwes_data->get(), decompressed_size);
 
-                        std::memcpy(&hash, &fxas_hash.at(it->second), 0x8);
+                            wem_file.close();
 
-                        for (int z = 0; z < 0x8; z++)
-                        {
-                            wwes_meta_data.push_back(hash[z]);
-                        }
+                            std::ofstream wwes_meta_data_file = std::ofstream(main_data->input_output_path + "WWES" + "/" + fxas_wwes_ioi_path.at(it->second) + "_" + hash_file_name, std::ifstream::binary);
 
-                        wwes_meta_data_file.write(wwes_meta_data.data(), wwes_meta_data.size());*/
+                            if (!wwes_meta_data_file.good())
+                            {
+                                std::cout << main_data->console_prefix << "Error: meta file " << main_data->input_output_path + "WWES" + "/" + fxas_wwes_ioi_path.at(it->second) + "_" + hash_file_name << " could not be created." << std::endl;
+                                std::exit(0);
+                            }
 
-                        wwes_meta_data_file.close();
+                            /*std::ofstream wwes_meta_data_file = std::ofstream(main_data->input_output_path + "WWES" + "/" + fxas_wwes_ioi_path.at(it->second) + ".meta", std::ifstream::binary);
 
-                        //std::cout << "wem file created: " << wem_file << std::endl;
+                            if (!wwes_meta_data_file.good())
+                            {
+                                std::cout << main_data->console_prefix << "Error: meta file " << main_data->input_output_path + "WWES" + "/" + fxas_wwes_ioi_path.at(it->second) + ".meta" << " could not be created." << std::endl;
+                                std::exit(0);
+                            }
 
-                        if (!path_exists("packed_codebooks_aoTuV_603.bin"))
-                        {
-                            std::cout << "Error: Missing packed_codebooks_aoTuV_603.bin file." << std::endl;
-                            std::cout << "       Attempting to create the packed_codebooks_aoTuV_603.bin file." << std::endl;
+                            std::vector<char> wwes_meta_data;
 
-                            std::ofstream output_file = std::ofstream("packed_codebooks_aoTuV_603.bin", std::ifstream::binary);
+                            char hash[8];
+
+                            std::memcpy(&hash, &main_data->rpkg_data.at(i).hash.at(j), 0x8);
+
+                            for (int z = 0; z < 0x8; z++)
+                            {
+                                wwes_meta_data.push_back(hash[z]);
+                            }
+
+                            std::memcpy(&hash, &fxas_hash.at(it->second), 0x8);
+
+                            for (int z = 0; z < 0x8; z++)
+                            {
+                                wwes_meta_data.push_back(hash[z]);
+                            }
+
+                            wwes_meta_data_file.write(wwes_meta_data.data(), wwes_meta_data.size());*/
+
+                            wwes_meta_data_file.close();
+
+                            //std::cout << main_data->console_prefix << "wem file created: " << wem_file << std::endl;
+
+                            if (!path_exists("packed_codebooks_aoTuV_603.bin"))
+                            {
+                                std::cout << main_data->console_prefix << "Error: Missing packed_codebooks_aoTuV_603.bin file." << std::endl;
+                                std::cout << main_data->console_prefix << "       Attempting to create the packed_codebooks_aoTuV_603.bin file." << std::endl;
+
+                                std::ofstream output_file = std::ofstream("packed_codebooks_aoTuV_603.bin", std::ifstream::binary);
+
+                                if (!output_file.good())
+                                {
+                                    std::cout << main_data->console_prefix << "Error: packed_codebooks_aoTuV_603.bin file packed_codebooks_aoTuV_603.bin could not be created." << std::endl;
+                                    std::cout << main_data->console_prefix << "       A packed_codebooks_aoTuV_603.bin must be in the same directory as rpkg.exe" << std::endl;
+                                    std::exit(0);
+                                }
+
+                                output_file.write((const char*)codebook, sizeof(codebook));
+                            }
+
+                            std::string ogg_file = main_data->input_output_path + "WWES" + "/" + fxas_wwes_ioi_path.at(it->second) + ".ogg";
+
+                            std::ofstream output_file = std::ofstream(ogg_file, std::ifstream::binary);
 
                             if (!output_file.good())
                             {
-                                std::cout << "Error: packed_codebooks_aoTuV_603.bin file packed_codebooks_aoTuV_603.bin could not be created." << std::endl;
-                                std::cout << "       A packed_codebooks_aoTuV_603.bin must be in the same directory as rpkg.exe" << std::endl;
+                                std::cout << main_data->console_prefix << "Error: ogg file " << ogg_file << " could not be created." << std::endl;
                                 std::exit(0);
                             }
 
-                            output_file.write((const char*)codebook, sizeof(codebook));
+                            try
+                            {
+                                Wwise_RIFF_Vorbis ww(wem_file_name, "packed_codebooks_aoTuV_603.bin", false, false, kNoForcePacketFormat);
+
+                                ww.generate_ogg(output_file);
+                            }
+                            catch (const Parse_error& pe)
+                            {
+                                std::cout << main_data->console_prefix << "WWEV resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
+                                std::cout << main_data->console_prefix << "Error parsing ogg file " << wem_file_name << " could not be created." << std::endl;
+                                std::cout << main_data->console_prefix << "Error: " << pe << std::endl;
+                            }
+
+                            output_file.close();
+
+                            //std::cout << main_data->console_prefix << "ogg file created: " << ogg_file << std::endl;
                         }
-
-                        std::string ogg_file = main_data->input_output_path + "WWES" + "/" + fxas_wwes_ioi_path.at(it->second) + ".ogg";
-
-                        std::ofstream output_file = std::ofstream(ogg_file, std::ifstream::binary);
-
-                        if (!output_file.good())
-                        {
-                            std::cout << "Error: ogg file " << ogg_file << " could not be created." << std::endl;
-                            std::exit(0);
-                        }
-
-                        try
-                        {
-                            Wwise_RIFF_Vorbis ww(wem_file_name, "packed_codebooks_aoTuV_603.bin", false, false, kNoForcePacketFormat);
-
-                            ww.generate_ogg(output_file);
-                        }
-                        catch (const Parse_error& pe)
-                        {
-                            std::cout << "WWEV resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
-                            std::cout << "Error parsing ogg file " << wem_file_name << " could not be created." << std::endl;
-                            std::cout << "Error: " << pe << std::endl;
-                        }
-
-                        output_file.close();
-
-                        //std::cout << "ogg file created: " << ogg_file << std::endl;
                     }
                     else
                     {
-                        std::cout << "Error: Could not match WWES string to any FXAS IOI path names." << std::endl;
+                        bool found = false;
 
-                        total_wwes_fxas_not_linked++;
+                        uint64_t input_filter_index = 0;
 
-                        std::string directory = main_data->input_output_path + "WWES" + "/" + "Assembly\\Sound\\Wwise\\Originals\\Voices\\English(US)\\_UNKNOWN";
-
-                        if (!path_exists(directory))
+                        for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
                         {
-                            if (!std::filesystem::create_directories(directory))
+                            std::size_t found_position_hash = hash_file_name.find(main_data->input_filter.at(z));
+
+                            std::size_t found_position_wwev = to_uppercase(wwes_string).find(to_uppercase(main_data->input_filter.at(z)));
+
+                            if ((found_position_hash != std::string::npos && main_data->input_filter.at(z) != "") || (found_position_wwev != std::string::npos && main_data->input_filter.at(z) != ""))
                             {
-                                std::cout << "Error: Couldn't create directory " << directory << std::endl;
-                                std::exit(0);
+                                found = true;
+
+                                input_filter_index = z;
+
+                                break;
                             }
                         }
 
-                        std::string wem_file_name = directory + "/" + wwes_string + ".wem";
-
-                        std::ofstream wem_file = std::ofstream(wem_file_name, std::ifstream::binary);
-
-                        if (!wem_file.good())
+                        if (found || !main_data->mode_filter)
                         {
-                            std::cout << "Error: wem file " << wem_file_name << " could not be created." << std::endl;
-                            std::exit(0);
-                        }
+                            if (main_data->input_filter.size() > 0)
+                            {
+                                extracted.at(input_filter_index) = true;
+                            }
 
-                        wem_file.write(wwes_data->get(), decompressed_size);
+                            std::cout << main_data->console_prefix << "Error: Could not match WWES string to any FXAS IOI path names." << std::endl;
 
-                        wem_file.close();
+                            total_wwes_fxas_not_linked++;
 
-                        std::ofstream wwes_meta_data_file = std::ofstream(directory + "/" + wwes_string + ".meta", std::ifstream::binary);
+                            std::string directory = main_data->input_output_path + "WWES" + "/" + "Assembly\\Sound\\Wwise\\Originals\\Voices\\English(US)\\_UNKNOWN";
 
-                        if (!wwes_meta_data_file.good())
-                        {
-                            std::cout << "Error: meta file " << directory + "/" + wwes_string + ".meta" << " could not be created." << std::endl;
-                            std::exit(0);
-                        }
+                            if (!path_exists(directory))
+                            {
+                                if (!std::filesystem::create_directories(directory))
+                                {
+                                    std::cout << main_data->console_prefix << "Error: Couldn't create directory " << directory << std::endl;
+                                    std::exit(0);
+                                }
+                            }
 
-                        std::vector<char> wwes_meta_data;
+                            std::string wem_file_name = directory + "/" + wwes_string + ".wem";
 
-                        char hash[8];
+                            std::ofstream wem_file = std::ofstream(wem_file_name, std::ifstream::binary);
 
-                        std::memcpy(&hash, &main_data->rpkg_data.at(i).hash.at(j), 0x8);
+                            if (!wem_file.good())
+                            {
+                                std::cout << main_data->console_prefix << "Error: wem file " << wem_file_name << " could not be created." << std::endl;
+                                std::exit(0);
+                            }
 
-                        for (int z = 0; z < 0x8; z++)
-                        {
-                            wwes_meta_data.push_back(hash[z]);
-                        }
+                            wem_file.write(wwes_data->get(), decompressed_size);
 
-                        wwes_meta_data_file.write(wwes_meta_data.data(), wwes_meta_data.size());
+                            wem_file.close();
 
-                        wwes_meta_data_file.close();
+                            std::ofstream wwes_meta_data_file = std::ofstream(directory + "/" + wwes_string + ".meta", std::ifstream::binary);
 
-                        //std::cout << "wem file created: " << wem_file << std::endl;
+                            if (!wwes_meta_data_file.good())
+                            {
+                                std::cout << main_data->console_prefix << "Error: meta file " << directory + "/" + wwes_string + ".meta" << " could not be created." << std::endl;
+                                std::exit(0);
+                            }
 
-                        if (!path_exists("packed_codebooks_aoTuV_603.bin"))
-                        {
-                            std::cout << "Error: Missing packed_codebooks_aoTuV_603.bin file." << std::endl;
-                            std::cout << "       Attempting to create the packed_codebooks_aoTuV_603.bin file." << std::endl;
+                            std::vector<char> wwes_meta_data;
 
-                            std::ofstream output_file = std::ofstream("packed_codebooks_aoTuV_603.bin", std::ifstream::binary);
+                            char hash[8];
+
+                            std::memcpy(&hash, &main_data->rpkg_data.at(i).hash.at(j), 0x8);
+
+                            for (int z = 0; z < 0x8; z++)
+                            {
+                                wwes_meta_data.push_back(hash[z]);
+                            }
+
+                            wwes_meta_data_file.write(wwes_meta_data.data(), wwes_meta_data.size());
+
+                            wwes_meta_data_file.close();
+
+                            //std::cout << main_data->console_prefix << "wem file created: " << wem_file << std::endl;
+
+                            if (!path_exists("packed_codebooks_aoTuV_603.bin"))
+                            {
+                                std::cout << main_data->console_prefix << "Error: Missing packed_codebooks_aoTuV_603.bin file." << std::endl;
+                                std::cout << main_data->console_prefix << "       Attempting to create the packed_codebooks_aoTuV_603.bin file." << std::endl;
+
+                                std::ofstream output_file = std::ofstream("packed_codebooks_aoTuV_603.bin", std::ifstream::binary);
+
+                                if (!output_file.good())
+                                {
+                                    std::cout << main_data->console_prefix << "Error: packed_codebooks_aoTuV_603.bin file packed_codebooks_aoTuV_603.bin could not be created." << std::endl;
+                                    std::cout << main_data->console_prefix << "       A packed_codebooks_aoTuV_603.bin must be in the same directory as rpkg.exe" << std::endl;
+                                    std::exit(0);
+                                }
+
+                                output_file.write((const char*)codebook, sizeof(codebook));
+                            }
+
+                            std::string ogg_file = directory + "/" + wwes_string + ".ogg";
+
+                            std::ofstream output_file = std::ofstream(ogg_file, std::ifstream::binary);
 
                             if (!output_file.good())
                             {
-                                std::cout << "Error: packed_codebooks_aoTuV_603.bin file packed_codebooks_aoTuV_603.bin could not be created." << std::endl;
-                                std::cout << "       A packed_codebooks_aoTuV_603.bin must be in the same directory as rpkg.exe" << std::endl;
+                                std::cout << main_data->console_prefix << "Error: ogg file " << ogg_file << " could not be created." << std::endl;
                                 std::exit(0);
                             }
 
-                            output_file.write((const char*)codebook, sizeof(codebook));
+                            try
+                            {
+                                Wwise_RIFF_Vorbis ww(wem_file_name, "packed_codebooks_aoTuV_603.bin", false, false, kNoForcePacketFormat);
+
+                                ww.generate_ogg(output_file);
+                            }
+                            catch (const Parse_error& pe)
+                            {
+                                std::cout << main_data->console_prefix << "WWEV resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
+                                std::cout << main_data->console_prefix << "Error parsing ogg file " << wem_file_name << " could not be created." << std::endl;
+                                std::cout << main_data->console_prefix << "Error: " << pe << std::endl;
+                            }
+
+                            output_file.close();
+
+                            //std::cout << main_data->console_prefix << "ogg file created: " << ogg_file << std::endl;
                         }
+                    }
+                }
+            }
 
-                        std::string ogg_file = directory + "/" + wwes_string + ".ogg";
-
-                        std::ofstream output_file = std::ofstream(ogg_file, std::ifstream::binary);
-
-                        if (!output_file.good())
-                        {
-                            std::cout << "Error: ogg file " << ogg_file << " could not be created." << std::endl;
-                            std::exit(0);
-                        }
-
-                        try
-                        {
-                            Wwise_RIFF_Vorbis ww(wem_file_name, "packed_codebooks_aoTuV_603.bin", false, false, kNoForcePacketFormat);
-
-                            ww.generate_ogg(output_file);
-                        }
-                        catch (const Parse_error& pe)
-                        {
-                            std::cout << "WWEV resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
-                            std::cout << "Error parsing ogg file " << wem_file_name << " could not be created." << std::endl;
-                            std::cout << "Error: " << pe << std::endl;
-                        }
-
-                        output_file.close();
-
-                        //std::cout << "ogg file created: " << ogg_file << std::endl;
+            for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
+            {
+                if (extracted.at(z))
+                {
+                    if (found_in.at(z) == "")
+                    {
+                        found_in.at(z).append(main_data->rpkg_data.at(i).rpkg_file_name);
+                    }
+                    else
+                    {
+                        found_in.at(z).append(", " + main_data->rpkg_data.at(i).rpkg_file_name);
+                    }
+                }
+                else
+                {
+                    if (not_found_in.at(z) == "")
+                    {
+                        not_found_in.at(z).append(main_data->rpkg_data.at(i).rpkg_file_name);
+                    }
+                    else
+                    {
+                        not_found_in.at(z).append(", " + main_data->rpkg_data.at(i).rpkg_file_name);
                     }
                 }
             }
@@ -5884,10 +6357,17 @@ void extract_all_wwes(main_variables* main_data)
         ss << message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
 
         std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+
+        for (uint64_t z = 0; z < main_data->input_filter.size(); z++)
+        {
+            std::cout << std::endl << main_data->console_prefix << "\"" << main_data->input_filter.at(z) << "\" was found in and extracted from: " << found_in.at(z) << std::endl;
+
+            std::cout << std::endl << main_data->console_prefix << "\"" << main_data->input_filter.at(z) << "\" was not found in RPKG file(s): " << not_found_in.at(z) << std::endl;
+        }
     }
     else
     {
-        std::cout << "Error: The folder " << main_data->input_rpkg_folder_path << " to generate the RPKG file does not exist." << std::endl;
+        std::cout << main_data->console_prefix << "Error: The folder " << main_data->input_rpkg_folder_path << " to generate the RPKG file does not exist." << std::endl;
         std::exit(0);
     }
 }
@@ -5940,7 +6420,7 @@ void extract_all_locr(main_variables* main_data)
 
                 ss << "Scanning folder" << std::string(period_count, '.');
 
-                std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ');
+                std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ');
 
                 period_count++;
             }
@@ -5969,14 +6449,14 @@ void extract_all_locr(main_variables* main_data)
 
                     if (main_data->debug)
                     {
-                        std::cout << entry.path().string() << " is a valid RPKG file." << std::endl;
+                        std::cout << main_data->console_prefix << entry.path().string() << " is a valid RPKG file." << std::endl;
                     }
                 }
                 else
                 {
                     if (main_data->debug)
                     {
-                        std::cout << entry.path().string() << " is not a valid RPKG file." << std::endl;
+                        std::cout << main_data->console_prefix << entry.path().string() << " is not a valid RPKG file." << std::endl;
                     }
                 }
             }
@@ -5986,13 +6466,13 @@ void extract_all_locr(main_variables* main_data)
 
         ss << "Scanning folder: Done";
 
-        std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
 
         if (main_data->debug)
         {
             for (uint64_t i = 0; i < rpkg_file_paths.size(); i++)
             {
-                std::cout << "Found RPKG file: " << rpkg_file_paths.at(i) << std::endl;
+                std::cout << main_data->console_prefix << "Found RPKG file: " << rpkg_file_paths.at(i) << std::endl;
             }
         }
 
@@ -6006,7 +6486,7 @@ void extract_all_locr(main_variables* main_data)
         {
             if (!std::filesystem::create_directories(main_data->input_output_path + "LOCR"))
             {
-                std::cout << "Error: Couldn't create directory " << main_data->input_output_path + "LOCR" << std::endl;
+                std::cout << main_data->console_prefix << "Error: Couldn't create directory " << main_data->input_output_path + "LOCR" << std::endl;
                 std::exit(0);
             }
         }
@@ -6043,7 +6523,7 @@ void extract_all_locr(main_variables* main_data)
 
                         ss << "Extracting LOCR as JSON" << std::string(period_count, '.');
 
-                        std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ');
+                        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ');
 
                         period_count++;
                     }
@@ -6058,13 +6538,13 @@ void extract_all_locr(main_variables* main_data)
 
                             if (!std::filesystem::create_directories(current_path))
                             {
-                                std::cout << "Error: Couldn't create directory " << current_path << std::endl;
+                                std::cout << main_data->console_prefix << "Error: Couldn't create directory " << current_path << std::endl;
                                 std::exit(0);
                             }
                         }
                     }
 
-                    //std::cout << "LOCR resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
+                    //std::cout << main_data->console_prefix << "LOCR resource found: " << hash_file_name << " in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
 
                     uint64_t hash_size;
 
@@ -6089,7 +6569,7 @@ void extract_all_locr(main_variables* main_data)
 
                     if (!file.good())
                     {
-                        std::cout << "Error: RPKG file " << main_data->input_rpkg_file_path << " could not be read." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: RPKG file " << main_data->input_rpkg_file_path << " could not be read." << std::endl;
                         std::exit(0);
                     }
 
@@ -6103,7 +6583,7 @@ void extract_all_locr(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << "XORing input_file_data with a hashSize of " << hash_size << std::endl;
+                            std::cout << main_data->console_prefix << "XORing input_file_data with a hashSize of " << hash_size << std::endl;
                         }
                     }
 
@@ -6122,7 +6602,7 @@ void extract_all_locr(main_variables* main_data)
 
                         if (main_data->debug)
                         {
-                            std::cout << "LZ4 decompression complete." << std::endl;
+                            std::cout << main_data->console_prefix << "LZ4 decompression complete." << std::endl;
                         }
                     }
                     else
@@ -6158,7 +6638,6 @@ void extract_all_locr(main_variables* main_data)
 
                     uint32_t position = 0;
 
-                    char input[1024];
                     uint8_t bytes1 = 0;
                     uint32_t bytes4 = 0;
                     uint64_t bytes8 = 0;
@@ -6227,7 +6706,7 @@ void extract_all_locr(main_variables* main_data)
 
                                 if (temp_language_string_length.back() % 8 != 0)
                                 {
-                                    std::cout << "Error: LOCR file " << hash_file_name << " in " << main_data->rpkg_data.at(i).rpkg_file_name << " is malformed." << std::endl;
+                                    std::cout << main_data->console_prefix << "Error: LOCR file " << hash_file_name << " in " << main_data->rpkg_data.at(i).rpkg_file_name << " is malformed." << std::endl;
                                     std::exit(0);
                                 }
 
@@ -6243,11 +6722,13 @@ void extract_all_locr(main_variables* main_data)
                                     std::memcpy(&temp_string[(uint64_t)m * (uint64_t)8 + (uint64_t)4], data + 1, sizeof(uint32_t));
                                 }
 
-                                uint32_t last_zero_position = temp_string.size();
+                                uint32_t last_zero_position = (uint32_t)temp_string.size();
 
                                 if (temp_string.size() > 0)
                                 {
-                                    for (uint32_t m = (temp_string.size() - 1); m >= 0; m--)
+                                    uint32_t m = (uint32_t)(temp_string.size() - 1);
+
+                                    while (m >= 0)
                                     {
                                         if (temp_string.at(m) != 0)
                                         {
@@ -6257,6 +6738,8 @@ void extract_all_locr(main_variables* main_data)
                                         {
                                             last_zero_position--;
                                         }
+
+                                        m--;
                                     }
                                 }
 
@@ -6276,8 +6759,8 @@ void extract_all_locr(main_variables* main_data)
                                 temp_json_object2["StringHash"] = temp_language_string_hash.back();
                                 temp_json_object2["String"] = temp_language_string.back();
 
-                                //std::cout << temp_language_string_hash.back() << std::endl;
-                                //std::cout << temp_language_string.back() << std::endl;
+                                //std::cout << main_data->console_prefix << temp_language_string_hash.back() << std::endl;
+                                //std::cout << main_data->console_prefix << temp_language_string.back() << std::endl;
 
                                 temp_language_json_object.push_back(temp_json_object2);
                             }
@@ -6292,7 +6775,7 @@ void extract_all_locr(main_variables* main_data)
 
                     if (!json_file.good())
                     {
-                        std::cout << "Error: JSON file " << json_path << " could not be created." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: JSON file " << json_path << " could not be created." << std::endl;
                         std::exit(0);
                     }
 
@@ -6306,7 +6789,7 @@ void extract_all_locr(main_variables* main_data)
 
                     if (!json_meta_file.good())
                     {
-                        std::cout << "Error: JSON meta file " << json_meta_path << " could not be created." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: JSON meta file " << json_meta_path << " could not be created." << std::endl;
                         std::exit(0);
                     }
 
@@ -6321,11 +6804,11 @@ void extract_all_locr(main_variables* main_data)
 
         ss << "Extracting LOCR as JSON: Done";
 
-        std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
     }
     else
     {
-        std::cout << "Error: The folder " << main_data->input_rpkg_folder_path << " to generate the RPKG file does not exist." << std::endl;
+        std::cout << main_data->console_prefix << "Error: The folder " << main_data->input_rpkg_folder_path << " to generate the RPKG file does not exist." << std::endl;
         std::exit(0);
     }
 }
@@ -6382,7 +6865,7 @@ void rebuild_all_locr(main_variables* main_data)
 
                 ss << "Scanning folder" << std::string(period_count, '.');
 
-                std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ');
+                std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ');
 
                 period_count++;
             }
@@ -6422,7 +6905,7 @@ void rebuild_all_locr(main_variables* main_data)
 
                 if (main_data->debug)
                 {
-                    std::cout << entry.path().string() << "," << hash_file_name << "," << hash_string << "," << resource_type << std::endl;
+                    std::cout << main_data->console_prefix << entry.path().string() << "," << hash_file_name << "," << hash_string << "," << resource_type << std::endl;
                 }
 
                 bool is_locr_hash_file = true;
@@ -6448,14 +6931,14 @@ void rebuild_all_locr(main_variables* main_data)
 
                     if (main_data->debug)
                     {
-                        std::cout << entry.path().string() << " is a valid JSON file." << std::endl;
+                        std::cout << main_data->console_prefix << entry.path().string() << " is a valid JSON file." << std::endl;
                     }
                 }
                 else
                 {
                     if (main_data->debug)
                     {
-                        std::cout << entry.path().string() << " is a not valid JSON file." << std::endl;
+                        std::cout << main_data->console_prefix << entry.path().string() << " is a not valid JSON file." << std::endl;
                     }
                 }
             }
@@ -6465,13 +6948,13 @@ void rebuild_all_locr(main_variables* main_data)
 
         ss << "Scanning folder: Done";
 
-        std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
 
         if (main_data->debug)
         {
             for (uint64_t i = 0; i < json_file_paths.size(); i++)
             {
-                std::cout << "Found JSON file: " << json_file_paths.at(i) << std::endl;
+                std::cout << main_data->console_prefix << "Found JSON file: " << json_file_paths.at(i) << std::endl;
             }
         }
 
@@ -6483,7 +6966,7 @@ void rebuild_all_locr(main_variables* main_data)
 
                 if (!input_json_meta_file.good())
                 {
-                    std::cout << "Error: JSON meta file " << json_file_paths.at(p) + ".meta" << " could not be read." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: JSON meta file " << json_file_paths.at(p) + ".meta" << " could not be read." << std::endl;
                     std::exit(0);
                 }
 
@@ -6495,7 +6978,7 @@ void rebuild_all_locr(main_variables* main_data)
 
                 if ((input_json_meta_file_size - 1) % 4 != 0)
                 {
-                    std::cout << "Error: JSON meta file " << main_data->input_packagedefinitions_thumbs_file_path + ".meta" << " is corrupt." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: JSON meta file " << main_data->input_packagedefinitions_thumbs_file_path + ".meta" << " is corrupt." << std::endl;
                     std::exit(0);
                 }
 
@@ -6509,7 +6992,7 @@ void rebuild_all_locr(main_variables* main_data)
 
                 if (!input_json_file.good())
                 {
-                    std::cout << "Error: JSON file " << json_file_paths.at(p) << " could not be read." << std::endl;
+                    std::cout << main_data->console_prefix << "Error: JSON file " << json_file_paths.at(p) << " could not be read." << std::endl;
                     std::exit(0);
                 }
                 json input_json;
@@ -6522,7 +7005,7 @@ void rebuild_all_locr(main_variables* main_data)
 
                 for (const auto& it : input_json.items())
                 {
-                    //std::cout << it.key() << ", " << it.value() << std::endl << std::endl;
+                    //std::cout << main_data->console_prefix << it.key() << ", " << it.value() << std::endl << std::endl;
 
                     bool language_found = false;
 
@@ -6534,13 +7017,13 @@ void rebuild_all_locr(main_variables* main_data)
 
                             language_count++;
 
-                            //std::cout << it2.key() << ", " << it2.value() << std::endl << std::endl;
+                            //std::cout << main_data->console_prefix << it2.key() << ", " << it2.value() << std::endl << std::endl;
                         }
                     }
 
                     if (!language_found)
                     {
-                        std::cout << "Error: JSON file " << json_file_paths.at(p) << " is malformed and can not be rebuilt into a LOCR file/resource." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: JSON file " << json_file_paths.at(p) << " is malformed and can not be rebuilt into a LOCR file/resource." << std::endl;
                         std::exit(0);
                     }
                 }
@@ -6549,7 +7032,7 @@ void rebuild_all_locr(main_variables* main_data)
 
                 if (input_json_meta_file_size == 0x19)
                 {
-                    std::cout << locr_file_names.at(p) << " is a Hitman 3 type LOCR." << std::endl;
+                    std::cout << main_data->console_prefix << locr_file_names.at(p) << " is a Hitman 3 type LOCR." << std::endl;
 
                     std::vector<std::string> languages;
                     languages.push_back("xx");
@@ -6609,9 +7092,9 @@ void rebuild_all_locr(main_variables* main_data)
                                             std::vector<std::string> temp_locr_language_section_strings;
                                             std::vector<uint32_t> temp_locr_language_section_string_lengths;
 
-                                            //std::cout << it2.key() << ", " << it2.value() << std::endl << std::endl;
-                                            //std::cout << it.key() << ", " << it.value() << std::endl << std::endl;
-                                            //std::cout << "LOCR string count: " << it.value().size() << std::endl << std::endl;
+                                            //std::cout << main_data->console_prefix << it2.key() << ", " << it2.value() << std::endl << std::endl;
+                                            //std::cout << main_data->console_prefix << it.key() << ", " << it.value() << std::endl << std::endl;
+                                            //std::cout << main_data->console_prefix << "LOCR string count: " << it.value().size() << std::endl << std::endl;
 
                                             uint32_t locr_section_size = 0x4;
 
@@ -6619,14 +7102,14 @@ void rebuild_all_locr(main_variables* main_data)
                                             {
                                                 if (!it3.value().contains("Language"))
                                                 {
-                                                    //std::cout << "LOCR string: " << std::hex << it3.value()["String"] << std::endl;
-                                                    //std::cout << "LOCR string hash: " << std::hex << it3.value()["StringHash"] << std::endl;
+                                                    //std::cout << main_data->console_prefix << "LOCR string: " << std::hex << it3.value()["String"] << std::endl;
+                                                    //std::cout << main_data->console_prefix << "LOCR string hash: " << std::hex << it3.value()["StringHash"] << std::endl;
 
                                                     temp_locr_language_section_string_hashes.push_back((uint32_t)it3.value()["StringHash"]);
 
                                                     std::string temp_string = it3.value()["String"];
 
-                                                    uint32_t string_length = temp_string.length();
+                                                    uint32_t string_length = (uint32_t)temp_string.length();
 
                                                     while (string_length % 8 != 0)
                                                     {
@@ -6636,11 +7119,11 @@ void rebuild_all_locr(main_variables* main_data)
                                                     }
 
                                                     temp_locr_language_section_strings.push_back(temp_string);
-                                                    temp_locr_language_section_string_lengths.push_back(temp_string.size());
+                                                    temp_locr_language_section_string_lengths.push_back((uint32_t)temp_string.size());
 
-                                                    locr_section_size += temp_string.size() + 0x9;
+                                                    locr_section_size += (uint32_t)temp_string.size() + (uint32_t)0x9;
 
-                                                    //std::cout << "LOCR section size: " << std::hex << locr_section_size << std::endl;
+                                                    //std::cout << main_data->console_prefix << "LOCR section size: " << std::hex << locr_section_size << std::endl;
                                                 }
                                             }
 
@@ -6656,7 +7139,7 @@ void rebuild_all_locr(main_variables* main_data)
                                                 }
                                             }
 
-                                            //std::cout << "LOCR offset: " << std::hex << offset << std::endl;
+                                            //std::cout << main_data->console_prefix << "LOCR offset: " << std::hex << offset << std::endl;
 
                                             locr_language_section_string_hashes.push_back(temp_locr_language_section_string_hashes);
                                             locr_language_section_strings.push_back(temp_locr_language_section_strings);
@@ -6664,7 +7147,7 @@ void rebuild_all_locr(main_variables* main_data)
                                         }
                                         else if (it2.value()["Language"] == languages.at(i) && !language_in_locr.at(i))
                                         {
-                                            std::cout << "Error: LOCR has language in JSON but not in the meta file." << std::endl;
+                                            std::cout << main_data->console_prefix << "Error: LOCR has language in JSON but not in the meta file." << std::endl;
                                             std::exit(0);
                                         }
                                     }
@@ -6693,7 +7176,7 @@ void rebuild_all_locr(main_variables* main_data)
                                 {
                                     if (it2.value()["Language"] == languages.at(i))
                                     {
-                                        uint32_t section_string_count = locr_language_section_string_hashes.at(i).size();
+                                        uint32_t section_string_count = (uint32_t)locr_language_section_string_hashes.at(i).size();
 
                                         std::memcpy(&char4, &section_string_count, sizeof(uint32_t));
 
@@ -6749,7 +7232,7 @@ void rebuild_all_locr(main_variables* main_data)
                     {
                         if (!std::filesystem::create_directories(current_path))
                         {
-                            std::cout << "Error: Couldn't create directory " << current_path << std::endl;
+                            std::cout << main_data->console_prefix << "Error: Couldn't create directory " << current_path << std::endl;
                             std::exit(0);
                         }
                     }
@@ -6758,17 +7241,17 @@ void rebuild_all_locr(main_variables* main_data)
 
                     if (!output_file.good())
                     {
-                        std::cout << "Error: Rebuilt LOCR file " << locr_file_names.at(p) << " could not be created." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: Rebuilt LOCR file " << locr_file_names.at(p) << " could not be created." << std::endl;
                         std::exit(0);
                     }
 
                     output_file.write(locr_data.data(), locr_data.size());
 
-                    std::cout << "Successfully rebuilt LOCR " << current_path + "/" + locr_file_names.at(p) << " from " << json_file_paths.at(p) << std::endl;
+                    std::cout << main_data->console_prefix << "Successfully rebuilt LOCR " << current_path + "/" + locr_file_names.at(p) << " from " << json_file_paths.at(p) << std::endl;
                 }
                 else if (input_json_meta_file_size == 0x35)
                 {
-                    std::cout << locr_file_names.at(p) << " is a Hitman 2 type LOCR." << std::endl;
+                    std::cout << main_data->console_prefix << locr_file_names.at(p) << " is a Hitman 2 type LOCR." << std::endl;
 
                     std::vector<std::string> languages;
                     languages.push_back("xx");
@@ -6835,9 +7318,9 @@ void rebuild_all_locr(main_variables* main_data)
                                             std::vector<std::string> temp_locr_language_section_strings;
                                             std::vector<uint32_t> temp_locr_language_section_string_lengths;
 
-                                            //std::cout << it2.key() << ", " << it2.value() << std::endl << std::endl;
-                                            //std::cout << it.key() << ", " << it.value() << std::endl << std::endl;
-                                            //std::cout << "LOCR string count: " << it.value().size() << std::endl << std::endl;
+                                            //std::cout << main_data->console_prefix << it2.key() << ", " << it2.value() << std::endl << std::endl;
+                                            //std::cout << main_data->console_prefix << it.key() << ", " << it.value() << std::endl << std::endl;
+                                            //std::cout << main_data->console_prefix << "LOCR string count: " << it.value().size() << std::endl << std::endl;
 
                                             uint32_t locr_section_size = 0x4;
 
@@ -6845,14 +7328,14 @@ void rebuild_all_locr(main_variables* main_data)
                                             {
                                                 if (!it3.value().contains("Language"))
                                                 {
-                                                    //std::cout << "LOCR string: " << std::hex << it3.value()["String"] << std::endl;
-                                                    //std::cout << "LOCR string hash: " << std::hex << it3.value()["StringHash"] << std::endl;
+                                                    //std::cout << main_data->console_prefix << "LOCR string: " << std::hex << it3.value()["String"] << std::endl;
+                                                    //std::cout << main_data->console_prefix << "LOCR string hash: " << std::hex << it3.value()["StringHash"] << std::endl;
 
                                                     temp_locr_language_section_string_hashes.push_back((uint32_t)it3.value()["StringHash"]);
 
                                                     std::string temp_string = it3.value()["String"];
 
-                                                    uint32_t string_length = temp_string.length();
+                                                    uint32_t string_length = (uint32_t)temp_string.length();
 
                                                     while (string_length % 8 != 0)
                                                     {
@@ -6862,11 +7345,11 @@ void rebuild_all_locr(main_variables* main_data)
                                                     }
 
                                                     temp_locr_language_section_strings.push_back(temp_string);
-                                                    temp_locr_language_section_string_lengths.push_back(temp_string.size());
+                                                    temp_locr_language_section_string_lengths.push_back((uint32_t)temp_string.size());
 
-                                                    locr_section_size += temp_string.size() + 0x9;
+                                                    locr_section_size += (uint32_t)temp_string.size() + (uint32_t)0x9;
 
-                                                    //std::cout << "LOCR section size: " << std::hex << locr_section_size << std::endl;
+                                                    //std::cout << main_data->console_prefix << "LOCR section size: " << std::hex << locr_section_size << std::endl;
                                                 }
                                             }
 
@@ -6882,7 +7365,7 @@ void rebuild_all_locr(main_variables* main_data)
                                                 }
                                             }
 
-                                            //std::cout << "LOCR offset: " << std::hex << offset << std::endl;
+                                            //std::cout << main_data->console_prefix << "LOCR offset: " << std::hex << offset << std::endl;
 
                                             locr_language_section_string_hashes.push_back(temp_locr_language_section_string_hashes);
                                             locr_language_section_strings.push_back(temp_locr_language_section_strings);
@@ -6890,7 +7373,7 @@ void rebuild_all_locr(main_variables* main_data)
                                         }
                                         else if (it2.value()["Language"] == languages.at(i) && !language_in_locr.at(i))
                                         {
-                                            std::cout << "Error: LOCR has language in JSON but not in the meta file." << std::endl;
+                                            std::cout << main_data->console_prefix << "Error: LOCR has language in JSON but not in the meta file." << std::endl;
                                             std::exit(0);
                                         }
                                     }
@@ -6919,7 +7402,7 @@ void rebuild_all_locr(main_variables* main_data)
                                 {
                                     if (it2.value()["Language"] == languages.at(i))
                                     {
-                                        uint32_t section_string_count = locr_language_section_string_hashes.at(i).size();
+                                        uint32_t section_string_count = (uint32_t)locr_language_section_string_hashes.at(i).size();
 
                                         std::memcpy(&char4, &section_string_count, sizeof(uint32_t));
 
@@ -6975,7 +7458,7 @@ void rebuild_all_locr(main_variables* main_data)
                     {
                         if (!std::filesystem::create_directories(current_path))
                         {
-                            std::cout << "Error: Couldn't create directory " << current_path << std::endl;
+                            std::cout << main_data->console_prefix << "Error: Couldn't create directory " << current_path << std::endl;
                             std::exit(0);
                         }
                     }
@@ -6984,32 +7467,32 @@ void rebuild_all_locr(main_variables* main_data)
 
                     if (!output_file.good())
                     {
-                        std::cout << "Error: Rebuilt LOCR file " << locr_file_names.at(p) << " could not be created." << std::endl;
+                        std::cout << main_data->console_prefix << "Error: Rebuilt LOCR file " << locr_file_names.at(p) << " could not be created." << std::endl;
                         std::exit(0);
                     }
 
                     output_file.write(locr_data.data(), locr_data.size());
 
-                    std::cout << "Successfully rebuilt LOCR " << current_path + "/" + locr_file_names.at(p) << " from " << json_file_paths.at(p) << std::endl;
+                    std::cout << main_data->console_prefix << "Successfully rebuilt LOCR " << current_path + "/" + locr_file_names.at(p) << " from " << json_file_paths.at(p) << std::endl;
                 }
                 else
                 {
-                    std::cout << locr_file_names.at(p) << " is not a known LOCR type." << std::endl;
-                    std::cout << "Can not rebuild " << locr_file_names.at(p) << " from JSON file " << json_file_paths.at(p) << std::endl;
+                    std::cout << main_data->console_prefix << locr_file_names.at(p) << " is not a known LOCR type." << std::endl;
+                    std::cout << main_data->console_prefix << "Can not rebuild " << locr_file_names.at(p) << " from JSON file " << json_file_paths.at(p) << std::endl;
                 }
 
-                //std::cout << "Languages found: " << language_count << std::endl;
+                //std::cout << main_data->console_prefix << "Languages found: " << language_count << std::endl;
             }
             else
             {
-                std::cout << "Error: JSON meta file " << json_file_paths.at(p) + ".meta" << " could not be found." << std::endl;
-                std::cout << "       Can not rebuild " << locr_file_names.at(p) << " from JSON file " << json_file_paths.at(p) << std::endl;
+                std::cout << main_data->console_prefix << "Error: JSON meta file " << json_file_paths.at(p) + ".meta" << " could not be found." << std::endl;
+                std::cout << main_data->console_prefix << "       Can not rebuild " << locr_file_names.at(p) << " from JSON file " << json_file_paths.at(p) << std::endl;
             }
         }
     }
     else
     {
-        std::cout << "Error: The folder " << main_data->input_rpkg_folder_path << " to rebuild the LOCR files from does not exist." << std::endl;
+        std::cout << main_data->console_prefix << "Error: The folder " << main_data->input_rpkg_folder_path << " to rebuild the LOCR files from does not exist." << std::endl;
         std::exit(0);
     }
 }
@@ -7020,7 +7503,7 @@ void decrypt_packagedefinition_thumbs(main_variables* main_data)
 
     if (!file.good())
     {
-        std::cout << "Error: packagedefinitions.txt / thumbs.dat file " << main_data->input_packagedefinitions_thumbs_file_path << " could not be read." << std::endl;
+        std::cout << main_data->console_prefix << "Error: packagedefinitions.txt / thumbs.dat file " << main_data->input_packagedefinitions_thumbs_file_path << " could not be read." << std::endl;
         std::exit(0);
     }
 
@@ -7049,7 +7532,7 @@ void decrypt_packagedefinition_thumbs(main_variables* main_data)
         input_data.push_back(0x0);
     }
 
-    uint32_t zero_pad_length = packagedefinitions_thumbs_file_size - input_data.size();
+    uint32_t zero_pad_length = (uint32_t)(packagedefinitions_thumbs_file_size - input_data.size());
 
     for (uint64_t i = 0; i < input_data.size() / 8; i++)
     {
@@ -7086,26 +7569,26 @@ void decrypt_packagedefinition_thumbs(main_variables* main_data)
 
     if (!output_file.good())
     {
-        std::cout << "Error: Output (packagedefinitions.txt / thumbs.dat).decrypted file " << output_file_base_name + ".decrypted" << " could not be created." << std::endl;
+        std::cout << main_data->console_prefix << "Error: Output (packagedefinitions.txt / thumbs.dat).decrypted file " << output_file_base_name + ".decrypted" << " could not be created." << std::endl;
         std::exit(0);
     }
 
     output_file.write(input_data.data(), last_zero_position);
 
-    std::cout << "Successfully decrypted " << output_file_base_name << " and saved to " << output_file_base_name + ".decrypted" << std::endl;
+    std::cout << main_data->console_prefix << "Successfully decrypted " << output_file_base_name << " and saved to " << output_file_base_name + ".decrypted" << std::endl;
 
     std::ofstream output_file_meta = std::ofstream(output_file_base_name + ".decrypted.meta", std::ifstream::binary);
 
     if (!output_file_meta.good())
     {
-        std::cout << "Error: Output (packagedefinitions.txt / thumbs.dat).decrypted.meta file " << output_file_base_name + ".decrypted.meta" << " could not be created." << std::endl;
+        std::cout << main_data->console_prefix << "Error: Output (packagedefinitions.txt / thumbs.dat).decrypted.meta file " << output_file_base_name + ".decrypted.meta" << " could not be created." << std::endl;
         std::exit(0);
     }
 
     output_file_meta.write(packagedefinitions_thumbs_header.data(), packagedefinitions_thumbs_header_size);
 
-    std::cout << "Successfully created decrypted meta file " << output_file_base_name + ".decrypted.meta" << std::endl;
-    std::cout << "The meta file is used when re-encrypting back to " << output_file_base_name << std::endl;
+    std::cout << main_data->console_prefix << "Successfully created decrypted meta file " << output_file_base_name + ".decrypted.meta" << std::endl;
+    std::cout << main_data->console_prefix << "The meta file is used when re-encrypting back to " << output_file_base_name << std::endl;
 }
 
 void encrypt_packagedefinition_thumbs(main_variables* main_data)
@@ -7116,7 +7599,7 @@ void encrypt_packagedefinition_thumbs(main_variables* main_data)
 
         if (!meta_file.good())
         {
-            std::cout << "Error: packagedefinitions.txt / thumbs.dat meta file " << main_data->input_packagedefinitions_thumbs_file_path + ".meta" << " could not be read." << std::endl;
+            std::cout << main_data->console_prefix << "Error: packagedefinitions.txt / thumbs.dat meta file " << main_data->input_packagedefinitions_thumbs_file_path + ".meta" << " could not be read." << std::endl;
             std::exit(0);
         }
 
@@ -7128,7 +7611,7 @@ void encrypt_packagedefinition_thumbs(main_variables* main_data)
 
         if (packagedefinitions_thumbs_meta_file_size != 20)
         {
-            std::cout << "Error: packagedefinitions.txt / thumbs.dat meta file " << main_data->input_packagedefinitions_thumbs_file_path + ".meta" << " is corrupt." << std::endl;
+            std::cout << main_data->console_prefix << "Error: packagedefinitions.txt / thumbs.dat meta file " << main_data->input_packagedefinitions_thumbs_file_path + ".meta" << " is corrupt." << std::endl;
             std::exit(0);
         }
 
@@ -7144,7 +7627,7 @@ void encrypt_packagedefinition_thumbs(main_variables* main_data)
 
         if (!file.good())
         {
-            std::cout << "Error: packagedefinitions.txt / thumbs.dat file " << main_data->input_packagedefinitions_thumbs_file_path << " could not be read." << std::endl;
+            std::cout << main_data->console_prefix << "Error: packagedefinitions.txt / thumbs.dat file " << main_data->input_packagedefinitions_thumbs_file_path << " could not be read." << std::endl;
             std::exit(0);
         }
 
@@ -7165,7 +7648,7 @@ void encrypt_packagedefinition_thumbs(main_variables* main_data)
             input_data.push_back(0x0);
         }
 
-        uint32_t zero_pad_length = packagedefinitions_thumbs_file_size - input_data.size();
+        uint32_t zero_pad_length = (uint32_t)(packagedefinitions_thumbs_file_size - input_data.size());
 
         for (uint64_t i = 0; i < input_data.size() / 8; i++)
         {
@@ -7185,7 +7668,7 @@ void encrypt_packagedefinition_thumbs(main_variables* main_data)
 
         if (!output_file.good())
         {
-            std::cout << "Error: Output (packagedefinitions.txt / thumbs.dat).encrypted file " << output_file_base_name + ".encrypted" << " could not be created." << std::endl;
+            std::cout << main_data->console_prefix << "Error: Output (packagedefinitions.txt / thumbs.dat).encrypted file " << output_file_base_name + ".encrypted" << " could not be created." << std::endl;
             std::exit(0);
         }
 
@@ -7193,12 +7676,12 @@ void encrypt_packagedefinition_thumbs(main_variables* main_data)
 
         output_file.write(input_data.data(), input_data.size());
 
-        std::cout << "Successfully encrypted " << output_file_base_name << " and saved to " << output_file_base_name + ".encrypted" << std::endl;
+        std::cout << main_data->console_prefix << "Successfully encrypted " << output_file_base_name << " and saved to " << output_file_base_name + ".encrypted" << std::endl;
     }
     else
     {
-        std::cout << "Error: packagedefinitions.txt / thumbs.dat meta file " << main_data->input_packagedefinitions_thumbs_file_path + ".meta" << " could not be found." << std::endl;
-        std::cout << "       packagedefinitions.txt / thumbs.dat meta file is required to recreate the 20 byte packagedefinitions.txt / thumbs.dat headers." << std::endl;
+        std::cout << main_data->console_prefix << "Error: packagedefinitions.txt / thumbs.dat meta file " << main_data->input_packagedefinitions_thumbs_file_path + ".meta" << " could not be found." << std::endl;
+        std::cout << main_data->console_prefix << "       packagedefinitions.txt / thumbs.dat meta file is required to recreate the 20 byte packagedefinitions.txt / thumbs.dat headers." << std::endl;
         std::exit(0);
     }
 }
@@ -7218,7 +7701,7 @@ void find_hash_depends(main_variables* main_data)
         main_data->input_rpkg_folder_path = main_data->input_rpkg_folder_path.substr(0, main_data->input_rpkg_folder_path.length() - 1);
     }
 
-    std::cout << main_data->input_rpkg_folder_path << std::endl;
+    std::cout << main_data->console_prefix << main_data->input_rpkg_folder_path << std::endl;
 
     if (path_exists(main_data->input_rpkg_folder_path))
     {
@@ -7249,7 +7732,7 @@ void find_hash_depends(main_variables* main_data)
 
                 ss << "Scanning folder" << std::string(period_count, '.');
 
-                std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ');
+                std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ');
 
                 period_count++;
             }
@@ -7283,13 +7766,13 @@ void find_hash_depends(main_variables* main_data)
 
         ss << "Scanning folder: Done";
 
-        std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
 
         if (main_data->debug)
         {
             for (uint64_t i = 0; i < rpkg_file_paths.size(); i++)
             {
-                std::cout << "Found RPKG file: " << rpkg_file_paths.at(i) << std::endl;
+                std::cout << main_data->console_prefix << "Found RPKG file: " << rpkg_file_paths.at(i) << std::endl;
             }
         }
 
@@ -7320,7 +7803,7 @@ void find_hash_depends(main_variables* main_data)
 
                     uint32_t temp_hash_reference_count = main_data->rpkg_data.at(i).hash_reference_data.at(it2->second).hash_reference_count & 0x3FFFFFFF;
 
-                    std::cout << main_data->input_filter.at(z) << " has " << temp_hash_reference_count << " dependencies in " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
+                    std::cout << main_data->console_prefix << main_data->input_filter.at(z) << " has " << temp_hash_reference_count << " dependencies in " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
 
                     if (temp_hash_reference_count > 0)
                     {
@@ -7376,33 +7859,33 @@ void find_hash_depends(main_variables* main_data)
                 }
             }
 
-            std::cout << main_data->input_filter.at(z) << " has dependencies in " << rpkg_dependency_count << " RPKG files:" << std::endl << std::endl;
+            std::cout << main_data->console_prefix << main_data->input_filter.at(z) << " has dependencies in " << rpkg_dependency_count << " RPKG files:" << std::endl << std::endl;
 
             for (uint64_t i = 0; i < hash_depends_data.size(); i++)
             {
                 if (hash_depends_data.at(i).hash_dependency.size() > 0)
                 {
-                    std::cout << main_data->input_filter.at(z) << " depends on " << hash_depends_data.at(i).hash_dependency_file_name.size() << " other hash files/resources in RPKG file: " << hash_depends_data.at(i).rpkg_file_name << std::endl;
+                    std::cout << main_data->console_prefix << main_data->input_filter.at(z) << " depends on " << hash_depends_data.at(i).hash_dependency_file_name.size() << " other hash files/resources in RPKG file: " << hash_depends_data.at(i).rpkg_file_name << std::endl;
 
                     if (hash_depends_data.at(i).hash_dependency_file_name.size() > 0)
                     {
-                        std::cout << main_data->input_filter.at(z) << "'s dependencies:" << std::endl;
+                        std::cout << main_data->console_prefix << main_data->input_filter.at(z) << "'s dependencies:" << std::endl;
 
                         for (uint64_t j = 0; j < hash_depends_data.at(i).hash_dependency_file_name.size(); j++)
                         {
-                            std::cout << "Hash file/resource: " << hash_depends_data.at(i).hash_dependency_file_name.at(j);
+                            std::cout << main_data->console_prefix << "Hash file/resource: " << hash_depends_data.at(i).hash_dependency_file_name.at(j);
 
                             if (hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).size() > 0)
                             {
-                                std::cout << ", Found in RPKG files: ";
+                                std::cout << main_data->console_prefix << ", Found in RPKG files: ";
 
                                 for (uint64_t k = 0; k < hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).size(); k++)
                                 {
-                                    std::cout << hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).at(k);
+                                    std::cout << main_data->console_prefix << hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).at(k);
 
                                     if (k < hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).size() - 1)
                                     {
-                                        std::cout << ", ";
+                                        std::cout << main_data->console_prefix << ", ";
 
                                         for (uint64_t x = 0; x < main_data->rpkg_data.size(); x++)
                                         {
@@ -7425,7 +7908,7 @@ void find_hash_depends(main_variables* main_data)
                             }
                             else
                             {
-                                std::cout << ", Found in RPKG files: None" << std::endl;
+                                std::cout << main_data->console_prefix << ", Found in RPKG files: None" << std::endl;
                             }
                         }
                     }
@@ -7495,27 +7978,27 @@ void find_hash_depends(main_variables* main_data)
                 }
             }
 
-            std::cout << main_data->input_filter.at(z) << " has reverse dependencies in " << reverse_dependency.size() << " RPKG files:" << std::endl << std::endl;
+            std::cout << main_data->console_prefix << main_data->input_filter.at(z) << " has reverse dependencies in " << reverse_dependency.size() << " RPKG files:" << std::endl << std::endl;
 
             if (reverse_dependency.size() > 0)
             {
-                std::cout << main_data->input_filter.at(z) << "'s reverse dependencies:" << std::endl;
+                std::cout << main_data->console_prefix << main_data->input_filter.at(z) << "'s reverse dependencies:" << std::endl;
 
                 for (uint64_t i = 0; i < reverse_dependency.size(); i++)
                 {
-                    std::cout << "Hash file/resource: " << reverse_dependency.at(i);
+                    std::cout << main_data->console_prefix << "Hash file/resource: " << reverse_dependency.at(i);
 
                     if (reverse_dependency_in_rpkg_file.at(i).size() > 0)
                     {
-                        std::cout << ", Found in RPKG files: ";
+                        std::cout << main_data->console_prefix << ", Found in RPKG files: ";
 
                         for (uint64_t j = 0; j < reverse_dependency_in_rpkg_file.at(i).size(); j++)
                         {
-                            std::cout << reverse_dependency_in_rpkg_file.at(i).at(j);
+                            std::cout << main_data->console_prefix << reverse_dependency_in_rpkg_file.at(i).at(j);
 
                             if (j < reverse_dependency_in_rpkg_file.at(i).size() - 1)
                             {
-                                std::cout << ", ";
+                                std::cout << main_data->console_prefix << ", ";
                             }
                         }
 
@@ -7523,7 +8006,7 @@ void find_hash_depends(main_variables* main_data)
                     }
                     else
                     {
-                        std::cout << ", Found in RPKG files: None" << std::endl;
+                        std::cout << main_data->console_prefix << ", Found in RPKG files: None" << std::endl;
                     }
                 }
             }
@@ -7531,7 +8014,7 @@ void find_hash_depends(main_variables* main_data)
     }
     else
     {
-        std::cout << "Error: The folder " << main_data->input_rpkg_folder_path << " to search for RPKG files for hash depends mode does not exist." << std::endl;
+        std::cout << main_data->console_prefix << "Error: The folder " << main_data->input_rpkg_folder_path << " to search for RPKG files for hash depends mode does not exist." << std::endl;
         std::exit(0);
     }
 }
@@ -7551,7 +8034,7 @@ void hash_probe(main_variables* main_data)
         main_data->input_rpkg_folder_path = main_data->input_rpkg_folder_path.substr(0, main_data->input_rpkg_folder_path.length() - 1);
     }
 
-    std::cout << main_data->input_rpkg_folder_path << std::endl;
+    std::cout << main_data->console_prefix << main_data->input_rpkg_folder_path << std::endl;
 
     if (path_exists(main_data->input_rpkg_folder_path))
     {
@@ -7582,7 +8065,7 @@ void hash_probe(main_variables* main_data)
 
                 ss << "Scanning folder" << std::string(period_count, '.');
 
-                std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ');
+                std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ');
 
                 period_count++;
             }
@@ -7616,13 +8099,13 @@ void hash_probe(main_variables* main_data)
 
         ss << "Scanning folder: Done";
 
-        std::cout << "\r" << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
+        std::cout << "\r" << main_data->console_prefix << ss.str() << std::string((80 - ss.str().length()), ' ') << std::endl;
 
         if (main_data->debug)
         {
             for (uint64_t i = 0; i < rpkg_file_paths.size(); i++)
             {
-                std::cout << "Found RPKG file: " << rpkg_file_paths.at(i) << std::endl;
+                std::cout << main_data->console_prefix << "Found RPKG file: " << rpkg_file_paths.at(i) << std::endl;
             }
         }
 
@@ -7643,7 +8126,7 @@ void hash_probe(main_variables* main_data)
 
             if (hash != 0)
             {
-                std::cout << std::endl << "Searching RPKGs for input filter: " << main_data->input_filter.at(z) << std::endl;
+                std::cout << std::endl << main_data->console_prefix << "Searching RPKGs for input filter: " << main_data->input_filter.at(z) << std::endl;
 
                 for (uint64_t i = 0; i < main_data->rpkg_data.size(); i++)
                 {
@@ -7655,60 +8138,60 @@ void hash_probe(main_variables* main_data)
 
                         found_count++;
 
-                        ss << std::endl << main_data->input_filter.at(z) << " is in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
-                        ss << "  - Data offset: " << main_data->rpkg_data.at(i).hash_offset.at(it2->second) << std::endl;
-                        ss << "  - Data size: " << (main_data->rpkg_data.at(i).hash_size.at(it2->second) & 0x3FFFFFFF) << std::endl;
+                        ss << std::endl << main_data->console_prefix << main_data->input_filter.at(z) << " is in RPKG file: " << main_data->rpkg_data.at(i).rpkg_file_name << std::endl;
+                        ss << main_data->console_prefix << "  - Data offset: " << main_data->rpkg_data.at(i).hash_offset.at(it2->second) << std::endl;
+                        ss << main_data->console_prefix << "  - Data size: " << (main_data->rpkg_data.at(i).hash_size.at(it2->second) & 0x3FFFFFFF) << std::endl;
 
                         if (main_data->rpkg_data.at(i).is_lz4ed.at(it2->second))
                         {
-                            ss << "  - LZ4: True" << std::endl;
+                            ss << main_data->console_prefix << "  - LZ4: True" << std::endl;
                         }
                         else
                         {
-                            ss << "  - LZ4: False" << std::endl;
+                            ss << main_data->console_prefix << "  - LZ4: False" << std::endl;
                         }
 
                         if (main_data->rpkg_data.at(i).is_xored.at(it2->second))
                         {
-                            ss << "  - XOR: True" << std::endl;
+                            ss << main_data->console_prefix << "  - XOR: True" << std::endl;
                         }
                         else
                         {
-                            ss << "  - XOR: False" << std::endl;
+                            ss << main_data->console_prefix << "  - XOR: False" << std::endl;
                         }
 
-                        ss << "  - Resource type: " << main_data->rpkg_data.at(i).hash_resource_type.at(it2->second) << std::endl;
-                        ss << "  - Hash reference table size: " << main_data->rpkg_data.at(i).hash_reference_table_size.at(it2->second) << std::endl;
-                        ss << "  - Forward hash depends: " << (main_data->rpkg_data.at(i).hash_reference_data.at(it2->second).hash_reference_count & 0x3FFFFFFF) << std::endl;
-                        ss << "  - Final size: " << main_data->rpkg_data.at(i).hash_size_final.at(it2->second) << std::endl;
-                        ss << "  - Size in memory: " << main_data->rpkg_data.at(i).hash_size_in_memory.at(it2->second) << std::endl;
-                        ss << "  - Size in video memory: " << main_data->rpkg_data.at(i).hash_size_in_video_memory.at(it2->second) << std::endl << std::endl;
+                        ss << main_data->console_prefix << "  - Resource type: " << main_data->rpkg_data.at(i).hash_resource_type.at(it2->second) << std::endl;
+                        ss << main_data->console_prefix << "  - Hash reference table size: " << main_data->rpkg_data.at(i).hash_reference_table_size.at(it2->second) << std::endl;
+                        ss << main_data->console_prefix << "  - Forward hash depends: " << (main_data->rpkg_data.at(i).hash_reference_data.at(it2->second).hash_reference_count & 0x3FFFFFFF) << std::endl;
+                        ss << main_data->console_prefix << "  - Final size: " << main_data->rpkg_data.at(i).hash_size_final.at(it2->second) << std::endl;
+                        ss << main_data->console_prefix << "  - Size in memory: " << main_data->rpkg_data.at(i).hash_size_in_memory.at(it2->second) << std::endl;
+                        ss << main_data->console_prefix << "  - Size in video memory: " << main_data->rpkg_data.at(i).hash_size_in_video_memory.at(it2->second) << std::endl << std::endl;
 
                     }
                 }
 
                 if (found)
                 {
-                    std::cout << "Input filter \"" << main_data->input_filter.at(z) << "\" was found in " << found_count << " RPKG files." << std::endl;
+                    std::cout << main_data->console_prefix << "Input filter \"" << main_data->input_filter.at(z) << "\" was found in " << found_count << " RPKG files." << std::endl;
 
-                    std::cout << ss.str() << std::endl;
+                    std::cout << main_data->console_prefix << ss.str() << std::endl;
                 }
                 else
                 {
-                    std::cout << "Input filter \"" << main_data->input_filter.at(z) << "\" was not found in any RPKG files." << std::endl;
+                    std::cout << main_data->console_prefix << "Input filter \"" << main_data->input_filter.at(z) << "\" was not found in any RPKG files." << std::endl;
                 }
             }
             else
             {
-                std::cout << "Unable to probe RPKG files for \"" << main_data->input_filter.at(z) << "\"." << std::endl;
-                std::cout << "Input filter \"" << main_data->input_filter.at(z) << "\" is not a valid IOI hash identifier." << std::endl;
-                std::cout << "IOI uses 64 bit hash identifiers for all it's hash files/resources/runtimeids." << std::endl;
+                std::cout << main_data->console_prefix << "Unable to probe RPKG files for \"" << main_data->input_filter.at(z) << "\"." << std::endl;
+                std::cout << main_data->console_prefix << "Input filter \"" << main_data->input_filter.at(z) << "\" is not a valid IOI hash identifier." << std::endl;
+                std::cout << main_data->console_prefix << "IOI uses 64 bit hash identifiers for all it's hash files/resources/runtimeids." << std::endl;
             }
         }
     }
     else
     {
-        std::cout << "Error: The folder " << main_data->input_rpkg_folder_path << " to search for RPKG files for hash probe mode does not exist." << std::endl;
+        std::cout << main_data->console_prefix << "Error: The folder " << main_data->input_rpkg_folder_path << " to search for RPKG files for hash probe mode does not exist." << std::endl;
         std::exit(0);
     }
 }
@@ -7725,7 +8208,7 @@ void compute_ioi_hash(main_variables* main_data)
         lowercase.push_back(std::tolower(main_data->input_to_ioi_hash[i]));
     }
 
-    //std::cout << "Input: " << main_data->input_to_ioi_hash << ", " << lowercase << std::endl;
+    //std::cout << main_data->console_prefix << "Input: " << main_data->input_to_ioi_hash << ", " << lowercase << std::endl;
 
     MD5Init(&md5c);
     MD5Update(&md5c, (unsigned char*)lowercase.c_str(), (unsigned int)lowercase.length());
@@ -7738,7 +8221,7 @@ void compute_ioi_hash(main_variables* main_data)
         ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)(unsigned char)signature[m];
     }
 
-    std::cout << "Normal MD5 Hash: " << ss.str() << std::endl;
+    std::cout << main_data->console_prefix << "Normal MD5 Hash: " << ss.str() << std::endl;
 
     ss.str(std::string());
 
@@ -7749,287 +8232,1380 @@ void compute_ioi_hash(main_variables* main_data)
         ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)(unsigned char)signature[m];
     }
 
-    std::cout << "IOI Hash: " << ss.str() << std::endl;
+    std::cout << main_data->console_prefix << "IOI Hash: " << ss.str() << std::endl;
+}
+
+void parse_input_filter(main_variables* main_data, std::string input_string)
+{
+    std::string input = std::string(input_string);
+
+    std::smatch m;
+    std::regex re("^([^, ]+)[, ]+");
+    std::regex_search(input, m, re);
+
+    if (m.size() > 0)
+    {
+        main_data->input_filter_string = input;
+
+        //std::cout << main_data->console_prefix << m[1].str() << std::endl;
+
+        main_data->input_filter.push_back(m[1].str());
+
+        std::smatch m2;
+        re.assign("[, ]+([^, ]+)");
+
+        while (std::regex_search(input, m2, re))
+        {
+            main_data->input_filter.push_back(m2[1].str());
+
+            input = m2.suffix().str();
+
+            //std::cout << main_data->console_prefix << m2[1].str() << std::endl;
+        }
+    }
+    else
+    {
+        main_data->input_filter_string = input;
+
+        main_data->input_filter.push_back(input);
+    }
+}
+
+void parse_input_output_path(main_variables* main_data, std::string input_string)
+{
+    main_data->input_output_path = input_string;
+
+    if (main_data->input_output_path != "-" && main_data->input_output_path != "")
+    {
+        main_data->input_output_path = remove_all_string_from_string(main_data->input_output_path, "\"");
+        main_data->input_output_path = remove_all_string_from_string(main_data->input_output_path, "\'");
+        main_data->input_output_path = replace_slashes(main_data->input_output_path);
+
+        if (main_data->input_output_path.substr(main_data->input_output_path.length() - 1, 1) == "\\")
+        {
+            main_data->input_output_path = main_data->input_output_path.substr(0, main_data->input_output_path.length() - 1);
+        }
+
+        if (main_data->input_output_path.substr(main_data->input_output_path.length() - 1, 1) == "/")
+        {
+            main_data->input_output_path = main_data->input_output_path.substr(0, main_data->input_output_path.length() - 1);
+        }
+
+        //std::cout << main_data->console_prefix << "input: " << main_data->input_output_path << std::endl;
+
+        if (!path_exists(main_data->input_output_path))
+        {
+            std::vector<std::string> output_file_path_elements;
+
+            //std::cout << main_data->console_prefix << "does not exist: " << main_data->input_output_path << std::endl;
+
+            std::smatch m;
+            std::regex re("^([^\\/]+)\\/");
+            std::regex_search(main_data->input_output_path, m, re);
+
+            if (m.size() > 0)
+            {
+                output_file_path_elements.push_back(m[1].str());
+
+                std::smatch m2;
+                re.assign("\\/([^\\/]+)");
+                std::string output_path = main_data->input_output_path;
+
+                while (std::regex_search(output_path, m2, re))
+                {
+                    output_file_path_elements.push_back(m2[1].str());
+
+                    output_path = m2.suffix().str();
+                }
+            }
+            else
+            {
+                output_file_path_elements.push_back(main_data->input_output_path);
+            }
+
+            std::string path = "";
+
+            for (uint64_t l = 0; l < output_file_path_elements.size(); l++)
+            {
+                path.append(output_file_path_elements.at(l));
+
+                if (!path_exists(path))
+                {
+                    if (!std::filesystem::create_directories(path))
+                    {
+                        std::cout << main_data->console_prefix << "Error: Couldn't create directory " << path << std::endl;
+                        std::exit(0);
+                    }
+                }
+
+                path.append("/");
+
+                //std::cout << main_data->console_prefix << "directory: " << path << std::endl;
+            }
+        }
+
+        main_data->input_output_path.append("/");
+    }
+    else
+    {
+        std::cout << main_data->console_prefix << "Error: Invalid RPKG file path." << std::endl;
+        std::exit(0);
+    }
+}
+
+void execute_command_json(main_variables* main_data)
+{
+    std::ifstream command_json_file(main_data->input_command_json_file_path);
+
+    if (!command_json_file.good())
+    {
+        std::cout << main_data->console_prefix << "Error: JSON file " << main_data->input_command_json_file_path << " could not be read." << std::endl;
+        std::exit(0);
+    }
+
+    json command_json;
+
+    command_json_file >> command_json;
+
+    command_json_file.close();
+
+    std::cout << main_data->console_prefix << "Parsing input " << main_data->input_command_json_file_path << " command JSON" << std::endl;
+
+    std::cout << main_data->console_prefix << "    Commands found: " << command_json.size() << std::endl;
+
+    for (const auto& it : command_json.items())
+    {
+        //std::cout << main_data->console_prefix << it.key() << ", " << it.value() << std::endl << std::endl;
+
+        if (it.value().contains("Command"))
+        {
+            main_variables main_data_backup;
+
+            main_data_backup = *main_data;
+
+            if (to_uppercase(it.value()["Command"]) == "COMPUTE_IOI_HASH")
+            {
+                main_data->console_prefix = "    ";
+
+                main_data->mode_compute_ioi_hash = true;
+
+                if (it.value().contains("OutputPath"))
+                {
+                    main_data->mode_output_path = true;
+
+                    parse_input_output_path(main_data, std::string(it.value()["OutputPath"]));
+                }
+
+                if (it.value().contains("StringToHash"))
+                {
+                    main_data->input_to_ioi_hash = std::string(it.value()["StringToHash"]);
+
+                    if (main_data->input_to_ioi_hash == "")
+                    {
+                        std::cout << "Error: No input string to hash specified in the input JSON." << std::endl;
+                        std::exit(0);
+                    }
+
+                    std::cout << "Executing JSON command number " << it.key() << std::endl;
+
+                    std::cout << "  Command: compute_ioi_hash" << std::endl;
+
+                    if (main_data->mode_output_path)
+                    {
+                        std::cout << "  OutputPath: " << main_data->input_output_path << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "  OutputPath: None" << std::endl;
+                    }
+
+                    std::cout << "  StringToHash: " << main_data->input_to_ioi_hash << std::endl;
+
+                    compute_ioi_hash(main_data);
+                }
+                else
+                {
+                    std::cout << "Error: Command compute_ioi_hash requires a \"StringToHash\" value in the input JSON." << std::endl;
+                    std::exit(0);
+                }
+            }
+            else if (to_uppercase(it.value()["Command"]) == "DECRYPT_PACKAGEDEFINITION_THUMBS")
+            {
+                main_data->console_prefix = "    ";
+
+                main_data->mode_decrypt_packagedefinition_thumbs = true;
+
+                if (it.value().contains("OutputPath"))
+                {
+                    main_data->mode_output_path = true;
+
+                    parse_input_output_path(main_data, std::string(it.value()["OutputPath"]));
+                }
+
+                if (it.value().contains("FileToDecrypt"))
+                {
+                    parse_packagedefinitions_thumbs_file_input(std::string(it.value()["FileToDecrypt"]), main_data);
+
+                    if (main_data->input_packagedefinitions_thumbs_file_path == "" || main_data->input_packagedefinitions_thumbs_file_name == "")
+                    {
+                        std::cout << "Error: Invalid packagedefinitions.txt / thumbs.dat file path specified in the input JSON." << std::endl;
+                        std::exit(0);
+                    }
+
+                    std::cout << "Executing JSON command number " << it.key() << std::endl;
+
+                    std::cout << "  Command: decrypt_packagedefinition_thumbs" << std::endl;
+
+                    if (main_data->mode_output_path)
+                    {
+                        std::cout << "  OutputPath: " << main_data->input_output_path << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "  OutputPath: None" << std::endl;
+                    }
+
+                    std::cout << "  FileToDecrypt: " << main_data->input_packagedefinitions_thumbs_file_path << std::endl;
+
+                    decrypt_packagedefinition_thumbs(main_data);
+                }
+                else
+                {
+                    std::cout << "Error: Command decrypt_packagedefinition_thumbs requires a \"FileToDecrypt\" value in the input JSON." << std::endl;
+                    std::exit(0);
+                }
+            }
+            else if (to_uppercase(it.value()["Command"]) == "ENCRYPT_PACKAGEDEFINITION_THUMBS")
+            {
+                main_data->console_prefix = "    ";
+
+                main_data->mode_encrypt_packagedefinition_thumbs = true;
+
+                if (it.value().contains("OutputPath"))
+                {
+                    main_data->mode_output_path = true;
+
+                    parse_input_output_path(main_data, std::string(it.value()["OutputPath"]));
+                }
+
+                if (it.value().contains("FileToEncrypt"))
+                {
+                    parse_packagedefinitions_thumbs_file_input(std::string(it.value()["FileToEncrypt"]), main_data);
+
+                    if (main_data->input_packagedefinitions_thumbs_file_path == "" || main_data->input_packagedefinitions_thumbs_file_name == "")
+                    {
+                        std::cout << "Error: Invalid packagedefinitions.txt / thumbs.dat file path specified in the input JSON." << std::endl;
+                        std::exit(0);
+                    }
+
+                    std::cout << "Executing JSON command number " << it.key() << std::endl;
+
+                    std::cout << "  Command: encrypt_packagedefinition_thumbs" << std::endl;
+
+                    if (main_data->mode_output_path)
+                    {
+                        std::cout << "  OutputPath: " << main_data->input_output_path << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "  OutputPath: None" << std::endl;
+                    }
+
+                    std::cout << "  FileToEncrypt: " << main_data->input_packagedefinitions_thumbs_file_path << std::endl;
+
+                    encrypt_packagedefinition_thumbs(main_data);
+                }
+                else
+                {
+                    std::cout << "Error: Command encrypt_packagedefinition_thumbs requires a \"FileToEncrypt\" value in the input JSON." << std::endl;
+                    std::exit(0);
+                }
+            }
+            else if (to_uppercase(it.value()["Command"]) == "EXTRACT_FROM_RPKG")
+            {
+                main_data->console_prefix = "    ";
+
+                main_data->mode_extract_from_rpkg = true;
+
+                if (it.value().contains("OutputPath"))
+                {
+                    main_data->mode_output_path = true;
+
+                    parse_input_output_path(main_data, std::string(it.value()["OutputPath"]));
+                }
+
+                if (it.value().contains("Filter"))
+                {
+                    main_data->mode_filter = true;
+
+                    parse_input_filter(main_data, std::string(it.value()["Filter"]));
+                }
+
+                if (it.value().contains("InputFilePath"))
+                {
+                    parse_rpkg_file_input(std::string(it.value()["InputFilePath"]), main_data);
+
+                    if (main_data->input_rpkg_file_path == "" || main_data->input_rpkg_file_name == "")
+                    {
+                        std::cout << "Error: Invalid RPKG file path specified in the input JSON." << std::endl;
+                        std::exit(0);
+                    }
+
+                    std::cout << "Executing JSON command number " << it.key() << std::endl;
+
+                    std::cout << "  Command: extract_from_rpkg" << std::endl;
+
+                    if (main_data->mode_output_path)
+                    {
+                        std::cout << "  OutputPath: " << main_data->input_output_path << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "  OutputPath: None" << std::endl;
+                    }
+
+                    if (main_data->input_filter.size() > 0)
+                    {
+                        std::cout << "  Filter: " << main_data->input_filter_string << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "  Filter: None" << std::endl;
+                    }
+
+                    std::cout << "  InputFilePath: " << main_data->input_rpkg_file_path << std::endl;
+
+                    extract_from_rpkg(main_data);
+                }
+                else
+                {
+                    std::cout << "Error: Command extract_from_rpkg requires a \"InputFilePath\" value in the input JSON." << std::endl;
+                    std::exit(0);
+                }
+            }
+            else if (to_uppercase(it.value()["Command"]) == "EXTRACT_ALL_ORES_FROM")
+            {
+                main_data->console_prefix = "    ";
+
+                main_data->mode_extract_all_ores = true;
+
+                if (it.value().contains("OutputPath"))
+                {
+                    main_data->mode_output_path = true;
+
+                    parse_input_output_path(main_data, std::string(it.value()["OutputPath"]));
+                }
+
+                if (it.value().contains("Filter"))
+                {
+                    main_data->mode_filter = true;
+
+                    parse_input_filter(main_data, std::string(it.value()["Filter"]));
+                }
+
+                if (it.value().contains("InputFolderPath"))
+                {
+                    main_data->input_rpkg_folder_path = std::string(it.value()["InputFolderPath"]);
+
+                    if (main_data->input_rpkg_folder_path == "")
+                    {
+                        std::cout << "Error: Invalid RPKG folder path specified in the input JSON." << std::endl;
+                        std::exit(0);
+                    }
+
+                    std::cout << "Executing JSON command number " << it.key() << std::endl;
+
+                    std::cout << "  Command: extract_all_ores_from" << std::endl;
+
+                    if (main_data->mode_output_path)
+                    {
+                        std::cout << "  OutputPath: " << main_data->input_output_path << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "  OutputPath: None" << std::endl;
+                    }
+
+                    if (main_data->input_filter.size() > 0)
+                    {
+                        std::cout << "  Filter: " << main_data->input_filter_string << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "  Filter: None" << std::endl;
+                    }
+
+                    std::cout << "  InputFolderPath: " << main_data->input_rpkg_folder_path << std::endl;
+
+                    extract_all_ores(main_data);
+                }
+                else
+                {
+                    std::cout << "Error: Command extract_all_ores_from requires a \"InputFolderPath\" value in the input JSON." << std::endl;
+                    std::exit(0);
+                }
+            }
+            else if (to_uppercase(it.value()["Command"]) == "EXTRACT_ALL_WWES_TO_OGG_FROM")
+            {
+                main_data->console_prefix = "    ";
+
+                main_data->mode_extract_all_wwes_to_ogg = true;
+
+                if (it.value().contains("OutputPath"))
+                {
+                    main_data->mode_output_path = true;
+
+                    parse_input_output_path(main_data, std::string(it.value()["OutputPath"]));
+                }
+
+                if (it.value().contains("Filter"))
+                {
+                    main_data->mode_filter = true;
+
+                    parse_input_filter(main_data, std::string(it.value()["Filter"]));
+                }
+
+                if (it.value().contains("InputFolderPath"))
+                {
+                    main_data->input_rpkg_folder_path = std::string(it.value()["InputFolderPath"]);
+
+                    if (main_data->input_rpkg_folder_path[0] == '-' || main_data->input_rpkg_folder_path == "")
+                    {
+                        std::cout << "Error: Invalid RPKG folder path specified in the input JSON." << std::endl;
+                        std::exit(0);
+                    }
+
+                    std::cout << "Executing JSON command number " << it.key() << std::endl;
+
+                    std::cout << "  Command: extract_all_wwes_to_ogg_from" << std::endl;
+
+                    if (main_data->mode_output_path)
+                    {
+                        std::cout << "  OutputPath: " << main_data->input_output_path << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "  OutputPath: None" << std::endl;
+                    }
+
+                    if (main_data->input_filter.size() > 0)
+                    {
+                        std::cout << "  Filter: " << main_data->input_filter_string << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "  Filter: None" << std::endl;
+                    }
+
+                    std::cout << "  InputFolderPath: " << main_data->input_rpkg_folder_path << std::endl;
+
+                    extract_all_wwes(main_data);
+                }
+                else
+                {
+                    std::cout << "Error: Command extract_all_wwes_to_ogg_from requires a \"InputFolderPath\" value in the input JSON." << std::endl;
+                    std::exit(0);
+                }
+            }
+            else if (to_uppercase(it.value()["Command"]) == "EXTRACT_ALL_WWEV_TO_OGG_FROM")
+            {
+                main_data->console_prefix = "    ";
+
+                main_data->mode_extract_all_wwev_to_ogg = true;
+
+                if (it.value().contains("OutputPath"))
+                {
+                    main_data->mode_output_path = true;
+
+                    parse_input_output_path(main_data, std::string(it.value()["OutputPath"]));
+                }
+
+                if (it.value().contains("Filter"))
+                {
+                    main_data->mode_filter = true;
+
+                    parse_input_filter(main_data, std::string(it.value()["Filter"]));
+                }
+
+                if (it.value().contains("InputFolderPath"))
+                {
+                    main_data->input_rpkg_folder_path = std::string(it.value()["InputFolderPath"]);
+
+                    if (main_data->input_rpkg_folder_path[0] == '-' || main_data->input_rpkg_folder_path == "")
+                    {
+                        std::cout << "Error: Invalid RPKG folder path specified in the input JSON." << std::endl;
+                        std::exit(0);
+                    }
+
+                    std::cout << "Executing JSON command number " << it.key() << std::endl;
+
+                    std::cout << "  Command: extract_all_wwev_to_ogg_from" << std::endl;
+
+                    if (main_data->mode_output_path)
+                    {
+                        std::cout << "  OutputPath: " << main_data->input_output_path << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "  OutputPath: None" << std::endl;
+                    }
+
+                    if (main_data->input_filter.size() > 0)
+                    {
+                        std::cout << "  Filter: " << main_data->input_filter_string << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "  Filter: None" << std::endl;
+                    }
+
+                    std::cout << "  InputFolderPath: " << main_data->input_rpkg_folder_path << std::endl;
+
+                    extract_all_wwev(main_data);
+                }
+                else
+                {
+                    std::cout << "Error: Command extract_all_wwev_to_ogg_from requires a \"InputFolderPath\" value in the input JSON." << std::endl;
+                    std::exit(0);
+                }
+            }
+            else if (to_uppercase(it.value()["Command"]) == "EXTRACT_LOCR_TO_JSON_FROM")
+            {
+                main_data->console_prefix = "    ";
+
+                main_data->mode_locr_to_json = true;
+
+                if (it.value().contains("OutputPath"))
+                {
+                    main_data->mode_output_path = true;
+
+                    parse_input_output_path(main_data, std::string(it.value()["OutputPath"]));
+                }
+
+                if (it.value().contains("InputFolderPath"))
+                {
+                    main_data->input_rpkg_folder_path = std::string(it.value()["InputFolderPath"]);
+
+                    if (main_data->input_rpkg_folder_path[0] == '-' || main_data->input_rpkg_folder_path == "")
+                    {
+                        std::cout << "Error: Invalid RPKG folder path specified in the input JSON." << std::endl;
+                        std::exit(0);
+                    }
+
+                    std::cout << "Executing JSON command number " << it.key() << std::endl;
+
+                    std::cout << "  Command: extract_locr_to_json_from" << std::endl;
+
+                    if (main_data->mode_output_path)
+                    {
+                        std::cout << "  OutputPath: " << main_data->input_output_path << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "  OutputPath: None" << std::endl;
+                    }
+
+                    std::cout << "  InputFolderPath: " << main_data->input_rpkg_folder_path << std::endl;
+
+                    extract_all_locr(main_data);
+                }
+                else
+                {
+                    std::cout << "Error: Command extract_locr_to_json_from requires a \"InputFolderPath\" value in the input JSON." << std::endl;
+                    std::exit(0);
+                }
+            }
+            else if (to_uppercase(it.value()["Command"]) == "GENERATE_RPKG_FROM")
+            {
+                main_data->console_prefix = "    ";
+
+                main_data->mode_generate_rpkg_file = true;
+
+                if (it.value().contains("OutputPath"))
+                {
+                    main_data->mode_output_path = true;
+
+                    parse_input_output_path(main_data, std::string(it.value()["OutputPath"]));
+                }
+
+                if (it.value().contains("InputFolderPath"))
+                {
+                    main_data->input_rpkg_folder_path = std::string(it.value()["InputFolderPath"]);
+
+                    if (main_data->input_rpkg_folder_path[0] == '-' || main_data->input_rpkg_folder_path == "")
+                    {
+                        std::cout << "Error: Invalid RPKG folder path specified in the input JSON." << std::endl;
+                        std::exit(0);
+                    }
+
+                    std::cout << "Executing JSON command number " << it.key() << std::endl;
+
+                    std::cout << "  Command: generate_rpkg_from" << std::endl;
+
+                    if (main_data->mode_output_path)
+                    {
+                        std::cout << "  OutputPath: " << main_data->input_output_path << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "  OutputPath: None" << std::endl;
+                    }
+
+                    std::cout << "  InputFolderPath: " << main_data->input_rpkg_folder_path << std::endl;
+
+                    generate_rpkg_file(main_data);
+                }
+                else
+                {
+                    std::cout << "Error: Command generate_rpkg_from requires a \"InputFolderPath\" value in the input JSON." << std::endl;
+                    std::exit(0);
+                }
+            }
+            else if (to_uppercase(it.value()["Command"]) == "HASH_DEPENDS")
+            {
+                main_data->console_prefix = "    ";
+
+                main_data->mode_hash_depends = true;
+
+                if (it.value().contains("OutputPath"))
+                {
+                    main_data->mode_output_path = true;
+
+                    parse_input_output_path(main_data, std::string(it.value()["OutputPath"]));
+                }
+
+                if (it.value().contains("Filter"))
+                {
+                    main_data->mode_filter = true;
+
+                    parse_input_filter(main_data, std::string(it.value()["Filter"]));
+                }
+                else
+                {
+                    std::cout << "Error: Command hash_depends requires a \"Filter\" value in the input JSON." << std::endl;
+                    std::exit(0);
+                }
+
+                if (it.value().contains("InputFolderPath"))
+                {
+                    main_data->input_rpkg_folder_path = std::string(it.value()["InputFolderPath"]);
+
+                    if (main_data->input_rpkg_folder_path[0] == '-' || main_data->input_rpkg_folder_path == "")
+                    {
+                        std::cout << "Error: Invalid RPKG folder path specified in the input JSON." << std::endl;
+                        std::exit(0);
+                    }
+
+                    std::cout << "Executing JSON command number " << it.key() << std::endl;
+
+                    std::cout << "  Command: hash_depends" << std::endl;
+
+                    if (main_data->mode_output_path)
+                    {
+                        std::cout << "  OutputPath: " << main_data->input_output_path << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "  OutputPath: None" << std::endl;
+                    }
+
+                    if (main_data->input_filter.size() > 0)
+                    {
+                        std::cout << "  Filter: " << main_data->input_filter_string << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "  Filter: None" << std::endl;
+                    }
+
+                    std::cout << "  InputFolderPath: " << main_data->input_rpkg_folder_path << std::endl;
+
+                    find_hash_depends(main_data);
+                }
+                else
+                {
+                    std::cout << "Error: Command hash_depends requires a \"InputFolderPath\" value in the input JSON." << std::endl;
+                    std::exit(0);
+                }
+            }
+            else if (to_uppercase(it.value()["Command"]) == "HASH_PROBE")
+            {
+                main_data->console_prefix = "    ";
+
+                main_data->mode_hash_probe = true;
+
+                if (it.value().contains("OutputPath"))
+                {
+                    main_data->mode_output_path = true;
+
+                    parse_input_output_path(main_data, std::string(it.value()["OutputPath"]));
+                }
+
+                if (it.value().contains("Filter"))
+                {
+                    main_data->mode_filter = true;
+
+                    parse_input_filter(main_data, std::string(it.value()["Filter"]));
+                }
+                else
+                {
+                    std::cout << "Error: Command hash_probe requires a \"Filter\" value in the input JSON." << std::endl;
+                    std::exit(0);
+                }
+
+                if (it.value().contains("InputFolderPath"))
+                {
+                    main_data->input_rpkg_folder_path = std::string(it.value()["InputFolderPath"]);
+
+                    if (main_data->input_rpkg_folder_path[0] == '-' || main_data->input_rpkg_folder_path == "")
+                    {
+                        std::cout << "Error: Invalid RPKG folder path specified in the input JSON." << std::endl;
+                        std::exit(0);
+                    }
+
+                    std::cout << "Executing JSON command number " << it.key() << std::endl;
+
+                    std::cout << "  Command: hash_probe" << std::endl;
+
+                    if (main_data->mode_output_path)
+                    {
+                        std::cout << "  OutputPath: " << main_data->input_output_path << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "  OutputPath: None" << std::endl;
+                    }
+
+                    if (main_data->input_filter.size() > 0)
+                    {
+                        std::cout << "  Filter: " << main_data->input_filter_string << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "  Filter: None" << std::endl;
+                    }
+
+                    std::cout << "  InputFolderPath: " << main_data->input_rpkg_folder_path << std::endl;
+
+                    hash_probe(main_data);
+                }
+                else
+                {
+                    std::cout << "Error: Command hash_probe requires a \"InputFolderPath\" value in the input JSON." << std::endl;
+                    std::exit(0);
+                }
+            }
+            else if (to_uppercase(it.value()["Command"]) == "REBUILD_LOCR_FROM_JSON_FROM")
+            {
+                main_data->console_prefix = "    ";
+
+                main_data->mode_json_to_locr = true;
+
+                if (it.value().contains("OutputPath"))
+                {
+                    main_data->mode_output_path = true;
+
+                    parse_input_output_path(main_data, std::string(it.value()["OutputPath"]));
+                }
+
+                if (it.value().contains("InputFolderPath"))
+                {
+                    main_data->input_rpkg_folder_path = std::string(it.value()["InputFolderPath"]);
+
+                    if (main_data->input_rpkg_folder_path[0] == '-' || main_data->input_rpkg_folder_path == "")
+                    {
+                        std::cout << "Error: Invalid RPKG folder path specified in the input JSON." << std::endl;
+                        std::exit(0);
+                    }
+
+                    std::cout << "Executing JSON command number " << it.key() << std::endl;
+
+                    std::cout << "  Command: rebuild_locr_from_json_from" << std::endl;
+
+                    if (main_data->mode_output_path)
+                    {
+                        std::cout << "  OutputPath: " << main_data->input_output_path << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "  OutputPath: None" << std::endl;
+                    }
+
+                    std::cout << "  InputFolderPath: " << main_data->input_rpkg_folder_path << std::endl;
+
+                    rebuild_all_locr(main_data);
+                }
+                else
+                {
+                    std::cout << "Error: Command rebuild_locr_from_json_from requires a \"InputFolderPath\" value in the input JSON." << std::endl;
+                    std::exit(0);
+                }
+            }
+            else if (to_uppercase(it.value()["Command"]) == "REBUILD_ALL_WWEV_IN")
+            {
+                main_data->console_prefix = "    ";
+
+                main_data->mode_rebuild_all_wwev = true;
+
+                if (it.value().contains("OutputPath"))
+                {
+                    main_data->mode_output_path = true;
+
+                    parse_input_output_path(main_data, std::string(it.value()["OutputPath"]));
+                }
+
+                if (it.value().contains("InputFolderPath"))
+                {
+                    main_data->input_rpkg_folder_path = std::string(it.value()["InputFolderPath"]);
+
+                    if (main_data->input_rpkg_folder_path[0] == '-' || main_data->input_rpkg_folder_path == "")
+                    {
+                        std::cout << "Error: Invalid RPKG folder path specified in the input JSON." << std::endl;
+                        std::exit(0);
+                    }
+
+                    std::cout << "Executing JSON command number " << it.key() << std::endl;
+
+                    std::cout << "  Command: rebuild_all_wwev_in" << std::endl;
+
+                    if (main_data->mode_output_path)
+                    {
+                        std::cout << "  OutputPath: " << main_data->input_output_path << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "  OutputPath: None" << std::endl;
+                    }
+
+                    std::cout << "  InputFolderPath: " << main_data->input_rpkg_folder_path << std::endl;
+
+                    rebuild_all_wwev(main_data);
+                }
+                else
+                {
+                    std::cout << "Error: Command rebuild_all_wwev_in requires a \"InputFolderPath\" value in the input JSON." << std::endl;
+                    std::exit(0);
+                }
+            }
+            else if (to_uppercase(it.value()["Command"]) == "SEARCH_RPKG")
+            {
+                main_data->console_prefix = "    ";
+
+                if (it.value().contains("OutputPath"))
+                {
+                    main_data->mode_output_path = true;
+
+                    parse_input_output_path(main_data, std::string(it.value()["OutputPath"]));
+                }
+
+                if (it.value().contains("Filter"))
+                {
+                    main_data->mode_filter = true;
+
+                    parse_input_filter(main_data, std::string(it.value()["Filter"]));
+                }
+
+                if (it.value().contains("SearchType"))
+                {
+                    if (to_uppercase(it.value()["SearchType"]) == "TEXT")
+                    {
+                        main_data->mode_text_search = true;
+
+                        if (it.value().contains("SearchString"))
+                        {
+                            main_data->input_text_search = std::string(it.value()["SearchString"]);
+                        }
+                        else
+                        {
+                            std::cout << "Error: Command search_rpkg requires a \"SearchString\" value in the input JSON." << std::endl;
+                            std::exit(0);
+                        }
+                    }
+                    else if (to_uppercase(it.value()["SearchType"]) == "HEX")
+                    {
+                        main_data->mode_hex_search = true;
+
+                        if (it.value().contains("SearchString"))
+                        {
+                            main_data->input_hex_search = std::string(it.value()["SearchString"]);
+                        }
+                        else
+                        {
+                            std::cout << "Error: Command search_rpkg requires a \"SearchString\" value in the input JSON." << std::endl;
+                            std::exit(0);
+                        }
+                    }
+                    else if (to_uppercase(it.value()["SearchType"]) == "REGEX")
+                    {
+                        main_data->mode_regex_search = true;
+
+                        if (it.value().contains("SearchString"))
+                        {
+                            main_data->input_regex_search = std::string(it.value()["SearchString"]);
+                        }
+                        else
+                        {
+                            std::cout << "Error: Command search_rpkg requires a \"SearchString\" value in the input JSON." << std::endl;
+                            std::exit(0);
+                        }
+                    }
+                    else
+                    {
+                        std::cout << main_data->console_prefix << "Error: \"SearchType\" value in the input JSON is not one of the only three valid options: text, hex, or regex" << std::endl;
+                        std::exit(0);
+                    }
+                }
+                else
+                {
+                    std::cout << "Error: Command search_rpkg requires a \"SearchType\" value in the input JSON." << std::endl;
+                    std::exit(0);
+                }
+
+                if (it.value().contains("InputFilePath"))
+                {
+                    parse_rpkg_file_input(std::string(it.value()["InputFilePath"]), main_data);
+
+                    if (main_data->input_rpkg_file_path == "" || main_data->input_rpkg_file_name == "")
+                    {
+                        std::cout << "Error: Invalid RPKG file path specified in the input JSON." << std::endl;
+                        std::exit(0);
+                    }
+
+                    std::cout << "Executing JSON command number " << it.key() << std::endl;
+
+                    std::cout << "  Command: search_rpkg" << std::endl;
+
+                    if (main_data->mode_output_path)
+                    {
+                        std::cout << "  OutputPath: " << main_data->input_output_path << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "  OutputPath: None" << std::endl;
+                    }
+
+                    if (main_data->input_filter.size() > 0)
+                    {
+                        std::cout << "  Filter: " << main_data->input_filter_string << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "  Filter: None" << std::endl;
+                    }
+
+                    if (to_uppercase(it.value()["SearchType"]) == "TEXT")
+                    {
+                        std::cout << "  SearchType: Text" << std::endl;
+                        std::cout << "  SearchString: " << it.value()["SearchString"] << std::endl;
+                    }
+                    else if (to_uppercase(it.value()["SearchType"]) == "HEX")
+                    {
+                        std::cout << "  SearchType: Hex" << std::endl;
+                        std::cout << "  SearchString: " << it.value()["SearchString"] << std::endl;
+                    }
+                    else if (to_uppercase(it.value()["SearchType"]) == "REGEX")
+                    {
+                        std::cout << "  SearchType: Regex" << std::endl;
+                        std::cout << "  SearchString: " << it.value()["SearchString"] << std::endl;
+                    }
+
+                    std::cout << "  InputFilePath: " << main_data->input_rpkg_file_path << std::endl;
+
+                    extract_from_rpkg(main_data);
+                }
+                else
+                {
+                    std::cout << "Error: Command search_rpkg requires a \"InputFilePath\" value in the input JSON." << std::endl;
+                    std::exit(0);
+                }
+            }
+            else if (to_uppercase(it.value()["Command"]) == "EXECUTE_SYSTEM_COMMAND")
+            {
+                main_data->console_prefix = "    ";
+
+                if (it.value().contains("CommandLine"))
+                {
+                    std::cout << "Executing JSON command number " << it.key() << std::endl;
+
+                    std::cout << "  Command: execute_system_command" << std::endl;
+
+                    std::cout << "  CommandLine: " << it.value()["CommandLine"] << std::endl;
+
+                    std::system(std::string(it.value()["CommandLine"]).c_str());
+                }
+                else
+                {
+                    std::cout << "Error: Command execute_system_command requires a \"CommandLine\" value in the input JSON." << std::endl;
+                    std::exit(0);
+                }
+            }
+
+            main_data = &main_data_backup;
+
+            std::cout << std::endl;
+        }
+    }
+}
+
+void display_usage_info(main_variables* main_data)
+{
+    std::cout << main_data->console_prefix << "rpkg v1.2 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files." << std::endl;
+    std::cout << main_data->console_prefix << "--------------------------------------------------------------------------------" << std::endl;
+    std::cout << main_data->console_prefix << "Note: All the information used to build this program was gleaned" << std::endl;
+    std::cout << main_data->console_prefix << "      in a completely 'clean room' environment." << std::endl;
+    std::cout << main_data->console_prefix << "--------------------------------------------------------------------------------" << std::endl;
+    std::cout << main_data->console_prefix << "Usage:" << std::endl << std::endl;
+    std::cout << main_data->console_prefix << "  Drag And Drop Options:" << std::endl;
+    std::cout << main_data->console_prefix << "    - RPKG files can be dragged and dropped directly onto the rpkg.exe file." << std::endl;
+    std::cout << main_data->console_prefix << "        This causes rpkg.exe to automatically enter RPKG extraction mode and" << std::endl;
+    std::cout << main_data->console_prefix << "        will fully extract all the hash files/resources from each RPKG dragged" << std::endl;
+    std::cout << main_data->console_prefix << "        and dropped upon rpkg.exe. It mimics (-extract_from_rpkg) in behaviour." << std::endl;
+    std::cout << main_data->console_prefix << "        One or more RPKG files can be dragged and dropped onto rpkg.exe at a time." << std::endl;
+    std::cout << main_data->console_prefix << "    - rpkg.exe command JSON files can be dragged and dropped onto the rpkg.exe file." << std::endl;
+    std::cout << main_data->console_prefix << "        This causes rpkg.exe to automatically enter rpkg.exe command JSON mode and" << std::endl;
+    std::cout << main_data->console_prefix << "        will import, parse, and run all the commands listed in the input JSON file." << std::endl;
+    std::cout << main_data->console_prefix << "        One or more JSON files can be dragged and dropped onto rpkg.exe at a time." << std::endl << std::endl;
+    std::cout << main_data->console_prefix << "  Command Line Options:" << std::endl;
+    std::cout << main_data->console_prefix << "    -compute_ioi_hash <string>" << std::endl;
+    std::cout << main_data->console_prefix << "        Computes the IOI style truncated md5 hash/runtimeid from a string." << std::endl;
+    std::cout << main_data->console_prefix << "    -decrypt_packagedefinition_thumbs <path to file>" << std::endl;
+    std::cout << main_data->console_prefix << "        Decrypts packagedefinitions.txt / thumbs.dat files." << std::endl;
+    std::cout << main_data->console_prefix << "    -encrypt_packagedefinition_thumbs <path to file>" << std::endl;
+    std::cout << main_data->console_prefix << "        Encrypts packagedefinitions.txt / thumbs.dat files." << std::endl;
+    std::cout << main_data->console_prefix << "    -extract_from_rpkg <path to rpkg file>" << std::endl;
+    std::cout << main_data->console_prefix << "        Extracts all hash linked files/resources from an RPKG file." << std::endl;
+    std::cout << main_data->console_prefix << "    -extract_all_ores_from <path to folder containing RPKG files>" << std::endl;
+    std::cout << main_data->console_prefix << "        Extracts all hash linked files/resources located in the ORES files" << std::endl;
+    std::cout << main_data->console_prefix << "        by their full IOI path names from all the RPKG files in a given directory." << std::endl;
+    std::cout << main_data->console_prefix << "    -extract_all_wwes_to_ogg_from <path to folder containing RPKG files>" << std::endl;
+    std::cout << main_data->console_prefix << "        Extracts all hash linked files/resources of type WWES to their" << std::endl;
+    std::cout << main_data->console_prefix << "        full IOI internal Wwise file paths / names. It also converts" << std::endl;
+    std::cout << main_data->console_prefix << "        the WWES (*.wem) files directly to *.ogg files for easy listening." << std::endl;
+    std::cout << main_data->console_prefix << "    -extract_all_wwev_to_ogg_from <path to folder containing RPKG files>" << std::endl;
+    std::cout << main_data->console_prefix << "        Extracts all hash linked files/resources of type WWEV to their" << std::endl;
+    std::cout << main_data->console_prefix << "        partial IOI internal Wwise file paths / names. It also converts" << std::endl;
+    std::cout << main_data->console_prefix << "        the WWEV (*.wem) files directly to *.ogg files for easy listening." << std::endl;
+    std::cout << main_data->console_prefix << "    -extract_locr_to_json_from <path to folder containing RPKG files>" << std::endl;
+    std::cout << main_data->console_prefix << "        Extracts all hash linked files/resources of type LOCR from" << std::endl;
+    std::cout << main_data->console_prefix << "        all the RPKG files in a given directory and then decrypts" << std::endl;
+    std::cout << main_data->console_prefix << "        them in memory and outputs / formats them as JSON files." << std::endl;
+    std::cout << main_data->console_prefix << "    -filter <hash filter>" << std::endl;
+    std::cout << main_data->console_prefix << "        Filters hash linked files/resources by string filter." << std::endl;
+    std::cout << main_data->console_prefix << "        String filter can be a full hash value, partial hash value," << std::endl;
+    std::cout << main_data->console_prefix << "        the hash resource type, partial hash resource type, WWES or WWEV" << std::endl;
+    std::cout << main_data->console_prefix << "        partial of full file/resource name, etc..." << std::endl;
+    std::cout << main_data->console_prefix << "        Can accept multiple filters: -filter <filter1>,<filter2>,..." << std::endl;
+    std::cout << main_data->console_prefix << "    -generate_rpkg_from <path to folder to generate rpkg from>" << std::endl;
+    std::cout << main_data->console_prefix << "        Generates a RPKG file from hash file(s) in a given folder and all subfolders." << std::endl;
+    std::cout << main_data->console_prefix << "        The folder name is used for the filename of the generated RPKG file." << std::endl;
+    std::cout << main_data->console_prefix << "    -hash_depends <path to folder containing RPKG files>" << std::endl;
+    std::cout << main_data->console_prefix << "        Lists the forward and reverse depends of a given hash file/resource." << std::endl;
+    std::cout << main_data->console_prefix << "        Scans a directory, commonly Hitman's Runtime dir, and imports and" << std::endl;
+    std::cout << main_data->console_prefix << "        scans all available RPKG files for dependency information and lists the results." << std::endl;
+    std::cout << main_data->console_prefix << "    -hash_probe <path to folder containing RPKG files>" << std::endl;
+    std::cout << main_data->console_prefix << "        Probes RPKG files for hash files/resources and displays key data points." << std::endl;
+    std::cout << main_data->console_prefix << "        Scans a directory, commonly Hitman's Runtime dir, and imports and" << std::endl;
+    std::cout << main_data->console_prefix << "        scans all available RPKG files for the existence of the hash file/resource." << std::endl;
+    std::cout << main_data->console_prefix << "    -hex_search <hex string>" << std::endl;
+    std::cout << main_data->console_prefix << "        Specifices the hex string to find within hash files/resources." << std::endl;
+    std::cout << main_data->console_prefix << "    -output_path <path to output folder>" << std::endl;
+    std::cout << main_data->console_prefix << "        Specifies output folder path to use instead of the current directory." << std::endl;
+    std::cout << main_data->console_prefix << "    -rebuild_locr_from_json_from <path to folder containing JSON (LOCR) files>" << std::endl;
+    std::cout << main_data->console_prefix << "        Rebuilds LOCR files/resources from JSON (LOCR) files that were previously" << std::endl;
+    std::cout << main_data->console_prefix << "        extracted with (-extract_locr_to_json_from)." << std::endl;
+    std::cout << main_data->console_prefix << "    -rebuild_all_wwev_in <path to folders containing wem files>" << std::endl;
+    std::cout << main_data->console_prefix << "        Rebuilds sets of individual Wwise .wem files that were previously" << std::endl;
+    std::cout << main_data->console_prefix << "        extracted with (-extract_all_wwev_from). The folder specified by the" << std::endl;
+    std::cout << main_data->console_prefix << "        argument can contain any number of sub folders, where each subfolder's" << std::endl;
+    std::cout << main_data->console_prefix << "        name is linked to an individual WWEV that will be built from the *.wem" << std::endl;
+    std::cout << main_data->console_prefix << "        files in that folder." << std::endl;
+    std::cout << main_data->console_prefix << "    -regex_search <regex>" << std::endl;
+    std::cout << main_data->console_prefix << "        Specifies the regex which is used to find within hash files/resources." << std::endl;
+    std::cout << main_data->console_prefix << "    -rpkg_command_json <path to rpkg command json file>" << std::endl;
+    std::cout << main_data->console_prefix << "        Imports, parses, and runs all the commands listed in the input JSON file." << std::endl;
+    std::cout << main_data->console_prefix << "        See included rpkg_command_reference.JSON for complete JSON command descriptions." << std::endl;
+    std::cout << main_data->console_prefix << "        See included rpkg_command_JSON_examples\*.JSON for some command JSON examples." << std::endl;
+    std::cout << main_data->console_prefix << "    -search_rpkg <path to rpkg file>" << std::endl;
+    std::cout << main_data->console_prefix << "        Specifies RPKG file whose hash files/resources will to be searched through." << std::endl;
+    std::cout << main_data->console_prefix << "    -text_search <text string>" << std::endl;
+    std::cout << main_data->console_prefix << "        Specifices the text string to find within hash files/resources." << std::endl;
+    std::cout << main_data->console_prefix << "  Examples:" << std::endl;
+    std::cout << main_data->console_prefix << "    Computes the IOI style truncated md5 hash/runtimeid from a string:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -compute_ioi_hash \"[assembly:/_PRO/Scenes/Missions/CoastalTown/Mission01.entity].pc_entitytemplate\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Decrypts packagedefinitions.txt / thumbs.dat files:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -decrypt_packagedefinition_thumbs packagedefinition.txt" << std::endl;
+    std::cout << main_data->console_prefix << "    Decrypts packagedefinitions.txt / thumbs.dat files:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -encrypt_packagedefinition_thumbs packagedefinition.txt.decrypted" << std::endl;
+    std::cout << main_data->console_prefix << "    Extracts all hash linked files/resources from an RPKG file:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -extract_from_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Extracts all hash linked files/resources from an RPKG file to an output folder:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -output_path \"R:\\my\\output\\path\" -extract_from_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Extracts one hash linked files/resources from an RPKG file by hash filter:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -filter 00123456789ABCDE -extract_from_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Extracts multiple hash linked files/resources from an RPKG file by hash filter:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -filter 00123456789ABCDE,00123456789ABCDE -extract_from_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Extracts all hash linked files/resources from an RPKG file by hash resource type filter:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -filter ORES -extract_from_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Extracts all hash linked files/resources from an RPKG file by hash resource types ORES, REPO, and JSON:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -filter ORES,REPO,JSON -extract_from_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Generates a RPKG file from hash file(s) in a given folder and all subfolders:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -generate_rpkg_from chunk0patch1" << std::endl;
+    std::cout << main_data->console_prefix << "    Extracts all hash linked files/resources located in the ORES files from all the RPKG files in a given directory:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -extract_all_ores_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Extracts all hash linked files/resources located in the ORES files from all the RPKG files in a given directory to an output folder:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -output_path \"R:\\my\\output\\path\" -extract_all_ores_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Extracts and decrypts (to JSON) all hash linked files/resources of type LOCR from all the RPKG files in a given directory:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -extract_locr_to_json_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Extracts and decrypts (to JSON) all hash linked files/resources of type LOCR from all the RPKG files in a given directory to an output folder:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -output_path \"R:\\my\\output\\path\" -extract_locr_to_json_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Rebuilds sets LOCR files from JSON files that were previously created with (-extract_locr_to_json_from):" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -rebuild_locr_from_json_from \"R:\\WWEV\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Rebuilds sets LOCR files from JSON files that were previously created with (-extract_locr_to_json_from) to an output folder:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -output_path \"R:\\my\\output\\path\" -rebuild_locr_from_json_from \"R:\\WWEV\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Extracts all hash linked files/resources of type WWES from all the RPKG files in a given directory:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -extract_all_wwes_to_ogg_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Extracts all hash linked files/resources of type WWES from all the RPKG files in a given directory to an output folder:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -output_path \"R:\\my\\output\\path\" -extract_all_wwes_to_ogg_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Extracts all hash linked files/resources of type WWEV from all the RPKG files in a given directory:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -extract_all_wwev_to_ogg_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Extracts all hash linked files/resources of type WWEV from all the RPKG files in a given directory to an output folder:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -output_path \"R:\\my\\output\\path\" -extract_all_wwev_to_ogg_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Rebuilds sets of individual Wwise .wem files that were previously extracted with (-extract_all_wwev_from):" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -rebuild_all_wwev_in \"R:\\WWEV\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Rebuilds sets of individual Wwise .wem files that were previously extracted with (-extract_all_wwev_from) to an output folder:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -output_path \"R:\\my\\output\\path\" -rebuild_all_wwev_in \"R:\\WWEV\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Lists the forward and reverse depends of a given hash file/resource:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -filter 00123456789ABCDE -hash_depends \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Lists the forward and reverse depends of two hash files/resources:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -filter 00123456789ABCDE,00123456789ABCDE -hash_depends \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Probes RPKG files for hash files/resources and displays key data points:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -filter 00123456789ABCDE -hash_probe \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Probes RPKG files for hash files/resources and displays key data points:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -filter 00123456789ABCDE,00123456789ABCDE -hash_probe \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Search a RPKG file's hash files/resources by hex string:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -hex_search 00112233445566 -search_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Search a RPKG file's hash files/resources by regex:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -regex_search \"assembly:[\\w/_]+\" -search_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Search a RPKG file's hash files/resources by text string:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -text_search assembly -search_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Search a RPKG file's hash files/resources by regex and filter by type ORES:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -filter ORES -regex_search \"assembly:[\\w/_.]+\" -search_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
+    std::cout << main_data->console_prefix << "    Imports, parses, and runs all the commands listed in the input JSON file:" << std::endl;
+    std::cout << main_data->console_prefix << "      The JSON input below batch extracts from all the RPKGs in the Hitman 3 Runtime folder:" << std::endl;
+    std::cout << main_data->console_prefix << "        rpkg.exe -rpkg_command_json rpkg_command-batch_extract_chunk_rpkgs.JSON" << std::endl;
 }
 
 int main(int argc, char* argv[])
 {
     main_variables main_data;
 
-    process_command_line(argc, argv, &main_data);
-
-    /*std::ifstream file = std::ifstream("R:\\rtlvtest", std::ifstream::binary);
-
-    if (!file.good())
+    if (argc > 1)
     {
-        std::cout << "Error: packagedefinitions.txt / thumbs.dat file " << "R:\\rtlvtest" << " could not be read." << std::endl;
-        std::exit(0);
-    }
+        bool all_args_are_paths = true;
 
-    file.seekg(0, file.end);
-
-    uint64_t packagedefinitions_thumbs_file_size = file.tellg();
-
-    file.seekg(0, file.beg);
-
-    std::vector<char> input_data(packagedefinitions_thumbs_file_size, 0);
-
-    file.read(input_data.data(), packagedefinitions_thumbs_file_size);
-
-    file.close();
-
-    while (input_data.size() % 8 != 0)
-    {
-        input_data.push_back(0x0);
-    }
-
-    uint32_t zero_pad_length = packagedefinitions_thumbs_file_size - input_data.size();
-
-    for (uint64_t i = 0; i < input_data.size() / 8; i++)
-    {
-        uint32_t data[2];
-        std::memcpy(data, &input_data[(uint64_t)i * (uint64_t)8], sizeof(uint32_t));
-        std::memcpy(data + 1, &input_data[(uint64_t)i * (uint64_t)8 + (uint64_t)4], sizeof(uint32_t));
-
-        xtea_decrypt_locr(data);
-
-        std::memcpy(&input_data[(uint64_t)i * (uint64_t)8], data, sizeof(uint32_t));
-        std::memcpy(&input_data[(uint64_t)i * (uint64_t)8 + (uint64_t)4], data + 1, sizeof(uint32_t));
-    }
-
-    std::ofstream output_file = std::ofstream("R:\\rtlvtest.output", std::ifstream::binary);
-
-    if (!output_file.good())
-    {
-        std::cout << "Error: Output (packagedefinitions.txt / thumbs.dat)-decrypted file " << "R:\\rtlvtest.output" << " could not be created." << std::endl;
-        std::exit(0);
-    }
-
-    output_file.write(input_data.data(), input_data.size());
-
-    exit(0);*/
-
-    if (main_data.mode_generate_rpkg_file)
-    {
-        std::cout << "Operation Mode: Generate RPKG file from folder" << std::endl;
-
-        generate_rpkg_file(&main_data);
-    }
-    else if (main_data.mode_extract_from_rpkg || main_data.mode_text_search || main_data.mode_hex_search || main_data.mode_regex_search)
-    {
-        if (main_data.mode_extract_from_rpkg)
+        for (uint32_t i = 1; i < argc; i++)
         {
-            std::cout << "Operation Mode: Extract from RPKG file to folder" << std::endl;
-        }
-        else if (main_data.mode_text_search)
-        {
-            std::cout << "Operation Mode: Search RPKG file for text" << std::endl;
-        }
-        else if (main_data.mode_hex_search)
-        {
-            std::cout << "Operation Mode: Search RPKG file for hex" << std::endl;
-        }
-        else if (main_data.mode_regex_search)
-        {
-            std::cout << "Operation Mode: Search RPKG file by regex" << std::endl;
+            if (!path_exists(std::string(argv[i])))
+            {
+                all_args_are_paths = false;
+            }
         }
 
-        extract_from_rpkg(&main_data);
-    }
-    else if (main_data.mode_extract_all_ores)
-    {
-        std::cout << "Operation Mode: Extract all ORES data from RPKGs in folder" << std::endl;
+        if (all_args_are_paths)
+        {
+            for (uint32_t i = 1; i < argc; i++)
+            {
+                if (to_uppercase(std::string(argv[i]).substr((std::string(argv[i]).length() - 5), 5)) == ".JSON")
+                {
+                    main_data.mode_command_json = true;
 
-        extract_all_ores(&main_data);
-    }
-    else if (main_data.mode_extract_all_wwev_to_ogg)
-    {
-        std::cout << "Operation Mode: Extract all WWEV data (to .ogg) from RPKGs in folder" << std::endl;
+                    parse_command_json_file_input(std::string(argv[i]), &main_data);
 
-        extract_all_wwev(&main_data);
-    }
-    else if (main_data.mode_rebuild_all_wwev)
-    {
-        std::cout << "Operation Mode: Rebuild all WWEV in folder" << std::endl;
+                    execute_command_json(&main_data);
+                }
+                else if (to_uppercase(std::string(argv[i]).substr((std::string(argv[i]).length() - 5), 5)) == ".RPKG")
+                {
+                    main_data.mode_extract_from_rpkg = true;
 
-        rebuild_all_wwev(&main_data);
-    }
-    else if (main_data.mode_extract_all_wwes_to_ogg)
-    {
-        std::cout << "Operation Mode: Extract all WWES data (to .ogg) from RPKGs in folder" << std::endl;
+                    parse_rpkg_file_input(std::string(argv[i]), &main_data);
 
-        extract_all_wwes(&main_data);
-    }
-    else if (main_data.mode_locr_to_json)
-    {
-        std::cout << "Operation Mode: Extract all LOCR data (to JSON) from RPKGs in folder" << std::endl;
+                    if (main_data.input_rpkg_file_path == "" || main_data.input_rpkg_file_name == "")
+                    {
+                        std::cout << main_data.console_prefix << "Error: Invalid RPKG file path." << std::endl;
+                        std::exit(0);
+                    }
 
-        extract_all_locr(&main_data);
-    }
-    else if (main_data.mode_json_to_locr)
-    {
-        std::cout << "Operation Mode: Rebuild all LOCR data from JSONs in folder" << std::endl;
+                    std::cout << main_data.console_prefix << "Operation Mode: Extract from RPKG file to folder" << std::endl;
 
-        rebuild_all_locr(&main_data);
-    }
-    else if (main_data.mode_hash_depends)
-    {
-        std::cout << "Operation Mode: Find hash (file/resource)'s depends" << std::endl;
+                    extract_from_rpkg(&main_data);
+                }
+            }
+        }
+        else
+        {
+            process_command_line(argc, argv, &main_data);
 
-        find_hash_depends(&main_data);
-    }
-    else if (main_data.mode_hash_probe)
-    {
-        std::cout << "Operation Mode: Probe for hash file(s)/resource(s) in RPKG files" << std::endl;
+            /*std::ifstream file = std::ifstream("R:\\rtlvtest", std::ifstream::binary);
 
-        hash_probe(&main_data);
-    }
-    else if (main_data.mode_compute_ioi_hash)
-    {
-        std::cout << "Operation Mode: Compute the IOI hash/runtimeid" << std::endl;
+            if (!file.good())
+            {
+                std::cout << main_data.console_prefix << "Error: packagedefinitions.txt / thumbs.dat file " << "R:\\rtlvtest" << " could not be read." << std::endl;
+                std::exit(0);
+            }
 
-        compute_ioi_hash(&main_data);
-    }
-    else if (main_data.mode_decrypt_packagedefinition_thumbs)
-    {
-        std::cout << "Operation Mode: Decrypt packagedefinitions.txt / thumbs.dat" << std::endl;
+            file.seekg(0, file.end);
 
-        decrypt_packagedefinition_thumbs(&main_data);
-    }
-    else if (main_data.mode_encrypt_packagedefinition_thumbs)
-    {
-        std::cout << "Operation Mode: Encrypt packagedefinitions.txt / thumbs.dat" << std::endl;
+            uint64_t packagedefinitions_thumbs_file_size = file.tellg();
 
-        encrypt_packagedefinition_thumbs(&main_data);
+            file.seekg(0, file.beg);
+
+            std::vector<char> input_data(packagedefinitions_thumbs_file_size, 0);
+
+            file.read(input_data.data(), packagedefinitions_thumbs_file_size);
+
+            file.close();
+
+            while (input_data.size() % 8 != 0)
+            {
+                input_data.push_back(0x0);
+            }
+
+            uint32_t zero_pad_length = packagedefinitions_thumbs_file_size - input_data.size();
+
+            for (uint64_t i = 0; i < input_data.size() / 8; i++)
+            {
+                uint32_t data[2];
+                std::memcpy(data, &input_data[(uint64_t)i * (uint64_t)8], sizeof(uint32_t));
+                std::memcpy(data + 1, &input_data[(uint64_t)i * (uint64_t)8 + (uint64_t)4], sizeof(uint32_t));
+
+                xtea_decrypt_locr(data);
+
+                std::memcpy(&input_data[(uint64_t)i * (uint64_t)8], data, sizeof(uint32_t));
+                std::memcpy(&input_data[(uint64_t)i * (uint64_t)8 + (uint64_t)4], data + 1, sizeof(uint32_t));
+            }
+
+            std::ofstream output_file = std::ofstream("R:\\rtlvtest.output", std::ifstream::binary);
+
+            if (!output_file.good())
+            {
+                std::cout << main_data.console_prefix << "Error: Output (packagedefinitions.txt / thumbs.dat)-decrypted file " << "R:\\rtlvtest.output" << " could not be created." << std::endl;
+                std::exit(0);
+            }
+
+            output_file.write(input_data.data(), input_data.size());
+
+            std::exit(0);*/
+
+            if (main_data.mode_command_json)
+            {
+                execute_command_json(&main_data);
+            }
+            else
+            {
+                if (main_data.mode_generate_rpkg_file)
+                {
+                    std::cout << main_data.console_prefix << "Operation Mode: Generate RPKG file from folder" << std::endl;
+
+                    generate_rpkg_file(&main_data);
+                }
+                else if (main_data.mode_extract_from_rpkg || main_data.mode_text_search || main_data.mode_hex_search || main_data.mode_regex_search)
+                {
+                    if (main_data.mode_extract_from_rpkg)
+                    {
+                        std::cout << main_data.console_prefix << "Operation Mode: Extract from RPKG file to folder" << std::endl;
+                    }
+                    else if (main_data.mode_text_search)
+                    {
+                        std::cout << main_data.console_prefix << "Operation Mode: Search RPKG file for text" << std::endl;
+                    }
+                    else if (main_data.mode_hex_search)
+                    {
+                        std::cout << main_data.console_prefix << "Operation Mode: Search RPKG file for hex" << std::endl;
+                    }
+                    else if (main_data.mode_regex_search)
+                    {
+                        std::cout << main_data.console_prefix << "Operation Mode: Search RPKG file by regex" << std::endl;
+                    }
+
+                    extract_from_rpkg(&main_data);
+                }
+                else if (main_data.mode_extract_all_ores)
+                {
+                    std::cout << main_data.console_prefix << "Operation Mode: Extract all ORES data from RPKGs in folder" << std::endl;
+
+                    extract_all_ores(&main_data);
+                }
+                else if (main_data.mode_extract_all_wwev_to_ogg)
+                {
+                    std::cout << main_data.console_prefix << "Operation Mode: Extract all WWEV data (to .ogg) from RPKGs in folder" << std::endl;
+
+                    extract_all_wwev(&main_data);
+                }
+                else if (main_data.mode_rebuild_all_wwev)
+                {
+                    std::cout << main_data.console_prefix << "Operation Mode: Rebuild all WWEV in folder" << std::endl;
+
+                    rebuild_all_wwev(&main_data);
+                }
+                else if (main_data.mode_extract_all_wwes_to_ogg)
+                {
+                    std::cout << main_data.console_prefix << "Operation Mode: Extract all WWES data (to .ogg) from RPKGs in folder" << std::endl;
+
+                    extract_all_wwes(&main_data);
+                }
+                else if (main_data.mode_locr_to_json)
+                {
+                    std::cout << main_data.console_prefix << "Operation Mode: Extract all LOCR data (to JSON) from RPKGs in folder" << std::endl;
+
+                    extract_all_locr(&main_data);
+                }
+                else if (main_data.mode_json_to_locr)
+                {
+                    std::cout << main_data.console_prefix << "Operation Mode: Rebuild all LOCR data from JSONs in folder" << std::endl;
+
+                    rebuild_all_locr(&main_data);
+                }
+                else if (main_data.mode_hash_depends)
+                {
+                    std::cout << main_data.console_prefix << "Operation Mode: Find hash (file/resource)'s depends" << std::endl;
+
+                    find_hash_depends(&main_data);
+                }
+                else if (main_data.mode_hash_probe)
+                {
+                    std::cout << main_data.console_prefix << "Operation Mode: Probe for hash file(s)/resource(s) in RPKG files" << std::endl;
+
+                    hash_probe(&main_data);
+                }
+                else if (main_data.mode_compute_ioi_hash)
+                {
+                    std::cout << main_data.console_prefix << "Operation Mode: Compute the IOI hash/runtimeid" << std::endl;
+
+                    compute_ioi_hash(&main_data);
+                }
+                else if (main_data.mode_decrypt_packagedefinition_thumbs)
+                {
+                    std::cout << main_data.console_prefix << "Operation Mode: Decrypt packagedefinitions.txt / thumbs.dat" << std::endl;
+
+                    decrypt_packagedefinition_thumbs(&main_data);
+                }
+                else if (main_data.mode_encrypt_packagedefinition_thumbs)
+                {
+                    std::cout << main_data.console_prefix << "Operation Mode: Encrypt packagedefinitions.txt / thumbs.dat" << std::endl;
+
+                    encrypt_packagedefinition_thumbs(&main_data);
+                }
+                else
+                {
+                    display_usage_info(&main_data);
+                }
+            }
+        }
     }
     else
     {
-        std::cout << "rpkg v1.11 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files." << std::endl;
-        std::cout << "--------------------------------------------------------------------------------" << std::endl;
-        std::cout << "Note: All the information used to build this program was gleaned" << std::endl;
-        std::cout << "      in a completely 'clean room' environment." << std::endl;
-        std::cout << "--------------------------------------------------------------------------------" << std::endl;
-        std::cout << "Usage:" << std::endl;
-        std::cout << "  Options:" << std::endl;
-        std::cout << "    -compute_ioi_hash <string>" << std::endl;
-        std::cout << "        Computes the IOI style truncated md5 hash/runtimeid from a string." << std::endl;
-        std::cout << "    -decrypt_packagedefinition_thumbs <path to file>" << std::endl;
-        std::cout << "        Decrypts packagedefinitions.txt / thumbs.dat files." << std::endl;
-        std::cout << "    -encrypt_packagedefinition_thumbs <path to file>" << std::endl;
-        std::cout << "        Encrypts packagedefinitions.txt / thumbs.dat files." << std::endl;
-        std::cout << "    -extract_from_rpkg <path to rpkg file>" << std::endl;
-        std::cout << "        Extracts all hash linked files/resources from an RPKG file." << std::endl;
-        std::cout << "    -extract_all_ores_from <path to folder containing RPKG files>" << std::endl;
-        std::cout << "        Extracts all hash linked files/resources located in the ORES files" << std::endl;
-        std::cout << "        by their full IOI path names from all the RPKG files in a given directory." << std::endl;
-        std::cout << "    -extract_all_wwes_to_ogg_from <path to folder containing RPKG files>" << std::endl;
-        std::cout << "        Extracts all hash linked files/resources of type WWES to their" << std::endl;
-        std::cout << "        full IOI internal Wwise file paths / names. It also converts" << std::endl;
-        std::cout << "        the WWES (*.wem) files directly to *.ogg files for easy listening." << std::endl;
-        std::cout << "    -extract_all_wwev_to_ogg_from <path to folder containing RPKG files>" << std::endl;
-        std::cout << "        Extracts all hash linked files/resources of type WWEV to their" << std::endl;
-        std::cout << "        partial IOI internal Wwise file paths / names. It also converts" << std::endl;
-        std::cout << "        the WWEV (*.wem) files directly to *.ogg files for easy listening." << std::endl;
-        std::cout << "    -extract_locr_to_json_from <path to folder containing RPKG files>" << std::endl;
-        std::cout << "        Extracts all hash linked files/resources of type LOCR from" << std::endl;
-        std::cout << "        all the RPKG files in a given directory and then decrypts" << std::endl;
-        std::cout << "        them in memory and outputs / formats them as JSON files." << std::endl;
-        std::cout << "    -filter <hash filter>" << std::endl;
-        std::cout << "        Filters hash linked files/resources in a RPKG file by string filter." << std::endl;
-        std::cout << "        String filter can be a full hash value, partial hash value," << std::endl;
-        std::cout << "        the hash resource type, partial hash resource type, etc." << std::endl;
-        std::cout << "        Can accept multiple filters: -filter <filter1>,<filter2>,..." << std::endl;
-        std::cout << "        Make sure there are no spaces before or after the comma(s)." << std::endl;
-        std::cout << "    -generate_rpkg_from <path to folder to generate rpkg from>" << std::endl;
-        std::cout << "        Generates a RPKG file from hash file(s) in a given folder and all subfolders." << std::endl;
-        std::cout << "        The folder name is used for the filename of the generated RPKG file." << std::endl;
-        std::cout << "    -hash_depends <path to folder containing RPKG files>" << std::endl;
-        std::cout << "        Lists the forward and reverse depends of a given hash file/resource." << std::endl;
-        std::cout << "        Scans a directory, commonly Hitman's Runtime dir, and imports and" << std::endl;
-        std::cout << "        scans all available RPKG files for dependency information and lists the results." << std::endl;
-        std::cout << "    -hash_probe <path to folder containing RPKG files>" << std::endl;
-        std::cout << "        Probes RPKG files for hash files/resources and displays key data points." << std::endl;
-        std::cout << "        Scans a directory, commonly Hitman's Runtime dir, and imports and" << std::endl;
-        std::cout << "        scans all available RPKG files for the existence of the hash file/resource." << std::endl;
-        std::cout << "    -hex_search <hex string>" << std::endl;
-        std::cout << "        Specifices the hex string to find within hash files/resources." << std::endl;
-        std::cout << "    -output_path <path to output folder>" << std::endl;
-        std::cout << "        Specifies output folder path to use instead of the current directory." << std::endl;
-        std::cout << "    -rebuild_locr_from_json_from <path to folder containing JSON (LOCR) files>" << std::endl;
-        std::cout << "        Rebuilds LOCR files/resources from JSON (LOCR) files that were previously" << std::endl;
-        std::cout << "        extracted with (-extract_locr_to_json_from)." << std::endl;
-        std::cout << "    -rebuild_all_wwev_in <path to folders containing wem files>" << std::endl;
-        std::cout << "        Rebuilds sets of individual Wwise .wem files that were previously" << std::endl;
-        std::cout << "        extracted with (-extract_all_wwev_from). The folder specified by the" << std::endl;
-        std::cout << "        argument can contain any number of sub folders, where each subfolder's" << std::endl;
-        std::cout << "        name is linked to an individual WWEV that will be built from the *.wem" << std::endl;
-        std::cout << "        files in that folder." << std::endl;
-        std::cout << "    -regex_search <regex>" << std::endl;
-        std::cout << "        Specifies the regex which is used to find within hash files/resources." << std::endl;
-        std::cout << "    -search_rpkg <path to rpkg file>" << std::endl;
-        std::cout << "        Specifies RPKG file whose hash files/resources will to be searched through." << std::endl;
-        std::cout << "    -text_search <text string>" << std::endl;
-        std::cout << "        Specifices the text string to find within hash files/resources." << std::endl;
-        std::cout << "  Examples:" << std::endl;
-        std::cout << "    Computes the IOI style truncated md5 hash/runtimeid from a string:" << std::endl;
-        std::cout << "        rpkg.exe -compute_ioi_hash \"[assembly:/_PRO/Scenes/Missions/CoastalTown/Mission01.entity].pc_entitytemplate\"" << std::endl;
-        std::cout << "    Decrypts packagedefinitions.txt / thumbs.dat files:" << std::endl;
-        std::cout << "        rpkg.exe -decrypt_packagedefinition_thumbs packagedefinition.txt" << std::endl;
-        std::cout << "    Decrypts packagedefinitions.txt / thumbs.dat files:" << std::endl;
-        std::cout << "        rpkg.exe -encrypt_packagedefinition_thumbs packagedefinition.txt.decrypted" << std::endl;
-        std::cout << "    Extracts all hash linked files/resources from an RPKG file:" << std::endl;
-        std::cout << "        rpkg.exe -extract_from_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
-        std::cout << "    Extracts all hash linked files/resources from an RPKG file to an output folder:" << std::endl;
-        std::cout << "        rpkg.exe -output_path \"R:\\my\\output\\path\" -extract_from_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
-        std::cout << "    Extracts one hash linked files/resources from an RPKG file by hash filter:" << std::endl;
-        std::cout << "        rpkg.exe -filter 00123456789ABCDE -extract_from_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
-        std::cout << "    Extracts multiple hash linked files/resources from an RPKG file by hash filter:" << std::endl;
-        std::cout << "        rpkg.exe -filter 00123456789ABCDE,00123456789ABCDE -extract_from_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
-        std::cout << "    Extracts all hash linked files/resources from an RPKG file by hash resource type filter:" << std::endl;
-        std::cout << "        rpkg.exe -filter ORES -extract_from_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
-        std::cout << "    Extracts all hash linked files/resources from an RPKG file by hash resource types ORES, REPO, and JSON:" << std::endl;
-        std::cout << "        rpkg.exe -filter ORES,REPO,JSON -extract_from_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
-        std::cout << "    Generates a RPKG file from hash file(s) in a given folder and all subfolders:" << std::endl;
-        std::cout << "        rpkg.exe -generate_rpkg_from chunk0patch1" << std::endl;
-        std::cout << "    Extracts all hash linked files/resources located in the ORES files from all the RPKG files in a given directory:" << std::endl;
-        std::cout << "        rpkg.exe -extract_all_ores_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
-        std::cout << "    Extracts all hash linked files/resources located in the ORES files from all the RPKG files in a given directory to an output folder:" << std::endl;
-        std::cout << "        rpkg.exe -output_path \"R:\\my\\output\\path\" -extract_all_ores_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
-        std::cout << "    Extracts and decrypts (to JSON) all hash linked files/resources of type LOCR from all the RPKG files in a given directory:" << std::endl;
-        std::cout << "        rpkg.exe -extract_locr_to_json_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
-        std::cout << "    Extracts and decrypts (to JSON) all hash linked files/resources of type LOCR from all the RPKG files in a given directory to an output folder:" << std::endl;
-        std::cout << "        rpkg.exe -output_path \"R:\\my\\output\\path\" -extract_locr_to_json_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
-        std::cout << "    Rebuilds sets LOCR files from JSON files that were previously created with (-extract_locr_to_json_from):" << std::endl;
-        std::cout << "        rpkg.exe -rebuild_locr_from_json_from \"R:\\WWEV\"" << std::endl;
-        std::cout << "    Rebuilds sets LOCR files from JSON files that were previously created with (-extract_locr_to_json_from) to an output folder:" << std::endl;
-        std::cout << "        rpkg.exe -output_path \"R:\\my\\output\\path\" -rebuild_locr_from_json_from \"R:\\WWEV\"" << std::endl;
-        std::cout << "    Extracts all hash linked files/resources of type WWES from all the RPKG files in a given directory:" << std::endl;
-        std::cout << "        rpkg.exe -extract_all_wwes_to_ogg_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
-        std::cout << "    Extracts all hash linked files/resources of type WWES from all the RPKG files in a given directory to an output folder:" << std::endl;
-        std::cout << "        rpkg.exe -output_path \"R:\\my\\output\\path\" -extract_all_wwes_to_ogg_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
-        std::cout << "    Extracts all hash linked files/resources of type WWEV from all the RPKG files in a given directory:" << std::endl;
-        std::cout << "        rpkg.exe -extract_all_wwev_to_ogg_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
-        std::cout << "    Extracts all hash linked files/resources of type WWEV from all the RPKG files in a given directory to an output folder:" << std::endl;
-        std::cout << "        rpkg.exe -output_path \"R:\\my\\output\\path\" -extract_all_wwev_to_ogg_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
-        std::cout << "    Rebuilds sets of individual Wwise .wem files that were previously extracted with (-extract_all_wwev_from):" << std::endl;
-        std::cout << "        rpkg.exe -rebuild_all_wwev_in \"R:\\WWEV\"" << std::endl;
-        std::cout << "    Rebuilds sets of individual Wwise .wem files that were previously extracted with (-extract_all_wwev_from) to an output folder:" << std::endl;
-        std::cout << "        rpkg.exe -output_path \"R:\\my\\output\\path\" -rebuild_all_wwev_in \"R:\\WWEV\"" << std::endl;
-        std::cout << "    Lists the forward and reverse depends of a given hash file/resource:" << std::endl;
-        std::cout << "        rpkg.exe -filter 00123456789ABCDE -hash_depends \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
-        std::cout << "    Lists the forward and reverse depends of two hash files/resources:" << std::endl;
-        std::cout << "        rpkg.exe -filter 00123456789ABCDE,00123456789ABCDE -hash_depends \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
-        std::cout << "    Probes RPKG files for hash files/resources and displays key data points:" << std::endl;
-        std::cout << "        rpkg.exe -filter 00123456789ABCDE -hash_probe \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
-        std::cout << "    Probes RPKG files for hash files/resources and displays key data points:" << std::endl;
-        std::cout << "        rpkg.exe -filter 00123456789ABCDE,00123456789ABCDE -hash_probe \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"" << std::endl;
-        std::cout << "    Search a RPKG file's hash files/resources by hex string:" << std::endl;
-        std::cout << "        rpkg.exe -hex_search 00112233445566 -search_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
-        std::cout << "    Search a RPKG file's hash files/resources by regex:" << std::endl;
-        std::cout << "        rpkg.exe -regex_search \"assembly:[\\w/_]+\" -search_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
-        std::cout << "    Search a RPKG file's hash files/resources by text string:" << std::endl;
-        std::cout << "        rpkg.exe -text_search assembly -search_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
-        std::cout << "    Search a RPKG file's hash files/resources by regex and filter by type ORES:" << std::endl;
-        std::cout << "        rpkg.exe -filter ORES -regex_search \"assembly:[\\w/_.]+\" -search_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"" << std::endl;
+        display_usage_info(&main_data);
+
+        std::system("pause");
     }
 }
