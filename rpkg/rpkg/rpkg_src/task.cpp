@@ -255,6 +255,14 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     {
         dev_function::dev_extract_all_entity_ids(input_path, filter, output_path);
     }
+    else if (command == "-dev_resource_tool")
+    {
+        dev_function::dev_resource_tool(input_path, filter, output_path);
+    }
+    else if (command == "-dev_extract_temp_strings")
+    {
+        dev_function::dev_extract_temp_strings(input_path, filter, output_path);
+    }
 }
 
 void task::process_and_execute_files_draged_and_dropped(std::vector<std::string>& dragged_and_dropped_files)
@@ -295,12 +303,14 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                      "-dev_extract_all_strings",
                                                      "-dev_extract_all_entity_ids",
                                                      "-dev_extract_temp_pointers",
+                                                     "-dev_extract_temp_strings",
                                                      "-dev_extract_ores_strings",
                                                      "-dev_extract_materials_textures_strings",
                                                      "-dev_extract_wwem_strings",
                                                      "-dev_extract_wwes_strings",
                                                      "-dev_extract_wwev_strings",
                                                      "-dev_extract_wwise_ids",
+                                                     "-dev_resource_tool",
                                                      "-encrypt_packagedefinition_thumbs",
                                                      "-extract_from_rpkg",
                                                      "-extract_gfxf_from",

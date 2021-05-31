@@ -152,3 +152,9 @@ RPKG_EXPORT int unload_rpkg(char* rpkg_file);
 RPKG_EXPORT int modify_patch_deletion_list(char* rpkg_file, char* patch_list, uint32_t patch_count, uint32_t backup_rpkg);
 
 RPKG_EXPORT int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, char* hash_flag_list, uint32_t hash_count, uint32_t backup_rpkg);
+
+RPKG_EXPORT int load_resource_tool_dll();
+
+RPKG_EXPORT int resource_tool_convert_resource(char* c_OperatingMode, char* c_ResourceType, char* c_InputPath, char* c_OutputPath);
+
+RPKG_EXPORT char* resource_tool_get_resource_json();

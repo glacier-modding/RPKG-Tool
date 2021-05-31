@@ -2153,7 +2153,7 @@ namespace rpkg
 
                 int rpkgItemIndex = 0;
 
-                MainTreeView.BeginUpdate();
+                SearchRPKGsTreeView.BeginUpdate();
 
                 foreach (System.Windows.Forms.TreeNode mainTreeNode in MainTreeView.Nodes)
                 {
@@ -2206,30 +2206,34 @@ namespace rpkg
 
                             if (searchResults.Length > 0)
                             {
-                                foreach (string searchResult in searchResults)
+                                if (searchResults[0] != "")
                                 {
-                                    if (searchResult != "")
+                                    int nodeCount = 0;
+
+                                    System.Windows.Forms.TreeNode[] nodes = new System.Windows.Forms.TreeNode[searchResults.Length];
+
+                                    System.Windows.Forms.TreeNode item2;
+
+                                    if (!resourceTypeItemAdded)
+                                    {
+                                        item2 = new System.Windows.Forms.TreeNode();
+
+                                        item2.Text = resourceType;
+
+                                        item2.Expand();
+                                    }
+                                    else
+                                    {
+                                        item2 = (item.Nodes[resourceTypeItemIndex] as System.Windows.Forms.TreeNode);
+                                    }
+
+                                    foreach (string searchResult in searchResults)
                                     {
                                         found = true;
 
                                         rpkgResultsCount++;
 
                                         //MessageBoxShow(searchResult);
-
-                                        System.Windows.Forms.TreeNode item2;
-
-                                        if (!resourceTypeItemAdded)
-                                        {
-                                            item2 = new System.Windows.Forms.TreeNode();
-                                        }
-                                        else
-                                        {
-                                            item2 = (item.Nodes[resourceTypeItemIndex] as System.Windows.Forms.TreeNode);
-                                        }
-
-                                        item2.Text = resourceType;
-
-                                        item2.Expand();
 
                                         //var item3 = new System.Windows.Forms.TreeNode();
 
@@ -2239,26 +2243,34 @@ namespace rpkg
 
                                         //item3.Header = searchResult + " (" + rpkgFile + ") " + ioiString;
 
-                                        item2.Nodes.Add(searchResult + " (" + rpkgFile + ") " + ioiString);
+                                        //item2.Nodes.Add(searchResult + " (" + rpkgFile + ") " + ioiString);
+
+                                        nodes[nodeCount] = new System.Windows.Forms.TreeNode();
+
+                                        nodes[nodeCount].Text = searchResult + " (" + rpkgFile + ") " + ioiString;
 
                                         //item3.Expanded += Item_Expanded;
 
                                         //item2.Items.Add(item3);
 
-                                        if (!resourceTypeItemAdded)
-                                        {
-                                            item.Nodes.Add(item2);
-
-                                            resourceTypeItemAdded = true;
-                                        }
+                                        nodeCount++;
                                     }
-                                }
 
-                                if (!rpkgItemAdded && found)
-                                {
-                                    SearchRPKGsTreeView.Nodes.Add(item);
+                                    item2.Nodes.AddRange(nodes);
 
-                                    rpkgItemAdded = true;
+                                    if (!resourceTypeItemAdded)
+                                    {
+                                        item.Nodes.Add(item2);
+
+                                        resourceTypeItemAdded = true;
+                                    }
+
+                                    if (!rpkgItemAdded && found)
+                                    {
+                                        SearchRPKGsTreeView.Nodes.Add(item);
+
+                                        rpkgItemAdded = true;
+                                    }
                                 }
                             }
 
@@ -2275,7 +2287,7 @@ namespace rpkg
                     }
                 }
 
-                MainTreeView.EndUpdate();
+                SearchRPKGsTreeView.EndUpdate();
             }
         }
 
@@ -2308,6 +2320,8 @@ namespace rpkg
 
             SearchHashListTreeView.Nodes.Clear();
 
+            SearchHashListTreeView.BeginUpdate();
+
             if (SearchHashListTextBox.Text.Length > 0)
             {
                 int maxSearchResults = 0;
@@ -2327,19 +2341,33 @@ namespace rpkg
 
                 if (searchResults.Length > 0)
                 {
-                    foreach (string searchResult in searchResults)
+                    if (searchResults[0] != "")
                     {
-                        if (searchResult != "")
+                        int nodeCount = 0;
+
+                        System.Windows.Forms.TreeNode[] nodes = new System.Windows.Forms.TreeNode[searchResults.Length];
+
+                        foreach (string searchResult in searchResults)
                         {
                             string[] temp_test = searchResult.Split('.');
 
                             string ioiString = Marshal.PtrToStringAnsi(get_hash_list_string(temp_test[0]));
 
-                            SearchHashListTreeView.Nodes.Add(searchResult + " (hashlist) " + ioiString);
+                            //SearchHashListTreeView.Nodes.Add(searchResult + " (hashlist) " + ioiString);
+
+                            nodes[nodeCount] = new System.Windows.Forms.TreeNode();
+
+                            nodes[nodeCount].Text = searchResult + " (hashlist) " + ioiString;
+
+                            nodeCount++;
                         }
+
+                        SearchHashListTreeView.Nodes.AddRange(nodes);
                     }
                 }
             }
+
+            SearchHashListTreeView.EndUpdate();
         }
 
         private void LeftTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -3653,12 +3681,6 @@ namespace rpkg
         [DllImport("rpkg.dll", EntryPoint = "modify_hash_depends", CallingConvention = CallingConvention.Cdecl)]
         public static extern int modify_hash_depends(string rpkg_file, string hash_string, string hash_list, string hash_flag_list, UInt32 hash_count, UInt32 backup_rpkg);
 
-        [DllImport("resourcetool.dll", EntryPoint = "ConvertResource", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ConvertResource(string c_OperatingMode, string c_ResourceType, string c_InputPath, string c_OutputPath);
-
-        [DllImport("resourcetool.dll", EntryPoint = "GetTEMPEntities", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr GetTEMPEntities();
-
 
         [SuppressUnmanagedCodeSecurity]
         internal static class SafeNativeMethods
@@ -4059,22 +4081,6 @@ namespace rpkg
             //GC.Collect();
             GC.WaitForPendingFinalizers();
             //GC.Collect();
-        }
-
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            string input_path = "R:\\chunk26\\TEMP\\00E9F09C3B030590.TEMP";
-            string output_path = "R:\\chunk26\\TEMP\\00E9F09C3B030590.OUTPUT.TEMP";
-
-            ConvertResource("convert", "TEMP", input_path, output_path);
-
-            ConvertResource("generate", "TEMP", input_path, output_path);
-
-            string responseJSON = Marshal.PtrToStringAnsi(GetTEMPEntities());
-
-            MessageBoxShow(responseJSON.Length.ToString());
-
-            MessageBoxShow(responseJSON.Substring(0, 1000));
         }
 
         private void DetailsTextBox_TextChanged(object sender, TextChangedEventArgs e)

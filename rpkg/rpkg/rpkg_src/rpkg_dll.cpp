@@ -21,6 +21,7 @@
 #include <string_view>
 #include <set>
 #include <filesystem>
+#include <Windows.h>
 
 using json = nlohmann::ordered_json;
 
@@ -2397,4 +2398,25 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
     }
 
     return 0;
+}
+
+int load_resource_tool_dll()
+{
+    resource_tool_dll = LoadLibrary(L"ResourceTool.dll");
+
+    resource_tool_ConvertResource = (ConvertResource)GetProcAddress((HMODULE)resource_tool_dll, "ConvertResource");
+    
+    resource_tool_GetTEMPEntities = (GetTEMPEntities)GetProcAddress((HMODULE)resource_tool_dll, "GetTEMPEntities");
+
+    return 0;
+}
+
+int resource_tool_convert_resource(char* c_OperatingMode, char* c_ResourceType, char* c_InputPath, char* c_OutputPath)
+{
+    return resource_tool_ConvertResource(c_OperatingMode, c_ResourceType, c_InputPath, c_OutputPath);
+}
+
+char* resource_tool_get_resource_json()
+{
+    return resource_tool_GetTEMPEntities();
 }

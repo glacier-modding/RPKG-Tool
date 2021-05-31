@@ -37,6 +37,9 @@
     <Filter Include="Source Files\mikktspace">
       <UniqueIdentifier>{e0fb69e9-6319-44c4-adb3-0c8d2146880f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\yyjson">
+      <UniqueIdentifier>{d26951a6-8c15-4bb6-93d2-c819381c41e9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\rpkg_src\thirdparty\ogg\src\bitwise.c">
@@ -513,6 +516,15 @@
     <ClCompile Include="..\rpkg_src\extract_direct_hash_depends_from.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\rpkg_src\dev_resource_tool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\yyjson\yyjson.c">
+      <Filter>Source Files\yyjson</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\dev_extract_temp_strings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\rpkg_src\command_line.h">
@@ -642,6 +654,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\rpkg_src\thirdparty\mikktspace\mikktspace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\thirdparty\yyjson\yyjson.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

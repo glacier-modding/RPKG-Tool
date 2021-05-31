@@ -9,6 +9,9 @@
 class dev_function
 {
 public:
+
+	static void dev_extract_temp_strings(std::string& input_path, std::string& filter, std::string& output_path);
+	static void dev_resource_tool(std::string& input_path, std::string& filter, std::string& output_path);
 	static void dev_extract_temp_pointers(std::string& input_path, std::string& filter, std::string& output_path);
 	static void dev_extract_ores_strings(std::string& input_path, std::string& filter, std::string& output_path);
 	static void dev_diff_rpkg_supermetas(std::string& input_path, std::string& filter, std::string& output_path);

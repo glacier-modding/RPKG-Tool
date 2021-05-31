@@ -30,5 +30,10 @@ namespace rpkg
         {
 
         }
+
+        private void LicensesTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
     }
 }

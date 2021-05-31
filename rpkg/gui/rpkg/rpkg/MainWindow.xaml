@@ -10,7 +10,7 @@
         xmlns:local="clr-namespace:rpkg"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
-        Title="RPKG v2.11.1" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
+        Title="RPKG v2.11.2" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -112,6 +112,12 @@
                                 <ComboBoxItem Content="200"/>
                                 <ComboBoxItem Content="500"/>
                                 <ComboBoxItem Content="1000"/>
+                                <ComboBoxItem Content="2000"/>
+                                <ComboBoxItem Content="5000"/>
+                                <ComboBoxItem Content="10000"/>
+                                <ComboBoxItem Content="20000"/>
+                                <ComboBoxItem Content="50000"/>
+                                <ComboBoxItem Content="100000"/>
                             </ComboBox>
                             <!--TreeView Grid.Row="1" Grid.ColumnSpan="4" x:Name="SearchRPKGsTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/-->
                             <WindowsFormsHost Grid.Row="1" Grid.ColumnSpan="4" x:Name="SearchRPKGsTreeViewWindowsFormsHost">
@@ -139,6 +145,12 @@
                                 <ComboBoxItem Content="200"/>
                                 <ComboBoxItem Content="500"/>
                                 <ComboBoxItem Content="1000"/>
+                                <ComboBoxItem Content="2000"/>
+                                <ComboBoxItem Content="5000"/>
+                                <ComboBoxItem Content="10000"/>
+                                <ComboBoxItem Content="20000"/>
+                                <ComboBoxItem Content="50000"/>
+                                <ComboBoxItem Content="100000"/>
                             </ComboBox>
                             <!--TreeView Grid.Row="1" Grid.ColumnSpan="4" x:Name="SearchHashListTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/-->
                             <WindowsFormsHost Grid.Row="1" Grid.ColumnSpan="4" x:Name="SearchHashListTreeViewWindowsFormsHost">

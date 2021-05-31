@@ -36,10 +36,12 @@
     <ClCompile Include="..\rpkg_src\dev_extract_rpkg_supermetas.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_temp_from.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_temp_pointers.cpp" />
+    <ClCompile Include="..\rpkg_src\dev_extract_temp_strings.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_wwem_strings.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_wwes_strings.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_wwev_strings.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_wwise_ids.cpp" />
+    <ClCompile Include="..\rpkg_src\dev_resource_tool.cpp" />
     <ClCompile Include="..\rpkg_src\encrypt_packagedefinition_thumbs.cpp" />
     <ClCompile Include="..\rpkg_src\extract_all_hash_depends_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_all_prim_from.cpp" />
@@ -176,6 +178,7 @@
     <ClCompile Include="..\rpkg_src\thirdparty\ww2ogg\crc.c" />
     <ClCompile Include="..\rpkg_src\thirdparty\ww2ogg\ww2oggcodebook.cpp" />
     <ClCompile Include="..\rpkg_src\thirdparty\ww2ogg\wwriff.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\yyjson\yyjson.c" />
     <ClCompile Include="..\rpkg_src\util.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -229,6 +232,7 @@
     <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\packed_codebooks_aoTuV_603.h" />
     <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\ww2oggcodebook.h" />
     <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\wwriff.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\yyjson\yyjson.h" />
     <ClInclude Include="..\rpkg_src\util.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

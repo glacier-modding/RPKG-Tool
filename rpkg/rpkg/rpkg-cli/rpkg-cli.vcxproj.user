@@ -1,7 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>-filter 00097AA87B144150 -dev_extract_all_entity_ids "C:\Program Files\Epic Games\HITMAN3\Runtime\"</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-filter 00E9F09C3B030590.TEMP -dev_resource_tool "C:\Program Files\Epic Games\HITMAN3\Runtime\chunk26.rpkg"</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LocalDebuggerCommandArguments>-dev_resource_tool "R:\\chunk26\\TEMP\\00E9F09C3B030590.TEMP"</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>
