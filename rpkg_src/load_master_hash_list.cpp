@@ -107,7 +107,7 @@ void generic_function::load_hash_list(bool exit_if_no_hash_list)
 
             position++;
 
-            if (position > hash_list_file_size)
+            if (position >= hash_list_file_size)
             {
                 done = true;
             }
