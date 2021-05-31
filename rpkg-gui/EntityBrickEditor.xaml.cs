@@ -131,7 +131,7 @@ namespace rpkg
             controlsChanged = null;
             controlsChanged = new List<bool>();
             controlsTEMPIndexes = null;
-            controlsTEMPIndexes = new List<UInt32>();
+            controlsTEMPIndexes = new List<uint>();
             controlJSONPointers = null;
             controlJSONPointers = new List<string>();
             controlJSONPointersTypes = null;
@@ -142,7 +142,7 @@ namespace rpkg
             controlCount = 0;
 
             tempFilesChanged = null;
-            tempFilesChanged = new List<UInt32>();
+            tempFilesChanged = new List<uint>();
 
             MainTreeView.BeginUpdate();
 
@@ -161,9 +161,9 @@ namespace rpkg
 
                 foreach (string topLevelParent in topLevelParents)
                 {
-                    UInt32 logical_parent = 0xFFFFFFFF;
+                    uint logical_parent = 0xFFFFFFFF;
 
-                    UInt32.TryParse(topLevelParent, out logical_parent);
+                    uint.TryParse(topLevelParent, out logical_parent);
 
                     int entry_data_size = RpkgLib.get_entries_with_logical_parent(temps_index, logical_parent);
 
@@ -175,10 +175,10 @@ namespace rpkg
 
                     while (data_pointer < entry_data_size)
                     {
-                        UInt32 entryIndex = BitConverter.ToUInt32(entry_data, data_pointer);
+                        uint entryIndex = BitConverter.ToUInt32(entry_data, data_pointer);
                         data_pointer += 4;
 
-                        UInt32 entryNameLength = BitConverter.ToUInt32(entry_data, data_pointer);
+                        uint entryNameLength = BitConverter.ToUInt32(entry_data, data_pointer);
                         data_pointer += 4;
 
                         string entryName = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryNameLength);
@@ -226,7 +226,7 @@ namespace rpkg
 
                         topItem.Text = brick;
 
-                        responseString = Marshal.PtrToStringAnsi(RpkgLib.get_top_level_logical_parents((UInt32)temp_index_hash_reference));
+                        responseString = Marshal.PtrToStringAnsi(RpkgLib.get_top_level_logical_parents((uint)temp_index_hash_reference));
 
                         //MessageBoxShow(responseString);
 
@@ -234,11 +234,11 @@ namespace rpkg
 
                         foreach (string topLevelParent in topLevelParents)
                         {
-                            UInt32 logical_parent = 0xFFFFFFFF;
+                            uint logical_parent = 0xFFFFFFFF;
 
-                            UInt32.TryParse(topLevelParent, out logical_parent);
+                            uint.TryParse(topLevelParent, out logical_parent);
 
-                            int entry_data_size = RpkgLib.get_entries_with_logical_parent((UInt32)temp_index_hash_reference, logical_parent);
+                            int entry_data_size = RpkgLib.get_entries_with_logical_parent((uint)temp_index_hash_reference, logical_parent);
 
                             byte[] entry_data = new byte[entry_data_size];
 
@@ -248,10 +248,10 @@ namespace rpkg
 
                             while (data_pointer < entry_data_size)
                             {
-                                UInt32 entryIndex = BitConverter.ToUInt32(entry_data, data_pointer);
+                                uint entryIndex = BitConverter.ToUInt32(entry_data, data_pointer);
                                 data_pointer += 4;
 
-                                UInt32 entryNameLength = BitConverter.ToUInt32(entry_data, data_pointer);
+                                uint entryNameLength = BitConverter.ToUInt32(entry_data, data_pointer);
                                 data_pointer += 4;
 
                                 string entryName = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryNameLength);
@@ -310,13 +310,13 @@ namespace rpkg
                 }
             }
 
-            UInt32 temp_entryIndex = 0;
+            uint temp_entryIndex = 0;
 
-            UInt32.TryParse(header[header.Length - 2], out temp_entryIndex);
+            uint.TryParse(header[header.Length - 2], out temp_entryIndex);
 
-            UInt32 temp_temp_index = 0;
+            uint temp_temp_index = 0;
 
-            UInt32.TryParse(header[header.Length - 1], out temp_temp_index);
+            uint.TryParse(header[header.Length - 1], out temp_temp_index);
 
             string hashReferenceData = Marshal.PtrToStringAnsi(RpkgLib.get_entries_hash_references(temp_temp_index, temp_entryIndex));
 
@@ -326,9 +326,9 @@ namespace rpkg
 
             if (temp_index_hash_reference > 0)
             {
-                UInt32 logical_parent = 0xFFFFFFFF;
+                uint logical_parent = 0xFFFFFFFF;
 
-                int hash_entry_data_size = RpkgLib.get_entries_with_logical_parent((UInt32)temp_index_hash_reference, logical_parent);
+                int hash_entry_data_size = RpkgLib.get_entries_with_logical_parent((uint)temp_index_hash_reference, logical_parent);
 
                 if (hash_entry_data_size > 0)
                 {
@@ -340,10 +340,10 @@ namespace rpkg
 
                     while (data_pointer < hash_entry_data_size)
                     {
-                        UInt32 entryIndex = BitConverter.ToUInt32(entry_data, data_pointer);
+                        uint entryIndex = BitConverter.ToUInt32(entry_data, data_pointer);
                         data_pointer += 4;
 
-                        UInt32 entryNameLength = BitConverter.ToUInt32(entry_data, data_pointer);
+                        uint entryNameLength = BitConverter.ToUInt32(entry_data, data_pointer);
                         data_pointer += 4;
 
                         string entryName = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryNameLength);
@@ -374,10 +374,10 @@ namespace rpkg
 
                 while (data_pointer < entry_data_size)
                 {
-                    UInt32 entryIndex = BitConverter.ToUInt32(entry_data, data_pointer);
+                    uint entryIndex = BitConverter.ToUInt32(entry_data, data_pointer);
                     data_pointer += 4;
 
-                    UInt32 entryNameLength = BitConverter.ToUInt32(entry_data, data_pointer);
+                    uint entryNameLength = BitConverter.ToUInt32(entry_data, data_pointer);
                     data_pointer += 4;
 
                     string entryName = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryNameLength);
@@ -566,9 +566,9 @@ namespace rpkg
                                 {
                                     //MessageBoxShow("Textbox: " + controlJSONPointers[i] + ": " + value);
 
-                                    UInt32 controlJSONPointersLength = (UInt32)controlJSONPointers[i].Length;
-                                    UInt32 controlJSONPointersTypesLength = (UInt32)controlJSONPointersTypes[i].Length;
-                                    UInt32 valueLength = (UInt32)value.Length;
+                                    uint controlJSONPointersLength = (uint)controlJSONPointers[i].Length;
+                                    uint controlJSONPointersTypesLength = (uint)controlJSONPointersTypes[i].Length;
+                                    uint valueLength = (uint)value.Length;
 
                                     updateDataWriter.Write(controlJSONPointersLength);
                                     updateDataWriter.Write(Encoding.UTF8.GetBytes(controlJSONPointers[i]));
@@ -592,9 +592,9 @@ namespace rpkg
                                 {
                                     //MessageBoxShow("Textbox: " + controlJSONPointers[i] + ": " + value + ", length: " + value.Length.ToString());
 
-                                    UInt32 controlJSONPointersLength = (UInt32)controlJSONPointers[i].Length;
-                                    UInt32 controlJSONPointersTypesLength = (UInt32)controlJSONPointersTypes[i].Length;
-                                    UInt32 valueLength = (UInt32)value.Length;
+                                    uint controlJSONPointersLength = (uint)controlJSONPointers[i].Length;
+                                    uint controlJSONPointersTypesLength = (uint)controlJSONPointersTypes[i].Length;
+                                    uint valueLength = (uint)value.Length;
 
                                     updateDataWriter.Write(controlJSONPointersLength);
                                     updateDataWriter.Write(Encoding.UTF8.GetBytes(controlJSONPointers[i]));
@@ -622,7 +622,7 @@ namespace rpkg
                     {
                         IntPtr address = updateDataHandle.AddrOfPinnedObject();
 
-                        int return_value = RpkgLib.update_temp_file(temp_index, entity_index, address, (UInt32)updateData.Length);
+                        int return_value = RpkgLib.update_temp_file(temp_index, entity_index, address, (uint)updateData.Length);
                     }
                     finally
                     {
@@ -708,7 +708,7 @@ namespace rpkg
                     controlsChanged = null;
                     controlsChanged = new List<bool>();
                     controlsTEMPIndexes = null;
-                    controlsTEMPIndexes = new List<UInt32>();
+                    controlsTEMPIndexes = new List<uint>();
                     controlJSONPointers = null;
                     controlJSONPointers = new List<string>();
                     controlJSONPointersTypes = null;
@@ -736,7 +736,7 @@ namespace rpkg
                             }
                         }
 
-                        temp_index = (UInt32) RpkgLib.get_temp_index(hashFileName);
+                        temp_index = (uint) RpkgLib.get_temp_index(hashFileName);
 
                         Label label1 = new Label();
                         label1.Content = hashFileName + "'s Data:";
@@ -818,15 +818,15 @@ namespace rpkg
                             }
                         }
 
-                        UInt32 entryIndex = 0;
+                        uint entryIndex = 0;
 
-                        UInt32.TryParse(headerData[headerData.Length - 2], out entryIndex);
+                        uint.TryParse(headerData[headerData.Length - 2], out entryIndex);
 
                         entity_index = entryIndex;
 
                         temp_index = 0;
 
-                        UInt32.TryParse(headerData[headerData.Length - 1], out temp_index);
+                        uint.TryParse(headerData[headerData.Length - 1], out temp_index);
 
                         string entryIndexString = headerData[headerData.Length - 2];
 
@@ -922,7 +922,7 @@ namespace rpkg
 
                     while (data_pointer < entry_data_size)
                     {
-                        UInt32 entryDataLength = BitConverter.ToUInt32(entry_data, data_pointer);
+                        uint entryDataLength = BitConverter.ToUInt32(entry_data, data_pointer);
                         data_pointer += 4;
 
                         string entryData = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryDataLength);
@@ -1088,7 +1088,7 @@ namespace rpkg
             }
         }
 
-        private void AppendInput(UInt32 entryIndex, string valueType)
+        private void AppendInput(uint entryIndex, string valueType)
         {
             int entry_data_size = RpkgLib.get_entries(temp_index, entryIndex, valueType);
 
@@ -1117,7 +1117,7 @@ namespace rpkg
 
                     while (data_pointer < entry_data_size)
                     {
-                        UInt32 entryDataLength = BitConverter.ToUInt32(entry_data, data_pointer);
+                        uint entryDataLength = BitConverter.ToUInt32(entry_data, data_pointer);
                         data_pointer += 4;
 
                         string entryData = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryDataLength);
@@ -1307,7 +1307,7 @@ namespace rpkg
             }
         }
 
-        private void AppendInput_Default(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
+        private void AppendInput_Default(uint temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
             Label label1 = new Label();
 
@@ -1510,7 +1510,7 @@ namespace rpkg
             MainStackPanelTEMP.Children.Add(grid);
         }
 
-        private void AppendInput_bool(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
+        private void AppendInput_bool(uint temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
             Label label1 = new Label();
 
@@ -1616,7 +1616,7 @@ namespace rpkg
             MainStackPanelTEMP.Children.Add(grid);
         }
 
-        private void AppendInput_enum(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes, ref string enumValues)
+        private void AppendInput_enum(uint temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes, ref string enumValues)
         {
             Label label1 = new Label();
 
@@ -1738,7 +1738,7 @@ namespace rpkg
             MainStackPanelTEMP.Children.Add(grid);
         }
 
-        private void AppendInput_SColorRGB(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes, bool rgba_mode)
+        private void AppendInput_SColorRGB(uint temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes, bool rgba_mode)
         {
             Label label1 = new Label();
 
@@ -1894,7 +1894,7 @@ namespace rpkg
             }
         }
 
-        private void AppendInput_SMatrix43(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
+        private void AppendInput_SMatrix43(uint temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
             Label label1 = new Label();
 
@@ -1992,7 +1992,7 @@ namespace rpkg
             MainStackPanelTEMP.Children.Add(grid);
         }
 
-        private void AppendInput_SVector2(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
+        private void AppendInput_SVector2(uint temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
             Label label1 = new Label();
 
@@ -2066,7 +2066,7 @@ namespace rpkg
             MainStackPanelTEMP.Children.Add(grid);
         }
 
-        private void AppendInput_SVector3(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
+        private void AppendInput_SVector3(uint temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
             Label label1 = new Label();
 
@@ -2146,7 +2146,7 @@ namespace rpkg
             MainStackPanelTEMP.Children.Add(grid);
         }
 
-        private void AppendInput_SVector4(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
+        private void AppendInput_SVector4(uint temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
             Label label1 = new Label();
 
@@ -2232,7 +2232,7 @@ namespace rpkg
             MainStackPanelTEMP.Children.Add(grid);
         }
 
-        private void AppendInput_ZGuid(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
+        private void AppendInput_ZGuid(uint temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
             Label label1 = new Label();
 
@@ -2355,9 +2355,9 @@ namespace rpkg
             {
                 string[] controlData = controlName.Split('_');
 
-                UInt32 controlNumber = 0;
+                uint controlNumber = 0;
 
-                UInt32.TryParse(controlData[1], out controlNumber);
+                uint.TryParse(controlData[1], out controlNumber);
 
                 tempFilesChanged.Add(controlsTEMPIndexes[(int)controlNumber]);
 
@@ -2378,9 +2378,9 @@ namespace rpkg
             {
                 string[] controlData = (sender as ComboBox).Name.Split('_');
 
-                UInt32 controlNumber = 0;
+                uint controlNumber = 0;
 
-                UInt32.TryParse(controlData[1], out controlNumber);
+                uint.TryParse(controlData[1], out controlNumber);
 
                 tempFilesChanged.Add(controlsTEMPIndexes[(int)controlNumber]);
 
@@ -2402,7 +2402,7 @@ namespace rpkg
                     {
                         if (zguidData[0].Length == 8 && zguidData[1].Length == 4 && zguidData[2].Length == 4 && zguidData[3].Length == 4 && zguidData[4].Length == 12)
                         {
-                            bool return_value = UInt32.TryParse(zguidData[0], NumberStyles.HexNumber, null, out zguid._a);
+                            bool return_value = uint.TryParse(zguidData[0], NumberStyles.HexNumber, null, out zguid._a);
 
                             if (!return_value)
                             {
@@ -2410,7 +2410,7 @@ namespace rpkg
                                 return false;
                             }
 
-                            return_value = UInt16.TryParse(zguidData[1], NumberStyles.HexNumber, null, out zguid._b);
+                            return_value = ushort.TryParse(zguidData[1], NumberStyles.HexNumber, null, out zguid._b);
 
                             if (!return_value)
                             {
@@ -2418,7 +2418,7 @@ namespace rpkg
                                 return false;
                             }
 
-                            return_value = UInt16.TryParse(zguidData[2], NumberStyles.HexNumber, null, out zguid._c);
+                            return_value = ushort.TryParse(zguidData[2], NumberStyles.HexNumber, null, out zguid._c);
 
                             if (!return_value)
                             {
@@ -2510,13 +2510,13 @@ namespace rpkg
 
             ZGuid zguid = new ZGuid();
 
-            bool return_value = UInt32.TryParse(zguidData[0], out zguid._a);
+            bool return_value = uint.TryParse(zguidData[0], out zguid._a);
             zguidString += zguid._a.ToString("X2").PadLeft(8, '0') + "-";
 
-            return_value = UInt16.TryParse(zguidData[1], out zguid._b);
+            return_value = ushort.TryParse(zguidData[1], out zguid._b);
             zguidString += zguid._b.ToString("X2").PadLeft(4, '0') + "-";
 
-            return_value = UInt16.TryParse(zguidData[2], out zguid._c);
+            return_value = ushort.TryParse(zguidData[2], out zguid._c);
             zguidString += zguid._c.ToString("X2").PadLeft(4, '0') + "-";
 
             return_value = byte.TryParse(zguidData[3], out zguid._d);
@@ -2575,7 +2575,7 @@ namespace rpkg
             return temp_float.ToString();
         }
 
-        public string GetNewControlName(UInt32 temp_index, string input, string type)
+        public string GetNewControlName(uint temp_index, string input, string type)
         {
             controlsTEMPIndexes.Add(temp_index);
 
@@ -2652,13 +2652,13 @@ namespace rpkg
                     }
                 }
 
-                UInt32 entryIndex = 0;
+                uint entryIndex = 0;
 
-                UInt32.TryParse(header[header.Length - 2], out entryIndex);
+                uint.TryParse(header[header.Length - 2], out entryIndex);
 
                 temp_index = 0;
 
-                UInt32.TryParse(header[header.Length - 1], out temp_index);
+                uint.TryParse(header[header.Length - 1], out temp_index);
 
                 string responseString = "";//Marshal.PtrToStringAnsi(get_entries_with_logical_parent(temp_index, entryIndex));
 
@@ -2670,7 +2670,7 @@ namespace rpkg
 
                 if (temp_index_hash_reference > 0)
                 {
-                    UInt32 logical_parent = 0xFFFFFFFF;
+                    uint logical_parent = 0xFFFFFFFF;
 
                     string responseStringHashReference = "";//Marshal.PtrToStringAnsi(get_entries_with_logical_parent((UInt32)temp_index_hash_reference, logical_parent));
 
@@ -2682,9 +2682,9 @@ namespace rpkg
                         {
                             string[] entryDataHashReference = entryHashReference.Split('|');
                             string entityNameHashReference = entryDataHashReference[1];
-                            UInt32 entryIndexHashReference = 0;
+                            uint entryIndexHashReference = 0;
 
-                            UInt32.TryParse(entryDataHashReference[0], out entryIndexHashReference);
+                            uint.TryParse(entryDataHashReference[0], out entryIndexHashReference);
 
                             var itemHashReference = new TreeViewItem();
 
@@ -2711,9 +2711,9 @@ namespace rpkg
                     {
                         string[] tempEntryData = entry.Split('|');
                         string tempEntityName = tempEntryData[1];
-                        UInt32 tempEntryIndex = 0;
+                        uint tempEntryIndex = 0;
 
-                        UInt32.TryParse(tempEntryData[0], out tempEntryIndex);
+                        uint.TryParse(tempEntryData[0], out tempEntryIndex);
 
                         var item2 = new TreeViewItem();
 
@@ -3072,9 +3072,9 @@ namespace rpkg
             public string controlName;
             public string[] subControlNames;
             public string zguidString;
-            public UInt32 _a;
-            public UInt16 _b;
-            public UInt16 _c;
+            public uint _a;
+            public ushort _b;
+            public ushort _c;
             public byte _d;
             public byte _e;
             public byte _f;
@@ -3091,17 +3091,17 @@ namespace rpkg
         public List<string> gltfParentList;
         public List<string> gltfNodeEntryList;
         public List<int> gltfGodotIndexList;
-        public List<UInt32> tempFilesChanged;
+        public List<uint> tempFilesChanged;
         public List<string> controls;
         public List<bool> controlsChanged;
-        public List<UInt32> controlsTEMPIndexes;
+        public List<uint> controlsTEMPIndexes;
         public List<string> controlJSONPointers;
         public List<string> controlJSONPointersTypes;
         public List<ZGuid> controlZGuids;
         public int controlCount;
-        public UInt32 entity_index;
-        public UInt32 temp_index;
-        public UInt32 temps_index;
+        public uint entity_index;
+        public uint temp_index;
+        public uint temps_index;
         public int temp_file_version = 0;
         public string tempFileName = "";
         public string tbluFileName = "";

@@ -54,7 +54,7 @@ namespace rpkg
                     {
                         new DiscordRPC.Button { Label = "Download RPKG Tool", Url = "https://notex.app" }
                     }
-                }); ;
+                });
             }
         }
 
