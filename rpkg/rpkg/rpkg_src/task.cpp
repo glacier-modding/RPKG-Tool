@@ -54,57 +54,41 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     {
         rpkg_function::extract_all_prim_of_temp_from(input_path, filter, output_path, GLB_SINGLE);
     }
-    else if (command == "-extract_all_prim_to_glb_multiple_from")
-    {
-        rpkg_function::extract_all_prim_from(input_path, filter, output_path, GLB_MULTIPLE);
-    }
-    else if (command == "-extract_all_prim_to_glb_single_from")
+    else if (command == "-extract_all_prim_to_glb_from")
     {
         rpkg_function::extract_all_prim_from(input_path, filter, output_path, GLB_SINGLE);
     }
-    else if (command == "-extract_all_prim_to_gltf_multiple_from")
-    {
-        rpkg_function::extract_all_prim_from(input_path, filter, output_path, GLTF_MULTIPLE);
-    }
-    else if (command == "-extract_all_prim_to_gltf_single_from")
+    else if (command == "-extract_all_prim_to_gltf_from")
     {
         rpkg_function::extract_all_prim_from(input_path, filter, output_path, GLTF_SINGLE);
     }
-    else if (command == "-extract_all_prim_to_obj_multiple_from")
-    {
-        rpkg_function::extract_all_prim_from(input_path, filter, output_path, OBJ_MULTIPLE);
-    }
-    else if (command == "-extract_all_prim_to_obj_single_from")
+    else if (command == "-extract_all_prim_to_obj_from")
     {
         rpkg_function::extract_all_prim_from(input_path, filter, output_path, OBJ_SINGLE);
     }
-    else if (command == "-extract_prim_to_glb_multiple_from")
-    {
-        rpkg_function::extract_prim_from(input_path, filter, output_path, GLB_MULTIPLE);
-    }
-    else if (command == "-extract_prim_to_glb_single_from")
+    else if (command == "-extract_prim_to_glb_from")
     {
         rpkg_function::extract_prim_from(input_path, filter, output_path, GLB_SINGLE);
     }
-    else if (command == "-extract_prim_to_gltf_multiple_from")
-    {
-        rpkg_function::extract_prim_from(input_path, filter, output_path, GLTF_MULTIPLE);
-    }
-    else if (command == "-extract_prim_to_gltf_single_from")
+    else if (command == "-extract_prim_to_gltf_from")
     {
         rpkg_function::extract_prim_from(input_path, filter, output_path, GLTF_SINGLE);
     }
-    else if (command == "-extract_prim_to_obj_multiple_from")
-    {
-        rpkg_function::extract_prim_from(input_path, filter, output_path, OBJ_MULTIPLE);
-    }
-    else if (command == "-extract_prim_to_obj_single_from")
+    else if (command == "-extract_prim_to_obj_from")
     {
         rpkg_function::extract_prim_from(input_path, filter, output_path, OBJ_SINGLE);
     }
     else if (command == "-extract_temp_from")
     {
         rpkg_function::extract_temp_from(input_path, filter, output_path);
+    }
+    else if (command == "-extract_all_text_from")
+    {
+        rpkg_function::extract_all_text_from(input_path, filter, output_path);
+    }
+    else if (command == "-extract_text_from")
+    {
+        rpkg_function::extract_text_from(input_path, filter, output_path);
     }
     else if (command == "-extract_wwem_to_ogg_from")
     {
@@ -155,6 +139,14 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     else if (command == "-import_rpkg")
     {
         rpkg_function::import_rpkg(input_path);
+    }
+    else if (command == "-rebuild_prim_in")
+    {
+        rpkg_function::rebuild_prim_in(input_path, filter, output_path);
+    }
+    else if (command == "-rebuild_text_in")
+    {
+    rpkg_function::rebuild_text_in(input_path, filter, output_path);
     }
     else if (command == "-rebuild_gfxf_in")
     {
@@ -284,19 +276,12 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                      "-extract_ores_from",
                                                      "-extract_prel_refs",
                                                      "-extract_all_prim_of_temp_from",
-                                                     "-extract_all_prim_to_glb_multiple_from",
-                                                     "-extract_all_prim_to_glb_single_from",
-                                                     "-extract_all_prim_to_gltf_multiple_from",
-                                                     "-extract_all_prim_to_gltf_single_from",
-                                                     "-extract_all_prim_to_obj_multiple_from",
-                                                     "-extract_all_prim_to_obj_single_from",
-                                                     "-extract_prim_to_glb_multiple_from",
-                                                     "-extract_prim_to_glb_single_from",
-                                                     "-extract_prim_to_gltf_multiple_from",
-                                                     "-extract_prim_to_gltf_single_from",
-                                                     "-extract_prim_to_obj_multiple_from",
-                                                     "-extract_prim_to_obj_single_from",
+                                                     "-extract_all_prim_to_glb_from",
+                                                     "-extract_prim_to_glb_from",
+                                                     "-extract_prim_to_obj_from",
                                                      "-extract_temp_from",
+                                                     "-extract_all_text_from",
+                                                     "-extract_text_from",
                                                      "-extract_wwem_to_ogg_from",
                                                      "-extract_wwes_to_ogg_from",
                                                      "-extract_wwev_to_ogg_from",
@@ -308,6 +293,8 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                      "-extract_direct_hash_depends",
                                                      "-hash_probe",
                                                      "-hash_probe_from_file",
+                                                     "-rebuild_prim_in",
+                                                     "-rebuild_text_in",
                                                      "-rebuild_gfxf_in",
                                                      "-rebuild_wwev_in",
                                                      "-rebuild_dlge_from_json_from",

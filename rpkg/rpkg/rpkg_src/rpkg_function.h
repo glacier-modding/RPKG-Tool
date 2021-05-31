@@ -21,6 +21,11 @@ struct rpkg_extraction_vars
 class rpkg_function
 {
 public:
+	static void rebuild_prim_in(std::string& input_path, std::string& filter, std::string& output_path);
+	static void rebuild_text(std::string& text_folder, std::string& tga_file_path, std::string& text_file_name, std::string& meta_file_path, std::string& rpkg_output_file, std::string& rpkgs_path);
+	static void rebuild_text_in(std::string& input_path, std::string& filter, std::string& output_path);
+	static void extract_all_text_from(std::string& input_path, std::string& filter, std::string& output_path);
+	static void extract_text_from(std::string& input_path, std::string& filter, std::string& output_path);
 	static void extract_all_prim_of_temp_from(std::string& input_path, std::string& filter, std::string& output_path, int type);
 	static void recursive_temp_loader(uint32_t rpkgs_index, uint32_t hash_index, std::map<uint32_t, uint32_t>& parents_map, std::vector<uint32_t> temps_indexes, uint32_t level, uint32_t level_max, uint32_t temps_max);
 	static void extract_all_prim_from(std::string& input_path, std::string& filter, std::string& output_path, int type);

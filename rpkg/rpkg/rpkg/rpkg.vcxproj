@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\rpkg_src\borg.cpp" />
     <ClCompile Include="..\rpkg_src\command_json.cpp" />
     <ClCompile Include="..\rpkg_src\command_line.cpp" />
     <ClCompile Include="..\rpkg_src\compute_ioi_hash.cpp" />
@@ -41,6 +42,7 @@
     <ClCompile Include="..\rpkg_src\encrypt_packagedefinition_thumbs.cpp" />
     <ClCompile Include="..\rpkg_src\extract_all_prim_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_all_prim_of_temp_from.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_all_text_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_direct_hash_depends.cpp" />
     <ClCompile Include="..\rpkg_src\extract_dlge_to_json_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_from_rpkg.cpp" />
@@ -54,6 +56,7 @@
     <ClCompile Include="..\rpkg_src\extract_rpkg_meta.cpp" />
     <ClCompile Include="..\rpkg_src\extract_rtlv_to_json_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_temp_from.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_text_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_wwem_to_ogg_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_wwes_to_ogg_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_wwev_to_ogg_from.cpp" />
@@ -62,6 +65,7 @@
     <ClCompile Include="..\rpkg_src\get_unique_name.cpp" />
     <ClCompile Include="..\rpkg_src\global.cpp" />
     <ClCompile Include="..\rpkg_src\gltf.cpp" />
+    <ClCompile Include="..\rpkg_src\gpudevice.cpp" />
     <ClCompile Include="..\rpkg_src\hash.cpp" />
     <ClCompile Include="..\rpkg_src\hash_depends.cpp" />
     <ClCompile Include="..\rpkg_src\hash_probe.cpp" />
@@ -72,11 +76,16 @@
     <ClCompile Include="..\rpkg_src\import_rpkg_meta.cpp" />
     <ClCompile Include="..\rpkg_src\load_master_hash_list.cpp" />
     <ClCompile Include="..\rpkg_src\load_temp_tblu_hash_depends.cpp" />
+    <ClCompile Include="..\rpkg_src\mati.cpp" />
     <ClCompile Include="..\rpkg_src\obj.cpp" />
+    <ClCompile Include="..\rpkg_src\prim.cpp" />
     <ClCompile Include="..\rpkg_src\rebuild_dlge_from_json_from.cpp" />
     <ClCompile Include="..\rpkg_src\rebuild_gfxf_in.cpp" />
     <ClCompile Include="..\rpkg_src\rebuild_locr_from_json_from.cpp" />
+    <ClCompile Include="..\rpkg_src\rebuild_prim_in.cpp" />
     <ClCompile Include="..\rpkg_src\rebuild_rtlv_from_json_from.cpp" />
+    <ClCompile Include="..\rpkg_src\rebuild_text.cpp" />
+    <ClCompile Include="..\rpkg_src\rebuild_text_in.cpp" />
     <ClCompile Include="..\rpkg_src\rebuild_wwev_in.cpp" />
     <ClCompile Include="..\rpkg_src\recursive_temp_loader.cpp" />
     <ClCompile Include="..\rpkg_src\rpkg.cpp" />
@@ -84,6 +93,29 @@
     <ClCompile Include="..\rpkg_src\search_hash_data.cpp" />
     <ClCompile Include="..\rpkg_src\task.cpp" />
     <ClCompile Include="..\rpkg_src\temp.cpp" />
+    <ClCompile Include="..\rpkg_src\texd.cpp" />
+    <ClCompile Include="..\rpkg_src\text.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\BC.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\BC4BC5.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\BC6HBC7.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\BCDirectCompute.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexCompress.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexCompressGPU.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexConvert.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexD3D11.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexD3D12.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexDDS.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexFlipRotate.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexHDR.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexImage.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexMipmaps.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexMisc.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexNormalMaps.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexPMAlpha.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexResize.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexTGA.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexUtil.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexWIC.cpp" />
     <ClCompile Include="..\rpkg_src\thirdparty\lz4\lz4.c" />
     <ClCompile Include="..\rpkg_src\thirdparty\lz4\lz4hc.c" />
     <ClCompile Include="..\rpkg_src\thirdparty\lz4\xxhash.c" />
@@ -119,6 +151,7 @@
     <ClCompile Include="..\rpkg_src\util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\rpkg_src\borg.h" />
     <ClInclude Include="..\rpkg_src\command_line.h" />
     <ClInclude Include="..\rpkg_src\console.h" />
     <ClInclude Include="..\rpkg_src\crypto.h" />
@@ -128,13 +161,26 @@
     <ClInclude Include="..\rpkg_src\generic_function.h" />
     <ClInclude Include="..\rpkg_src\global.h" />
     <ClInclude Include="..\rpkg_src\gltf.h" />
+    <ClInclude Include="..\rpkg_src\gpudevice.h" />
     <ClInclude Include="..\rpkg_src\hash.h" />
+    <ClInclude Include="..\rpkg_src\mati.h" />
     <ClInclude Include="..\rpkg_src\obj.h" />
+    <ClInclude Include="..\rpkg_src\prim.h" />
     <ClInclude Include="..\rpkg_src\rpkg.h" />
     <ClInclude Include="..\rpkg_src\rpkg_dll.h" />
     <ClInclude Include="..\rpkg_src\rpkg_function.h" />
     <ClInclude Include="..\rpkg_src\task.h" />
     <ClInclude Include="..\rpkg_src\temp.h" />
+    <ClInclude Include="..\rpkg_src\texd.h" />
+    <ClInclude Include="..\rpkg_src\text.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\directxtex\BC.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\directxtex\BCDirectCompute.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\directxtex\d3dx12.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\directxtex\DDS.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\directxtex\DirectXTex.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\directxtex\DirectXTexP.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\directxtex\filters.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\directxtex\scoped.h" />
     <ClInclude Include="..\rpkg_src\thirdparty\json\json.hpp" />
     <ClInclude Include="..\rpkg_src\thirdparty\lz4\lz4.h" />
     <ClInclude Include="..\rpkg_src\thirdparty\lz4\lz4hc.h" />

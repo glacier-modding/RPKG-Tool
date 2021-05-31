@@ -101,6 +101,8 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
 
         std::string message = "Rebuilding GFXF files from: ";
 
+        timing_string = message;
+
         for (uint64_t i = 0; i < gfxf_folders.size(); i++)
         {
             if (gui_control == ABORT_CURRENT_TASK)
@@ -352,7 +354,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                     unsigned char footer_serial_data[] = { 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x28, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x38, 0x00, 0x00, 0x00 };
                     uint32_t footer_serial_data_count = 7;
 
-                    uint32_t footer_total_size = footer_serial_data_count * (uint32_t)0x4;
+                    uint32_t footer_total_size = footer_serial_data_count * (uint32_t)0x4 + (uint32_t)0x4;
 
                     for (uint64_t k = 0; k < sizeof(footer_header); k++)
                     {
@@ -1290,6 +1292,6 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
     }
     else
     {
-        LOG_AND_EXIT("Error: The folder " + input_rpkg_folder_path + " to rebuild the WWEVs does not exist.");
+        LOG_AND_EXIT("Error: The folder " + input_rpkg_folder_path + " to rebuild the GFXFs does not exist.");
     }
 }

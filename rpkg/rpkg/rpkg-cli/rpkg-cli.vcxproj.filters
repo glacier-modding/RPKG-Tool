@@ -28,6 +28,9 @@
     <Filter Include="Source Files\revorb">
       <UniqueIdentifier>{7683c88f-33c9-45f5-b3bf-ae4c29c617d5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\directxtex">
+      <UniqueIdentifier>{d2890bc1-8af1-4371-8665-b18b931921eb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\rpkg_src\command_json.cpp">
@@ -324,6 +327,102 @@
     <ClCompile Include="..\rpkg_src\extract_all_prim_of_temp_from.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\BC.cpp">
+      <Filter>Source Files\directxtex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\BC4BC5.cpp">
+      <Filter>Source Files\directxtex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\BC6HBC7.cpp">
+      <Filter>Source Files\directxtex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\BCDirectCompute.cpp">
+      <Filter>Source Files\directxtex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexCompress.cpp">
+      <Filter>Source Files\directxtex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexCompressGPU.cpp">
+      <Filter>Source Files\directxtex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexConvert.cpp">
+      <Filter>Source Files\directxtex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexD3D11.cpp">
+      <Filter>Source Files\directxtex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexD3D12.cpp">
+      <Filter>Source Files\directxtex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexDDS.cpp">
+      <Filter>Source Files\directxtex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexFlipRotate.cpp">
+      <Filter>Source Files\directxtex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexHDR.cpp">
+      <Filter>Source Files\directxtex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexImage.cpp">
+      <Filter>Source Files\directxtex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexMipmaps.cpp">
+      <Filter>Source Files\directxtex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexMisc.cpp">
+      <Filter>Source Files\directxtex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexNormalMaps.cpp">
+      <Filter>Source Files\directxtex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexPMAlpha.cpp">
+      <Filter>Source Files\directxtex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexResize.cpp">
+      <Filter>Source Files\directxtex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexTGA.cpp">
+      <Filter>Source Files\directxtex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexUtil.cpp">
+      <Filter>Source Files\directxtex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexWIC.cpp">
+      <Filter>Source Files\directxtex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\prim.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\text.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\texd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\borg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\mati.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\rebuild_prim_in.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\gpudevice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\rebuild_text.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\rebuild_text_in.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\extract_text_from.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\extract_all_text_from.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\Bit_stream.h">
@@ -411,6 +510,48 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\rpkg_src\temp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\thirdparty\directxtex\BC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\thirdparty\directxtex\BCDirectCompute.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\thirdparty\directxtex\d3dx12.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\thirdparty\directxtex\DDS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\thirdparty\directxtex\DirectXTex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\thirdparty\directxtex\DirectXTexP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\thirdparty\directxtex\filters.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\thirdparty\directxtex\scoped.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\prim.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\text.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\texd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\borg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\mati.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\gpudevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

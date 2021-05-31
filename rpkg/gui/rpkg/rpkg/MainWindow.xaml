@@ -9,7 +9,7 @@
         xmlns:local="clr-namespace:rpkg"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
-        Title="RPKG v2.6" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
+        Title="RPKG v2.7" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -33,6 +33,7 @@
                     <MenuItem Click="GenerateRPKGFromFolder_Click" Header="Generate RPKG From Folder"/>
                 </MenuItem>
                 <MenuItem Header="Mass Extract">
+                    <MenuItem Click="MassExtract_Click"  Header="Extract Textures (TEXT/TEXD) To TGA From RPKGs In Folder"/>
                     <MenuItem Click="MassExtract_Click" Header="Extract Images/JSONs (ORES) To IOI Paths From RPKGs In Folder"/>
                     <MenuItem Click="MassExtract_Click" Header="Extract Sounds (WWEM) To OGG To IOI Paths From RPKGs In Folder"/>
                     <MenuItem Click="MassExtract_Click" Header="Extract Sounds (WWES) To OGG To IOI Paths From RPKGs In Folder"/>
@@ -43,11 +44,12 @@
                     <MenuItem Click="MassExtract_Click" Header="Extract Scaleform GFX/DDS/TGA (GFXF) From RPKGs In Folder"/>
                 </MenuItem>
                 <MenuItem Header="Rebuild">
-                    <MenuItem Click="Rebuild_Click" Header="Rebuild DLGE From Folder"/>
-                    <MenuItem Click="Rebuild_Click" Header="Rebuild GFXF From Folder"/>
-                    <MenuItem Click="Rebuild_Click" Header="Rebuild LOCR From Folder"/>
-                    <MenuItem Click="Rebuild_Click" Header="Rebuild RTLV From Folder"/>
-                    <MenuItem Click="Rebuild_Click" Header="Rebuild WWEV From Folder"/>
+                    <MenuItem Click="Rebuild_Click" Header="Rebuild Textures (TEXT/TEXD) From Folder"/>
+                    <MenuItem Click="Rebuild_Click" Header="Rebuild Scaleform GFX/DDS/TGA (GFXF) From Folder"/>
+                    <MenuItem Click="Rebuild_Click" Header="Rebuild Localization (DLGE) From Folder"/>
+                    <MenuItem Click="Rebuild_Click" Header="Rebuild Localization (LOCR) From Folder"/>
+                    <MenuItem Click="Rebuild_Click" Header="Rebuild Localization (RTLV) From Folder"/>
+                    <MenuItem Click="Rebuild_Click" Header="Rebuild Sounds (WWEV) From Folder"/>
                 </MenuItem>
                 <MenuItem Header="Color Theme">
                     <MenuItem Click="ChangeColorTheme_Click" Header="Light/Blue"/>
@@ -140,7 +142,7 @@
         <GridSplitter HorizontalAlignment="Right" VerticalAlignment="Stretch" Grid.Row="1"  Grid.Column="1" ResizeBehavior="PreviousAndNext" Width="5"/>
         <TabControl x:Name="RightTabControl" Grid.Row="1" Grid.Column="2">
             <TabItem x:Name="FirstTabRight" Header="Details">
-                <TextBox x:Name="DetailsTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap"/>
+                <TextBox x:Name="DetailsTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap" TextChanged="DetailsTextBox_TextChanged"/>
             </TabItem>
             <TabItem x:Name="SecondTabRight" Header="Hex Viewer">
                 <TextBox x:Name="HexViewerTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap"/>

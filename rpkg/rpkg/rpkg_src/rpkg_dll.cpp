@@ -6,6 +6,7 @@
 #include "crypto.h"
 #include "console.h"
 #include "util.h"
+#include "text.h"
 #include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
@@ -1775,4 +1776,96 @@ char* get_all_bricks(uint32_t temps_index)
     temps.at(temps_index).get_all_bricks();
 
     return &response_string[0];
+}
+
+int search_temp_files(uint32_t temps_index, char* search_str, int max_results)
+{
+    task_single_status = TASK_EXECUTING;
+    task_multiple_status = TASK_EXECUTING;
+
+    timing_string = "Searching for \"" + std::string(search_str) + "\" in recursively loaded TEMPs...";
+
+    std::string search_string = std::string(search_str);
+
+    search_string = util::to_lower_case(search_string);
+
+    int search_count = 0;
+
+    response_string = "";
+
+    std::set<uint32_t> logical_parents_set;
+
+    for (uint32_t e = 0; e < temps.at(temps_index).tblu_logicalParent.size(); e++)
+    {
+        if (temps.at(temps_index).tblu_logicalParent.at(e) >= temps.at(temps_index).tblu_logicalParent.size())
+        {
+            logical_parents_set.insert(temps.at(temps_index).tblu_logicalParent.at(e));
+        }
+    }
+
+    for (uint32_t e = 0; e < temps.at(temps_index).tblu_logicalParent.size(); e++)
+    {
+        for (std::set<uint32_t>::iterator it = logical_parents_set.begin(); it != logical_parents_set.end(); it++)
+        {
+            if (temps.at(temps_index).tblu_logicalParent.at(e) == (*it))
+            {
+                //response_string.append(util::uint32_t_to_string(temps.at(temps_index).tblu_entry_index.at(e)));
+                //response_string.push_back('|');
+                //response_string.append(temps.at(temps_index).tblu_entityName.at(e));
+                //response_string.push_back(',');
+            }
+        }
+    }
+
+    for (uint32_t e = 0; e < temps.at(temps_index).tblu_entityName.size(); e++)
+    {
+        std::string tblu_entityName_lowercase = util::to_lower_case(temps.at(temps_index).tblu_entityName.at(e));
+
+        if (tblu_entityName_lowercase.find(search_string) != std::string::npos)
+        {
+            response_string.append(util::uint32_t_to_string(temps.at(temps_index).tblu_entry_index.at(e)));
+            response_string.push_back('|');
+            response_string.append(temps.at(temps_index).tblu_entityName.at(e));
+            response_string.push_back(',');
+        }
+    }
+
+    task_single_status = TASK_SUCCESSFUL;
+    task_multiple_status = TASK_SUCCESSFUL;
+
+    return 0;
+}
+
+char* get_search_temp_files()
+{
+    return &response_string[0];
+}
+
+int generate_png_from_text(char* rpkg_file, char* hash_string, char* png_path)
+{
+    for (uint64_t i = 0; i < rpkgs.size(); i++)
+    {
+        if (rpkgs.at(i).rpkg_file_path == rpkg_file)
+        {
+            uint64_t hash_value = std::strtoull(hash_string, nullptr, 16);
+
+            std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(hash_value);
+
+            if (it != rpkgs.at(i).hash_map.end())
+            {
+                text temp_text(i, it->second);
+
+                if (temp_text.texd_found)
+                {
+                    temp_text.save_texd_to_png(png_path);
+                }
+                else
+                {
+                    temp_text.save_text_to_png(png_path);
+                }
+            }
+        }
+    }
+
+    return 0;
 }

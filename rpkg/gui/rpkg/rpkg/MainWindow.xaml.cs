@@ -389,6 +389,59 @@ namespace rpkg
             }
         }
 
+        public static void TEXTToPNGThread(string rpkgFilePath, string hash, string png_file_name)
+        {
+            int return_value = generate_png_from_text(rpkgFilePath, hash, png_file_name);
+        }
+
+        public static void MassExtractTEXTThread(string command, string input_path, string filter, string search, string search_type, string output_path)
+        {
+            int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+        }
+
+        public int MassExtractTEXT(string command, string input_path, string filter, string search, string search_type, string output_path)
+        {
+            Thread thread = new Thread(() => MassExtractTEXTThread(command, input_path, filter, search, search_type, output_path));
+            thread.SetApartmentState(ApartmentState.MTA);
+            thread.Start();
+            thread.Join();
+            thread = null;
+
+            return 0;
+        }
+
+        public static void RebuildTEXTThread(string command, string input_path, string filter, string search, string search_type, string output_path)
+        {
+            int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+        }
+
+        public int RebuildTEXT(string command, string input_path, string filter, string search, string search_type, string output_path)
+        {
+            Thread thread = new Thread(() => RebuildTEXTThread(command, input_path, filter, search, search_type, output_path));
+            thread.SetApartmentState(ApartmentState.MTA);
+            thread.Start();
+            thread.Join();
+            thread = null;
+
+            return 0;
+        }
+
+        public static void ExtractTEXTThread(string command, string input_path, string filter, string search, string search_type, string output_path)
+        {
+            int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+        }
+
+        public int ExtractTEXT(string command, string input_path, string filter, string search, string search_type, string output_path)
+        {
+            Thread thread = new Thread(() => ExtractTEXTThread(command, input_path, filter, search, search_type, output_path));
+            thread.SetApartmentState(ApartmentState.MTA);
+            thread.Start();
+            thread.Join();
+            thread = null;
+
+            return 0;
+        }
+
         private void MainTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             if (oneOrMoreRPKGsHaveBeenImported)
@@ -598,7 +651,7 @@ namespace rpkg
 
                         if (resourceType == "PRIM")
                         {
-                            string command = "-extract_prim_to_obj_single_from";
+                            string command = "-extract_prim_to_obj_from";
                             string input_path = rpkgFilePath;
                             string filter = hash;
                             string search = "";
@@ -694,6 +747,51 @@ namespace rpkg
                                 {
                                     FourthTabRight.Visibility = Visibility.Visible;
                                 }
+                            }
+                            else
+                            {
+                                if (FourthTabRight.Visibility == Visibility.Visible)
+                                {
+                                    FourthTabRight.Visibility = Visibility.Collapsed;
+                                }
+                            }
+
+                            int return_value_clear = clear_hash_data_vector();
+                        }
+
+                        if (resourceType == "TEXT")
+                        {
+                            BitmapImage bitmapImage = new BitmapImage();
+
+                            bitmapImage.BeginInit();
+
+                            string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+
+                            string png_file_name = currentDirectory + "\\" + hashFile + ".png";
+
+                            //return_value = generate_png_from_text(rpkgFilePath, hash, png_file_name);
+
+                            Thread thread = new Thread(() => TEXTToPNGThread(rpkgFilePath, hash, png_file_name));
+                            thread.SetApartmentState(ApartmentState.MTA);
+                            thread.Start();
+                            thread.Join();
+
+                            if (File.Exists(png_file_name))
+                            {
+                                MemoryStream memoryStream = new MemoryStream(File.ReadAllBytes(png_file_name));
+
+                                bitmapImage.StreamSource = memoryStream;
+
+                                bitmapImage.EndInit();
+
+                                ImageViewer.Source = bitmapImage;
+
+                                if (FourthTabRight.Visibility == Visibility.Collapsed)
+                                {
+                                    FourthTabRight.Visibility = Visibility.Visible;
+                                }
+
+                                File.Delete(png_file_name);
                             }
                             else
                             {
@@ -1437,6 +1535,14 @@ namespace rpkg
 
                         rightClickMenu = new RightClickMenu(buttons);
                     }
+                    else if (hashType == "TEXT")
+                    {
+                        string[] buttons = { "Extract " + rightClickedOnName, "Extract TEXTs(TEXDs) linked to " + rightClickedOnName + " To TGA File(s)", "Cancel" };
+
+                        buttonCount = 3;
+
+                        rightClickMenu = new RightClickMenu(buttons);
+                    }
                     else if (hashType == "WWEM" || hashType == "WWES" || hashType == "WWEV")
                     {
                         string[] buttons = { "Extract " + rightClickedOnName, "Extract " + rightClickedOnName + " To OGG (IOI Path)", "Cancel" };
@@ -1539,6 +1645,50 @@ namespace rpkg
                             filter = hashValue;
 
                             progress.message.Content = "Extracting " + rightClickedOnName + " To GLB File...";
+                        }
+                        else if (hashType == "TEXT")
+                        {
+                            command = "-extract_text_from";
+
+                            progress.operation = (int)Progress.Operation.GENERAL;
+
+                            filter = hashValue;
+
+                            progress.message.Content = "Extracting " + rightClickedOnName + " To TGA File(s)...";
+
+                            string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + rightClickedOnName + " To:");
+
+                            if (temp_outputFolder == "")
+                            {
+                                rightClickedOn = 0;
+
+                                rightClickedOnFirst = true;
+
+                                return;
+                            }
+
+                            output_path = temp_outputFolder;
+
+                            int temp_return_value = reset_task_status();
+
+                            execute_task temp_rpkgExecute = ExtractTEXT;
+
+                            IAsyncResult temp_ar = temp_rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
+
+                            progress.ShowDialog();
+
+                            if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
+                            {
+                                //MessageBoxShow(progress.task_status_string);
+
+                                return;
+                            }
+
+                            rightClickedOn = 0;
+
+                            rightClickedOnFirst = true;
+
+                            return;
                         }
                         else if (hashType == "TEMP")
                         {
@@ -1668,6 +1818,11 @@ namespace rpkg
                                 entityBrickEditor.tempFileName = rightClickedOnName;
                                 entityBrickEditor.rpkgFilePath = rpkgFilePath;
                                 entityBrickEditor.tempFileNameFull = rightClickedOnFullName;
+
+                                string[] theme = userSettings.ColorTheme.Split('/');
+
+                                entityBrickEditor.currentThemeBrightness = theme[0];
+                                string color = theme[1];
 
                                 entityBrickEditor.ShowDialog();
 
@@ -1960,6 +2115,10 @@ namespace rpkg
             {
                 massExtractName = "GFXF";
             }
+            else if (massExtractButton.Contains("TEXT"))
+            {
+                massExtractName = "TEXT";
+            }
 
             string inputFolder = SelectFolder("input", "Select Input Folder (Runtime folder or other folder with multiple RPKGs) To Extract " + massExtractName + " From:");
 
@@ -2016,86 +2175,110 @@ namespace rpkg
 
             filterDialog.message1.Content = "Enter extraction filter for " + massExtractName + " below.";
 
-            if (massExtractName == "ORES")
+            if (massExtractName == "TEXT")
             {
-                filterDialog.ShowDialog();
+                command = "-extract_all_text_from";
 
-                filter = filterDialog.filterString;
+                progress.message.Content = "Extracting TEXT/TEXD...";
 
-                command = "-extract_ores_from";
+                int return_value = reset_task_status();
 
-                progress.ProgressBar.IsIndeterminate = true;
+                execute_task rpkgExecute = MassExtractTEXT;
 
-                progress.message.Content = "Extracting ORES To IOI Paths...";
+                IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
+
+                progress.ShowDialog();
+
+                if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
+                {
+                    //MessageBoxShow(progress.task_status_string);
+
+                    return;
+                }
             }
-            else if (massExtractName == "WWEM")
+            else
             {
-                filterDialog.ShowDialog();
+                if (massExtractName == "ORES")
+                {
+                    filterDialog.ShowDialog();
 
-                filter = filterDialog.filterString;
+                    filter = filterDialog.filterString;
 
-                command = "-extract_wwem_to_ogg_from";
+                    command = "-extract_ores_from";
 
-                progress.message.Content = "Extracting WWEM To IOI Paths...";
-            }
-            else if (massExtractName == "WWES")
-            {
-                filterDialog.ShowDialog();
+                    progress.ProgressBar.IsIndeterminate = true;
 
-                filter = filterDialog.filterString;
+                    progress.message.Content = "Extracting ORES To IOI Paths...";
+                }
+                else if (massExtractName == "WWEM")
+                {
+                    filterDialog.ShowDialog();
 
-                command = "-extract_wwes_to_ogg_from";
+                    filter = filterDialog.filterString;
 
-                progress.message.Content = "Extracting WWES To IOI Paths...";
-            }
-            else if (massExtractName == "WWEV")
-            {
-                filterDialog.ShowDialog();
+                    command = "-extract_wwem_to_ogg_from";
 
-                filter = filterDialog.filterString;
+                    progress.message.Content = "Extracting WWEM To IOI Paths...";
+                }
+                else if (massExtractName == "WWES")
+                {
+                    filterDialog.ShowDialog();
 
-                command = "-extract_wwev_to_ogg_from";
+                    filter = filterDialog.filterString;
 
-                progress.message.Content = "Extracting WWEV To IOI Paths...";
-            }
-            else if (massExtractName == "DLGE")
-            {
-                command = "-extract_dlge_to_json_from";
+                    command = "-extract_wwes_to_ogg_from";
 
-                progress.message.Content = "Extracting DLGEs To JSONs...";
-            }
-            else if (massExtractName == "LOCR")
-            {
-                command = "-extract_locr_to_json_from";
+                    progress.message.Content = "Extracting WWES To IOI Paths...";
+                }
+                else if (massExtractName == "WWEV")
+                {
+                    filterDialog.ShowDialog();
 
-                progress.message.Content = "Extracting LOCRs To JSONs...";
-            }
-            else if (massExtractName == "RTLV")
-            {
-                command = "-extract_rtlv_to_json_from";
+                    filter = filterDialog.filterString;
 
-                progress.message.Content = "Extracting RTLVs To JSONs...";
-            }
-            else if (massExtractName == "GFXF")
-            {
-                command = "-extract_gfxf_from";
+                    command = "-extract_wwev_to_ogg_from";
 
-                progress.message.Content = "Extracting GFXF...";
-            }
+                    progress.message.Content = "Extracting WWEV To IOI Paths...";
+                }
+                else if (massExtractName == "DLGE")
+                {
+                    command = "-extract_dlge_to_json_from";
 
-            int return_value = reset_task_status();
+                    progress.message.Content = "Extracting DLGEs To JSONs...";
+                }
+                else if (massExtractName == "LOCR")
+                {
+                    command = "-extract_locr_to_json_from";
 
-            execute_task rpkgExecute = task_execute;
+                    progress.message.Content = "Extracting LOCRs To JSONs...";
+                }
+                else if (massExtractName == "RTLV")
+                {
+                    command = "-extract_rtlv_to_json_from";
 
-            IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
+                    progress.message.Content = "Extracting RTLVs To JSONs...";
+                }
+                else if (massExtractName == "GFXF")
+                {
+                    command = "-extract_gfxf_from";
 
-            progress.ShowDialog();
+                    progress.message.Content = "Extracting GFXF...";
+                }
 
-            if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
-            {
-                //MessageBoxShow(progress.task_status_string);
+                int return_value = reset_task_status();
 
-                return;
+                execute_task rpkgExecute = task_execute;
+
+                IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
+
+                progress.ShowDialog();
+
+                if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
+                {
+                    //MessageBoxShow(progress.task_status_string);
+
+                    return;
+                }
             }
         }
 
@@ -2121,6 +2304,10 @@ namespace rpkg
             {
                 rebuildType = "RTLV";
             }
+            else if (rebuildButton.Contains("TEXT"))
+            {
+                rebuildType = "TEXT";
+            }
             else if (rebuildButton.Contains("WWEV"))
             {
                 rebuildType = "WWEV";
@@ -2143,51 +2330,75 @@ namespace rpkg
 
                 progress.ProgressBar.IsIndeterminate = true;
 
-                if (rebuildType == "DLGE")
+                if (rebuildType == "TEXT")
                 {
-                    command = "-rebuild_dlge_from_json_from";
+                    command = "-rebuild_text_in";
 
-                    progress.message.Content = "Rebuilding All DLGE from JSON in " + input_path + "...";
+                    progress.message.Content = "Rebuilding All TEXT/TEXD in " + input_path + "...";
+
+                    int return_value = reset_task_status();
+
+                    execute_task rpkgExecute = RebuildTEXT;
+
+                    IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
+
+                    progress.ShowDialog();
+
+                    if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
+                    {
+                        //MessageBoxShow(progress.task_status_string);
+
+                        return;
+                    }
                 }
-                else if (rebuildType == "GFXF")
+                else
                 {
-                    command = "-rebuild_gfxf_in";
+                    if (rebuildType == "DLGE")
+                    {
+                        command = "-rebuild_dlge_from_json_from";
 
-                    progress.message.Content = "Rebuilding All GFXF in " + input_path + "...";
-                }
-                else if (rebuildType == "LOCR")
-                {
-                    command = "-rebuild_locr_from_json_from";
+                        progress.message.Content = "Rebuilding All DLGE from JSON in " + input_path + "...";
+                    }
+                    else if (rebuildType == "GFXF")
+                    {
+                        command = "-rebuild_gfxf_in";
 
-                    progress.message.Content = "Rebuilding All LOCR from JSON in " + input_path + "...";
-                }
-                else if (rebuildType == "RTLV")
-                {
-                    command = "-rebuild_rtlv_from_json_from";
+                        progress.message.Content = "Rebuilding All GFXF in " + input_path + "...";
+                    }
+                    else if (rebuildType == "LOCR")
+                    {
+                        command = "-rebuild_locr_from_json_from";
 
-                    progress.message.Content = "Rebuilding All RTLV from JSON in " + input_path + "...";
-                }
-                else if (rebuildType == "WWEV")
-                {
-                    command = "-rebuild_wwev_in";
+                        progress.message.Content = "Rebuilding All LOCR from JSON in " + input_path + "...";
+                    }
+                    else if (rebuildType == "RTLV")
+                    {
+                        command = "-rebuild_rtlv_from_json_from";
 
-                    progress.message.Content = "Rebuilding All WWEV in " + input_path + "...";
-                }
+                        progress.message.Content = "Rebuilding All RTLV from JSON in " + input_path + "...";
+                    }
+                    else if (rebuildType == "WWEV")
+                    {
+                        command = "-rebuild_wwev_in";
 
-                int return_value = reset_task_status();
+                        progress.message.Content = "Rebuilding All WWEV in " + input_path + "...";
+                    }
 
-                execute_task rpkgExecute = task_execute;
+                    int return_value = reset_task_status();
 
-                IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
+                    execute_task rpkgExecute = task_execute;
 
-                progress.ShowDialog();
+                    IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
-                if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
-                {
-                    MessageBoxShow(progress.task_status_string);
+                    progress.ShowDialog();
 
-                    return;
-                }
+                    if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
+                    {
+                        MessageBoxShow(progress.task_status_string);
+
+                        return;
+                    }
+                }                
             }
         }
 
@@ -2702,6 +2913,9 @@ namespace rpkg
 
         [DllImport("rpkg.dll", EntryPoint = "get_temp_index", CallingConvention = CallingConvention.Cdecl)]
         public static extern int get_temp_index(string temp_hash_string);
+
+        [DllImport("rpkg.dll", EntryPoint = "generate_png_from_text", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int generate_png_from_text(string rpkg_file, string hash_string, string png_path);
 
 
         [SuppressUnmanagedCodeSecurity]
@@ -3338,6 +3552,11 @@ namespace rpkg
             string output_path = "R:\\testing\\00E9F09C3B030590.OUTPUT.TEMP";
 
             //int return_value = convert_temp_to_json(input_path, output_path, "convert");
+        }
+
+        private void DetailsTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
         }
     }
 }

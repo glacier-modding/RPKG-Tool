@@ -140,3 +140,9 @@ RPKG_EXPORT int generate_rpkg_files_from_data(char* temp_path);
 RPKG_EXPORT char* get_top_level_logical_parents(uint32_t temps_index);
 
 RPKG_EXPORT char* get_all_bricks(uint32_t temps_index);
+
+RPKG_EXPORT int search_temp_files(uint32_t temps_index, char* search_str, int max_results);
+
+RPKG_EXPORT char* get_search_temp_files();
+
+RPKG_EXPORT int generate_png_from_text(char* rpkg_file, char* hash_string, char* png_path);

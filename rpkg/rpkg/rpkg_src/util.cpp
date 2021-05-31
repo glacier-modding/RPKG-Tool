@@ -1,9 +1,13 @@
 #include "util.h"
+#include "thirdparty/lz4/lz4.h"
+#include "thirdparty/lz4/lz4hc.h"
+#include "thirdparty/directxtex/DirectXTex.h"
 #include <string>
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
 #include <regex>
+#include <Windows.h>
 
 std::vector<std::string> util::parse_input_filter(std::string input_string)
 {
@@ -189,6 +193,43 @@ bool util::float_equal(float float_existing, float float_new, float tolerance)
     }
 
     if (std::abs(float_new - float_existing) > difference)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+std::wstring util::string_to_wstring(const std::string& input_string)
+{
+    if (input_string.empty())
+    {
+        return std::wstring();
+    }
+    int num_chars = MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, input_string.c_str(), input_string.length(), NULL, 0);
+    std::wstring wstrTo;
+    if (num_chars)
+    {
+        wstrTo.resize(num_chars);
+        if (MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, input_string.c_str(), input_string.length(), &wstrTo[0], num_chars))
+        {
+            return wstrTo;
+        }
+    }
+    return std::wstring();
+}
+
+bool util::lz4_compress_hc(const char* source, std::vector<char>& destination, int source_size, int& compressed_size)
+{
+    int compressed_bound = LZ4_compressBound(source_size);
+
+    destination = std::vector<char>(compressed_bound, 0);
+
+    compressed_size = LZ4_compress_HC(source, destination.data(), source_size, compressed_bound, LZ4HC_CLEVEL_MAX);
+
+    if (compressed_size == 0)
     {
         return false;
     }

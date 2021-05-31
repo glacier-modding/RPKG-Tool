@@ -32,7 +32,16 @@ namespace rpkg
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            EventManager.RegisterClassHandler(typeof(TreeViewItem), TreeViewItem.MouseLeftButtonUpEvent, new RoutedEventHandler(TreeViewItem_MouseLeftButtonUpEvent));
+            if (currentThemeBrightness == "Dark")
+            {
+                MainTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+                MainTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
+            }
+            else if (currentThemeBrightness == "Light")
+            {
+                MainTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
+                MainTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+            }
 
             LoadMainTreeView();
         }
@@ -41,7 +50,19 @@ namespace rpkg
         {
             if (hidden)
             {
+                if (currentThemeBrightness == "Dark")
+                {
+                    MainTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+                    MainTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
+                }
+                else if (currentThemeBrightness == "Light")
+                {
+                    MainTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
+                    MainTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+                }
+
                 LoadMainTreeView();
+
                 hidden = false;
             }
         }
@@ -50,7 +71,7 @@ namespace rpkg
         {
             //clear_temp_tblu_data();
 
-            MainTreeView.Items.Clear();
+            MainTreeView.Nodes.Clear();
 
             while (MainStackPanel.Children.Count > 0)
             {
@@ -63,10 +84,14 @@ namespace rpkg
 
             controlCount = 0;
 
-            {
-                var topItem = new TreeViewItem();
+            MainTreeView.BeginUpdate();
 
-                topItem.Header = tempFileNameFull.Replace("(", "").Replace(")", "");
+            MainTreeView.AfterSelect += MainTreeView_AfterSelect;
+
+            {
+                var topItem = new System.Windows.Forms.TreeNode();
+
+                topItem.Text = tempFileNameFull.Replace("(", "").Replace(")", "");
 
                 string responseString = Marshal.PtrToStringAnsi(get_top_level_logical_parents(temps_index));
 
@@ -94,22 +119,26 @@ namespace rpkg
 
                             UInt32.TryParse(entryData[0], out entryIndex);
 
-                            var item = new TreeViewItem();
+                            var item = new System.Windows.Forms.TreeNode();
 
-                            item.Header = entityName + " (" + entryData[0] + ") (" + temps_index.ToString() + ")";
+                            item.Text = entityName + " (" + entryData[0] + ") (" + temps_index.ToString() + ")";
 
-                            item.Expanded += Item_Expanded;
+                            //item.Expanded += Item_Expanded;
 
-                            item.Items.Add(null);
+                            //item.Items.Add(null);
 
-                            //LoadTreeView(entryIndex, entityName, ref item);
+                            LoadTreeView(ref item);
 
-                            topItem.Items.Add(item);
+                            topItem.Nodes.Add(item);
                         }
                     }
                 }
 
-                MainTreeView.Items.Add(topItem);
+                int nodeCount = topItem.Nodes.Count;
+                System.Windows.Forms.TreeNode[] nodes = new System.Windows.Forms.TreeNode[nodeCount];
+                topItem.Nodes.CopyTo(nodes, 0);
+
+                MainTreeView.Nodes.Add(topItem);
             }
 
             {
@@ -131,9 +160,9 @@ namespace rpkg
 
                         //MessageBoxShow(temp_index_hash_reference.ToString());
 
-                        var topItem = new TreeViewItem();
+                        var topItem = new System.Windows.Forms.TreeNode();
 
-                        topItem.Header = brick;
+                        topItem.Text = brick;
 
                         responseString = Marshal.PtrToStringAnsi(get_top_level_logical_parents((UInt32)temp_index_hash_reference));
 
@@ -161,25 +190,33 @@ namespace rpkg
 
                                     UInt32.TryParse(entryData[0], out entryIndex);
 
-                                    var item = new TreeViewItem();
+                                    var item = new System.Windows.Forms.TreeNode();
 
-                                    item.Header = entityName + " (" + entryData[0] + ") (" + temp_index_hash_reference.ToString() + ")";
+                                    item.Text = entityName + " (" + entryData[0] + ") (" + temp_index_hash_reference.ToString() + ")";
 
-                                    item.Expanded += Item_Expanded;
+                                    //item.Expanded += Item_Expanded;
 
-                                    item.Items.Add(null);
+                                    //item.Items.Add(null);
 
-                                    //LoadTreeView(entryIndex, entityName, ref item);
+                                    LoadTreeView(ref item);
 
-                                    topItem.Items.Add(item);
+                                    topItem.Nodes.Add(item);
                                 }
                             }
                         }
 
-                        MainTreeView.Items.Add(topItem);
+                        int nodeCount = topItem.Nodes.Count;
+                        System.Windows.Forms.TreeNode[] nodes = new System.Windows.Forms.TreeNode[nodeCount];
+                        topItem.Nodes.CopyTo(nodes, 0);
+
+                        MainTreeView.Nodes.Add(topItem);
                     }
                 }
             }
+
+            MainTreeView.EndUpdate();
+
+            treeViewBackup = new TreeViewBackup(MainTreeView.Nodes);
 
             /*UInt32 logical_parent = 0xFFFFFFFF;
 
@@ -240,6 +277,94 @@ namespace rpkg
                     MainTreeView.Items.Add(item);
                 }
             }*/
+        }
+
+        private void LoadTreeView(ref System.Windows.Forms.TreeNode masterTreeViewItem)
+        {
+            string[] header = masterTreeViewItem.Text.Replace("(", "").Replace(")", "").Split(' ');
+
+            var testing = 0;
+
+            string entityName = "";
+
+            for (int i = 0; i < (header.Length - 2); i++)
+            {
+                entityName += header[i];
+
+                if (i != (header.Length - 3))
+                {
+                    entityName += " ";
+                }
+            }
+
+            UInt32 temp_entryIndex = 0;
+
+            UInt32.TryParse(header[header.Length - 2], out temp_entryIndex);
+
+            UInt32 temp_temp_index = 0;
+
+            UInt32.TryParse(header[header.Length - 1], out temp_temp_index);
+
+            string responseString = Marshal.PtrToStringAnsi(get_entries_with_logical_parent(temp_temp_index, temp_entryIndex));
+
+            string hashReferenceData = Marshal.PtrToStringAnsi(get_entries_hash_references(temp_temp_index, temp_entryIndex));
+
+            string[] hashReferences = hashReferenceData.Split(',');
+
+            int temp_index_hash_reference = get_temp_index(hashReferences[0]);
+
+            if (temp_index_hash_reference > 0)
+            {
+                UInt32 logical_parent = 0xFFFFFFFF;
+
+                string responseStringHashReference = Marshal.PtrToStringAnsi(get_entries_with_logical_parent((UInt32)temp_index_hash_reference, logical_parent));
+
+                if (responseStringHashReference != "")
+                {
+                    string[] topLevelEntriesHashReference = responseStringHashReference.Trim(',').Split(',');
+
+                    foreach (string entryHashReference in topLevelEntriesHashReference)
+                    {
+                        string[] entryDataHashReference = entryHashReference.Split('|');
+                        string entityNameHashReference = entryDataHashReference[1];
+                        UInt32 entryIndexHashReference = 0;
+
+                        UInt32.TryParse(entryDataHashReference[0], out entryIndexHashReference);
+
+                        var itemHashReference = new System.Windows.Forms.TreeNode();
+
+                        itemHashReference.Text = entityNameHashReference + " (" + entryDataHashReference[0] + ") (" + temp_index_hash_reference.ToString() + ")";
+
+                        LoadTreeView(ref itemHashReference);
+
+                        masterTreeViewItem.Nodes.Add(itemHashReference);
+                    }
+                }
+            }
+
+            //MessageBoxShow(temp_index_hash_reference.ToString());
+
+            string[] topLevelEntries = responseString.Trim(',').Split(',');
+
+            foreach (string entry in topLevelEntries)
+            {
+                if (entry != "")
+                {
+                    string[] tempEntryData = entry.Split('|');
+                    string tempEntityName = tempEntryData[1];
+                    UInt32 tempEntryIndex = 0;
+
+                    UInt32.TryParse(tempEntryData[0], out tempEntryIndex);
+
+                    var item2 = new System.Windows.Forms.TreeNode();
+
+                    item2.Text = tempEntityName + " (" + tempEntryData[0] + ") (" + temp_temp_index.ToString() + ")";
+
+                    LoadTreeView(ref item2);
+
+                    masterTreeViewItem.Nodes.Add(item2);
+                }
+            }
         }
 
         private void UpdateTempFile()
@@ -339,19 +464,17 @@ namespace rpkg
             }
         }
 
-        private void TreeViewItem_MouseLeftButtonUpEvent(object sender, RoutedEventArgs e)
+        private void MainTreeView_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
         {
-            e.Handled = true;
-
             if (!hidden)
             {
-                TreeViewItem item = (sender as TreeViewItem);
+                System.Windows.Forms.TreeNode item = (e.Node as System.Windows.Forms.TreeNode);
 
-                item.IsSelected = true;
+                //item.IsSelected = true;
 
-                string header = item.Header.ToString();
+                string header = item.Text.ToString();
 
-                if (MainTreeView.Items.Count > 0)
+                if (MainTreeView.Nodes.Count > 0)
                 {
                     UpdateTempFile();
 
@@ -368,9 +491,9 @@ namespace rpkg
 
                     controlCount = 0;
 
-                    if ((item.Header as string).Contains("("))
+                    if (item.Text.Contains("("))
                     {
-                        string[] headerData = (item.Header as string).Replace("(", "").Replace(")", "").Split(' ');
+                        string[] headerData = item.Text.Replace("(", "").Replace(")", "").Split(' ');
 
                         string entityName = "";
 
@@ -2027,33 +2150,6 @@ namespace rpkg
             }
         }
 
-        private void LoadTreeView(UInt32 entryIndex, string entityName, ref TreeViewItem masterTreeViewItem)
-        {
-            string responseString = Marshal.PtrToStringAnsi(get_entries_with_logical_parent(temps_index, entryIndex));
-
-            string[] topLevelEntries = responseString.Trim(',').Split(',');
-
-            foreach (string entry in topLevelEntries)
-            {
-                if (entry != "")
-                {
-                    string[] tempEntryData = entry.Split('|');
-                    string tempEntityName = tempEntryData[1];
-                    UInt32 tempEntryIndex = 0;
-
-                    UInt32.TryParse(tempEntryData[0], out tempEntryIndex);
-
-                    var item = new TreeViewItem();
-
-                    item.Header = tempEntityName;
-
-                    LoadTreeView(tempEntryIndex, tempEntityName, ref item);
-
-                    masterTreeViewItem.Items.Add(item);
-                }
-            }
-        }
-
         private void GenerateTEMPFile_Click(object sender, RoutedEventArgs e)
         {
             UpdateTempFile();
@@ -2178,6 +2274,123 @@ namespace rpkg
             }
         }
 
+        private void SearchTEMPsTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (searchTEMPsInputTimer == null)
+            {
+                searchTEMPsInputTimer = new System.Windows.Threading.DispatcherTimer();
+
+                searchTEMPsInputTimer.Interval = TimeSpan.FromMilliseconds(600);
+
+                searchTEMPsInputTimer.Tick += SearchTEMPsTextBox_TimerTimeout;
+            }
+
+            searchTEMPsInputTimer.Stop();
+            searchTEMPsInputTimer.Tag = (sender as TextBox).Text;
+            searchTEMPsInputTimer.Start();
+        }
+
+        private void SearchTEMPsTextBox_TimerTimeout(object sender, EventArgs e)
+        {
+            var timer = (sender as System.Windows.Threading.DispatcherTimer);
+
+            if (timer == null)
+            {
+                return;
+            }
+
+            timer.Stop();
+
+            MainTreeView.BeginUpdate();
+
+            treeViewBackup.Restore();
+
+            if (FilterTextBox.Text.Length > 0)
+            {
+                string filter = FilterTextBox.Text.ToLower();
+                int childrenVisibleCount = 0;
+
+                foreach (System.Windows.Forms.TreeNode node in MainTreeView.Nodes)
+                {
+                    FilterNodes(node, ref filter, childrenVisibleCount);
+                }
+            }
+
+            MainTreeView.EndUpdate();
+        }
+
+        private int FilterNodes(System.Windows.Forms.TreeNode parentNode, ref string filter, int childrenVisibleCount)
+        {
+            int currentChildrenVisibleCount = 0;
+
+            if (parentNode != null)
+            {
+                if (parentNode.Nodes.Count > 0)
+                {
+                    foreach (System.Windows.Forms.TreeNode node in parentNode.Nodes)
+                    {
+                        currentChildrenVisibleCount += FilterNodes(node, ref filter, 0);
+                    }
+                }
+
+                //if (parentNode.Text.ToLower().Contains("pier_area_entrance_stairs_a (9425)"))
+                //{
+                    //MessageBoxShow("LOL!!!");
+                //}
+
+                if (!parentNode.Text.ToLower().Contains(filter) && currentChildrenVisibleCount == 0)
+                {
+                    parentNode.Nodes.Clear();
+                }
+                else
+                {
+                    if (parentNode.Nodes.Count > 0)
+                    {
+                        List<int> nodesToRemove = new List<int>();
+
+                        for (int i = 0; i < parentNode.Nodes.Count; i++)
+                        {
+                            if (!parentNode.Nodes[i].Text.ToLower().Contains(filter) && parentNode.Nodes[i].Nodes.Count < 1)
+                            {
+                                nodesToRemove.Add(i);
+                            }
+                        }
+
+                        for (int i = 0; i < nodesToRemove.Count; i++)
+                        {
+                            int toRemove = nodesToRemove.Count - i - 1;
+
+                            parentNode.Nodes[nodesToRemove[toRemove]].Remove();
+                        }
+                    }
+
+                    childrenVisibleCount++;
+                }
+            }
+
+            return childrenVisibleCount;
+        }
+
+        public class TreeViewBackup : List<TreeViewBackup>
+        {
+            public System.Windows.Forms.TreeNode Parent { get; }
+            public System.Windows.Forms.TreeNodeCollection Children { get; }
+
+            public TreeViewBackup(System.Windows.Forms.TreeNodeCollection children, System.Windows.Forms.TreeNode parent = null)
+            {
+                Parent = parent;
+                Children = children;
+                AddRange(Children.Cast<System.Windows.Forms.TreeNode>().Select(child => new TreeViewBackup(child.Nodes, child)));
+            }
+
+            public void Restore()
+            {
+                Children.Clear();
+                this.ForEach(clone => clone.Restore());
+                Children.AddRange(this.Select(n => n.Parent).ToArray());
+            }
+        }
+
         private void Exit_Click(object sender, RoutedEventArgs e)
         {
             clear_temp_tblu_data();
@@ -2219,6 +2432,9 @@ namespace rpkg
         public string inputFolder = "";
         public string outputFolder = "";
         public bool hidden = false;
+        private System.Windows.Threading.DispatcherTimer searchTEMPsInputTimer;
+        public string currentThemeBrightness = "Dark";
+        public TreeViewBackup treeViewBackup;
 
         enum RPKGStatus
         {
@@ -2351,5 +2567,21 @@ namespace rpkg
 
         [DllImport("rpkg.dll", EntryPoint = "get_all_bricks", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr get_all_bricks(UInt32 temps_index);
+
+        [DllImport("rpkg.dll", EntryPoint = "search_temp_files", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int search_temp_files(UInt32 temps_index, string search_str, int max_results);
+
+        [DllImport("rpkg.dll", EntryPoint = "get_search_temp_files", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr get_search_temp_files();
+
+        private void ExpandAllNodes_Click(object sender, RoutedEventArgs e)
+        {
+            MainTreeView.ExpandAll();
+        }
+
+        private void CollapseAllNodes_Click(object sender, RoutedEventArgs e)
+        {
+            MainTreeView.CollapseAll();
+        }
     }
 }

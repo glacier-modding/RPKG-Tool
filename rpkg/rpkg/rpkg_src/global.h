@@ -54,6 +54,8 @@ enum FileType3D
     OBJ_SINGLE
 };
 
+extern std::string DirectXFormatsStrings[116];
+
 struct vector2
 {
     float x = 0;
@@ -116,17 +118,20 @@ struct asset3d
     std::vector<uint16_t>* indexes;
     std::vector<vector4>* vertexes;
     std::vector<vector4>* normals;
+    std::vector<vector4>* tangents;
     std::vector<vector2>* uvs;
     std::vector<rgba>* colors;
 };
 
 struct asset3ds
 {
-    std::vector<std::vector<uint16_t>>* indexes;
-    std::vector<std::vector<vector4>>* vertexes;
-    std::vector<std::vector<vector4>>* normals;
-    std::vector<std::vector<vector2>>* uvs;
-    std::vector<std::vector<rgba>>* colors;
+    std::string name = "";
+    std::vector<std::vector<uint16_t>> indexes;
+    std::vector<std::vector<vector4>> vertexes;
+    std::vector<std::vector<vector4>> normals;
+    std::vector<std::vector<vector4>> tangents;
+    std::vector<std::vector<vector2>> uvs;
+    std::vector<std::vector<rgba>> colors;
 };
 
 extern std::vector<rpkg> rpkgs;
