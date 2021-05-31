@@ -442,6 +442,38 @@ namespace rpkg
             return 0;
         }
 
+        public static void ExtractMODELThread(string command, string input_path, string filter, string search, string search_type, string output_path)
+        {
+            int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+        }
+
+        public int ExtractMODEL(string command, string input_path, string filter, string search, string search_type, string output_path)
+        {
+            Thread thread = new Thread(() => ExtractMODELThread(command, input_path, filter, search, search_type, output_path));
+            thread.SetApartmentState(ApartmentState.MTA);
+            thread.Start();
+            thread.Join();
+            thread = null;
+
+            return 0;
+        }
+
+        public static void RebuildMODELThread(string command, string input_path, string filter, string search, string search_type, string output_path)
+        {
+            int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+        }
+
+        public int RebuildMODEL(string command, string input_path, string filter, string search, string search_type, string output_path)
+        {
+            Thread thread = new Thread(() => RebuildMODELThread(command, input_path, filter, search, search_type, output_path));
+            thread.SetApartmentState(ApartmentState.MTA);
+            thread.Start();
+            thread.Join();
+            thread = null;
+
+            return 0;
+        }
+
         private void MainTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             if (oneOrMoreRPKGsHaveBeenImported)
@@ -1272,7 +1304,115 @@ namespace rpkg
 
                     progress.operation = (int)Progress.Operation.MASS_EXTRACT;
 
-                    if (rightClickedOnName == "LOCR" || rightClickedOnName == "DLGE" || rightClickedOnName == "RTLV")
+                    if (rightClickedOnName == "PRIM")
+                    {
+                        string[] buttons = { "Extract All " + rightClickedOnName, "Extract All " + rightClickedOnName + " To GLB", "Cancel" };
+
+                        RightClickMenu rightClickMenu = new RightClickMenu(buttons);
+
+                        rightClickMenu.Left = PointToScreen(Mouse.GetPosition(null)).X;
+                        rightClickMenu.Top = PointToScreen(Mouse.GetPosition(null)).Y;
+
+                        rightClickMenu.ShowDialog();
+
+                        //MessageBoxShow(rightClickMenu.buttonPressed);
+                        //MessageBoxShow(rpkgFilePath);
+
+                        if (rightClickMenu.buttonPressed == "button0")
+                        {
+                            command = "-extract_from_rpkg";
+
+                            filter = rightClickedOnName;
+
+                            progress.message.Content = "Extracting All " + rightClickedOnName + "...";
+                        }
+                        else if (rightClickMenu.buttonPressed == "button1")
+                        {
+                            command = "-extract_all_prim_to_glb_from";
+
+                            progress.message.Content = "Extracting All " + rightClickedOnName + " To GLB...";
+
+                            string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + rightClickedOnName + " To:");
+
+                            if (temp_outputFolder == "")
+                            {
+                                rightClickedOn = 0;
+
+                                rightClickedOnFirst = true;
+
+                                return;
+                            }
+
+                            output_path = temp_outputFolder;
+                        }
+                        else
+                        {
+                            rightClickedOn = 0;
+
+                            rightClickedOnFirst = true;
+
+                            return;
+                        }
+
+                        rightClickedOn = 0;
+
+                        rightClickedOnFirst = true;
+                    }
+                    else if (rightClickedOnName == "TEXT")
+                    {
+                        string[] buttons = { "Extract All " + rightClickedOnName, "Extract All " + rightClickedOnName + " To TGA", "Cancel" };
+
+                        RightClickMenu rightClickMenu = new RightClickMenu(buttons);
+
+                        rightClickMenu.Left = PointToScreen(Mouse.GetPosition(null)).X;
+                        rightClickMenu.Top = PointToScreen(Mouse.GetPosition(null)).Y;
+
+                        rightClickMenu.ShowDialog();
+
+                        //MessageBoxShow(rightClickMenu.buttonPressed);
+                        //MessageBoxShow(rpkgFilePath);
+
+                        if (rightClickMenu.buttonPressed == "button0")
+                        {
+                            command = "-extract_from_rpkg";
+
+                            filter = rightClickedOnName;
+
+                            progress.message.Content = "Extracting All " + rightClickedOnName + "...";
+                        }
+                        else if (rightClickMenu.buttonPressed == "button1")
+                        {
+                            command = "-extract_all_text_from";
+
+                            progress.message.Content = "Extracting All " + rightClickedOnName + " To TGA...";
+
+                            string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + rightClickedOnName + " To:");
+
+                            if (temp_outputFolder == "")
+                            {
+                                rightClickedOn = 0;
+
+                                rightClickedOnFirst = true;
+
+                                return;
+                            }
+
+                            output_path = temp_outputFolder;
+                        }
+                        else
+                        {
+                            rightClickedOn = 0;
+
+                            rightClickedOnFirst = true;
+
+                            return;
+                        }
+
+                        rightClickedOn = 0;
+
+                        rightClickedOnFirst = true;
+                    }
+                    else if (rightClickedOnName == "LOCR" || rightClickedOnName == "DLGE" || rightClickedOnName == "RTLV")
                     {
                         string[] buttons = { "Extract All " + rightClickedOnName, "Extract All " + rightClickedOnName + " To JSON", "Cancel" };
 
@@ -1521,9 +1661,9 @@ namespace rpkg
 
                     if (hashType == "PRIM")
                     {
-                        string[] buttons = { "Extract " + rightClickedOnName, "Extract " + rightClickedOnName + " To GLB File", "Cancel" };
+                        string[] buttons = { "Extract " + rightClickedOnName, "Extract " + rightClickedOnName + " MODEL To GLB/TGA File(s)", "Extract " + rightClickedOnName + " To GLB File", "Cancel" };
 
-                        buttonCount = 3;
+                        buttonCount = 4;
 
                         rightClickMenu = new RightClickMenu(buttons);
                     }
@@ -1638,13 +1778,77 @@ namespace rpkg
                     {
                         if (hashType == "PRIM")
                         {
-                            command = "-extract_prim_to_glb_single_from";
+                            string runtimeDirectory = rpkgFilePath.Substring(0, rpkgFilePath.LastIndexOf("\\"));
+
+                            if (!runtimeDirectory.EndsWith("runtime", StringComparison.OrdinalIgnoreCase))
+                            {
+                                MessageBoxShow("The current RPKG does not exist in the Hitman runtime directory, can not perform PRIM model extraction.");
+
+                                rightClickedOn = 0;
+
+                                rightClickedOnFirst = true;
+
+                                return;
+                            }
+
+                            List<string> rpkgFiles = new List<string>();
+
+                            foreach (var filePath in Directory.GetFiles(runtimeDirectory))
+                            {
+                                if (filePath.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    rpkgFiles.Add(filePath);
+                                }
+                            }
+
+                            rpkgFiles.Sort(new NaturalStringComparer());
+
+                            foreach (string filePath in rpkgFiles)
+                            {
+                                ImportRPKGFile(filePath);
+                            }
+
+                            command = "-extract_prim_model_from";
 
                             progress.operation = (int)Progress.Operation.GENERAL;
 
                             filter = hashValue;
 
-                            progress.message.Content = "Extracting " + rightClickedOnName + " To GLB File...";
+                            progress.message.Content = "Extracting " + rightClickedOnName + " To GLB/TGA File(s)...";
+
+                            string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + rightClickedOnName + " To:");
+
+                            if (temp_outputFolder == "")
+                            {
+                                rightClickedOn = 0;
+
+                                rightClickedOnFirst = true;
+
+                                return;
+                            }
+
+                            output_path = temp_outputFolder;
+
+                            int temp_return_value = reset_task_status();
+
+                            execute_task temp_rpkgExecute = ExtractMODEL;
+
+                            IAsyncResult temp_ar = temp_rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
+
+                            progress.ShowDialog();
+
+                            if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
+                            {
+                                //MessageBoxShow(progress.task_status_string);
+
+                                return;
+                            }
+
+                            rightClickedOn = 0;
+
+                            rightClickedOnFirst = true;
+
+                            return;
                         }
                         else if (hashType == "TEXT")
                         {
@@ -1917,7 +2121,17 @@ namespace rpkg
                     }
                     else if (rightClickMenu.buttonPressed == "button2" && buttonCount == 4)
                     {
-                        if (hashType == "TEMP")
+                        if (hashType == "PRIM")
+                        {
+                            command = "-extract_prim_to_glb_from";
+
+                            progress.operation = (int)Progress.Operation.GENERAL;
+
+                            filter = hashValue;
+
+                            progress.message.Content = "Extracting " + rightClickedOnName + " To GLB File...";
+                        }
+                        else if (hashType == "TEMP")
                         {
                             command = "-extract_all_prim_of_temp_from";
 
@@ -1925,6 +2139,7 @@ namespace rpkg
 
                             progress.message.Content = "Extracting PRIMs linked to " + rightClickedOnName + " To GLB File(s)...";
                         }
+
                         string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + rightClickedOnName + " To:");
 
                         if (outputFolder == "")
@@ -2119,6 +2334,10 @@ namespace rpkg
             {
                 massExtractName = "TEXT";
             }
+            else if (massExtractButton.Contains("PRIM"))
+            {
+                massExtractName = "PRIM";
+            }
 
             string inputFolder = SelectFolder("input", "Select Input Folder (Runtime folder or other folder with multiple RPKGs) To Extract " + massExtractName + " From:");
 
@@ -2264,6 +2483,12 @@ namespace rpkg
 
                     progress.message.Content = "Extracting GFXF...";
                 }
+                else if (massExtractName == "PRIM")
+                {
+                    command = "-extract_all_prim_to_glb_from";
+
+                    progress.message.Content = "Extracting PRIM...";
+                }
 
                 int return_value = reset_task_status();
 
@@ -2304,9 +2529,17 @@ namespace rpkg
             {
                 rebuildType = "RTLV";
             }
+            else if (rebuildButton.Contains("PRIM/TEXT/TEXD"))
+            {
+                rebuildType = "PRIM/TEXT/TEXD";
+            }
             else if (rebuildButton.Contains("TEXT"))
             {
                 rebuildType = "TEXT";
+            }
+            else if (rebuildButton.Contains("PRIM"))
+            {
+                rebuildType = "PRIM";
             }
             else if (rebuildButton.Contains("WWEV"))
             {
@@ -2330,7 +2563,28 @@ namespace rpkg
 
                 progress.ProgressBar.IsIndeterminate = true;
 
-                if (rebuildType == "TEXT")
+                if (rebuildType == "PRIM/TEXT/TEXD")
+                {
+                    command = "-rebuild_prim_model_in";
+
+                    progress.message.Content = "Rebuilding All PRIM Models in " + input_path + "...";
+
+                    int return_value = reset_task_status();
+
+                    execute_task rpkgExecute = RebuildMODEL;
+
+                    IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
+
+                    progress.ShowDialog();
+
+                    if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
+                    {
+                        //MessageBoxShow(progress.task_status_string);
+
+                        return;
+                    }
+                }
+                else if (rebuildType == "TEXT")
                 {
                     command = "-rebuild_text_in";
 
@@ -2353,7 +2607,13 @@ namespace rpkg
                 }
                 else
                 {
-                    if (rebuildType == "DLGE")
+                    if (rebuildType == "PRIM")
+                    {
+                        command = "-rebuild_prim_in";
+
+                        progress.message.Content = "Rebuilding All PRIM in " + input_path + "...";
+                    }
+                    else if (rebuildType == "DLGE")
                     {
                         command = "-rebuild_dlge_from_json_from";
 

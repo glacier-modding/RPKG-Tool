@@ -165,11 +165,11 @@ void rpkg_function::extract_all_prim_from(std::string& input_path, std::string& 
         uint64_t prim_count_current = 0;
         uint64_t prim_hash_size_current = 0;
 
-        std::string message = "Extracting PRIM to OBJ files: ";
+        std::string message = "Extracting PRIM to GLB files: ";
 
         if (filter != "")
         {
-            LOG("Extracting PRIM to OBJ files with filter \"" << filter << "\"");
+            LOG("Extracting PRIM to GLB files with filter \"" << filter << "\"");
         }
 
         std::map<std::string, uint32_t> prim_name_map;

@@ -105,12 +105,35 @@ struct uint8_t_6
     uint8_t f = 0;
 };
 
+struct matrix42
+{
+    vector4 x;
+    vector4 y;
+};
+
 struct matrix43
 {
     vector3 x_axis;
     vector3 y_axis;
     vector3 z_axis;
     vector3 transform;
+};
+
+struct matrix44
+{
+    vector4 x;
+    vector4 y;
+    vector4 z;
+    vector4 w;
+};
+
+struct bone_data
+{
+    vector3 position;
+    uint32_t parent_id;
+    vector3 size;
+    std::string name;
+    uint16_t part;
 };
 
 struct asset3d
@@ -125,13 +148,27 @@ struct asset3d
 
 struct asset3ds
 {
-    std::string name = "";
+    std::string root_name = "";
+    std::vector<std::string> names;
     std::vector<std::vector<uint16_t>> indexes;
-    std::vector<std::vector<vector4>> vertexes;
-    std::vector<std::vector<vector4>> normals;
-    std::vector<std::vector<vector4>> tangents;
-    std::vector<std::vector<vector2>> uvs;
-    std::vector<std::vector<rgba>> colors;
+    std::vector<std::vector<float>> vertexes;
+    std::vector<std::vector<float>> normals;
+    std::vector<std::vector<float>> tangents;
+    std::vector<std::vector<float>> uvs;
+    std::vector<std::vector<uint8_t>> colors;
+    std::vector<bool> weighted;
+    std::vector<std::vector<float>> vertexes_weighted_weights_0;
+    std::vector<std::vector<float>> vertexes_weighted_weights_1;
+    std::vector<std::vector<uint8_t>> vertexes_weighted_bone_ids_0;
+    std::vector<std::vector<uint8_t>> vertexes_weighted_bone_ids_1;
+    std::vector<std::vector<char>> cloths;
+    std::vector<std::vector<char>> collisions;
+    std::vector<std::vector<uint32_t>> bones_nodes;
+    std::vector<std::vector<uint8_t>> bones_infos;
+    std::vector<std::vector<uint16_t>> bones_indices;
+    std::vector<bone_data> bones_data;
+    std::vector<float> bones_positions;
+    std::vector<float> bones_inverse_matrices;
 };
 
 extern std::vector<rpkg> rpkgs;

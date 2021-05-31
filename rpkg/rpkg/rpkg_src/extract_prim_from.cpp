@@ -85,15 +85,34 @@ void rpkg_function::extract_prim_from(std::string& input_path, std::string& filt
 
                         prim temp_prim(rpkg_index, it->second);
 
-                        if (temp_prim.asset3ds_data.vertexes.size() > 0)
+                        if (temp_prim.asset3ds_data.vertexes.size() > 0 && temp_prim.success)
                         {
                             if (type == GLB_SINGLE)
                             {
-                                std::string asset_file_name = file::output_path_append(rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name + ".glb", output_path);
+                                std::string asset_file_name = "";
+
+                                if (output_path == "")
+                                {
+                                    asset_file_name = std::filesystem::current_path().generic_string() + "/" + rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name + ".glb";
+                                }
+                                else
+                                {
+                                    asset_file_name = file::output_path_append(rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name + ".glb", output_path);
+                                }
+
+                                file::create_directories(output_path);
 
                                 prim_asset_file_names.push_back(asset_file_name);
 
-                                //temp_prim.extract_meta(output_path);
+                                std::string meta_path = output_path + "\\" + "metas";
+
+                                file::create_directories(meta_path);
+
+                                temp_prim.extract_meta(meta_path);
+
+                                std::string hash_meta_file_name = file::output_path_append(rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name, meta_path);
+
+                                rpkg_function::extract_hash_meta(rpkg_index, it->second, hash_meta_file_name);
 
                                 gltf::output_to_single_file(temp_prim.asset3ds_data, asset_file_name, type);
                             }
@@ -103,7 +122,7 @@ void rpkg_function::extract_prim_from(std::string& input_path, std::string& filt
 
                                 prim_asset_file_names.push_back(asset_file_name);
 
-                                //temp_prim.extract_meta(output_path);
+                                temp_prim.extract_meta(output_path);
 
                                 gltf::output_to_single_file(temp_prim.asset3ds_data, asset_file_name, type);
                             }

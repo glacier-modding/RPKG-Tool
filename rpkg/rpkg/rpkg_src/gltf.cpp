@@ -1,519 +1,536 @@
 #include "gltf.h"
 #include "file.h"
 #include "util.h"
+#include <GLTFSDK/BufferBuilder.h>
+#include <GLTFSDK/IStreamWriter.h>
+#include <GLTFSDK/GLBResourceWriter.h>
+#include <GLTFSDK/Serialize.h>
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <assert.h>
+
+using namespace Microsoft::glTF;
+
+class StreamWriter : public IStreamWriter
+{
+public:
+    StreamWriter(std::filesystem::path pathBase) : m_pathBase(std::move(pathBase))
+    {
+        assert(m_pathBase.has_root_path());
+    }
+
+    std::shared_ptr<std::ostream> GetOutputStream(const std::string& filename) const override
+    {
+        auto streamPath = m_pathBase / std::filesystem::u8path(filename);
+        auto stream = std::make_shared<std::ofstream>(streamPath, std::ios_base::binary);
+
+        if (!stream || !(*stream))
+        {
+            throw std::runtime_error("Unable to create a valid output stream for uri: " + filename);
+        }
+
+        return stream;
+    }
+
+private:
+    std::filesystem::path m_pathBase;
+};
 
 void gltf::output_to_single_file(asset3ds& asset3ds_data, std::string& file_path, int type)
 {
-    char char2[2];
-    char char4[4];
-
-    uint16_t bytes2 = 0;
-    uint32_t bytes4 = 0;
-
-    std::vector<std::vector<char>> gltf_bin_file_data;
-
-    uint64_t gltf_bin_file_data_total_size = 0;
-
-    std::vector<uint16_t> indexes_min;
-    std::vector<uint16_t> indexes_max;
-
-    std::vector<vector3> vertexes_min;
-    std::vector<vector3> vertexes_max;
-
-    std::vector<vector3> normals_min;
-    std::vector<vector3> normals_max;
-
-    std::vector<vector2> uvs_min;
-    std::vector<vector2> uvs_max;
-
-    std::vector<uint32_t> buffer_offset_aligned_1;
-    std::vector<uint32_t> buffer_offset_aligned_2;
-    std::vector<uint32_t> buffer_offset_aligned_3;
-    std::vector<uint32_t> buffer_offset_aligned_4;
+    std::vector<std::vector<float>> vertexes_min;
+    std::vector<std::vector<float>> vertexes_max;
 
     for (uint32_t a = 0; a < asset3ds_data.indexes.size(); a++)
     {
-        std::vector<char> temp_gltf_bin_file_data;
+        std::vector<float> temp_vertexes_min;
+        std::vector<float> temp_vertexes_max;
 
-        uint16_t temp_indexes_min = 0;
-        uint16_t temp_indexes_max = 0;
-
-        vector3 temp_vertexes_min;
-        vector3 temp_vertexes_max;
-
-        vector3 temp_normals_min;
-        vector3 temp_normals_max;
-
-        vector2 temp_uvs_min;
-        vector2 temp_uvs_max;
-
-        uint32_t temp_buffer_offset_aligned_1 = 0;
-        uint32_t temp_buffer_offset_aligned_2 = 0;
-        uint32_t temp_buffer_offset_aligned_3 = 0;
-        uint32_t temp_buffer_offset_aligned_4 = 0;
-
-        for (uint32_t v = 0; v < asset3ds_data.indexes.at(a).size(); v++)
+        for (uint32_t v = 0; v < (asset3ds_data.vertexes.at(a).size() / 3); v++)
         {
+            uint32_t x = v * 3;
+            uint32_t y = v * 3 + 1;
+            uint32_t z = v * 3 + 2;
+
             if (v == 0)
             {
-                temp_indexes_min = asset3ds_data.indexes.at(a).at(v);
-                temp_indexes_max = asset3ds_data.indexes.at(a).at(v);
+                temp_vertexes_min.push_back(asset3ds_data.vertexes.at(a).at(x));
+                temp_vertexes_min.push_back(asset3ds_data.vertexes.at(a).at(y));
+                temp_vertexes_min.push_back(asset3ds_data.vertexes.at(a).at(z));
+                temp_vertexes_max.push_back(asset3ds_data.vertexes.at(a).at(x));
+                temp_vertexes_max.push_back(asset3ds_data.vertexes.at(a).at(y));
+                temp_vertexes_max.push_back(asset3ds_data.vertexes.at(a).at(z));
             }
             else
             {
-                if (asset3ds_data.indexes.at(a).at(v) < temp_indexes_min)
-                    temp_indexes_min = asset3ds_data.indexes.at(a).at(v);
-                if (asset3ds_data.indexes.at(a).at(v) > temp_indexes_max)
-                    temp_indexes_max = asset3ds_data.indexes.at(a).at(v);
-            }
-
-            std::memcpy(&char2, &asset3ds_data.indexes.at(a).at(v), sizeof(bytes2));
-
-            for (uint32_t d = 0; d < 2; d++)
-            {
-                temp_gltf_bin_file_data.push_back(char2[d]);
-            }
-        }
-
-        while (temp_gltf_bin_file_data.size() % 4 != 0)
-        {
-            temp_gltf_bin_file_data.push_back(0x0);
-        }
-
-        temp_buffer_offset_aligned_1 = temp_gltf_bin_file_data.size();
-
-        temp_buffer_offset_aligned_2 = temp_gltf_bin_file_data.size();
-
-        for (uint32_t v = 0; v < asset3ds_data.vertexes.at(a).size(); v++)
-        {
-            if (v == 0)
-            {
-                temp_vertexes_min.x = asset3ds_data.vertexes.at(a).at(v).x;
-                temp_vertexes_min.y = asset3ds_data.vertexes.at(a).at(v).y;
-                temp_vertexes_min.z = asset3ds_data.vertexes.at(a).at(v).z;
-                temp_vertexes_max.x = asset3ds_data.vertexes.at(a).at(v).x;
-                temp_vertexes_max.y = asset3ds_data.vertexes.at(a).at(v).y;
-                temp_vertexes_max.z = asset3ds_data.vertexes.at(a).at(v).z;
-            }
-            else
-            {
-                if (asset3ds_data.vertexes.at(a).at(v).x < temp_vertexes_min.x)
-                    temp_vertexes_min.x = asset3ds_data.vertexes.at(a).at(v).x;
-                if (asset3ds_data.vertexes.at(a).at(v).x > temp_vertexes_max.x)
-                    temp_vertexes_max.x = asset3ds_data.vertexes.at(a).at(v).x;
-                if (asset3ds_data.vertexes.at(a).at(v).y < temp_vertexes_min.y)
-                    temp_vertexes_min.y = asset3ds_data.vertexes.at(a).at(v).y;
-                if (asset3ds_data.vertexes.at(a).at(v).y > temp_vertexes_max.y)
-                    temp_vertexes_max.y = asset3ds_data.vertexes.at(a).at(v).y;
-                if (asset3ds_data.vertexes.at(a).at(v).z < temp_vertexes_min.z)
-                    temp_vertexes_min.z = asset3ds_data.vertexes.at(a).at(v).z;
-                if (asset3ds_data.vertexes.at(a).at(v).z > temp_vertexes_max.z)
-                    temp_vertexes_max.z = asset3ds_data.vertexes.at(a).at(v).z;
-            }
-
-            std::memcpy(&char4, &asset3ds_data.vertexes.at(a).at(v).x, sizeof(bytes4));
-
-            for (uint32_t d = 0; d < 4; d++)
-            {
-                temp_gltf_bin_file_data.push_back(char4[d]);
-            }
-
-            std::memcpy(&char4, &asset3ds_data.vertexes.at(a).at(v).y, sizeof(bytes4));
-
-            for (uint32_t d = 0; d < 4; d++)
-            {
-                temp_gltf_bin_file_data.push_back(char4[d]);
-            }
-
-            std::memcpy(&char4, &asset3ds_data.vertexes.at(a).at(v).z, sizeof(bytes4));
-
-            for (uint32_t d = 0; d < 4; d++)
-            {
-                temp_gltf_bin_file_data.push_back(char4[d]);
+                if (asset3ds_data.vertexes.at(a).at(x) < temp_vertexes_min.at(0))
+                    temp_vertexes_min.at(0) = asset3ds_data.vertexes.at(a).at(x);
+                if (asset3ds_data.vertexes.at(a).at(x) > temp_vertexes_max.at(0))
+                    temp_vertexes_max.at(0) = asset3ds_data.vertexes.at(a).at(x);
+                if (asset3ds_data.vertexes.at(a).at(y) < temp_vertexes_min.at(1))
+                    temp_vertexes_min.at(1) = asset3ds_data.vertexes.at(a).at(y);
+                if (asset3ds_data.vertexes.at(a).at(y) > temp_vertexes_max.at(1))
+                    temp_vertexes_max.at(1) = asset3ds_data.vertexes.at(a).at(y);
+                if (asset3ds_data.vertexes.at(a).at(z) < temp_vertexes_min.at(2))
+                    temp_vertexes_min.at(2) = asset3ds_data.vertexes.at(a).at(z);
+                if (asset3ds_data.vertexes.at(a).at(z) > temp_vertexes_max.at(2))
+                    temp_vertexes_max.at(2) = asset3ds_data.vertexes.at(a).at(z);
             }
         }
-
-        while (temp_gltf_bin_file_data.size() % 4 != 0)
-        {
-            temp_gltf_bin_file_data.push_back(0x0);
-        }
-
-        temp_buffer_offset_aligned_2 = temp_gltf_bin_file_data.size() - temp_buffer_offset_aligned_2;
-
-        temp_buffer_offset_aligned_3 = temp_gltf_bin_file_data.size();
-
-        for (uint32_t v = 0; v < asset3ds_data.normals.at(a).size(); v++)
-        {
-            if (v == 0)
-            {
-                temp_normals_min.x = asset3ds_data.normals.at(a).at(v).x;
-                temp_normals_min.y = asset3ds_data.normals.at(a).at(v).y;
-                temp_normals_min.z = asset3ds_data.normals.at(a).at(v).z;
-                temp_normals_max.x = asset3ds_data.normals.at(a).at(v).x;
-                temp_normals_max.y = asset3ds_data.normals.at(a).at(v).y;
-                temp_normals_max.z = asset3ds_data.normals.at(a).at(v).z;
-            }
-            else
-            {
-                if (asset3ds_data.normals.at(a).at(v).x < temp_normals_min.x)
-                    temp_normals_min.x = asset3ds_data.normals.at(a).at(v).x;
-                if (asset3ds_data.normals.at(a).at(v).x > temp_normals_max.x)
-                    temp_normals_max.x = asset3ds_data.normals.at(a).at(v).x;
-                if (asset3ds_data.normals.at(a).at(v).y < temp_normals_min.y)
-                    temp_normals_min.y = asset3ds_data.normals.at(a).at(v).y;
-                if (asset3ds_data.normals.at(a).at(v).y > temp_normals_max.y)
-                    temp_normals_max.y = asset3ds_data.normals.at(a).at(v).y;
-                if (asset3ds_data.normals.at(a).at(v).z < temp_normals_min.z)
-                    temp_normals_min.z = asset3ds_data.normals.at(a).at(v).z;
-                if (asset3ds_data.normals.at(a).at(v).z > temp_normals_max.z)
-                    temp_normals_max.z = asset3ds_data.normals.at(a).at(v).z;
-            }
-
-            std::memcpy(&char4, &asset3ds_data.normals.at(a).at(v).x, sizeof(bytes4));
-
-            for (uint32_t d = 0; d < 4; d++)
-            {
-                temp_gltf_bin_file_data.push_back(char4[d]);
-            }
-
-            std::memcpy(&char4, &asset3ds_data.normals.at(a).at(v).y, sizeof(bytes4));
-
-            for (uint32_t d = 0; d < 4; d++)
-            {
-                temp_gltf_bin_file_data.push_back(char4[d]);
-            }
-
-            std::memcpy(&char4, &asset3ds_data.normals.at(a).at(v).z, sizeof(bytes4));
-
-            for (uint32_t d = 0; d < 4; d++)
-            {
-                temp_gltf_bin_file_data.push_back(char4[d]);
-            }
-        }
-
-        while (temp_gltf_bin_file_data.size() % 4 != 0)
-        {
-            temp_gltf_bin_file_data.push_back(0x0);
-        }
-
-        temp_buffer_offset_aligned_3 = temp_gltf_bin_file_data.size() - temp_buffer_offset_aligned_3;
-
-        temp_buffer_offset_aligned_4 = temp_gltf_bin_file_data.size();
-
-        for (uint32_t v = 0; v < asset3ds_data.uvs.at(a).size(); v++)
-        {
-            if (v == 0)
-            {
-                temp_uvs_min.x = asset3ds_data.uvs.at(a).at(v).x;
-                temp_uvs_min.y = asset3ds_data.uvs.at(a).at(v).y;
-                temp_uvs_max.x = asset3ds_data.uvs.at(a).at(v).x;
-                temp_uvs_max.y = asset3ds_data.uvs.at(a).at(v).y;
-            }
-            else
-            {
-                if (asset3ds_data.uvs.at(a).at(v).x < temp_uvs_min.x)
-                    temp_uvs_min.x = asset3ds_data.uvs.at(a).at(v).x;
-                if (asset3ds_data.uvs.at(a).at(v).x > temp_uvs_max.x)
-                    temp_uvs_max.x = asset3ds_data.uvs.at(a).at(v).x;
-                if (asset3ds_data.uvs.at(a).at(v).y < temp_uvs_min.y)
-                    temp_uvs_min.y = asset3ds_data.uvs.at(a).at(v).y;
-                if (asset3ds_data.uvs.at(a).at(v).y > temp_uvs_max.y)
-                    temp_uvs_max.y = asset3ds_data.uvs.at(a).at(v).y;
-            }
-
-            std::memcpy(&char4, &asset3ds_data.uvs.at(a).at(v).x, sizeof(bytes4));
-
-            for (uint32_t d = 0; d < 4; d++)
-            {
-                temp_gltf_bin_file_data.push_back(char4[d]);
-            }
-
-            std::memcpy(&char4, &asset3ds_data.uvs.at(a).at(v).y, sizeof(bytes4));
-
-            for (uint32_t d = 0; d < 4; d++)
-            {
-                temp_gltf_bin_file_data.push_back(char4[d]);
-            }
-        }
-
-        while (temp_gltf_bin_file_data.size() % 4 != 0)
-        {
-            temp_gltf_bin_file_data.push_back(0x0);
-        }
-
-        temp_buffer_offset_aligned_4 = temp_gltf_bin_file_data.size() - temp_buffer_offset_aligned_4;
-
-        gltf_bin_file_data_total_size += temp_gltf_bin_file_data.size();
-
-        gltf_bin_file_data.push_back(temp_gltf_bin_file_data);
-
-        indexes_min.push_back(temp_indexes_min);
-        indexes_max.push_back(temp_indexes_max);
 
         vertexes_min.push_back(temp_vertexes_min);
         vertexes_max.push_back(temp_vertexes_max);
-
-        normals_min.push_back(temp_normals_min);
-        normals_max.push_back(temp_normals_max);
-
-        uvs_min.push_back(temp_uvs_min);
-        uvs_max.push_back(temp_uvs_max);
-
-        buffer_offset_aligned_1.push_back(temp_buffer_offset_aligned_1);
-        buffer_offset_aligned_2.push_back(temp_buffer_offset_aligned_2);
-        buffer_offset_aligned_3.push_back(temp_buffer_offset_aligned_3);
-        buffer_offset_aligned_4.push_back(temp_buffer_offset_aligned_4);
     }
 
-    std::string gltf_json_file = "{\"asset\":{\"generator\":\"RPKG\",\"version\":\"2.0\"},\"scene\":0,\"scenes\":[{\"nodes\":[";
+    std::filesystem::path glb_path = file_path;
 
-    for (int i = 0; i < gltf_bin_file_data.size(); i++)
+    auto streamWriter = std::make_unique<StreamWriter>(glb_path.parent_path());
+
+    std::filesystem::path glb_file_name = glb_path.filename();
+
+    std::unique_ptr<ResourceWriter> resourceWriter;
+
+    resourceWriter = std::make_unique<GLBResourceWriter>(std::move(streamWriter));
+
+    if (!resourceWriter)
     {
-        gltf_json_file.append(std::to_string(i));
-
-        if (i < (gltf_bin_file_data.size() - 1))
-        {
-            gltf_json_file.push_back(',');
-        }
+        throw std::runtime_error("Command line argument path filename extension must be .gltf or .glb");
     }
 
-    gltf_json_file += "]}],\"nodes\":[";
+    Document document;
 
-    for (int i = 0; i < gltf_bin_file_data.size(); i++)
+    BufferBuilder bufferBuilder(std::move(resourceWriter));
+
+    const char* bufferId = nullptr;
+
+    bufferId = GLB_BUFFER_ID;
+
+    bufferBuilder.AddBuffer(bufferId);
+
+    std::vector<std::string> node_ids;
+
+    bool bones_added = false;
+
+    bool any_weighted = false;
+
+    std::vector<std::string> joints;
+
+    std::string skin_id = "";
+
+    for (uint32_t o = 0; o < asset3ds_data.vertexes.size(); o++)
     {
-        gltf_json_file.append("{\"mesh\":" + std::to_string(i) + ",\"name\":\"" + asset3ds_data.name + "_" + std::to_string(i) + "\"}");
-
-        if (i < (gltf_bin_file_data.size() - 1))
+        if (asset3ds_data.weighted.at(o))
         {
-            gltf_json_file.push_back(',');
+            any_weighted = true;
         }
     }
 
-    gltf_json_file += "],\"meshes\":[";
-
-    for (int i = 0; i < gltf_bin_file_data.size(); i++)
+    if (!any_weighted)
     {
-        int index = i * 4;
+        Node node;
 
-        //gltf_json_file.append("{\"primitives\":[{\"attributes\":{\"POSITION\":" + std::to_string(index + 1) + ",\"NORMAL\":" + std::to_string(index + 2) + +",\"TEXCOORD_0\":" + std::to_string(index + 3) + "},\"indices\":" + std::to_string(index) + ",\"material\":0}]}");
-        gltf_json_file.append("{\"primitives\":[{\"attributes\":{\"POSITION\":" + std::to_string(index + 1) + ",\"NORMAL\":" + std::to_string(index + 2) + +",\"TEXCOORD_0\":" + std::to_string(index + 3) + "},\"indices\":" + std::to_string(index) + "}]}");
+        node.name = asset3ds_data.root_name;
 
-        if (i < (gltf_bin_file_data.size() - 1))
+        node.rotation = Quaternion(std::sqrt(2.0) / 2.0, 0.0, 0.0, -std::sqrt(2.0) / 2.0);
+
+        for (uint32_t b = 1; b < (asset3ds_data.vertexes.size() + 1); b++)
         {
-            gltf_json_file.push_back(',');
+            node.children.push_back(std::to_string(b));
         }
+
+        document.nodes.Append(std::move(node), AppendIdPolicy::GenerateOnEmpty).id;
     }
 
-    //gltf_json_file += "],\"materials\":[{\"pbrMetallicRoughness\":{\"baseColorFactor\":[1.0,1.0,1.0,1.0],\"metallicFactor\":0.0,\"roughnessFactor\":0.0}}],";
-    gltf_json_file += "],";
-
-    if (type == GLB_SINGLE)
+    for (uint32_t o = 0; o < asset3ds_data.vertexes.size(); o++)
     {
-        gltf_json_file += "\"buffers\":[{\"byteLength\":" + util::uint64_t_to_string(gltf_bin_file_data_total_size) + "}],\"bufferViews\":[";
+        MeshPrimitive meshPrimitive;
+
+        bufferBuilder.AddBufferView(BufferViewTarget::ELEMENT_ARRAY_BUFFER);
+        meshPrimitive.indicesAccessorId = bufferBuilder.AddAccessor(asset3ds_data.indexes.at(o), { TYPE_SCALAR, COMPONENT_UNSIGNED_SHORT }).id;
+
+        bufferBuilder.AddBufferView(BufferViewTarget::ARRAY_BUFFER);
+        meshPrimitive.attributes["POSITION"] = bufferBuilder.AddAccessor(asset3ds_data.vertexes.at(o), { TYPE_VEC3, COMPONENT_FLOAT, false, std::move(vertexes_min.at(o)), std::move(vertexes_max.at(o)) }).id;
+
+        bufferBuilder.AddBufferView(BufferViewTarget::ARRAY_BUFFER);
+        meshPrimitive.attributes["NORMAL"] = bufferBuilder.AddAccessor(asset3ds_data.normals.at(o), { TYPE_VEC3, COMPONENT_FLOAT }).id;
+
+        //bufferBuilder.AddBufferView(BufferViewTarget::ARRAY_BUFFER);
+        //meshPrimitive.attributes["TANGENT"] = bufferBuilder.AddAccessor(asset3ds_data.tangents.at(o), { TYPE_VEC4, COMPONENT_FLOAT }).id;
+
+        bufferBuilder.AddBufferView(BufferViewTarget::ARRAY_BUFFER);
+        meshPrimitive.attributes["TEXCOORD_0"] = bufferBuilder.AddAccessor(asset3ds_data.uvs.at(o), { TYPE_VEC2, COMPONENT_FLOAT }).id;
+
+        if (asset3ds_data.colors.at(o).size() > 0)
+        {
+            bufferBuilder.AddBufferView(BufferViewTarget::ARRAY_BUFFER);
+            meshPrimitive.attributes["COLOR_0"] = bufferBuilder.AddAccessor(asset3ds_data.colors.at(o), { TYPE_VEC4, COMPONENT_UNSIGNED_BYTE, true }).id;
+        }
+
+        if (asset3ds_data.weighted.at(o))
+        {
+            any_weighted = true;
+
+            bufferBuilder.AddBufferView(BufferViewTarget::ARRAY_BUFFER);
+            meshPrimitive.attributes["JOINTS_0"] = bufferBuilder.AddAccessor(asset3ds_data.vertexes_weighted_bone_ids_0.at(o), { TYPE_VEC4, COMPONENT_UNSIGNED_BYTE }).id;
+
+            bufferBuilder.AddBufferView(BufferViewTarget::ARRAY_BUFFER);
+            meshPrimitive.attributes["JOINTS_1"] = bufferBuilder.AddAccessor(asset3ds_data.vertexes_weighted_bone_ids_1.at(o), { TYPE_VEC4, COMPONENT_UNSIGNED_BYTE }).id;
+
+            bufferBuilder.AddBufferView(BufferViewTarget::ARRAY_BUFFER);
+            meshPrimitive.attributes["WEIGHTS_0"] = bufferBuilder.AddAccessor(asset3ds_data.vertexes_weighted_weights_0.at(o), { TYPE_VEC4, COMPONENT_FLOAT }).id;
+
+            bufferBuilder.AddBufferView(BufferViewTarget::ARRAY_BUFFER);
+            meshPrimitive.attributes["WEIGHTS_1"] = bufferBuilder.AddAccessor(asset3ds_data.vertexes_weighted_weights_1.at(o), { TYPE_VEC4, COMPONENT_FLOAT }).id;
+
+            if (!bones_added)
+            {
+                bones_added = true;
+
+                std::vector<Node> bones;
+
+                for (uint32_t b = 0; b < asset3ds_data.bones_data.size(); b++)
+                {
+                    bones.emplace_back();
+
+                    bones.back().name = asset3ds_data.bones_data.at(b).name;
+                    bones.back().translation = Vector3(asset3ds_data.bones_positions.at(b * 8 + 4), asset3ds_data.bones_positions.at(b * 8 + 5), asset3ds_data.bones_positions.at(b * 8 + 6));
+                    bones.back().rotation = Quaternion(asset3ds_data.bones_positions.at(b * 8), asset3ds_data.bones_positions.at(b * 8 + 1), asset3ds_data.bones_positions.at(b * 8 + 2), asset3ds_data.bones_positions.at(b * 8 + 3));
+                }
+
+                uint32_t node_id_offset = document.nodes.Size();
+
+                for (uint32_t b = 0; b < asset3ds_data.bones_data.size(); b++)
+                {
+                    for (uint32_t a = 0; a < asset3ds_data.bones_data.size(); a++)
+                    {
+                        if (b == asset3ds_data.bones_data.at(a).parent_id)
+                        {
+                            bones.at(b).children.push_back(std::to_string(a + node_id_offset));
+                        }
+                    }
+                }
+                for (uint32_t b = 0; b < asset3ds_data.bones_data.size(); b++)
+                {
+                    joints.emplace_back(document.nodes.Append(bones.at(b), AppendIdPolicy::GenerateOnEmpty).id);
+                }
+
+                Node node;
+
+                node.name = asset3ds_data.root_name;
+                node.children.push_back(joints.front());
+                node.rotation = Quaternion(std::sqrt(2.0) / 2.0, 0.0, 0.0, -std::sqrt(2.0) / 2.0);
+
+                node_ids.push_back(document.nodes.Append(std::move(node), AppendIdPolicy::GenerateOnEmpty).id);
+
+                Skin temp_skin;
+
+                temp_skin.name = "S_" + asset3ds_data.root_name;
+
+                for (uint32_t b = 0; b < joints.size(); b++)
+                {
+                    temp_skin.jointIds.push_back(joints.at(b));
+                }
+
+                bufferBuilder.AddBufferView(BufferViewTarget::ARRAY_BUFFER);
+
+                temp_skin.inverseBindMatricesAccessorId = bufferBuilder.AddAccessor(asset3ds_data.bones_inverse_matrices, { TYPE_MAT4, COMPONENT_FLOAT }).id;
+
+                temp_skin.skeletonId = joints.front();
+
+                skin_id = document.skins.Append(std::move(temp_skin), AppendIdPolicy::GenerateOnEmpty).id;
+            }
+
+        }
+
+        Mesh mesh;
+        mesh.primitives.push_back(std::move(meshPrimitive));
+        mesh.name = asset3ds_data.names.at(o);
+
+        auto meshId = document.meshes.Append(std::move(mesh), AppendIdPolicy::GenerateOnEmpty).id;
+
+        Node node;
+        node.meshId = meshId;
+
+        if (asset3ds_data.weighted.at(o))
+        {
+            node.skinId = skin_id;
+            //node.children.push_back(joints.front());
+        }
+
+        node_ids.push_back(document.nodes.Append(std::move(node), AppendIdPolicy::GenerateOnEmpty).id);
     }
-    else if (type == GLTF_SINGLE)
+
+    Scene scene;
+
+    for (uint32_t b = 0; b < node_ids.size(); b++)
     {
-        gltf_json_file += "\"buffers\":[{\"uri\":\"" + file_path + ".bin\",\"byteLength\":" + util::uint64_t_to_string(gltf_bin_file_data_total_size) + "}],\"bufferViews\":[";
+        scene.nodes.push_back(node_ids.at(b));
     }
 
-    uint64_t buffer_offset = 0;
+    document.SetDefaultScene(std::move(scene), AppendIdPolicy::GenerateOnEmpty);
 
-    for (int i = 0; i < gltf_bin_file_data.size(); i++)
+    bufferBuilder.Output(document);
+
+    std::string manifest;
+
+    try
     {
-        gltf_json_file.append("{\"buffer\":0,\"byteOffset\":" + util::uint64_t_to_string(buffer_offset) + ",\"byteLength\":" + util::uint64_t_to_string(asset3ds_data.indexes.at(i).size() * 0x2) + ",\"target\":34963},");
-
-        std::string temp_string = util::uint64_t_to_string(asset3ds_data.vertexes.at(i).size() * 0xC);
-
-        //std::cout << (asset3ds_data.indexes.at(i).size() * 0x2) << "," << buffer_offset_aligned_1.at(i) << std::endl;
-        //std::cout << (asset3ds_data.vertexes->at(i).size() * 0xC) << "," << buffer_offset_aligned_2.at(i) << std::endl;
-        //std::cout << (asset3ds_data.normals->at(i).size() * 0xC) << "," << buffer_offset_aligned_3.at(i) << std::endl;
-        //std::cout << (asset3ds_data.uvs->at(i).size() * 0x8) << "," << buffer_offset_aligned_4.at(i) << std::endl;
-
-        buffer_offset += buffer_offset_aligned_1.at(i);
-
-        gltf_json_file.append("{\"buffer\":0,\"byteOffset\":" + util::uint64_t_to_string(buffer_offset) + ",\"byteLength\":" + temp_string + ",\"target\":34962},");
-
-        buffer_offset += buffer_offset_aligned_2.at(i);
-
-        gltf_json_file.append("{\"buffer\":0,\"byteOffset\":" + util::uint64_t_to_string(buffer_offset) + ",\"byteLength\":" + temp_string + ",\"target\":34962},");
-
-        buffer_offset += buffer_offset_aligned_3.at(i);
-
-        gltf_json_file.append("{\"buffer\":0,\"byteOffset\":" + util::uint64_t_to_string(buffer_offset) + ",\"byteLength\":" + util::uint64_t_to_string(asset3ds_data.vertexes.at(i).size() * 0x8) + ",\"target\":34962}");
-
-        buffer_offset += buffer_offset_aligned_4.at(i);
-
-        if (i < (gltf_bin_file_data.size() - 1))
-        {
-            gltf_json_file.push_back(',');
-        }
+        manifest = Serialize(document, SerializeFlags::None);
     }
-
-    gltf_json_file += "],\"accessors\":[";
-
-    for (int i = 0; i < gltf_bin_file_data.size(); i++)
+    catch (const GLTFException& ex)
     {
-        int index = i * 4;
+        std::stringstream ss;
 
-        gltf_json_file.append("{\"bufferView\":" + std::to_string(index) + ",\"byteOffset\":0,\"componentType\":5123,\"count\":" + util::uint64_t_to_string(asset3ds_data.indexes.at(i).size()) + ",\"type\":\"SCALAR\",\"max\":[" + util::uint16_t_to_string(indexes_max.at(i)) + "],\"min\":[" + util::uint16_t_to_string(indexes_min.at(i)) + "]},");
+        ss << "Microsoft::glTF::Serialize failed: ";
+        ss << ex.what();
 
-        std::string temp_string = util::uint64_t_to_string(asset3ds_data.vertexes.at(i).size());
-
-        gltf_json_file.append("{\"bufferView\":" + std::to_string(index + 1) + ",\"byteOffset\":0,\"componentType\":5126,\"count\":" + temp_string + ",\"type\":\"VEC3\",\"max\":[" + util::float_to_string(vertexes_max.at(i).x) + "," + util::float_to_string(vertexes_max.at(i).y) + "," + util::float_to_string(vertexes_max.at(i).z) + "],\"min\":[" + util::float_to_string(vertexes_min.at(i).x) + "," + util::float_to_string(vertexes_min.at(i).y) + "," + util::float_to_string(vertexes_min.at(i).z) + "]},");
-
-        gltf_json_file.append("{\"bufferView\":" + std::to_string(index + 2) + ",\"byteOffset\":0,\"componentType\":5126,\"count\":" + temp_string + ",\"type\":\"VEC3\",\"max\":[" + util::float_to_string(normals_max.at(i).x) + "," + util::float_to_string(normals_max.at(i).y) + "," + util::float_to_string(normals_max.at(i).z) + "],\"min\":[" + util::float_to_string(normals_min.at(i).x) + "," + util::float_to_string(normals_min.at(i).y) + "," + util::float_to_string(normals_min.at(i).z) + "]},");
-
-        gltf_json_file.append("{\"bufferView\":" + std::to_string(index + 3) + ",\"byteOffset\":0,\"componentType\":5126,\"count\":" + temp_string + ",\"type\":\"VEC2\",\"max\":[" + util::float_to_string(uvs_max.at(i).x) + "," + util::float_to_string(uvs_max.at(i).y) + "],\"min\":[" + util::float_to_string(uvs_min.at(i).x) + "," + util::float_to_string(uvs_min.at(i).y) + "]}");
-
-        if (i < (gltf_bin_file_data.size() - 1))
-        {
-            gltf_json_file.push_back(',');
-        }
+        throw std::runtime_error(ss.str());
     }
 
-    gltf_json_file += "]}";
+    auto& gltfResourceWriter = bufferBuilder.GetResourceWriter();
 
-    if (type == GLB_SINGLE)
-    {
-        std::ofstream output_file = std::ofstream(file_path, std::ofstream::binary);
+    auto glbResourceWriter = dynamic_cast<GLBResourceWriter*>(&gltfResourceWriter);
 
-        if (!output_file.good())
-        {
-            LOG_AND_EXIT("Error: glb file " + file_path + " could not be created.");
-        }
-
-        std::vector<char> glb_file_data_1;
-        std::vector<char> glb_file_data_2;
-        std::vector<char> json_data;
-        std::vector<char> buffer_data;
-
-        uint32_t json_size = gltf_json_file.length();
-
-        while (json_size % 4 != 0)
-        {
-            json_data.push_back(0x20);
-
-            json_size++;
-        }
-
-        uint32_t buffer_size_total = 0;
-
-        for (uint32_t i = 0; i < gltf_bin_file_data.size(); i++)
-        {
-            uint32_t buffer_size = gltf_bin_file_data.at(i).size();
-
-            buffer_size_total += buffer_size;
-        }
-
-        while (buffer_size_total % 4 != 0)
-        {
-            buffer_data.push_back(0x0);
-
-            buffer_size_total++;
-        }
-
-        glb_file_data_1.push_back(0x67);
-        glb_file_data_1.push_back(0x6C);
-        glb_file_data_1.push_back(0x54);
-        glb_file_data_1.push_back(0x46);
-        glb_file_data_1.push_back(0x2);
-        glb_file_data_1.push_back(0x0);
-        glb_file_data_1.push_back(0x0);
-        glb_file_data_1.push_back(0x0);
-
-        uint32_t glb_file_size = (uint32_t)0x1C + json_size + buffer_size_total;
-
-        std::memcpy(&char4, &glb_file_size, sizeof(bytes4));
-
-        for (uint32_t j = 0; j < 4; j++)
-        {
-            glb_file_data_1.push_back(char4[j]);
-        }
-
-        std::memcpy(&char4, &json_size, sizeof(bytes4));
-
-        for (uint32_t j = 0; j < 4; j++)
-        {
-            glb_file_data_1.push_back(char4[j]);
-        }
-
-        glb_file_data_1.push_back(0x4A);
-        glb_file_data_1.push_back(0x53);
-        glb_file_data_1.push_back(0x4F);
-        glb_file_data_1.push_back(0x4E);
-
-        std::memcpy(&char4, &buffer_size_total, sizeof(bytes4));
-
-        for (uint32_t j = 0; j < 4; j++)
-        {
-            glb_file_data_2.push_back(char4[j]);
-        }
-
-        glb_file_data_2.push_back(0x42);
-        glb_file_data_2.push_back(0x49);
-        glb_file_data_2.push_back(0x4E);
-        glb_file_data_2.push_back(0x0);
-
-        output_file.write(glb_file_data_1.data(), glb_file_data_1.size());
-
-        output_file.write(gltf_json_file.c_str(), gltf_json_file.length());
-
-        output_file.write(json_data.data(), json_data.size());
-
-        output_file.write(glb_file_data_2.data(), glb_file_data_2.size());
-
-        for (uint32_t i = 0; i < gltf_bin_file_data.size(); i++)
-        {
-            output_file.write(gltf_bin_file_data.at(i).data(), gltf_bin_file_data.at(i).size());
-        }
-
-        output_file.write(buffer_data.data(), buffer_data.size());
-
-        output_file.close();
-    }
-    else if (type == GLTF_SINGLE)
-    {
-        std::string gltf_bin_file_name = file_path + ".bin";
-
-        std::ofstream output_file = std::ofstream(gltf_bin_file_name, std::ofstream::binary);
-
-        if (!output_file.good())
-        {
-            LOG_AND_EXIT("Error: glTF bin file " + gltf_bin_file_name + " could not be created.");
-        }
-
-        uint32_t buffer_size_total = 0;
-
-        for (uint32_t i = 0; i < gltf_bin_file_data.size(); i++)
-        {
-            uint32_t buffer_size = gltf_bin_file_data.at(i).size();
-
-            buffer_size_total += buffer_size;
-
-            output_file.write(gltf_bin_file_data.at(i).data(), gltf_bin_file_data.at(i).size());
-        }
-
-        while (buffer_size_total % 4 != 0)
-        {
-            output_file.write(0x0, 1);
-
-            buffer_size_total++;
-        }
-
-        output_file.close();
-
-        output_file = std::ofstream(file_path, std::ofstream::binary);
-
-        if (!output_file.good())
-        {
-            LOG_AND_EXIT("Error: glTF file " + file_path + " could not be created.");
-        }
-
-        output_file << std::setw(4) << gltf_json_file;
-
-        output_file.close();
-    }
+    glbResourceWriter->Flush(manifest, glb_file_name.u8string());
 }
+
+/*#include "gltf.h"
+#include "file.h"
+#include "util.h"
+#include <GLTFSDK/BufferBuilder.h>
+#include <GLTFSDK/Serialize.h>
+#include <GLTFSDK/IStreamWriter.h>
+#include <GLTFSDK/GLTFResourceWriter.h>
+#include <GLTFSDK/GLBResourceWriter.h>
+#include <GLTFSDK/ExtensionsKHR.h>
+#include <GLTFSDK/Validation.h>
+#include <GLTFSDK/AnimationUtils.h>
+#include <iostream>
+#include <fstream>
+#include <filesystem>
+#include <assert.h>
+
+using namespace Microsoft::glTF;
+
+class StreamWriter : public IStreamWriter
+{
+public:
+    StreamWriter(std::filesystem::path pathBase) : m_pathBase(std::move(pathBase))
+    {
+        assert(m_pathBase.has_root_path());
+    }
+
+    // Resolves the relative URIs of any external resources declared in the glTF manifest
+    std::shared_ptr<std::ostream> GetOutputStream(const std::string& filename) const override
+    {
+        // In order to construct a valid stream:
+        // 1. The filename argument will be encoded as UTF-8 so use filesystem::u8path to
+        //    correctly construct a path instance.
+        // 2. Generate an absolute path by concatenating m_pathBase with the specified filename
+        //    path. The filesystem::operator/ uses the platform's preferred directory separator
+        //    if appropriate.
+        // 3. Always open the file stream in binary mode. The glTF SDK will handle any text
+        //    encoding issues for us.
+        auto streamPath = m_pathBase / std::filesystem::u8path(filename);
+        auto stream = std::make_shared<std::ofstream>(streamPath, std::ios_base::binary);
+
+        // Check if the stream has no errors and is ready for I/O operations
+        if (!stream || !(*stream))
+        {
+            throw std::runtime_error("Unable to create a valid output stream for uri: " + filename);
+        }
+
+        return stream;
+    }
+
+private:
+    std::filesystem::path m_pathBase;
+};
+
+void CreateTriangleResources(Document& document, BufferBuilder& bufferBuilder, std::string& accessorIdIndices, std::string& accessorIdPositions)
+{
+    // Create all the resource data (e.g. triangle indices and
+    // vertex positions) that will be written to the binary buffer
+    const char* bufferId = nullptr;
+
+    // Specify the 'special' GLB buffer ID. This informs the GLBResourceWriter that it should use
+    // the GLB container's binary chunk (usually the desired buffer location when creating GLBs)
+    if (dynamic_cast<const GLBResourceWriter*>(&bufferBuilder.GetResourceWriter()))
+    {
+        bufferId = GLB_BUFFER_ID;
+    }
+
+    // Create a Buffer - it will be the 'current' Buffer that all the BufferViews
+    // created by this BufferBuilder will automatically reference
+    bufferBuilder.AddBuffer(bufferId);
+
+    // Create a BufferView with a target of ELEMENT_ARRAY_BUFFER (as it will reference index
+    // data) - it will be the 'current' BufferView that all the Accessors created by this
+    // BufferBuilder will automatically reference
+    bufferBuilder.AddBufferView(BufferViewTarget::ELEMENT_ARRAY_BUFFER);
+
+    // Add an Accessor for the indices
+    std::vector<uint16_t> indices = {
+        0U, 1U, 2U
+    };
+
+    // Copy the Accessor's id - subsequent calls to AddAccessor may invalidate the returned reference
+    accessorIdIndices = bufferBuilder.AddAccessor(indices, { TYPE_SCALAR, COMPONENT_UNSIGNED_SHORT }).id;
+
+    // Create a BufferView with target ARRAY_BUFFER (as it will reference vertex attribute data)
+    bufferBuilder.AddBufferView(BufferViewTarget::ARRAY_BUFFER);
+
+    // Add an Accessor for the positions
+    std::vector<float> positions = {
+        0.0f, 0.0f, 0.0f, // Vertex 0
+        1.0f, 0.0f, 0.0f, // Vertex 1
+        0.0f, 1.0f, 0.0f  // Vertex 2
+    };
+
+    std::vector<float> minValues(3U, std::numeric_limits<float>::max());
+    std::vector<float> maxValues(3U, std::numeric_limits<float>::lowest());
+
+    const size_t positionCount = positions.size();
+
+    // Accessor min/max properties must be set for vertex position data so calculate them here
+    for (size_t i = 0U, j = 0U; i < positionCount; ++i, j = (i % 3U))
+    {
+        minValues[j] = std::min(positions[i], minValues[j]);
+        maxValues[j] = std::max(positions[i], maxValues[j]);
+    }
+
+    accessorIdPositions = bufferBuilder.AddAccessor(positions, { TYPE_VEC3, COMPONENT_FLOAT, false, std::move(minValues), std::move(maxValues) }).id;
+
+    // Add all of the Buffers, BufferViews and Accessors that were created using BufferBuilder to
+    // the Document. Note that after this point, no further calls should be made to BufferBuilder
+    bufferBuilder.Output(document);
+}
+
+void CreateTriangleEntities(Document& document, const std::string& accessorIdIndices, const std::string& accessorIdPositions)
+{
+    // Create a very simple glTF Document with the following hierarchy:
+    //  Scene
+    //     Node
+    //       Mesh (Triangle)
+    //         MeshPrimitive
+    //           Material (Blue)
+    // 
+    // A Document can be constructed top-down or bottom up. However, if constructed top-down
+    // then the IDs of child entities must be known in advance, which prevents using the glTF
+    // SDK's automatic ID generation functionality.
+
+    // Construct a Material
+    Material material;
+    material.metallicRoughness.baseColorFactor = Color4(0.0f, 0.0f, 1.0f, 1.0f);
+    material.metallicRoughness.metallicFactor = 0.2f;
+    material.metallicRoughness.roughnessFactor = 0.4f;
+    material.doubleSided = true;
+
+    // Add it to the Document and store the generated ID
+    auto materialId = document.materials.Append(std::move(material), AppendIdPolicy::GenerateOnEmpty).id;
+
+    // Construct a MeshPrimitive. Unlike most types in glTF, MeshPrimitives are direct children
+    // of their parent Mesh entity rather than being children of the Document. This is why they
+    // don't have an ID member.
+    MeshPrimitive meshPrimitive;
+    meshPrimitive.materialId = materialId;
+    meshPrimitive.indicesAccessorId = accessorIdIndices;
+    meshPrimitive.attributes[ACCESSOR_POSITION] = accessorIdPositions;
+
+    // Construct a Mesh and add the MeshPrimitive as a child
+    Mesh mesh;
+    mesh.primitives.push_back(std::move(meshPrimitive));
+    // Add it to the Document and store the generated ID
+    auto meshId = document.meshes.Append(std::move(mesh), AppendIdPolicy::GenerateOnEmpty).id;
+
+    // Construct a Node adding a reference to the Mesh
+    Node node;
+    node.meshId = meshId;
+    // Add it to the Document and store the generated ID
+    auto nodeId = document.nodes.Append(std::move(node), AppendIdPolicy::GenerateOnEmpty).id;
+
+    // Construct a Scene
+    Scene scene;
+    scene.nodes.push_back(nodeId);
+    // Add it to the Document, using a utility method that also sets the Scene as the Document's default
+    document.SetDefaultScene(std::move(scene), AppendIdPolicy::GenerateOnEmpty);
+}
+
+void gltf::output_to_single_file(asset3ds& asset3ds_data, std::string& file_path, int type)
+{
+    std::filesystem::path path = "R:\\test.glb";
+
+    // Pass the absolute path, without the filename, to the stream writer
+    auto streamWriter = std::make_unique<StreamWriter>(path.parent_path());
+
+    std::filesystem::path pathFile = path.filename();
+    std::filesystem::path pathFileExt = pathFile.extension();
+
+    auto MakePathExt = [](const std::string& ext)
+    {
+        return "." + ext;
+    };
+
+    std::unique_ptr<ResourceWriter> resourceWriter;
+
+    // If the file has a '.gltf' extension then create a GLTFResourceWriter
+    if (pathFileExt == MakePathExt(GLTF_EXTENSION))
+    {
+        resourceWriter = std::make_unique<GLTFResourceWriter>(std::move(streamWriter));
+    }
+
+    // If the file has a '.glb' extension then create a GLBResourceWriter. This class derives
+    // from GLTFResourceWriter and adds support for writing manifests to a GLB container's
+    // JSON chunk and resource data to the binary chunk.
+    if (pathFileExt == MakePathExt(GLB_EXTENSION))
+    {
+        resourceWriter = std::make_unique<GLBResourceWriter>(std::move(streamWriter));
+    }
+
+    if (!resourceWriter)
+    {
+        throw std::runtime_error("Command line argument path filename extension must be .gltf or .glb");
+    }
+
+    // The Document instance represents the glTF JSON manifest
+    Document document;
+
+    std::string accessorIdIndices;
+    std::string accessorIdPositions;
+
+    // Use the BufferBuilder helper class to simplify the process of
+    // constructing valid glTF Buffer, BufferView and Accessor entities
+    BufferBuilder bufferBuilder(std::move(resourceWriter));
+
+    CreateTriangleResources(document, bufferBuilder, accessorIdIndices, accessorIdPositions);
+    CreateTriangleEntities(document, accessorIdIndices, accessorIdPositions);
+
+    std::string manifest;
+
+    try
+    {
+        // Serialize the glTF Document into a JSON manifest
+        manifest = Serialize(document, SerializeFlags::None);
+    }
+    catch (const GLTFException& ex)
+    {
+        std::stringstream ss;
+
+        ss << "Microsoft::glTF::Serialize failed: ";
+        ss << ex.what();
+
+        throw std::runtime_error(ss.str());
+    }
+
+    auto& gltfResourceWriter = bufferBuilder.GetResourceWriter();
+
+    if (auto glbResourceWriter = dynamic_cast<GLBResourceWriter*>(&gltfResourceWriter))
+    {
+        glbResourceWriter->Flush(manifest, pathFile.u8string()); // A GLB container isn't created until the GLBResourceWriter::Flush member function is called
+    }
+    else
+    {
+        gltfResourceWriter.WriteExternal(pathFile.u8string(), manifest); // Binary resources have already been written, just need to write the manifest
+    }
+}*/

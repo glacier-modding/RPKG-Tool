@@ -41,6 +41,7 @@
     <ClCompile Include="..\rpkg_src\dev_extract_wwise_ids.cpp" />
     <ClCompile Include="..\rpkg_src\encrypt_packagedefinition_thumbs.cpp" />
     <ClCompile Include="..\rpkg_src\extract_all_prim_from.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_all_prim_model_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_all_prim_of_temp_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_all_text_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_direct_hash_depends.cpp" />
@@ -53,6 +54,7 @@
     <ClCompile Include="..\rpkg_src\extract_ores_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_prel_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_prim_from.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_prim_model_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_rpkg_meta.cpp" />
     <ClCompile Include="..\rpkg_src\extract_rtlv_to_json_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_temp_from.cpp" />
@@ -84,6 +86,7 @@
     <ClCompile Include="..\rpkg_src\rebuild_gfxf_in.cpp" />
     <ClCompile Include="..\rpkg_src\rebuild_locr_from_json_from.cpp" />
     <ClCompile Include="..\rpkg_src\rebuild_prim_in.cpp" />
+    <ClCompile Include="..\rpkg_src\rebuild_prim_model_in.cpp" />
     <ClCompile Include="..\rpkg_src\rebuild_rtlv_from_json_from.cpp" />
     <ClCompile Include="..\rpkg_src\rebuild_text.cpp" />
     <ClCompile Include="..\rpkg_src\rebuild_text_in.cpp" />
@@ -116,10 +119,32 @@
     <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexTGA.cpp" />
     <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexUtil.cpp" />
     <ClCompile Include="..\rpkg_src\thirdparty\directxtex\DirectXTexWIC.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\AnimationUtils.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\BufferBuilder.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\Color.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\Deserialize.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\Document.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\Extension.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\ExtensionHandlers.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\GLBResourceReader.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\GLBResourceWriter.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\GLTFResourceReader.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\GLTFResourceWriter.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\Math.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\MeshPrimitiveUtils.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\MicrosoftGeneratorVersion.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\PBRUtils.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\ResourceWriter.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\Schema.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\SchemaValidation.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\Serialize.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\Validation.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\Version.cpp" />
     <ClCompile Include="..\rpkg_src\thirdparty\lz4\lz4.c" />
     <ClCompile Include="..\rpkg_src\thirdparty\lz4\lz4hc.c" />
     <ClCompile Include="..\rpkg_src\thirdparty\lz4\xxhash.c" />
     <ClCompile Include="..\rpkg_src\thirdparty\md5\md5.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\mikktspace\mikktspace.c" />
     <ClCompile Include="..\rpkg_src\thirdparty\ogg\src\bitwise.c" />
     <ClCompile Include="..\rpkg_src\thirdparty\ogg\src\framing.c" />
     <ClCompile Include="..\rpkg_src\thirdparty\revorb\revorb.cpp" />
@@ -174,6 +199,10 @@
     <ClInclude Include="..\rpkg_src\temp.h" />
     <ClInclude Include="..\rpkg_src\texd.h" />
     <ClInclude Include="..\rpkg_src\text.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\directxmath\DirectXCollision.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\directxmath\DirectXColors.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\directxmath\DirectXMath.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\directxmath\DirectXPackedVector.h" />
     <ClInclude Include="..\rpkg_src\thirdparty\directxtex\BC.h" />
     <ClInclude Include="..\rpkg_src\thirdparty\directxtex\BCDirectCompute.h" />
     <ClInclude Include="..\rpkg_src\thirdparty\directxtex\d3dx12.h" />
@@ -187,6 +216,10 @@
     <ClInclude Include="..\rpkg_src\thirdparty\lz4\lz4hc.h" />
     <ClInclude Include="..\rpkg_src\thirdparty\lz4\xxhash.h" />
     <ClInclude Include="..\rpkg_src\thirdparty\md5\md5.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\mikktspace\mikktspace.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\quaternions\quaternion.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\quaternions\quaternion_io.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\quaternions\quaternion_utils.h" />
     <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\Bit_stream.h" />
     <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\crc.h" />
     <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\errors.h" />
@@ -258,11 +291,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\ninja\source\repos\rpkg\new\rpkg\rpkg_src\thirdparty\ogg\include;C:\Users\ninja\source\repos\rpkg\new\rpkg\rpkg_src\thirdparty\vorbis\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\rpkg_src\thirdparty\ogg\include;..\rpkg_src\thirdparty\vorbis\include;..\rpkg_src\thirdparty\GLTFSDK\Inc;..\rpkg_src\thirdparty;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\rpkg_src\thirdparty\ogg\include;..\rpkg_src\thirdparty\vorbis\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\rpkg_src\thirdparty\ogg\include;..\rpkg_src\thirdparty\vorbis\include;..\rpkg_src\thirdparty\GLTFSDK\Inc;..\rpkg_src\thirdparty\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

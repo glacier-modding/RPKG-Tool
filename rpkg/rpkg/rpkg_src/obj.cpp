@@ -18,14 +18,18 @@ void obj::output_to_single_file(asset3ds asset3ds_data, std::string& file_path)
 
     for (uint32_t a = 0; a < asset3ds_data.vertexes.size(); a++)
     {
-        for (uint32_t v = 0; v < asset3ds_data.vertexes.at(a).size(); v++)
+        for (uint32_t v = 0; v < (asset3ds_data.vertexes.at(a).size() / 3); v++)
         {
+            uint32_t x = v * 3;
+            uint32_t y = v * 3 + 1;
+            uint32_t z = v * 3 + 2;
+
             obj_file_data.append("v ");
-            obj_file_data.append(util::float_to_string(asset3ds_data.vertexes.at(a).at(v).x));
+            obj_file_data.append(util::float_to_string(asset3ds_data.vertexes.at(a).at(x)));
             obj_file_data.push_back(' ');
-            obj_file_data.append(util::float_to_string(asset3ds_data.vertexes.at(a).at(v).y));
+            obj_file_data.append(util::float_to_string(asset3ds_data.vertexes.at(a).at(y)));
             obj_file_data.push_back(' ');
-            obj_file_data.append(util::float_to_string(asset3ds_data.vertexes.at(a).at(v).z));
+            obj_file_data.append(util::float_to_string(asset3ds_data.vertexes.at(a).at(z)));
             //obj_file_data.push_back(' ');
             //obj_file_data.append(util::float_to_string(asset3d_data.vertexes->at(v).w));
             obj_file_data.push_back('\n');
@@ -34,14 +38,18 @@ void obj::output_to_single_file(asset3ds asset3ds_data, std::string& file_path)
 
     for (uint32_t a = 0; a < asset3ds_data.normals.size(); a++)
     {
-        for (uint32_t v = 0; v < asset3ds_data.normals.at(a).size(); v++)
+        for (uint32_t v = 0; v < (asset3ds_data.normals.at(a).size() / 3); v++)
         {
+            uint32_t x = v * 3;
+            uint32_t y = v * 3 + 1;
+            uint32_t z = v * 3 + 2;
+
             obj_file_data.append("vn ");
-            obj_file_data.append(util::float_to_string(asset3ds_data.normals.at(a).at(v).x));
+            obj_file_data.append(util::float_to_string(asset3ds_data.normals.at(a).at(x)));
             obj_file_data.push_back(' ');
-            obj_file_data.append(util::float_to_string(asset3ds_data.normals.at(a).at(v).y));
+            obj_file_data.append(util::float_to_string(asset3ds_data.normals.at(a).at(y)));
             obj_file_data.push_back(' ');
-            obj_file_data.append(util::float_to_string(asset3ds_data.normals.at(a).at(v).z));
+            obj_file_data.append(util::float_to_string(asset3ds_data.normals.at(a).at(z)));
             //obj_file_data.push_back(' ');
             //obj_file_data.append(util::float_to_string(asset3d_data.normals->at(v).w));
             obj_file_data.push_back('\n');
@@ -50,12 +58,15 @@ void obj::output_to_single_file(asset3ds asset3ds_data, std::string& file_path)
 
     for (uint32_t a = 0; a < asset3ds_data.uvs.size(); a++)
     {
-        for (uint32_t v = 0; v < asset3ds_data.uvs.at(a).size(); v++)
+        for (uint32_t v = 0; v < (asset3ds_data.uvs.at(a).size() / 2); v++)
         {
+            uint32_t x = v * 2;
+            uint32_t y = v * 2 + 1;
+
             obj_file_data.append("vt ");
-            obj_file_data.append(util::float_to_string(asset3ds_data.uvs.at(a).at(v).x));
+            obj_file_data.append(util::float_to_string(asset3ds_data.uvs.at(a).at(x)));
             obj_file_data.push_back(' ');
-            obj_file_data.append(util::float_to_string(asset3ds_data.uvs.at(a).at(v).y));
+            obj_file_data.append(util::float_to_string(asset3ds_data.uvs.at(a).at(y)));
             obj_file_data.push_back('\n');
         }
     }
@@ -113,7 +124,7 @@ void obj::output_to_single_file(asset3ds asset3ds_data, std::string& file_path)
             obj_file_data.push_back('\n');
         }
 
-        v_count += asset3ds_data.vertexes.at(a).size();
+        v_count += (asset3ds_data.vertexes.at(a).size() / 3);
     }
 
     output_file.write(obj_file_data.c_str(), obj_file_data.length());

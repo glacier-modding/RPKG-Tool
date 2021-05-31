@@ -323,6 +323,73 @@ char* get_hash_details(char* rpkg_file, char* hash_string)
                     }
                 }
 
+                uint32_t reverse_dependency_count = 0;
+
+                std::vector<std::string> reverse_dependency;
+
+                for (uint64_t a = 0; a < rpkgs.size(); a++)
+                {
+                    for (uint64_t b = 0; b < rpkgs.at(a).hash.size(); b++)
+                    {
+                        uint32_t temp_hash_reference_count = rpkgs.at(a).hash.at(b).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+
+                        for (uint64_t c = 0; c < temp_hash_reference_count; c++)
+                        {
+                            if (rpkgs.at(a).hash.at(b).hash_reference_data.hash_reference.at(c) == hash_value)
+                            {
+                                reverse_dependency_count++;
+
+                                std::string rd = rpkgs.at(a).hash.at(b).hash_file_name;
+
+                                if (reverse_dependency.size() > 0)
+                                {
+                                    bool found = false;
+
+                                    for (uint64_t d = 0; d < reverse_dependency.size(); d++)
+                                    {
+                                        if (reverse_dependency.at(d) == rd)
+                                        {
+                                            found = true;
+                                        }
+                                    }
+
+                                    if (!found)
+                                    {
+                                        reverse_dependency.push_back(rd);
+                                    }
+                                }
+                                else
+                                {
+                                    reverse_dependency.push_back(rd);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                ss << std::endl;
+
+                ss << std::dec << "There are " << reverse_dependency.size() << " reverse hash depends (within the currently loaded RPKGs):" << std::endl;
+
+                if (reverse_dependency.size() > 0)
+                {
+                    for (uint64_t i = 0; i < reverse_dependency.size(); i++)
+                    {
+                        LOG("Hash file/resource: " << reverse_dependency.at(i));
+
+                        std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(std::strtoull(reverse_dependency.at(i).c_str(), nullptr, 16));
+
+                        if (it2 != hash_list_hash_map.end())
+                        {
+                            ss << "  - " << util::to_upper_case(hash_list_hash_file_names.at(it2->second)) << " " << hash_list_hash_strings.at(it2->second) << std::endl;
+                        }
+                        else
+                        {
+                            ss << "  - " << reverse_dependency.at(i) << std::endl;
+                        }
+                    }
+                }
+
                 response_string = ss.str();
 
                 return &response_string[0];

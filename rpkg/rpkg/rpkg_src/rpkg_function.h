@@ -21,9 +21,12 @@ struct rpkg_extraction_vars
 class rpkg_function
 {
 public:
-	static void rebuild_prim_in(std::string& input_path, std::string& filter, std::string& output_path);
-	static void rebuild_text(std::string& text_folder, std::string& tga_file_path, std::string& text_file_name, std::string& meta_file_path, std::string& rpkg_output_file, std::string& rpkgs_path);
-	static void rebuild_text_in(std::string& input_path, std::string& filter, std::string& output_path);
+	static void extract_all_prim_model_from(std::string& input_path, std::string& filter, std::string& output_path);
+	static void rebuild_prim_model_in(std::string& input_path, std::string& filter, std::string& output_path);
+	static void extract_prim_model_from(std::string& input_path, std::string& filter, std::string& output_path);
+	static void rebuild_prim_in(std::string& input_path, std::string& filter, std::string& output_path, bool generate_rpkgs);
+	static bool rebuild_text(std::string& text_folder, std::string& tga_file_path, std::string& text_file_name, std::string& meta_file_path, std::string& rpkg_output_file, std::string& rpkgs_path, bool generate_rpkgs);
+	static void rebuild_text_in(std::string& input_path, std::string& filter, std::string& output_path, bool generate_rpkgs);
 	static void extract_all_text_from(std::string& input_path, std::string& filter, std::string& output_path);
 	static void extract_text_from(std::string& input_path, std::string& filter, std::string& output_path);
 	static void extract_all_prim_of_temp_from(std::string& input_path, std::string& filter, std::string& output_path, int type);

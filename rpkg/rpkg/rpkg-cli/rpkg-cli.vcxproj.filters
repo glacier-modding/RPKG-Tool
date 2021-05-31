@@ -31,6 +31,12 @@
     <Filter Include="Source Files\directxtex">
       <UniqueIdentifier>{d2890bc1-8af1-4371-8665-b18b931921eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\gltfsdk">
+      <UniqueIdentifier>{73da3bd7-a6bd-4113-a5c7-b0425e7aa60f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\mikktspace">
+      <UniqueIdentifier>{c1a0a4e3-1108-4746-b179-3b2746cdb764}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\rpkg_src\command_json.cpp">
@@ -423,6 +429,81 @@
     <ClCompile Include="..\rpkg_src\extract_all_text_from.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\AnimationUtils.cpp">
+      <Filter>Source Files\gltfsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\BufferBuilder.cpp">
+      <Filter>Source Files\gltfsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\Color.cpp">
+      <Filter>Source Files\gltfsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\Deserialize.cpp">
+      <Filter>Source Files\gltfsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\Document.cpp">
+      <Filter>Source Files\gltfsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\Extension.cpp">
+      <Filter>Source Files\gltfsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\ExtensionHandlers.cpp">
+      <Filter>Source Files\gltfsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\GLBResourceReader.cpp">
+      <Filter>Source Files\gltfsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\GLBResourceWriter.cpp">
+      <Filter>Source Files\gltfsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\GLTFResourceReader.cpp">
+      <Filter>Source Files\gltfsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\GLTFResourceWriter.cpp">
+      <Filter>Source Files\gltfsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\Math.cpp">
+      <Filter>Source Files\gltfsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\MeshPrimitiveUtils.cpp">
+      <Filter>Source Files\gltfsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\MicrosoftGeneratorVersion.cpp">
+      <Filter>Source Files\gltfsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\PBRUtils.cpp">
+      <Filter>Source Files\gltfsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\ResourceWriter.cpp">
+      <Filter>Source Files\gltfsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\Schema.cpp">
+      <Filter>Source Files\gltfsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\SchemaValidation.cpp">
+      <Filter>Source Files\gltfsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\Serialize.cpp">
+      <Filter>Source Files\gltfsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\Validation.cpp">
+      <Filter>Source Files\gltfsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\GLTFSDK\Source\Version.cpp">
+      <Filter>Source Files\gltfsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\mikktspace\mikktspace.c">
+      <Filter>Source Files\mikktspace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\extract_prim_model_from.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\rebuild_prim_model_in.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\extract_all_prim_model_from.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\Bit_stream.h">
@@ -552,6 +633,30 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\rpkg_src\gpudevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\thirdparty\quaternions\quaternion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\thirdparty\quaternions\quaternion_io.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\thirdparty\quaternions\quaternion_utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\thirdparty\directxmath\DirectXCollision.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\thirdparty\directxmath\DirectXColors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\thirdparty\directxmath\DirectXMath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\thirdparty\directxmath\DirectXPackedVector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\thirdparty\mikktspace\mikktspace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

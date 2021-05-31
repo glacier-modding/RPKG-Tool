@@ -17,7 +17,7 @@
 #include <filesystem>
 #include <set>
 
-void rpkg_function::rebuild_text_in(std::string& input_path, std::string& filter, std::string& output_path)
+void rpkg_function::rebuild_text_in(std::string& input_path, std::string& filter, std::string& output_path, bool generate_rpkgs)
 {
     task_single_status = TASK_EXECUTING;
 
@@ -36,7 +36,10 @@ void rpkg_function::rebuild_text_in(std::string& input_path, std::string& filter
 
         std::string rpkgs_path = input_rpkg_folder_path + "RPKGS";
 
-        file::create_directories(rpkgs_path);
+        if (generate_rpkgs)
+        {
+            file::create_directories(rpkgs_path);
+        }
 
         std::filesystem::path input_folder_path = input_rpkg_folder_path;
 
@@ -110,7 +113,7 @@ void rpkg_function::rebuild_text_in(std::string& input_path, std::string& filter
         start_time = std::chrono::high_resolution_clock::now();
         int stringstream_length = 80;
 
-        std::string message = "Rebuilding TEXT files from: ";
+        std::string message = "Rebuilding TEXT files...";
 
         timing_string = message;
 
@@ -211,19 +214,25 @@ void rpkg_function::rebuild_text_in(std::string& input_path, std::string& filter
             {
                 std::string rpkg_output_path = "";
 
-                rpkg_function::rebuild_text(text_folders.at(i), tga_file_paths.at(j), text_file_names.at(j), meta_file_paths.at(j), rpkg_output_path, rpkgs_path);
+                bool texture_rebuilt = rpkg_function::rebuild_text(text_folders.at(i), tga_file_paths.at(j), text_file_names.at(j), meta_file_paths.at(j), rpkg_output_path, rpkgs_path, generate_rpkgs);
 
-                directory_set.insert(rpkg_output_path);
+                if (texture_rebuilt)
+                {
+                    directory_set.insert(rpkg_output_path);
+                }
             }
+        }
 
+        if (generate_rpkgs)
+        {
             for (std::set<std::string>::iterator it = directory_set.begin(); it != directory_set.end(); it++)
             {
                 std::string input_path = *it;
                 std::string filter = "";
                 std::string output_path_string = rpkgs_path;
 
-                std::cout << *it << std::endl;
-                std::cout << output_path_string << std::endl;
+                //std::cout << *it << std::endl;
+                //std::cout << output_path_string << std::endl;
 
                 rpkg_function::generate_rpkg_from(input_path, filter, output_path_string);
             }

@@ -50,6 +50,14 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     {
         rpkg_function::extract_ores_from(input_path, filter, output_path);
     }
+    else if (command == "-extract_all_prim_model_from")
+    {
+        rpkg_function::extract_all_prim_model_from(input_path, filter, output_path);
+    }
+    else if (command == "-extract_prim_model_from")
+    {
+        rpkg_function::extract_prim_model_from(input_path, filter, output_path);
+    }
     else if (command == "-extract_all_prim_of_temp_from")
     {
         rpkg_function::extract_all_prim_of_temp_from(input_path, filter, output_path, GLB_SINGLE);
@@ -140,13 +148,17 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     {
         rpkg_function::import_rpkg(input_path);
     }
+    else if (command == "-rebuild_prim_model_in")
+    {
+        rpkg_function::rebuild_prim_model_in(input_path, filter, output_path);
+    }
     else if (command == "-rebuild_prim_in")
     {
-        rpkg_function::rebuild_prim_in(input_path, filter, output_path);
+        rpkg_function::rebuild_prim_in(input_path, filter, output_path, true);
     }
     else if (command == "-rebuild_text_in")
     {
-    rpkg_function::rebuild_text_in(input_path, filter, output_path);
+        rpkg_function::rebuild_text_in(input_path, filter, output_path, true);
     }
     else if (command == "-rebuild_gfxf_in")
     {
@@ -275,6 +287,8 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                      "-extract_gfxf_from",
                                                      "-extract_ores_from",
                                                      "-extract_prel_refs",
+                                                     "-extract_prim_model_from",
+                                                     "-extract_all_prim_model_from",
                                                      "-extract_all_prim_of_temp_from",
                                                      "-extract_all_prim_to_glb_from",
                                                      "-extract_prim_to_glb_from",
@@ -293,6 +307,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                      "-extract_direct_hash_depends",
                                                      "-hash_probe",
                                                      "-hash_probe_from_file",
+                                                     "-rebuild_prim_model_in",
                                                      "-rebuild_prim_in",
                                                      "-rebuild_text_in",
                                                      "-rebuild_gfxf_in",

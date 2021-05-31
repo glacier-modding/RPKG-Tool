@@ -17,7 +17,7 @@
 #include <regex>
 #include <filesystem>
 
-void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file_path, std::string& text_file_name, std::string& meta_file_path, std::string& rpkg_output_file, std::string& rpkgs_path)
+bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file_path, std::string& text_file_name, std::string& meta_file_path, std::string& rpkg_output_file, std::string& rpkgs_path, bool generate_rpkgs)
 {
     gpudevice gpu;
 
@@ -27,7 +27,7 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
     {
         LOG("Error: TEXT PNG Meta file " + meta_file_path + " could not be opened.");
 
-        return;
+        return false;
     }
 
     meta_file.seekg(0, meta_file.end);
@@ -43,6 +43,7 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
     meta_file.close();
 
     char input[1024];
+    char char1;
     char char2[2];
     char char4[4];
     uint8_t bytes1 = 0;
@@ -100,6 +101,21 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
     rpkg_output_file = std::string(input);
 
     LOG("  - TEXT meta RPKG file name: " + rpkg_output_file);
+
+    std::string current_path = text_folder + "\\REBUILT";
+
+    file::create_directories(current_path);
+
+    std::string rpkg_output_dir = rpkgs_path + "\\" + rpkg_output_file;
+
+    std::string rpkg_output_file_name = rpkg_output_file;
+
+    if (generate_rpkgs)
+    {
+        file::create_directories(rpkg_output_dir);
+    }
+
+    rpkg_output_file = rpkg_output_dir;
 
     std::memcpy(&texd_hash_value, &meta_data.data()[position], sizeof(bytes8));
     position += 0x8;
@@ -332,8 +348,12 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
     {
         LOG("Failed to initilize COM.");
 
-        return;
+        return false;
     }
+
+    uint16_t header_texd_width = 0;
+    uint16_t header_texd_height = 0;
+    uint8_t header_mipmaps_count = 0;
 
     if (texd_found)
     {
@@ -344,19 +364,23 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
         {
             LOG("Error: TGA file " + texture_file_path.generic_string() + " importing failed.");
 
-            return;
+            return false;
         }
 
-        if (texd_tga.GetImage(0, 0, 0)->width != texd_width || texd_tga.GetImage(0, 0, 0)->height != texd_height)
-        {
-            LOG("Error: Dimensions of imported TGA file " + texture_file_path.generic_string() + " do not match original TEXD's dimentions.");
+        //if (texd_tga.GetImage(0, 0, 0)->width != texd_width || texd_tga.GetImage(0, 0, 0)->height != texd_height)
+        //{
+            //LOG("Error: Dimensions of imported TGA file " + texture_file_path.generic_string() + " do not match original TEXD's dimentions.");
+            //LOG("Warning: Dimensions of imported TGA file " + texture_file_path.generic_string() + " do not match original TEXD's dimentions.");
 
             LOG("TEXD width original: " + util::uint16_t_to_string(texd_width));
             LOG("TEXD height original: " + util::uint16_t_to_string(texd_height));
             LOG("TEXD width imported: " + util::uint16_t_to_string(texd_tga.GetImage(0, 0, 0)->width));
             LOG("TEXD width imported: " + util::uint16_t_to_string(texd_tga.GetImage(0, 0, 0)->height));
 
-            std::exit(0);
+            header_texd_width = texd_tga.GetImage(0, 0, 0)->width;
+            header_texd_height = texd_tga.GetImage(0, 0, 0)->height;
+
+            //std::exit(0);
 
             //LOG("Attempting to resize the imported image to " + util::uint16_t_to_string(texd_width) + "x" + util::uint16_t_to_string(texd_height));
 
@@ -366,7 +390,7 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
             //{
                 //LOG_AND_EXIT("Error: TGA resizing of " + texture_file_path.generic_string() + " for TEXD failed.");
             //}
-        }
+        //}
 
         hresult = DirectX::Resize(*texd_tga.GetImage(0, 0, 0), text_width, text_height, DirectX::TEX_FILTER_DEFAULT, text_tga);
 
@@ -374,7 +398,7 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
         {
             LOG("Error: TGA resizing of " + texture_file_path.generic_string() + " for TEXT failed.");
 
-            return;
+            return false;
         }
     }
     else
@@ -386,7 +410,7 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
         {
             LOG("Error: TGA file " + texture_file_path.generic_string() + " importing failed.");
 
-            return;
+            return false;
         }
 
         if (text_tga.GetImage(0, 0, 0)->width != text_width || text_tga.GetImage(0, 0, 0)->height != text_height)
@@ -398,7 +422,7 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
             LOG("TEXT width imported: " + util::uint16_t_to_string(text_tga.GetImage(0, 0, 0)->width));
             LOG("TEXT width imported: " + util::uint16_t_to_string(text_tga.GetImage(0, 0, 0)->height));
 
-            std::exit(0);
+            return false;
 
             //LOG("Attempting to resize the imported image to " + util::uint16_t_to_string(texd_width) + "x" + util::uint16_t_to_string(texd_height));
 
@@ -413,13 +437,35 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
     if (texd_found)
     {
-        hresult = DirectX::GenerateMipMaps(*texd_tga.GetImage(0, 0, 0), DirectX::TEX_FILTER_FLAGS::TEX_FILTER_DEFAULT, text_mips_count, texd_mipmaps);
+        uint32_t mips_count = 1;
+        uint32_t temp_text_width = header_texd_width;
+        uint32_t temp_text_height = header_texd_height;
+
+        while (temp_text_width > 1 || temp_text_height > 1)
+        {
+            if (temp_text_width > 1)
+            {
+                temp_text_width >>= 1;
+            }
+
+            if (temp_text_height > 1)
+            {
+                temp_text_height >>= 1;
+            }
+
+            mips_count++;
+        }
+
+        header_mipmaps_count = mips_count;
+
+        //hresult = DirectX::GenerateMipMaps(*texd_tga.GetImage(0, 0, 0), DirectX::TEX_FILTER_FLAGS::TEX_FILTER_DEFAULT, text_mips_count, texd_mipmaps);
+        hresult = DirectX::GenerateMipMaps(*texd_tga.GetImage(0, 0, 0), DirectX::TEX_FILTER_FLAGS::TEX_FILTER_DEFAULT, mips_count, texd_mipmaps);
 
         if (FAILED(hresult))
         {
             LOG("Error: Couldn't generate mipmaps for TGA file " + texture_file_path.generic_string() + ".");
 
-            return;
+            return false;
         }
     }
     else
@@ -449,7 +495,7 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
             {
                 LOG("Error: TEXD header mipmap count and calculated mipmap count mismatch.");
 
-                return;
+                return false;
             }
 
             hresult = DirectX::GenerateMipMaps(*text_tga.GetImage(0, 0, 0), DirectX::TEX_FILTER_FLAGS::TEX_FILTER_DEFAULT, mips_count, text_mipmaps);
@@ -458,10 +504,35 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
             {
                 LOG("Error: Couldn't generate resized mipmaps for TGA file " + texture_file_path.generic_string() + ".");
 
-                return;
+                return false;
             }
         }
     }
+
+    //std::cout << "TEXD mipmaps in texd_mipmaps ScratchImage: " << texd_mipmaps.GetImageCount() << std::endl;
+
+    //std::cout << "TEXT mipmaps in text_mipmaps ScratchImage: " << text_mipmaps.GetImageCount() << std::endl;
+
+    /*switch (format) {
+    case TextureFormat::R8G8B8A8: //0x1C
+        return DXGI_FORMAT_R8G8B8A8_UNORM;
+    case TextureFormat::A8: //0x42
+        return DXGI_FORMAT_A8_UNORM;
+    case TextureFormat::R8G8: //0x34
+        return DXGI_FORMAT_R8G8_UNORM;
+    case TextureFormat::DXT1: //0x49
+        return DXGI_FORMAT_BC1_UNORM;
+    case TextureFormat::DXT5: //0x4F
+        return DXGI_FORMAT_BC3_UNORM;
+    case TextureFormat::BC7: //0x5A
+        return DXGI_FORMAT_BC7_UNORM;
+    case TextureFormat::BC4: //0x52
+        return DXGI_FORMAT_BC4_UNORM;
+    case TextureFormat::BC5: //0x55
+        return DXGI_FORMAT_BC5_UNORM;
+    default:
+        return DXGI_FORMAT_UNKNOWN;
+    }*/
 
     DXGI_FORMAT directx_compression_format;
 
@@ -520,7 +591,7 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
     {
         LOG("Error: DirectX format (" + util::uint16_t_to_hex_string(text_directx_format) + ") unsupported.");
 
-        return;
+        return false;
     }
 
     uint32_t mipmap_count_1 = 0;
@@ -542,7 +613,7 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
                 {
                     LOG("Error: DDS conversion failed.");
 
-                    return;
+                    return false;
                 }
             }
 
@@ -576,7 +647,7 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
                 {
                     LOG("TEXD LZ4 compressed failed.");
 
-                    return;
+                    return false;
                 }
 
                 texd_images_sizes.push_back((uint32_t)texd_image_size);
@@ -611,7 +682,7 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
             {
                 LOG("Error: DDS compression failed.");
 
-                return;
+                return false;
             }
         }
 
@@ -637,7 +708,7 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
             {
                 LOG("TEXT LZ4 compressed failed.");
 
-                return;
+                return false;
             }
 
             text_images_sizes.push_back((uint32_t)text_image_size);
@@ -669,7 +740,7 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
                     {
                         LOG("Error: DDS conversion failed.");
 
-                        return;
+                        return false;
                     }
                 }
 
@@ -703,7 +774,7 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
                     {
                         LOG("TEXT LZ4 compressed failed.");
 
-                        return;
+                        return false;
                     }
 
                     mipmap_count_2 += (uint32_t)text_image_size;
@@ -740,7 +811,7 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
                 {
                     LOG("Error: DDS conversion failed.");
 
-                    return;
+                    return false;
                 }
             }
 
@@ -774,7 +845,7 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
                 {
                     LOG("TEXT LZ4 compressed failed.");
 
-                    return;
+                    return false;
                 }
 
                 mipmap_count_2 += (uint32_t)text_image_size;
@@ -801,9 +872,53 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
     std::vector<char> text_file_data;
     std::vector<char> texd_file_data;
 
-    for (uint64_t m = 0; m < 0x18; m++)
+    //for (uint64_t m = 0; m < 0x18; m++)
+    //{
+        //text_file_data.push_back(meta_data.data()[meta_position + m]);
+    //}
+
+    if (texd_found)
     {
-        text_file_data.push_back(meta_data.data()[meta_position + m]);
+        for (uint64_t m = 0; m < 0xC; m++)
+        {
+            text_file_data.push_back(meta_data.data()[meta_position + m]);
+        }
+
+        std::memcpy(&char2, &header_texd_width, 0x2);
+
+        for (uint64_t n = 0; n < 0x2; n++)
+        {
+            text_file_data.push_back(char2[n]);
+        }
+
+        std::memcpy(&char2, &header_texd_height, 0x2);
+
+        for (uint64_t n = 0; n < 0x2; n++)
+        {
+            text_file_data.push_back(char2[n]);
+        }
+
+        for (uint64_t m = 0; m < 0x2; m++)
+        {
+            text_file_data.push_back(meta_data.data()[meta_position + 0x10 + m]);
+        }
+
+        std::memcpy(&char1, &header_mipmaps_count, 0x1);
+
+        text_file_data.push_back(char1);
+
+        for (uint64_t m = 0; m < 0x5; m++)
+        {
+            text_file_data.push_back(meta_data.data()[meta_position + 0x13 + m]);
+        }
+
+    }
+    else
+    {
+        for (uint64_t m = 0; m < 0x18; m++)
+        {
+            text_file_data.push_back(meta_data.data()[meta_position + m]);
+        }
     }
 
     for (uint32_t m = 0; m < 0xE; m++)
@@ -861,34 +976,32 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
         }
     }
 
-    std::string current_path = text_folder + "\\REBUILT";
-
-    file::create_directories(current_path);
-
-    std::string rpkg_output_dir = rpkgs_path + "\\" + rpkg_output_file;
-
-    file::create_directories(rpkg_output_dir);
-
-    rpkg_output_file = rpkg_output_dir;
-
     std::ofstream text_file = std::ofstream(current_path + "\\" + text_file_name, std::ofstream::binary);
 
     if (!text_file.good())
     {
         LOG("Error: TEXT file " + current_path + "\\" + text_file_name + " could not be created.");
 
-        return;
+        return false;
     }
 
     text_file.write(text_file_data.data(), text_file_data.size());
 
     text_file.close();
 
-    std::filesystem::copy(current_path + "\\" + text_file_name, rpkg_output_dir + "\\" + text_file_name, std::filesystem::copy_options::overwrite_existing);
+    if (generate_rpkgs)
+    {
+        std::filesystem::copy(current_path + "\\" + text_file_name, rpkg_output_dir + "\\" + text_file_name, std::filesystem::copy_options::overwrite_existing);
+    }
 
-    std::filesystem::copy(text_folder + "\\metas\\" + text_file_name + ".tga.meta", rpkg_output_dir + "\\" + text_file_name + ".tga.meta", std::filesystem::copy_options::overwrite_existing);
+    std::filesystem::copy(text_folder + "\\metas\\" + text_file_name + ".meta", current_path + "\\" + text_file_name + ".meta", std::filesystem::copy_options::overwrite_existing);
 
-    std::filesystem::copy(text_folder + "\\metas\\" + text_file_name + ".meta", rpkg_output_dir + "\\" + text_file_name + ".meta", std::filesystem::copy_options::overwrite_existing);
+    //std::filesystem::copy(text_folder + "\\metas\\" + text_file_name + ".tga.meta", rpkg_output_dir + "\\" + text_file_name + ".tga.meta", std::filesystem::copy_options::overwrite_existing);
+
+    if (generate_rpkgs)
+    {
+        std::filesystem::copy(text_folder + "\\metas\\" + text_file_name + ".meta", rpkg_output_dir + "\\" + text_file_name + ".meta", std::filesystem::copy_options::overwrite_existing);
+    }
 
     if (texd_found)
     {
@@ -908,15 +1021,38 @@ void rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
         {
             LOG("Error: TEXT file " + current_path + "\\" + texd_file_name + " could not be created.");
 
-            return;
+            return false;
         }
 
         texd_file.write(texd_file_data.data(), texd_file_data.size());
 
         texd_file.close();
 
-        std::filesystem::copy(current_path + "\\" + texd_file_name, rpkg_output_dir + "\\" + texd_file_name, std::filesystem::copy_options::overwrite_existing);
+        if (generate_rpkgs)
+        {
+            std::filesystem::copy(current_path + "\\" + texd_file_name, rpkg_output_dir + "\\" + texd_file_name, std::filesystem::copy_options::overwrite_existing);
+        }
 
-        std::filesystem::copy(text_folder + "\\metas\\" + texd_file_name + ".meta", rpkg_output_dir + "\\" + texd_file_name + ".meta", std::filesystem::copy_options::overwrite_existing);
+        std::filesystem::copy(text_folder + "\\metas\\" + texd_file_name + ".meta", current_path + "\\" + texd_file_name + ".meta", std::filesystem::copy_options::overwrite_existing);
+
+        if (generate_rpkgs)
+        {
+            std::filesystem::copy(text_folder + "\\metas\\" + texd_file_name + ".meta", rpkg_output_dir + "\\" + texd_file_name + ".meta", std::filesystem::copy_options::overwrite_existing);
+        }
     }
+
+    std::ofstream rpkg_file_name_file = std::ofstream(current_path + "\\rpkgfilename.txt", std::ofstream::binary);
+
+    if (!rpkg_file_name_file.good())
+    {
+        LOG("Error: RPKG file name file " + current_path + "\\rpkgfilename.txt" + " could not be created.");
+
+        return false;
+    }
+
+    rpkg_file_name_file.write(rpkg_output_file_name.c_str(), rpkg_output_file_name.length());
+
+    rpkg_file_name_file.close();
+
+    return true;
 }

@@ -10,6 +10,7 @@ class prim
 {
 public:
 	prim(uint64_t rpkgs_index, uint64_t hash_index);
+    prim(std::string prim_file_path);
 
 	void load_hash_depends();
     void extract_meta(std::string output_path);
@@ -135,17 +136,17 @@ public:
         prim_weighted_mesh(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number);
 
         prim_mesh prim_mesh_instance;
-        uint32_t bones_nodes_count;
-        uint32_t bones_nodes_offset;
-        uint32_t bone_indices_offset;
-        uint32_t bone_info_offset;
+        uint32_t bones_nodes_count = 0;
+        uint32_t bones_nodes_offset = 0;
+        uint32_t bone_indices_offset = 0;
+        uint32_t bone_info_offset = 0;
     };
 
     class prim_sub_mesh
     {
     public:
         prim_sub_mesh();
-        prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number, prim_mesh& temp_prim_mesh, std::vector<char>& meta_data, bool flag_high_resolution);
+        prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number, prim_mesh& temp_prim_mesh, std::vector<char>& meta_data, bool flag_high_resolution, bool& success);
 
         prim_object prim_object_instance;
         uint32_t vertex_count = 0;
@@ -157,22 +158,30 @@ public:
         uint32_t cloth_offset = 0;
         uint32_t uv_channel_count = 0;
         uint32_t unknown_offset = 0;
+        std::vector<std::string> names;
         std::vector<uint16_t> indexes;
-        std::vector<vector4> vertexes;
-        std::vector<vector4> vertexes_normals;
-        std::vector<vector4> vertexes_tangents;
-        std::vector<vector4> vertexes_bitangents;
-        std::vector<vector2> vertexes_uvs;
-        std::vector<rgba> vertexes_colors;
+        std::vector<float> vertexes;
+        std::vector<float> vertexes_weighted_weights_0;
+        std::vector<float> vertexes_weighted_weights_1;
+        std::vector<uint8_t> vertexes_weighted_bone_ids_0;
+        std::vector<uint8_t> vertexes_weighted_bone_ids_1;
+        std::vector<float> vertexes_normals;
+        std::vector<float> vertexes_tangents;
+        std::vector<float> vertexes_bitangents;
+        std::vector<float> vertexes_uvs;
+        std::vector<uint8_t> vertexes_colors;
         std::vector<char> cloth_data;
         std::vector<char> collision_data;
+        std::vector<uint32_t> bones_nodes_data;
+        std::vector<uint8_t> bones_info_data;
+        std::vector<uint16_t> bones_indices_data;
     };
 
     class prim_weighted_sub_mesh
     {
     public:
         prim_weighted_sub_mesh();
-        prim_weighted_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number, prim_weighted_mesh& temp_prim_mesh, std::vector<char>& meta_data, bool flag_high_resolution);
+        prim_weighted_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number, prim_weighted_mesh& temp_prim_mesh, std::vector<char>& meta_data, bool flag_high_resolution, bool& success);
 
         prim_object prim_object_instance;
         uint32_t vertex_count = 0;
@@ -184,15 +193,18 @@ public:
         uint32_t cloth_offset = 0;
         uint32_t uv_channel_count = 0;
         uint32_t unknown_offset = 0;
+        std::vector<std::string> names;
         std::vector<uint16_t> indexes;
-        std::vector<vector4> vertexes;
-        std::vector<vector6> vertexes_weighted_weights;
-        std::vector<uint8_t_6> vertexes_weighted_bone_ids;
-        std::vector<vector4> vertexes_normals;
-        std::vector<vector4> vertexes_tangents;
-        std::vector<vector4> vertexes_bitangents;
-        std::vector<vector2> vertexes_uvs;
-        std::vector<rgba> vertexes_colors;
+        std::vector<float> vertexes;
+        std::vector<float> vertexes_weighted_weights_0;
+        std::vector<float> vertexes_weighted_weights_1;
+        std::vector<uint8_t> vertexes_weighted_bone_ids_0;
+        std::vector<uint8_t> vertexes_weighted_bone_ids_1;
+        std::vector<float> vertexes_normals;
+        std::vector<float> vertexes_tangents;
+        std::vector<float> vertexes_bitangents;
+        std::vector<float> vertexes_uvs;
+        std::vector<uint8_t> vertexes_colors;
         std::vector<char> cloth_data;
         std::vector<char> collision_data;
         std::vector<uint32_t> bones_nodes_data;
@@ -226,6 +238,7 @@ public:
 	std::vector<uint32_t> borg_depends_rpkg_index_index;
 	std::vector<std::vector<uint32_t>> borg_depends_hash_index;
 	std::vector<uint32_t> borg_depends_hash_index_index;
+    std::map<std::string, uint32_t> borg_bone_name_map;
     uint32_t prim_primary_header_offset = 0;
     std::vector<uint32_t> prim_object_offsets;
     std::vector<bool> prim_object_is_weighted;
@@ -235,5 +248,7 @@ public:
     std::vector<prim_sub_mesh> prim_sub_meshes;
     std::vector<prim_weighted_sub_mesh> prim_weighted_sub_meshes;
     std::vector<char> prim_meta_data;
+    std::string rpkg_output_file = "";
+    bool success = true;
     asset3ds asset3ds_data;
 };

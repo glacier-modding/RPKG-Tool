@@ -267,6 +267,13 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& fil
                 std::string hash_file_name = files.at(files_index.at(i)) + ".meta";
                 
                 rpkg_function::import_hash_meta(meta_data, hash_file_name);
+                                
+                uint64_t test_hash_value = std::strtoll(hash_strings.at(files_index.at(i)).c_str(), nullptr, 16);
+
+                if (meta_data.hash_value != test_hash_value && test_hash_value > 0x0)
+                {
+                    meta_data.hash_value = test_hash_value;
+                }
 
                 temp_hash_data.hash_reference_data = meta_data.hash_reference_data;
             }
