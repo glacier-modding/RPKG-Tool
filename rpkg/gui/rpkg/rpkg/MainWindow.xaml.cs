@@ -4340,6 +4340,9 @@ namespace rpkg
         [DllImport("rpkg.dll", EntryPoint = "is_rpkg_valid", CallingConvention = CallingConvention.Cdecl)]
         public static extern int is_rpkg_valid(string rpkg_file_path);
 
+        [DllImport("rpkg.dll", EntryPoint = "get_response_string", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr get_response_string();
+
 
         [SuppressUnmanagedCodeSecurity]
         internal static class SafeNativeMethods
@@ -6577,6 +6580,154 @@ namespace rpkg
             else if (LeftTabControl.SelectedIndex == 2)
             {
                 SetDiscordStatus("Search View", "");
+            }
+        }
+
+        private void ConvertHashMetaFileToJSON_Click(object sender, RoutedEventArgs e)
+        {
+            var fileDialog = new Ookii.Dialogs.Wpf.VistaOpenFileDialog();
+
+            fileDialog.Title = "Select an input Hash meta file:";
+
+            fileDialog.Filter = "meta file|*.meta|All files|*.*";
+
+            if (!System.IO.Directory.Exists(userSettings.InputFolder))
+            {
+                userSettings.InputFolder = System.IO.Directory.GetCurrentDirectory();
+
+                var options = new JsonSerializerOptions { WriteIndented = true };
+
+                string jsonString = JsonSerializer.Serialize(userSettings, options);
+
+                File.WriteAllText("rpkg.json", jsonString);
+            }
+
+            fileDialog.InitialDirectory = userSettings.InputFolder;
+
+            fileDialog.FileName = userSettings.InputFolder;
+
+            var fileDialogResult = fileDialog.ShowDialog();
+
+            if (fileDialogResult == true)
+            {
+                if (fileDialog.FileName.EndsWith(".meta", StringComparison.OrdinalIgnoreCase))
+                {
+                    string command = "";
+                    string input_path = fileDialog.FileName;
+                    string filter = "";
+                    string search = "";
+                    string search_type = "";
+                    string output_path = "";
+
+                    Progress progress = new Progress();
+
+                    progress.operation = (int)Progress.Operation.MASS_EXTRACT;
+
+                    command = "-hash_meta_to_json";
+
+                    progress.message.Content = "Converting Hash meta to JSON...";
+
+                    progress.ProgressBar.IsIndeterminate = true;
+
+                    int return_value = reset_task_status();
+
+                    execute_task rpkgExecute = task_execute;
+
+                    IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
+
+                    progress.ShowDialog();
+
+                    string responseString = Marshal.PtrToStringAnsi(get_response_string());
+
+                    if (responseString != "")
+                    {
+                        MessageBoxShow(responseString);
+                    }
+                }
+                else
+                {
+                    MessageBoxShow("Error: The input file must end in .meta");
+
+                    return;
+                }
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        private void ConvertJSONToHashMetaFile_Click(object sender, RoutedEventArgs e)
+        {
+            var fileDialog = new Ookii.Dialogs.Wpf.VistaOpenFileDialog();
+
+            fileDialog.Title = "Select an input Hash meta.JSON file:";
+
+            fileDialog.Filter = "meta.JSON file|*.meta.JSON|All files|*.*";
+
+            if (!System.IO.Directory.Exists(userSettings.InputFolder))
+            {
+                userSettings.InputFolder = System.IO.Directory.GetCurrentDirectory();
+
+                var options = new JsonSerializerOptions { WriteIndented = true };
+
+                string jsonString = JsonSerializer.Serialize(userSettings, options);
+
+                File.WriteAllText("rpkg.json", jsonString);
+            }
+
+            fileDialog.InitialDirectory = userSettings.InputFolder;
+
+            fileDialog.FileName = userSettings.InputFolder;
+
+            var fileDialogResult = fileDialog.ShowDialog();
+
+            if (fileDialogResult == true)
+            {
+                if (fileDialog.FileName.EndsWith(".meta.JSON", StringComparison.OrdinalIgnoreCase))
+                {
+                    string command = "";
+                    string input_path = fileDialog.FileName;
+                    string filter = "";
+                    string search = "";
+                    string search_type = "";
+                    string output_path = "";
+
+                    Progress progress = new Progress();
+
+                    progress.operation = (int)Progress.Operation.MASS_EXTRACT;
+
+                    command = "-json_to_hash_meta";
+
+                    progress.message.Content = "Converting Hash meta.JSON to meta...";
+
+                    progress.ProgressBar.IsIndeterminate = true;
+
+                    int return_value = reset_task_status();
+
+                    execute_task rpkgExecute = task_execute;
+
+                    IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
+
+                    progress.ShowDialog();
+
+                    string responseString = Marshal.PtrToStringAnsi(get_response_string());
+
+                    if (responseString != "")
+                    {
+                        MessageBoxShow(responseString);
+                    }
+                }
+                else
+                {
+                    MessageBoxShow("Error: The input file must end in .meta.JSON");
+
+                    return;
+                }
+            }
+            else
+            {
+                return;
             }
         }
     }

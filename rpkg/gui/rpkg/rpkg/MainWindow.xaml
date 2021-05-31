@@ -10,7 +10,7 @@
         xmlns:local="clr-namespace:rpkg"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
-        Title="RPKG v2.15.1" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
+        Title="RPKG v2.16" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -85,6 +85,10 @@
                         <MenuItem Click="ChangeColorTheme_Click" Header="Dark/White"/>
                     </MenuItem>
                     <MenuItem Click="HashCalculator_Click"  Header="Hash Calculator"/>
+                    <MenuItem Header="Utilities">
+                        <MenuItem Click="ConvertHashMetaFileToJSON_Click" Header="Convert Hash Meta File To JSON"/>
+                        <MenuItem Click="ConvertJSONToHashMetaFile_Click" Header="Convert JSON To Hash Meta File"/>
+                    </MenuItem>
                     <MenuItem Click="About_Click" Header="About"/>
                     <MenuItem Click="Exit_Click" Header="Exit"/>
                 </Menu>

@@ -24,6 +24,7 @@
     <ClCompile Include="..\rpkg_src\command_line.cpp" />
     <ClCompile Include="..\rpkg_src\compute_ioi_hash.cpp" />
     <ClCompile Include="..\rpkg_src\compute_ioi_hash_from_file.cpp" />
+    <ClCompile Include="..\rpkg_src\compute_ioi_hash_string.cpp" />
     <ClCompile Include="..\rpkg_src\console.cpp" />
     <ClCompile Include="..\rpkg_src\crypto.cpp" />
     <ClCompile Include="..\rpkg_src\decrypt_packagedefinition_thumbs.cpp" />
@@ -76,12 +77,14 @@
     <ClCompile Include="..\rpkg_src\gpudevice.cpp" />
     <ClCompile Include="..\rpkg_src\hash.cpp" />
     <ClCompile Include="..\rpkg_src\hash_depends.cpp" />
+    <ClCompile Include="..\rpkg_src\hash_meta_to_json.cpp" />
     <ClCompile Include="..\rpkg_src\hash_probe.cpp" />
     <ClCompile Include="..\rpkg_src\hash_probe_from_file.cpp" />
     <ClCompile Include="..\rpkg_src\import_hash_meta.cpp" />
     <ClCompile Include="..\rpkg_src\import_rpkg.cpp" />
     <ClCompile Include="..\rpkg_src\import_rpkg_files_in_folder.cpp" />
     <ClCompile Include="..\rpkg_src\import_rpkg_meta.cpp" />
+    <ClCompile Include="..\rpkg_src\json_to_hash_meta.cpp" />
     <ClCompile Include="..\rpkg_src\load_master_hash_list.cpp" />
     <ClCompile Include="..\rpkg_src\load_temp_tblu_hash_depends.cpp" />
     <ClCompile Include="..\rpkg_src\main.cpp" />

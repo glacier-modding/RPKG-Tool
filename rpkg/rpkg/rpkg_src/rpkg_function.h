@@ -21,6 +21,8 @@ struct rpkg_extraction_vars
 class rpkg_function
 {
 public:
+	static void json_to_hash_meta(std::string& input_path, std::string& filter, std::string& output_path);
+	static void hash_meta_to_json(std::string& input_path, std::string& filter, std::string& output_path);
 	static void edit_hash_depends(std::string& input_path, std::string& filter, std::string& search, std::string& search_type, std::string& output_path);
 	static void edit_patch_deletion_list(std::string& input_path, std::string& filter, std::string& search, std::string& search_type, std::string& output_path);
 	static void extract_all_hash_depends_from(std::string& input_path, std::string& filter, std::string& output_path, bool extract_prim_models);

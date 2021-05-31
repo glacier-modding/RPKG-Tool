@@ -1191,7 +1191,7 @@ void console::display_usage_info()
     LOG("");
     LOG("");
     LOG("");
-    LOG("rpkg-cli v2.15.1 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files.");
+    LOG("rpkg-cli v2.16 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files.");
     LOG("--------------------------------------------------------------------------------");
     LOG("Note: All the information used to build this program was gleaned");
     LOG("      in a completely 'clean room' environment.");
@@ -1316,8 +1316,12 @@ void console::display_usage_info()
     LOG("        Probes RPKG files for hash files/resources and displays key data points.");
     LOG("        Scans a directory, commonly Hitman's Runtime dir, and imports and");
     LOG("        scans all available RPKG files for the existence of the hash file/resource.");
+    LOG("    -hash_meta_to_json <path to hash *.meta file>");
+    LOG("        Converts a Hash *.meta file into an easily editable JSON file (*.meta.JSON).");
     LOG("    -hex_search <hex string>");
     LOG("        Specifices the hex string to find within hash files/resources.");
+    LOG("    -json_to_hash_meta <path to hash *.meta.JSON file>");
+    LOG("        Converts a Hash meta JSON file (*.meta.JSON) into a Hash *.meta file.");
     LOG("    -output_path <path to output folder>");
     LOG("        Specifies output folder path to use instead of the current directory.");
     LOG("    -rebuild_wwev_in <path to folders containing wem files>");
@@ -1378,6 +1382,10 @@ void console::display_usage_info()
     LOG("        rpkg-cli.exe -filter ORES,REPO,JSON -extract_from_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"");
     LOG("    Generates a RPKG file from hash file(s) in a given folder and all subfolders:");
     LOG("        rpkg-cli.exe -generate_rpkg_from chunk0patch1");
+    LOG("    Converts a Hash *.meta file into an easily editable JSON file (*.meta.JSON):");
+    LOG("        rpkg-cli.exe -hash_meta_to_json \"C:\\00123456789ABCDE.meta\"");
+    LOG("    Converts a Hash meta JSON file (*.meta.JSON) into a Hash *.meta file:");
+    LOG("        rpkg-cli.exe -json_to_hash_meta \"C:\\00123456789ABCDE.meta.JSON\"");
     LOG("    Extracts all of the recursive hash depends, specified by -filter, of a given hash file/resource:");
     LOG("        rpkg-cli.exe -filter 00123456789ABCDE -extract_all_hash_depends_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"");
     LOG("    Extracts all of the recursive PRIM Model(s) (GLB/TGA) hash depends, specified by -filter, of a given hash file/resource:");
