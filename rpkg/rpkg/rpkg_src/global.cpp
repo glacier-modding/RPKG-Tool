@@ -49,3 +49,11 @@ std::string search_imported_hashes_string = "";
 std::string search_hash_list_string = "";
 
 std::string rpkg_file_paths_hash_is_in = "";
+
+int pcm_sample_size = 0;
+
+int pcm_sample_rate = 0;
+
+int pcm_channels = 0;
+
+std::string extracted_wem_string = "";

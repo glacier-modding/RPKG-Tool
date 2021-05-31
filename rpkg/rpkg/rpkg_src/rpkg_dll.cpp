@@ -1,6 +1,7 @@
 #include "rpkg_dll.h"
 #include "global.h"
 #include "task.h"
+#include "file.h"
 #include "rpkg_function.h"
 #include "crypto.h"
 #include "console.h"
@@ -8,6 +9,10 @@
 #include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
+#include "thirdparty/ww2ogg/packed_codebooks_aoTuV_603.h"
+#include "thirdparty/ww2ogg/wwriff.h"
+#include "thirdparty/revorb/revorb.h"
+#include "thirdparty/vorbis/include/vorbis/vorbisfile.h"
 #include <sstream>
 #include <fstream>
 #include <iomanip>
@@ -404,6 +409,7 @@ char* get_hash_in_rpkg_data(char* rpkg_file, char* hash_string)
 
                 file.seekg(rpkgs.at(i).hash.at(it->second).hash_offset, file.beg);
                 file.read(input_data.data(), hash_size);
+                file.close();
 
                 if (rpkgs.at(i).hash.at(it->second).is_xored == 1)
                 {
@@ -435,6 +441,270 @@ int clear_hash_data_vector()
     std::vector<char>().swap(response_data);
 
     return (int)response_data.size();
+}
+
+int create_ogg_file_from_hash_in_rpkg(char* rpkg_file, char* hash_string, int command, int wwev_number)
+{
+    for (uint64_t i = 0; i < rpkgs.size(); i++)
+    {
+        if (rpkgs.at(i).rpkg_file_path == rpkg_file)
+        {
+            uint64_t hash_value = std::strtoull(hash_string, nullptr, 16);
+
+            std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(hash_value);
+
+            if (it != rpkgs.at(i).hash_map.end())
+            {
+                uint64_t hash_size;
+
+                if (rpkgs.at(i).hash.at(it->second).is_lz4ed == 1)
+                {
+                    hash_size = rpkgs.at(i).hash.at(it->second).hash_size;
+
+                    if (rpkgs.at(i).hash.at(it->second).is_xored == 1)
+                    {
+                        hash_size &= 0x3FFFFFFF;
+                    }
+                }
+                else
+                {
+                    hash_size = rpkgs.at(i).hash.at(it->second).hash_size_final;
+                }
+
+                std::vector<char> input_data(hash_size, 0);
+
+                std::ifstream file = std::ifstream(rpkgs.at(i).rpkg_file_path, std::ifstream::binary);
+
+                if (!file.good())
+                {
+                    response_string = "failed";
+                }
+
+                file.seekg(rpkgs.at(i).hash.at(it->second).hash_offset, file.beg);
+                file.read(input_data.data(), hash_size);
+                file.close();
+
+                if (rpkgs.at(i).hash.at(it->second).is_xored == 1)
+                {
+                    crypto::xor_data(input_data.data(), (uint32_t)hash_size);
+                }
+
+                uint32_t decompressed_size = rpkgs.at(i).hash.at(it->second).hash_size_final;
+
+                std::vector<char> lz4_output_data(decompressed_size, 0);
+
+                std::vector<char>* sound_data;
+
+                if (rpkgs.at(i).hash.at(it->second).is_lz4ed)
+                {
+                    LZ4_decompress_safe(input_data.data(), lz4_output_data.data(), (int)hash_size, decompressed_size);
+
+                    sound_data = &lz4_output_data;
+                }
+                else
+                {
+                    sound_data = &input_data;
+                }
+
+                if (rpkgs.at(i).hash.at(it->second).hash_resource_type == "WWEM" || rpkgs.at(i).hash.at(it->second).hash_resource_type == "WWES")
+                {
+                    std::string wem_file_name = rpkgs.at(i).hash.at(it->second).hash_string + ".wem";
+                    std::string ogg_file = rpkgs.at(i).hash.at(it->second).hash_string + ".ogg";
+
+                    std::ofstream wem_file = std::ofstream(wem_file_name, std::ifstream::binary);
+
+                    if (!wem_file.good())
+                    {
+                        response_string = "failed";
+                    }
+
+                    wem_file.write(sound_data->data(), decompressed_size);
+
+                    wem_file.close();
+
+                    if (!file::path_exists("packed_codebooks_aoTuV_603.bin"))
+                    {
+                        response_string = "failed";
+
+                        std::ofstream output_file = std::ofstream("packed_codebooks_aoTuV_603.bin", std::ifstream::binary);
+
+                        if (!output_file.good())
+                        {
+                            response_string = "failed";
+                        }
+
+                        output_file.write((const char*)codebook, sizeof(codebook));
+
+                        output_file.close();
+                    }
+
+                    std::ofstream output_file = std::ofstream(ogg_file, std::ifstream::binary);
+
+                    if (!output_file.good())
+                    {
+                        response_string = "failed";
+                    }
+
+                    try
+                    {
+                        Wwise_RIFF_Vorbis ww(wem_file_name, "packed_codebooks_aoTuV_603.bin", false, false, kNoForcePacketFormat);
+
+                        ww.generate_ogg(output_file);
+                    }
+                    catch (const Parse_error& pe)
+                    {
+                        LOG("WWEV resource found: " << hash_file_name << " in RPKG file: " << rpkgs.at(i).rpkg_file_name);
+                        LOG("Error parsing ogg file " << wem_file_name << " could not be created.");
+                        LOG("Error: " << pe);
+                    }
+
+                    output_file.close();
+
+                    revorb(ogg_file);
+                }
+                else if (rpkgs.at(i).hash.at(it->second).hash_resource_type == "WWEV")
+                {
+                    uint32_t wwev_file_name_length = 0;
+                    uint32_t wwev_file_count = 0;
+                    uint32_t wwev_file_count_test = 0;
+
+                    uint32_t position = 0;
+
+                    char input[1024];
+                    uint8_t bytes1 = 0;
+                    uint32_t bytes4 = 0;
+                    uint64_t bytes8 = 0;
+
+                    std::memcpy(&wwev_file_name_length, &sound_data->data()[position], sizeof(bytes4));
+
+                    std::vector<char> wwev_meta_data;
+
+                    char hash[8];
+
+                    std::memcpy(&hash, &rpkgs.at(i).hash.at(it->second).hash_value, 0x8);
+
+                    for (uint64_t k = 0; k < sizeof(uint64_t); k++)
+                    {
+                        wwev_meta_data.push_back(hash[k]);
+                    }
+
+                    std::memcpy(&input, &sound_data->data()[position], (wwev_file_name_length + (uint64_t)0xC));
+                    for (uint64_t k = 0; k < (wwev_file_name_length + (uint64_t)0xC); k++)
+                    {
+                        wwev_meta_data.push_back(input[k]);
+                    }
+
+                    position += 0x4;
+
+                    std::vector<char> wwev_file_name((uint64_t)wwev_file_name_length + (uint64_t)1, 0);
+                    wwev_file_name[wwev_file_name_length] = 0;
+
+                    std::memcpy(wwev_file_name.data(), &sound_data->data()[position], wwev_file_name_length);
+                    position += wwev_file_name_length;
+                    position += 0x4;
+
+                    std::memcpy(&wwev_file_count, &sound_data->data()[position], sizeof(bytes4));
+                    position += 0x4;
+
+                    std::memcpy(&wwev_file_count_test, &sound_data->data()[position], sizeof(bytes4));
+
+                    std::string wem_ogg_path = rpkgs.at(i).hash.at(it->second).hash_string;
+
+                    if (command == 0)
+                    {
+                        return (int)wwev_file_count;
+                    }
+
+                    std::string wem_file_name = rpkgs.at(i).hash.at(it->second).hash_string + ".wem";
+                    std::string ogg_file = rpkgs.at(i).hash.at(it->second).hash_string + ".ogg";
+
+                    if (wwev_file_count > 0)
+                    {
+                        for (uint64_t k = 0; k < wwev_file_count; k++)
+                        {
+                            std::memcpy(&input, &sound_data->data()[position], 0x8);
+                            for (uint64_t l = 0; l < 0x8; l++)
+                            {
+                                wwev_meta_data.push_back(input[l]);
+                            }
+
+                            position += 0x4;
+
+                            uint32_t wem_size;
+
+                            std::memcpy(&wem_size, &sound_data->data()[position], sizeof(bytes4));
+                            position += 0x4;
+
+                            std::vector<char> wwev_file_data(wem_size, 0);
+
+                            std::memcpy(wwev_file_data.data(), &sound_data->data()[position], wem_size);
+                            position += wem_size;
+
+                            if (wwev_number == k)
+                            {
+                                std::string wem_file = wem_ogg_path + ".wem";
+
+                                std::ofstream output_file = std::ofstream(wem_file, std::ifstream::binary);
+
+                                if (!output_file.good())
+                                {
+                                    response_string = "failed";
+                                }
+
+                                output_file.write(wwev_file_data.data(), wem_size);
+
+                                output_file.close();
+
+                                if (!file::path_exists("packed_codebooks_aoTuV_603.bin"))
+                                {
+                                    response_string = "failed";
+
+                                    std::ofstream output_file = std::ofstream("packed_codebooks_aoTuV_603.bin", std::ifstream::binary);
+
+                                    if (!output_file.good())
+                                    {
+                                        response_string = "failed";
+                                    }
+
+                                    output_file.write((const char*)codebook, sizeof(codebook));
+
+                                    output_file.close();
+                                }
+
+                                std::string ogg_file = wem_ogg_path + ".ogg";
+
+                                output_file = std::ofstream(ogg_file, std::ifstream::binary);
+
+                                if (!output_file.good())
+                                {
+                                    response_string = "failed";
+                                }
+
+                                try
+                                {
+                                    Wwise_RIFF_Vorbis ww(wem_file, "packed_codebooks_aoTuV_603.bin", false, false, kNoForcePacketFormat);
+
+                                    ww.generate_ogg(output_file);
+                                }
+                                catch (const Parse_error& pe)
+                                {
+                                    LOG("WWEV resource found: " << hash_file_name << " in RPKG file: " << rpkgs.at(i).rpkg_file_name);
+                                    LOG("Error parsing ogg file " << wem_file << " could not be created.");
+                                    LOG("Error: " << pe);
+                                }
+
+                                output_file.close();
+
+                                revorb(ogg_file);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return 0;
 }
 
 char* get_hash_in_rpkg_data_in_hex_view(char* rpkg_file, char* hash_string)
@@ -477,6 +747,7 @@ char* get_hash_in_rpkg_data_in_hex_view(char* rpkg_file, char* hash_string)
 
                 file.seekg(rpkgs.at(i).hash.at(it->second).hash_offset, file.beg);
                 file.read(input_data.data(), hash_size);
+                file.close();
 
                 if (rpkgs.at(i).hash.at(it->second).is_xored == 1)
                 {
@@ -900,4 +1171,109 @@ char* get_rpkg_file_paths_hash_is_in(char* hash_string)
     }
 
     return &rpkg_file_paths_hash_is_in[0];
+}
+
+int convert_ogg_to_pcm(char* input_path, char* output_path)
+{
+    OggVorbis_File vf;
+    std::string input_file_path = std::string(input_path);
+    std::string output_file_path = std::string(output_path);
+    uint64_t samples = 0;
+    char buffer[8192];
+    int bits = 16;
+    int return_value = 0;
+    int retrieve_all_pcm_samples = 0;
+    int bit_stream = 0;
+
+    if (ov_fopen(input_file_path.c_str(), &vf) < 0)
+    {
+        task_status_string = "Couldn't open the OGG file.";
+        return 0;
+        ov_clear(&vf);
+    }
+
+    if (!ov_seekable(&vf))
+    {
+        task_status_string = "OGG file is not seekable.";
+        return 0;
+        ov_clear(&vf);
+    }
+
+    pcm_channels = ov_info(&vf, 0)->channels;
+    pcm_sample_rate = ov_info(&vf, 0)->rate;
+
+    for (int i = 0; i < ov_streams(&vf); i++)
+    {
+        if (ov_info(&vf, i)->channels == pcm_channels && ov_info(&vf, i)->rate == pcm_sample_rate)
+        {
+            retrieve_all_pcm_samples = 1;
+        }
+    }
+
+    if (retrieve_all_pcm_samples)
+    {
+        samples = ov_pcm_total(&vf, -1);
+    }
+    else
+    {
+        samples = ov_pcm_total(&vf, 0);
+    }
+
+    int pcm_data_size = sizeof(int16_t) * samples * pcm_channels;
+
+    std::vector<char> pcm_data(pcm_data_size, 0);
+
+    int position = 0;
+
+    while ((return_value = ov_read(&vf, buffer, sizeof(buffer), 0, bits / 8, 1, &bit_stream)) != 0)
+    {
+        if (bit_stream != 0)
+        {
+            vorbis_info* vi = ov_info(&vf, -1);
+            if ((pcm_channels != vi->channels) || (pcm_sample_rate != vi->rate))
+            {
+                std::cout << "Logical bit streams parameters are not allowed to vary." << std::endl;
+                break;
+            }
+        }
+
+        if (return_value == OV_HOLE) {
+            std::cout << "There is a hole in the data." << std::endl;
+            continue;
+        }
+
+        std::memcpy(&pcm_data.data()[position], buffer, return_value);
+
+        position += return_value;
+    }
+
+    std::ofstream output_file = std::ofstream(output_file_path, std::ifstream::binary);
+
+    output_file.write(reinterpret_cast<char*>(pcm_data.data()), pcm_data_size);
+
+    output_file.close();
+
+    ov_clear(&vf);
+
+    return 1;
+}
+
+int get_pcm_sample_size()
+{
+    return pcm_sample_size;
+}
+
+int get_pcm_sample_rate()
+{
+    return pcm_sample_rate;
+}
+
+int get_pcm_channels()
+{
+    return pcm_channels;
+}
+
+char* get_wem_string()
+{
+    return &extracted_wem_string[0];
 }

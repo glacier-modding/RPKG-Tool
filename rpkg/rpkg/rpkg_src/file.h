@@ -13,4 +13,5 @@ public:
     static void parse_input_file_name(std::string input, std::string ends_with);
     static bool is_json_file(std::string input);
     static bool is_rpkg_file(std::string input);
+    static bool is_supermeta_file(std::string input);
 };

@@ -284,7 +284,7 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
                                 char hash[8];
 
-                                std::memcpy(&hash, &rpkgs.at(i).hash.at(hash_index), 0x8);
+                                std::memcpy(&hash, &rpkgs.at(i).hash.at(hash_index).hash_value, 0x8);
 
                                 for (uint64_t k = 0; k < sizeof(uint64_t); k++)
                                 {

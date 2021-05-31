@@ -23,6 +23,7 @@ using Ookii.Dialogs.Wpf;
 using System.Net.Http;
 using System.Diagnostics;
 using System.Security;
+using NAudio.Wave;
 
 namespace rpkg
 {
@@ -53,6 +54,8 @@ namespace rpkg
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            AddHandlers();
+
             if (!File.Exists("rpkg.json"))
             {
                 SetColorTheme("Dark", "Red");
@@ -281,7 +284,7 @@ namespace rpkg
 
                                     if (localization_data_size > 0)
                                     {
-                                        if (ThirdTabRight.Visibility == Visibility.Hidden)
+                                        if (ThirdTabRight.Visibility == Visibility.Collapsed)
                                         {
                                             ThirdTabRight.Visibility = Visibility.Visible;
                                         }
@@ -290,7 +293,7 @@ namespace rpkg
                                     {
                                         if (ThirdTabRight.Visibility == Visibility.Visible)
                                         {
-                                            ThirdTabRight.Visibility = Visibility.Hidden;
+                                            ThirdTabRight.Visibility = Visibility.Collapsed;
                                         }
                                     }
 
@@ -300,7 +303,17 @@ namespace rpkg
                                 {
                                     if (ThirdTabRight.Visibility == Visibility.Visible)
                                     {
-                                        ThirdTabRight.Visibility = Visibility.Hidden;
+                                        ThirdTabRight.Visibility = Visibility.Collapsed;
+                                    }
+
+                                    if (FourthTabRight.Visibility == Visibility.Visible)
+                                    {
+                                        FourthTabRight.Visibility = Visibility.Collapsed;
+                                    }
+
+                                    if (FifthTabRight.Visibility == Visibility.Visible)
+                                    {
+                                        FifthTabRight.Visibility = Visibility.Collapsed;
                                     }
                                 }
 
@@ -391,6 +404,21 @@ namespace rpkg
                         DetailsTextBox.Text += "having a combined total data size of " + resourceTypesDataSize.ToString("N0") + " bytes";
 
                         HexViewerTextBox.Text = "";
+
+                        if (ThirdTabRight.Visibility == Visibility.Visible)
+                        {
+                            ThirdTabRight.Visibility = Visibility.Collapsed;
+                        }
+
+                        if (FourthTabRight.Visibility == Visibility.Visible)
+                        {
+                            FourthTabRight.Visibility = Visibility.Collapsed;
+                        }
+
+                        if (FifthTabRight.Visibility == Visibility.Visible)
+                        {
+                            FifthTabRight.Visibility = Visibility.Collapsed;
+                        }
                     }
                     else if (itemHeader.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
                     {
@@ -405,12 +433,28 @@ namespace rpkg
                         DetailsTextBox.Text += Marshal.PtrToStringAnsi(get_patch_deletion_list(itemHeader));
 
                         HexViewerTextBox.Text = "";
+
+                        if (ThirdTabRight.Visibility == Visibility.Visible)
+                        {
+                            ThirdTabRight.Visibility = Visibility.Collapsed;
+                        }
+
+                        if (FourthTabRight.Visibility == Visibility.Visible)
+                        {
+                            FourthTabRight.Visibility = Visibility.Collapsed;
+                        }
+
+                        if (FifthTabRight.Visibility == Visibility.Visible)
+                        {
+                            FifthTabRight.Visibility = Visibility.Collapsed;
+                        }
                     }
                     else
                     {
                         string[] header = itemHeader.Split(' ');
 
                         string hashFile = header[0];
+                        string ioiString = header[1];
 
                         string[] hashDetails = hashFile.Split('.');
 
@@ -452,7 +496,7 @@ namespace rpkg
 
                                 if (localization_data_size > 0)
                                 {
-                                    if (ThirdTabRight.Visibility == Visibility.Hidden)
+                                    if (ThirdTabRight.Visibility == Visibility.Collapsed)
                                     {
                                         ThirdTabRight.Visibility = Visibility.Visible;
                                     }
@@ -461,7 +505,7 @@ namespace rpkg
                                 {
                                     if (ThirdTabRight.Visibility == Visibility.Visible)
                                     {
-                                        ThirdTabRight.Visibility = Visibility.Hidden;
+                                        ThirdTabRight.Visibility = Visibility.Collapsed;
                                     }
                                 }
 
@@ -471,7 +515,17 @@ namespace rpkg
                             {
                                 if (ThirdTabRight.Visibility == Visibility.Visible)
                                 {
-                                    ThirdTabRight.Visibility = Visibility.Hidden;
+                                    ThirdTabRight.Visibility = Visibility.Collapsed;
+                                }
+
+                                if (FourthTabRight.Visibility == Visibility.Visible)
+                                {
+                                    FourthTabRight.Visibility = Visibility.Collapsed;
+                                }
+
+                                if (FifthTabRight.Visibility == Visibility.Visible)
+                                {
+                                    FifthTabRight.Visibility = Visibility.Collapsed;
                                 }
                             }
 
@@ -497,6 +551,230 @@ namespace rpkg
                                 string localization = "";
                                 localizationTextBoxText.TryGetValue(identifier, out localization);
                                 LocalizationTextBox.Text = localization;
+                            }
+                        }
+
+                        if (resourceType == "GFXI")
+                        {
+                            BitmapImage bitmapImage = new BitmapImage();
+
+                            bitmapImage.BeginInit();
+
+                            UInt32 hash_size = get_hash_in_rpkg_size(rpkgFilePath, hash);
+
+                            byte[] hash_data = new byte[hash_size];
+
+                            unsafe
+                            {
+                                Marshal.Copy(get_hash_in_rpkg_data(rpkgFilePath, hash), hash_data, 0, (int)hash_size);
+                            }
+
+                            MemoryStream memoryStream = new MemoryStream(hash_data);
+
+                            bitmapImage.StreamSource = memoryStream;
+
+                            bitmapImage.EndInit();
+
+                            ImageViewer.Source = bitmapImage;
+
+                            if (hash_size > 0)
+                            {
+                                if (FourthTabRight.Visibility == Visibility.Collapsed)
+                                {
+                                    FourthTabRight.Visibility = Visibility.Visible;
+                                }
+                            }
+                            else
+                            {
+                                if (FourthTabRight.Visibility == Visibility.Visible)
+                                {
+                                    FourthTabRight.Visibility = Visibility.Collapsed;
+                                }
+                            }
+
+                            int return_value_clear = clear_hash_data_vector();
+                        }
+
+                        if (resourceType == "WWEM" || resourceType == "WWES")
+                        {
+                            if (OGGPlayerTimer != null)
+                            {
+                                OGGPlayerTimer.Stop();
+                            }
+
+                            if (waveOut != null)
+                            {
+                                waveOut.Stop();
+                                waveOut.Dispose();
+                                waveOut = null;
+                            }
+
+                            oggPlayerState = (int)OggPlayerState.NULL;
+
+                            oggPlayerPaused = false;
+
+                            OGGPlayerLabelHashFileName.Content = hashFile;
+                            OGGPlayerLabelIOIString.Content = ioiString;
+
+                            OGGPlayer.Value = 0;
+
+                            OGGPlayerLabel.Content = "0 / 0";
+
+                            OGGPlayerPlay.Kind = MahApps.Metro.IconPacks.PackIconMaterialDesignKind.PlayCircleOutline;
+
+                            if (OGGPlayerComboBox.Visibility == Visibility.Visible)
+                            {
+                                OGGPlayerComboBox.Visibility = Visibility.Collapsed;
+                            }
+
+                            if (FifthTabRight.Visibility == Visibility.Collapsed)
+                            {
+                                FifthTabRight.Visibility = Visibility.Visible;
+                            }
+
+                            int return_value = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hash, 0, 0);
+
+                            string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+
+                            string inputOGGFile = currentDirectory + "\\" + hash + ".ogg";
+
+                            string outputPCMFile = currentDirectory + "\\" + hash + ".pcm";
+
+                            return_value = convert_ogg_to_pcm(inputOGGFile, outputPCMFile);
+
+                            if (File.Exists(outputPCMFile))
+                            {
+                                if (pcmMemoryStream != null)
+                                {
+                                    pcmMemoryStream.Dispose();
+                                }
+
+                                pcmMemoryStream = new MemoryStream(File.ReadAllBytes(outputPCMFile));
+
+                                int pcmSampleSize = get_pcm_sample_size();
+                                int pcmSampleRate = get_pcm_sample_rate();
+                                int pcmChannels = get_pcm_channels();
+
+                                File.Delete(hash + ".ogg");
+                                File.Delete(hash + ".wem");
+                                File.Delete(hash + ".pcm");
+
+                                //file = new FileInfo("output.pcm");
+                                //stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
+
+                                waveFormat = new WaveFormat(pcmSampleRate, 16, pcmChannels);
+
+                                pcmSource = new NAudio.Wave.RawSourceWaveStream(pcmMemoryStream, waveFormat);
+
+                                oggPlayerState = (int)OggPlayerState.READY;
+                            }
+                        }
+
+                        if (resourceType == "WWEV")
+                        {
+                            if (OGGPlayerTimer != null)
+                            {
+                                OGGPlayerTimer.Stop();
+                            }
+
+                            if (waveOut != null)
+                            {
+                                waveOut.Stop();
+                                waveOut.Dispose();
+                                waveOut = null;
+                            }
+
+                            oggPlayerPaused = false;
+
+                            OGGPlayerLabelHashFileName.Content = hashFile;
+                            OGGPlayerLabelIOIString.Content = ioiString;
+
+                            OGGPlayer.Value = 0;
+
+                            OGGPlayerLabel.Content = "0 / 0";
+
+                            OGGPlayerPlay.Kind = MahApps.Metro.IconPacks.PackIconMaterialDesignKind.PlayCircleOutline;
+
+                            OGGPlayerComboBox.Items.Clear();
+
+                            if (OGGPlayerComboBox.Visibility == Visibility.Collapsed)
+                            {
+                                OGGPlayerComboBox.Visibility = Visibility.Visible;
+                            }
+
+                            int wwevCount = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hash, 0, 0);
+
+                            if (wwevCount > 0)
+                            {
+                                if (FifthTabRight.Visibility == Visibility.Collapsed)
+                                {
+                                    FifthTabRight.Visibility = Visibility.Visible;
+                                }
+
+                                int return_value = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hash, 1, 0);
+
+                                string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+
+                                string inputOGGFile = currentDirectory + "\\" + hash + ".ogg";
+
+                                string outputPCMFile = currentDirectory + "\\" + hash + ".pcm";
+
+                                return_value = convert_ogg_to_pcm(inputOGGFile, outputPCMFile);
+
+                                if (return_value == 1)
+                                {
+                                    if (File.Exists(outputPCMFile))
+                                    {
+                                        if (pcmMemoryStream != null)
+                                        {
+                                            pcmMemoryStream.Dispose();
+                                        }
+
+                                        pcmMemoryStream = new MemoryStream(File.ReadAllBytes(outputPCMFile));
+
+                                        int pcmSampleSize = get_pcm_sample_size();
+                                        int pcmSampleRate = get_pcm_sample_rate();
+                                        int pcmChannels = get_pcm_channels();
+
+                                        File.Delete(hash + ".ogg");
+                                        File.Delete(hash + ".wem");
+                                        File.Delete(hash + ".pcm");
+
+                                        //file = new FileInfo("output.pcm");
+                                        //stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
+
+                                        waveFormat = new WaveFormat(pcmSampleRate, 16, pcmChannels);
+
+                                        pcmSource = new NAudio.Wave.RawSourceWaveStream(pcmMemoryStream, waveFormat);
+
+                                        oggPlayerState = (int)OggPlayerState.READY;
+                                    }
+
+                                    for (int i = 0; i < wwevCount; i++)
+                                    {
+                                        OGGPlayerComboBox.Items.Add(i.ToString() + ".ogg");
+                                    }
+
+                                    OGGPlayerComboBox.SelectedIndex = 0;
+                                }
+                                else
+                                {
+                                    if (FifthTabRight.Visibility == Visibility.Visible)
+                                    {
+                                        FifthTabRight.Visibility = Visibility.Collapsed;
+                                    }
+
+                                    FirstTabRight.IsSelected = true;
+                                }
+                            }
+                            else
+                            {
+                                if (FifthTabRight.Visibility == Visibility.Visible)
+                                {
+                                    FifthTabRight.Visibility = Visibility.Collapsed;
+                                }
+
+                                FirstTabRight.IsSelected = true;
                             }
                         }
                     }
@@ -1929,6 +2207,31 @@ namespace rpkg
         private bool oneOrMoreRPKGsHaveBeenImported = false;
         private System.Windows.Threading.DispatcherTimer searchRPKGsInputTimer;
         private System.Windows.Threading.DispatcherTimer searchHashListInputTimer;
+        private System.Windows.Threading.DispatcherTimer OGGPlayerTimer;
+        private NAudio.Wave.WaveOut waveOut;
+        private MemoryStream pcmMemoryStream;
+        private int pcmSampleSize;
+        private int pcmSampleRate;
+        private int pcmChannels;
+
+        private enum OggPlayerState
+        {
+            NULL,
+            READY,
+            PLAYING,
+            PAUSED,
+            RESET
+        }
+
+        private int oggPlayerState = (int)OggPlayerState.NULL;
+        private bool oggPlayerRunning = false;
+        private bool oggPlayerPaused = false;
+        private bool oggPlayerStopped = false;
+        private bool oggPlayerStoppedNew = false;
+        FileInfo file;
+        FileStream stream;
+        WaveFormat waveFormat;
+        NAudio.Wave.RawSourceWaveStream pcmSource;
 
         public delegate int execute_get_hashes_with_no_reverse_depends(string rpkg_file);
         public delegate int execute_get_direct_hash_depends(string rpkg_file, string hash_string);
@@ -2029,6 +2332,22 @@ namespace rpkg
 
         [DllImport("rpkg.dll", EntryPoint = "get_rpkg_file_paths_hash_is_in", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr get_rpkg_file_paths_hash_is_in(string hash_string);
+
+        [DllImport("rpkg.dll", EntryPoint = "create_ogg_file_from_hash_in_rpkg", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int create_ogg_file_from_hash_in_rpkg(string rpkg_file, string hash_string, int command, int wwev_number);
+
+        [DllImport("rpkg.dll", EntryPoint = "convert_ogg_to_pcm", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int convert_ogg_to_pcm(string input_path, string output_path);
+
+        [DllImport("rpkg.dll", EntryPoint = "get_pcm_sample_size", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int get_pcm_sample_size();
+
+        [DllImport("rpkg.dll", EntryPoint = "get_pcm_sample_rate", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int get_pcm_sample_rate();
+
+        [DllImport("rpkg.dll", EntryPoint = "get_pcm_channels", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int get_pcm_channels();
+
 
         [SuppressUnmanagedCodeSecurity]
         internal static class SafeNativeMethods
@@ -2283,6 +2602,357 @@ namespace rpkg
                             SearchHashListTreeView.Items.Add(searchResult + " (hashlist) " + ioiString);
                         }
                     }
+                }
+            }
+        }
+
+        private void OGGPlayerTimer_Tick(object sender, EventArgs e)
+        {
+            //MessageBoxShow((((double)waveStream.Position / (double)waveStream.Length) * 100.0).ToString());
+            OGGPlayer.Value = ((double)pcmSource.Position / (double)pcmSource.Length) * 100.0;
+            OGGPlayerLabel.Content = pcmSource.CurrentTime.ToString() + " / " + pcmSource.TotalTime.ToString();
+
+            if (pcmSource.Position == pcmSource.Length)
+            {
+                if (OGGPlayerTimer == null)
+                {
+                    return;
+                }
+
+                OGGPlayerTimer.Stop();
+
+                waveOut.Stop();
+
+                //MessageBoxShow(waveStream.CurrentTime.ToString());
+
+                OGGPlayer.Value = 0;
+
+                pcmSource.Position = 0;
+
+                oggPlayerPaused = false;
+
+                oggPlayerStopped = true;
+
+                OGGPlayerPlay.Kind = MahApps.Metro.IconPacks.PackIconMaterialDesignKind.PlayCircleOutline;
+
+                if (OGGPlayerComboBox.Items.Count > 1)
+                {
+                    oggPlayerState = (int)OggPlayerState.NULL;
+
+                    int newIndex = OGGPlayerComboBox.SelectedIndex + 1;
+
+                    if (newIndex >= OGGPlayerComboBox.Items.Count)
+                    {
+                        newIndex = 0;
+                    }
+
+                    OGGPlayerComboBox.SelectedIndex = newIndex;
+
+                    string[] hashData = OGGPlayerLabelHashFileName.Content.ToString().Split('.');
+
+                    int return_value = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hashData[0], 1, newIndex);
+
+                    string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+
+                    string inputOGGFile = currentDirectory + "\\" + hashData[0] + ".ogg";
+
+                    string outputPCMFile = currentDirectory + "\\" + hashData[0] + ".pcm";
+
+                    return_value = convert_ogg_to_pcm(inputOGGFile, outputPCMFile);
+
+                    if (return_value == 1)
+                    {
+                        if (File.Exists(outputPCMFile))
+                        {
+                            if (OGGPlayerTimer != null)
+                            {
+                                OGGPlayerTimer.Stop();
+                            }
+
+                            if (waveOut != null)
+                            {
+                                waveOut.Stop();
+                                waveOut.Dispose();
+                                waveOut = null;
+                            }
+
+                            if (pcmMemoryStream != null)
+                            {
+                                pcmMemoryStream.Dispose();
+                            }
+
+                            pcmMemoryStream = new MemoryStream(File.ReadAllBytes(outputPCMFile));
+
+                            int pcmSampleSize = get_pcm_sample_size();
+                            int pcmSampleRate = get_pcm_sample_rate();
+                            int pcmChannels = get_pcm_channels();
+
+                            File.Delete(hashData[0] + ".ogg");
+                            File.Delete(hashData[0] + ".wem");
+                            File.Delete(hashData[0] + ".pcm");
+
+                            //file = new FileInfo("output.pcm");
+                            //stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
+
+                            waveFormat = new WaveFormat(pcmSampleRate, 16, pcmChannels);
+
+                            pcmSource = new NAudio.Wave.RawSourceWaveStream(pcmMemoryStream, waveFormat);
+
+                            oggPlayerState = (int)OggPlayerState.READY;
+                        }
+                    }
+                    else
+                    {
+                        if (FifthTabRight.Visibility == Visibility.Visible)
+                        {
+                            FifthTabRight.Visibility = Visibility.Collapsed;
+                        }
+
+                        FirstTabRight.IsSelected = true;
+                    }
+                }
+                else
+                {
+                    oggPlayerState = (int)OggPlayerState.RESET;
+                }
+            }
+
+            //MessageBoxShow(pcmSource.Position.ToString() + "," + pcmSource.Length.ToString());
+            //MessageBoxShow(pcmSource.CurrentTime.ToString() + " / " + pcmSource.TotalTime.ToString());
+        }
+
+        private void OGGPlayer_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
+        {
+            //MessageBoxShow(waveStream.Length.ToString() + "," + ((double)waveStream.Length * (OGGPlayer.Value / 100.0)).ToString() + "," + OGGPlayer.Value.ToString());
+
+            //MessageBoxShow(waveStream.CurrentTime.ToString());
+
+            pcmSource.Position = (long)((double)pcmSource.Length * (OGGPlayer.Value / 100.0));
+
+            OGGPlayerTimer.Start();
+        }
+
+        private void OGGPlayer_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
+        {
+            if (OGGPlayerTimer == null)
+            {
+                return;
+            }
+
+            OGGPlayerTimer.Stop();
+        }
+
+        private void OGGPlayer_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (OGGPlayerTimer == null)
+            {
+                return;
+            }
+
+            OGGPlayerTimer.Stop();
+
+            //MessageBoxShow(waveStream.CurrentTime.ToString());
+
+            pcmSource.Position = (long)((double)pcmSource.Length * (OGGPlayer.Value / 100.0));
+
+            OGGPlayerTimer.Start();
+        }
+
+        private void AddHandlers()
+        {
+            OGGPlayer.AddHandler(
+                PreviewMouseLeftButtonDownEvent,
+                new MouseButtonEventHandler((sender, e) =>
+                {
+                    if (!OGGPlayer.IsMoveToPointEnabled ||
+                    !(OGGPlayer.Template.FindName("PART_Track", OGGPlayer) is System.Windows.Controls.Primitives.Track track) ||
+                    track.Thumb?.IsMouseOver != false)
+                    {
+                        return;
+                    }
+                    track.Thumb.UpdateLayout();
+                    track.Thumb.RaiseEvent(new MouseButtonEventArgs(e.MouseDevice, e.Timestamp, MouseButton.Left)
+                    {
+                        RoutedEvent = MouseLeftButtonDownEvent,
+                        Source = track.Thumb
+                    });
+                }), true);
+        }
+
+        private void PackIconMaterialDesign_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (OGGPlayerTimer != null)
+            {
+                OGGPlayerTimer.Stop();
+            }
+
+            if (OGGPlayerPlay.Kind == MahApps.Metro.IconPacks.PackIconMaterialDesignKind.PlayCircleOutline)
+            {
+                if ((oggPlayerState == (int)OggPlayerState.PAUSED || oggPlayerState == (int)OggPlayerState.RESET) && waveOut != null)
+                {
+                    if (oggPlayerState == (int)OggPlayerState.RESET)
+                    {
+                        waveOut.Play();
+
+                        OGGPlayerTimer.Start();
+                    }
+                    else
+                    {
+                        waveOut.Resume();
+
+                        OGGPlayerTimer.Start();
+                    }
+
+                    oggPlayerPaused = true;
+
+                    OGGPlayerPlay.Kind = MahApps.Metro.IconPacks.PackIconMaterialDesignKind.PauseCircleOutline;
+                }
+                else
+                {
+                    if (OGGPlayerTimer == null)
+                    {
+                        OGGPlayerTimer = new System.Windows.Threading.DispatcherTimer();
+
+                        OGGPlayerTimer.Interval = TimeSpan.FromMilliseconds(200);
+
+                        OGGPlayerTimer.Tick += OGGPlayerTimer_Tick;
+                    }
+
+                    OGGPlayerTimer.Stop();
+                    OGGPlayerTimer.Start();
+
+                    oggPlayerStoppedNew = false;
+
+                    waveOut = new WaveOut();
+                    NAudio.Wave.MultiplexingWaveProvider multiplexingWaveProvider;
+                    multiplexingWaveProvider = new MultiplexingWaveProvider(new IWaveProvider[] { pcmSource }, 2);
+                    multiplexingWaveProvider.ConnectInputToOutput(0, 0);
+                    multiplexingWaveProvider.ConnectInputToOutput(0, 1);
+                    var wait = new System.Threading.ManualResetEventSlim(false);
+                    waveOut.PlaybackStopped += (s, ee) => wait.Set();
+
+                    try
+                    {
+                        //if (pcmSource.WaveFormat.Channels > 2)
+                        //{
+                            waveOut.Init(multiplexingWaveProvider);
+                        //}
+                        //else
+                        //{
+                            //waveOut.Init(waveStream);
+                        //}
+                        waveOut.Play();
+
+                        oggPlayerState = (int)OggPlayerState.PLAYING;
+                    }
+                    catch
+                    {
+                        MessageBoxShow("OGG File can't be played due to WaveBadFormat error.");
+                    }
+
+                    OGGPlayerPlay.Kind = MahApps.Metro.IconPacks.PackIconMaterialDesignKind.PauseCircleOutline;
+                }
+            }
+            else if (OGGPlayerPlay.Kind == MahApps.Metro.IconPacks.PackIconMaterialDesignKind.PauseCircleOutline)
+            {
+                waveOut.Pause();
+
+                oggPlayerPaused = true;
+
+                oggPlayerState = (int)OggPlayerState.PAUSED;
+
+                OGGPlayerPlay.Kind = MahApps.Metro.IconPacks.PackIconMaterialDesignKind.PlayCircleOutline;
+            }
+        }
+
+        private void OGGPlayerComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (oggPlayerState == (int)OggPlayerState.PLAYING && waveOut != null)
+            {
+                if (OGGPlayerTimer == null)
+                {
+                    return;
+                }
+
+                OGGPlayerTimer.Stop();
+
+                waveOut.Stop();
+
+                //MessageBoxShow(waveStream.CurrentTime.ToString());
+
+                OGGPlayer.Value = 0;
+
+                pcmSource.Position = 0;
+
+                oggPlayerPaused = false;
+
+                oggPlayerStopped = true;
+
+                OGGPlayerPlay.Kind = MahApps.Metro.IconPacks.PackIconMaterialDesignKind.PlayCircleOutline;
+
+                string[] hashData = OGGPlayerLabelHashFileName.Content.ToString().Split('.');
+
+                int return_value = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hashData[0], 1, OGGPlayerComboBox.SelectedIndex);
+
+                string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+
+                string inputOGGFile = currentDirectory + "\\" + hashData[0] + ".ogg";
+
+                string outputPCMFile = currentDirectory + "\\" + hashData[0] + ".pcm";
+
+                return_value = convert_ogg_to_pcm(inputOGGFile, outputPCMFile);
+
+                if (return_value == 1)
+                {
+                    if (File.Exists(outputPCMFile))
+                    {
+                        if (OGGPlayerTimer != null)
+                        {
+                            OGGPlayerTimer.Stop();
+                        }
+
+                        if (waveOut != null)
+                        {
+                            waveOut.Stop();
+                            waveOut.Dispose();
+                            waveOut = null;
+                        }
+
+                        oggPlayerState = (int)OggPlayerState.NULL;
+
+                        if (pcmMemoryStream != null)
+                        {
+                            pcmMemoryStream.Dispose();
+                        }
+
+                        pcmMemoryStream = new MemoryStream(File.ReadAllBytes(outputPCMFile));
+
+                        int pcmSampleSize = get_pcm_sample_size();
+                        int pcmSampleRate = get_pcm_sample_rate();
+                        int pcmChannels = get_pcm_channels();
+
+                        File.Delete(hashData[0] + ".ogg");
+                        File.Delete(hashData[0] + ".wem");
+                        File.Delete(hashData[0] + ".pcm");
+
+                        //file = new FileInfo("output.pcm");
+                        //stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
+
+                        waveFormat = new WaveFormat(pcmSampleRate, 16, pcmChannels);
+
+                        pcmSource = new NAudio.Wave.RawSourceWaveStream(pcmMemoryStream, waveFormat);
+
+                        oggPlayerState = (int)OggPlayerState.RESET;
+                    }
+                }
+                else
+                {
+                    if (FifthTabRight.Visibility == Visibility.Visible)
+                    {
+                        FifthTabRight.Visibility = Visibility.Collapsed;
+                    }
+
+                    FirstTabRight.IsSelected = true;
                 }
             }
         }

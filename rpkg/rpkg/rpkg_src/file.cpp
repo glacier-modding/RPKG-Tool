@@ -140,3 +140,16 @@ bool file::is_rpkg_file(std::string input)
 
     return false;
 }
+
+bool file::is_supermeta_file(std::string input)
+{
+    if (input.length() > 11)
+    {
+        if (util::to_upper_case(input.substr((input.length() - 10), 10)) == ".SUPERMETA")
+        {
+            return true;
+        }
+    }
+
+    return false;
+}

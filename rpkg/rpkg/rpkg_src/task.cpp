@@ -4,6 +4,7 @@
 #include "util.h"
 #include "generic_function.h"
 #include "rpkg_function.h"
+#include "dev_function.h"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -124,6 +125,34 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
 
         rpkg_function::extract_from_rpkg(rpkg_vars);
     }
+    else if (command == "-dev_diff_rpkg_supermetas")
+    {
+        dev_function::dev_diff_rpkg_supermetas(input_path, filter, output_path);
+    }
+    else if (command == "-dev_extract_rpkg_supermetas")
+    {
+        dev_function::dev_extract_rpkg_supermetas(input_path, output_path);
+    }
+    else if (command == "-dev_extract_all_strings")
+    {
+        dev_function::dev_extract_all_strings(input_path, filter, output_path);
+    }
+    else if (command == "-dev_extract_wwem_strings")
+    {
+        dev_function::dev_extract_wwem_strings(input_path, filter, output_path);
+    }
+    else if (command == "-dev_extract_wwes_strings")
+    {
+        dev_function::dev_extract_wwes_strings(input_path, filter, output_path);
+    }
+    else if (command == "-dev_extract_wwev_strings")
+    {
+        dev_function::dev_extract_wwev_strings(input_path, filter, output_path);
+    }
+    else if (command == "-dev_extract_materials_textures_strings")
+    {
+        dev_function::dev_extract_materials_textures_strings(input_path, filter, output_path);
+    }
 }
 
 void task::process_and_execute_files_draged_and_dropped(std::vector<std::string>& dragged_and_dropped_files)
@@ -158,6 +187,13 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
     std::vector<std::string> commands_without_paths = { "-compute_ioi_hash" };
     std::vector<std::string> commands_with_paths = { "-compute_ioi_hash_from_file",
                                                      "-decrypt_packagedefinition_thumbs",
+                                                     "-dev_diff_rpkg_supermetas",
+                                                     "-dev_extract_rpkg_supermetas",
+                                                     "-dev_extract_all_strings",
+                                                     "-dev_extract_materials_textures_strings",
+                                                     "-dev_extract_wwem_strings",
+                                                     "-dev_extract_wwes_strings",
+                                                     "-dev_extract_wwev_strings",
                                                      "-encrypt_packagedefinition_thumbs",
                                                      "-extract_from_rpkg",
                                                      "-extract_ores_from",

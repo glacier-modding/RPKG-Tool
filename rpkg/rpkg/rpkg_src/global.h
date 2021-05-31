@@ -58,3 +58,7 @@ extern std::vector<std::string> hash_list_hash_strings;
 extern std::string search_imported_hashes_string;
 extern std::string search_hash_list_string;
 extern std::string rpkg_file_paths_hash_is_in;
+extern int pcm_sample_size;
+extern int pcm_sample_rate;
+extern int pcm_channels;
+extern std::string extracted_wem_string;

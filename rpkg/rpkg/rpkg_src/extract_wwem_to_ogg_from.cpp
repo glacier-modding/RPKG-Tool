@@ -422,7 +422,7 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
 
                                         std::string final_path = metas_directory + "\\" + rpkgs.at(i).hash.at(hash_index).hash_file_name;
 
-                                        rpkg_function::extract_hash_meta(i, j, final_path);
+                                        rpkg_function::extract_hash_meta(i, hash_index, final_path);
                                     }
                                 }
                             }

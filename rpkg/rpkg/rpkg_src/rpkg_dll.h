@@ -79,3 +79,13 @@ RPKG_EXPORT int search_hash_list(char* search_str, int max_results);
 RPKG_EXPORT char* get_search_hash_list();
 
 RPKG_EXPORT char* get_rpkg_file_paths_hash_is_in(char* hash_string);
+
+RPKG_EXPORT int create_ogg_file_from_hash_in_rpkg(char* rpkg_file, char* hash_string, int command, int wwev_number);
+
+RPKG_EXPORT int convert_ogg_to_pcm(char* input_path, char* output_path);
+
+RPKG_EXPORT int get_pcm_sample_size();
+
+RPKG_EXPORT int get_pcm_sample_rate();
+
+RPKG_EXPORT int get_pcm_channels();
