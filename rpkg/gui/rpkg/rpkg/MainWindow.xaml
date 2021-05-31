@@ -1,0 +1,91 @@
+﻿<mah:MetroWindow x:Class="rpkg.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:rpkg"
+        mc:Ignorable="d"
+        Loaded="Window_Loaded" Closed="Window_Closed"
+        Title="RPKG v2.0" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <DockPanel Grid.Row="0" Grid.ColumnSpan="5">
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="Import">
+                    <MenuItem Click="OpenRPKGFile_Click" Header="Import RPKG File"/>
+                    <MenuItem Click="OpenRPKGFolder_Click" Header="Import RPKGs Folder"/>
+                </MenuItem>
+                <MenuItem Header="Extract">
+                    <MenuItem Click="Extract_Click" Header="Extract from RPKG File"/>
+                </MenuItem>
+                <MenuItem Header="Generate">
+                    <MenuItem Click="GenerateRPKGFromFolder_Click" Header="Generate RPKG From Folder"/>
+                </MenuItem>
+                <MenuItem Header="Mass Extract">
+                    <MenuItem Click="MassExtract_Click" Header="Extract Images/JSONs (ORES) To IOI Paths From RPKGs In Folder"/>
+                    <MenuItem Click="MassExtract_Click" Header="Extract Sounds (WWEM) To OGG To IOI Paths From RPKGs In Folder"/>
+                    <MenuItem Click="MassExtract_Click" Header="Extract Sounds (WWES) To OGG To IOI Paths From RPKGs In Folder"/>
+                    <MenuItem Click="MassExtract_Click" Header="Extract Sounds (WWEV) To OGG To IOI Paths From RPKGs In Folder"/>
+                    <MenuItem Click="MassExtract_Click" Header="Extract Localization (DLGE) To JSON From RPKGs In Folder"/>
+                    <MenuItem Click="MassExtract_Click" Header="Extract Localization (LOCR) To JSON From RPKGs In Folder"/>
+                    <MenuItem Click="MassExtract_Click" Header="Extract Localization (RTLV) To JSON From RPKGs In Folder"/>
+                </MenuItem>
+                <MenuItem Header="Rebuild">
+                    <MenuItem Click="Rebuild_Click" Header="Rebuild DLGE From Folder"/>
+                    <MenuItem Click="Rebuild_Click" Header="Rebuild LOCR From Folder"/>
+                    <MenuItem Click="Rebuild_Click" Header="Rebuild RTLV From Folder"/>
+                    <MenuItem Click="Rebuild_Click" Header="Rebuild WWEV From Folder"/>
+                </MenuItem>
+                <MenuItem Header="Color Theme">
+                    <MenuItem Click="ChangeColorTheme_Click" Header="Light/Blue"/>
+                    <MenuItem Click="ChangeColorTheme_Click" Header="Light/Brown"/>
+                    <MenuItem Click="ChangeColorTheme_Click" Header="Light/Green"/>
+                    <MenuItem Click="ChangeColorTheme_Click" Header="Light/Orange"/>
+                    <MenuItem Click="ChangeColorTheme_Click" Header="Light/Purple"/>
+                    <MenuItem Click="ChangeColorTheme_Click" Header="Light/Red"/>
+                    <MenuItem Click="ChangeColorTheme_Click" Header="Light/Yellow"/>
+                    <MenuItem Click="ChangeColorTheme_Click" Header="Light/White"/>
+                    <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Blue"/>
+                    <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Brown"/>
+                    <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Green"/>
+                    <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Orange"/>
+                    <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Purple"/>
+                    <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Red"/>
+                    <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Yellow"/>
+                    <MenuItem Click="ChangeColorTheme_Click" Header="Dark/White"/>
+                </MenuItem>
+                <MenuItem Click="About_Click" Header="About"/>
+                <MenuItem Click="Exit_Click" Header="Exit"/>
+            </Menu>
+        </DockPanel>
+        <TabControl x:Name="LeftTabControl" Grid.Row="1" Grid.Column="0">
+            <TabItem x:Name="FirstTabLeft" Header="Resource View">
+                <TreeView x:Name="MainTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/>
+            </TabItem>
+            <TabItem x:Name="SecondTabLeft" Header="Dependency View">
+                <TreeView x:Name="HashMapTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/>
+            </TabItem>
+        </TabControl>
+        <GridSplitter HorizontalAlignment="Right" VerticalAlignment="Stretch" Grid.Row="1"  Grid.Column="1" ResizeBehavior="PreviousAndNext" Width="5"/>
+        <TabControl x:Name="RightTabControl" Grid.Row="1" Grid.Column="2">
+            <TabItem x:Name="FirstTabRight" Header="Details">
+                <TextBox x:Name="DetailsTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" TextWrapping="NoWrap"/>
+            </TabItem>
+            <TabItem x:Name="SecondTabRight" Header="Hex Viewer">
+                <TextBox x:Name="HexViewerTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" TextWrapping="NoWrap"/>
+            </TabItem>
+            <TabItem x:Name="ThirdTabRight" Header="JSON Viewer" Visibility="Hidden">
+                <TextBox x:Name="LocalizationTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap"/>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</mah:MetroWindow>

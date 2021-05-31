@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\rpkg_src\command_json.cpp" />
+    <ClCompile Include="..\rpkg_src\command_line.cpp" />
+    <ClCompile Include="..\rpkg_src\compute_ioi_hash.cpp" />
+    <ClCompile Include="..\rpkg_src\compute_ioi_hash_from_file.cpp" />
+    <ClCompile Include="..\rpkg_src\console.cpp" />
+    <ClCompile Include="..\rpkg_src\crypto.cpp" />
+    <ClCompile Include="..\rpkg_src\decrypt_packagedefinition_thumbs.cpp" />
+    <ClCompile Include="..\rpkg_src\encrypt_packagedefinition_thumbs.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_dlge_to_json_from.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_from_rpkg.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_from_rpkg_with_map.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_hash_meta.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_locr_to_json_from.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_ores_from.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_rpkg_meta.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_rtlv_to_json_from.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_wwem_to_ogg_from.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_wwes_to_ogg_from.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_wwev_to_ogg_from.cpp" />
+    <ClCompile Include="..\rpkg_src\file.cpp" />
+    <ClCompile Include="..\rpkg_src\generate_rpkg_from.cpp" />
+    <ClCompile Include="..\rpkg_src\get_unique_name.cpp" />
+    <ClCompile Include="..\rpkg_src\global.cpp" />
+    <ClCompile Include="..\rpkg_src\hash.cpp" />
+    <ClCompile Include="..\rpkg_src\hash_depends.cpp" />
+    <ClCompile Include="..\rpkg_src\hash_probe.cpp" />
+    <ClCompile Include="..\rpkg_src\hash_probe_from_file.cpp" />
+    <ClCompile Include="..\rpkg_src\import_hash_meta.cpp" />
+    <ClCompile Include="..\rpkg_src\import_rpkg.cpp" />
+    <ClCompile Include="..\rpkg_src\import_rpkg_files_in_folder.cpp" />
+    <ClCompile Include="..\rpkg_src\import_rpkg_meta.cpp" />
+    <ClCompile Include="..\rpkg_src\load_master_hash_list.cpp" />
+    <ClCompile Include="..\rpkg_src\main.cpp" />
+    <ClCompile Include="..\rpkg_src\rebuild_dlge_from_json_from.cpp" />
+    <ClCompile Include="..\rpkg_src\rebuild_locr_from_json_from.cpp" />
+    <ClCompile Include="..\rpkg_src\rebuild_rtlv_from_json_from.cpp" />
+    <ClCompile Include="..\rpkg_src\rebuild_wwev_in.cpp" />
+    <ClCompile Include="..\rpkg_src\rpkg.cpp" />
+    <ClCompile Include="..\rpkg_src\search_hash_data.cpp" />
+    <ClCompile Include="..\rpkg_src\task.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\lz4\lz4.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\lz4\lz4hc.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\lz4\xxhash.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\md5\md5.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\ogg\src\bitwise.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\ogg\src\framing.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\revorb\revorb.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\analysis.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\bitrate.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\block.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\codebook.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\envelope.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\floor0.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\floor1.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\info.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\lookup.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\lpc.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\lsp.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\mapping0.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\mdct.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\psy.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\registry.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\res0.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\sharedbook.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\smallft.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\synthesis.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\vorbisenc.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\vorbisfile.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\window.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\ww2ogg\crc.c" />
+    <ClCompile Include="..\rpkg_src\thirdparty\ww2ogg\ww2oggcodebook.cpp" />
+    <ClCompile Include="..\rpkg_src\thirdparty\ww2ogg\wwriff.cpp" />
+    <ClCompile Include="..\rpkg_src\util.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\rpkg_src\command_line.h" />
+    <ClInclude Include="..\rpkg_src\compressed_master_hash_list.h" />
+    <ClInclude Include="..\rpkg_src\console.h" />
+    <ClInclude Include="..\rpkg_src\crypto.h" />
+    <ClInclude Include="..\rpkg_src\file.h" />
+    <ClInclude Include="..\rpkg_src\framework.h" />
+    <ClInclude Include="..\rpkg_src\generic_function.h" />
+    <ClInclude Include="..\rpkg_src\global.h" />
+    <ClInclude Include="..\rpkg_src\hash.h" />
+    <ClInclude Include="..\rpkg_src\rpkg.h" />
+    <ClInclude Include="..\rpkg_src\rpkg_dll.h" />
+    <ClInclude Include="..\rpkg_src\rpkg_function.h" />
+    <ClInclude Include="..\rpkg_src\task.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\json\json.hpp" />
+    <ClInclude Include="..\rpkg_src\thirdparty\lz4\lz4.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\lz4\lz4hc.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\lz4\xxhash.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\md5\md5.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\Bit_stream.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\crc.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\errors.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\packed_codebooks_aoTuV_603.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\ww2oggcodebook.h" />
+    <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\wwriff.h" />
+    <ClInclude Include="..\rpkg_src\util.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{00000000-0000-0000-0000-000000000001}</ProjectGuid>
+    <RootNamespace>rpkgcli</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>..\rpkg_src\thirdparty\ogg\include;..\rpkg_src\thirdparty\vorbis\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>..\rpkg_src\thirdparty\ogg\include;..\rpkg_src\thirdparty\vorbis\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>RPKG_CLI;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>RPKG_CLI;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
