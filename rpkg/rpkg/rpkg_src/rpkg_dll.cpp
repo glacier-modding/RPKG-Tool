@@ -1014,14 +1014,17 @@ int get_direct_hash_depends(char* rpkg_file, char* hash_string)
 
                     for (uint64_t k = 0; k < rpkgs.size(); k++)
                     {
-                        std::map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(k).hash_map.find(rpkgs.at(i).hash.at(it->second).hash_reference_data.hash_reference.at(j));
-
-                        if (it2 != rpkgs.at(k).hash_map.end())
+                        if (rpkgs.at(k).rpkg_file_path == rpkg_file)
                         {
-                            hash_direct_depends.append(rpkgs.at(k).hash.at(it2->second).hash_file_name);
-                            hash_direct_depends.push_back('|');
-                            hash_direct_depends.append(rpkgs.at(k).rpkg_file_name);
-                            hash_direct_depends.push_back(',');
+                            std::map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(k).hash_map.find(rpkgs.at(i).hash.at(it->second).hash_reference_data.hash_reference.at(j));
+
+                            if (it2 != rpkgs.at(k).hash_map.end())
+                            {
+                                hash_direct_depends.append(rpkgs.at(k).hash.at(it2->second).hash_file_name);
+                                hash_direct_depends.push_back('|');
+                                hash_direct_depends.append(rpkgs.at(k).rpkg_file_name);
+                                hash_direct_depends.push_back(',');
+                            }
                         }
                     }
                 }
@@ -1377,9 +1380,9 @@ char* get_entries_data(uint32_t entry_index)
 
                 std::string property_string = "";
 
-                std::map<uint32_t, std::string>::iterator it = property_map.find(property_crc32_values.at(e).at(p));
+                std::map<uint32_t, std::string>::iterator it = property_map->find(property_crc32_values.at(e).at(p));
 
-                if (it != property_map.end())
+                if (it != property_map->end())
                 {
                     property_string = it->second;
                 }
@@ -1418,7 +1421,16 @@ char* get_entries_data(uint32_t entry_index)
                 uint32_t bytes4 = 0;
                 uint64_t bytes8 = 0;
 
-                if (temp_property_types.at(property_type_index) == "bool")
+                std::map<std::string, std::map<uint32_t, std::string>>::iterator it2 = enum_map->find(temp_property_types.at(property_type_index));
+
+                if (it2 != enum_map->end())
+                {
+                    std::memcpy(&bytes4, &temp_data->data()[property_offset], sizeof(bytes4));
+                    property_offset += 0x4;
+
+                    response_string.append(util::uint32_t_to_string((uint32_t)bytes4));
+                }
+                else if (temp_property_types.at(property_type_index) == "bool")
                 {
                     std::memcpy(&bytes4, &temp_data->data()[property_offset], sizeof(bytes4));
                     property_offset += 0x4;
@@ -1687,7 +1699,13 @@ int update_temp_file(char* offset, char* type, char* value)
 
     uint32_t offset_value = std::strtoul(offset_string.c_str(), nullptr, 10);
 
-    if (type_string == "bool")
+    if (type_string == "enum")
+    {
+        uint32_t uint32_temp = std::strtoul(value_string.c_str(), nullptr, 10);
+
+        std::memcpy(&temp_data->data()[offset_value], &uint32_temp, 0x4);
+    }
+    else if (type_string == "bool")
     {
         if (value_string == "True")
         {
@@ -1876,4 +1894,26 @@ int update_temp_file_pointer(char* entry_index, char* property_index, char* offs
     }
 
     return 0;
+}
+
+char* get_enum_values(char* property_type)
+{
+    response_string = "";
+
+    std::string property_type_string = std::string(property_type);
+
+    std::map<std::string, std::map<uint32_t, std::string>>::iterator it = enum_map->find(property_type_string);
+
+    if (it != enum_map->end())
+    {
+        for (std::map<uint32_t, std::string>::iterator it2 = it->second.begin(); it2 != it->second.end(); it2++)
+        {
+            response_string.append(util::uint32_t_to_string(it2->first));
+            response_string.push_back('|');
+            response_string.append(it2->second);
+            response_string.push_back(',');
+        }
+    }
+
+    return &response_string[0];
 }

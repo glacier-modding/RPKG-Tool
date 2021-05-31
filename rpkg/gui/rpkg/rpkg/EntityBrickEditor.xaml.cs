@@ -65,11 +65,41 @@ namespace rpkg
 
             UInt32 logical_parent = 0xFFFFFFFF;
 
-            string reponseString = Marshal.PtrToStringAnsi(get_entries_with_logical_parent(logical_parent));
+            string responseString = Marshal.PtrToStringAnsi(get_entries_with_logical_parent(logical_parent));
 
-            if (reponseString != "")
+            if (responseString != "")
             {
-                string[] topLevelEntries = reponseString.Trim(',').Split(',');
+                string[] topLevelEntries = responseString.Trim(',').Split(',');
+
+                foreach (string entry in topLevelEntries)
+                {
+                    string[] entryData = entry.Split('|');
+                    string entityName = entryData[1];
+                    UInt32 entryIndex = 0;
+
+                    UInt32.TryParse(entryData[0], out entryIndex);
+
+                    var item = new TreeViewItem();
+
+                    item.Header = entityName.Replace(" ", "_") + " (" + entryData[0] + ")";
+
+                    item.Expanded += Item_Expanded;
+
+                    item.Items.Add(null);
+
+                    //LoadTreeView(entryIndex, entityName, ref item);
+
+                    MainTreeView.Items.Add(item);
+                }
+            }
+
+            logical_parent = 0xFFFFFFFE;
+
+            responseString = Marshal.PtrToStringAnsi(get_entries_with_logical_parent(logical_parent));
+
+            if (responseString != "")
+            {
+                string[] topLevelEntries = responseString.Trim(',').Split(',');
 
                 foreach (string entry in topLevelEntries)
                 {
@@ -126,7 +156,18 @@ namespace rpkg
                                 {
                                     //MessageBoxShow("update_temp_file(" + controlData[5] + ", " + controlData[1] + ", " + value);
 
-                                    int return_value = update_temp_file(controlData[5], controlData[1], value);
+                                    if (controlData[1] == "enum")
+                                    {
+                                        string[] valueData = value.Replace("offset=0x", "").Replace("(", "").Replace(")", "").Split(' ');
+
+                                        //MessageBoxShow("update_temp_file(" + controlData[5] + ", " + controlData[1] + ", " + valueData[1]);
+
+                                        int return_value = update_temp_file(controlData[5], controlData[1], valueData[1]);
+                                    }
+                                    else
+                                    {
+                                        int return_value = update_temp_file(controlData[5], controlData[1], value);
+                                    }                                    
                                 }
                             }
                         }
@@ -144,13 +185,26 @@ namespace rpkg
 
                                     //MessageBoxShow("update_temp_file_pointer(" + controlData[3] + ", " + controlData[4] + ", " + valueData[1]);
 
+                                    //MessageBoxShow("update_temp_file(" + controlData[5] + ", " + controlData[1] + ", " + valueData[1]);
+
                                     int return_value = update_temp_file_pointer(controlData[3], controlData[4], valueData[1]);
                                 }
                                 else
                                 {
                                     //MessageBoxShow("update_temp_file(" + controlData[5] + ", " + controlData[1] + ", " + value);
 
-                                    int return_value = update_temp_file(controlData[5], controlData[1], value);
+                                    if (controlData[1] == "enum")
+                                    {
+                                        string[] valueData = value.Replace("offset=0x", "").Replace("(", "").Replace(")", "").Split(' ');
+
+                                        //MessageBoxShow("update_temp_file(" + controlData[5] + ", " + controlData[1] + ", " + valueData[1]);
+
+                                        int return_value = update_temp_file(controlData[5], controlData[1], valueData[1]);
+                                    }
+                                    else
+                                    {
+                                        int return_value = update_temp_file(controlData[5], controlData[1], value);
+                                    }
                                 }
                             }
                         }
@@ -203,11 +257,11 @@ namespace rpkg
 
                     string hashReferenceData = Marshal.PtrToStringAnsi(get_entries_hash_reference_data(entryIndex));
 
-                    string reponseString = Marshal.PtrToStringAnsi(get_entries_data(entryIndex));
+                    string responseString = Marshal.PtrToStringAnsi(get_entries_data(entryIndex));
 
                     //MessageBoxShow(hashReferenceData);
 
-                    //MessageBoxShow(reponseString);
+                    //MessageBoxShow(responseString);
 
                     Label label1 = new Label();
                     label1.Content = entityName + "'s Data:";
@@ -235,7 +289,7 @@ namespace rpkg
 
                     MainStackPanel.Children.Add(label1);
 
-                    if (reponseString == "")
+                    if (responseString == "")
                     {
                         label2 = new Label();
                         label2.Content = "  None";
@@ -244,7 +298,7 @@ namespace rpkg
                     }
                     else
                     {
-                        string[] entryDataStrings = reponseString.Trim(',').Split(',');
+                        string[] entryDataStrings = responseString.Trim(',').Split(',');
 
                         foreach (string entryDataString in entryDataStrings)
                         {
@@ -279,7 +333,15 @@ namespace rpkg
 
                                 //MessageBoxShow(propertyData);
 
-                                if (propertyType == "bool")
+                                responseString = Marshal.PtrToStringAnsi(get_enum_values(propertyType));
+
+                                //MessageBoxShow(responseString);
+
+                                if (responseString != "")
+                                {
+                                    AppendInput_enum(entryIndexString, propertyCRC32String.Replace("_", "__"), propertyData, propertyOffset, propertyTypeIndex, propertyTypeIndexIndex, responseString);
+                                }
+                                else if (propertyType == "bool")
                                 {
                                     AppendInput_bool(entryIndexString, propertyCRC32String.Replace("_", "__"), propertyData, propertyOffset, propertyTypeIndex, propertyTypeIndexIndex);
                                 }
@@ -336,6 +398,99 @@ namespace rpkg
                     }
                 }
             }
+        }
+        private void AppendInput_enum(string entryIndexString, string propertyCRC32String, string propertyData, UInt32 propertyOffset, string propertyTypeIndex, string propertyTypeIndexIndex, string enum_values)
+        {
+            bool isShared = false;
+
+            int return_value = is_offset_shared(propertyOffset.ToString(), propertyTypeIndex);
+
+            string shared_values = "";
+
+            int shared_index = 0;
+
+            int shared_count = 0;
+
+            if (return_value == 1)
+            {
+                isShared = true;
+
+                shared_index = get_shared_index(propertyOffset.ToString(), propertyTypeIndex);
+
+                shared_count = get_shared_count(propertyOffset.ToString(), propertyTypeIndex);
+
+                //shared_values = Marshal.PtrToStringAnsi(get_all_shared_values(propertyOffset.ToString(), propertyTypeIndex));
+            }
+
+            int enumInt = 0;
+
+            int.TryParse(propertyData, out enumInt);
+
+            Label label1 = new Label();
+
+            if (isShared)
+            {
+                label1.Content = propertyCRC32String + " (enum) (shared by " + shared_count + ") (offset=0x" + propertyOffset.ToString("X") + "):";
+            }
+            else
+            {
+                label1.Content = propertyCRC32String + " (enum) (offset=0x" + propertyOffset.ToString("X") + "):";
+            }
+
+            label1.FontSize = 14;
+            label1.FontWeight = FontWeights.Bold;
+
+            MainStackPanel.Children.Add(label1);
+
+            Grid grid = new Grid();
+
+            RowDefinition rowDefinition = new RowDefinition();
+            rowDefinition.Height = new GridLength(8);
+            grid.RowDefinitions.Add(rowDefinition);
+            rowDefinition = new RowDefinition();
+            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+            grid.RowDefinitions.Add(rowDefinition);
+            rowDefinition = new RowDefinition();
+            rowDefinition.Height = new GridLength(8);
+            grid.RowDefinitions.Add(rowDefinition);
+            ColumnDefinition columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
+
+            ComboBox comboBox = new ComboBox();
+                        
+            comboBox.Name = GetNewControlName("ComboBox_enum_ns_" + entryIndexString + "_" + propertyTypeIndexIndex + "_" + propertyOffset.ToString());
+
+            string[] valuesStrings = enum_values.Trim(',').Split(',');
+
+            int index = 0;
+            int indexCount = 0;
+
+            foreach (string valueString in valuesStrings)
+            {
+                string[] valueData = valueString.Split('|');
+
+                UInt32 enumNum = 0;
+                UInt32.TryParse(valueData[0], out enumNum);
+
+                if (enumInt == enumNum)
+                {
+                    index = indexCount;
+                }
+                
+                indexCount++;
+
+                comboBox.Items.Add(valueData[1] + " (" + valueData[0] + ") (offset=0x" + propertyOffset.ToString("X") + ")");
+            }
+
+            comboBox.SelectedIndex = index;
+
+            comboBox.Margin = new Thickness(4, 0, 4, 0);
+            grid.Children.Add(comboBox);
+            Grid.SetRow(comboBox, 1);
+            Grid.SetColumn(comboBox, 1);
+
+            MainStackPanel.Children.Add(grid);
         }
 
         private void AppendInput_NotImplementedYet(string entryIndexString, string propertyCRC32String, string propertyData, UInt32 propertyOffset, string propertyType, string propertyTypeIndex, string propertyTypeIndexIndex)
@@ -1645,9 +1800,9 @@ namespace rpkg
 
                 UInt32.TryParse(header[1], out entryIndex);
 
-                string reponseString = Marshal.PtrToStringAnsi(get_entries_with_logical_parent(entryIndex));
+                string responseString = Marshal.PtrToStringAnsi(get_entries_with_logical_parent(entryIndex));
 
-                string[] topLevelEntries = reponseString.Trim(',').Split(',');
+                string[] topLevelEntries = responseString.Trim(',').Split(',');
 
                 foreach (string entry in topLevelEntries)
                 {
@@ -1673,11 +1828,177 @@ namespace rpkg
             }
         }
 
+        private void ExportCoordinatesToCSVFile_Click(object sender, RoutedEventArgs e)
+        {
+            List<matrix43> matrix43List = new List<matrix43>();
+            List<string> propertyNamesList = new List<string>();
+
+            matrix43 temp_matrix43;
+            temp_matrix43.x_axis.x = 0.0F;
+            temp_matrix43.x_axis.y = 0.0F;
+            temp_matrix43.x_axis.z = 0.0F;
+            temp_matrix43.y_axis.x = 0.0F;
+            temp_matrix43.y_axis.y = 0.0F;
+            temp_matrix43.y_axis.z = 0.0F;
+            temp_matrix43.z_axis.x = 0.0F;
+            temp_matrix43.z_axis.y = 0.0F;
+            temp_matrix43.z_axis.z = 0.0F;
+            temp_matrix43.transform.x = 0.0F;
+            temp_matrix43.transform.y = 0.0F;
+            temp_matrix43.transform.z = 0.0F;
+
+            FindAllEntityWorldCoordinates("", 0xFFFFFFFF, temp_matrix43, ref matrix43List, ref propertyNamesList);
+
+            int index = 0;
+
+            string csvData = "property_name,x,y,z\n";
+
+            foreach (string propertyName in propertyNamesList)
+            {
+                string matrix43Data = propertyName + ": \n";
+                matrix43Data += "  - X Axis:    x: " + matrix43List[index].x_axis.x.ToString() + ", y: " + matrix43List[index].x_axis.y.ToString() + ", z: " + matrix43List[index].x_axis.z.ToString() + "\n";
+                matrix43Data += "  - Y Axis:    x: " + matrix43List[index].y_axis.x.ToString() + ", y: " + matrix43List[index].y_axis.y.ToString() + ", z: " + matrix43List[index].y_axis.z.ToString() + "\n";
+                matrix43Data += "  - Z Axis:    x: " + matrix43List[index].z_axis.x.ToString() + ", y: " + matrix43List[index].z_axis.y.ToString() + ", z: " + matrix43List[index].z_axis.z.ToString() + "\n";
+                matrix43Data += "  - Transform: x: " + matrix43List[index].transform.x.ToString() + ", y: " + matrix43List[index].transform.y.ToString() + ", z: " + matrix43List[index].transform.z.ToString();
+
+                //MessageBoxShow(matrix43Data);
+
+                csvData += propertyName + "," + matrix43List[index].transform.x.ToString() + "," + matrix43List[index].transform.y.ToString() + "," + matrix43List[index].transform.z.ToString() + "\n";
+
+                index++;
+            }
+
+            var fileDialog = new Ookii.Dialogs.Wpf.VistaSaveFileDialog();
+
+            fileDialog.Title = "Save Entity World Coordinate Data to CSV file:";
+
+            fileDialog.Filter = "CSV file|*.csv|All files|*.*";
+
+            if (!System.IO.Directory.Exists(outputFolder))
+            {
+                outputFolder = System.IO.Directory.GetCurrentDirectory();
+            }
+
+            fileDialog.InitialDirectory = outputFolder;
+
+            fileDialog.FileName = tempFileName + ".csv";
+
+            var fileDialogResult = fileDialog.ShowDialog();
+
+            if (fileDialogResult == true)
+            {
+                System.IO.File.WriteAllText(fileDialog.FileName, csvData);
+
+                MessageBoxShow("CSV file successfully generated: " + fileDialog.FileName);
+            }
+        }
+
+        private void FindAllEntityWorldCoordinates(string entryName, UInt32 entryIndex, matrix43 temp_matrix43, ref List<matrix43> matrix43List, ref List<string> propertyNamesList)
+        {
+            string responseString = Marshal.PtrToStringAnsi(get_entries_data(entryIndex));
+
+            string[] entryDataStrings = responseString.Trim(',').Split(',');
+
+            foreach (string entryDataString in entryDataStrings)
+            {
+                if (entryDataString != "")
+                {
+                    string[] entryData = entryDataString.Split('|');
+
+                    UInt32 propertyCRC32 = 0;
+                    UInt32.TryParse(entryData[0], out propertyCRC32);
+
+                    string propertyCRC32String = entryData[1];
+
+                    if (propertyCRC32String == "")
+                    {
+                        propertyCRC32String = "Unknown (CRC32=" + entryData[0] + ")";
+                    }
+
+                    string propertyType = entryData[2];
+
+                    string propertyTypeIndex = entryData[3];
+
+                    string propertyTypeIndexIndex = entryData[4];
+
+                    UInt32 propertyOffset = 0;
+                    UInt32.TryParse(entryData[5], out propertyOffset);
+
+                    string logicalParent = entryData[6];
+
+                    string propertyData = entryData[7];
+
+                    if (propertyType == "SMatrix43")
+                    {
+                        string[] vectorData = propertyData.Split('!');
+
+                        float temp_float = 0.0F;
+                        float.TryParse(vectorData[0], out temp_float);
+                        temp_matrix43.x_axis.x += temp_float;
+                        temp_float = 0.0F;
+                        float.TryParse(vectorData[1], out temp_float);
+                        temp_matrix43.x_axis.y += temp_float;
+                        temp_float = 0.0F;
+                        float.TryParse(vectorData[2], out temp_float);
+                        temp_matrix43.x_axis.z += temp_float;
+                        temp_float = 0.0F;
+                        float.TryParse(vectorData[3], out temp_float);
+                        temp_matrix43.y_axis.x += temp_float;
+                        temp_float = 0.0F;
+                        float.TryParse(vectorData[4], out temp_float);
+                        temp_matrix43.y_axis.y += temp_float;
+                        temp_float = 0.0F;
+                        float.TryParse(vectorData[5], out temp_float);
+                        temp_matrix43.y_axis.z += temp_float;
+                        temp_float = 0.0F;
+                        float.TryParse(vectorData[6], out temp_float);
+                        temp_matrix43.z_axis.x += temp_float;
+                        temp_float = 0.0F;
+                        float.TryParse(vectorData[7], out temp_float);
+                        temp_matrix43.z_axis.y += temp_float;
+                        temp_float = 0.0F;
+                        float.TryParse(vectorData[8], out temp_float);
+                        temp_matrix43.z_axis.z += temp_float;
+                        temp_float = 0.0F;
+                        float.TryParse(vectorData[9], out temp_float);
+                        temp_matrix43.transform.x += temp_float;
+                        temp_float = 0.0F;
+                        float.TryParse(vectorData[10], out temp_float);
+                        temp_matrix43.transform.y += temp_float;
+                        temp_float = 0.0F;
+                        float.TryParse(vectorData[11], out temp_float);
+                        temp_matrix43.transform.z += temp_float;
+
+                        matrix43List.Add(temp_matrix43);
+                        propertyNamesList.Add(entryName.Replace(" ", "_") + " (" + entryIndex.ToString() + ")");
+                    }
+                }
+            }
+
+            responseString = Marshal.PtrToStringAnsi(get_entries_with_logical_parent(entryIndex));
+
+            string[] topLevelEntries = responseString.Trim(',').Split(',');
+
+            foreach (string entry in topLevelEntries)
+            {
+                if (entry != "")
+                {
+                    string[] tempEntryData = entry.Split('|');
+                    string tempEntityName = tempEntryData[1];
+                    UInt32 tempEntryIndex = 0;
+
+                    UInt32.TryParse(tempEntryData[0], out tempEntryIndex);
+
+                    FindAllEntityWorldCoordinates(tempEntityName, tempEntryIndex, temp_matrix43, ref matrix43List, ref propertyNamesList);
+                }
+            }
+        }
+
         private void LoadTreeView(UInt32 entryIndex, string entityName, ref TreeViewItem masterTreeViewItem)
         {
-            string reponseString = Marshal.PtrToStringAnsi(get_entries_with_logical_parent(entryIndex));
+            string responseString = Marshal.PtrToStringAnsi(get_entries_with_logical_parent(entryIndex));
 
-            string[] topLevelEntries = reponseString.Trim(',').Split(',');
+            string[] topLevelEntries = responseString.Trim(',').Split(',');
 
             foreach (string entry in topLevelEntries)
             {
@@ -1852,6 +2173,35 @@ namespace rpkg
             TEMP_TBLU_TOO_MANY
         };
 
+        struct vector2
+        {
+            public float x;
+            public float y;
+        };
+
+        struct vector3
+        {
+            public float x;
+            public float y;
+            public float z;
+        };
+
+        struct vector4
+        {
+            public float w;
+            public float x;
+            public float y;
+            public float z;
+        };
+
+        struct matrix43
+        {
+            public vector3 x_axis;
+            public vector3 y_axis;
+            public vector3 z_axis;
+            public vector3 transform;
+        };
+
         public delegate int execute_task(string csharp_command, string csharp_input_path, string csharp_filter, string search, string search_type, string csharp_output_path);
 
         [DllImport("rpkg.dll", EntryPoint = "task_execute", CallingConvention = CallingConvention.Cdecl)]
@@ -1892,5 +2242,8 @@ namespace rpkg
 
         [DllImport("rpkg.dll", EntryPoint = "update_temp_file_pointer", CallingConvention = CallingConvention.Cdecl)]
         public static extern int update_temp_file_pointer(string entry_index, string property_index, string offset);
+
+        [DllImport("rpkg.dll", EntryPoint = "get_enum_values", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr get_enum_values(string property_type);
     }
 }

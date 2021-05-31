@@ -165,17 +165,14 @@ int rpkg_function::load_temp_tblu_hash_depends(uint64_t rpkg_index, uint64_t has
 
     uint64_t tblu_hash_value = std::strtoull(tblu_file_name.c_str(), nullptr, 16);
 
-    if (rpkgs.at(rpkg_index).rpkg_file_name == tblu_in_rpkg)
+    std::map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(rpkg_index).hash_map.find(tblu_hash_value);
+
+    if (it2 != rpkgs.at(rpkg_index).hash_map.end())
     {
-        std::map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(rpkg_index).hash_map.find(tblu_hash_value);
+        tblu_found_in_rpkg = true;
 
-        if (it2 != rpkgs.at(rpkg_index).hash_map.end())
-        {
-            tblu_found_in_rpkg = true;
-
-            tblu_rpkg_index_1 = rpkg_index;
-            tblu_rpkg_index_2 = it2->second;
-        }
+        tblu_rpkg_index_1 = rpkg_index;
+        tblu_rpkg_index_2 = it2->second;
     }
 
     if (!tblu_found_in_rpkg)

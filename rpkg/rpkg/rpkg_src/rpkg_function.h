@@ -21,6 +21,7 @@ struct rpkg_extraction_vars
 class rpkg_function
 {
 public:
+	static void extract_prim_to_obj_from(std::string& input_path, std::string& filter, std::string& output_path);
 	static int load_temp_tblu_hash_depends(uint64_t rpkg_index, uint64_t hash_index);
 	static void extract_temp_from(std::string& input_path, std::string& filter, std::string& output_path);
 	static void extract_prel_refs(std::string& input_path, std::string& filter, std::string& output_path);

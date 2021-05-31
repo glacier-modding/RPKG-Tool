@@ -100,7 +100,7 @@ std::string util::uint16_t_to_hex_string(uint16_t bytes2)
 std::string util::uint8_t_to_hex_string(uint8_t bytes1)
 {
     std::stringstream ss;
-    ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << bytes1;
+    ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)(unsigned char)bytes1;
     return ss.str();
 }
 
@@ -125,10 +125,17 @@ std::string util::uint16_t_to_string(uint16_t bytes2)
     return ss.str();
 }
 
+std::string util::short_to_string(short bytes2)
+{
+    std::stringstream ss;
+    ss << bytes2;
+    return ss.str();
+}
+
 std::string util::uint8_t_to_string(uint8_t bytes1)
 {
     std::stringstream ss;
-    ss << bytes1;
+    ss << (int)(unsigned char)bytes1;
     return ss.str();
 }
 

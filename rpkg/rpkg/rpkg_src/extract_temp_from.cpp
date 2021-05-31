@@ -49,6 +49,10 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
+    initialize_property_map();
+
+    initialize_enum_map();
+
     bool input_path_is_rpkg_file = false;
 
     if (std::filesystem::is_regular_file(input_path))
@@ -291,6 +295,15 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
                             if (temp_entry_count != tblu_entry_count)
                             {
                                 LOG_AND_EXIT("Error: TEMP and TBLU files have mismatched entry counts.");
+                            }
+
+                            if (temp_entry_count != tblu_entry_count)
+                            {
+                                LOG_AND_EXIT_NOP("Error: TEMP_TBLU_ENTRY_COUNT_MISMATCH");
+
+                                task_multiple_status = TEMP_TBLU_ENTRY_COUNT_MISMATCH;
+
+                                return;
                             }
 
                             temp_position += 0x4;
@@ -612,9 +625,9 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
 
                                             std::string property_string = "";
 
-                                            std::map<uint32_t, std::string>::iterator it2 = property_map.find(property_crc32_value);
+                                            std::map<uint32_t, std::string>::iterator it2 = property_map->find(property_crc32_value);
 
-                                            if (it2 != property_map.end())
+                                            if (it2 != property_map->end())
                                             {
                                                 property_string = it2->second;
 
@@ -633,7 +646,21 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
 
                                             LOG("    - " + property_string + "'s type: " + temp_property_types.at(property_type_index));
 
-                                            if (temp_property_types.at(property_type_index) == "bool")
+                                            std::map<std::string, std::map<uint32_t, std::string>>::iterator it = enum_map->find(temp_property_types.at(property_type_index));
+
+                                            if (it != enum_map->end())
+                                            {
+                                                std::memcpy(&bytes4, &temp_data->data()[property_offset], sizeof(bytes4));
+                                                property_offset += 0x4;
+
+                                                if (!shared_value_found)
+                                                {
+                                                    temp_property_types_values.at(property_type_index).back() = util::uint32_t_to_string(bytes4);
+                                                }
+
+                                                LOG("    - enum: " + util::uint32_t_to_string(bytes4));
+                                            }
+                                            else if (temp_property_types.at(property_type_index) == "bool")
                                             {
                                                 std::memcpy(&bytes4, &temp_data->data()[property_offset], sizeof(bytes4));
                                                 property_offset += 0x4;

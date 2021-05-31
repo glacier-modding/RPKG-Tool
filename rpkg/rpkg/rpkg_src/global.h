@@ -35,7 +35,10 @@ enum RPKGStatus
     TEMP_TBLU_NOT_FOUND_IN_DEPENDS,
     TEMP_TBLU_NOT_FOUND_IN_RPKG,
     TEMP_TBLU_TOO_MANY,
-    TEMP_HEADER_NOT_FOUND
+    TEMP_HEADER_NOT_FOUND,
+    TEMP_TBLU_ENTRY_COUNT_MISMATCH,
+    PRIM_UV_CHANNEL_COUNT_GREATER_THAN_1,
+    PRIM_OBJECT_IS_NOT_A_MESH_TYPE
 };
 
 extern std::vector<rpkg> rpkgs;
@@ -67,7 +70,12 @@ extern int pcm_sample_size;
 extern int pcm_sample_rate;
 extern int pcm_channels;
 extern std::string extracted_wem_string;
-extern std::map<uint32_t, std::string> property_map;
+extern std::map<uint32_t, std::string>* property_map;
+extern std::map<std::string, std::map<uint32_t, std::string>>* enum_map;
+extern void initialize_property_map();
+extern void initialize_enum_map();
+extern bool property_map_initialized;
+extern bool enum_map_initialized;
 extern std::vector<uint32_t> temp_entry_index;
 extern std::vector<uint32_t> temp_logicalParent;
 extern std::vector<uint32_t> temp_entityTypeResourceIndex;

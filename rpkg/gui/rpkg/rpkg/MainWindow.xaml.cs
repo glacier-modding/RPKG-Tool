@@ -24,6 +24,11 @@ using System.Net.Http;
 using System.Diagnostics;
 using System.Security;
 using NAudio.Wave;
+using HelixToolkit.Wpf;
+using HelixToolkit;
+using System.ComponentModel;
+using System.Drawing;
+using System.Runtime.CompilerServices;
 
 namespace rpkg
 {
@@ -338,6 +343,11 @@ namespace rpkg
                                 {
                                     FifthTabRight.Visibility = Visibility.Collapsed;
                                 }
+
+                                if (SixthTabRight.Visibility == Visibility.Visible)
+                                {
+                                    SixthTabRight.Visibility = Visibility.Collapsed;
+                                }
                             }
 
                             int return_value = clear_hash_data_vector();
@@ -419,6 +429,11 @@ namespace rpkg
                         {
                             FifthTabRight.Visibility = Visibility.Collapsed;
                         }
+
+                        if (SixthTabRight.Visibility == Visibility.Visible)
+                        {
+                            SixthTabRight.Visibility = Visibility.Collapsed;
+                        }
                     }
                     else if (itemHeader.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
                     {
@@ -447,6 +462,11 @@ namespace rpkg
                         if (FifthTabRight.Visibility == Visibility.Visible)
                         {
                             FifthTabRight.Visibility = Visibility.Collapsed;
+                        }
+
+                        if (SixthTabRight.Visibility == Visibility.Visible)
+                        {
+                            SixthTabRight.Visibility = Visibility.Collapsed;
                         }
                     }
                     else
@@ -525,9 +545,86 @@ namespace rpkg
                             {
                                 FifthTabRight.Visibility = Visibility.Collapsed;
                             }
+
+                            if (SixthTabRight.Visibility == Visibility.Visible)
+                            {
+                                SixthTabRight.Visibility = Visibility.Collapsed;
+                            }
                         }
 
                         int return_value = clear_hash_data_vector();
+
+                        if (resourceType == "PRIM")
+                        {
+                            string command = "-extract_prim_to_obj_from";
+                            string input_path = rpkgFilePath;
+                            string filter = hash;
+                            string search = "";
+                            string search_type = "";
+                            string output_path = "";
+
+                            return_value = reset_task_status();
+
+                            return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+
+                            string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+
+                            List<string> objFileNames = new List<string>();
+                            List<int> objFileSizes = new List<int>();
+
+                            int fileSizeMax = 0;
+
+                            int objIndex = 0;
+                            int objIndexCount = 0;
+
+                            foreach (var filePath in Directory.GetFiles(currentDirectory))
+                            {
+                                if (filePath.ToUpper().Contains(hash) && filePath.EndsWith(".obj"))
+                                {
+                                    objFileNames.Add(filePath);
+
+                                    if (filePath.Length > fileSizeMax)
+                                    {
+                                        fileSizeMax = filePath.Length;
+
+                                        objIndex = objIndexCount;
+                                    }
+
+                                    objIndexCount++;
+                                }
+                            }
+
+                            if (objFileNames.Count > 0)
+                            {
+                                if (SixthTabRight.Visibility == Visibility.Collapsed)
+                                {
+                                    SixthTabRight.Visibility = Visibility.Visible;
+                                }
+
+                                ModelImporter import = new ModelImporter();
+                                System.Windows.Media.Media3D.Model3DGroup model1 = import.Load(objFileNames[objIndex]);
+                                System.Windows.Media.Media3D.Material mat = MaterialHelper.CreateMaterial(new SolidColorBrush(System.Windows.Media.Color.FromRgb(200, 200, 200)));
+                                foreach (System.Windows.Media.Media3D.GeometryModel3D geometryModel in model1.Children)
+                                {
+                                    geometryModel.Material = mat;
+                                    geometryModel.BackMaterial = mat;
+                                }
+                                model.Content = model1;
+                                CameraHelper.ZoomExtents(helixViewport.Camera, helixViewport.Viewport, 1000);
+
+                                foreach (string filePath in objFileNames)
+                                {
+                                    File.Delete(filePath);
+                                }
+                            }
+                            else
+                            {
+                                if (SixthTabRight.Visibility == Visibility.Visible)
+                                {
+                                    SixthTabRight.Visibility = Visibility.Collapsed;
+                                }
+                            }
+                        }
 
                         if (resourceType == "GFXI")
                         {
@@ -1282,7 +1379,15 @@ namespace rpkg
 
                     int buttonCount = 0;
 
-                    if (hashType == "TEMP")
+                    if (hashType == "PRIM")
+                    {
+                        string[] buttons = { "Extract " + rightClickedOnName, "Extract " + rightClickedOnName + " To OBJ File(s)", "Cancel" };
+
+                        buttonCount = 3;
+
+                        rightClickMenu = new RightClickMenu(buttons);
+                    }
+                    else if (hashType == "TEMP")
                     {
                         string[] buttons = { "Extract " + rightClickedOnName, "Edit " + rightClickedOnName + " in Brick/Entity Editor", "Cancel" };
 
@@ -1383,7 +1488,15 @@ namespace rpkg
                     }
                     else if (rightClickMenu.buttonPressed == "button1" && buttonCount == 3)
                     {
-                        if (hashType == "TEMP")
+                        if (hashType == "PRIM")
+                        {
+                            command = "-extract_prim_to_obj_from";
+
+                            filter = hashValue;
+
+                            progress.message.Content = "Extracting " + rightClickedOnName + " To OBJ File(s)...";
+                        }
+                        else if (hashType == "TEMP")
                         {
                             string rpkgFileBackup = rpkgFilePath;
 
@@ -1475,6 +1588,10 @@ namespace rpkg
                                 else if (temp_progress.task_status == (int)Progress.RPKGStatus.TEMP_HEADER_NOT_FOUND)
                                 {
                                     MessageBoxShow("Error: " + rightClickedOnName + " file is an empty TEMP file, missing it's resource type header/footer.");
+                                }
+                                else if (temp_progress.task_status == (int)Progress.RPKGStatus.TEMP_TBLU_ENTRY_COUNT_MISMATCH)
+                                {
+                                    MessageBoxShow("Error: " + rightClickedOnName + " file and TBLU file have mismatched entry/entity counts.");
                                 }
 
                                 temp_return_value = clear_temp_tblu_data();

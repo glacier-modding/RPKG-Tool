@@ -3,12 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:hx="http://helix-toolkit.org/wpf"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:rpkg"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
-        Title="RPKG v2.4" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
+        Title="RPKG v2.5" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -176,6 +177,18 @@
                     <Label x:Name="OGGPlayerLabel" Grid.Row="3" Grid.ColumnSpan="3" Content="0 / 0" HorizontalContentAlignment="Center" FontFamily="Consolas"/>
                     <ComboBox Margin="5" Grid.Row="2" Grid.Column="2" x:Name="OGGPlayerComboBox" FontFamily="Consolas" SelectionChanged="OGGPlayerComboBox_SelectionChanged">
                     </ComboBox>
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="SixthTabRight" Header="3D Viewer" Visibility="Collapsed">
+                <Grid>
+                    <hx:HelixViewport3D x:Name="helixViewport">
+                        <hx:HelixViewport3D.Camera>
+                            <OrthographicCamera />
+                        </hx:HelixViewport3D.Camera>
+                        <hx:SunLight/>
+                        <hx:DefaultLights></hx:DefaultLights>
+                        <ModelVisual3D x:Name="model"></ModelVisual3D>
+                    </hx:HelixViewport3D>
                 </Grid>
             </TabItem>
         </TabControl>

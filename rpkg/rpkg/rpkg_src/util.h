@@ -19,4 +19,5 @@ public:
     static std::string uint8_t_to_string(uint8_t bytes1);
     static std::string int32_t_to_string(int32_t bytes4);
     static std::string float_to_string(float bytes4);
+    static std::string short_to_string(short bytes2);
 };

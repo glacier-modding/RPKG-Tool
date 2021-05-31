@@ -111,3 +111,5 @@ RPKG_EXPORT int get_shared_index(char* offset, char* property_type_index);
 RPKG_EXPORT int get_shared_count(char* offset, char* property_type_index);
 
 RPKG_EXPORT int update_temp_file_pointer(char* entry_index, char* property_index, char* offset);
+
+RPKG_EXPORT char* get_enum_values(char* property_type);

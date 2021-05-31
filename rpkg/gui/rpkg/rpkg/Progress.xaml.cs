@@ -117,6 +117,33 @@ namespace rpkg
 
                         task_done = true;
                     }
+                    else if (task_multiple_status == (int)RPKGStatus.TEMP_TBLU_ENTRY_COUNT_MISMATCH)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                }
+                else if (operation == (int)Operation.PRIM)
+                {
+                    if (task_multiple_status == (int)RPKGStatus.TASK_SUCCESSFUL)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                    else if (task_multiple_status == (int)RPKGStatus.PRIM_UV_CHANNEL_COUNT_GREATER_THAN_1)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                    else if (task_multiple_status == (int)RPKGStatus.PRIM_OBJECT_IS_NOT_A_MESH_TYPE)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
                 }
                 else if (operation == (int)Operation.MASS_EXTRACT)
                 {
@@ -185,7 +212,8 @@ namespace rpkg
             GENERAL,
             MASS_EXTRACT,
             DOWNLOAD,
-            TEMP_TBLU
+            TEMP_TBLU,
+            PRIM
         };
 
         public enum RPKGStatus
@@ -205,7 +233,10 @@ namespace rpkg
             TEMP_TBLU_NOT_FOUND_IN_DEPENDS,
             TEMP_TBLU_NOT_FOUND_IN_RPKG,
             TEMP_TBLU_TOO_MANY,
-            TEMP_HEADER_NOT_FOUND
+            TEMP_HEADER_NOT_FOUND,
+            TEMP_TBLU_ENTRY_COUNT_MISMATCH,
+            PRIM_UV_CHANNEL_COUNT_GREATER_THAN_1,
+            PRIM_OBJECT_IS_NOT_A_MESH_TYPE
         };
 
         public string timing_string = "";

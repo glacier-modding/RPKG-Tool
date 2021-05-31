@@ -22,6 +22,7 @@
             <Menu DockPanel.Dock="Top">
                 <MenuItem Click="GenerateTEMPFile_Click" Header="Generate Entity/Brick TEMP File From Changes"/>
                 <MenuItem Click="GenerateRPKGFile_Click" Header="Generate Patch RPKG With Entity/Brick TEMP File From Changes"/>
+                <MenuItem Click="ExportCoordinatesToCSVFile_Click"  Header="Export All Entity Coordinates To CSV File"/>
                 <MenuItem Click="Exit_Click" Header="Exit"/>
             </Menu>
         </DockPanel>
