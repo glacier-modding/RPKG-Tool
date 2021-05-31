@@ -567,7 +567,8 @@ void text::save_text_to_png(std::string png_path)
     if (text_directx_format == 0x5A)
     {
         dds_header_data.ddspf = DirectX::DDSPF_DX10;
-        dds_header_data_dxt10.dxgiFormat = DXGI_FORMAT_BC7_UNORM_SRGB;
+        //dds_header_data_dxt10.dxgiFormat = DXGI_FORMAT_BC7_UNORM_SRGB;
+        dds_header_data_dxt10.dxgiFormat = DXGI_FORMAT_BC7_UNORM;
         dds_header_data_dxt10.resourceDimension = DirectX::DDS_DIMENSION_TEXTURE2D;
         dds_header_data_dxt10.miscFlag = 0;
         dds_header_data_dxt10.arraySize = 1;

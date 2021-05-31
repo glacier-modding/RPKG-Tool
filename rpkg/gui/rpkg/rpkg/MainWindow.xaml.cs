@@ -217,6 +217,8 @@ namespace rpkg
 
                     string itemHeader = item.Text;
 
+                    currentNodeText = item.Text;
+
                     //MessageBoxShow(itemHeader);
 
                     rpkgFilePath = GetRootTreeNode(e.Node).Text;
@@ -3464,6 +3466,7 @@ namespace rpkg
         private string currentHash = "";
         private string currentHashFileName = "";
         public string hashDependsRPKGFilePath = "";
+        private string currentNodeText = "";
         private System.Windows.Threading.DispatcherTimer searchRPKGsInputTimer;
         private System.Windows.Threading.DispatcherTimer searchHashListInputTimer;
         private System.Windows.Threading.DispatcherTimer OGGPlayerTimer;
@@ -3649,6 +3652,12 @@ namespace rpkg
 
         [DllImport("rpkg.dll", EntryPoint = "modify_hash_depends", CallingConvention = CallingConvention.Cdecl)]
         public static extern int modify_hash_depends(string rpkg_file, string hash_string, string hash_list, string hash_flag_list, UInt32 hash_count, UInt32 backup_rpkg);
+
+        [DllImport("resourcetool.dll", EntryPoint = "ConvertResource", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ConvertResource(string c_OperatingMode, string c_ResourceType, string c_InputPath, string c_OutputPath);
+
+        [DllImport("resourcetool.dll", EntryPoint = "GetTEMPEntities", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr GetTEMPEntities();
 
 
         [SuppressUnmanagedCodeSecurity]
@@ -4054,10 +4063,18 @@ namespace rpkg
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            string input_path = "R:\\testing\\00E9F09C3B030590.TEMP";
-            string output_path = "R:\\testing\\00E9F09C3B030590.OUTPUT.TEMP";
+            string input_path = "R:\\chunk26\\TEMP\\00E9F09C3B030590.TEMP";
+            string output_path = "R:\\chunk26\\TEMP\\00E9F09C3B030590.OUTPUT.TEMP";
 
-            //int return_value = convert_temp_to_json(input_path, output_path, "convert");
+            ConvertResource("convert", "TEMP", input_path, output_path);
+
+            ConvertResource("generate", "TEMP", input_path, output_path);
+
+            string responseJSON = Marshal.PtrToStringAnsi(GetTEMPEntities());
+
+            MessageBoxShow(responseJSON.Length.ToString());
+
+            MessageBoxShow(responseJSON.Substring(0, 1000));
         }
 
         private void DetailsTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -5658,6 +5675,8 @@ namespace rpkg
 
             string hashValue = DetailsTextBox.Text.Substring(0, DetailsTextBox.Text.IndexOf(' '));
 
+            string[] nodeData = currentNodeText.Split(' ');
+
             if (hashValue.Length == 16)
             {
                 Progress progress = new Progress();
@@ -5723,8 +5742,6 @@ namespace rpkg
                 {
                     ImportRPKGFile(filePath);
                 }
-
-                string[] nodeData = MainTreeView.SelectedNode.Text.Split(' ');
 
                 string command = "";
                 string input_path = runtimeDirectory;

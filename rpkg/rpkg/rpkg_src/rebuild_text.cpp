@@ -585,7 +585,8 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
     }
     else if (text_directx_format == 0x5A) //BC7
     {
-        directx_compression_format = DXGI_FORMAT_BC7_UNORM_SRGB;
+        //directx_compression_format = DXGI_FORMAT_BC7_UNORM_SRGB;
+        directx_compression_format = DXGI_FORMAT_BC7_UNORM;
     }
     else
     {
