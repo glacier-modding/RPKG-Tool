@@ -258,12 +258,10 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\rpkg_src\thirdparty\ogg\include;..\rpkg_src\thirdparty\vorbis\include;..\rpkg_src\thirdparty\GLTFSDK\Inc;..\rpkg_src\thirdparty\;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)_build\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\rpkg_src\thirdparty\ogg\include;..\rpkg_src\thirdparty\vorbis\include;..\rpkg_src\thirdparty\GLTFSDK\Inc;..\rpkg_src\thirdparty\;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)_build\$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -277,6 +275,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\rpkg_src\thirdparty\ogg\include;..\rpkg_src\thirdparty\vorbis\include;..\rpkg_src\thirdparty\GLTFSDK\Inc;..\rpkg_src\thirdparty\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -298,6 +297,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\rpkg_src\thirdparty\ogg\include;..\rpkg_src\thirdparty\vorbis\include;..\rpkg_src\thirdparty\GLTFSDK\Inc;..\rpkg_src\thirdparty\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
