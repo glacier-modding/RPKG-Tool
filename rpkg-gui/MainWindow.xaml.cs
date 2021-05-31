@@ -201,7 +201,7 @@ namespace rpkg
                 }
             }
 
-            int currentVersion = load_hash_list();
+            int currentVersion = RpkgLib.load_hash_list();
 
             DownloadExtractionProgress downloadExtractionProgress = new DownloadExtractionProgress();
             downloadExtractionProgress.operation = (int)Progress.Operation.MASS_EXTRACT;
@@ -338,9 +338,9 @@ namespace rpkg
                             SetDiscordStatus("Search View", rpkgFile);
                         }
 
-                        UInt32 hashBasedOnResourceTypeCount = get_hash_based_on_resource_type_count(rpkgFilePath, resourceType);
+                        UInt32 hashBasedOnResourceTypeCount = RpkgLib.get_hash_based_on_resource_type_count(rpkgFilePath, resourceType);
 
-                        UInt64 resourceTypesDataSize = get_resource_types_data_size(rpkgFilePath, resourceType);
+                        UInt64 resourceTypesDataSize = RpkgLib.get_resource_types_data_size(rpkgFilePath, resourceType);
 
                         DetailsTextBox.Text = rpkgFile + " has " + hashBasedOnResourceTypeCount.ToString("N0") + " hash files/resources of resource type " + resourceType + ",\n";
                         DetailsTextBox.Text += "having a combined total data size of " + resourceTypesDataSize.ToString("N0") + " bytes";
@@ -395,14 +395,14 @@ namespace rpkg
                             SetDiscordStatus("Search View", rpkgFile);
                         }
 
-                        UInt32 allHashesInRPKGCount = get_all_hashes_in_rpkg_count(itemHeader);
+                        UInt32 allHashesInRPKGCount = RpkgLib.get_all_hashes_in_rpkg_count(itemHeader);
 
-                        UInt64 allHashesInRPKGDataSize = get_all_hashes_in_rpkg_data_size(itemHeader);
+                        UInt64 allHashesInRPKGDataSize = RpkgLib.get_all_hashes_in_rpkg_data_size(itemHeader);
 
                         DetailsTextBox.Text = rpkgFile + " has " + allHashesInRPKGCount.ToString("N0") + " hash files/resources,\n";
                         DetailsTextBox.Text += "having a combined total data size of " + allHashesInRPKGDataSize.ToString("N0") + " bytes";
 
-                        string patchDataString = Marshal.PtrToStringAnsi(get_patch_deletion_list(itemHeader));
+                        string patchDataString = Marshal.PtrToStringAnsi(RpkgLib.get_patch_deletion_list(itemHeader));
 
                         if (patchDataString != "")
                         {
@@ -484,7 +484,7 @@ namespace rpkg
 
                         DetailsTextBox.Text = hash + " in RPKG file " + rpkgFilePath + ":\n";
 
-                        DetailsTextBox.Text += Marshal.PtrToStringAnsi(get_hash_details(rpkgFilePath, hash));
+                        DetailsTextBox.Text += Marshal.PtrToStringAnsi(RpkgLib.get_hash_details(rpkgFilePath, hash));
 
                         hashDependsRPKGFilePath = rpkgFilePath;
 
@@ -518,11 +518,11 @@ namespace rpkg
 
                         if (resourceType == "JSON")
                         {
-                            UInt32 json_data_size = generate_json_string(rpkgFilePath, hash);
+                            UInt32 json_data_size = RpkgLib.generate_json_string(rpkgFilePath, hash);
 
                             byte[] json_data = new byte[json_data_size];
 
-                            Marshal.Copy(get_json_string(), json_data, 0, (int)json_data_size);
+                            Marshal.Copy(RpkgLib.get_json_string(), json_data, 0, (int)json_data_size);
 
                             if (json_data_size > 0)
                             {
@@ -546,11 +546,11 @@ namespace rpkg
                         }
                         else if (resourceType == "LOCR" || resourceType == "DLGE" || resourceType == "RTLV")
                         {
-                            UInt32 localization_data_size = generate_localization_string(rpkgFilePath, hash, resourceType);
+                            UInt32 localization_data_size = RpkgLib.generate_localization_string(rpkgFilePath, hash, resourceType);
 
                             byte[] localization_data = new byte[localization_data_size];
 
-                            Marshal.Copy(get_localization_string(), localization_data, 0, (int)localization_data_size);
+                            Marshal.Copy(RpkgLib.get_localization_string(), localization_data, 0, (int)localization_data_size);
 
                             if (localization_data_size > 0)
                             {
@@ -595,7 +595,7 @@ namespace rpkg
                             }
                         }
 
-                        int return_value = clear_hash_data_vector();
+                        int return_value = RpkgLib.clear_hash_data_vector();
 
                         if (resourceType == "PRIM")
                         {
@@ -606,9 +606,9 @@ namespace rpkg
                             string search_type = "";
                             string output_path = "";
 
-                            return_value = reset_task_status();
+                            return_value = RpkgLib.reset_task_status();
 
-                            return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+                            return_value = RpkgLib.task_execute(command, input_path, filter, search, search_type, output_path);
 
                             string currentDirectory = System.IO.Directory.GetCurrentDirectory();
 
@@ -675,11 +675,11 @@ namespace rpkg
 
                             bitmapImage.BeginInit();
 
-                            UInt32 hash_size = get_hash_in_rpkg_size(rpkgFilePath, hash);
+                            UInt32 hash_size = RpkgLib.get_hash_in_rpkg_size(rpkgFilePath, hash);
 
                             byte[] hash_data = new byte[hash_size];
 
-                            Marshal.Copy(get_hash_in_rpkg_data(rpkgFilePath, hash), hash_data, 0, (int)hash_size);
+                            Marshal.Copy(RpkgLib.get_hash_in_rpkg_data(rpkgFilePath, hash), hash_data, 0, (int)hash_size);
 
                             MemoryStream memoryStream = new MemoryStream(hash_data);
 
@@ -704,7 +704,7 @@ namespace rpkg
                                 }
                             }
 
-                            int return_value_clear = clear_hash_data_vector();
+                            int return_value_clear = RpkgLib.clear_hash_data_vector();
                         }
 
                         if (resourceType == "TEXT")
@@ -749,7 +749,7 @@ namespace rpkg
                                 }
                             }
 
-                            int return_value_clear = clear_hash_data_vector();
+                            int return_value_clear = RpkgLib.clear_hash_data_vector();
                         }
 
                         if (resourceType == "WWEM" || resourceType == "WWES")
@@ -789,7 +789,7 @@ namespace rpkg
                                 FifthTabRight.Visibility = Visibility.Visible;
                             }
 
-                            return_value = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hash, 0, 0);
+                            return_value = RpkgLib.create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hash, 0, 0);
 
                             string currentDirectory = System.IO.Directory.GetCurrentDirectory();
 
@@ -797,7 +797,7 @@ namespace rpkg
 
                             string outputPCMFile = currentDirectory + "\\" + hash + ".pcm";
 
-                            return_value = convert_ogg_to_pcm(inputOGGFile, outputPCMFile);
+                            return_value = RpkgLib.convert_ogg_to_pcm(inputOGGFile, outputPCMFile);
 
                             if (File.Exists(outputPCMFile))
                             {
@@ -808,9 +808,9 @@ namespace rpkg
 
                                 pcmMemoryStream = new MemoryStream(File.ReadAllBytes(outputPCMFile));
 
-                                int pcmSampleSize = get_pcm_sample_size();
-                                int pcmSampleRate = get_pcm_sample_rate();
-                                int pcmChannels = get_pcm_channels();
+                                int pcmSampleSize = RpkgLib.get_pcm_sample_size();
+                                int pcmSampleRate = RpkgLib.get_pcm_sample_rate();
+                                int pcmChannels = RpkgLib.get_pcm_channels();
 
                                 File.Delete(hash + ".ogg");
                                 File.Delete(hash + ".wem");
@@ -859,7 +859,7 @@ namespace rpkg
                                 OGGPlayerComboBox.Visibility = Visibility.Visible;
                             }
 
-                            int wwevCount = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hash, 0, 0);
+                            int wwevCount = RpkgLib.create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hash, 0, 0);
 
                             if (wwevCount > 0)
                             {
@@ -868,7 +868,7 @@ namespace rpkg
                                     FifthTabRight.Visibility = Visibility.Visible;
                                 }
 
-                                return_value = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hash, 1, 0);
+                                return_value = RpkgLib.create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hash, 1, 0);
 
                                 string currentDirectory = System.IO.Directory.GetCurrentDirectory();
 
@@ -876,7 +876,7 @@ namespace rpkg
 
                                 string outputPCMFile = currentDirectory + "\\" + hash + ".pcm";
 
-                                return_value = convert_ogg_to_pcm(inputOGGFile, outputPCMFile);
+                                return_value = RpkgLib.convert_ogg_to_pcm(inputOGGFile, outputPCMFile);
 
                                 if (return_value == 1)
                                 {
@@ -889,9 +889,9 @@ namespace rpkg
 
                                         pcmMemoryStream = new MemoryStream(File.ReadAllBytes(outputPCMFile));
 
-                                        int pcmSampleSize = get_pcm_sample_size();
-                                        int pcmSampleRate = get_pcm_sample_rate();
-                                        int pcmChannels = get_pcm_channels();
+                                        int pcmSampleSize = RpkgLib.get_pcm_sample_size();
+                                        int pcmSampleRate = RpkgLib.get_pcm_sample_rate();
+                                        int pcmChannels = RpkgLib.get_pcm_channels();
 
                                         File.Delete(hash + ".ogg");
                                         File.Delete(hash + ".wem");
@@ -955,7 +955,7 @@ namespace rpkg
 
                 rpkgFilePath = GetRootTreeNode(e.Node).Text;
 
-                UInt32 hashBasedOnResourceTypeCount = get_hash_based_on_resource_type_count(rpkgFilePath, resourceType);
+                UInt32 hashBasedOnResourceTypeCount = RpkgLib.get_hash_based_on_resource_type_count(rpkgFilePath, resourceType);
 
                 MainTreeView.BeginUpdate();
 
@@ -967,11 +967,11 @@ namespace rpkg
                 {
                     string hash = "";
 
-                    hash = Marshal.PtrToStringAnsi(get_hash_based_on_resource_type_at(rpkgFilePath, resourceType, i));
+                    hash = Marshal.PtrToStringAnsi(RpkgLib.get_hash_based_on_resource_type_at(rpkgFilePath, resourceType, i));
 
                     string[] temp_test = hash.Split('.');
 
-                    string ioiString = Marshal.PtrToStringAnsi(get_hash_list_string(temp_test[0]));
+                    string ioiString = Marshal.PtrToStringAnsi(RpkgLib.get_hash_list_string(temp_test[0]));
 
                     nodes[i] = new System.Windows.Forms.TreeNode();
 
@@ -1045,7 +1045,7 @@ namespace rpkg
                         }
                         else if (rightClickMenu.buttonPressed == "button1")
                         {
-                            int temp_return_value = unload_rpkg(rpkgFilePath);
+                            int temp_return_value = RpkgLib.unload_rpkg(rpkgFilePath);
 
                             SearchRPKGsTreeView.Nodes.Clear();
 
@@ -1126,9 +1126,9 @@ namespace rpkg
                             return;
                         }
 
-                        int return_value = reset_task_status();
+                        int return_value = RpkgLib.reset_task_status();
 
-                        execute_task rpkgExecute = task_execute;
+                        RpkgLib.execute_task rpkgExecute = RpkgLib.task_execute;
 
                         IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
@@ -1428,9 +1428,9 @@ namespace rpkg
                             }
                         }
 
-                        int return_value = reset_task_status();
+                        int return_value = RpkgLib.reset_task_status();
 
-                        execute_task rpkgExecute = task_execute;
+                        RpkgLib.execute_task rpkgExecute = RpkgLib.task_execute;
 
                         IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
@@ -1635,9 +1635,9 @@ namespace rpkg
 
                                 output_path = temp_outputFolder;
 
-                                int temp_return_value = reset_task_status();
+                                int temp_return_value = RpkgLib.reset_task_status();
 
-                                execute_task temp_rpkgExecute = ExtractMODEL;
+                                RpkgLib.execute_task temp_rpkgExecute = ExtractMODEL;
 
                                 IAsyncResult temp_ar = temp_rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
@@ -1671,9 +1671,9 @@ namespace rpkg
 
                                 output_path = temp_outputFolder;
 
-                                int temp_return_value = reset_task_status();
+                                int temp_return_value = RpkgLib.reset_task_status();
 
-                                execute_task temp_rpkgExecute = ExtractTEXT;
+                                RpkgLib.execute_task temp_rpkgExecute = ExtractTEXT;
 
                                 IAsyncResult temp_ar = temp_rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
@@ -1719,7 +1719,7 @@ namespace rpkg
                                         }
                                     }
 
-                                    rpkgFiles.Sort(new NaturalStringComparer());
+                                    rpkgFiles.Sort(new MainWindow.NaturalStringComparer());
 
                                     bool anyRPKGImported = false;
 
@@ -1740,7 +1740,7 @@ namespace rpkg
 
                                 //MessageBoxShow(rpkgFilePath);
 
-                                int temp_file_version = get_temp_version(hashName, rpkgFilePath);
+                                int temp_file_version = RpkgLib.get_temp_version(hashName, rpkgFilePath);
 
                                 while (temp_file_version < 2 || temp_file_version > 3)
                                 {
@@ -1773,15 +1773,15 @@ namespace rpkg
                                     }
                                 }
 
-                                int temp_return_value = clear_temp_tblu_data();
+                                int temp_return_value = RpkgLib.clear_temp_tblu_data();
 
                                 //MessageBoxShow(hashName + ", " + rpkgFilePath);
 
                                 rpkgFilePath = rpkgFileBackup;
 
-                                temp_return_value = reset_task_status();
+                                temp_return_value = RpkgLib.reset_task_status();
 
-                                execute_load_recursive_temps load_recursive_temps_execute = load_recursive_temps;
+                                RpkgLib.execute_load_recursive_temps load_recursive_temps_execute = RpkgLib.load_recursive_temps;
 
                                 IAsyncResult temp_ar = load_recursive_temps_execute.BeginInvoke(hashName, rpkgFilePath, (UInt32)temp_file_version, null, null);
 
@@ -1793,7 +1793,7 @@ namespace rpkg
 
                                 temp_progress.ShowDialog();
 
-                                int temp_index = get_temp_index(hashName);
+                                int temp_index = RpkgLib.get_temp_index(hashName);
 
                                 //MessageBoxShow(temp_index.ToString());
 
@@ -1837,7 +1837,7 @@ namespace rpkg
                                         MessageBoxShow("Error: " + hashName + " file's TBLU file's version is unknown.");
                                     }
 
-                                    temp_return_value = clear_temp_tblu_data();
+                                    temp_return_value = RpkgLib.clear_temp_tblu_data();
                                 }
                                 else
                                 {
@@ -2023,7 +2023,7 @@ namespace rpkg
                                         }
                                     }
 
-                                    rpkgFiles.Sort(new NaturalStringComparer());
+                                    rpkgFiles.Sort(new MainWindow.NaturalStringComparer());
 
                                     bool anyRPKGImported = false;
 
@@ -2044,7 +2044,7 @@ namespace rpkg
 
                                 //MessageBoxShow(rpkgFilePath);
 
-                                int temp_file_version = get_temp_version(hashName, rpkgFilePath);
+                                int temp_file_version = RpkgLib.get_temp_version(hashName, rpkgFilePath);
 
                                 while (temp_file_version < 2 || temp_file_version > 3)
                                 {
@@ -2077,15 +2077,15 @@ namespace rpkg
                                     }
                                 }
 
-                                int temp_return_value = clear_temp_tblu_data();
+                                int temp_return_value = RpkgLib.clear_temp_tblu_data();
 
                                 //MessageBoxShow(hashName + ", " + rpkgFilePath);
 
                                 rpkgFilePath = rpkgFileBackup;
 
-                                temp_return_value = reset_task_status();
+                                temp_return_value = RpkgLib.reset_task_status();
 
-                                execute_load_recursive_temps load_recursive_temps_execute = load_non_recursive_temps;
+                                RpkgLib.execute_load_recursive_temps load_recursive_temps_execute = RpkgLib.load_non_recursive_temps;
 
                                 IAsyncResult temp_ar = load_recursive_temps_execute.BeginInvoke(hashName, rpkgFilePath, (UInt32)temp_file_version, null, null);
 
@@ -2097,7 +2097,7 @@ namespace rpkg
 
                                 temp_progress.ShowDialog();
 
-                                int temp_index = get_temp_index(hashName);
+                                int temp_index = RpkgLib.get_temp_index(hashName);
 
                                 //MessageBoxShow(temp_index.ToString());
 
@@ -2141,7 +2141,7 @@ namespace rpkg
                                         MessageBoxShow("Error: " + hashName + " file's TBLU file's version is unknown.");
                                     }
 
-                                    temp_return_value = clear_temp_tblu_data();
+                                    temp_return_value = RpkgLib.clear_temp_tblu_data();
                                 }
                                 else
                                 {
@@ -2267,9 +2267,9 @@ namespace rpkg
 
                                 output_path = temp_outputFolder;
 
-                                int temp_return_value = reset_task_status();
+                                int temp_return_value = RpkgLib.reset_task_status();
 
-                                execute_task temp_rpkgExecute = RebuildMODEL;
+                                RpkgLib.execute_task temp_rpkgExecute = RebuildMODEL;
 
                                 IAsyncResult temp_ar = temp_rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
@@ -2323,9 +2323,9 @@ namespace rpkg
                             return;
                         }
 
-                        int return_value = reset_task_status();
+                        int return_value = RpkgLib.reset_task_status();
 
-                        execute_task rpkgExecute = task_execute;
+                        RpkgLib.execute_task rpkgExecute = RpkgLib.task_execute;
 
                         IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
@@ -2372,9 +2372,9 @@ namespace rpkg
 
                 //System.Windows.MessageBox.Show(hash + "," + rpkgFilePath);
 
-                int return_value = reset_task_status();
+                int return_value = RpkgLib.reset_task_status();
 
-                execute_get_direct_hash_depends rpkgExecute = get_direct_hash_depends;
+                RpkgLib.execute_get_direct_hash_depends rpkgExecute = RpkgLib.get_direct_hash_depends;
 
                 IAsyncResult ar = rpkgExecute.BeginInvoke(rpkgFilePathLocal, hash, null, null);
 
@@ -2384,7 +2384,7 @@ namespace rpkg
 
                 progress.ShowDialog();
 
-                string hashDependsString = Marshal.PtrToStringAnsi(get_direct_hash_depends_string());
+                string hashDependsString = Marshal.PtrToStringAnsi(RpkgLib.get_direct_hash_depends_string());
 
                 //System.Windows.MessageBox.Show(hashDependsString);
 
@@ -2403,7 +2403,7 @@ namespace rpkg
 
                         string[] temp_test = hash2.Split('.');
 
-                        string ioiString = Marshal.PtrToStringAnsi(get_hash_list_string(temp_test[0]));
+                        string ioiString = Marshal.PtrToStringAnsi(RpkgLib.get_hash_list_string(temp_test[0]));
 
                         item2.Text = hash2 + " (" + rpkgFile + ") " + ioiString;
 
@@ -2445,7 +2445,7 @@ namespace rpkg
 
                     string rpkgFilePath = GetRootTreeNode(e.Node).Text;
 
-                    string rpkgHashFilePathString = Marshal.PtrToStringAnsi(get_rpkg_file_paths_hash_is_in(hash));
+                    string rpkgHashFilePathString = Marshal.PtrToStringAnsi(RpkgLib.get_rpkg_file_paths_hash_is_in(hash));
 
                     if (rpkgHashFilePathString != "")
                     {
@@ -2465,7 +2465,7 @@ namespace rpkg
 
                             DetailsTextBox.Text += hash + " in RPKG file " + rpkgHashFilePath + ":\n";
 
-                            DetailsTextBox.Text += Marshal.PtrToStringAnsi(get_hash_details(rpkgHashFilePath, hash));
+                            DetailsTextBox.Text += Marshal.PtrToStringAnsi(RpkgLib.get_hash_details(rpkgHashFilePath, hash));
 
                             DetailsTextBox.Text += "\n\n";
 
@@ -2486,11 +2486,11 @@ namespace rpkg
 
                             if (resourceType == "LOCR" || resourceType == "DLGE" || resourceType == "RTLV")
                             {
-                                UInt32 localization_data_size = generate_localization_string(rpkgHashFilePath, hash, resourceType);
+                                UInt32 localization_data_size = RpkgLib.generate_localization_string(rpkgHashFilePath, hash, resourceType);
 
                                 byte[] localization_data = new byte[localization_data_size];
 
-                                Marshal.Copy(get_localization_string(), localization_data, 0, (int)localization_data_size);
+                                Marshal.Copy(RpkgLib.get_localization_string(), localization_data, 0, (int)localization_data_size);
 
                                 if (localization_data_size > 0)
                                 {
@@ -2535,7 +2535,7 @@ namespace rpkg
                                 }
                             }
 
-                            int return_value = clear_hash_data_vector();
+                            int return_value = RpkgLib.clear_hash_data_vector();
                         }
                     }
                     else
@@ -2626,11 +2626,11 @@ namespace rpkg
 
                             //MessageBoxShow(resourceType);
 
-                            int return_value = search_imported_hashes(SearchRPKGsTextBox.Text, rpkgPath, resourceType, maxSearchResults);
+                            int return_value = RpkgLib.search_imported_hashes(SearchRPKGsTextBox.Text, rpkgPath, resourceType, maxSearchResults);
 
                             //MessageBoxShow(Marshal.PtrToStringAnsi(get_search_imported_hashes()));
 
-                            string searchResultsString = Marshal.PtrToStringAnsi(get_search_imported_hashes());
+                            string searchResultsString = Marshal.PtrToStringAnsi(RpkgLib.get_search_imported_hashes());
 
                             bool found = false;
 
@@ -2688,7 +2688,7 @@ namespace rpkg
 
                                         string[] temp_test = searchResult.Split('.');
 
-                                        string ioiString = Marshal.PtrToStringAnsi(get_hash_list_string(temp_test[0]));
+                                        string ioiString = Marshal.PtrToStringAnsi(RpkgLib.get_hash_list_string(temp_test[0]));
 
                                         //item3.Header = searchResult + " (" + rpkgFile + ") " + ioiString;
 
@@ -2782,9 +2782,9 @@ namespace rpkg
                     maxSearchResults = 100;
                 }
 
-                int return_value = search_hash_list(SearchHashListTextBox.Text, maxSearchResults);
+                int return_value = RpkgLib.search_hash_list(SearchHashListTextBox.Text, maxSearchResults);
 
-                string searchResultsString = Marshal.PtrToStringAnsi(get_search_hash_list());
+                string searchResultsString = Marshal.PtrToStringAnsi(RpkgLib.get_search_hash_list());
 
                 string[] searchResults = searchResultsString.TrimEnd(',').Split(',');
 
@@ -2800,7 +2800,7 @@ namespace rpkg
                         {
                             string[] temp_test = searchResult.Split('.');
 
-                            string ioiString = Marshal.PtrToStringAnsi(get_hash_list_string(temp_test[0]));
+                            string ioiString = Marshal.PtrToStringAnsi(RpkgLib.get_hash_list_string(temp_test[0]));
 
                             //SearchHashListTreeView.Nodes.Add(searchResult + " (hashlist) " + ioiString);
 
@@ -2873,17 +2873,17 @@ namespace rpkg
 
             string hash = hashDetails[0];
 
-            HexViewerTextBox.Text += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgFilePath, hash));
+            HexViewerTextBox.Text += Marshal.PtrToStringAnsi(RpkgLib.get_hash_in_rpkg_data_in_hex_view(rpkgFilePath, hash));
         }
 
         public static void TEXTToPNGThread(string rpkgFilePathLocal, string hash, string png_file_name)
         {
-            int return_value = generate_png_from_text(rpkgFilePathLocal, hash, png_file_name);
+            int return_value = RpkgLib.generate_png_from_text(rpkgFilePathLocal, hash, png_file_name);
         }
 
         public static void MassExtractTEXTThread(string command, string input_path, string filter, string search, string search_type, string output_path)
         {
-            int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+            int return_value = RpkgLib.task_execute(command, input_path, filter, search, search_type, output_path);
         }
 
         public int MassExtractTEXT(string command, string input_path, string filter, string search, string search_type, string output_path)
@@ -2899,7 +2899,7 @@ namespace rpkg
 
         public static void RebuildTEXTThread(string command, string input_path, string filter, string search, string search_type, string output_path)
         {
-            int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+            int return_value = RpkgLib.task_execute(command, input_path, filter, search, search_type, output_path);
         }
 
         public int RebuildTEXT(string command, string input_path, string filter, string search, string search_type, string output_path)
@@ -2915,7 +2915,7 @@ namespace rpkg
 
         public static void ExtractTEXTThread(string command, string input_path, string filter, string search, string search_type, string output_path)
         {
-            int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+            int return_value = RpkgLib.task_execute(command, input_path, filter, search, search_type, output_path);
         }
 
         public int ExtractTEXT(string command, string input_path, string filter, string search, string search_type, string output_path)
@@ -2931,7 +2931,7 @@ namespace rpkg
 
         public static void ExtractMODELThread(string command, string input_path, string filter, string search, string search_type, string output_path)
         {
-            int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+            int return_value = RpkgLib.task_execute(command, input_path, filter, search, search_type, output_path);
         }
 
         public int ExtractMODEL(string command, string input_path, string filter, string search, string search_type, string output_path)
@@ -2947,7 +2947,7 @@ namespace rpkg
 
         public static void RebuildMODELThread(string command, string input_path, string filter, string search, string search_type, string output_path)
         {
-            int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+            int return_value = RpkgLib.task_execute(command, input_path, filter, search, search_type, output_path);
         }
 
         public int RebuildMODEL(string command, string input_path, string filter, string search, string search_type, string output_path)
@@ -2967,15 +2967,15 @@ namespace rpkg
 
             string hash = header[0];
 
-            DetailsTextBox.Text = Marshal.PtrToStringAnsi(get_hash_details(rpkgFilePath, hash));
+            DetailsTextBox.Text = Marshal.PtrToStringAnsi(RpkgLib.get_hash_details(rpkgFilePath, hash));
 
-            UInt32 hash_size = get_hash_in_rpkg_size(rpkgFilePath, hash);
+            UInt32 hash_size = RpkgLib.get_hash_in_rpkg_size(rpkgFilePath, hash);
 
             byte[] hash_data = new byte[hash_size];
 
-            Marshal.Copy(get_hash_in_rpkg_data(rpkgFilePath, hash), hash_data, 0, (int)hash_size);
+            Marshal.Copy(RpkgLib.get_hash_in_rpkg_data(rpkgFilePath, hash), hash_data, 0, (int)hash_size);
 
-            int return_value = clear_hash_data_vector();
+            int return_value = RpkgLib.clear_hash_data_vector();
         }
 
         private void ImportRPKGFile(string rpkgPath)
@@ -2999,9 +2999,9 @@ namespace rpkg
                 }
             }
 
-            int return_value = reset_task_status();
+            int return_value = RpkgLib.reset_task_status();
 
-            execute_task rpkgExecute = task_execute;
+            RpkgLib.execute_task rpkgExecute = RpkgLib.task_execute;
 
             IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
@@ -3038,11 +3038,11 @@ namespace rpkg
 
             List<string> resourceTypes = new List<string>();
 
-            UInt32 resourceTypeCount = get_resource_types_count(rpkgFilePath);
+            UInt32 resourceTypeCount = RpkgLib.get_resource_types_count(rpkgFilePath);
 
             for (UInt32 i = 0; i < resourceTypeCount; i++)
             {
-                resourceTypes.Add(Marshal.PtrToStringAnsi(get_resource_types_at(rpkgFilePath, i)));
+                resourceTypes.Add(Marshal.PtrToStringAnsi(RpkgLib.get_resource_types_at(rpkgFilePath, i)));
             }
 
             resourceTypes.Sort();
@@ -3091,7 +3091,7 @@ namespace rpkg
                 }
             }
 
-            rpkgFiles.Sort(new NaturalStringComparer());
+            rpkgFiles.Sort(new MainWindow.NaturalStringComparer());
 
             string rpkgListString = "";
 
@@ -3117,9 +3117,9 @@ namespace rpkg
                 }
             }
 
-            int return_value = reset_task_status();
+            int return_value = RpkgLib.reset_task_status();
 
-            execute_import_rpkgs temp_rpkgExecute = import_rpkgs;
+            RpkgLib.execute_import_rpkgs temp_rpkgExecute = RpkgLib.import_rpkgs;
 
             IAsyncResult temp_ar = temp_rpkgExecute.BeginInvoke(folderPath, rpkgListString, null, null);
 
@@ -3140,7 +3140,7 @@ namespace rpkg
 
             foreach (string filePath in rpkgList)
             {
-                int rpkg_valid = is_rpkg_valid(filePath);
+                int rpkg_valid = RpkgLib.is_rpkg_valid(filePath);
 
                 if (rpkg_valid == 1)
                 {
@@ -3162,11 +3162,11 @@ namespace rpkg
 
                     List<string> resourceTypes = new List<string>();
 
-                    UInt32 resourceTypeCount = get_resource_types_count(filePath);
+                    UInt32 resourceTypeCount = RpkgLib.get_resource_types_count(filePath);
 
                     for (UInt32 i = 0; i < resourceTypeCount; i++)
                     {
-                        resourceTypes.Add(Marshal.PtrToStringAnsi(get_resource_types_at(filePath, i)));
+                        resourceTypes.Add(Marshal.PtrToStringAnsi(RpkgLib.get_resource_types_at(filePath, i)));
                     }
 
                     resourceTypes.Sort();
@@ -3298,9 +3298,9 @@ namespace rpkg
 
             filter = filterDialog.filterString;
 
-            int return_value = reset_task_status();
+            int return_value = RpkgLib.reset_task_status();
 
-            execute_task rpkgExecute = task_execute;
+            RpkgLib.execute_task rpkgExecute = RpkgLib.task_execute;
 
             IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
@@ -3424,9 +3424,9 @@ namespace rpkg
 
                 progress.message.Content = "Extracting TEXT/TEXD...";
 
-                int return_value = reset_task_status();
+                int return_value = RpkgLib.reset_task_status();
 
-                execute_task rpkgExecute = MassExtractTEXT;
+                RpkgLib.execute_task rpkgExecute = MassExtractTEXT;
 
                 IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
@@ -3514,9 +3514,9 @@ namespace rpkg
                     progress.message.Content = "Extracting PRIM...";
                 }
 
-                int return_value = reset_task_status();
+                int return_value = RpkgLib.reset_task_status();
 
-                execute_task rpkgExecute = task_execute;
+                RpkgLib.execute_task rpkgExecute = RpkgLib.task_execute;
 
                 IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
@@ -3593,9 +3593,9 @@ namespace rpkg
 
                     progress.message.Content = "Rebuilding All PRIM Models in " + input_path + "...";
 
-                    int return_value = reset_task_status();
+                    int return_value = RpkgLib.reset_task_status();
 
-                    execute_task rpkgExecute = RebuildMODEL;
+                    RpkgLib.execute_task rpkgExecute = RebuildMODEL;
 
                     IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
@@ -3664,7 +3664,7 @@ namespace rpkg
                             MessageBoxShow("Error: PRIM has too many primary object headers.");
                         }*/
 
-                        return_value = clear_temp_tblu_data();
+                        return_value = RpkgLib.clear_temp_tblu_data();
 
                         return;
                     }
@@ -3679,9 +3679,9 @@ namespace rpkg
 
                     progress.message.Content = "Rebuilding All TEXT/TEXD in " + input_path + "...";
 
-                    int return_value = reset_task_status();
+                    int return_value = RpkgLib.reset_task_status();
 
-                    execute_task rpkgExecute = RebuildTEXT;
+                    RpkgLib.execute_task rpkgExecute = RebuildTEXT;
 
                     IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
@@ -3700,9 +3700,9 @@ namespace rpkg
 
                     progress.message.Content = "Rebuilding All PRIM in " + input_path + "...";
 
-                    int return_value = reset_task_status();
+                    int return_value = RpkgLib.reset_task_status();
 
-                    execute_task rpkgExecute = RebuildMODEL;
+                    RpkgLib.execute_task rpkgExecute = RebuildMODEL;
 
                     IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
@@ -3771,7 +3771,7 @@ namespace rpkg
                             MessageBoxShow("Error: PRIM has too many primary object headers.");
                         }*/
 
-                        return_value = clear_temp_tblu_data();
+                        return_value = RpkgLib.clear_temp_tblu_data();
 
                         return;
                     }
@@ -3813,9 +3813,9 @@ namespace rpkg
                         progress.message.Content = "Rebuilding All WWEV in " + input_path + "...";
                     }
 
-                    int return_value = reset_task_status();
+                    int return_value = RpkgLib.reset_task_status();
 
-                    execute_task rpkgExecute = task_execute;
+                    RpkgLib.execute_task rpkgExecute = RpkgLib.task_execute;
 
                     IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
@@ -3884,7 +3884,7 @@ namespace rpkg
 
                 string rpkgFile = inputFolder.Substring(inputFolder.LastIndexOf("\\") + 1);
 
-                execute_task rpkgExecute = task_execute;
+                RpkgLib.execute_task rpkgExecute = RpkgLib.task_execute;
 
                 IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
@@ -4006,9 +4006,9 @@ namespace rpkg
 
                         item.Text = rpkgPath;
 
-                        int return_value = reset_task_status();
+                        int return_value = RpkgLib.reset_task_status();
 
-                        execute_get_hashes_with_no_reverse_depends rpkg = get_hashes_with_no_reverse_depends;
+                        RpkgLib.execute_get_hashes_with_no_reverse_depends rpkg = RpkgLib.get_hashes_with_no_reverse_depends;
 
                         IAsyncResult ar = rpkg.BeginInvoke(rpkgPath, null, null);
 
@@ -4018,7 +4018,7 @@ namespace rpkg
 
                         progress.ShowDialog();
 
-                        string hashesWithNoReveserseDepends = Marshal.PtrToStringAnsi(get_hashes_with_no_reverse_depends_string());
+                        string hashesWithNoReveserseDepends = Marshal.PtrToStringAnsi(RpkgLib.get_hashes_with_no_reverse_depends_string());
 
                         string[] hashes = hashesWithNoReveserseDepends.TrimEnd(',').Split(',');
 
@@ -4030,7 +4030,7 @@ namespace rpkg
 
                             string[] temp_test = hash.Split('.');
 
-                            string ioiString = Marshal.PtrToStringAnsi(get_hash_list_string(temp_test[0]));
+                            string ioiString = Marshal.PtrToStringAnsi(RpkgLib.get_hash_list_string(temp_test[0]));
 
                             item2.Text = hash + " (" + rpkgFile + ") " + ioiString;
 
@@ -4175,174 +4175,6 @@ namespace rpkg
         WaveFormat waveFormat;
         NAudio.Wave.RawSourceWaveStream pcmSource;
 
-        public delegate int execute_import_rpkgs(string rpkgs_path, string rpkgs_list);
-        public delegate int execute_load_recursive_temps(string temp_hash, string rpkg_file_path, UInt32 temp_version);
-        public delegate int execute_get_hashes_with_no_reverse_depends(string rpkg_file);
-        public delegate int execute_get_direct_hash_depends(string rpkg_file, string hash_string);
-        public delegate int execute_task(string csharp_command, string csharp_input_path, string csharp_filter, string search, string search_type, string csharp_output_path);
-
-        [DllImport("rpkg.dll", EntryPoint = "task_execute", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int task_execute(string csharp_command, string csharp_input_path, string csharp_filter, string search, string search_type, string csharp_output_path);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_current_percent", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_current_percent();
-
-        [DllImport("rpkg.dll", EntryPoint = "reset_task_status", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int reset_task_status();
-
-        [DllImport("rpkg.dll", EntryPoint = "reset_task_single_status", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int reset_task_single_status();
-
-        [DllImport("rpkg.dll", EntryPoint = "get_resource_types_count", CallingConvention = CallingConvention.Cdecl)]
-        public static extern UInt32 get_resource_types_count(string rpkg_file);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_resource_types_at", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_resource_types_at(string rpkg_file, UInt32 at_index);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_resource_types_data_size", CallingConvention = CallingConvention.Cdecl)]
-        public static extern UInt64 get_resource_types_data_size(string rpkg_file, string resource_type);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_hash_based_on_resource_type_count", CallingConvention = CallingConvention.Cdecl)]
-        public static extern UInt32 get_hash_based_on_resource_type_count(string rpkg_file, string resource_type);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_hash_based_on_resource_type_at", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_hash_based_on_resource_type_at(string rpkg_file, string resource_type, UInt32 at_index);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_all_hashes_in_rpkg_count", CallingConvention = CallingConvention.Cdecl)]
-        public static extern UInt32 get_all_hashes_in_rpkg_count(string rpkg_file);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_all_hashes_in_rpkg_at", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_all_hashes_in_rpkg_at(string rpkg_file, UInt32 at_index);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_hash_details", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_hash_details(string rpkg_file, string hash_string);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_hash_in_rpkg_size", CallingConvention = CallingConvention.Cdecl)]
-        public static extern UInt32 get_hash_in_rpkg_size(string rpkg_file_name, string hash_string);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_hash_in_rpkg_data", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_hash_in_rpkg_data(string rpkg_file_name, string hash_string);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_all_hashes_in_rpkg_data_size", CallingConvention = CallingConvention.Cdecl)]
-        public static extern UInt64 get_all_hashes_in_rpkg_data_size(string rpkg_file);
-
-        [DllImport("rpkg.dll", EntryPoint = "clear_hash_data_vector", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int clear_hash_data_vector();
-
-        [DllImport("rpkg.dll", EntryPoint = "get_hash_in_rpkg_data_in_hex_view", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_hash_in_rpkg_data_in_hex_view(string rpkg_file_name, string hash_string);
-
-        [DllImport("rpkg.dll", EntryPoint = "generate_localization_string", CallingConvention = CallingConvention.Cdecl)]
-        public static extern UInt32 generate_localization_string(string rpkg_file_name, string hash_string, string resource_type);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_localization_string", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_localization_string();
-
-        [DllImport("rpkg.dll", EntryPoint = "generate_json_string", CallingConvention = CallingConvention.Cdecl)]
-        public static extern UInt32 generate_json_string(string rpkg_file_name, string hash_string);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_json_string", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_json_string();
-
-        [DllImport("rpkg.dll", EntryPoint = "get_hashes_with_no_reverse_depends", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_hashes_with_no_reverse_depends();
-
-        [DllImport("rpkg.dll", EntryPoint = "load_hash_list", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int load_hash_list();
-
-        [DllImport("rpkg.dll", EntryPoint = "get_hash_list_string", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_hash_list_string(string hash_string);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_hashes_with_no_reverse_depends", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_hashes_with_no_reverse_depends(string rpkg_file);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_hashes_with_no_reverse_depends_string", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_hashes_with_no_reverse_depends_string();
-
-        [DllImport("rpkg.dll", EntryPoint = "get_direct_hash_depends", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_direct_hash_depends(string rpkg_file, string hash_string);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_direct_hash_depends_string", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_direct_hash_depends_string();
-
-        [DllImport("rpkg.dll", EntryPoint = "get_patch_deletion_list", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_patch_deletion_list(string rpkg_file);
-
-        [DllImport("rpkg.dll", EntryPoint = "search_imported_hashes", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int search_imported_hashes(string search_str, string rpkg_file, string resource_type, int max_results);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_search_imported_hashes", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_search_imported_hashes();
-
-        [DllImport("rpkg.dll", EntryPoint = "search_hash_list", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int search_hash_list(string search_str, int max_results);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_search_hash_list", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_search_hash_list();
-
-        [DllImport("rpkg.dll", EntryPoint = "get_rpkg_file_paths_hash_is_in", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_rpkg_file_paths_hash_is_in(string hash_string);
-
-        [DllImport("rpkg.dll", EntryPoint = "create_ogg_file_from_hash_in_rpkg", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int create_ogg_file_from_hash_in_rpkg(string rpkg_file, string hash_string, int command, int wwev_number);
-
-        [DllImport("rpkg.dll", EntryPoint = "convert_ogg_to_pcm", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int convert_ogg_to_pcm(string input_path, string output_path);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_pcm_sample_size", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_pcm_sample_size();
-
-        [DllImport("rpkg.dll", EntryPoint = "get_pcm_sample_rate", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_pcm_sample_rate();
-
-        [DllImport("rpkg.dll", EntryPoint = "get_pcm_channels", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_pcm_channels();
-
-        [DllImport("rpkg.dll", EntryPoint = "clear_temp_tblu_data", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int clear_temp_tblu_data();
-
-        [DllImport("resourcetool.dll", EntryPoint = "convert_temp_to_json", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int convert_temp_to_json(string input_path, string output_path, string operating_mode);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_matrix_data_from_godot_scene", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_matrix_data_from_godot_scene(string input_path);
-
-        [DllImport("rpkg.dll", EntryPoint = "load_recursive_temps", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int load_recursive_temps(string temp_hash, string rpkg_file_path, UInt32 temp_version);
-
-        [DllImport("rpkg.dll", EntryPoint = "load_non_recursive_temps", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int load_non_recursive_temps(string temp_hash, string rpkg_file_path, UInt32 temp_version);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_temp_index", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_temp_index(string temp_hash_string);
-
-        [DllImport("rpkg.dll", EntryPoint = "generate_png_from_text", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int generate_png_from_text(string rpkg_file, string hash_string, string png_path);
-
-        [DllImport("rpkg.dll", EntryPoint = "unload_rpkg", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int unload_rpkg(string rpkg_file);
-
-        [DllImport("rpkg.dll", EntryPoint = "modify_patch_deletion_list", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int modify_patch_deletion_list(string rpkg_file, string patch_list, UInt32 patch_count, UInt32 backup_rpkg);
-
-        [DllImport("rpkg.dll", EntryPoint = "modify_hash_depends", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int modify_hash_depends(string rpkg_file, string hash_string, string hash_list, string hash_flag_list, UInt32 hash_count, UInt32 backup_rpkg);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_temp_version", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_temp_version(string temp_hash, string rpkg_file_path);
-
-        [DllImport("rpkg.dll", EntryPoint = "set_temp_version", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int set_temp_version(UInt32 temps_index, UInt32 temp_version);
-
-        [DllImport("rpkg.dll", EntryPoint = "import_rpkgs", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int import_rpkgs(string rpkgs_path, string rpkgs_list);
-
-        [DllImport("rpkg.dll", EntryPoint = "is_rpkg_valid", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int is_rpkg_valid(string rpkg_file_path);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_response_string", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_response_string();
-
 
         [SuppressUnmanagedCodeSecurity]
         internal static class SafeNativeMethods
@@ -4355,7 +4187,7 @@ namespace rpkg
         {
             public int Compare(string a, string b)
             {
-                return SafeNativeMethods.StrCmpLogicalW(a, b);
+                return MainWindow.SafeNativeMethods.StrCmpLogicalW(a, b);
             }
         }
 
@@ -4363,7 +4195,7 @@ namespace rpkg
         {
             public int Compare(FileInfo a, FileInfo b)
             {
-                return SafeNativeMethods.StrCmpLogicalW(a.Name, b.Name);
+                return MainWindow.SafeNativeMethods.StrCmpLogicalW(a.Name, b.Name);
             }
         }
 
@@ -4418,7 +4250,7 @@ namespace rpkg
 
                     string[] hashData = OGGPlayerLabelHashFileName.Content.ToString().Split('.');
 
-                    int return_value = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hashData[0], 1, newIndex);
+                    int return_value = RpkgLib.create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hashData[0], 1, newIndex);
 
                     string currentDirectory = System.IO.Directory.GetCurrentDirectory();
 
@@ -4426,7 +4258,7 @@ namespace rpkg
 
                     string outputPCMFile = currentDirectory + "\\" + hashData[0] + ".pcm";
 
-                    return_value = convert_ogg_to_pcm(inputOGGFile, outputPCMFile);
+                    return_value = RpkgLib.convert_ogg_to_pcm(inputOGGFile, outputPCMFile);
 
                     if (return_value == 1)
                     {
@@ -4451,9 +4283,9 @@ namespace rpkg
 
                             pcmMemoryStream = new MemoryStream(File.ReadAllBytes(outputPCMFile));
 
-                            int pcmSampleSize = get_pcm_sample_size();
-                            int pcmSampleRate = get_pcm_sample_rate();
-                            int pcmChannels = get_pcm_channels();
+                            int pcmSampleSize = RpkgLib.get_pcm_sample_size();
+                            int pcmSampleRate = RpkgLib.get_pcm_sample_rate();
+                            int pcmChannels = RpkgLib.get_pcm_channels();
 
                             File.Delete(hashData[0] + ".ogg");
                             File.Delete(hashData[0] + ".wem");
@@ -4660,7 +4492,7 @@ namespace rpkg
 
                 string[] hashData = OGGPlayerLabelHashFileName.Content.ToString().Split('.');
 
-                int return_value = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hashData[0], 1, OGGPlayerComboBox.SelectedIndex);
+                int return_value = RpkgLib.create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hashData[0], 1, OGGPlayerComboBox.SelectedIndex);
 
                 string currentDirectory = System.IO.Directory.GetCurrentDirectory();
 
@@ -4668,7 +4500,7 @@ namespace rpkg
 
                 string outputPCMFile = currentDirectory + "\\" + hashData[0] + ".pcm";
 
-                return_value = convert_ogg_to_pcm(inputOGGFile, outputPCMFile);
+                return_value = RpkgLib.convert_ogg_to_pcm(inputOGGFile, outputPCMFile);
 
                 if (return_value == 1)
                 {
@@ -4695,9 +4527,9 @@ namespace rpkg
 
                         pcmMemoryStream = new MemoryStream(File.ReadAllBytes(outputPCMFile));
 
-                        int pcmSampleSize = get_pcm_sample_size();
-                        int pcmSampleRate = get_pcm_sample_rate();
-                        int pcmChannels = get_pcm_channels();
+                        int pcmSampleSize = RpkgLib.get_pcm_sample_size();
+                        int pcmSampleRate = RpkgLib.get_pcm_sample_rate();
+                        int pcmChannels = RpkgLib.get_pcm_channels();
 
                         File.Delete(hashData[0] + ".ogg");
                         File.Delete(hashData[0] + ".wem");
@@ -5138,18 +4970,18 @@ namespace rpkg
 
                 if (backup_rpkg_file)
                 {
-                    return_value = modify_patch_deletion_list(rpkgFilePath, patchList, patchNumber, 1);
+                    return_value = RpkgLib.modify_patch_deletion_list(rpkgFilePath, patchList, patchNumber, 1);
                 }
                 else
                 {
-                    return_value = modify_patch_deletion_list(rpkgFilePath, patchList, patchNumber, 0);
+                    return_value = RpkgLib.modify_patch_deletion_list(rpkgFilePath, patchList, patchNumber, 0);
                 }
 
                 if (return_value == 0)
                 {
                     MessageBoxShow("Patch deletion list has been successfully updated for RPKG: " + rpkgFilePath);
 
-                    return_value = unload_rpkg(rpkgFilePath);
+                    return_value = RpkgLib.unload_rpkg(rpkgFilePath);
 
                     SearchRPKGsTreeView.Nodes.Clear();
 
@@ -6202,18 +6034,18 @@ namespace rpkg
 
                 if (backup_rpkg_file)
                 {
-                    return_value = modify_hash_depends(hashDependsRPKGFilePath, currentHashFileName, hashList, hashFlagList, (UInt32)hashDependsList.Count, 1);
+                    return_value = RpkgLib.modify_hash_depends(hashDependsRPKGFilePath, currentHashFileName, hashList, hashFlagList, (UInt32)hashDependsList.Count, 1);
                 }
                 else
                 {
-                    return_value = modify_hash_depends(hashDependsRPKGFilePath, currentHashFileName, hashList, hashFlagList, (UInt32)hashDependsList.Count, 0);
+                    return_value = RpkgLib.modify_hash_depends(hashDependsRPKGFilePath, currentHashFileName, hashList, hashFlagList, (UInt32)hashDependsList.Count, 0);
                 }
 
                 if (return_value == 0)
                 {
                     MessageBoxShow("Hash Depends has been successfully updated for RPKG: " + hashDependsRPKGFilePath);
 
-                    return_value = unload_rpkg(hashDependsRPKGFilePath);
+                    return_value = RpkgLib.unload_rpkg(hashDependsRPKGFilePath);
 
                     SearchRPKGsTreeView.Nodes.Clear();
 
@@ -6404,7 +6236,7 @@ namespace rpkg
                     }
                 }
 
-                rpkgFiles.Sort(new NaturalStringComparer());
+                rpkgFiles.Sort(new MainWindow.NaturalStringComparer());
 
                 foreach (string filePath in rpkgFiles)
                 {
@@ -6437,9 +6269,9 @@ namespace rpkg
 
                     output_path = temp_outputFolder;
 
-                    int temp_return_value = reset_task_status();
+                    int temp_return_value = RpkgLib.reset_task_status();
 
-                    execute_task temp_rpkgExecute = task_execute;
+                    RpkgLib.execute_task temp_rpkgExecute = RpkgLib.task_execute;
 
                     IAsyncResult temp_ar = temp_rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
@@ -6471,9 +6303,9 @@ namespace rpkg
 
                     output_path = temp_outputFolder;
 
-                    int temp_return_value = reset_task_status();
+                    int temp_return_value = RpkgLib.reset_task_status();
 
-                    execute_task temp_rpkgExecute = ExtractMODEL;
+                    RpkgLib.execute_task temp_rpkgExecute = ExtractMODEL;
 
                     IAsyncResult temp_ar = temp_rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
@@ -6505,9 +6337,9 @@ namespace rpkg
 
                     output_path = temp_outputFolder;
 
-                    int temp_return_value = reset_task_status();
+                    int temp_return_value = RpkgLib.reset_task_status();
 
-                    execute_task temp_rpkgExecute = task_execute;
+                    RpkgLib.execute_task temp_rpkgExecute = RpkgLib.task_execute;
 
                     IAsyncResult temp_ar = temp_rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
@@ -6539,9 +6371,9 @@ namespace rpkg
 
                     output_path = temp_outputFolder;
 
-                    int temp_return_value = reset_task_status();
+                    int temp_return_value = RpkgLib.reset_task_status();
 
-                    execute_task temp_rpkgExecute = ExtractMODEL;
+                    RpkgLib.execute_task temp_rpkgExecute = ExtractMODEL;
 
                     IAsyncResult temp_ar = temp_rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
@@ -6629,15 +6461,15 @@ namespace rpkg
 
                     progress.ProgressBar.IsIndeterminate = true;
 
-                    int return_value = reset_task_status();
+                    int return_value = RpkgLib.reset_task_status();
 
-                    execute_task rpkgExecute = task_execute;
+                    RpkgLib.execute_task rpkgExecute = RpkgLib.task_execute;
 
                     IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
                     progress.ShowDialog();
 
-                    string responseString = Marshal.PtrToStringAnsi(get_response_string());
+                    string responseString = Marshal.PtrToStringAnsi(RpkgLib.get_response_string());
 
                     if (responseString != "")
                     {
@@ -6703,15 +6535,15 @@ namespace rpkg
 
                     progress.ProgressBar.IsIndeterminate = true;
 
-                    int return_value = reset_task_status();
+                    int return_value = RpkgLib.reset_task_status();
 
-                    execute_task rpkgExecute = task_execute;
+                    RpkgLib.execute_task rpkgExecute = RpkgLib.task_execute;
 
                     IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
                     progress.ShowDialog();
 
-                    string responseString = Marshal.PtrToStringAnsi(get_response_string());
+                    string responseString = Marshal.PtrToStringAnsi(RpkgLib.get_response_string());
 
                     if (responseString != "")
                     {

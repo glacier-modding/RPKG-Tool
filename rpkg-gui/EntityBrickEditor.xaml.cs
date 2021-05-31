@@ -134,7 +134,7 @@ namespace rpkg
             controlJSONPointersTypes = null;
             controlJSONPointersTypes = new List<string>();
             controlZGuids = null;
-            controlZGuids = new List<ZGuid>();
+            controlZGuids = new List<EntityBrickEditor.ZGuid>();
 
             controlCount = 0;
 
@@ -150,7 +150,7 @@ namespace rpkg
 
                 topItem.Text = tempFileNameFull.Replace("(", "").Replace(")", "");
 
-                string responseString = Marshal.PtrToStringAnsi(get_top_level_logical_parents(temps_index));
+                string responseString = Marshal.PtrToStringAnsi(RpkgLib.get_top_level_logical_parents(temps_index));
 
                 //MessageBoxShow(responseString);
 
@@ -162,11 +162,11 @@ namespace rpkg
 
                     UInt32.TryParse(topLevelParent, out logical_parent);
 
-                    int entry_data_size = get_entries_with_logical_parent(temps_index, logical_parent);
+                    int entry_data_size = RpkgLib.get_entries_with_logical_parent(temps_index, logical_parent);
 
                     byte[] entry_data = new byte[entry_data_size];
 
-                    Marshal.Copy(get_entries_with_logical_parent_data(), entry_data, 0, entry_data_size);
+                    Marshal.Copy(RpkgLib.get_entries_with_logical_parent_data(), entry_data, 0, entry_data_size);
 
                     int data_pointer = 0;
 
@@ -201,7 +201,7 @@ namespace rpkg
             }
             
             {
-                string responseString = Marshal.PtrToStringAnsi(get_all_bricks(temps_index));
+                string responseString = Marshal.PtrToStringAnsi(RpkgLib.get_all_bricks(temps_index));
 
                 //MessageBoxShow(responseString);
 
@@ -215,7 +215,7 @@ namespace rpkg
 
                         //MessageBoxShow(brick);
 
-                        int temp_index_hash_reference = get_temp_index(brickData[0]);
+                        int temp_index_hash_reference = RpkgLib.get_temp_index(brickData[0]);
 
                         //MessageBoxShow(temp_index_hash_reference.ToString());
 
@@ -223,7 +223,7 @@ namespace rpkg
 
                         topItem.Text = brick;
 
-                        responseString = Marshal.PtrToStringAnsi(get_top_level_logical_parents((UInt32)temp_index_hash_reference));
+                        responseString = Marshal.PtrToStringAnsi(RpkgLib.get_top_level_logical_parents((UInt32)temp_index_hash_reference));
 
                         //MessageBoxShow(responseString);
 
@@ -235,11 +235,11 @@ namespace rpkg
 
                             UInt32.TryParse(topLevelParent, out logical_parent);
 
-                            int entry_data_size = get_entries_with_logical_parent((UInt32)temp_index_hash_reference, logical_parent);
+                            int entry_data_size = RpkgLib.get_entries_with_logical_parent((UInt32)temp_index_hash_reference, logical_parent);
 
                             byte[] entry_data = new byte[entry_data_size];
 
-                            Marshal.Copy(get_entries_with_logical_parent_data(), entry_data, 0, entry_data_size);
+                            Marshal.Copy(RpkgLib.get_entries_with_logical_parent_data(), entry_data, 0, entry_data_size);
 
                             int data_pointer = 0;
 
@@ -277,13 +277,13 @@ namespace rpkg
             
             MainTreeView.EndUpdate();
 
-            treeViewBackup = new TreeViewBackup(MainTreeView.Nodes);
+            treeViewBackup = new EntityBrickEditor.TreeViewBackup(MainTreeView.Nodes);
 
             message.Close();
 
-            int temp_subentity_count = get_temp_subentity_count(temps_index);
+            int temp_subentity_count = RpkgLib.get_temp_subentity_count(temps_index);
 
-            int tblu_subentity_count = get_tblu_subentity_count(temps_index);
+            int tblu_subentity_count = RpkgLib.get_tblu_subentity_count(temps_index);
 
             if (temp_subentity_count != tblu_subentity_count)
             {
@@ -315,23 +315,23 @@ namespace rpkg
 
             UInt32.TryParse(header[header.Length - 1], out temp_temp_index);
 
-            string hashReferenceData = Marshal.PtrToStringAnsi(get_entries_hash_references(temp_temp_index, temp_entryIndex));
+            string hashReferenceData = Marshal.PtrToStringAnsi(RpkgLib.get_entries_hash_references(temp_temp_index, temp_entryIndex));
 
             string[] hashReferences = hashReferenceData.Split(',');
 
-            int temp_index_hash_reference = get_temp_index(hashReferences[0]);
+            int temp_index_hash_reference = RpkgLib.get_temp_index(hashReferences[0]);
 
             if (temp_index_hash_reference > 0)
             {
                 UInt32 logical_parent = 0xFFFFFFFF;
 
-                int hash_entry_data_size = get_entries_with_logical_parent((UInt32)temp_index_hash_reference, logical_parent);
+                int hash_entry_data_size = RpkgLib.get_entries_with_logical_parent((UInt32)temp_index_hash_reference, logical_parent);
 
                 if (hash_entry_data_size > 0)
                 {
                     byte[] entry_data = new byte[hash_entry_data_size];
 
-                    Marshal.Copy(get_entries_with_logical_parent_data(), entry_data, 0, hash_entry_data_size);
+                    Marshal.Copy(RpkgLib.get_entries_with_logical_parent_data(), entry_data, 0, hash_entry_data_size);
 
                     int data_pointer = 0;
 
@@ -359,13 +359,13 @@ namespace rpkg
                 }
             }
 
-            int entry_data_size = get_entries_with_logical_parent(temp_temp_index, temp_entryIndex);
+            int entry_data_size = RpkgLib.get_entries_with_logical_parent(temp_temp_index, temp_entryIndex);
 
             if (entry_data_size > 0)
             {
                 byte[] entry_data = new byte[entry_data_size];
 
-                Marshal.Copy(get_entries_with_logical_parent_data(), entry_data, 0, entry_data_size);
+                Marshal.Copy(RpkgLib.get_entries_with_logical_parent_data(), entry_data, 0, entry_data_size);
 
                 int data_pointer = 0;
 
@@ -475,7 +475,7 @@ namespace rpkg
             {
                 if (controlZGuids.Count > 0)
                 {
-                    foreach (ZGuid zguid in controlZGuids)
+                    foreach (EntityBrickEditor.ZGuid zguid in controlZGuids)
                     {
                         DependencyObject descendant = FindDescendant(EditorWindow, zguid.controlName);
 
@@ -619,7 +619,7 @@ namespace rpkg
                     {
                         IntPtr address = updateDataHandle.AddrOfPinnedObject();
 
-                        int return_value = update_temp_file(temp_index, entity_index, address, (UInt32)updateData.Length);
+                        int return_value = RpkgLib.update_temp_file(temp_index, entity_index, address, (UInt32)updateData.Length);
                     }
                     finally
                     {
@@ -629,7 +629,7 @@ namespace rpkg
                         }
                     }
 
-                    string responseString = Marshal.PtrToStringAnsi(get_response_string());
+                    string responseString = Marshal.PtrToStringAnsi(RpkgLib.get_response_string());
 
                     if (responseString != "")
                     {
@@ -711,7 +711,7 @@ namespace rpkg
                     controlJSONPointersTypes = null;
                     controlJSONPointersTypes = new List<string>();
                     controlZGuids = null;
-                    controlZGuids = new List<ZGuid>();
+                    controlZGuids = new List<EntityBrickEditor.ZGuid>();
 
                     controlCount = 0;
 
@@ -733,7 +733,7 @@ namespace rpkg
                             }
                         }
 
-                        temp_index = (UInt32)get_temp_index(hashFileName);
+                        temp_index = (UInt32) RpkgLib.get_temp_index(hashFileName);
 
                         Label label1 = new Label();
                         label1.Content = hashFileName + "'s Data:";
@@ -831,7 +831,7 @@ namespace rpkg
                         //MessageBoxShow(temp_index.ToString());
                         //MessageBoxShow(entityName);
 
-                        string hashReferenceData = Marshal.PtrToStringAnsi(get_entries_hash_reference_data(temp_index, entryIndex));
+                        string hashReferenceData = Marshal.PtrToStringAnsi(RpkgLib.get_entries_hash_reference_data(temp_index, entryIndex));
 
                         //MessageBoxShow(hashReferenceData);
 
@@ -892,9 +892,9 @@ namespace rpkg
 
         private void AppendInput_TEMP(string valueType, string typeString)
         {
-            int entry_data_size = get_temp_entries(temp_index, valueType, typeString);
+            int entry_data_size = RpkgLib.get_temp_entries(temp_index, valueType, typeString);
 
-            string responseString = Marshal.PtrToStringAnsi(get_response_string());
+            string responseString = Marshal.PtrToStringAnsi(RpkgLib.get_response_string());
 
             if (responseString != "")
             {
@@ -906,7 +906,7 @@ namespace rpkg
                 {
                     byte[] entry_data = new byte[entry_data_size];
 
-                    Marshal.Copy(get_entries_with_logical_parent_data(), entry_data, 0, entry_data_size);
+                    Marshal.Copy(RpkgLib.get_entries_with_logical_parent_data(), entry_data, 0, entry_data_size);
 
                     int data_pointer = 0;
 
@@ -1054,7 +1054,7 @@ namespace rpkg
                     {
                         if (propertyValueVals[i].Count > 0)
                         {
-                            string enumValues = Marshal.PtrToStringAnsi(get_enum_values(temp_index, propertyValueTypes[i]));
+                            string enumValues = Marshal.PtrToStringAnsi(RpkgLib.get_enum_values(temp_index, propertyValueTypes[i]));
 
                             if (enumValues != "")
                             {
@@ -1087,9 +1087,9 @@ namespace rpkg
 
         private void AppendInput(UInt32 entryIndex, string valueType)
         {
-            int entry_data_size = get_entries(temp_index, entryIndex, valueType);
+            int entry_data_size = RpkgLib.get_entries(temp_index, entryIndex, valueType);
 
-            string responseString = Marshal.PtrToStringAnsi(get_response_string());
+            string responseString = Marshal.PtrToStringAnsi(RpkgLib.get_response_string());
 
             if (responseString != "")
             {
@@ -1101,7 +1101,7 @@ namespace rpkg
                 {
                     byte[] entry_data = new byte[entry_data_size];
 
-                    Marshal.Copy(get_entries_with_logical_parent_data(), entry_data, 0, entry_data_size);
+                    Marshal.Copy(RpkgLib.get_entries_with_logical_parent_data(), entry_data, 0, entry_data_size);
 
                     int data_pointer = 0;
 
@@ -1249,7 +1249,7 @@ namespace rpkg
                     {
                         if (propertyValueVals[i].Count > 0)
                         {
-                            string enumValues = Marshal.PtrToStringAnsi(get_enum_values(temp_index, propertyValueTypes[i]));
+                            string enumValues = Marshal.PtrToStringAnsi(RpkgLib.get_enum_values(temp_index, propertyValueTypes[i]));
 
                             if (enumValues != "")
                             {
@@ -1355,7 +1355,7 @@ namespace rpkg
                     Grid.SetRow(label, rowCount);
                     Grid.SetColumn(label, 0);
 
-                    string enumValues = Marshal.PtrToStringAnsi(get_enum_values(temp_index, propertyValueTypes[propertyIndex]));
+                    string enumValues = Marshal.PtrToStringAnsi(RpkgLib.get_enum_values(temp_index, propertyValueTypes[propertyIndex]));
 
                     if (enumValues != "")
                     {
@@ -1419,7 +1419,7 @@ namespace rpkg
 
                             int.TryParse(propertyValueVals[propertyIndex][i], out temp_entity_index);
 
-                            string temp_entity_name = Marshal.PtrToStringAnsi(get_entry_name(temp_index, temp_entity_index));
+                            string temp_entity_name = Marshal.PtrToStringAnsi(RpkgLib.get_entry_name(temp_index, temp_entity_index));
 
                             if (temp_entity_name == "")
                             {
@@ -2307,7 +2307,7 @@ namespace rpkg
 
                 string zguidString = GenerateZGuid(ref propertyValueVals[propertyIndex]);
 
-                ZGuid zguid = new ZGuid();
+                EntityBrickEditor.ZGuid zguid = new EntityBrickEditor.ZGuid();
                 zguid.controlName = textBox.Name;
 
                 zguid.subControlNames = new string[11];
@@ -2389,7 +2389,7 @@ namespace rpkg
 
         private bool ProcessZGuid(string controlName, string zguidString)
         {
-            foreach (ZGuid zguid in controlZGuids)
+            foreach (EntityBrickEditor.ZGuid zguid in controlZGuids)
             {
                 if (zguid.controlName == controlName)
                 {
@@ -2509,7 +2509,7 @@ namespace rpkg
         {
             string zguidString = "";
 
-            ZGuid zguid = new ZGuid();
+            EntityBrickEditor.ZGuid zguid = new EntityBrickEditor.ZGuid();
 
             bool return_value = UInt32.TryParse(zguidData[0], out zguid._a);
             zguidString += zguid._a.ToString("X2").PadLeft(8, '0') + "-";
@@ -2663,11 +2663,11 @@ namespace rpkg
 
                 string responseString = "";//Marshal.PtrToStringAnsi(get_entries_with_logical_parent(temp_index, entryIndex));
 
-                string hashReferenceData = Marshal.PtrToStringAnsi(get_entries_hash_references(temp_index, entryIndex));
+                string hashReferenceData = Marshal.PtrToStringAnsi(RpkgLib.get_entries_hash_references(temp_index, entryIndex));
 
                 string[] hashReferences = hashReferenceData.Split(',');
 
-                int temp_index_hash_reference = get_temp_index(hashReferences[0]);
+                int temp_index_hash_reference = RpkgLib.get_temp_index(hashReferences[0]);
 
                 if (temp_index_hash_reference > 0)
                 {
@@ -2734,7 +2734,7 @@ namespace rpkg
         {
             UpdateTEMPFile();
 
-            int changedCount = get_number_of_changed_temps();
+            int changedCount = RpkgLib.get_number_of_changed_temps();
 
             if (changedCount == 0)
             {
@@ -2742,7 +2742,7 @@ namespace rpkg
             }
             else
             {
-                int totalCount = get_total_numer_of_temps();
+                int totalCount = RpkgLib.get_total_numer_of_temps();
 
                 MessageQuestion messageBox = new MessageQuestion();
                 messageBox.message.Content = "A total of " + changedCount.ToString() + " out of " + totalCount.ToString() + " TEMP files have been changed.\n\nWould you like to continue generating TEMP files for them all?";
@@ -2773,7 +2773,7 @@ namespace rpkg
 
                         outputFolder = outputFolder.Trim('\\') + "\\";
 
-                        int return_value = generate_temp_files_from_data(outputFolder);
+                        int return_value = RpkgLib.generate_temp_files_from_data(outputFolder);
 
                         if (return_value == 0)
                         {
@@ -2796,7 +2796,7 @@ namespace rpkg
         {
             UpdateTEMPFile();
 
-            int changedCount = get_number_of_changed_temps();
+            int changedCount = RpkgLib.get_number_of_changed_temps();
 
             if (changedCount == 0)
             {
@@ -2804,7 +2804,7 @@ namespace rpkg
             }
             else
             {
-                int totalCount = get_total_numer_of_temps();
+                int totalCount = RpkgLib.get_total_numer_of_temps();
 
                 MessageQuestion messageBox = new MessageQuestion();
                 messageBox.message.Content = "A total of " + changedCount.ToString() + " out of " + totalCount.ToString() + " TEMP files have been changed.\n\nWould you like to continue generating RPKG files with them all?";
@@ -2835,7 +2835,7 @@ namespace rpkg
 
                         outputFolder = outputFolder.Trim('\\') + "\\";
 
-                        int return_value = generate_rpkg_files_from_data(outputFolder);
+                        int return_value = RpkgLib.generate_rpkg_files_from_data(outputFolder);
 
                         if (return_value == 0)
                         {
@@ -2858,7 +2858,7 @@ namespace rpkg
         {
             UpdateTEMPFile();
 
-            int changedCount = get_number_of_changed_temps();
+            int changedCount = RpkgLib.get_number_of_changed_temps();
 
             if (changedCount == 0)
             {
@@ -2866,7 +2866,7 @@ namespace rpkg
             }
             else
             {
-                int totalCount = get_total_numer_of_temps();
+                int totalCount = RpkgLib.get_total_numer_of_temps();
 
                 MessageQuestion messageBox = new MessageQuestion();
                 messageBox.message.Content = "A total of " + changedCount.ToString() + " out of " + totalCount.ToString() + " TEMP files have been changed.\n\nWould you like to continue generating TEMP JSON files for them all?";
@@ -2897,7 +2897,7 @@ namespace rpkg
 
                         outputFolder = outputFolder.Trim('\\') + "\\";
 
-                        int return_value = generate_json_files_from_data(outputFolder);
+                        int return_value = RpkgLib.generate_json_files_from_data(outputFolder);
 
                         if (return_value == 0)
                         {
@@ -3023,7 +3023,7 @@ namespace rpkg
             MainTreeView.CollapseAll();
         }
 
-        public class TreeViewBackup : List<TreeViewBackup>
+        public class TreeViewBackup : List<EntityBrickEditor.TreeViewBackup>
         {
             public System.Windows.Forms.TreeNode Parent { get; }
             public System.Windows.Forms.TreeNodeCollection Children { get; }
@@ -3032,7 +3032,7 @@ namespace rpkg
             {
                 Parent = parent;
                 Children = children;
-                AddRange(Children.Cast<System.Windows.Forms.TreeNode>().Select(child => new TreeViewBackup(child.Nodes, child)));
+                AddRange(Children.Cast<System.Windows.Forms.TreeNode>().Select(child => new EntityBrickEditor.TreeViewBackup(child.Nodes, child)));
             }
 
             public void Restore()
@@ -3045,7 +3045,7 @@ namespace rpkg
 
         private void Exit_Click(object sender, RoutedEventArgs e)
         {
-            clear_temp_tblu_data();
+            RpkgLib.clear_temp_tblu_data();
             hidden = true;
             this.Hide();
         }
@@ -3054,7 +3054,7 @@ namespace rpkg
         {
             e.Cancel = true;
 
-            clear_temp_tblu_data();
+            RpkgLib.clear_temp_tblu_data();
             hidden = true;
             this.Hide();
         }
@@ -3098,7 +3098,7 @@ namespace rpkg
         public List<UInt32> controlsTEMPIndexes;
         public List<string> controlJSONPointers;
         public List<string> controlJSONPointersTypes;
-        public List<ZGuid> controlZGuids;
+        public List<EntityBrickEditor.ZGuid> controlZGuids;
         public int controlCount = 0;
         public UInt32 entity_index = 0;
         public UInt32 temp_index = 0;
@@ -3115,7 +3115,7 @@ namespace rpkg
         private System.Windows.Threading.DispatcherTimer searchTEMPsInputTimer;
         private System.Windows.Threading.DispatcherTimer loadingWindowTimer;
         public string currentThemeBrightness = "Dark";
-        public TreeViewBackup treeViewBackup;
+        public EntityBrickEditor.TreeViewBackup treeViewBackup;
         public Message message;
         public List<System.Windows.Forms.TreeNode> visitedNodes;
 
@@ -3167,103 +3167,10 @@ namespace rpkg
 
         struct matrix43
         {
-            public vector3 x_axis;
-            public vector3 y_axis;
-            public vector3 z_axis;
-            public vector3 transform;
+            public EntityBrickEditor.vector3 x_axis;
+            public EntityBrickEditor.vector3 y_axis;
+            public EntityBrickEditor.vector3 z_axis;
+            public EntityBrickEditor.vector3 transform;
         };
-
-        public delegate int execute_generate_rpkg_files_from_data(string outputFolder);
-
-        public delegate int execute_export_map_data_to_folder(UInt32 temps_index, string map_name, string output_path);
-
-        public delegate int execute_task(string csharp_command, string csharp_input_path, string csharp_filter, string search, string search_type, string csharp_output_path);
-
-        [DllImport("rpkg.dll", EntryPoint = "task_execute", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int task_execute(string csharp_command, string csharp_input_path, string csharp_filter, string search, string search_type, string csharp_output_path);
-
-        [DllImport("rpkg.dll", EntryPoint = "reset_task_status", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int reset_task_status();
-
-        [DllImport("rpkg.dll", EntryPoint = "clear_temp_tblu_data", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int clear_temp_tblu_data();
-
-        [DllImport("rpkg.dll", EntryPoint = "get_entries_with_logical_parent", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_entries_with_logical_parent(UInt32 temps_index, UInt32 logical_parent);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_entries_with_logical_parent_string", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_entries_with_logical_parent_string(UInt32 vector_index);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_entries_with_logical_parent_data", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_entries_with_logical_parent_data();
-
-        [DllImport("rpkg.dll", EntryPoint = "get_temp_entries", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_temp_entries(UInt32 temps_index, string value_type, string type_string);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_entries", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_entries(UInt32 temps_index, UInt32 entry_index, string value_type);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_entries_data", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_entries_data();
-
-        [DllImport("rpkg.dll", EntryPoint = "get_entries_hash_reference_data", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_entries_hash_reference_data(UInt32 temps_index, UInt32 entry_index);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_entries_hash_references", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_entries_hash_references(UInt32 temps_index, UInt32 entry_index);
-
-        [DllImport("rpkg.dll", EntryPoint = "update_temp_file", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int update_temp_file(UInt32 temps_index, UInt32 entry_index, IntPtr update_data, UInt32 update_data_size);
-
-        [DllImport("rpkg.dll", EntryPoint = "generate_temp_file_from_data", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int generate_temp_file_from_data(UInt32 temps_index, string temp_file_path);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_enum_values", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_enum_values(UInt32 temps_index, string property_type);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_temp_index", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_temp_index(string temp_hash_string);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_number_of_changed_temps", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_number_of_changed_temps();
-
-        [DllImport("rpkg.dll", EntryPoint = "generate_temp_files_from_data", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int generate_temp_files_from_data(string temp_path);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_total_numer_of_temps", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_total_numer_of_temps();
-
-        [DllImport("rpkg.dll", EntryPoint = "generate_rpkg_files_from_data", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int generate_rpkg_files_from_data(string temp_path);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_top_level_logical_parents", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_top_level_logical_parents(UInt32 temps_index);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_all_bricks", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_all_bricks(UInt32 temps_index);
-
-        [DllImport("rpkg.dll", EntryPoint = "search_temp_files", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int search_temp_files(UInt32 temps_index, string search_str, int max_results);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_search_temp_files", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_search_temp_files();
-
-        [DllImport("rpkg.dll", EntryPoint = "get_response_string", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_response_string();
-
-        [DllImport("rpkg.dll", EntryPoint = "get_temp_version", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_temp_version(UInt32 temps_index);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_temp_subentity_count", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_temp_subentity_count(UInt32 temps_index);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_tblu_subentity_count", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_tblu_subentity_count(UInt32 temps_index);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_entry_name", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_entry_name(UInt32 temp_index, int entry_index);
-
-        [DllImport("rpkg.dll", EntryPoint = "generate_json_files_from_data", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int generate_json_files_from_data(string temp_path);
     }
 }

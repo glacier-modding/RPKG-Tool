@@ -121,6 +121,7 @@
     <Compile Include="RightClickMenu.xaml.cs">
       <DependentUpon>RightClickMenu.xaml</DependentUpon>
     </Compile>
+    <Compile Include="RpkgLib.cs" />
     <Compile Include="UserSettings.cs" />
     <Page Include="ColorPicker.xaml">
       <SubType>Designer</SubType>
