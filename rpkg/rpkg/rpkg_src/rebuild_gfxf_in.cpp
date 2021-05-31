@@ -252,13 +252,13 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                     meta_dds_tga_file_names.push_back(std::string(input));
                 }
 
-                if ((meta_file_size - position) > 0)
-                {
-                    for (uint64_t k = 0; k < (meta_file_size - position); k++)
-                    {
-                        meta_data_footer.push_back(meta_data.data()[position + k]);
-                    }
-                }
+                //if ((meta_file_size - position) > 0)
+                //{
+                    //for (uint64_t k = 0; k < (meta_file_size - position); k++)
+                    //{
+                        //meta_data_footer.push_back(meta_data.data()[position + k]);
+                    //}
+                //}
 
                 bool all_dds_tga_exist = true;
 
@@ -348,6 +348,36 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                         gfxf_file_header_data.push_back(input[k]);
                     }
 
+                    unsigned char footer_header[] = { 0xED, 0xA5, 0xEB, 0x12 };
+                    unsigned char footer_serial_data[] = { 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x28, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x38, 0x00, 0x00, 0x00 };
+                    uint32_t footer_serial_data_count = 7;
+
+                    uint32_t footer_total_size = footer_serial_data_count * (uint32_t)0x4;
+
+                    for (uint64_t k = 0; k < sizeof(footer_header); k++)
+                    {
+                        meta_data_footer.push_back(footer_header[k]);
+                    }
+
+                    std::memcpy(&input, &footer_total_size, sizeof(uint32_t));
+
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                    {
+                        meta_data_footer.push_back(input[k]);
+                    }
+
+                    std::memcpy(&input, &footer_serial_data_count, sizeof(uint32_t));
+
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                    {
+                        meta_data_footer.push_back(input[k]);
+                    }
+
+                    for (uint64_t k = 0; k < sizeof(footer_serial_data); k++)
+                    {
+                        meta_data_footer.push_back(footer_serial_data[k]);
+                    }
+
                     std::string current_path = gfxf_folders.at(i) + "\\GFXF.rebuilt";
 
                     file::create_directories(current_path);
@@ -373,6 +403,10 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                     uint32_t dds_tga_names_offset_end = 0;
                     uint32_t dds_tga_data_offset_start = 0;
                     uint32_t dds_tga_data_offset_end = 0;
+                    std::vector<uint32_t> dds_tga_name_offsets;
+                    std::vector<uint32_t> dds_tga_data_1_offsets;
+                    std::vector<uint32_t> dds_tga_data_2_offsets;
+                    std::vector<uint32_t> dds_tga_data_3_offsets;
 
                     if (all_dds_tga_exist && (gfxf_dds_tga_file_count == meta_dds_tga_file_names.size()))
                     {
@@ -393,6 +427,8 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                             gfxf_file_data.push_back(input[k]);
                         }
 
+                        position += 0x4;
+
                         uint32_t offset = (uint64_t)dds_tga_names_offset_start + ((uint64_t)gfxf_dds_tga_file_count * (uint64_t)0x10) + (uint64_t)0x8;
 
                         for (uint64_t j = 0; j < meta_dds_tga_file_names.size(); j++)
@@ -409,10 +445,16 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                                 gfxf_file_data.push_back(input[k]);
                             }
 
+                            position += 0x4;
+
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
+
+                            position += 0x4;
+
+                            dds_tga_name_offsets.push_back((uint32_t)position);
 
                             std::memcpy(&input, &offset, sizeof(uint32_t));
 
@@ -421,10 +463,14 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                                 gfxf_file_data.push_back(input[k]);
                             }
 
+                            position += 0x4;
+
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
+
+                            position += 0x4;
 
                             offset += 0x4;
 
@@ -452,17 +498,24 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                                 gfxf_file_data.push_back(input[k]);
                             }
 
+                            position += 0x4;
+
                             for (uint64_t k = 0; k < meta_dds_tga_file_names.at(j).length(); k++)
                             {
                                 gfxf_file_data.push_back(meta_dds_tga_file_names.at(j)[k]);
                             }
 
+                            position += (uint64_t)meta_dds_tga_file_names.at(j).length();
+
                             gfxf_file_data.push_back(0x0);
+
+                            position++;
 
                             while (dds_tga_file_length1 % 4 != 0)
                             {
                                 gfxf_file_data.push_back(0x0);
                                 dds_tga_file_length1++;
+                                position++;
                             }
                         }
 
@@ -499,6 +552,8 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                             gfxf_file_data.push_back(input[k]);
                         }
 
+                        position += 0x4;
+
                         dds_tga_data_offset_start = (uint32_t)gfx_file_size + (uint32_t)0x44 + (uint32_t)gfxf_file_data.size();
 
                         offset = (uint32_t)gfx_file_size + (uint32_t)0x44 + (uint32_t)gfxf_file_data.size() + ((uint64_t)gfxf_dds_tga_file_count * (uint64_t)0x18) + (uint64_t)0x4;
@@ -507,6 +562,8 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                         {
                             uint32_t dds_tga_file_length = dds_tga_file_data.at(j).size();
 
+                            dds_tga_data_1_offsets.push_back((uint32_t)position);
+
                             std::memcpy(&input, &offset, sizeof(uint32_t));
 
                             for (uint64_t k = 0; k < sizeof(uint32_t); k++)
@@ -514,24 +571,18 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                                 gfxf_file_data.push_back(input[k]);
                             }
 
+                            position += 0x4;
+
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
+
+                            position += 0x4;
 
                             offset += dds_tga_file_length;
 
-                            std::memcpy(&input, &offset, sizeof(uint32_t));
-
-                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                            {
-                                gfxf_file_data.push_back(input[k]);
-                            }
-
-                            gfxf_file_data.push_back(0x0);
-                            gfxf_file_data.push_back(0x0);
-                            gfxf_file_data.push_back(0x0);
-                            gfxf_file_data.push_back(0x0);
+                            dds_tga_data_2_offsets.push_back((uint32_t)position);
 
                             std::memcpy(&input, &offset, sizeof(uint32_t));
 
@@ -540,10 +591,32 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                                 gfxf_file_data.push_back(input[k]);
                             }
 
+                            position += 0x4;
+
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
+
+                            position += 0x4;
+
+                            dds_tga_data_3_offsets.push_back((uint32_t)position);
+
+                            std::memcpy(&input, &offset, sizeof(uint32_t));
+
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                gfxf_file_data.push_back(input[k]);
+                            }
+
+                            position += 0x4;
+
+                            gfxf_file_data.push_back(0x0);
+                            gfxf_file_data.push_back(0x0);
+                            gfxf_file_data.push_back(0x0);
+                            gfxf_file_data.push_back(0x0);
+
+                            position += 0x4;
 
                             offset += 0x4;
                         }
@@ -679,6 +752,72 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                         for (uint64_t k = 0; k < sizeof(uint32_t); k++)
                         {
                             gfxf_file_header_data.push_back(input[k]);
+                        }
+
+                        unsigned char footer_header[] = { 0xED, 0xA5, 0xEB, 0x12 };
+                        unsigned char footer_serial_data[] = { 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x28, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x38, 0x00, 0x00, 0x00 };
+                        uint32_t footer_serial_data_count = 7;
+
+                        uint32_t footer_data_count = (uint32_t)meta_dds_tga_file_names.size() * (uint32_t)0x4 + footer_serial_data_count;
+
+                        uint32_t footer_total_size = footer_data_count * (uint32_t)0x4 + (uint32_t)0x4;
+
+                        for (uint64_t k = 0; k < sizeof(footer_header); k++)
+                        {
+                            meta_data_footer.push_back(footer_header[k]);
+                        }
+
+                        std::memcpy(&input, &footer_total_size, sizeof(uint32_t));
+
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                        {
+                            meta_data_footer.push_back(input[k]);
+                        }
+
+                        std::memcpy(&input, &footer_data_count, sizeof(uint32_t));
+
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                        {
+                            meta_data_footer.push_back(input[k]);
+                        }
+
+                        for (uint64_t k = 0; k < sizeof(footer_serial_data); k++)
+                        {
+                            meta_data_footer.push_back(footer_serial_data[k]);
+                        }
+
+                        for (uint64_t d = 0; d < dds_tga_name_offsets.size(); d++)
+                        {
+                            std::memcpy(&input, &dds_tga_name_offsets.at(d), sizeof(uint32_t));
+
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data_footer.push_back(input[k]);
+                            }
+                        }
+
+                        for (uint64_t d = 0; d < dds_tga_data_1_offsets.size(); d++)
+                        {
+                            std::memcpy(&input, &dds_tga_data_1_offsets.at(d), sizeof(uint32_t));
+
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data_footer.push_back(input[k]);
+                            }
+
+                            std::memcpy(&input, &dds_tga_data_2_offsets.at(d), sizeof(uint32_t));
+
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data_footer.push_back(input[k]);
+                            }
+
+                            std::memcpy(&input, &dds_tga_data_3_offsets.at(d), sizeof(uint32_t));
+
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data_footer.push_back(input[k]);
+                            }
                         }
 
                         std::string current_path = gfxf_folders.at(i) + "\\GFXF.rebuilt";
@@ -721,6 +860,8 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                             gfxf_file_data.push_back(input[k]);
                         }
 
+                        position += 0x4;
+
                         uint32_t offset = (uint64_t)dds_tga_names_offset_start + ((uint64_t)gfxf_dds_tga_file_count * (uint64_t)0x10) + (uint64_t)0x8;
 
                         for (uint64_t j = 0; j < dds_tga_file_names.size(); j++)
@@ -737,10 +878,16 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                                 gfxf_file_data.push_back(input[k]);
                             }
 
+                            position += 0x4;
+
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
+
+                            position += 0x4;
+                            
+                            dds_tga_name_offsets.push_back((uint32_t)position);
 
                             std::memcpy(&input, &offset, sizeof(uint32_t));
 
@@ -749,10 +896,14 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                                 gfxf_file_data.push_back(input[k]);
                             }
 
+                            position += 0x4;
+
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
+
+                            position += 0x4;
 
                             offset += 0x4;
 
@@ -780,17 +931,24 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                                 gfxf_file_data.push_back(input[k]);
                             }
 
+                            position += 0x4;
+
                             for (uint64_t k = 0; k < dds_tga_file_names.at(j).length(); k++)
                             {
                                 gfxf_file_data.push_back(dds_tga_file_names.at(j)[k]);
                             }
 
+                            position += (uint64_t)dds_tga_file_names.at(j).length();
+
                             gfxf_file_data.push_back(0x0);
+
+                            position++;
 
                             while (dds_tga_file_length1 % 4 != 0)
                             {
                                 gfxf_file_data.push_back(0x0);
                                 dds_tga_file_length1++;
+                                position++;
                             }
                         }
 
@@ -827,6 +985,8 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                             gfxf_file_data.push_back(input[k]);
                         }
 
+                        position += 0x4;
+
                         dds_tga_data_offset_start = (uint32_t)gfx_file_size + (uint32_t)0x44 + (uint32_t)gfxf_file_data.size();
 
                         offset = (uint32_t)gfx_file_size + (uint32_t)0x44 + (uint32_t)gfxf_file_data.size() + ((uint64_t)gfxf_dds_tga_file_count * (uint64_t)0x18) + (uint64_t)0x4;
@@ -835,6 +995,8 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                         {
                             uint32_t dds_tga_file_length = dds_tga_file_data.at(j).size();
 
+                            dds_tga_data_1_offsets.push_back((uint32_t)position);
+
                             std::memcpy(&input, &offset, sizeof(uint32_t));
 
                             for (uint64_t k = 0; k < sizeof(uint32_t); k++)
@@ -842,24 +1004,18 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                                 gfxf_file_data.push_back(input[k]);
                             }
 
+                            position += 0x4;
+
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
+
+                            position += 0x4;
 
                             offset += dds_tga_file_length;
 
-                            std::memcpy(&input, &offset, sizeof(uint32_t));
-
-                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                            {
-                                gfxf_file_data.push_back(input[k]);
-                            }
-
-                            gfxf_file_data.push_back(0x0);
-                            gfxf_file_data.push_back(0x0);
-                            gfxf_file_data.push_back(0x0);
-                            gfxf_file_data.push_back(0x0);
+                            dds_tga_data_2_offsets.push_back((uint32_t)position);
 
                             std::memcpy(&input, &offset, sizeof(uint32_t));
 
@@ -868,10 +1024,32 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                                 gfxf_file_data.push_back(input[k]);
                             }
 
+                            position += 0x4;
+
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
                             gfxf_file_data.push_back(0x0);
+
+                            position += 0x4;
+
+                            dds_tga_data_3_offsets.push_back((uint32_t)position);
+
+                            std::memcpy(&input, &offset, sizeof(uint32_t));
+
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                gfxf_file_data.push_back(input[k]);
+                            }
+
+                            position += 0x4;
+
+                            gfxf_file_data.push_back(0x0);
+                            gfxf_file_data.push_back(0x0);
+                            gfxf_file_data.push_back(0x0);
+                            gfxf_file_data.push_back(0x0);
+
+                            position += 0x4;
 
                             offset += 0x4;
                         }
@@ -1007,6 +1185,72 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                         for (uint64_t k = 0; k < sizeof(uint32_t); k++)
                         {
                             gfxf_file_header_data.push_back(input[k]);
+                        }
+
+                        unsigned char footer_header[] = { 0xED, 0xA5, 0xEB, 0x12 };
+                        unsigned char footer_serial_data[] = { 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x28, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x38, 0x00, 0x00, 0x00 };
+                        uint32_t footer_serial_data_count = 7;
+
+                        uint32_t footer_data_count = (uint32_t)dds_tga_file_names.size() * (uint32_t)0x4 + footer_serial_data_count;
+
+                        uint32_t footer_total_size = footer_data_count * (uint32_t)0x4 + (uint32_t)0x4;
+
+                        for (uint64_t k = 0; k < sizeof(footer_header); k++)
+                        {
+                            meta_data_footer.push_back(footer_header[k]);
+                        }
+
+                        std::memcpy(&input, &footer_total_size, sizeof(uint32_t));
+
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                        {
+                            meta_data_footer.push_back(input[k]);
+                        }
+
+                        std::memcpy(&input, &footer_data_count, sizeof(uint32_t));
+
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                        {
+                            meta_data_footer.push_back(input[k]);
+                        }
+
+                        for (uint64_t k = 0; k < sizeof(footer_serial_data); k++)
+                        {
+                            meta_data_footer.push_back(footer_serial_data[k]);
+                        }
+
+                        for (uint64_t d = 0; d < dds_tga_name_offsets.size(); d++)
+                        {
+                            std::memcpy(&input, &dds_tga_name_offsets.at(d), sizeof(uint32_t));
+
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data_footer.push_back(input[k]);
+                            }
+                        }
+
+                        for (uint64_t d = 0; d < dds_tga_data_1_offsets.size(); d++)
+                        {
+                            std::memcpy(&input, &dds_tga_data_1_offsets.at(d), sizeof(uint32_t));
+
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data_footer.push_back(input[k]);
+                            }
+
+                            std::memcpy(&input, &dds_tga_data_2_offsets.at(d), sizeof(uint32_t));
+
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data_footer.push_back(input[k]);
+                            }
+
+                            std::memcpy(&input, &dds_tga_data_3_offsets.at(d), sizeof(uint32_t));
+
+                            for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+                            {
+                                meta_data_footer.push_back(input[k]);
+                            }
                         }
 
                         std::string current_path = gfxf_folders.at(i) + "\\GFXF.rebuilt";

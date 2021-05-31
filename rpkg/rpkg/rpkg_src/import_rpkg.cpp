@@ -387,6 +387,13 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path)
 
         if (temp_hash.hash_reference_table_size != 0x0)
         {
+            bool reference_table_normal = true;
+
+            if (input_file_data[position + (uint64_t)temp_hash.hash_reference_table_size - (uint64_t)0x1] != 0x0)
+            {
+                reference_table_normal = false;
+            }
+
             temp_hash_reference_data.hash_value = temp_hash.hash_value;
 
             std::memcpy(&bytes4, &input_file_data[position], sizeof(bytes4));
@@ -395,27 +402,56 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path)
 
             uint32_t temp_hash_reference_count = temp_hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
-            for (uint64_t i = 0; i < temp_hash_reference_count; i++)
+            if (reference_table_normal)
             {
-                std::memcpy(&bytes1, &input_file_data[position], sizeof(bytes1));
-                position += sizeof(bytes1);
-                temp_hash_reference_data.hash_reference_type.push_back(bytes1);
-            }
-
-            for (uint64_t i = 0; i < temp_hash_reference_count; i++)
-            {
-                std::memcpy(&bytes8, &input_file_data[position], sizeof(bytes8));
-                position += sizeof(bytes8);
-                temp_hash_reference_data.hash_reference.push_back(bytes8);
-
-                value = util::uint64_t_to_hex_string(bytes8);
-                temp_hash_reference_data.hash_reference_string.push_back(value);
-
-                std::map<uint64_t, uint64_t>::iterator it = temp_hashes_depends_map.find(temp_hash_reference_data.hash_reference.back());
-
-                if (it == temp_hashes_depends_map.end())
+                for (uint64_t i = 0; i < temp_hash_reference_count; i++)
                 {
-                    temp_hashes_depends_map[temp_hash_reference_data.hash_reference.back()] = temp_hashes_depends_map.size();
+                    std::memcpy(&bytes1, &input_file_data[position], sizeof(bytes1));
+                    position += sizeof(bytes1);
+                    temp_hash_reference_data.hash_reference_type.push_back(bytes1);
+                }
+
+                for (uint64_t i = 0; i < temp_hash_reference_count; i++)
+                {
+                    std::memcpy(&bytes8, &input_file_data[position], sizeof(bytes8));
+                    position += sizeof(bytes8);
+                    temp_hash_reference_data.hash_reference.push_back(bytes8);
+
+                    value = util::uint64_t_to_hex_string(bytes8);
+                    temp_hash_reference_data.hash_reference_string.push_back(value);
+
+                    std::map<uint64_t, uint64_t>::iterator it = temp_hashes_depends_map.find(temp_hash_reference_data.hash_reference.back());
+
+                    if (it == temp_hashes_depends_map.end())
+                    {
+                        temp_hashes_depends_map[temp_hash_reference_data.hash_reference.back()] = temp_hashes_depends_map.size();
+                    }
+                }
+            }
+            else
+            {
+                for (uint64_t i = 0; i < temp_hash_reference_count; i++)
+                {
+                    std::memcpy(&bytes8, &input_file_data[position], sizeof(bytes8));
+                    position += sizeof(bytes8);
+                    temp_hash_reference_data.hash_reference.push_back(bytes8);
+
+                    value = util::uint64_t_to_hex_string(bytes8);
+                    temp_hash_reference_data.hash_reference_string.push_back(value);
+
+                    std::map<uint64_t, uint64_t>::iterator it = temp_hashes_depends_map.find(temp_hash_reference_data.hash_reference.back());
+
+                    if (it == temp_hashes_depends_map.end())
+                    {
+                        temp_hashes_depends_map[temp_hash_reference_data.hash_reference.back()] = temp_hashes_depends_map.size();
+                    }
+                }
+
+                for (uint64_t i = 0; i < temp_hash_reference_count; i++)
+                {
+                    std::memcpy(&bytes1, &input_file_data[position], sizeof(bytes1));
+                    position += sizeof(bytes1);
+                    temp_hash_reference_data.hash_reference_type.push_back(bytes1);
                 }
             }
 

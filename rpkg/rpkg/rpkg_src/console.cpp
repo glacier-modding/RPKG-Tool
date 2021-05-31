@@ -382,7 +382,7 @@ void console::display_usage_info()
     LOG("");
     LOG("");
     LOG("");
-    LOG("rpkg-cli v2.3 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files.");
+    LOG("rpkg-cli v2.31 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files.");
     LOG("--------------------------------------------------------------------------------");
     LOG("Note: All the information used to build this program was gleaned");
     LOG("      in a completely 'clean room' environment.");
