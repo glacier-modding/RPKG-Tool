@@ -141,9 +141,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="codebook.cpp" />
+    <ClCompile Include="crc.c" />
     <ClCompile Include="lib\lz4\lz4.c" />
     <ClCompile Include="lib\lz4\lz4hc.c" />
+    <ClCompile Include="md5.c" />
     <ClCompile Include="rpkg.cpp" />
+    <ClCompile Include="wwriff.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="packed_codebooks_aoTuV_603.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
