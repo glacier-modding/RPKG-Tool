@@ -21,6 +21,7 @@ struct rpkg_extraction_vars
 class rpkg_function
 {
 public:
+	static void extract_all_prim_model_of_temp_from(std::string& input_path, std::string& filter, std::string& output_path);
 	static void extract_all_prim_model_from(std::string& input_path, std::string& filter, std::string& output_path);
 	static void rebuild_prim_model_in(std::string& input_path, std::string& filter, std::string& output_path);
 	static void extract_prim_model_from(std::string& input_path, std::string& filter, std::string& output_path);

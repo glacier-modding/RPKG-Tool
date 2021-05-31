@@ -28,6 +28,11 @@ void rpkg_function::rebuild_prim_model_in(std::string& input_path, std::string& 
 
         rpkg_function::rebuild_prim_in(input_path, filter_string, output_path, false);
 
+        if (task_multiple_status != PRIM_REBUILD_SUCCESSFUL)
+        {
+            return;
+        }
+
         LOG("Rebuilding TEXT/TEXD files in" + input_rpkg_folder_path);
 
         rpkg_function::rebuild_text_in(input_path, filter_string, output_path, false);
@@ -257,7 +262,9 @@ void rpkg_function::rebuild_prim_model_in(std::string& input_path, std::string& 
 
         percent_progress = (uint32_t)100;
 
-        task_single_status = TASK_SUCCESSFUL;
+        task_single_status = TASK_SUCCESSFUL;;
+
+        task_multiple_status = PRIM_MODEL_REBUILD_SUCCESSFUL;
     }
     else
     {

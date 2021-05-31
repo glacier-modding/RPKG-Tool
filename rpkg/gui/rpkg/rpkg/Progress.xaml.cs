@@ -157,6 +157,123 @@ namespace rpkg
                         task_done = true;
                     }
                 }
+                else if (operation == (int)Operation.PRIM_REBUILD || operation == (int)Operation.PRIM_MODEL_REBUILD || operation == (int)Operation.PRIM_MODEL_EXTRACT)
+                {
+                    if (operation == (int)Operation.PRIM_REBUILD)
+                    {
+                        if (task_multiple_status == (int)RPKGStatus.PRIM_REBUILD_SUCCESSFUL)
+                        {
+                            task_status = task_multiple_status;
+
+                            task_done = true;
+                        }
+                    }
+
+                    if (operation == (int)Operation.PRIM_MODEL_REBUILD)
+                    {
+                        if (task_multiple_status == (int)RPKGStatus.PRIM_MODEL_REBUILD_SUCCESSFUL)
+                        {
+                            task_status = task_multiple_status;
+
+                            task_done = true;
+                        }
+                    }
+
+                    if (operation == (int)Operation.PRIM_MODEL_EXTRACT)
+                    {
+                        if (task_multiple_status == (int)RPKGStatus.PRIM_MODEL_EXTRACT_SUCCESSFUL)
+                        {
+                            task_status = task_multiple_status;
+
+                            task_done = true;
+                        }
+                    }
+
+                    if (task_multiple_status == (int)RPKGStatus.PRIM_REBUILD_GLB_MESH_NAME_MALFORMED)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                    else if (task_multiple_status == (int)RPKGStatus.PRIM_REBUILD_ONLY_ONE_MESH_ALLOWED)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                    else if (task_multiple_status == (int)RPKGStatus.PRIM_REBUILD_VERTEX_NOT_MULTIPLE_OF_3)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                    else if (task_multiple_status == (int)RPKGStatus.PRIM_REBUILD_MISSING_POSITION_DATA)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                    else if (task_multiple_status == (int)RPKGStatus.PRIM_REBUILD_MISMATCHED_BONES)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                    else if (task_multiple_status == (int)RPKGStatus.PRIM_REBUILD_WEIGHTED_DATA_DOES_NOT_CONFORM)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                    else if (task_multiple_status == (int)RPKGStatus.PRIM_REBUILD_WEIGHTED_DATA_MISSING)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                    else if (task_multiple_status == (int)RPKGStatus.PRIM_REBUILD_NORMALS_DO_NOT_MATCH_VERTICES)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                    else if (task_multiple_status == (int)RPKGStatus.PRIM_REBUILD_MISSING_NORMAL_DATA)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                    else if (task_multiple_status == (int)RPKGStatus.PRIM_REBUILD_UVS_DO_NOT_MATCH_VERTICES)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                    else if (task_multiple_status == (int)RPKGStatus.PRIM_REBUILD_MISSING_UV_DATA)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                    else if (task_multiple_status == (int)RPKGStatus.PRIM_REBUILD_COLORS_DO_NOT_MATCH_VERTICES)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                    else if (task_multiple_status == (int)RPKGStatus.PRIM_REBUILD_COLORS_WRONG_FORMAT)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                    else if (task_multiple_status == (int)RPKGStatus.PRIM_REBUILD_TOO_MANY_PRIMARY_OBJECT_HEADERS)
+                    {
+                        task_status = task_multiple_status;
+
+                        task_done = true;
+                    }
+                }
                 else if (operation == (int)Operation.MASS_EXTRACT)
                 {
                     if (task_multiple_status == (int)RPKGStatus.TASK_SUCCESSFUL)
@@ -225,7 +342,10 @@ namespace rpkg
             MASS_EXTRACT,
             DOWNLOAD,
             TEMP_TBLU,
-            PRIM
+            PRIM,
+            PRIM_REBUILD,
+            PRIM_MODEL_REBUILD,
+            PRIM_MODEL_EXTRACT
         };
 
         public enum RPKGStatus
@@ -250,7 +370,25 @@ namespace rpkg
             PRIM_UV_CHANNEL_COUNT_GREATER_THAN_1,
             PRIM_OBJECT_IS_NOT_A_MESH_TYPE,
             TEMP_VERSION_UNKNOWN,
-            TBLU_VERSION_UNKNOWN
+            TBLU_VERSION_UNKNOWN,
+            PRIM_REBUILD_GLB_MESH_NAME_MALFORMED,
+            PRIM_REBUILD_ONLY_ONE_MESH_ALLOWED,
+            PRIM_REBUILD_VERTEX_NOT_MULTIPLE_OF_3,
+            PRIM_REBUILD_MISSING_POSITION_DATA,
+            PRIM_REBUILD_MISMATCHED_BONES,
+            PRIM_REBUILD_WEIGHTED_DATA_DOES_NOT_CONFORM,
+            PRIM_REBUILD_WEIGHTED_DATA_MISSING,
+            PRIM_REBUILD_NORMALS_DO_NOT_MATCH_VERTICES,
+            PRIM_REBUILD_MISSING_NORMAL_DATA,
+            PRIM_REBUILD_UVS_DO_NOT_MATCH_VERTICES,
+            PRIM_REBUILD_MISSING_UV_DATA,
+            PRIM_REBUILD_COLORS_DO_NOT_MATCH_VERTICES,
+            PRIM_REBUILD_COLORS_WRONG_FORMAT,
+            PRIM_REBUILD_TOO_MANY_PRIMARY_OBJECT_HEADERS,
+            PRIM_REBUILD_META_FILE_MISSING,
+            PRIM_REBUILD_SUCCESSFUL,
+            PRIM_MODEL_REBUILD_SUCCESSFUL,
+            PRIM_MODEL_EXTRACT_SUCCESSFUL
         };
 
         public string timing_string = "";

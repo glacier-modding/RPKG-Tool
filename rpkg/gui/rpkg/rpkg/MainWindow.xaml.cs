@@ -1669,9 +1669,9 @@ namespace rpkg
                     }
                     else if (hashType == "TEMP")
                     {
-                        string[] buttons = { "Extract " + rightClickedOnName, "Edit " + rightClickedOnName + " in Brick/Entity Editor", "Extract PRIMs linked to " + rightClickedOnName + " To GLB File(s)", "Cancel" };
+                        string[] buttons = { "Extract " + rightClickedOnName, "Edit " + rightClickedOnName + " in Brick/Entity Editor", "Extract PRIM Models linked to " + rightClickedOnName + " To GLB/TGA File(s)", "Extract PRIMs linked to " + rightClickedOnName + " To GLB File(s)", "Cancel" };
 
-                        buttonCount = 4;
+                        buttonCount = 5;
 
                         rightClickMenu = new RightClickMenu(buttons);
                     }
@@ -2119,7 +2119,7 @@ namespace rpkg
 
                         output_path = outputFolder;
                     }
-                    else if (rightClickMenu.buttonPressed == "button2" && buttonCount == 4)
+                    else if (rightClickMenu.buttonPressed == "button2" && buttonCount >= 4)
                     {
                         if (hashType == "PRIM")
                         {
@@ -2132,6 +2132,98 @@ namespace rpkg
                             progress.message.Content = "Extracting " + rightClickedOnName + " To GLB File...";
                         }
                         else if (hashType == "TEMP")
+                        {
+                            string runtimeDirectory = rpkgFilePath.Substring(0, rpkgFilePath.LastIndexOf("\\"));
+
+                            if (!runtimeDirectory.EndsWith("runtime", StringComparison.OrdinalIgnoreCase))
+                            {
+                                MessageBoxShow("The current RPKG does not exist in the Hitman runtime directory, can not perform PRIM model extraction.");
+
+                                rightClickedOn = 0;
+
+                                rightClickedOnFirst = true;
+
+                                return;
+                            }
+
+                            List<string> rpkgFiles = new List<string>();
+
+                            foreach (var filePath in Directory.GetFiles(runtimeDirectory))
+                            {
+                                if (filePath.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    rpkgFiles.Add(filePath);
+                                }
+                            }
+
+                            rpkgFiles.Sort(new NaturalStringComparer());
+
+                            foreach (string filePath in rpkgFiles)
+                            {
+                                ImportRPKGFile(filePath);
+                            }
+
+                            command = "-extract_all_prim_model_of_temp_from";
+
+                            filter = hashValue;
+
+                            progress.message.Content = "Extracting PRIM Models linked to " + rightClickedOnName + " To GLB/TGA File(s)...";
+
+                            string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + rightClickedOnName + " To:");
+
+                            if (temp_outputFolder == "")
+                            {
+                                rightClickedOn = 0;
+
+                                rightClickedOnFirst = true;
+
+                                return;
+                            }
+
+                            output_path = temp_outputFolder;
+
+                            int temp_return_value = reset_task_status();
+
+                            execute_task temp_rpkgExecute = RebuildMODEL;
+
+                            IAsyncResult temp_ar = temp_rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
+
+                            progress.operation = (int)Progress.Operation.PRIM_MODEL_EXTRACT;
+
+                            progress.ShowDialog();
+
+                            if (progress.task_status != (int)Progress.RPKGStatus.PRIM_MODEL_EXTRACT_SUCCESSFUL)
+                            {
+                                MessageBoxShow(progress.task_status_string.Replace("_", "__"));
+                            }
+                            else
+                            {
+                                MessageBoxShow("PRIM model(s) extracted successfully in " + temp_outputFolder);
+                            }
+
+                            rightClickedOn = 0;
+
+                            rightClickedOnFirst = true;
+
+                            return;
+                        }
+
+                        string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + rightClickedOnName + " To:");
+
+                        if (outputFolder == "")
+                        {
+                            rightClickedOn = 0;
+
+                            rightClickedOnFirst = true;
+
+                            return;
+                        }
+
+                        output_path = outputFolder;
+                    }
+                    else if (rightClickMenu.buttonPressed == "button3" && buttonCount == 5)
+                    {
+                        if (hashType == "TEMP")
                         {
                             command = "-extract_all_prim_of_temp_from";
 
@@ -2575,13 +2667,78 @@ namespace rpkg
 
                     IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
+                    progress.operation = (int)Progress.Operation.PRIM_MODEL_REBUILD;
+
                     progress.ShowDialog();
 
-                    if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
+                    if (progress.task_status != (int)Progress.RPKGStatus.PRIM_MODEL_REBUILD_SUCCESSFUL)
                     {
-                        //MessageBoxShow(progress.task_status_string);
+                        MessageBoxShow(progress.task_status_string.Replace("_","__"));
+
+                        /*if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_GLB_MESH_NAME_MALFORMED)
+                        {
+                            MessageBoxShow("Error: GLB mesh name is malformed.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_ONLY_ONE_MESH_ALLOWED)
+                        {
+                            MessageBoxShow("Error: Only one mesh primitive per mesh is allowed.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_VERTEX_NOT_MULTIPLE_OF_3)
+                        {
+                            MessageBoxShow("Error: GLB vertex float size is not a multiple of 3.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISSING_POSITION_DATA)
+                        {
+                            MessageBoxShow("Error: GLB is missing POSITION data.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISMATCHED_BONES)
+                        {
+                            MessageBoxShow("Error: GLB has mismatched bones compared to the original BORG file.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_WEIGHTED_DATA_DOES_NOT_CONFORM)
+                        {
+                            MessageBoxShow("Error: GLB weighted data does not conform to IOI's specs (per vertex): JOINTS_0 (4 values), WEIGHTS_0 (4 values), JOINTS_1 (2 values), WEIGHTS_1 (2 values).");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_WEIGHTED_DATA_MISSING)
+                        {
+                            MessageBoxShow("Error: GLB is weighted, but does not have all necessary weighted data: JOINTS_0, WEIGHTS_0, JOINTS_1, WEIGHTS_1.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_NORMALS_DO_NOT_MATCH_VERTICES)
+                        {
+                            MessageBoxShow("Error: GLB vertex float size not equal to normal float size.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISSING_NORMAL_DATA)
+                        {
+                            MessageBoxShow("Error: GLB is missing NORMAL data.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_UVS_DO_NOT_MATCH_VERTICES)
+                        {
+                            MessageBoxShow("Error: GLB vertex float size not equal to UV float size.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISSING_UV_DATA)
+                        {
+                            MessageBoxShow("Error: GLB is missing TEXCOORD_0 data.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_COLORS_DO_NOT_MATCH_VERTICES)
+                        {
+                            MessageBoxShow("Error: GLB color size not equal to vertex size.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_COLORS_WRONG_FORMAT)
+                        {
+                            MessageBoxShow("Error: GLB color data is of the wrong format, needs to be of type VEC4, an unsigned byte or short, and normalized.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_TOO_MANY_PRIMARY_OBJECT_HEADERS)
+                        {
+                            MessageBoxShow("Error: PRIM has too many primary object headers.");
+                        }*/
+
+                        return_value = clear_temp_tblu_data();
 
                         return;
+                    }
+                    else
+                    {
+                        MessageBoxShow("PRIM model(s) rebuilt successfully in " + inputFolder);
                     }
                 }
                 else if (rebuildType == "TEXT")
@@ -2605,15 +2762,95 @@ namespace rpkg
                         return;
                     }
                 }
+                else if (rebuildType == "PRIM")
+                {
+                    command = "-rebuild_prim_in";
+
+                    progress.message.Content = "Rebuilding All PRIM in " + input_path + "...";
+
+                    int return_value = reset_task_status();
+
+                    execute_task rpkgExecute = RebuildMODEL;
+
+                    IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
+
+                    progress.operation = (int)Progress.Operation.PRIM_REBUILD;
+
+                    progress.ShowDialog();
+
+                    if (progress.task_status != (int)Progress.RPKGStatus.PRIM_REBUILD_SUCCESSFUL)
+                    {
+                        MessageBoxShow(progress.task_status_string.Replace("_", "__"));
+
+                        /*if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_GLB_MESH_NAME_MALFORMED)
+                        {
+                            MessageBoxShow("Error: GLB mesh name is malformed.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_ONLY_ONE_MESH_ALLOWED)
+                        {
+                            MessageBoxShow("Error: Only one mesh primitive per mesh is allowed.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_VERTEX_NOT_MULTIPLE_OF_3)
+                        {
+                            MessageBoxShow("Error: GLB vertex float size is not a multiple of 3.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISSING_POSITION_DATA)
+                        {
+                            MessageBoxShow("Error: GLB is missing POSITION data.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISMATCHED_BONES)
+                        {
+                            MessageBoxShow("Error: GLB has mismatched bones compared to the original BORG file.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_WEIGHTED_DATA_DOES_NOT_CONFORM)
+                        {
+                            MessageBoxShow("Error: GLB weighted data does not conform to IOI's specs (per vertex): JOINTS_0 (4 values), WEIGHTS_0 (4 values), JOINTS_1 (2 values), WEIGHTS_1 (2 values).");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_WEIGHTED_DATA_MISSING)
+                        {
+                            MessageBoxShow("Error: GLB is weighted, but does not have all necessary weighted data: JOINTS_0, WEIGHTS_0, JOINTS_1, WEIGHTS_1.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_NORMALS_DO_NOT_MATCH_VERTICES)
+                        {
+                            MessageBoxShow("Error: GLB vertex float size not equal to normal float size.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISSING_NORMAL_DATA)
+                        {
+                            MessageBoxShow("Error: GLB is missing NORMAL data.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_UVS_DO_NOT_MATCH_VERTICES)
+                        {
+                            MessageBoxShow("Error: GLB vertex float size not equal to UV float size.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISSING_UV_DATA)
+                        {
+                            MessageBoxShow("Error: GLB is missing TEXCOORD_0 data.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_COLORS_DO_NOT_MATCH_VERTICES)
+                        {
+                            MessageBoxShow("Error: GLB color size not equal to vertex size.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_COLORS_WRONG_FORMAT)
+                        {
+                            MessageBoxShow("Error: GLB color data is of the wrong format, needs to be of type VEC4, an unsigned byte or short, and normalized.");
+                        }
+                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_TOO_MANY_PRIMARY_OBJECT_HEADERS)
+                        {
+                            MessageBoxShow("Error: PRIM has too many primary object headers.");
+                        }*/
+
+                        return_value = clear_temp_tblu_data();
+
+                        return;
+                    }
+                    else
+                    {
+                        MessageBoxShow("PRIM(s) rebuilt successfully in " + inputFolder);
+                    }
+                }
                 else
                 {
-                    if (rebuildType == "PRIM")
-                    {
-                        command = "-rebuild_prim_in";
-
-                        progress.message.Content = "Rebuilding All PRIM in " + input_path + "...";
-                    }
-                    else if (rebuildType == "DLGE")
+                    if (rebuildType == "DLGE")
                     {
                         command = "-rebuild_dlge_from_json_from";
 

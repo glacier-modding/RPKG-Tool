@@ -61,6 +61,7 @@ std::vector<uint32_t> entity_id_logicalParent;
 std::vector<std::string> entity_id_logicalParent_string;
 std::vector<uint64_t> entity_id_m_eidParent;
 std::vector<bool> entity_id_has_matrix;
+bool interative_mode = false;
 
 void initialize_property_map()
 {

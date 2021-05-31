@@ -42,6 +42,7 @@
     <ClCompile Include="..\rpkg_src\encrypt_packagedefinition_thumbs.cpp" />
     <ClCompile Include="..\rpkg_src\extract_all_prim_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_all_prim_model_from.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_all_prim_model_of_temp_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_all_prim_of_temp_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_all_text_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_direct_hash_depends.cpp" />

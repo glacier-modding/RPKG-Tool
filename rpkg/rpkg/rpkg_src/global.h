@@ -8,9 +8,9 @@
 #ifdef RPKG_CLI
 #define LOG(x) std::cout << x << std::endl
 #define LOG_NO_ENDL(x) std::cout << x
-#define LOG_AND_EXIT(x) std::cout << x << std::endl; std::exit(0)
+#define LOG_AND_EXIT(x) std::cout << x << std::endl; if (interative_mode) { return; } else std::exit(0)
 #define LOG_AND_RETURN(x) std::cout << x << std::endl; return
-#define LOG_AND_EXIT_NOP(x) std::cout << x << std::endl; std::exit(0)
+#define LOG_AND_EXIT_NOP(x) std::cout << x << std::endl; if (!interative_mode) std::exit(0)
 #elif RPKG_DLL
 #define LOG(x)
 #define LOG_NO_ENDL(x)
@@ -41,7 +41,25 @@ enum RPKGStatus
     PRIM_UV_CHANNEL_COUNT_GREATER_THAN_1,
     PRIM_OBJECT_IS_NOT_A_MESH_TYPE,
     TEMP_VERSION_UNKNOWN,
-    TBLU_VERSION_UNKNOWN
+    TBLU_VERSION_UNKNOWN,
+    PRIM_REBUILD_GLB_MESH_NAME_MALFORMED,
+    PRIM_REBUILD_ONLY_ONE_MESH_ALLOWED,
+    PRIM_REBUILD_VERTEX_NOT_MULTIPLE_OF_3,
+    PRIM_REBUILD_MISSING_POSITION_DATA,
+    PRIM_REBUILD_MISMATCHED_BONES,
+    PRIM_REBUILD_WEIGHTED_DATA_DOES_NOT_CONFORM,
+    PRIM_REBUILD_WEIGHTED_DATA_MISSING,
+    PRIM_REBUILD_NORMALS_DO_NOT_MATCH_VERTICES,
+    PRIM_REBUILD_MISSING_NORMAL_DATA,
+    PRIM_REBUILD_UVS_DO_NOT_MATCH_VERTICES,
+    PRIM_REBUILD_MISSING_UV_DATA,
+    PRIM_REBUILD_COLORS_DO_NOT_MATCH_VERTICES,
+    PRIM_REBUILD_COLORS_WRONG_FORMAT,
+    PRIM_REBUILD_TOO_MANY_PRIMARY_OBJECT_HEADERS,
+    PRIM_REBUILD_META_FILE_MISSING,
+    PRIM_REBUILD_SUCCESSFUL,
+    PRIM_MODEL_REBUILD_SUCCESSFUL,
+    PRIM_MODEL_EXTRACT_SUCCESSFUL
 };
 
 enum FileType3D
@@ -234,6 +252,7 @@ extern std::vector<uint32_t> entity_id_logicalParent;
 extern std::vector<std::string> entity_id_logicalParent_string;
 extern std::vector<uint64_t> entity_id_m_eidParent;
 extern std::vector<bool> entity_id_has_matrix;
+extern bool interative_mode;
 //extern void find_all_world_coordinates(std::string entry_name, uint32_t entry_index, matrix43 matrix43_value);
 //extern void extract_world_coordinates_and_gltfs(std::string entry_name, uint32_t entry_index, matrix43 matrix43_value, std::string& output_path, std::ofstream& output_file);
 //extern void extract_glbs_and_return_coordinates_for_entry(uint32_t entry_index);

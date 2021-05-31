@@ -323,6 +323,12 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
                                 glb_hash_meta = false;
 
                                 LOG("GLB file " + entry.path().string() + " found but meta file is missing, can't rebuild.");
+
+                                task_status_string = "GLB file " + entry.path().string() + " found but meta file is missing, can't rebuild.";
+
+                                task_multiple_status = PRIM_REBUILD_META_FILE_MISSING;
+
+                                return;
                             }
 
                             if (is_glb_hash_file && glb_hash_meta)
@@ -364,7 +370,7 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
 
                 if (!resourceReader)
                 {
-                    throw std::runtime_error("Command line argument path filename extension must be .gltf or .glb");
+                    LOG_AND_EXIT("Command line argument path filename extension must be .gltf or .glb");
                 }
 
                 Document document;
@@ -380,7 +386,7 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
                     ss << "Microsoft::glTF::Deserialize failed: ";
                     ss << ex.what();
 
-                    throw std::runtime_error(ss.str());
+                    LOG_AND_EXIT(ss.str());
                 }
 
                 LOG_NO_ENDL("### glTF Info - " + pathFile.generic_string() + " ###\n\n");
@@ -440,7 +446,7 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
 
                 prim temp_prim(glb_meta_file_paths.at(j));
 
-                LOG("PRIM meta object offsets size: " + temp_prim.prim_object_offsets.size());
+                LOG("PRIM meta object offsets size: " + util::uint32_t_to_string(temp_prim.prim_object_offsets.size()));
 
                 bool lods_match = false;
 
@@ -482,14 +488,22 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
                             }
                             else
                             {
-                                LOG("Error: GLB's mesh name " + temp_node.name + " is malformed.");
+                                LOG("Error: " + glb_file_names.at(j) + "'s mesh name " + temp_mesh.name + " value (0 indexed) " + mesh_value + " exceeds the original mesh count (" + util::uint32_t_to_string(temp_prim.prim_object_offsets.size()) + ") in the PRIM.");
+
+                                task_status_string = "Error: " + glb_file_names.at(j) + "'s mesh name " + temp_mesh.name + " value (0 indexed) " + mesh_value + " exceeds the original mesh count (" + util::uint32_t_to_string(temp_prim.prim_object_offsets.size()) + ") in the PRIM.";
+
+                                task_multiple_status = PRIM_REBUILD_GLB_MESH_NAME_MALFORMED;
 
                                 return;
                             }
                         }
                         else
                         {
-                            LOG("Error: GLB's mesh name " + temp_node.name + " is malformed.");
+                            LOG("Error: " + glb_file_names.at(j) + "'s mesh name " + temp_mesh.name + " is malformed.");
+
+                            task_status_string = "Error: " + glb_file_names.at(j) + "'s mesh name " + temp_mesh.name + " is malformed.";
+
+                            task_multiple_status = PRIM_REBUILD_GLB_MESH_NAME_MALFORMED;
 
                             return;
                         }
@@ -537,7 +551,11 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
 
                         if (temp_mesh.primitives.size() > 1)
                         {
-                            LOG("Error: Only one mesh primitive per mesh is allowed.");
+                            LOG("Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " has more than one mesh primitive, only one mesh primitive per mesh is allowed.");
+
+                            task_status_string = "Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " has more than one mesh primitive, only one mesh primitive per mesh is allowed.";
+
+                            task_multiple_status = PRIM_REBUILD_ONLY_ONE_MESH_ALLOWED;
 
                             return;
                         }
@@ -636,7 +654,11 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
                                 }
                                 else
                                 {
-                                    LOG("Error: GLB vertex float size is not a multiple of 3.");
+                                    LOG("Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " vertex float size (" + util::uint32_t_to_string(vertices_data.size()) + ") is not a multiple of 3.");
+
+                                    task_status_string = "Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " vertex float size (" + util::uint32_t_to_string(vertices_data.size()) + ") is not a multiple of 3.";
+
+                                    task_multiple_status = PRIM_REBUILD_VERTEX_NOT_MULTIPLE_OF_3;
 
                                     return;
                                 }
@@ -849,7 +871,11 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
                             }
                             else
                             {
-                                LOG("Error: GLB is missing POSITION data.");
+                                LOG("Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " is missing POSITION data.");
+
+                                task_status_string = "Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " is missing POSITION data.";
+
+                                task_multiple_status = PRIM_REBUILD_MISSING_POSITION_DATA;
 
                                 return;
                             }
@@ -870,7 +896,11 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
                                         }
                                         catch (...)
                                         {
-                                            LOG("Error: GLB has mismatched bones compared to the original BORG file.");
+                                            LOG("Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " has mismatched bones compared to the original BORG file.");
+
+                                            task_status_string = "Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " has mismatched bones compared to the original BORG file.";
+
+                                            task_multiple_status = PRIM_REBUILD_MISMATCHED_BONES;
 
                                             return;
                                         }
@@ -920,7 +950,11 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
 
                                         if ((uint32_t)(joints_0_data.size() / 4) != vertex_count || (uint32_t)(joints_1_data.size() / 4) != vertex_count || (uint32_t)(weights_0_data.size() / 4) != vertex_count || (uint32_t)(weights_1_data.size() / 4) != vertex_count)
                                         {
-                                            LOG("Error: GLB weighted data does not conform to IOI's specs (per vertex): JOINTS_0 (4 values), WEIGHTS_0 (4 values), JOINTS_1 (2 values), WEIGHTS_1 (2 values).");
+                                            LOG("Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " weighted data does not conform to IOI's specs (per vertex): JOINTS_0 (4 values), WEIGHTS_0 (4 values), JOINTS_1 (2 values), WEIGHTS_1 (2 values).");
+
+                                            task_status_string = "Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " weighted data does not conform to IOI's specs (per vertex): JOINTS_0 (4 values), WEIGHTS_0 (4 values), JOINTS_1 (2 values), WEIGHTS_1 (2 values).";
+
+                                            task_multiple_status = PRIM_REBUILD_WEIGHTED_DATA_DOES_NOT_CONFORM;
 
                                             return;
                                         }
@@ -997,7 +1031,11 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
                                     {
                                         if ((uint32_t)(joints_0_data.size() / 4) != vertex_count || (uint32_t)(weights_0_data.size() / 4) != vertex_count)
                                         {
-                                            LOG("Error: GLB weighted data does not conform to IOI's specs (per vertex): JOINTS_0 (4 values), WEIGHTS_0 (4 values), JOINTS_1 (2 values), WEIGHTS_1 (2 values).");
+                                            LOG("Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " weighted data does not conform to IOI's specs (per vertex): JOINTS_0 (4 values), WEIGHTS_0 (4 values), JOINTS_1 (2 values), WEIGHTS_1 (2 values).");
+
+                                            task_status_string = "Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " weighted data does not conform to IOI's specs (per vertex): JOINTS_0 (4 values), WEIGHTS_0 (4 values), JOINTS_1 (2 values), WEIGHTS_1 (2 values).";
+
+                                            task_multiple_status = PRIM_REBUILD_WEIGHTED_DATA_DOES_NOT_CONFORM;
 
                                             return;
                                         }
@@ -1080,7 +1118,11 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
                                 }
                                 else
                                 {
-                                    LOG("Error: GLB is weighted, but does not have all necessary weighted data: JOINTS_0, WEIGHTS_0, JOINTS_1, WEIGHTS_1.");
+                                    LOG("Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " is weighted, but does not have all necessary weighted data: JOINTS_0, WEIGHTS_0, (and if extended weights are used JOINTS_1, WEIGHTS_1).");
+
+                                    task_status_string = "Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " is weighted, but does not have all necessary weighted data: JOINTS_0, WEIGHTS_0, (and if extended weights are used JOINTS_1, WEIGHTS_1).";
+
+                                    task_multiple_status = PRIM_REBUILD_WEIGHTED_DATA_MISSING;
 
                                     return;
                                 }
@@ -1097,14 +1139,22 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
 
                                 if ((uint32_t)(normals_data.size() / 3) != vertex_count)
                                 {
-                                    LOG("Error: GLB vertex float size not equal to normal float size.");
+                                    LOG("Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " vertex float size (" + util::uint32_t_to_string(vertex_count) + ") not equal to normal float size (" + util::uint32_t_to_string((uint32_t)(normals_data.size() / 3)) + ").");
+
+                                    task_status_string = "Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " vertex float size (" + util::uint32_t_to_string(vertex_count) + ") not equal to normal float size (" + util::uint32_t_to_string((uint32_t)(normals_data.size() / 3)) + ").";
+
+                                    task_multiple_status = PRIM_REBUILD_NORMALS_DO_NOT_MATCH_VERTICES;
 
                                     return;
                                 }
                             }
                             else
                             {
-                                LOG("Error: GLB is missing NORMAL data.");
+                                LOG("Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " is missing NORMAL data.");
+
+                                task_status_string = "Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " is missing NORMAL data.";
+
+                                task_multiple_status = PRIM_REBUILD_MISSING_NORMAL_DATA;
 
                                 return;
                             }
@@ -1116,23 +1166,26 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
                                 uvs_data = resourceReader->ReadBinaryData<float>(document, accessor);
                                 uvs_data_size = uvs_data.size() * sizeof(float);
 
-                                LOG_NO_ENDL("MeshPrimitive: " + util::uint32_t_to_string(uvs_data_size) + " bytes of UV data\n");
+                                LOG_NO_ENDL("MeshPrimitive: " + util::uint32_t_to_string(uvs_data_size) + " bytes of TEXTCOORD_0 data\n");
 
                                 if ((uint32_t)(uvs_data.size() / 2) != vertex_count)
                                 {
-                                    LOG("Error: GLB vertex float size not equal to normal float size.");
+                                    LOG("Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " vertex float size (" + util::uint32_t_to_string(vertex_count) + ") not equal to TEXTCOORD_0 float size (" + util::uint32_t_to_string((uint32_t)(uvs_data.size() / 2)) + ").");
+
+                                    task_status_string = "Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " vertex float size (" + util::uint32_t_to_string(vertex_count) + ") not equal to TEXTCOORD_0 float size (" + util::uint32_t_to_string((uint32_t)(uvs_data.size() / 2)) + ").";
+
+                                    task_multiple_status = PRIM_REBUILD_UVS_DO_NOT_MATCH_VERTICES;
 
                                     return;
-                                }
-
-                                for (uint32_t v = 0; v < vertex_count; v++)
-                                {
-
                                 }
                             }
                             else
                             {
-                                LOG("Error: GLB is missing TEXCOORD_0 data.");
+                                LOG("Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " is missing TEXCOORD_0 data.");
+
+                                task_status_string = "Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " is missing TEXCOORD_0 data.";
+
+                                task_multiple_status = PRIM_REBUILD_MISSING_UV_DATA;
 
                                 return;
                             }
@@ -1308,7 +1361,11 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
 
                                             if ((uint32_t)(colors_data_uint8_t.size() / 4) != vertex_count)
                                             {
-                                                LOG("Error: GLB color size not equal to vertex size.");
+                                                LOG("Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " color size (" + util::uint32_t_to_string((uint32_t)(colors_data_uint8_t.size() / 4)) + ") not equal to vertex size (" + util::uint32_t_to_string(vertex_count) + ").");
+
+                                                task_status_string = "Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " color size (" + util::uint32_t_to_string((uint32_t)(colors_data_uint8_t.size() / 4)) + ") not equal to vertex size (" + util::uint32_t_to_string(vertex_count) + ").";
+
+                                                task_multiple_status = PRIM_REBUILD_COLORS_DO_NOT_MATCH_VERTICES;
 
                                                 return;
                                             }
@@ -1342,7 +1399,11 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
 
                                             if ((uint32_t)(colors_data_uint16_t.size() / 4) != vertex_count)
                                             {
-                                                LOG("Error: GLB color size not equal to vertex size.");
+                                                LOG("Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " color size (" + util::uint32_t_to_string((uint32_t)(colors_data_uint16_t.size() / 4)) + ") not equal to vertex size (" + util::uint32_t_to_string(vertex_count) + ").");
+
+                                                task_status_string = "Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " color size (" + util::uint32_t_to_string((uint32_t)(colors_data_uint16_t.size() / 4)) + ") not equal to vertex size (" + util::uint32_t_to_string(vertex_count) + ").";
+
+                                                task_multiple_status = PRIM_REBUILD_COLORS_DO_NOT_MATCH_VERTICES;
 
                                                 return;
                                             }
@@ -1377,7 +1438,11 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
                                         }
                                         else
                                         {
-                                            LOG("Error: GLB color data is of the wrong format, needs to be of type VEC4, an unsigned byte or short, and normalized.");
+                                            LOG("Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " color data is of the wrong format, needs to be of type VEC4, an unsigned byte or short, and normalized.");
+
+                                            task_status_string = "Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " color data is of the wrong format, needs to be of type VEC4, an unsigned byte or short, and normalized.";
+
+                                            task_multiple_status = PRIM_REBUILD_COLORS_WRONG_FORMAT;
 
                                             return;
                                         }
@@ -1410,7 +1475,11 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
 
                                             if ((uint32_t)(colors_data_uint8_t.size() / 4) != vertex_count)
                                             {
-                                                LOG("Error: GLB color size not equal to vertex size.");
+                                                LOG("Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " color size (" + util::uint32_t_to_string((uint32_t)(colors_data_uint8_t.size() / 4)) + ") not equal to vertex size (" + util::uint32_t_to_string(vertex_count) + ").");
+
+                                                task_status_string = "Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " color size (" + util::uint32_t_to_string((uint32_t)(colors_data_uint8_t.size() / 4)) + ") not equal to vertex size (" + util::uint32_t_to_string(vertex_count) + ").";
+
+                                                task_multiple_status = PRIM_REBUILD_COLORS_DO_NOT_MATCH_VERTICES;
 
                                                 return;
                                             }
@@ -1444,7 +1513,11 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
 
                                             if ((uint32_t)(colors_data_uint16_t.size() / 4) != vertex_count)
                                             {
-                                                LOG("Error: GLB color size not equal to vertex size.");
+                                                LOG("Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " color size (" + util::uint32_t_to_string((uint32_t)(colors_data_uint16_t.size() / 4)) + ") not equal to vertex size (" + util::uint32_t_to_string(vertex_count) + ").");
+
+                                                task_status_string = "Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " color size (" + util::uint32_t_to_string((uint32_t)(colors_data_uint16_t.size() / 4)) + ") not equal to vertex size (" + util::uint32_t_to_string(vertex_count) + ").";
+
+                                                task_multiple_status = PRIM_REBUILD_COLORS_DO_NOT_MATCH_VERTICES;
 
                                                 return;
                                             }
@@ -1479,7 +1552,11 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
                                         }
                                         else
                                         {
-                                            LOG("Error: GLB color data is of the wrong format, needs to be of type VEC4, an unsigned byte or short, and normalized.");
+                                            LOG("Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " color data is of the wrong format, needs to be of type VEC4, an unsigned byte or short, and normalized.");
+
+                                            task_status_string = "Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name + " color data is of the wrong format, needs to be of type VEC4, an unsigned byte or short, and normalized.";
+
+                                            task_multiple_status = PRIM_REBUILD_COLORS_WRONG_FORMAT;
 
                                             return;
                                         }
@@ -2238,7 +2315,11 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
 
                 if (temp_prim.prim_object_headers.size() != 1)
                 {
-                    LOG("Error: PRIM has too many primary object headers.");
+                    LOG("Error: " + glb_file_names.at(j) + "'s has too many primary object headers.");
+
+                    task_status_string = "Error: " + glb_file_names.at(j) + "'s has too many primary object headers.";
+
+                    task_multiple_status = PRIM_REBUILD_TOO_MANY_PRIMARY_OBJECT_HEADERS;
 
                     return;
                 }
@@ -2436,6 +2517,8 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
         percent_progress = (uint32_t)100;
 
         task_single_status = TASK_SUCCESSFUL;
+
+        task_multiple_status = PRIM_REBUILD_SUCCESSFUL;
     }
     else
     {

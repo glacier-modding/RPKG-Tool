@@ -39,7 +39,13 @@ void rpkg_function::extract_all_prim_model_from(std::string& input_path, std::st
         }
         else
         {
-            rpkg_function::import_rpkg(input_path);
+            //rpkg_function::import_rpkg(input_path);
+
+            std::filesystem::path base_folder_path = input_path;
+
+            std::string parent_path = base_folder_path.parent_path().string();
+
+            rpkg_function::import_rpkg_files_in_folder(parent_path);
         }
 
         LOG("Loading Hash List...");
@@ -252,7 +258,7 @@ void rpkg_function::extract_all_prim_model_from(std::string& input_path, std::st
                                         extracted.at(input_filter_index) = true;
                                     }
 
-                                    //std::cout << "rpkg_function::extract_prim_to_gltf_from(" << rpkgs.at(i).rpkg_file_path << ", " << rpkgs.at(i).hash.at(hash_index).hash_string << ", " << prim_output_dir << ");" << std::endl;
+                                    std::cout << "rpkg_function::extract_prim_model_from(" << rpkgs.at(i).rpkg_file_path << ", " << rpkgs.at(i).hash.at(hash_index).hash_string << ", " << prim_output_dir << ");" << std::endl;
 
                                     rpkg_function::extract_prim_model_from(rpkgs.at(i).rpkg_file_path, rpkgs.at(i).hash.at(hash_index).hash_string, prim_output_dir);
 

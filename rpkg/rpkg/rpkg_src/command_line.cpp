@@ -58,6 +58,44 @@ std::vector<std::vector<std::string>> command_line::parse(int argc, char* argv[]
     return command_line_args;
 }
 
+std::vector<std::vector<std::string>> command_line::parse(std::vector<std::string> args)
+{
+    std::vector<std::vector<std::string>> command_line_args;
+
+    if (args.size() > 1)
+    {
+        for (int i = 0; i < args.size(); i++)
+        {
+            if (args[i][0] == '-')
+            {
+                std::vector<std::string> temp_command_line_args;
+
+                temp_command_line_args.push_back(args[i]);
+
+                if (args.size() > (i + 1))
+                {
+                    if (args[i + 1][0] != '-' && std::string(args[i + 1]).length() > 0)
+                    {
+                        temp_command_line_args.push_back(args[i + 1]);
+                    }
+                    else
+                    {
+                        LOG_AND_EXIT_NOP("Error: Invalid command line input.");
+                    }
+                }
+                else
+                {
+                    LOG_AND_EXIT_NOP("Error: Invalid command line input.");
+                }
+
+                command_line_args.push_back(temp_command_line_args);
+            }
+        }
+    }
+
+    return command_line_args;
+}
+
 std::vector<std::string> command_line::get_dragged_and_dropped_files(int argc, char* argv[])
 {
     std::vector<std::string> dragged_and_dropped_files;
