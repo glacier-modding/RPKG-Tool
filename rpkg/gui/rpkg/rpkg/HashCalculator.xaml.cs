@@ -80,10 +80,21 @@ namespace rpkg
 
                     for (var i = 1; i < 8; i++)
                     {
-                        sb.Append(buffer[i].ToString("X2"));
+                        sb.Append(buffer[i].ToString("X2").PadLeft(2, '0'));
                     }
 
-                    OutputTextBox.Text += "00" + sb.ToString() + "\n";
+                    string ioiHash = "00" + sb.ToString();
+
+                    int return_value = search_hash_list_by_hash_value(ioiHash);
+
+                    if (return_value == 1)
+                    {
+                        OutputTextBox.Text += ioiHash + " - Found in hash list" + "\n";
+                    }
+                    else
+                    {
+                        OutputTextBox.Text += ioiHash + " - Not found in hash list" + "\n";
+                    }
                 }
             }
         }
@@ -95,5 +106,8 @@ namespace rpkg
         }
 
         private System.Windows.Threading.DispatcherTimer hashInputTimer;
+
+        [DllImport("rpkg.dll", EntryPoint = "search_hash_list_by_hash_value", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int search_hash_list_by_hash_value(string hash_value);
     }
 }

@@ -40,7 +40,7 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     }
     else if (command == "-dev_extract_temp_from")
     {
-        //rpkg_function::dev_extract_temp_from(input_path, filter, output_path);
+        rpkg_function::dev_extract_temp_from(input_path, filter, output_path);
     }
     else if (command == "-extract_gfxf_from")
     {

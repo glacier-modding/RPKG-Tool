@@ -72,6 +72,8 @@ void temp::load_data()
 #ifdef RPKG_DLL
     const rapidjson::Value& temp_json_subEntities = temp_json_document["subEntities"];
 
+    temp_subentity_count = temp_json_subEntities.Size();
+
     for (rapidjson::SizeType i = 0; i < temp_json_subEntities.Size(); i++)
     {
         rapidjson::Value::ConstMemberIterator it1 = temp_json_subEntities[i].FindMember("logicalParent");
@@ -106,20 +108,25 @@ void temp::load_data()
 #ifdef RPKG_DLL
         const rapidjson::Value& tblu_json_subEntities = tblu_json_document["subEntities"];
 
+        tblu_subentity_count = tblu_json_subEntities.Size();
+
         for (rapidjson::SizeType i = 0; i < tblu_json_subEntities.Size(); i++)
         {
-            rapidjson::Value::ConstMemberIterator it1 = tblu_json_subEntities[i].FindMember("entityName");
-
-            if (it1 != tblu_json_subEntities[i].MemberEnd())
+            if (i < temp_logicalParent.size())
             {
-                tblu_entityName.at(i) = it1->value.GetString();
-            }
+                rapidjson::Value::ConstMemberIterator it1 = tblu_json_subEntities[i].FindMember("entityName");
 
-            rapidjson::Value::ConstMemberIterator it2 = tblu_json_subEntities[i].FindMember("entityTypeResourceIndex");
+                if (it1 != tblu_json_subEntities[i].MemberEnd())
+                {
+                    tblu_entityName.at(i) = it1->value.GetString();
+                }
 
-            if (it2 != tblu_json_subEntities[i].MemberEnd())
-            {
-                tblu_entityTypeResourceIndex.at(i) = it2->value.GetInt();
+                rapidjson::Value::ConstMemberIterator it2 = tblu_json_subEntities[i].FindMember("entityTypeResourceIndex");
+
+                if (it2 != tblu_json_subEntities[i].MemberEnd())
+                {
+                    tblu_entityTypeResourceIndex.at(i) = it2->value.GetInt();
+                }
             }
         }
 #endif
@@ -605,9 +612,6 @@ void temp::get_prim_from_temp(uint32_t entry_index)
 
 void temp::temp_version_check()
 {
-    //std::cout << rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_file_name << std::endl;
-    //std::cout << rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_file_name << std::endl;
-
     uint64_t temp_hash_size;
 
     if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).is_lz4ed == 1)
@@ -664,34 +668,71 @@ void temp::temp_version_check()
 
     uint32_t temp_sub_entity_table_offset = 0;
     uint32_t temp_after_sub_entity_table_offset = 0;
+    uint32_t entity_count = 0;
 
     temp_position = 0x20;
 
     std::memcpy(&temp_sub_entity_table_offset, &temp_data.data()[temp_position], 0x4);
 
-    temp_position += 0x8;
+    temp_position = 0x28;
 
     std::memcpy(&temp_after_sub_entity_table_offset, &temp_data.data()[temp_position], 0x4);
 
-    uint32_t temp_version_check = temp_after_sub_entity_table_offset - temp_sub_entity_table_offset;
+    temp_position = 0x6C;
 
-    if ((temp_version_check % 0x58 == 0) && (temp_version_check % 0x70 == 0))
+    std::memcpy(&entity_count, &temp_data.data()[temp_position], 0x4);
+
+    if (temp_sub_entity_table_offset == 0x60 && entity_count != 0xFFFFFFFF)
     {
-        temp_file_version = 4;
+        uint32_t temp_version_check = temp_after_sub_entity_table_offset - temp_sub_entity_table_offset;
+
+        if (temp_version_check == 0x58 * entity_count)
+        {
+            temp_file_version = 2;
+
+            LOG("TEMP version: H1/H2");
+        }
+        else if (temp_version_check == 0x70 * entity_count)
+        {
+            temp_file_version = 3;
+
+            LOG("TEMP version: H3");
+        }
+        else
+        {
+            temp_file_version = 4;
+
+            LOG("TEMP version: Entry count found by still unknown");
+        }
+    }
+    else if (temp_sub_entity_table_offset == 0x58)
+    {
+        uint32_t temp_version_check = temp_after_sub_entity_table_offset - temp_sub_entity_table_offset;
+
+        if ((temp_version_check % 0x58 == 0) && (temp_version_check % 0x70 == 0))
+        {
+            temp_file_version = 5;
+
+            LOG("TEMP version: Entry count not found and still Unknown");
+        }
+        else if (temp_version_check % 0x58 == 0)
+        {
+            temp_file_version = 2;
+
+            LOG("TEMP version: H1/H2");
+        }
+        else if (temp_version_check % 0x70 == 0)
+        {
+            temp_file_version = 3;
+
+            LOG("TEMP version: H3");
+        }
+    }
+    else
+    {
+        temp_file_version = 6;
 
         LOG("TEMP version: Unknown");
-    }
-    else if (temp_version_check % 0x58 == 0)
-    {
-        temp_file_version = 2;
-
-        LOG("TEMP version: H1/H2");
-    }
-    else if (temp_version_check % 0x70 == 0)
-    {
-        temp_file_version = 3;
-
-        LOG("TEMP version: H3");
     }
 }
 
@@ -1949,6 +1990,11 @@ int temp::generate_temp_file_from_data(std::string temp_path)
     std::cout << buffer.GetString() << std::endl;
 
     std::string type = "TEMP";
+
+    if (temp_file_version == 2)
+    {
+        type = "TEMPH2";
+    }
 
     resource_tool_ConvertMemoryJsonToResource(&type[0], buffer.GetString(), buffer.GetSize(), &temp_path[0]);
 

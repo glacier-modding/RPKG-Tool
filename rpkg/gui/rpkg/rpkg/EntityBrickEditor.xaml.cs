@@ -277,6 +277,15 @@ namespace rpkg
             treeViewBackup = new TreeViewBackup(MainTreeView.Nodes);
 
             message.Close();
+
+            int temp_subentity_count = get_temp_subentity_count(temps_index);
+
+            int tblu_subentity_count = get_tblu_subentity_count(temps_index);
+
+            if (temp_subentity_count != tblu_subentity_count)
+            {
+                MessageBoxShow("Warning: There is a subEntities mismatch between the TEMP and TBLU files.\n\nThe TEMP file has " + temp_subentity_count.ToString() + " subEntities\n\nThe TBLU file has " + tblu_subentity_count.ToString() + " subEntities\n\nHaving mismatched subEntities (nodes in the treeview) counts can result in the nodes being misnamed.\n\nAlways look for the newest version of a TEMP file in the patch archives for a given chunk/dlc RPKG.");
+            }
         }
 
         private void LoadTreeView(ref System.Windows.Forms.TreeNode masterTreeViewItem)
@@ -3026,5 +3035,11 @@ namespace rpkg
 
         [DllImport("rpkg.dll", EntryPoint = "get_temp_version", CallingConvention = CallingConvention.Cdecl)]
         public static extern int get_temp_version(UInt32 temps_index);
+
+        [DllImport("rpkg.dll", EntryPoint = "get_temp_subentity_count", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int get_temp_subentity_count(UInt32 temps_index);
+
+        [DllImport("rpkg.dll", EntryPoint = "get_tblu_subentity_count", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int get_tblu_subentity_count(UInt32 temps_index);
     }
 }

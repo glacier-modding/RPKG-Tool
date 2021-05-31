@@ -158,3 +158,11 @@ RPKG_EXPORT int get_temp_version(char* temp_hash, char* rpkg_file_path);
 RPKG_EXPORT int set_temp_version(uint32_t temps_index, uint32_t temp_version);
 
 RPKG_EXPORT int import_rpkgs(char* rpkgs_path, char* rpkgs_list);
+
+RPKG_EXPORT int is_rpkg_valid(char* rpkg_file_path);
+
+RPKG_EXPORT int search_hash_list_by_hash_value(char* hash_value);
+
+RPKG_EXPORT int get_temp_subentity_count(uint32_t temps_index);
+
+RPKG_EXPORT int get_tblu_subentity_count(uint32_t temps_index);

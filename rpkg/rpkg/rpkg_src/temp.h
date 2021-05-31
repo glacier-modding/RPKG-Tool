@@ -45,6 +45,8 @@ public:
 	uint32_t tblu_rpkg_index = 0;
 	uint32_t tblu_hash_index = 0;
 	uint32_t temp_file_version = 0;
+	uint32_t temp_subentity_count = 0;
+	uint32_t tblu_subentity_count = 0;
 	uint32_t parent = 0;
 	std::vector<uint32_t> parents;
 	std::vector<uint32_t> children;

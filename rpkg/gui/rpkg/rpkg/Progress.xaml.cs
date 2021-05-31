@@ -78,13 +78,6 @@ namespace rpkg
                     task_done = true;
                 }
 
-                if (task_single_status == (int)RPKGStatus.TASK_EXITED)
-                {
-                    task_status = task_single_status;
-
-                    task_done = true;
-                }
-
                 if (operation == (int)Operation.TEMP_TBLU)
                 {
                     if (task_multiple_status == (int)RPKGStatus.TASK_SUCCESSFUL)

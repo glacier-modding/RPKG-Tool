@@ -1446,6 +1446,7 @@ char* get_wem_string()
 int clear_temp_tblu_data()
 {
     std::vector<temp>().swap(temps);
+    std::map<uint64_t, uint32_t>().swap(temps_map);
 
     return 0;
 }
@@ -1473,9 +1474,8 @@ int load_recursive_temps(char* temp_hash, char* rpkg_file_path, uint32_t temp_ve
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
-    //initialize_property_map();
-
-    initialize_enum_map();
+    std::vector<temp>().swap(temps);
+    std::map<uint64_t, uint32_t>().swap(temps_map);
 
     std::string temp_hash_string = std::string(temp_hash);
     std::string rpkg_file_path_string = std::string(rpkg_file_path);
@@ -1517,7 +1517,10 @@ int load_recursive_temps(char* temp_hash, char* rpkg_file_path, uint32_t temp_ve
                         stringstream_length = console::update_console(message, temps.size(), t, start_time, stringstream_length);
                     }
 
-                    temps.at(t).load_data();
+                    if (temps.at(t).tblu_return_value == TEMP_TBLU_FOUND)
+                    {
+                        temps.at(t).load_data();
+                    }
                 }
 
                 timing_string = "Found " + util::uint32_t_to_string(temps.size()) + " TEMP/TBLU recursively linked file(s).\n\nLoading recursive TEMP/TBLU file data: 100% done";
@@ -1551,9 +1554,8 @@ int load_non_recursive_temps(char* temp_hash, char* rpkg_file_path, uint32_t tem
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
-    //initialize_property_map();
-
-    initialize_enum_map();
+    std::vector<temp>().swap(temps);
+    std::map<uint64_t, uint32_t>().swap(temps_map);
 
     std::string temp_hash_string = std::string(temp_hash);
     std::string rpkg_file_path_string = std::string(rpkg_file_path);
@@ -1596,7 +1598,10 @@ int load_non_recursive_temps(char* temp_hash, char* rpkg_file_path, uint32_t tem
                         stringstream_length = console::update_console(message, temps.size(), t, start_time, stringstream_length);
                     }
 
-                    temps.at(t).load_data();
+                    if (temps.at(t).tblu_return_value == TEMP_TBLU_FOUND)
+                    {
+                        temps.at(t).load_data();
+                    }
                 }
 
                 timing_string = "Loading non-recursive TEMP/TBLU file data: 100% done";
@@ -2477,4 +2482,45 @@ int import_rpkgs(char* rpkgs_path, char* rpkgs_list)
     task_multiple_status = TASK_SUCCESSFUL;
 
     return 0;
+}
+
+int is_rpkg_valid(char* rpkg_file_path)
+{
+    std::string rpkg_file_path_string = std::string(rpkg_file_path);
+
+    for (uint64_t i = 0; i < rpkgs.size(); i++)
+    {
+        if (rpkgs.at(i).rpkg_file_path == rpkg_file_path_string)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+int search_hash_list_by_hash_value(char* hash_value)
+{
+    std::string hash_value_string = std::string(hash_value);
+
+    uint64_t temp_hash_value = std::strtoull(hash_value_string.c_str(), nullptr, 16);
+
+    std::map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(temp_hash_value);
+
+    if (it != hash_list_hash_map.end())
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+int get_temp_subentity_count(uint32_t temps_index)
+{
+    return temps.at(temps_index).temp_subentity_count;
+}
+
+int get_tblu_subentity_count(uint32_t temps_index)
+{
+    return temps.at(temps_index).tblu_subentity_count;
 }

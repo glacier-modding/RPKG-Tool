@@ -16,7 +16,7 @@
 #include <regex>
 #include <filesystem>
 #include <string_view>
-/*
+
 void rpkg_function::dev_extract_temp_from(std::string& input_path, std::string& filter, std::string& output_path)
 {
     task_single_status = TASK_EXECUTING;
@@ -43,7 +43,7 @@ void rpkg_function::dev_extract_temp_from(std::string& input_path, std::string& 
         }
         else
         {
-            rpkg_function::import_rpkg(input_path);
+            rpkg_function::import_rpkg(input_path, true);
         }
 
         std::stringstream ss;
@@ -66,7 +66,7 @@ void rpkg_function::dev_extract_temp_from(std::string& input_path, std::string& 
         {
             uint64_t rpkg_index = i;
 
-            if (rpkgs.at(i).rpkg_file_path == input_path || !input_path_is_rpkg_file)
+            if (rpkgs.at(i).rpkg_file_path == "C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg")
             {
                 std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
@@ -76,167 +76,51 @@ void rpkg_function::dev_extract_temp_from(std::string& input_path, std::string& 
 
                     std::vector<uint32_t> temps_indexes;
 
-                    recursive_temp_loader(rpkg_index, it->second, parents_map, temps_indexes, 0, 0, 0);
+                    recursive_temp_loader(rpkg_index, it->second, 3, parents_map, temps_indexes, 0, 0, 0);
 
-                    for (uint64_t j = 0; j < temps.size(); j++)
+                    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
+                    int stringstream_length = 80;
+
+                    timing_string = "Found " + util::uint32_t_to_string(temps.size()) + " TEMP/TBLU recursively linked file(s).\n\nLoading recursive TEMP/TBLU file data: 0% done";
+
+                    percent_progress = 0;
+
+                    std::string message = "Found " + util::uint32_t_to_string(temps.size()) + " TEMP/TBLU recursively linked file(s).\n\nLoading recursive TEMP/TBLU file data: ";
+
+                    for (uint64_t t = 0; t < temps.size(); t++)
                     {
-                        for (uint64_t a = 0; a < temps.at(j).prim_depends_file_name.size(); a++)
+                        //if (((t * (uint64_t)100000) / (uint64_t)temps.size()) % (uint64_t)100 == 0 && t > 0)
+                        if (t > 0)
                         {
-                            if (temps.at(j).prim_depends_in_rpkgs.at(a).size() > 0)
-                            {
-                                for (uint64_t b = 0; b < temps.at(j).children.size(); b++)
-                                {
-                                    for (uint64_t c = 0; c < temps.at(temps.at(j).children.at(b)).prim_depends_file_name.size(); c++)
-                                    {
-                                        if (temps.at(temps.at(j).children.at(b)).prim_depends_in_rpkgs.at(c).size() > 0)
-                                        {
-                                            //temps.at(j).prim_depends_in_children = true;
+                            stringstream_length = console::update_console(message, temps.size(), t, start_time, stringstream_length);
+                        }
 
-                                            if (temps.at(j).prim_depends_file_name.at(a) == temps.at(temps.at(j).children.at(b)).prim_depends_file_name.at(c))
-                                            {
-                                                //temps.at(j).prim_depends_is_godot_node.at(a) = false;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                        if (temps.at(t).tblu_return_value == TEMP_TBLU_FOUND)
+                        {
+                            temps.at(t).load_data();
                         }
                     }
 
-                    std::string map_name1 = "lol.tscn";
-                    std::string map_name2 = "r:\\h3";
+                    timing_string = "Found " + util::uint32_t_to_string(temps.size()) + " TEMP/TBLU recursively linked file(s).\n\nLoading recursive TEMP/TBLU file data: 100% done";
 
-                    //export_all_map_data_to_folder(0, map_name1, map_name2);
+                    percent_progress = 100;
 
-                    std::exit(0);
-
-                    //temps.at(0).export_map_data_to_folder(map_name1, map_name2);
-
-                    //map_export_map_data_to_folder(0, "output.tscn", "R:\\output");
-
-                    LOG("Recursively loaded TEMPs: " + util::uint64_t_to_string(temps.size()));
-
-                    for (uint64_t j = 0; j < temps.size(); j++)
+                    if (temps.at(0).tblu_return_value == TEMP_TBLU_FOUND)
                     {
-                        std::cout << "TEMP File Name: " << temps.at(j).temp_file_name << std::endl;
-                        std::cout << "  - In RPKG: " << rpkgs.at(temps.at(j).temp_rpkg_index).rpkg_file_path << std::endl;
-
-                        //std::cout << "  - TBLU return value: " << temps.at(j).tblu_return_value << std::endl;
-
-                        for (uint64_t a = 0; a < temps.at(j).prim_depends_file_name.size(); a++)
-                        {
-                            if (temps.at(j).prim_depends_in_rpkgs.at(a).size() > 0)
-                            {
-                                for (uint64_t b = 0; b < temps.at(j).children.size(); b++)
-                                {
-                                    //std::cout << "    - Child: " << temps.at(j).children.at(b) << std::endl;
-                                    //std::cout << "    - Child TEMP File Name: " << temps.at(temps.at(j).children.at(b)).temp_file_name << std::endl;
-
-                                    for (uint64_t c = 0; c < temps.at(temps.at(j).children.at(b)).prim_depends_file_name.size(); c++)
-                                    {
-                                        if (temps.at(temps.at(j).children.at(b)).prim_depends_in_rpkgs.at(c).size() > 0)
-                                        {
-                                            if (temps.at(j).prim_depends_file_name.at(a) == temps.at(temps.at(j).children.at(b)).prim_depends_file_name.at(c))
-                                            {
-                                                std::cout << "Duplicate found! Main TEMP's PRIM matches child PRIM!" << std::endl;
-
-                                                std::cout << "      - Child PRIM File Name Found: " << temps.at(temps.at(j).children.at(b)).prim_depends_file_name.at(c) << std::endl;
-                                                std::cout << "      - Child In RPKG: " << temps.at(temps.at(j).children.at(b)).prim_depends_in_rpkgs.at(c).at(temps.at(temps.at(j).children.at(b)).prim_depends_in_rpkgs_index.at(c)) << std::endl;
-
-                                                std::cout << "  - PRIM File Name Found: " << temps.at(j).prim_depends_file_name.at(a) << std::endl;
-                                                std::cout << "  - In RPKG: " << temps.at(j).prim_depends_in_rpkgs.at(a).at(temps.at(j).prim_depends_in_rpkgs_index.at(a)) << std::endl;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        //std::cout << "  - Top Level Logical Parents: " << std::endl;
-
-                        temps.at(j).get_top_level_logical_parents();
-
-                        //std::cout << "  - Parents: " << std::endl;
-
-                        for (uint64_t k = 0; k < temps.at(j).parents.size(); k++)
-                        {
-                            //std::cout << "    - Parent: " << temps.at(j).parents.at(k) << std::endl;
-                            //std::cout << "    - Parent TEMP File Name: " << temps.at(temps.at(j).parents.at(k)).temp_file_name << std::endl;
-                        }
-
-                        //std::cout << "  - Children: " << std::endl;
-
-                        for (uint64_t k = 0; k < temps.at(j).children.size(); k++)
-                        {
-                            //std::cout << "    - Child: " << temps.at(j).children.at(k) << std::endl;
-                            //std::cout << "    - Child TEMP File Name: " << temps.at(temps.at(j).children.at(k)).temp_file_name << std::endl;
-
-                            for (uint64_t c = 0; c < temps.at(temps.at(j).children.at(k)).prim_depends_file_name.size(); c++)
-                            {
-                                if (temps.at(temps.at(j).children.at(k)).prim_depends_in_rpkgs.at(c).size() > 0)
-                                {
-                                    //std::cout << "      - Child PRIM File Name Found: " << temps.at(temps.at(j).children.at(k)).prim_depends_file_name.at(c) << std::endl;
-                                    //std::cout << "      - Child Hash Depends Index: " << temps.at(temps.at(j).children.at(k)).prim_depends_index.at(c) << std::endl;
-                                    //std::cout << "      - Child In RPKG: " << temps.at(temps.at(j).children.at(k)).prim_depends_in_rpkgs.at(c).at(temps.at(temps.at(j).children.at(k)).prim_depends_in_rpkgs_index.at(c)) << std::endl;
-                                    //std::cout << "      - Child rpkg_index: " << temps.at(temps.at(j).children.at(k)).prim_depends_rpkg_index_index.at(c) << std::endl;
-                                    //std::cout << "      - Child hash_index: " << temps.at(temps.at(j).children.at(k)).prim_depends_hash_index_index.at(c) << std::endl;
-                                    //std::cout << "      - Child rpkg_index (rpkgs): " << temps.at(temps.at(j).children.at(k)).prim_depends_rpkg_index.at(c).at(temps.at(temps.at(j).children.at(k)).prim_depends_rpkg_index_index.at(c)) << std::endl;
-                                    //std::cout << "      - Child hash_index (rpkgs): " << temps.at(temps.at(j).children.at(k)).prim_depends_hash_index.at(c).at(temps.at(temps.at(j).children.at(k)).prim_depends_hash_index_index.at(c)) << std::endl;
-                                }
-                            }
-                        }
-
-                        for (uint64_t k = 0; k < temps.at(j).temp_depends_file_name.size(); k++)
-                        {
-                            if (temps.at(j).temp_depends_in_rpkgs.at(k).size() > 0)
-                            {
-                                //std::cout << "  - TEMP File Name Found: " << temps.at(j).temp_depends_file_name.at(k) << std::endl;
-                                //std::cout << "  - Hash Depends Index: " << temps.at(j).temp_depends_index.at(k) << std::endl;
-                                //std::cout << "  - In RPKG: " << temps.at(j).temp_depends_in_rpkgs.at(k).at(temps.at(j).temp_depends_in_rpkgs_index.at(k)) << std::endl;
-                                //std::cout << "  - rpkg_index: " << temps.at(j).temp_depends_rpkg_index_index.at(k) << std::endl;
-                                //std::cout << "  - hash_index: " << temps.at(j).temp_depends_hash_index_index.at(k) << std::endl;
-                                //std::cout << "  - rpkg_index (rpkgs): " << temps.at(j).temp_depends_rpkg_index.at(k).at(temps.at(j).temp_depends_rpkg_index_index.at(k)) << std::endl;
-                                //std::cout << "  - hash_index (rpkgs): " << temps.at(j).temp_depends_hash_index.at(k).at(temps.at(j).temp_depends_hash_index_index.at(k)) << std::endl;
-                            }
-                        }
-
-                        for (uint64_t k = 0; k < temps.at(j).tblu_depends_file_name.size(); k++)
-                        {
-                            if (temps.at(j).tblu_depends_in_rpkgs.at(k).size() > 0)
-                            {
-                                //std::cout << "  - TBLU File Name Found: " << temps.at(j).tblu_depends_file_name.at(k) << std::endl;
-                                //std::cout << "  - Hash Depends Index: " << temps.at(j).tblu_depends_index.at(k) << std::endl;
-                                //std::cout << "  - In RPKG: " << temps.at(j).tblu_depends_in_rpkgs.at(k).at(temps.at(j).tblu_depends_in_rpkgs_index.at(k)) << std::endl;
-                                //std::cout << "  - rpkg_index: " << temps.at(j).tblu_depends_rpkg_index_index.at(k) << std::endl;
-                                //std::cout << "  - hash_index: " << temps.at(j).tblu_depends_hash_index_index.at(k) << std::endl;
-                                //std::cout << "  - rpkg_index (rpkgs): " << temps.at(j).tblu_depends_rpkg_index.at(k).at(temps.at(j).tblu_depends_rpkg_index_index.at(k)) << std::endl;
-                                //std::cout << "  - hash_index (rpkgs): " << temps.at(j).tblu_depends_hash_index.at(k).at(temps.at(j).tblu_depends_hash_index_index.at(k)) << std::endl;
-                            }
-                        }
-
-                        for (uint64_t k = 0; k < temps.at(j).prim_depends_file_name.size(); k++)
-                        {
-                            if (temps.at(j).prim_depends_in_rpkgs.at(k).size() > 0)
-                            {
-                                //std::cout << "  - PRIM File Name Found: " << temps.at(j).prim_depends_file_name.at(k) << std::endl;
-                                //std::cout << "  - Hash Depends Index: " << temps.at(j).prim_depends_index.at(k) << std::endl;
-                                //std::cout << "  - In RPKG: " << temps.at(j).prim_depends_in_rpkgs.at(k).at(temps.at(j).prim_depends_in_rpkgs_index.at(k)) << std::endl;
-                                //std::cout << "  - rpkg_index: " << temps.at(j).prim_depends_rpkg_index_index.at(k) << std::endl;
-                                //std::cout << "  - hash_index: " << temps.at(j).prim_depends_hash_index_index.at(k) << std::endl;
-                                //std::cout << "  - rpkg_index (rpkgs): " << temps.at(j).prim_depends_rpkg_index.at(k).at(temps.at(j).prim_depends_rpkg_index_index.at(k)) << std::endl;
-                                //std::cout << "  - hash_index (rpkgs): " << temps.at(j).prim_depends_hash_index.at(k).at(temps.at(j).prim_depends_hash_index_index.at(k)) << std::endl;
-                            }
-                        }
+                        task_multiple_status = TASK_SUCCESSFUL;
                     }
+                    else
+                    {
+                        task_multiple_status = temps.at(0).tblu_return_value;
+                    }
+
+                    task_single_status = TASK_SUCCESSFUL;
                 }
             }
         }
-
-        std::vector<temp>().swap(temps);
-
     }
     else
     {
         LOG_AND_EXIT("Error: The folder " + input_path + " to with the input RPKGs does not exist.");
     }
-}*/
+}

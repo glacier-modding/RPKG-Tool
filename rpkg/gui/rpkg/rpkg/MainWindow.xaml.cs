@@ -1316,6 +1316,8 @@ namespace rpkg
 
                         rpkgFilePath = GetRootTreeNode(e.Node).Text;
 
+                        //MessageBoxShow(rpkgFilePath);
+
                         string command = "";
                         string input_path = rpkgFilePath;
                         string filter = "";
@@ -1599,12 +1601,29 @@ namespace rpkg
                                     }
                                 }
 
+                                rpkgFilePath = rpkgFileBackup;
+
+                                //MessageBoxShow(rpkgFilePath);
+
                                 int temp_file_version = get_temp_version(hashName, rpkgFilePath);
 
-                                if (temp_file_version == 4)
+                                while (temp_file_version < 2 || temp_file_version > 3)
                                 {
                                     MessageQuestion messageBox = new MessageQuestion();
-                                    messageBox.message.Content = "The automatic TEMP/TBLU version check was unable to determine what version of Hitman (H2 or H3) these files are.\n\nPlease select the correct version of Hitman H2 or H3 below.";
+
+                                    if (temp_file_version == 4)
+                                    {
+                                        messageBox.message.Content = "The automatic TEMP/TBLU version check found a TEMP entry count but was still unable to determine what version of Hitman (H2 or H3) these files are.\n\nPlease select the correct version of Hitman H2 or H3 below.";
+                                    }
+                                    else if (temp_file_version == 5)
+                                    {
+                                        messageBox.message.Content = "The automatic TEMP/TBLU version check could not find a TEMP entry count,\n\nmost likely because this TEMP file was made by a version of ResourceTool that didn't include the TEMP subEntities count value.\n\nTherefore the version of Hitman (H2 or H3) was not able to be determined.\n\nPlease select the correct version of Hitman H2 or H3 below.";
+                                    }
+                                    else
+                                    {
+                                        messageBox.message.Content = "The automatic TEMP/TBLU version check was unable to determine what version of Hitman (H2 or H3) these files are.\n\nPlease select the correct version of Hitman H2 or H3 below.";
+                                    }
+
                                     messageBox.OKButton.Content = "Hitman 2";
                                     messageBox.CancelButton.Content = "Hitman 3";
                                     messageBox.ShowDialog();
@@ -1849,12 +1868,29 @@ namespace rpkg
                                     }
                                 }
 
+                                rpkgFilePath = rpkgFileBackup;
+
+                                //MessageBoxShow(rpkgFilePath);
+
                                 int temp_file_version = get_temp_version(hashName, rpkgFilePath);
 
-                                if (temp_file_version == 4)
+                                while (temp_file_version < 2 || temp_file_version > 3)
                                 {
                                     MessageQuestion messageBox = new MessageQuestion();
-                                    messageBox.message.Content = "The automatic TEMP/TBLU version check was unable to determine what version of Hitman (H2 or H3) these files are.\n\nPlease select the correct version of Hitman H2 or H3 below.";
+
+                                    if (temp_file_version == 4)
+                                    {
+                                        messageBox.message.Content = "The automatic TEMP/TBLU version check found a TEMP entry count but was still unable to determine what version of Hitman (H2 or H3) these files are.\n\nPlease select the correct version of Hitman H2 or H3 below.";
+                                    }
+                                    else if (temp_file_version == 5)
+                                    {
+                                        messageBox.message.Content = "The automatic TEMP/TBLU version check could not find a TEMP entry count,\n\nmost likely because this TEMP file was made by a version of ResourceTool that didn't include the TEMP subEntities count value.\n\nTherefore the version of Hitman (H2 or H3) was not able to be determined.\n\nPlease select the correct version of Hitman H2 or H3 below.";
+                                    }
+                                    else
+                                    {
+                                        messageBox.message.Content = "The automatic TEMP/TBLU version check was unable to determine what version of Hitman (H2 or H3) these files are.\n\nPlease select the correct version of Hitman H2 or H3 below.";
+                                    }
+                                    
                                     messageBox.OKButton.Content = "Hitman 2";
                                     messageBox.CancelButton.Content = "Hitman 3";
                                     messageBox.ShowDialog();
@@ -2869,44 +2905,49 @@ namespace rpkg
 
             foreach (string filePath in rpkgList)
             {
-                if (MainTreeView.Nodes.Count > 0)
+                int rpkg_valid = is_rpkg_valid(filePath);
+
+                if (rpkg_valid == 1)
                 {
-                    if ((MainTreeView.Nodes[0] as System.Windows.Forms.TreeNode).Text.ToString() == "Click")
+                    if (MainTreeView.Nodes.Count > 0)
                     {
-                        MainTreeView.Nodes.Clear();
+                        if ((MainTreeView.Nodes[0] as System.Windows.Forms.TreeNode).Text.ToString() == "Click")
+                        {
+                            MainTreeView.Nodes.Clear();
+                        }
                     }
-                }
 
-                MainTreeView.AfterExpand += MainTreeView_AfterExpand;
+                    MainTreeView.AfterExpand += MainTreeView_AfterExpand;
 
-                var item = new System.Windows.Forms.TreeNode();
+                    var item = new System.Windows.Forms.TreeNode();
 
-                item.Text = filePath;
+                    item.Text = filePath;
 
-                MainTreeView.Nodes.Add(item);
+                    MainTreeView.Nodes.Add(item);
 
-                List<string> resourceTypes = new List<string>();
+                    List<string> resourceTypes = new List<string>();
 
-                UInt32 resourceTypeCount = get_resource_types_count(filePath);
+                    UInt32 resourceTypeCount = get_resource_types_count(filePath);
 
-                for (UInt32 i = 0; i < resourceTypeCount; i++)
-                {
-                    resourceTypes.Add(Marshal.PtrToStringAnsi(get_resource_types_at(filePath, i)));
-                }
+                    for (UInt32 i = 0; i < resourceTypeCount; i++)
+                    {
+                        resourceTypes.Add(Marshal.PtrToStringAnsi(get_resource_types_at(filePath, i)));
+                    }
 
-                resourceTypes.Sort();
+                    resourceTypes.Sort();
 
-                foreach (string resourceType in resourceTypes)
-                {
-                    var item2 = new System.Windows.Forms.TreeNode();
+                    foreach (string resourceType in resourceTypes)
+                    {
+                        var item2 = new System.Windows.Forms.TreeNode();
 
-                    item2.Text = resourceType;
+                        item2.Text = resourceType;
 
-                    item2.Nodes.Add("");
+                        item2.Nodes.Add("");
 
-                    //item2.Collapsed += Item2_Collapsed;
+                        //item2.Collapsed += Item2_Collapsed;
 
-                    item.Nodes.Add(item2);
+                        item.Nodes.Add(item2);
+                    }
                 }
             }
 
@@ -4004,6 +4045,9 @@ namespace rpkg
 
         [DllImport("rpkg.dll", EntryPoint = "import_rpkgs", CallingConvention = CallingConvention.Cdecl)]
         public static extern int import_rpkgs(string rpkgs_path, string rpkgs_list);
+
+        [DllImport("rpkg.dll", EntryPoint = "is_rpkg_valid", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int is_rpkg_valid(string rpkg_file_path);
 
 
         [SuppressUnmanagedCodeSecurity]
