@@ -1,4 +1,5 @@
 #pragma once
+
 #include "hash.h"
 #include <string>
 #include <vector>
@@ -7,10 +8,6 @@
 #include "thirdparty/rapidjson/document.h"
 #include "thirdparty/rapidjson/writer.h"
 #include "thirdparty/rapidjson/stringbuffer.h"
-#include "thirdparty/zhmtools/ResourceConverter.h"
-#include "thirdparty/zhmtools/ResourceGenerator.h"
-#include "thirdparty/zhmtools/ResourceLib.h"
-#include "thirdparty/zhmtools/ResourceLibCommon.h"
 #include "thirdparty/zhmtools/ResourceLib_HM2.h"
 #include "thirdparty/zhmtools/ResourceLib_HM3.h"
 
