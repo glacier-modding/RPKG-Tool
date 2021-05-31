@@ -29,7 +29,6 @@ public:
 	void get_entry_name_string(uint32_t entry_index);
 	void get_top_level_logical_parents();
 	void get_all_bricks();
-	void check_pointer_map(uint32_t position);
 
 	void load_temp_hash_depends();
 	void load_prim_hash_depends();
@@ -44,16 +43,6 @@ public:
 	std::vector<uint32_t> parents;
 	std::vector<uint32_t> children;
 	bool file_has_been_changed = false;
-	uint32_t temp_after_header_table_offset = 0;
-	uint32_t temp_footer_offset = 0;
-	uint32_t tblu_header_table_offset = 0;
-	uint32_t temp_file_version = 0;
-	uint32_t tblu_file_version = 0;
-	uint32_t pointers_size = 0;
-	uint32_t pointers_count = 0;
-	std::vector<uint32_t> pointers;
-	std::map<uint32_t, uint32_t> pointers_map;
-	std::multimap<uint32_t, uint32_t> pointers_multimap;
 	std::vector<uint32_t> temp_entry_index;
 	std::vector<uint32_t> temp_logicalParent;
 	std::vector<bool> temp_logicalParent_is_entityId;
@@ -66,7 +55,6 @@ public:
 	std::vector<uint32_t> temp_platformSpecificPropertyValues_start_offsets;
 	std::vector<uint32_t> temp_platformSpecificPropertyValues_end_offsets;
 	std::vector<std::string> temp_property_types;
-	std::vector<uint8_t> temp_property_types_header;
 	std::vector<std::vector<bool>> temp_property_types_shared;
 	std::vector<std::vector<uint32_t>> temp_property_types_shared_count;
 	std::vector<std::vector<uint32_t>> temp_property_types_offsets;

@@ -133,371 +133,93 @@ namespace rpkg
                 }
             }
 
-            EventManager.RegisterClassHandler(typeof(TreeViewItem), TreeViewItem.PreviewMouseLeftButtonUpEvent, new RoutedEventHandler(TreeViewItem_PreviewMouseLeftButtonUpEvent));
-            EventManager.RegisterClassHandler(typeof(TreeViewItem), TreeViewItem.PreviewMouseRightButtonDownEvent, new RoutedEventHandler(TreeViewItem_PreviewMouseRightButtonDownEvent));
-            EventManager.RegisterClassHandler(typeof(TreeViewItem), TreeViewItem.MouseRightButtonDownEvent, new RoutedEventHandler(TreeViewItem_MouseRightButtonDownEvent));
+            var item = new System.Windows.Forms.TreeNode();
+            item.Text = "Click";
+            MainTreeView.Nodes.Add(item);
+            item = new System.Windows.Forms.TreeNode();
+            item.Text = "File->Import RPKG File";
+            MainTreeView.Nodes.Add(item);
+            item = new System.Windows.Forms.TreeNode();
+            item.Text = "Or";
+            MainTreeView.Nodes.Add(item);
+            item = new System.Windows.Forms.TreeNode();
+            item.Text = "File->Import RPKGs Folder";
+            MainTreeView.Nodes.Add(item);
+            item = new System.Windows.Forms.TreeNode();
+            item.Text = "Above to start!";
+            MainTreeView.Nodes.Add(item);
+            item = new System.Windows.Forms.TreeNode();
+            item.Text = "";
+            MainTreeView.Nodes.Add(item);
+            item = new System.Windows.Forms.TreeNode();
+            item.Text = "After any RPKGs have been imported you can left or right click on the RPKG";
+            MainTreeView.Nodes.Add(item);
+            item = new System.Windows.Forms.TreeNode();
+            item.Text = "or on any item in the Resources or Dependency Views.";
+            MainTreeView.Nodes.Add(item);
+            item = new System.Windows.Forms.TreeNode();
+            item.Text = "";
+            MainTreeView.Nodes.Add(item);
+            item = new System.Windows.Forms.TreeNode();
+            item.Text = "Left clicking causes the Details/Hex Viewer/JSON Viewer on the right to update.";
+            MainTreeView.Nodes.Add(item);
+            item = new System.Windows.Forms.TreeNode();
+            item.Text = "Right clicking provides you with a popup menu for further options.";
+            MainTreeView.Nodes.Add(item);
+            item = new System.Windows.Forms.TreeNode();
+            item.Text = "";
+            MainTreeView.Nodes.Add(item);
+            item = new System.Windows.Forms.TreeNode();
+            item.Text = "Alternatively you can select from the:";
+            MainTreeView.Nodes.Add(item);
+            item = new System.Windows.Forms.TreeNode();
+            item.Text = "Extract";
+            MainTreeView.Nodes.Add(item);
+            item = new System.Windows.Forms.TreeNode();
+            item.Text = "Generate";
+            MainTreeView.Nodes.Add(item);
+            item = new System.Windows.Forms.TreeNode();
+            item.Text = "Mass Extract";
+            MainTreeView.Nodes.Add(item);
+            item = new System.Windows.Forms.TreeNode();
+            item.Text = "Rebuild";
+            MainTreeView.Nodes.Add(item);
+            item = new System.Windows.Forms.TreeNode();
+            item.Text = "Color Theme";
+            MainTreeView.Nodes.Add(item);
+            item = new System.Windows.Forms.TreeNode();
+            item.Text = "menus above for additional functions.";
+            MainTreeView.Nodes.Add(item);
 
-            var item = new TreeViewItem();
-            item.Header = "Click";
-            MainTreeView.Items.Add(item);
-            item = new TreeViewItem();
-            item.Header = "File->Import RPKG File";
-            MainTreeView.Items.Add(item);
-            item = new TreeViewItem();
-            item.Header = "Or";
-            MainTreeView.Items.Add(item);
-            item = new TreeViewItem();
-            item.Header = "File->Import RPKGs Folder";
-            MainTreeView.Items.Add(item);
-            item = new TreeViewItem();
-            item.Header = "Above to start!";
-            MainTreeView.Items.Add(item);
-            item = new TreeViewItem();
-            item.Header = "";
-            MainTreeView.Items.Add(item);
-            item = new TreeViewItem();
-            item.Header = "After any RPKGs have been imported you can left or right click on the RPKG";
-            MainTreeView.Items.Add(item);
-            item = new TreeViewItem();
-            item.Header = "or on any item in the Resources or Dependency Views.";
-            MainTreeView.Items.Add(item);
-            item = new TreeViewItem();
-            item.Header = "";
-            MainTreeView.Items.Add(item);
-            item = new TreeViewItem();
-            item.Header = "Left clicking causes the Details/Hex Viewer/JSON Viewer on the right to update.";
-            MainTreeView.Items.Add(item);
-            item = new TreeViewItem();
-            item.Header = "Right clicking provides you with a popup menu for further options.";
-            MainTreeView.Items.Add(item);
-            item = new TreeViewItem();
-            item.Header = "";
-            MainTreeView.Items.Add(item);
-            item = new TreeViewItem();
-            item.Header = "Alternatively you can select from the:";
-            MainTreeView.Items.Add(item);
-            item = new TreeViewItem();
-            item.Header = "Extract";
-            MainTreeView.Items.Add(item);
-            item = new TreeViewItem();
-            item.Header = "Generate";
-            MainTreeView.Items.Add(item);
-            item = new TreeViewItem();
-            item.Header = "Mass Extract";
-            MainTreeView.Items.Add(item);
-            item = new TreeViewItem();
-            item.Header = "Rebuild";
-            MainTreeView.Items.Add(item);
-            item = new TreeViewItem();
-            item.Header = "Color Theme";
-            MainTreeView.Items.Add(item);
-            item = new TreeViewItem();
-            item.Header = "menus above for additional functions.";
-            MainTreeView.Items.Add(item);
-
-            MainTreeView.SelectedItemChanged += MainTreeView_SelectedItemChanged;
-
-            HashMapTreeView.SelectedItemChanged += MainTreeView_SelectedItemChanged;
-
-            SearchRPKGsTreeView.SelectedItemChanged += MainTreeView_SelectedItemChanged;
-
-            SearchHashListTreeView.SelectedItemChanged += SearchHashListTreeView_SelectedItemChanged;
-
+            MainTreeView.NodeMouseClick += MainTreeView_NodeMouseClick;
+            HashMapTreeView.NodeMouseClick += MainTreeView_NodeMouseClick;
+            SearchRPKGsTreeView.NodeMouseClick += MainTreeView_NodeMouseClick;
+            MainTreeView.AfterSelect += MainTreeView_AfterSelect;
+            HashMapTreeView.AfterSelect += MainTreeView_AfterSelect;
+            SearchRPKGsTreeView.AfterSelect += MainTreeView_AfterSelect;
+            SearchHashListTreeView.AfterSelect += SearchHashListTreeView_AfterSelect;
             LeftTabControl.SelectionChanged += LeftTabControl_SelectionChanged;
-
             RightTabControl.SelectionChanged += RightTabControl_SelectionChanged;
         }
 
-        private void LeftTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            TabControl tab = (sender as TabControl);
-
-            //MessageBoxShow(tab.SelectedIndex.ToString());
-
-            if (tab.SelectedIndex == 1)
-            {
-                LoadHashDependsMap();
-            }
-        }
-
-        private void RightTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            TabControl tab = (sender as TabControl);
-
-            //MessageBoxShow(tab.SelectedIndex.ToString());
-
-            if (tab.SelectedIndex == 1)
-            {
-                LoadHexEditor();
-            }
-        }
-
-        private void LoadHexEditor()
-        {
-            HexViewerTextBox.Text = "Hex view of " + currentHash + ":\n\n";
-
-            string[] hashDetails = currentHash.Split('.');
-
-            string hash = hashDetails[0];
-
-            HexViewerTextBox.Text += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(currentRPKGFilePath, hash));
-        }
-
-        private void SearchHashListTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        private void MainTreeView_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
         {
             if (oneOrMoreRPKGsHaveBeenImported)
             {
-                if (MainTreeView.Items.Count > 0)
+                if (MainTreeView.Nodes.Count > 0)
                 {
-                    var treeview = (sender as TreeView);
+                    System.Windows.Forms.TreeNode item = (e.Node as System.Windows.Forms.TreeNode);
 
-                    string itemHeader = "";
-
-                    if (treeview.SelectedItem is TreeViewItem item)
-                    {
-                        itemHeader = (item.Header as string);
-                    }
-                    else if (treeview.SelectedItem == null)
+                    if (item == null)
                     {
                         return;
                     }
-                    else
-                    {
-                        itemHeader = treeview.SelectedItem.ToString();
-                    }
 
-                    string[] header = itemHeader.Split(' ');
-
-                    string hashFile = header[0];
-
-                    string[] hashDetails = hashFile.Split('.');
-
-                    string hash = hashDetails[0];
-                    string resourceType = hashDetails[1];
-
-                    string rpkgHashFilePathString = Marshal.PtrToStringAnsi(get_rpkg_file_paths_hash_is_in(hash));
-
-                    if (rpkgHashFilePathString != "")
-                    {
-                        string[] rpkgHashFilePaths = rpkgHashFilePathString.Trim(',').Split(',');
-
-                        DetailsTextBox.Text = "";
-
-                        HexViewerTextBox.Text = "";
-
-                        LocalizationTextBox.Text = "";
-
-                        foreach (string rpkgHashFilePath in rpkgHashFilePaths)
-                        {
-                            //MessageBoxShow(rpkgHashFilePath);
-
-                            string identifier = rpkgHashFilePath + hash;
-
-                            DetailsTextBox.Text += hash + " in RPKG file " + rpkgHashFilePath + ":\n";
-
-                            DetailsTextBox.Text += Marshal.PtrToStringAnsi(get_hash_details(rpkgHashFilePath, hash));
-
-                            DetailsTextBox.Text += "\n\n";
-
-                            //HexViewerTextBox.Text = "Hex view of " + header[0] + ":\n\n";
-
-                            LocalizationTextBox.Text = "";
-
-                            //HexViewerTextBox.Text += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgHashFilePath, hash));
-
-                            if (RightTabControl.SelectedIndex == 1)
-                            {
-                                LoadHexEditor();
-                            }
-
-                            currentRPKGFilePath = rpkgHashFilePath;
-                            currentHash = header[0];
-
-                            if (resourceType == "LOCR" || resourceType == "DLGE" || resourceType == "RTLV")
-                            {
-                                UInt32 localization_data_size = generate_localization_string(rpkgHashFilePath, hash, resourceType);
-
-                                byte[] localization_data = new byte[localization_data_size];
-
-                                Marshal.Copy(get_localization_string(), localization_data, 0, (int)localization_data_size);
-
-                                if (localization_data_size > 0)
-                                {
-                                    LocalizationTextBox.Text = Encoding.UTF8.GetString(localization_data);
-                                }
-
-                                if (localization_data_size > 0)
-                                {
-                                    if (ThirdTabRight.Visibility == Visibility.Collapsed)
-                                    {
-                                        ThirdTabRight.Visibility = Visibility.Visible;
-                                    }
-                                }
-                                else
-                                {
-                                    if (ThirdTabRight.Visibility == Visibility.Visible)
-                                    {
-                                        ThirdTabRight.Visibility = Visibility.Collapsed;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if (ThirdTabRight.Visibility == Visibility.Visible)
-                                {
-                                    ThirdTabRight.Visibility = Visibility.Collapsed;
-                                }
-
-                                if (FourthTabRight.Visibility == Visibility.Visible)
-                                {
-                                    FourthTabRight.Visibility = Visibility.Collapsed;
-                                }
-
-                                if (FifthTabRight.Visibility == Visibility.Visible)
-                                {
-                                    FifthTabRight.Visibility = Visibility.Collapsed;
-                                }
-
-                                if (SixthTabRight.Visibility == Visibility.Visible)
-                                {
-                                    SixthTabRight.Visibility = Visibility.Collapsed;
-                                }
-                            }
-
-                            int return_value = clear_hash_data_vector();
-                        }
-                    }
-                    else
-                    {
-                        DetailsTextBox.Text = "Hash is not located in any of the currently imported RPKGs.";
-
-                        HexViewerTextBox.Text = "";
-
-                        LocalizationTextBox.Text = "";
-                    }
-
-                    GC.Collect();
-                }
-            }
-            else
-            {
-                DetailsTextBox.Text = "Hash is not located in any of the currently imported RPKGs.";
-
-                HexViewerTextBox.Text = "";
-
-                LocalizationTextBox.Text = "";
-            }
-        }
-
-        public static void TEXTToPNGThread(string rpkgFilePath, string hash, string png_file_name)
-        {
-            int return_value = generate_png_from_text(rpkgFilePath, hash, png_file_name);
-        }
-
-        public static void MassExtractTEXTThread(string command, string input_path, string filter, string search, string search_type, string output_path)
-        {
-            int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
-        }
-
-        public int MassExtractTEXT(string command, string input_path, string filter, string search, string search_type, string output_path)
-        {
-            Thread thread = new Thread(() => MassExtractTEXTThread(command, input_path, filter, search, search_type, output_path));
-            thread.SetApartmentState(ApartmentState.MTA);
-            thread.Start();
-            thread.Join();
-            thread = null;
-
-            return 0;
-        }
-
-        public static void RebuildTEXTThread(string command, string input_path, string filter, string search, string search_type, string output_path)
-        {
-            int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
-        }
-
-        public int RebuildTEXT(string command, string input_path, string filter, string search, string search_type, string output_path)
-        {
-            Thread thread = new Thread(() => RebuildTEXTThread(command, input_path, filter, search, search_type, output_path));
-            thread.SetApartmentState(ApartmentState.MTA);
-            thread.Start();
-            thread.Join();
-            thread = null;
-
-            return 0;
-        }
-
-        public static void ExtractTEXTThread(string command, string input_path, string filter, string search, string search_type, string output_path)
-        {
-            int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
-        }
-
-        public int ExtractTEXT(string command, string input_path, string filter, string search, string search_type, string output_path)
-        {
-            Thread thread = new Thread(() => ExtractTEXTThread(command, input_path, filter, search, search_type, output_path));
-            thread.SetApartmentState(ApartmentState.MTA);
-            thread.Start();
-            thread.Join();
-            thread = null;
-
-            return 0;
-        }
-
-        public static void ExtractMODELThread(string command, string input_path, string filter, string search, string search_type, string output_path)
-        {
-            int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
-        }
-
-        public int ExtractMODEL(string command, string input_path, string filter, string search, string search_type, string output_path)
-        {
-            Thread thread = new Thread(() => ExtractMODELThread(command, input_path, filter, search, search_type, output_path));
-            thread.SetApartmentState(ApartmentState.MTA);
-            thread.Start();
-            thread.Join();
-            thread = null;
-
-            return 0;
-        }
-
-        public static void RebuildMODELThread(string command, string input_path, string filter, string search, string search_type, string output_path)
-        {
-            int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
-        }
-
-        public int RebuildMODEL(string command, string input_path, string filter, string search, string search_type, string output_path)
-        {
-            Thread thread = new Thread(() => RebuildMODELThread(command, input_path, filter, search, search_type, output_path));
-            thread.SetApartmentState(ApartmentState.MTA);
-            thread.Start();
-            thread.Join();
-            thread = null;
-
-            return 0;
-        }
-
-        private void MainTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            if (oneOrMoreRPKGsHaveBeenImported)
-            {
-                if (MainTreeView.Items.Count > 0)
-                {
-                    var treeview = (sender as TreeView);
-
-                    string itemHeader = "";
-
-                    if (treeview.SelectedItem is TreeViewItem item)
-                    {
-                        itemHeader = (item.Header as string);
-                    }
-                    else if (treeview.SelectedItem == null)
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        itemHeader = treeview.SelectedItem.ToString();
-                    }
+                    string itemHeader = item.Text;
 
                     //MessageBoxShow(itemHeader);
+
+                    rpkgFilePath = GetRootTreeNode(e.Node).Text;
 
                     if (itemHeader.Length == 4)
                     {
@@ -653,7 +375,8 @@ namespace rpkg
                             LoadHexEditor();
                         }
 
-                        currentRPKGFilePath = rpkgFilePath;
+                        string currentRPKGFilePath = rpkgFilePath;
+
                         currentHash = header[0];
 
                         if (resourceType == "JSON")
@@ -1076,161 +799,32 @@ namespace rpkg
                         }
                     }
 
-                    GC.Collect();
+                    //GC.Collect();
                 }
             }
         }
 
-        private void Item2_GotFocus(object sender, RoutedEventArgs e)
+        private void MainTreeView_AfterExpand(object sender, System.Windows.Forms.TreeViewEventArgs e)
         {
-            string[] header = ((sender as ListViewItem).Content as string).Split(' ');
+            var item = (e.Node as System.Windows.Forms.TreeNode);
 
-            string hash = header[0];
-
-            DetailsTextBox.Text = Marshal.PtrToStringAnsi(get_hash_details(rpkgFilePath, hash));
-
-            UInt32 hash_size = get_hash_in_rpkg_size(rpkgFilePath, hash);
-
-            byte[] hash_data = new byte[hash_size];
-
-            Marshal.Copy(get_hash_in_rpkg_data(rpkgFilePath, hash), hash_data, 0, (int)hash_size);
-
-            int return_value = clear_hash_data_vector();
-        }
-
-        private void ImportRPKGFile(string rpkgPath)
-        {
-            rpkgFilePath = rpkgPath;
-
-            string command = "-import_rpkg";
-            string input_path = rpkgFilePath;
-            string filter = "";
-            string search = "";
-            string search_type = "";
-            string output_path = "";
-
-            string rpkgFile = rpkgFilePath.Substring(rpkgFilePath.LastIndexOf("\\") + 1);
-
-            foreach (TreeViewItem treeviewItem in MainTreeView.Items)
+            if (item.Nodes.Count == 1 && item.Nodes[0].Text == "")
             {
-                if (rpkgFilePath == (treeviewItem.Header as string))
-                {
-                    return;
-                }
-            }
+                item.Nodes.Clear();
 
-            int return_value = reset_task_status();
-
-            execute_task rpkgExecute = task_execute;
-
-            IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
-
-            Progress progress = new Progress();
-
-            progress.message.Content = "Importing RPKG file " + rpkgFile + "...";
-
-            progress.operation = (int)Progress.Operation.IMPORT;
-
-            progress.ShowDialog();
-
-            if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
-            {
-                //MessageBoxShow(progress.task_status_string);
-
-                return;
-            }
-
-            if (MainTreeView.Items.Count > 0)
-            {
-                if ((MainTreeView.Items.GetItemAt(0) as TreeViewItem).Header.ToString() == "Click")
-                {
-                    MainTreeView.Items.Clear();
-                }
-            }
-
-            var item = new TreeViewItem();
-
-            item.Header = rpkgFilePath;
-
-            MainTreeView.Items.Add(item);
-
-            Thread.Sleep(200);
-
-            List<string> resourceTypes = new List<string>();
-
-            UInt32 resourceTypeCount = get_resource_types_count(rpkgFilePath);
-
-            for (UInt32 i = 0; i < resourceTypeCount; i++)
-            {
-                resourceTypes.Add(Marshal.PtrToStringAnsi(get_resource_types_at(rpkgFilePath, i)));
-            }
-
-            resourceTypes.Sort();
-
-            foreach (string resourceType in resourceTypes)
-            {
-                var item2 = new TreeViewItem();
-
-                item2.Header = resourceType;
-
-                item2.Items.Add(null);
-
-                item2.Expanded += Item2_Expanded;
-
-                //item2.Collapsed += Item2_Collapsed;
-
-                item.Items.Add(item2);
-            }
-
-            oneOrMoreRPKGsHaveBeenImported = true;
-        }
-
-        private void OpenRPKGFile_Click(object sender, RoutedEventArgs e)
-        {
-            var fileDialog = new Ookii.Dialogs.Wpf.VistaOpenFileDialog();
-
-            fileDialog.Title = "Select an RPKG file to import:";
-
-            fileDialog.Filter = "RPKG file|*.rpkg|All files|*.*";
-
-            if (!System.IO.Directory.Exists(userSettings.InputFolder))
-            {
-                userSettings.InputFolder = System.IO.Directory.GetCurrentDirectory();
-
-                var options = new JsonSerializerOptions { WriteIndented = true };
-
-                string jsonString = JsonSerializer.Serialize(userSettings, options);
-
-                File.WriteAllText("rpkg.json", jsonString);
-            }
-
-            fileDialog.InitialDirectory = userSettings.InputFolder;
-
-            fileDialog.FileName = userSettings.InputFolder;
-
-            var fileDialogResult = fileDialog.ShowDialog();
-
-            if (fileDialogResult == true)
-            {
-                ImportRPKGFile(fileDialog.FileName);
-
-                //LoadHashDependsMap();
-            }
-        }
-
-        private void Item2_Expanded(object sender, RoutedEventArgs e)
-        {
-            var item = (sender as TreeViewItem);
-
-            if (item.Items.Count == 1 && item.Items[0] == null)
-            {
-                item.Items.Clear();
-
-                string[] header = (item.Header as string).Split(' ');
+                string[] header = (item.Text as string).Split(' ');
 
                 string resourceType = header[0];
 
+                rpkgFilePath = GetRootTreeNode(e.Node).Text;
+
                 UInt32 hashBasedOnResourceTypeCount = get_hash_based_on_resource_type_count(rpkgFilePath, resourceType);
+
+                MainTreeView.BeginUpdate();
+
+                int nodeCount = (int)hashBasedOnResourceTypeCount;
+
+                System.Windows.Forms.TreeNode[] nodes = new System.Windows.Forms.TreeNode[nodeCount];
 
                 for (UInt32 i = 0; i < hashBasedOnResourceTypeCount; i++)
                 {
@@ -1242,47 +836,35 @@ namespace rpkg
 
                     string ioiString = Marshal.PtrToStringAnsi(get_hash_list_string(temp_test[0]));
 
-                    item.Items.Add(hash + " " + ioiString);
+                    nodes[i] = new System.Windows.Forms.TreeNode();
+
+                    nodes[i].Text = hash + " " + ioiString;
                 }
+                                
+                item.Nodes.AddRange(nodes);
+
+                MainTreeView.EndUpdate();
             }
 
-            GC.Collect();
+            //GC.Collect();
         }
 
-        private void TreeViewItem_PreviewMouseLeftButtonUpEvent(object sender, RoutedEventArgs e)
+        private void MainTreeView_NodeMouseClick(object sender, System.Windows.Forms.TreeNodeMouseClickEventArgs e)
         {
-            (sender as TreeViewItem).IsSelected = true;
-
-            string header = (sender as TreeViewItem).Header.ToString();
-
-            if (header.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
+            if (e.Button == System.Windows.Forms.MouseButtons.Right)
             {
-                rpkgFilePath = header;
-            }
-        }
+                MainTreeView.SelectedNode = e.Node;
 
-        private void TreeViewItem_PreviewMouseRightButtonDownEvent(object sender, RoutedEventArgs e)
-        {
-            (sender as TreeViewItem).IsSelected = true;
+                //MessageBoxShow(e.Node.Text);
 
-            string header = (sender as TreeViewItem).Header.ToString();
+                //MessageBoxShow(e.Button.ToString());
 
-            if (header.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
-            {
-                rpkgFilePath = header;
-            }
-        }
-
-        private void TreeViewItem_MouseRightButtonDownEvent(object sender, RoutedEventArgs e)
-        {
-            (sender as TreeViewItem).IsSelected = true;
-
-            string header = (sender as TreeViewItem).Header.ToString();
-
-            if (header.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
-            {
-                if (rightClickedOn == 0)
+                string header = e.Node.Text;
+                                
+                if (header.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
                 {
+                    rpkgFilePath = header;
+
                     string command = "";
                     string input_path = rpkgFilePath;
                     string filter = "";
@@ -1300,8 +882,10 @@ namespace rpkg
 
                     RightClickMenu rightClickMenu = new RightClickMenu(buttons);
 
-                    rightClickMenu.Left = PointToScreen(Mouse.GetPosition(null)).X;
-                    rightClickMenu.Top = PointToScreen(Mouse.GetPosition(null)).Y;
+                    System.Windows.Point point = new System.Windows.Point(e.Location.X, e.Location.Y);
+
+                    rightClickMenu.Left = PointToScreen(point).X;
+                    rightClickMenu.Top = PointToScreen(point).Y;
 
                     rightClickMenu.ShowDialog();
 
@@ -1324,22 +908,82 @@ namespace rpkg
                     {
                         int temp_return_value = unload_rpkg(rpkgFilePath);
 
-                        MainTreeView.Items.Remove((sender as TreeViewItem));
+                        SearchRPKGsTreeView.Nodes.Clear();
 
-                        SearchRPKGsTreeView.Items.Clear();
+                        bool treeview_item_found = false;
 
-                        rightClickedOn = 0;
+                        int count = 0;
 
-                        rightClickedOnFirst = true;
+                        int treeview_item_index = 0;
+
+                        foreach (System.Windows.Forms.TreeNode item in MainTreeView.Nodes)
+                        {
+                            if (item.Text.ToString() == rpkgFilePath)
+                            {
+                                treeview_item_index = count;
+
+                                treeview_item_found = true;
+                            }
+
+                            count++;
+                        }
+
+                        if (treeview_item_found)
+                        {
+                            MainTreeView.Nodes.RemoveAt(treeview_item_index);
+
+                            //ImportRPKGFile(rpkgFilePath);
+
+                            //foreach (System.Windows.Forms.TreeNode item in MainTreeView.Nodes)
+                            //{
+                                //if (item.Text.ToString() == rpkgFilePath)
+                                //{
+                                    //MainTreeView.SelectedNode = item;
+                                //}
+                            //}
+                        }
+                        else
+                        {
+                            MessageBoxShow("Error: Cound not find the treeview item for unloading for RPKG: " + rpkgFilePath);
+                        }
+
+                        treeview_item_found = false;
+
+                        count = 0;
+
+                        treeview_item_index = 0;
+
+                        foreach (System.Windows.Forms.TreeNode item in HashMapTreeView.Nodes)
+                        {
+                            if (item.Text.ToString() == rpkgFilePath)
+                            {
+                                treeview_item_index = count;
+
+                                treeview_item_found = true;
+                            }
+
+                            count++;
+                        }
+
+                        if (treeview_item_found)
+                        {
+                            HashMapTreeView.Nodes.RemoveAt(treeview_item_index);
+
+                            //ImportRPKGFile(rpkgFilePath);
+
+                            //foreach (System.Windows.Forms.TreeNode item in MainTreeView.Nodes)
+                            //{
+                            //if (item.Text.ToString() == rpkgFilePath)
+                            //{
+                            //MainTreeView.SelectedNode = item;
+                            //}
+                            //}
+                        }
 
                         return;
                     }
                     else
                     {
-                        rightClickedOn = 0;
-
-                        rightClickedOnFirst = true;
-
                         return;
                     }
 
@@ -1355,19 +999,13 @@ namespace rpkg
                     {
                         //MessageBoxShow(progress.task_status_string);
 
-                        rightClickedOn = 0;
-
-                        rightClickedOnFirst = true;
-
                         return;
                     }
-
-                    rightClickedOn = 0;
-
-                    rightClickedOnFirst = true;
                 }
-                else if (rightClickedOn == 1)
+                else if (header.Length == 4)
                 {
+                    rpkgFilePath = GetRootTreeNode(e.Node).Text;
+
                     string command = "";
                     string input_path = rpkgFilePath;
                     string filter = "";
@@ -1379,14 +1017,16 @@ namespace rpkg
 
                     progress.operation = (int)Progress.Operation.MASS_EXTRACT;
 
-                    if (rightClickedOnName == "PRIM")
+                    if (header == "PRIM")
                     {
-                        string[] buttons = { "Extract All " + rightClickedOnName, "Extract All " + rightClickedOnName + " To GLB", "Cancel" };
+                        string[] buttons = { "Extract All " + header, "Extract All " + header + " To GLB", "Cancel" };
 
                         RightClickMenu rightClickMenu = new RightClickMenu(buttons);
 
-                        rightClickMenu.Left = PointToScreen(Mouse.GetPosition(null)).X;
-                        rightClickMenu.Top = PointToScreen(Mouse.GetPosition(null)).Y;
+                        System.Windows.Point point = new System.Windows.Point(e.Location.X, e.Location.Y);
+
+                        rightClickMenu.Left = PointToScreen(point).X;
+                        rightClickMenu.Top = PointToScreen(point).Y;
 
                         rightClickMenu.ShowDialog();
 
@@ -1397,24 +1037,20 @@ namespace rpkg
                         {
                             command = "-extract_from_rpkg";
 
-                            filter = rightClickedOnName;
+                            filter = header;
 
-                            progress.message.Content = "Extracting All " + rightClickedOnName + "...";
+                            progress.message.Content = "Extracting All " + header + "...";
                         }
                         else if (rightClickMenu.buttonPressed == "button1")
                         {
                             command = "-extract_all_prim_to_glb_from";
 
-                            progress.message.Content = "Extracting All " + rightClickedOnName + " To GLB...";
+                            progress.message.Content = "Extracting All " + header + " To GLB...";
 
-                            string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + rightClickedOnName + " To:");
+                            string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + header + " To:");
 
                             if (temp_outputFolder == "")
                             {
-                                rightClickedOn = 0;
-
-                                rightClickedOnFirst = true;
-
                                 return;
                             }
 
@@ -1422,25 +1058,19 @@ namespace rpkg
                         }
                         else
                         {
-                            rightClickedOn = 0;
-
-                            rightClickedOnFirst = true;
-
                             return;
                         }
-
-                        rightClickedOn = 0;
-
-                        rightClickedOnFirst = true;
                     }
-                    else if (rightClickedOnName == "TEXT")
+                    else if (header == "TEXT")
                     {
-                        string[] buttons = { "Extract All " + rightClickedOnName, "Extract All " + rightClickedOnName + " To TGA", "Cancel" };
+                        string[] buttons = { "Extract All " + header, "Extract All " + header + " To TGA", "Cancel" };
 
                         RightClickMenu rightClickMenu = new RightClickMenu(buttons);
 
-                        rightClickMenu.Left = PointToScreen(Mouse.GetPosition(null)).X;
-                        rightClickMenu.Top = PointToScreen(Mouse.GetPosition(null)).Y;
+                        System.Windows.Point point = new System.Windows.Point(e.Location.X, e.Location.Y);
+
+                        rightClickMenu.Left = PointToScreen(point).X;
+                        rightClickMenu.Top = PointToScreen(point).Y;
 
                         rightClickMenu.ShowDialog();
 
@@ -1451,24 +1081,20 @@ namespace rpkg
                         {
                             command = "-extract_from_rpkg";
 
-                            filter = rightClickedOnName;
+                            filter = header;
 
-                            progress.message.Content = "Extracting All " + rightClickedOnName + "...";
+                            progress.message.Content = "Extracting All " + header + "...";
                         }
                         else if (rightClickMenu.buttonPressed == "button1")
                         {
                             command = "-extract_all_text_from";
 
-                            progress.message.Content = "Extracting All " + rightClickedOnName + " To TGA...";
+                            progress.message.Content = "Extracting All " + header + " To TGA...";
 
-                            string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + rightClickedOnName + " To:");
+                            string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + header + " To:");
 
                             if (temp_outputFolder == "")
                             {
-                                rightClickedOn = 0;
-
-                                rightClickedOnFirst = true;
-
                                 return;
                             }
 
@@ -1476,25 +1102,19 @@ namespace rpkg
                         }
                         else
                         {
-                            rightClickedOn = 0;
-
-                            rightClickedOnFirst = true;
-
                             return;
                         }
-
-                        rightClickedOn = 0;
-
-                        rightClickedOnFirst = true;
                     }
-                    else if (rightClickedOnName == "LOCR" || rightClickedOnName == "DLGE" || rightClickedOnName == "RTLV")
+                    else if (header == "LOCR" || header == "DLGE" || header == "RTLV")
                     {
-                        string[] buttons = { "Extract All " + rightClickedOnName, "Extract All " + rightClickedOnName + " To JSON", "Cancel" };
+                        string[] buttons = { "Extract All " + header, "Extract All " + header + " To JSON", "Cancel" };
 
                         RightClickMenu rightClickMenu = new RightClickMenu(buttons);
 
-                        rightClickMenu.Left = PointToScreen(Mouse.GetPosition(null)).X;
-                        rightClickMenu.Top = PointToScreen(Mouse.GetPosition(null)).Y;
+                        System.Windows.Point point = new System.Windows.Point(e.Location.X, e.Location.Y);
+
+                        rightClickMenu.Left = PointToScreen(point).X;
+                        rightClickMenu.Top = PointToScreen(point).Y;
 
                         rightClickMenu.ShowDialog();
 
@@ -1505,71 +1125,65 @@ namespace rpkg
                         {
                             command = "-extract_from_rpkg";
 
-                            filter = rightClickedOnName;
+                            filter = header;
 
-                            progress.message.Content = "Extracting All " + rightClickedOnName + "...";
+                            progress.message.Content = "Extracting All " + header + "...";
                         }
                         else if (rightClickMenu.buttonPressed == "button1")
                         {
-                            if (rightClickedOnName == "LOCR")
+                            if (header == "LOCR")
                             {
                                 command = "-extract_locr_to_json_from";
 
-                                progress.message.Content = "Extracting All " + rightClickedOnName + " To JSON...";
+                                progress.message.Content = "Extracting All " + header + " To JSON...";
                             }
-                            else if (rightClickedOnName == "DLGE")
+                            else if (header == "DLGE")
                             {
                                 command = "-extract_dlge_to_json_from";
 
-                                progress.message.Content = "Extracting All " + rightClickedOnName + " To JSON...";
+                                progress.message.Content = "Extracting All " + header + " To JSON...";
                             }
-                            else if (rightClickedOnName == "RTLV")
+                            else if (header == "RTLV")
                             {
                                 command = "-extract_rtlv_to_json_from";
 
-                                progress.message.Content = "Extracting All " + rightClickedOnName + " To JSON...";
+                                progress.message.Content = "Extracting All " + header + " To JSON...";
                             }
                         }
                         else
                         {
-                            rightClickedOn = 0;
-
-                            rightClickedOnFirst = true;
-
                             return;
                         }
-
-                        rightClickedOn = 0;
-
-                        rightClickedOnFirst = true;
                     }
-                    else if (rightClickedOnName == "WWEM" || rightClickedOnName == "WWES" || rightClickedOnName == "WWEV" || rightClickedOnName == "ORES" || rightClickedOnName == "GFXI" || rightClickedOnName == "JSON")
+                    else if (header == "WWEM" || header == "WWES" || header == "WWEV" || header == "ORES" || header == "GFXI" || header == "JSON")
                     {
                         string buttonContent = "";
 
-                        if (rightClickedOnName == "WWEM" || rightClickedOnName == "WWES" || rightClickedOnName == "WWEV")
+                        if (header == "WWEM" || header == "WWES" || header == "WWEV")
                         {
-                            buttonContent = "Extract All " + rightClickedOnName + " To OGG To IOI Paths";
+                            buttonContent = "Extract All " + header + " To OGG To IOI Paths";
                         }
-                        else if (rightClickedOnName == "ORES")
+                        else if (header == "ORES")
                         {
-                            buttonContent = "Extract All " + rightClickedOnName + " To IOI Paths";
+                            buttonContent = "Extract All " + header + " To IOI Paths";
                         }
-                        else if (rightClickedOnName == "GFXI")
+                        else if (header == "GFXI")
                         {
-                            buttonContent = "Extract All " + rightClickedOnName + " To Images To IOI Paths";
+                            buttonContent = "Extract All " + header + " To Images To IOI Paths";
                         }
-                        else if (rightClickedOnName == "JSON")
+                        else if (header == "JSON")
                         {
-                            buttonContent = "Extract All " + rightClickedOnName + " To JSONs To IOI Paths";
+                            buttonContent = "Extract All " + header + " To JSONs To IOI Paths";
                         }
 
-                        string[] buttons = { "Extract All " + rightClickedOnName, buttonContent, "Cancel" };
+                        string[] buttons = { "Extract All " + header, buttonContent, "Cancel" };
 
                         RightClickMenu rightClickMenu = new RightClickMenu(buttons);
 
-                        rightClickMenu.Left = PointToScreen(Mouse.GetPosition(null)).X;
-                        rightClickMenu.Top = PointToScreen(Mouse.GetPosition(null)).Y;
+                        System.Windows.Point point = new System.Windows.Point(e.Location.X, e.Location.Y);
+
+                        rightClickMenu.Left = PointToScreen(point).X;
+                        rightClickMenu.Top = PointToScreen(point).Y;
 
                         rightClickMenu.ShowDialog();
 
@@ -1582,85 +1196,79 @@ namespace rpkg
 
                             command = "-extract_from_rpkg";
 
-                            filter = rightClickedOnName;
+                            filter = header;
 
-                            progress.message.Content = "Extracting All " + rightClickedOnName + "...";
+                            progress.message.Content = "Extracting All " + header + "...";
                         }
                         else if (rightClickMenu.buttonPressed == "button1")
                         {
-                            if (rightClickedOnName == "WWEM" || rightClickedOnName == "WWES" || rightClickedOnName == "WWEV" || rightClickedOnName == "ORES")
+                            if (header == "WWEM" || header == "WWES" || header == "WWEV" || header == "ORES")
                             {
                                 Filter filterDialog = new Filter();
 
-                                filterDialog.message1.Content = "Enter extraction filter for " + rightClickedOnName + " below.";
+                                filterDialog.message1.Content = "Enter extraction filter for " + header + " below.";
 
                                 filterDialog.ShowDialog();
 
                                 filter = filterDialog.filterString;
                             }
 
-                            if (rightClickedOnName == "WWEM")
+                            if (header == "WWEM")
                             {
                                 command = "-extract_wwem_to_ogg_from";
 
-                                progress.message.Content = "Extracting All " + rightClickedOnName + " To OGG To IOI Paths...";
+                                progress.message.Content = "Extracting All " + header + " To OGG To IOI Paths...";
                             }
-                            else if (rightClickedOnName == "WWES")
+                            else if (header == "WWES")
                             {
                                 command = "-extract_wwes_to_ogg_from";
 
-                                progress.message.Content = "Extracting All " + rightClickedOnName + " To OGG To IOI Paths...";
+                                progress.message.Content = "Extracting All " + header + " To OGG To IOI Paths...";
                             }
-                            else if (rightClickedOnName == "WWEV")
+                            else if (header == "WWEV")
                             {
                                 command = "-extract_wwev_to_ogg_from";
 
-                                progress.message.Content = "Extracting All " + rightClickedOnName + " To OGG To IOI Paths...";
+                                progress.message.Content = "Extracting All " + header + " To OGG To IOI Paths...";
                             }
-                            else if (rightClickedOnName == "ORES")
+                            else if (header == "ORES")
                             {
                                 command = "-extract_ores_from";
 
-                                progress.message.Content = "Extracting All " + rightClickedOnName + " To IOI Paths...";
+                                progress.message.Content = "Extracting All " + header + " To IOI Paths...";
                             }
-                            else if (rightClickedOnName == "GFXI")
+                            else if (header == "GFXI")
                             {
                                 command = "-extract_ores_from";
 
-                                filter = rightClickedOnName;
+                                filter = header;
 
-                                progress.message.Content = "Extracting All " + rightClickedOnName + " To IOI Paths...";
+                                progress.message.Content = "Extracting All " + header + " To IOI Paths...";
                             }
-                            else if (rightClickedOnName == "JSON")
+                            else if (header == "JSON")
                             {
                                 command = "-extract_ores_from";
 
-                                filter = rightClickedOnName;
+                                filter = header;
 
-                                progress.message.Content = "Extracting All " + rightClickedOnName + " To IOI Paths...";
+                                progress.message.Content = "Extracting All " + header + " To IOI Paths...";
                             }
                         }
                         else
                         {
-                            rightClickedOn = 0;
-
-                            rightClickedOnFirst = true;
-
                             return;
                         }
-
-                        rightClickedOn = 0;
-
-                        rightClickedOnFirst = true;
                     }
                     else
                     {
-                        string[] buttons = { "Extract All " + rightClickedOnName, "Cancel" };
+                        string[] buttons = { "Extract All " + header, "Cancel" };
 
                         RightClickMenu rightClickMenu = new RightClickMenu(buttons);
 
-                        rightClickMenu.Left = PointToScreen(Mouse.GetPosition(null)).X;
-                        rightClickMenu.Top = PointToScreen(Mouse.GetPosition(null)).Y;
+                        System.Windows.Point point = new System.Windows.Point(e.Location.X, e.Location.Y);
+
+                        rightClickMenu.Left = PointToScreen(point).X;
+                        rightClickMenu.Top = PointToScreen(point).Y;
 
                         rightClickMenu.ShowDialog();
 
@@ -1671,22 +1279,14 @@ namespace rpkg
                         {
                             command = "-extract_from_rpkg";
 
-                            filter = rightClickedOnName;
+                            filter = header;
 
-                            progress.message.Content = "Extracting " + rightClickedOnName + "...";
+                            progress.message.Content = "Extracting " + header + "...";
                         }
                         else
                         {
-                            rightClickedOn = 0;
-
-                            rightClickedOnFirst = true;
-
                             return;
                         }
-
-                        rightClickedOn = 0;
-
-                        rightClickedOnFirst = true;
                     }
 
                     int return_value = reset_task_status();
@@ -1701,19 +1301,17 @@ namespace rpkg
                     {
                         //MessageBoxShow(progress.task_status_string);
 
-                        rightClickedOn = 0;
-
-                        rightClickedOnFirst = true;
-
                         return;
                     }
-
-                    rightClickedOn = 0;
-
-                    rightClickedOnFirst = true;
                 }
                 else
                 {
+                    string[] headerSplit = header.Split(' ');
+
+                    string hashName = headerSplit[0];
+
+                    rpkgFilePath = GetRootTreeNode(e.Node).Text;
+
                     string command = "";
                     string input_path = rpkgFilePath;
                     string filter = "";
@@ -1725,7 +1323,7 @@ namespace rpkg
 
                     progress.operation = (int)Progress.Operation.MASS_EXTRACT;
 
-                    string[] hashData = rightClickedOnName.Split('.');
+                    string[] hashData = hashName.Split('.');
 
                     string hashValue = hashData[0];
                     string hashType = hashData[1];
@@ -1736,7 +1334,7 @@ namespace rpkg
 
                     if (hashType == "PRIM")
                     {
-                        string[] buttons = { "Extract " + rightClickedOnName, "Extract " + rightClickedOnName + " MODEL To GLB/TGA File(s)", "Extract " + rightClickedOnName + " To GLB File", "Cancel" };
+                        string[] buttons = { "Extract " + hashName, "Extract " + hashName + " MODEL To GLB/TGA File(s)", "Extract " + hashName + " To GLB File", "Cancel" };
 
                         buttonCount = 4;
 
@@ -1744,7 +1342,7 @@ namespace rpkg
                     }
                     else if (hashType == "TEMP")
                     {
-                        string[] buttons = { "Extract " + rightClickedOnName, "Edit " + rightClickedOnName + " in Brick/Entity Editor", "Extract PRIM Models linked to " + rightClickedOnName + " To GLB/TGA File(s)", "Extract PRIMs linked to " + rightClickedOnName + " To GLB File(s)", "Cancel" };
+                        string[] buttons = { "Extract " + hashName, "Edit " + hashName + " in Brick/Entity Editor", "Extract PRIM Models linked to " + hashName + " To GLB/TGA File(s)", "Extract PRIMs linked to " + hashName + " To GLB File(s)", "Cancel" };
 
                         buttonCount = 5;
 
@@ -1752,7 +1350,7 @@ namespace rpkg
                     }
                     else if (hashType == "TEXT")
                     {
-                        string[] buttons = { "Extract " + rightClickedOnName, "Extract TEXTs(TEXDs) linked to " + rightClickedOnName + " To TGA File(s)", "Cancel" };
+                        string[] buttons = { "Extract " + hashName, "Extract TEXTs(TEXDs) linked to " + hashName + " To TGA File(s)", "Cancel" };
 
                         buttonCount = 3;
 
@@ -1760,7 +1358,7 @@ namespace rpkg
                     }
                     else if (hashType == "WWEM" || hashType == "WWES" || hashType == "WWEV")
                     {
-                        string[] buttons = { "Extract " + rightClickedOnName, "Extract " + rightClickedOnName + " To OGG (IOI Path)", "Cancel" };
+                        string[] buttons = { "Extract " + hashName, "Extract " + hashName + " To OGG (IOI Path)", "Cancel" };
 
                         buttonCount = 3;
 
@@ -1768,7 +1366,7 @@ namespace rpkg
                     }
                     else if (hashType == "DLGE" || hashType == "LOCR" || hashType == "RTLV")
                     {
-                        string[] buttons = { "Extract " + rightClickedOnName, "Extract " + rightClickedOnName + " To JSON (IOI Path)", "Cancel" };
+                        string[] buttons = { "Extract " + hashName, "Extract " + hashName + " To JSON (IOI Path)", "Cancel" };
 
                         buttonCount = 3;
 
@@ -1776,9 +1374,9 @@ namespace rpkg
                     }
                     else if (hashType == "GFXI")
                     {
-                        if (rightClickedOnFullName.Contains("[ores:"))
+                        if (header.Contains("[ores:"))
                         {
-                            string[] buttons = { "Extract " + rightClickedOnName, "Extract " + rightClickedOnName + " To Image (IOI Path)", "Cancel" };
+                            string[] buttons = { "Extract " + hashName, "Extract " + hashName + " To Image (IOI Path)", "Cancel" };
 
                             buttonCount = 3;
 
@@ -1786,7 +1384,7 @@ namespace rpkg
                         }
                         else
                         {
-                            string[] buttons = { "Extract " + rightClickedOnName, "Cancel" };
+                            string[] buttons = { "Extract " + hashName, "Cancel" };
 
                             buttonCount = 2;
 
@@ -1795,9 +1393,9 @@ namespace rpkg
                     }
                     else if (hashType == "JSON")
                     {
-                        if (rightClickedOnFullName.Contains("[ores:"))
+                        if (header.Contains("[ores:"))
                         {
-                            string[] buttons = { "Extract " + rightClickedOnName, "Extract " + rightClickedOnName + " To JSON (IOI Path)", "Cancel" };
+                            string[] buttons = { "Extract " + hashName, "Extract " + hashName + " To JSON (IOI Path)", "Cancel" };
 
                             buttonCount = 3;
 
@@ -1805,7 +1403,7 @@ namespace rpkg
                         }
                         else
                         {
-                            string[] buttons = { "Extract " + rightClickedOnName, "Cancel" };
+                            string[] buttons = { "Extract " + hashName, "Cancel" };
 
                             buttonCount = 2;
 
@@ -1814,15 +1412,17 @@ namespace rpkg
                     }
                     else
                     {
-                        string[] buttons = { "Extract " + rightClickedOnName, "Cancel" };
+                        string[] buttons = { "Extract " + hashName, "Cancel" };
 
                         buttonCount = 2;
 
                         rightClickMenu = new RightClickMenu(buttons);
                     }
 
-                    rightClickMenu.Left = PointToScreen(Mouse.GetPosition(null)).X;
-                    rightClickMenu.Top = PointToScreen(Mouse.GetPosition(null)).Y;
+                    System.Windows.Point point = new System.Windows.Point(e.Location.X, e.Location.Y);
+
+                    rightClickMenu.Left = PointToScreen(point).X;
+                    rightClickMenu.Top = PointToScreen(point).Y;
 
                     rightClickMenu.ShowDialog();
 
@@ -1834,16 +1434,12 @@ namespace rpkg
 
                         filter = hashValue;
 
-                        progress.message.Content = "Extracting " + rightClickedOnName + "...";
+                        progress.message.Content = "Extracting " + hashName + "...";
 
-                        string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + rightClickedOnName + " To:");
+                        string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
 
                         if (outputFolder == "")
                         {
-                            rightClickedOn = 0;
-
-                            rightClickedOnFirst = true;
-
                             return;
                         }
 
@@ -1858,10 +1454,6 @@ namespace rpkg
                             if (!runtimeDirectory.EndsWith("runtime", StringComparison.OrdinalIgnoreCase))
                             {
                                 MessageBoxShow("The current RPKG does not exist in the Hitman runtime directory, can not perform PRIM model extraction.");
-
-                                rightClickedOn = 0;
-
-                                rightClickedOnFirst = true;
 
                                 return;
                             }
@@ -1889,16 +1481,12 @@ namespace rpkg
 
                             filter = hashValue;
 
-                            progress.message.Content = "Extracting " + rightClickedOnName + " To GLB/TGA File(s)...";
+                            progress.message.Content = "Extracting " + hashName + " To GLB/TGA File(s)...";
 
-                            string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + rightClickedOnName + " To:");
+                            string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
 
                             if (temp_outputFolder == "")
                             {
-                                rightClickedOn = 0;
-
-                                rightClickedOnFirst = true;
-
                                 return;
                             }
 
@@ -1919,10 +1507,6 @@ namespace rpkg
                                 return;
                             }
 
-                            rightClickedOn = 0;
-
-                            rightClickedOnFirst = true;
-
                             return;
                         }
                         else if (hashType == "TEXT")
@@ -1933,16 +1517,12 @@ namespace rpkg
 
                             filter = hashValue;
 
-                            progress.message.Content = "Extracting " + rightClickedOnName + " To TGA File(s)...";
+                            progress.message.Content = "Extracting " + hashName + " To TGA File(s)...";
 
-                            string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + rightClickedOnName + " To:");
+                            string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
 
                             if (temp_outputFolder == "")
                             {
-                                rightClickedOn = 0;
-
-                                rightClickedOnFirst = true;
-
                                 return;
                             }
 
@@ -1962,10 +1542,6 @@ namespace rpkg
 
                                 return;
                             }
-
-                            rightClickedOn = 0;
-
-                            rightClickedOnFirst = true;
 
                             return;
                         }
@@ -2019,7 +1595,7 @@ namespace rpkg
 
                             int temp_return_value = clear_temp_tblu_data();
 
-                            //MessageBoxShow(rightClickedOnName + ", " + rpkgFilePath);
+                            //MessageBoxShow(hashName + ", " + rpkgFilePath);
 
                             rpkgFilePath = rpkgFileBackup;
 
@@ -2027,7 +1603,7 @@ namespace rpkg
 
                             execute_load_recursive_temps load_recursive_temps_execute = load_recursive_temps;
 
-                            IAsyncResult temp_ar = load_recursive_temps_execute.BeginInvoke(rightClickedOnName, rpkgFilePath, null, null);
+                            IAsyncResult temp_ar = load_recursive_temps_execute.BeginInvoke(hashName, rpkgFilePath, null, null);
 
                             Progress temp_progress = new Progress();
 
@@ -2037,7 +1613,7 @@ namespace rpkg
 
                             temp_progress.ShowDialog();
 
-                            int temp_index = get_temp_index(rightClickedOnName);
+                            int temp_index = get_temp_index(hashName);
 
                             //MessageBoxShow(temp_index.ToString());
 
@@ -2045,7 +1621,7 @@ namespace rpkg
                             {
                                 if (temp_progress.task_status == (int)Progress.RPKGStatus.TEMP_TBLU_NOT_FOUND_IN_DEPENDS)
                                 {
-                                    MessageBoxShow("Error: " + rightClickedOnName + " file has no TBLU hash depends.");
+                                    MessageBoxShow("Error: " + hashName + " file has no TBLU hash depends.");
                                 }
                                 else if (temp_progress.task_status == (int)Progress.RPKGStatus.TEMP_TBLU_NOT_FOUND_IN_RPKG)
                                 {
@@ -2053,32 +1629,32 @@ namespace rpkg
                                     {
                                         string rpkgBaseName = rpkgFile.Substring(0, rpkgUpperName.IndexOf("PATCH")) + ".rpkg";
 
-                                        MessageBoxShow("Error: TBLU file linked to " + rightClickedOnName + " file is missing.\n\nMake sure you you import the base archives if you are trying to edit a TEMP file residing in a patch RPKG.\n\nTry importing " + rpkgBaseName + " and trying to edit " + rightClickedOnName + " again.\n\nThis should be done before trying to launch the Brick/Entity Editor.");
+                                        MessageBoxShow("Error: TBLU file linked to " + hashName + " file is missing.\n\nMake sure you you import the base archives if you are trying to edit a TEMP file residing in a patch RPKG.\n\nTry importing " + rpkgBaseName + " and trying to edit " + hashName + " again.\n\nThis should be done before trying to launch the Brick/Entity Editor.");
                                     }
                                     else
                                     {
-                                        MessageBoxShow("Error: TBLU file linked to " + rightClickedOnName + " file is missing.\n\nMake sure you you import the base archives if you are trying to edit a TEMP file residing in a patch RPKG.");
+                                        MessageBoxShow("Error: TBLU file linked to " + hashName + " file is missing.\n\nMake sure you you import the base archives if you are trying to edit a TEMP file residing in a patch RPKG.");
                                     }
                                 }
                                 else if (temp_progress.task_status == (int)Progress.RPKGStatus.TEMP_TBLU_TOO_MANY)
                                 {
-                                    MessageBoxShow("Error: " + rightClickedOnName + " file has too many TBLU hash depends.");
+                                    MessageBoxShow("Error: " + hashName + " file has too many TBLU hash depends.");
                                 }
                                 else if (temp_progress.task_status == (int)Progress.RPKGStatus.TEMP_HEADER_NOT_FOUND)
                                 {
-                                    MessageBoxShow("Error: " + rightClickedOnName + " file is an empty TEMP file, missing it's resource type header/footer.");
+                                    MessageBoxShow("Error: " + hashName + " file is an empty TEMP file, missing it's resource type header/footer.");
                                 }
                                 else if (temp_progress.task_status == (int)Progress.RPKGStatus.TEMP_TBLU_ENTRY_COUNT_MISMATCH)
                                 {
-                                    MessageBoxShow("Error: " + rightClickedOnName + " file and TBLU file have mismatched entry/entity counts.");
+                                    MessageBoxShow("Error: " + hashName + " file and TBLU file have mismatched entry/entity counts.");
                                 }
                                 else if (temp_progress.task_status == (int)Progress.RPKGStatus.TEMP_VERSION_UNKNOWN)
                                 {
-                                    MessageBoxShow("Error: " + rightClickedOnName + " file's version is unknown.");
+                                    MessageBoxShow("Error: " + hashName + " file's version is unknown.");
                                 }
                                 else if (temp_progress.task_status == (int)Progress.RPKGStatus.TBLU_VERSION_UNKNOWN)
                                 {
-                                    MessageBoxShow("Error: " + rightClickedOnName + " file's TBLU file's version is unknown.");
+                                    MessageBoxShow("Error: " + hashName + " file's TBLU file's version is unknown.");
                                 }
 
                                 temp_return_value = clear_temp_tblu_data();
@@ -2094,9 +1670,9 @@ namespace rpkg
                                 entityBrickEditor.outputFolder = userSettings.OutputFolder;
 
                                 entityBrickEditor.temps_index = (UInt32)temp_index;
-                                entityBrickEditor.tempFileName = rightClickedOnName;
+                                entityBrickEditor.tempFileName = hashName;
                                 entityBrickEditor.rpkgFilePath = rpkgFilePath;
-                                entityBrickEditor.tempFileNameFull = rightClickedOnFullName;
+                                entityBrickEditor.tempFileNameFull = header;
 
                                 string[] theme = userSettings.ColorTheme.Split('/');
 
@@ -2105,14 +1681,10 @@ namespace rpkg
 
                                 entityBrickEditor.ShowDialog();
 
-                                GC.Collect();
+                                //GC.Collect();
                                 GC.WaitForPendingFinalizers();
-                                GC.Collect();
+                                //GC.Collect();
                             }
-
-                            rightClickedOn = 0;
-
-                            rightClickedOnFirst = true;
 
                             return;
                         }
@@ -2122,7 +1694,7 @@ namespace rpkg
 
                             filter = hashValue;
 
-                            progress.message.Content = "Extracting " + rightClickedOnName + " To OGG To IOI Path...";
+                            progress.message.Content = "Extracting " + hashName + " To OGG To IOI Path...";
                         }
                         else if (hashType == "WWES")
                         {
@@ -2130,7 +1702,7 @@ namespace rpkg
 
                             filter = hashValue;
 
-                            progress.message.Content = "Extracting " + rightClickedOnName + " To OGG To IOI Path...";
+                            progress.message.Content = "Extracting " + hashName + " To OGG To IOI Path...";
                         }
                         else if (hashType == "WWEV")
                         {
@@ -2138,7 +1710,7 @@ namespace rpkg
 
                             filter = hashValue;
 
-                            progress.message.Content = "Extracting " + rightClickedOnName + " To OGG To IOI Path...";
+                            progress.message.Content = "Extracting " + hashName + " To OGG To IOI Path...";
                         }
                         else if (hashType == "DLGE")
                         {
@@ -2146,7 +1718,7 @@ namespace rpkg
 
                             filter = hashValue;
 
-                            progress.message.Content = "Extracting " + rightClickedOnName + " To JSON...";
+                            progress.message.Content = "Extracting " + hashName + " To JSON...";
                         }
                         else if (hashType == "LOCR")
                         {
@@ -2154,7 +1726,7 @@ namespace rpkg
 
                             filter = hashValue;
 
-                            progress.message.Content = "Extracting " + rightClickedOnName + " To JSON...";
+                            progress.message.Content = "Extracting " + hashName + " To JSON...";
                         }
                         else if (hashType == "RTLV")
                         {
@@ -2162,7 +1734,7 @@ namespace rpkg
 
                             filter = hashValue;
 
-                            progress.message.Content = "Extracting " + rightClickedOnName + " To JSON...";
+                            progress.message.Content = "Extracting " + hashName + " To JSON...";
                         }
                         else if (hashType == "GFXI")
                         {
@@ -2170,7 +1742,7 @@ namespace rpkg
 
                             filter = hashValue;
 
-                            progress.message.Content = "Extracting " + rightClickedOnName + " To Image To IOI Path...";
+                            progress.message.Content = "Extracting " + hashName + " To Image To IOI Path...";
                         }
                         else if (hashType == "JSON")
                         {
@@ -2178,17 +1750,13 @@ namespace rpkg
 
                             filter = hashValue;
 
-                            progress.message.Content = "Extracting " + rightClickedOnName + " To JSON To IOI Path...";
+                            progress.message.Content = "Extracting " + hashName + " To JSON To IOI Path...";
                         }
 
-                        string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + rightClickedOnName + " To:");
+                        string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
 
                         if (outputFolder == "")
                         {
-                            rightClickedOn = 0;
-
-                            rightClickedOnFirst = true;
-
                             return;
                         }
 
@@ -2204,7 +1772,7 @@ namespace rpkg
 
                             filter = hashValue;
 
-                            progress.message.Content = "Extracting " + rightClickedOnName + " To GLB File...";
+                            progress.message.Content = "Extracting " + hashName + " To GLB File...";
                         }
                         else if (hashType == "TEMP")
                         {
@@ -2213,10 +1781,6 @@ namespace rpkg
                             if (!runtimeDirectory.EndsWith("runtime", StringComparison.OrdinalIgnoreCase))
                             {
                                 MessageBoxShow("The current RPKG does not exist in the Hitman runtime directory, can not perform PRIM model extraction.");
-
-                                rightClickedOn = 0;
-
-                                rightClickedOnFirst = true;
 
                                 return;
                             }
@@ -2242,16 +1806,12 @@ namespace rpkg
 
                             filter = hashValue;
 
-                            progress.message.Content = "Extracting PRIM Models linked to " + rightClickedOnName + " To GLB/TGA File(s)...";
+                            progress.message.Content = "Extracting PRIM Models linked to " + hashName + " To GLB/TGA File(s)...";
 
-                            string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + rightClickedOnName + " To:");
+                            string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
 
                             if (temp_outputFolder == "")
                             {
-                                rightClickedOn = 0;
-
-                                rightClickedOnFirst = true;
-
                                 return;
                             }
 
@@ -2276,21 +1836,13 @@ namespace rpkg
                                 MessageBoxShow("PRIM model(s) extracted successfully in " + temp_outputFolder);
                             }
 
-                            rightClickedOn = 0;
-
-                            rightClickedOnFirst = true;
-
                             return;
                         }
 
-                        string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + rightClickedOnName + " To:");
+                        string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
 
                         if (outputFolder == "")
                         {
-                            rightClickedOn = 0;
-
-                            rightClickedOnFirst = true;
-
                             return;
                         }
 
@@ -2304,17 +1856,13 @@ namespace rpkg
 
                             filter = hashValue;
 
-                            progress.message.Content = "Extracting PRIMs linked to " + rightClickedOnName + " To GLB File(s)...";
+                            progress.message.Content = "Extracting PRIMs linked to " + hashName + " To GLB File(s)...";
                         }
 
-                        string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + rightClickedOnName + " To:");
+                        string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
 
                         if (outputFolder == "")
                         {
-                            rightClickedOn = 0;
-
-                            rightClickedOnFirst = true;
-
                             return;
                         }
 
@@ -2322,16 +1870,8 @@ namespace rpkg
                     }
                     else
                     {
-                        rightClickedOn = 0;
-
-                        rightClickedOnFirst = true;
-
                         return;
                     }
-
-                    rightClickedOn = 0;
-
-                    rightClickedOnFirst = true;
 
                     int return_value = reset_task_status();
 
@@ -2345,52 +1885,727 @@ namespace rpkg
                     {
                         //MessageBoxShow(progress.task_status_string);
 
-                        rightClickedOn = 0;
+                        return;
+                    }
+                }
+            }
+        }
 
-                        rightClickedOnFirst = true;
+        private void HashMapTreeView_AfterExpand(object sender, System.Windows.Forms.TreeViewEventArgs e)
+        {
+            var item = (e.Node as System.Windows.Forms.TreeNode);
 
+            if (item.Nodes.Count == 1 && item.Nodes[0].Text == "")
+            {
+                item.Nodes.Clear();
+
+                System.Windows.Forms.TreeNode parentPrevious = item.Parent;
+
+                System.Windows.Forms.TreeNode parentCurrent = parentPrevious;
+
+                while (parentCurrent != null)
+                {
+                    parentPrevious = parentCurrent;
+
+                    parentCurrent = parentPrevious.Parent;
+                }
+
+                //System.Windows.MessageBox.Show(parentPrevious.Header.ToString());
+
+                string rpkgFilePathLocal = parentPrevious.Text.ToString();
+
+                string[] header = (item.Text as string).Replace("(", "").Replace(")", "").Split(' ');
+
+                string hash = header[0];
+                string rpkgFile = header[1];
+
+                //System.Windows.MessageBox.Show(hash + "," + rpkgFilePath);
+
+                int return_value = reset_task_status();
+
+                execute_get_direct_hash_depends rpkgExecute = get_direct_hash_depends;
+
+                IAsyncResult ar = rpkgExecute.BeginInvoke(rpkgFilePathLocal, hash, null, null);
+
+                Progress progress = new Progress();
+
+                progress.operation = (int)Progress.Operation.GENERAL;
+
+                progress.ShowDialog();
+
+                string hashDependsString = Marshal.PtrToStringAnsi(get_direct_hash_depends_string());
+
+                //System.Windows.MessageBox.Show(hashDependsString);
+
+                string[] hashDepends = hashDependsString.TrimEnd(',').Split(',');
+
+                if (hashDependsString != "")
+                {
+                    foreach (string hashDepend in hashDepends)
+                    {
+                        string[] hashData = hashDepend.Split('|');
+
+                        string hash2 = hashData[0];
+                        string rpkgFile2 = hashData[1];
+
+                        var item2 = new System.Windows.Forms.TreeNode();
+
+                        string[] temp_test = hash2.Split('.');
+
+                        string ioiString = Marshal.PtrToStringAnsi(get_hash_list_string(temp_test[0]));
+
+                        item2.Text = hash2 + " (" + rpkgFile + ") " + ioiString;
+
+                        item2.Nodes.Add("");
+
+                        item.Nodes.Add(item2);
+                    }
+                }
+            }
+
+            //GC.Collect();
+        }
+
+        private void SearchHashListTreeView_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
+        {
+            if (oneOrMoreRPKGsHaveBeenImported)
+            {
+                if (MainTreeView.Nodes.Count > 0)
+                {
+                    System.Windows.Forms.TreeNode item = (e.Node as System.Windows.Forms.TreeNode);
+
+                    if (item == null)
+                    {
                         return;
                     }
 
-                    rightClickedOn = 0;
+                    string itemHeader = item.Text;
 
-                    rightClickedOnFirst = true;
+                    //MessageBoxShow(itemHeader);
+
+                    string[] header = itemHeader.Split(' ');
+
+                    string hashFile = header[0];
+
+                    string[] hashDetails = hashFile.Split('.');
+
+                    string hash = hashDetails[0];
+                    string resourceType = hashDetails[1];
+
+                    string rpkgFilePath = GetRootTreeNode(e.Node).Text;
+
+                    string rpkgHashFilePathString = Marshal.PtrToStringAnsi(get_rpkg_file_paths_hash_is_in(hash));
+
+                    if (rpkgHashFilePathString != "")
+                    {
+                        string[] rpkgHashFilePaths = rpkgHashFilePathString.Trim(',').Split(',');
+
+                        DetailsTextBox.Text = "";
+
+                        HexViewerTextBox.Text = "";
+
+                        LocalizationTextBox.Text = "";
+
+                        foreach (string rpkgHashFilePath in rpkgHashFilePaths)
+                        {
+                            //MessageBoxShow(rpkgHashFilePath);
+
+                            string identifier = rpkgHashFilePath + hash;
+
+                            DetailsTextBox.Text += hash + " in RPKG file " + rpkgHashFilePath + ":\n";
+
+                            DetailsTextBox.Text += Marshal.PtrToStringAnsi(get_hash_details(rpkgHashFilePath, hash));
+
+                            DetailsTextBox.Text += "\n\n";
+
+                            //HexViewerTextBox.Text = "Hex view of " + header[0] + ":\n\n";
+
+                            LocalizationTextBox.Text = "";
+
+                            //HexViewerTextBox.Text += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgHashFilePath, hash));
+
+                            if (RightTabControl.SelectedIndex == 1)
+                            {
+                                LoadHexEditor();
+                            }
+
+                            string currentRPKGFilePath = rpkgHashFilePath;
+
+                            currentHash = header[0];
+
+                            if (resourceType == "LOCR" || resourceType == "DLGE" || resourceType == "RTLV")
+                            {
+                                UInt32 localization_data_size = generate_localization_string(rpkgHashFilePath, hash, resourceType);
+
+                                byte[] localization_data = new byte[localization_data_size];
+
+                                Marshal.Copy(get_localization_string(), localization_data, 0, (int)localization_data_size);
+
+                                if (localization_data_size > 0)
+                                {
+                                    LocalizationTextBox.Text = Encoding.UTF8.GetString(localization_data);
+                                }
+
+                                if (localization_data_size > 0)
+                                {
+                                    if (ThirdTabRight.Visibility == Visibility.Collapsed)
+                                    {
+                                        ThirdTabRight.Visibility = Visibility.Visible;
+                                    }
+                                }
+                                else
+                                {
+                                    if (ThirdTabRight.Visibility == Visibility.Visible)
+                                    {
+                                        ThirdTabRight.Visibility = Visibility.Collapsed;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (ThirdTabRight.Visibility == Visibility.Visible)
+                                {
+                                    ThirdTabRight.Visibility = Visibility.Collapsed;
+                                }
+
+                                if (FourthTabRight.Visibility == Visibility.Visible)
+                                {
+                                    FourthTabRight.Visibility = Visibility.Collapsed;
+                                }
+
+                                if (FifthTabRight.Visibility == Visibility.Visible)
+                                {
+                                    FifthTabRight.Visibility = Visibility.Collapsed;
+                                }
+
+                                if (SixthTabRight.Visibility == Visibility.Visible)
+                                {
+                                    SixthTabRight.Visibility = Visibility.Collapsed;
+                                }
+                            }
+
+                            int return_value = clear_hash_data_vector();
+                        }
+                    }
+                    else
+                    {
+                        DetailsTextBox.Text = "Hash is not located in any of the currently imported RPKGs.";
+
+                        HexViewerTextBox.Text = "";
+
+                        LocalizationTextBox.Text = "";
+                    }
+
+                    //GC.Collect();
                 }
             }
             else
             {
-                string[] headerSplit = header.Split(' ');
+                DetailsTextBox.Text = "Hash is not located in any of the currently imported RPKGs.";
 
-                string name = headerSplit[0];
+                HexViewerTextBox.Text = "";
 
-                //MessageBoxShow(name);
+                LocalizationTextBox.Text = "";
+            }
+        }
 
-                //MessageBoxShow(rightClickedOnFirst.ToString());
+        private void SearchRPKGsTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (searchRPKGsInputTimer == null)
+            {
+                searchRPKGsInputTimer = new System.Windows.Threading.DispatcherTimer();
 
-                if (name.Length == 4)
+                searchRPKGsInputTimer.Interval = TimeSpan.FromMilliseconds(600);
+
+                searchRPKGsInputTimer.Tick += SearchRPKGsTextBox_TimerTimeout;
+            }
+
+            searchRPKGsInputTimer.Stop();
+            searchRPKGsInputTimer.Tag = (sender as TextBox).Text;
+            searchRPKGsInputTimer.Start();
+        }
+
+        private void SearchRPKGsTextBox_TimerTimeout(object sender, EventArgs e)
+        {
+            var timer = (sender as System.Windows.Threading.DispatcherTimer);
+
+            if (timer == null)
+            {
+                return;
+            }
+
+            timer.Stop();
+
+            SearchRPKGsTreeView.Nodes.Clear();
+
+            if (SearchRPKGsTextBox.Text.Length > 0)
+            {
+                int maxSearchResults = 0;
+
+                int.TryParse(SearchRPKGsComboBox.Text, out maxSearchResults);
+
+                if (maxSearchResults == 0)
                 {
-                    if (rightClickedOn != 2)
+                    maxSearchResults = 100;
+                }
+
+                int rpkgItemIndex = 0;
+
+                MainTreeView.BeginUpdate();
+
+                foreach (System.Windows.Forms.TreeNode mainTreeNode in MainTreeView.Nodes)
+                {
+                    string rpkgPath = mainTreeNode.Text.ToString();
+
+                    bool rpkgItemAdded = false;
+
+                    //MessageBoxShow(rpkgPath);
+
+                    int rpkgResultsCount = 0;
+
+                    int resourceTypeItemIndex = 0;
+
+                    foreach (System.Windows.Forms.TreeNode resourceItems in mainTreeNode.Nodes)
                     {
-                        rightClickedOn = 1;
+                        if (rpkgResultsCount <= maxSearchResults)
+                        {
+                            string resourceType = resourceItems.Text.ToString();
 
-                        rightClickedOnName = name;
+                            bool resourceTypeItemAdded = false;
 
-                        rightClickedOnFullName = header;
+                            //MessageBoxShow(resourceType);
+
+                            int return_value = search_imported_hashes(SearchRPKGsTextBox.Text, rpkgPath, resourceType, maxSearchResults);
+
+                            //MessageBoxShow(Marshal.PtrToStringAnsi(get_search_imported_hashes()));
+
+                            string searchResultsString = Marshal.PtrToStringAnsi(get_search_imported_hashes());
+
+                            bool found = false;
+
+                            System.Windows.Forms.TreeNode item;
+
+                            if (!rpkgItemAdded)
+                            {
+                                item = new System.Windows.Forms.TreeNode();
+                            }
+                            else
+                            {
+                                item = (SearchRPKGsTreeView.Nodes[rpkgItemIndex] as System.Windows.Forms.TreeNode);
+                            }
+
+                            item.Text = rpkgPath;
+
+                            //item.IsExpanded = true;
+
+                            string rpkgFile = rpkgPath.Substring(rpkgPath.LastIndexOf("\\") + 1);
+
+                            string[] searchResults = searchResultsString.TrimEnd(',').Split(',');
+
+                            if (searchResults.Length > 0)
+                            {
+                                foreach (string searchResult in searchResults)
+                                {
+                                    if (searchResult != "")
+                                    {
+                                        found = true;
+
+                                        rpkgResultsCount++;
+
+                                        //MessageBoxShow(searchResult);
+
+                                        System.Windows.Forms.TreeNode item2;
+
+                                        if (!resourceTypeItemAdded)
+                                        {
+                                            item2 = new System.Windows.Forms.TreeNode();
+                                        }
+                                        else
+                                        {
+                                            item2 = (item.Nodes[resourceTypeItemIndex] as System.Windows.Forms.TreeNode);
+                                        }
+
+                                        item2.Text = resourceType;
+
+                                        item2.Expand();
+
+                                        //var item3 = new System.Windows.Forms.TreeNode();
+
+                                        string[] temp_test = searchResult.Split('.');
+
+                                        string ioiString = Marshal.PtrToStringAnsi(get_hash_list_string(temp_test[0]));
+
+                                        //item3.Header = searchResult + " (" + rpkgFile + ") " + ioiString;
+
+                                        item2.Nodes.Add(searchResult + " (" + rpkgFile + ") " + ioiString);
+
+                                        //item3.Expanded += Item_Expanded;
+
+                                        //item2.Items.Add(item3);
+
+                                        if (!resourceTypeItemAdded)
+                                        {
+                                            item.Nodes.Add(item2);
+
+                                            resourceTypeItemAdded = true;
+                                        }
+                                    }
+                                }
+
+                                if (!rpkgItemAdded && found)
+                                {
+                                    SearchRPKGsTreeView.Nodes.Add(item);
+
+                                    rpkgItemAdded = true;
+                                }
+                            }
+
+                            if (resourceTypeItemAdded)
+                            {
+                                resourceTypeItemIndex++;
+                            }
+                        }
+                    }
+
+                    if (rpkgItemAdded)
+                    {
+                        rpkgItemIndex++;
                     }
                 }
-                else if (name.Contains("."))
+
+                MainTreeView.EndUpdate();
+            }
+        }
+
+        private void SearchHashListTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (searchHashListInputTimer == null)
+            {
+                searchHashListInputTimer = new System.Windows.Threading.DispatcherTimer();
+
+                searchHashListInputTimer.Interval = TimeSpan.FromMilliseconds(600);
+
+                searchHashListInputTimer.Tick += SearchHashListTextBox_TimerTimeout;
+            }
+
+            searchHashListInputTimer.Stop();
+            searchHashListInputTimer.Tag = (sender as TextBox).Text;
+            searchHashListInputTimer.Start();
+        }
+
+        private void SearchHashListTextBox_TimerTimeout(object sender, EventArgs e)
+        {
+            var timer = (sender as System.Windows.Threading.DispatcherTimer);
+
+            if (timer == null)
+            {
+                return;
+            }
+
+            timer.Stop();
+
+            SearchHashListTreeView.Nodes.Clear();
+
+            if (SearchHashListTextBox.Text.Length > 0)
+            {
+                int maxSearchResults = 0;
+
+                int.TryParse(SearchHashListComboBox.Text, out maxSearchResults);
+
+                if (maxSearchResults == 0)
                 {
-                    if (rightClickedOnFirst)
+                    maxSearchResults = 100;
+                }
+
+                int return_value = search_hash_list(SearchHashListTextBox.Text, maxSearchResults);
+
+                string searchResultsString = Marshal.PtrToStringAnsi(get_search_hash_list());
+
+                string[] searchResults = searchResultsString.TrimEnd(',').Split(',');
+
+                if (searchResults.Length > 0)
+                {
+                    foreach (string searchResult in searchResults)
                     {
-                        rightClickedOn = 2;
+                        if (searchResult != "")
+                        {
+                            string[] temp_test = searchResult.Split('.');
 
-                        rightClickedOnName = name;
+                            string ioiString = Marshal.PtrToStringAnsi(get_hash_list_string(temp_test[0]));
 
-                        rightClickedOnFullName = header;
-
-                        rightClickedOnFirst = false;
+                            SearchHashListTreeView.Nodes.Add(searchResult + " (hashlist) " + ioiString);
+                        }
                     }
                 }
+            }
+        }
+
+        private void LeftTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            TabControl tab = (sender as TabControl);
+
+            //MessageBoxShow(tab.SelectedIndex.ToString());
+
+            if (tab.SelectedIndex == 1)
+            {
+                LoadHashDependsMap();
+            }
+        }
+
+        private void RightTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            TabControl tab = (sender as TabControl);
+
+            //MessageBoxShow(tab.SelectedIndex.ToString());
+
+            if (tab.SelectedIndex == 1)
+            {
+                LoadHexEditor();
+            }
+        }
+
+        private System.Windows.Forms.TreeNode GetRootTreeNode(System.Windows.Forms.TreeNode node)
+        {
+            System.Windows.Forms.TreeNode parentNode = node;
+
+            while (parentNode.Parent != null)
+            {
+                parentNode = parentNode.Parent;
+            }
+
+            return parentNode;
+        }
+
+        private void LoadHexEditor()
+        {
+            HexViewerTextBox.Text = "Hex view of " + currentHash + ":\n\n";
+
+            string[] hashDetails = currentHash.Split('.');
+
+            string hash = hashDetails[0];
+
+            HexViewerTextBox.Text += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgFilePath, hash));
+        }
+
+        public static void TEXTToPNGThread(string rpkgFilePathLocal, string hash, string png_file_name)
+        {
+            int return_value = generate_png_from_text(rpkgFilePathLocal, hash, png_file_name);
+        }
+
+        public static void MassExtractTEXTThread(string command, string input_path, string filter, string search, string search_type, string output_path)
+        {
+            int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+        }
+
+        public int MassExtractTEXT(string command, string input_path, string filter, string search, string search_type, string output_path)
+        {
+            Thread thread = new Thread(() => MassExtractTEXTThread(command, input_path, filter, search, search_type, output_path));
+            thread.SetApartmentState(ApartmentState.MTA);
+            thread.Start();
+            thread.Join();
+            thread = null;
+
+            return 0;
+        }
+
+        public static void RebuildTEXTThread(string command, string input_path, string filter, string search, string search_type, string output_path)
+        {
+            int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+        }
+
+        public int RebuildTEXT(string command, string input_path, string filter, string search, string search_type, string output_path)
+        {
+            Thread thread = new Thread(() => RebuildTEXTThread(command, input_path, filter, search, search_type, output_path));
+            thread.SetApartmentState(ApartmentState.MTA);
+            thread.Start();
+            thread.Join();
+            thread = null;
+
+            return 0;
+        }
+
+        public static void ExtractTEXTThread(string command, string input_path, string filter, string search, string search_type, string output_path)
+        {
+            int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+        }
+
+        public int ExtractTEXT(string command, string input_path, string filter, string search, string search_type, string output_path)
+        {
+            Thread thread = new Thread(() => ExtractTEXTThread(command, input_path, filter, search, search_type, output_path));
+            thread.SetApartmentState(ApartmentState.MTA);
+            thread.Start();
+            thread.Join();
+            thread = null;
+
+            return 0;
+        }
+
+        public static void ExtractMODELThread(string command, string input_path, string filter, string search, string search_type, string output_path)
+        {
+            int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+        }
+
+        public int ExtractMODEL(string command, string input_path, string filter, string search, string search_type, string output_path)
+        {
+            Thread thread = new Thread(() => ExtractMODELThread(command, input_path, filter, search, search_type, output_path));
+            thread.SetApartmentState(ApartmentState.MTA);
+            thread.Start();
+            thread.Join();
+            thread = null;
+
+            return 0;
+        }
+
+        public static void RebuildMODELThread(string command, string input_path, string filter, string search, string search_type, string output_path)
+        {
+            int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+        }
+
+        public int RebuildMODEL(string command, string input_path, string filter, string search, string search_type, string output_path)
+        {
+            Thread thread = new Thread(() => RebuildMODELThread(command, input_path, filter, search, search_type, output_path));
+            thread.SetApartmentState(ApartmentState.MTA);
+            thread.Start();
+            thread.Join();
+            thread = null;
+
+            return 0;
+        }
+
+        private void Item2_GotFocus(object sender, RoutedEventArgs e)
+        {
+            string[] header = ((sender as ListViewItem).Content as string).Split(' ');
+
+            string hash = header[0];
+
+            DetailsTextBox.Text = Marshal.PtrToStringAnsi(get_hash_details(rpkgFilePath, hash));
+
+            UInt32 hash_size = get_hash_in_rpkg_size(rpkgFilePath, hash);
+
+            byte[] hash_data = new byte[hash_size];
+
+            Marshal.Copy(get_hash_in_rpkg_data(rpkgFilePath, hash), hash_data, 0, (int)hash_size);
+
+            int return_value = clear_hash_data_vector();
+        }
+
+        private void ImportRPKGFile(string rpkgPath)
+        {
+            rpkgFilePath = rpkgPath;
+
+            string command = "-import_rpkg";
+            string input_path = rpkgFilePath;
+            string filter = "";
+            string search = "";
+            string search_type = "";
+            string output_path = "";
+
+            string rpkgFile = rpkgFilePath.Substring(rpkgFilePath.LastIndexOf("\\") + 1);
+
+            foreach (System.Windows.Forms.TreeNode treeViewNode in MainTreeView.Nodes)
+            {
+                if (rpkgFilePath == (treeViewNode.Text as string))
+                {
+                    return;
+                }
+            }
+
+            int return_value = reset_task_status();
+
+            execute_task rpkgExecute = task_execute;
+
+            IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
+
+            Progress progress = new Progress();
+
+            progress.message.Content = "Importing RPKG file " + rpkgFile + "...";
+
+            progress.operation = (int)Progress.Operation.IMPORT;
+
+            progress.ShowDialog();
+
+            if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
+            {
+                //MessageBoxShow(progress.task_status_string);
+
+                return;
+            }
+
+            if (MainTreeView.Nodes.Count > 0)
+            {
+                if ((MainTreeView.Nodes[0] as System.Windows.Forms.TreeNode).Text.ToString() == "Click")
+                {
+                    MainTreeView.Nodes.Clear();
+                }
+            }
+
+            MainTreeView.AfterExpand += MainTreeView_AfterExpand;
+
+            var item = new System.Windows.Forms.TreeNode();
+
+            item.Text = rpkgFilePath;
+
+            MainTreeView.Nodes.Add(item);
+
+            Thread.Sleep(200);
+
+            List<string> resourceTypes = new List<string>();
+
+            UInt32 resourceTypeCount = get_resource_types_count(rpkgFilePath);
+
+            for (UInt32 i = 0; i < resourceTypeCount; i++)
+            {
+                resourceTypes.Add(Marshal.PtrToStringAnsi(get_resource_types_at(rpkgFilePath, i)));
+            }
+
+            resourceTypes.Sort();
+
+            foreach (string resourceType in resourceTypes)
+            {
+                var item2 = new System.Windows.Forms.TreeNode();
+
+                item2.Text = resourceType;
+
+                item2.Nodes.Add("");
+
+                //item2.Collapsed += Item2_Collapsed;
+
+                item.Nodes.Add(item2);
+            }
+
+            oneOrMoreRPKGsHaveBeenImported = true;
+        }
+
+        private void OpenRPKGFile_Click(object sender, RoutedEventArgs e)
+        {
+            var fileDialog = new Ookii.Dialogs.Wpf.VistaOpenFileDialog();
+
+            fileDialog.Title = "Select an RPKG file to import:";
+
+            fileDialog.Filter = "RPKG file|*.rpkg|All files|*.*";
+
+            if (!System.IO.Directory.Exists(userSettings.InputFolder))
+            {
+                userSettings.InputFolder = System.IO.Directory.GetCurrentDirectory();
+
+                var options = new JsonSerializerOptions { WriteIndented = true };
+
+                string jsonString = JsonSerializer.Serialize(userSettings, options);
+
+                File.WriteAllText("rpkg.json", jsonString);
+            }
+
+            fileDialog.InitialDirectory = userSettings.InputFolder;
+
+            fileDialog.FileName = userSettings.InputFolder;
+
+            var fileDialogResult = fileDialog.ShowDialog();
+
+            if (fileDialogResult == true)
+            {
+                ImportRPKGFile(fileDialog.FileName);
+
+                //LoadHashDependsMap();
             }
         }
 
@@ -3101,157 +3316,66 @@ namespace rpkg
 
         private void LoadHashDependsMap()
         {
-            foreach (TreeViewItem rpkgItem in MainTreeView.Items)
+            if (oneOrMoreRPKGsHaveBeenImported)
             {
-                string rpkgPath = rpkgItem.Header.ToString();
-
-                bool alreadyLoaded = false;
-
-                foreach (TreeViewItem treeviewItem in HashMapTreeView.Items)
+                foreach (System.Windows.Forms.TreeNode rpkgItem in MainTreeView.Nodes)
                 {
-                    if (rpkgPath == (treeviewItem.Header as string))
+                    string rpkgPath = rpkgItem.Text.ToString();
+
+                    bool alreadyLoaded = false;
+
+                    HashMapTreeView.AfterExpand += HashMapTreeView_AfterExpand;
+
+                    foreach (System.Windows.Forms.TreeNode treeViewNode in HashMapTreeView.Nodes)
                     {
-                        alreadyLoaded = true;
-                    }
-                }
-
-                if (!alreadyLoaded)
-                {
-                    var item = new TreeViewItem();
-
-                    item.Header = rpkgPath;
-
-                    int return_value = reset_task_status();
-
-                    execute_get_hashes_with_no_reverse_depends rpkg = get_hashes_with_no_reverse_depends;
-
-                    IAsyncResult ar = rpkg.BeginInvoke(rpkgPath, null, null);
-
-                    Progress progress = new Progress();
-
-                    progress.operation = (int)Progress.Operation.MASS_EXTRACT;
-
-                    progress.ShowDialog();
-
-                    string hashesWithNoReveserseDepends = Marshal.PtrToStringAnsi(get_hashes_with_no_reverse_depends_string());
-
-                    string[] hashes = hashesWithNoReveserseDepends.TrimEnd(',').Split(',');
-
-                    string rpkgFile = rpkgPath.Substring(rpkgPath.LastIndexOf("\\") + 1);
-
-                    foreach (string hash in hashes)
-                    {
-                        var item2 = new TreeViewItem();
-
-                        string[] temp_test = hash.Split('.');
-
-                        string ioiString = Marshal.PtrToStringAnsi(get_hash_list_string(temp_test[0]));
-
-                        item2.Header = hash + " (" + rpkgFile + ") " + ioiString;
-
-                        item2.Items.Add(null);
-
-                        item2.Expanded += Item_Expanded;
-
-                        item.Items.Add(item2);
+                        if (rpkgPath == (treeViewNode.Text as string))
+                        {
+                            alreadyLoaded = true;
+                        }
                     }
 
-                    HashMapTreeView.Items.Add(item);
-                }
-            }
-        }
-
-        private void Item_Expanded(object sender, RoutedEventArgs e)
-        {
-            var item = (sender as TreeViewItem);
-
-            if (item.Items.Count == 1 && item.Items[0] == null)
-            {
-                item.Items.Clear();
-
-                TreeViewItem parentPrevious = FindParentTreeViewItem(item);
-
-                TreeViewItem parentCurrent = parentPrevious;
-
-                while (parentCurrent != null)
-                {
-                    parentPrevious = parentCurrent;
-
-                    parentCurrent = FindParentTreeViewItem(parentPrevious);
-                }
-
-                //System.Windows.MessageBox.Show(parentPrevious.Header.ToString());
-
-                rpkgFilePath = parentPrevious.Header.ToString();
-
-                string[] header = (item.Header as string).Replace("(", "").Replace(")", "").Split(' ');
-
-                string hash = header[0];
-                string rpkgFile = header[1];
-
-                //System.Windows.MessageBox.Show(hash + "," + rpkgFilePath);
-
-                int return_value = reset_task_status();
-
-                execute_get_direct_hash_depends rpkgExecute = get_direct_hash_depends;
-
-                IAsyncResult ar = rpkgExecute.BeginInvoke(rpkgFilePath, hash, null, null);
-
-                Progress progress = new Progress();
-
-                progress.operation = (int)Progress.Operation.GENERAL;
-
-                progress.ShowDialog();
-
-                string hashDependsString = Marshal.PtrToStringAnsi(get_direct_hash_depends_string());
-
-                //System.Windows.MessageBox.Show(hashDependsString);
-
-                string[] hashDepends = hashDependsString.TrimEnd(',').Split(',');
-
-                if (hashDependsString != "")
-                {
-                    foreach (string hashDepend in hashDepends)
+                    if (!alreadyLoaded)
                     {
-                        string[] hashData = hashDepend.Split('|');
+                        var item = new System.Windows.Forms.TreeNode();
 
-                        string hash2 = hashData[0];
-                        string rpkgFile2 = hashData[1];
+                        item.Text = rpkgPath;
 
-                        var item2 = new TreeViewItem();
+                        int return_value = reset_task_status();
 
-                        string[] temp_test = hash2.Split('.');
+                        execute_get_hashes_with_no_reverse_depends rpkg = get_hashes_with_no_reverse_depends;
 
-                        string ioiString = Marshal.PtrToStringAnsi(get_hash_list_string(temp_test[0]));
+                        IAsyncResult ar = rpkg.BeginInvoke(rpkgPath, null, null);
 
-                        item2.Header = hash2 + " (" + rpkgFile + ") " + ioiString;
+                        Progress progress = new Progress();
 
-                        item2.Items.Add(null);
+                        progress.operation = (int)Progress.Operation.MASS_EXTRACT;
 
-                        item2.Expanded += Item_Expanded;
+                        progress.ShowDialog();
 
-                        item.Items.Add(item2);
+                        string hashesWithNoReveserseDepends = Marshal.PtrToStringAnsi(get_hashes_with_no_reverse_depends_string());
+
+                        string[] hashes = hashesWithNoReveserseDepends.TrimEnd(',').Split(',');
+
+                        string rpkgFile = rpkgPath.Substring(rpkgPath.LastIndexOf("\\") + 1);
+
+                        foreach (string hash in hashes)
+                        {
+                            var item2 = new System.Windows.Forms.TreeNode();
+
+                            string[] temp_test = hash.Split('.');
+
+                            string ioiString = Marshal.PtrToStringAnsi(get_hash_list_string(temp_test[0]));
+
+                            item2.Text = hash + " (" + rpkgFile + ") " + ioiString;
+
+                            item2.Nodes.Add("");
+
+                            item.Nodes.Add(item2);
+                        }
+
+                        HashMapTreeView.Nodes.Add(item);
                     }
                 }
-            }
-
-            GC.Collect();
-        }
-
-        private TreeViewItem FindParentTreeViewItem(object child)
-        {
-            try
-            {
-                var parent = VisualTreeHelper.GetParent(child as DependencyObject);
-                while ((parent as TreeViewItem) == null)
-                {
-                    parent = VisualTreeHelper.GetParent(parent);
-                }
-                return parent as TreeViewItem;
-            }
-            catch (Exception e)
-            {
-                return null;
             }
         }
 
@@ -3298,6 +3422,29 @@ namespace rpkg
                 ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.Yellow)));
             if (brightness == "Dark" && color == "White")
                 ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.White)));
+
+            if (brightness == "Dark")
+            {
+                MainTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+                MainTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
+                HashMapTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+                HashMapTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
+                SearchRPKGsTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+                SearchRPKGsTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
+                SearchHashListTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+                SearchHashListTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
+            }
+            else if (brightness == "Light")
+            {
+                MainTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
+                MainTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+                HashMapTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
+                HashMapTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+                SearchRPKGsTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
+                SearchRPKGsTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+                SearchHashListTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
+                SearchHashListTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+            }
         }
 
         private void About_Click(object sender, RoutedEventArgs e)
@@ -3312,13 +3459,8 @@ namespace rpkg
         }
 
         private UserSettings userSettings;
-        public string rpkgFilePath = "";
-        private bool rightClickedOnFirst = true;
-        private int rightClickedOn = 0;
-        private string rightClickedOnName = "";
-        private string rightClickedOnFullName = "";
         private bool oneOrMoreRPKGsHaveBeenImported = false;
-        private string currentRPKGFilePath = "";
+        private string rpkgFilePath = "";
         private string currentHash = "";
         private string currentHashFileName = "";
         public string hashDependsRPKGFilePath = "";
@@ -3537,233 +3679,6 @@ namespace rpkg
             base.OnClosed(e);
 
             Process.GetCurrentProcess().Kill();
-        }
-
-        private void SearchRPKGsTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (searchRPKGsInputTimer == null)
-            {
-                searchRPKGsInputTimer = new System.Windows.Threading.DispatcherTimer();
-
-                searchRPKGsInputTimer.Interval = TimeSpan.FromMilliseconds(600);
-
-                searchRPKGsInputTimer.Tick += SearchRPKGsTextBox_TimerTimeout;
-            }
-
-            searchRPKGsInputTimer.Stop();
-            searchRPKGsInputTimer.Tag = (sender as TextBox).Text;
-            searchRPKGsInputTimer.Start();
-        }
-
-        private void SearchRPKGsTextBox_TimerTimeout(object sender, EventArgs e)
-        {
-            var timer = (sender as System.Windows.Threading.DispatcherTimer);
-
-            if (timer == null)
-            {
-                return;
-            }
-
-            timer.Stop();
-
-            SearchRPKGsTreeView.Items.Clear();
-
-            if (SearchRPKGsTextBox.Text.Length > 0)
-            {
-                int maxSearchResults = 0;
-
-                int.TryParse(SearchRPKGsComboBox.Text, out maxSearchResults);
-
-                if (maxSearchResults == 0)
-                {
-                    maxSearchResults = 100;
-                }
-
-                int rpkgItemIndex = 0;
-
-                foreach (TreeViewItem mainTreeViewItem in MainTreeView.Items)
-                {
-                    string rpkgPath = mainTreeViewItem.Header.ToString();
-
-                    bool rpkgItemAdded = false;
-
-                    //MessageBoxShow(rpkgPath);
-
-                    int rpkgResultsCount = 0;
-
-                    int resourceTypeItemIndex = 0;
-
-                    foreach (TreeViewItem resourceItems in mainTreeViewItem.Items)
-                    {
-                        if (rpkgResultsCount <= maxSearchResults)
-                        {
-                            string resourceType = resourceItems.Header.ToString();
-
-                            bool resourceTypeItemAdded = false;
-
-                            //MessageBoxShow(resourceType);
-
-                            int return_value = search_imported_hashes(SearchRPKGsTextBox.Text, rpkgPath, resourceType, maxSearchResults);
-
-                            //MessageBoxShow(Marshal.PtrToStringAnsi(get_search_imported_hashes()));
-
-                            string searchResultsString = Marshal.PtrToStringAnsi(get_search_imported_hashes());
-
-                            bool found = false;
-
-                            TreeViewItem item;
-
-                            if (!rpkgItemAdded)
-                            {
-                                item = new TreeViewItem();
-                            }
-                            else
-                            {
-                                item = (SearchRPKGsTreeView.Items.GetItemAt(rpkgItemIndex) as TreeViewItem);
-                            }
-
-                            item.Header = rpkgPath;
-
-                            //item.IsExpanded = true;
-
-                            string rpkgFile = rpkgPath.Substring(rpkgPath.LastIndexOf("\\") + 1);
-
-                            string[] searchResults = searchResultsString.TrimEnd(',').Split(',');
-
-                            if (searchResults.Length > 0)
-                            {
-                                foreach (string searchResult in searchResults)
-                                {
-                                    if (searchResult != "")
-                                    {
-                                        found = true;
-
-                                        rpkgResultsCount++;
-
-                                        //MessageBoxShow(searchResult);
-
-                                        TreeViewItem item2;
-
-                                        if (!resourceTypeItemAdded)
-                                        {
-                                            item2 = new TreeViewItem();
-                                        }
-                                        else
-                                        {
-                                            item2 = (item.Items.GetItemAt(resourceTypeItemIndex) as TreeViewItem);
-                                        }
-
-                                        item2.Header = resourceType;
-
-                                        item2.IsExpanded = true;
-
-                                        //var item3 = new TreeViewItem();
-
-                                        string[] temp_test = searchResult.Split('.');
-
-                                        string ioiString = Marshal.PtrToStringAnsi(get_hash_list_string(temp_test[0]));
-
-                                        //item3.Header = searchResult + " (" + rpkgFile + ") " + ioiString;
-
-                                        item2.Items.Add(searchResult + " (" + rpkgFile + ") " + ioiString);
-
-                                        //item3.Expanded += Item_Expanded;
-
-                                        //item2.Items.Add(item3);
-
-                                        if (!resourceTypeItemAdded)
-                                        {
-                                            item.Items.Add(item2);
-
-                                            resourceTypeItemAdded = true;
-                                        }
-                                    }
-                                }
-
-                                if (!rpkgItemAdded && found)
-                                {
-                                    SearchRPKGsTreeView.Items.Add(item);
-
-                                    rpkgItemAdded = true;
-                                }
-                            }
-
-                            if (resourceTypeItemAdded)
-                            {
-                                resourceTypeItemIndex++;
-                            }
-                        }
-                    }
-
-                    if (rpkgItemAdded)
-                    {
-                        rpkgItemIndex++;
-                    }
-                }
-            }
-        }
-
-        private void SearchHashListTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (searchHashListInputTimer == null)
-            {
-                searchHashListInputTimer = new System.Windows.Threading.DispatcherTimer();
-
-                searchHashListInputTimer.Interval = TimeSpan.FromMilliseconds(600);
-
-                searchHashListInputTimer.Tick += SearchHashListTextBox_TimerTimeout;
-            }
-
-            searchHashListInputTimer.Stop();
-            searchHashListInputTimer.Tag = (sender as TextBox).Text;
-            searchHashListInputTimer.Start();
-        }
-
-        private void SearchHashListTextBox_TimerTimeout(object sender, EventArgs e)
-        {
-            var timer = (sender as System.Windows.Threading.DispatcherTimer);
-
-            if (timer == null)
-            {
-                return;
-            }
-
-            timer.Stop();
-
-            SearchHashListTreeView.Items.Clear();
-
-            if (SearchHashListTextBox.Text.Length > 0)
-            {
-                int maxSearchResults = 0;
-
-                int.TryParse(SearchHashListComboBox.Text, out maxSearchResults);
-
-                if (maxSearchResults == 0)
-                {
-                    maxSearchResults = 100;
-                }
-
-                int return_value = search_hash_list(SearchHashListTextBox.Text, maxSearchResults);
-
-                string searchResultsString = Marshal.PtrToStringAnsi(get_search_hash_list());
-
-                string[] searchResults = searchResultsString.TrimEnd(',').Split(',');
-
-                if (searchResults.Length > 0)
-                {
-                    foreach (string searchResult in searchResults)
-                    {
-                        if (searchResult != "")
-                        {
-                            string[] temp_test = searchResult.Split('.');
-
-                            string ioiString = Marshal.PtrToStringAnsi(get_hash_list_string(temp_test[0]));
-
-                            SearchHashListTreeView.Items.Add(searchResult + " (hashlist) " + ioiString);
-                        }
-                    }
-                }
-            }
         }
 
         private void OGGPlayerTimer_Tick(object sender, EventArgs e)
@@ -4132,9 +4047,9 @@ namespace rpkg
 
             entityBrickEditor.ShowDialog();
 
-            GC.Collect();
+            //GC.Collect();
             GC.WaitForPendingFinalizers();
-            GC.Collect();
+            //GC.Collect();
         }
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
@@ -4398,7 +4313,7 @@ namespace rpkg
             }
         }
 
-        bool IsLegalHashName(string hashName)
+        private bool IsLegalHashName(string hashName)
         {
             hashName.ToUpper();
 
@@ -4430,7 +4345,7 @@ namespace rpkg
             return true;
         }
 
-        bool IsLegalHashFlag(string hashFlag)
+        private bool IsLegalHashFlag(string hashFlag)
         {
             hashFlag.ToUpper();
 
@@ -4551,7 +4466,7 @@ namespace rpkg
 
                     return_value = unload_rpkg(rpkgFilePath);
 
-                    SearchRPKGsTreeView.Items.Clear();
+                    SearchRPKGsTreeView.Nodes.Clear();
 
                     bool treeview_item_found = false;
 
@@ -4559,9 +4474,9 @@ namespace rpkg
 
                     int treeview_item_index = 0;
 
-                    foreach (TreeViewItem item in MainTreeView.Items)
+                    foreach (System.Windows.Forms.TreeNode item in MainTreeView.Nodes)
                     {
-                        if (item.Header.ToString() == rpkgFilePath)
+                        if (item.Text.ToString() == rpkgFilePath)
                         {
                             treeview_item_index = count;
 
@@ -4573,15 +4488,15 @@ namespace rpkg
 
                     if (treeview_item_found)
                     {
-                        MainTreeView.Items.RemoveAt(treeview_item_index);
+                        MainTreeView.Nodes.RemoveAt(treeview_item_index);
 
                         ImportRPKGFile(rpkgFilePath);
 
-                        foreach (TreeViewItem item in MainTreeView.Items)
+                        foreach (System.Windows.Forms.TreeNode item in MainTreeView.Nodes)
                         {
-                            if (item.Header.ToString() == rpkgFilePath)
+                            if (item.Text.ToString() == rpkgFilePath)
                             {
-                                item.IsSelected = true;
+                                MainTreeView.SelectedNode = item;
                             }
                         }
                     }
@@ -4589,6 +4504,40 @@ namespace rpkg
                     {
                         MessageBoxShow("Error: Cound not find the treeview item for unloading for RPKG: " + rpkgFilePath);
                     }
+
+                    treeview_item_found = false;
+
+                    count = 0;
+
+                    treeview_item_index = 0;
+
+                    foreach (System.Windows.Forms.TreeNode item in HashMapTreeView.Nodes)
+                    {
+                        if (item.Text.ToString() == rpkgFilePath)
+                        {
+                            treeview_item_index = count;
+
+                            treeview_item_found = true;
+                        }
+
+                        count++;
+                    }
+
+                    if (treeview_item_found)
+                    {
+                        HashMapTreeView.Nodes.RemoveAt(treeview_item_index);
+
+                        //ImportRPKGFile(rpkgFilePath);
+
+                        //foreach (System.Windows.Forms.TreeNode item in MainTreeView.Nodes)
+                        //{
+                        //if (item.Text.ToString() == rpkgFilePath)
+                        //{
+                        //MainTreeView.SelectedNode = item;
+                        //}
+                        //}
+                    }
+
                 }
                 else if (return_value == 1)
                 {
@@ -4923,7 +4872,7 @@ namespace rpkg
 
                     MainStackPanel.Children.Add(grid1);
                 }
-                                
+
                 ToggleSwitch toggleSwitch = new ToggleSwitch();
                 toggleSwitch.Name = "backup_rpkg";
                 toggleSwitch.Content = "Backup RPKG File When Saving Changes";
@@ -5581,7 +5530,7 @@ namespace rpkg
 
                     return_value = unload_rpkg(hashDependsRPKGFilePath);
 
-                    SearchRPKGsTreeView.Items.Clear();
+                    SearchRPKGsTreeView.Nodes.Clear();
 
                     bool treeview_item_found = false;
 
@@ -5589,9 +5538,9 @@ namespace rpkg
 
                     int treeview_item_index = 0;
 
-                    foreach (TreeViewItem item in MainTreeView.Items)
+                    foreach (System.Windows.Forms.TreeNode item in MainTreeView.Nodes)
                     {
-                        if (item.Header.ToString() == hashDependsRPKGFilePath)
+                        if (item.Text.ToString() == hashDependsRPKGFilePath)
                         {
                             treeview_item_index = count;
 
@@ -5603,15 +5552,15 @@ namespace rpkg
 
                     if (treeview_item_found)
                     {
-                        MainTreeView.Items.RemoveAt(treeview_item_index);
+                        MainTreeView.Nodes.RemoveAt(treeview_item_index);
 
                         ImportRPKGFile(hashDependsRPKGFilePath);
 
-                        foreach (TreeViewItem item in MainTreeView.Items)
+                        foreach (System.Windows.Forms.TreeNode item in MainTreeView.Nodes)
                         {
-                            if (item.Header.ToString() == hashDependsRPKGFilePath)
+                            if (item.Text.ToString() == hashDependsRPKGFilePath)
                             {
-                                item.IsSelected = true;
+                                MainTreeView.SelectedNode = item;
                             }
                         }
                     }
@@ -5619,6 +5568,40 @@ namespace rpkg
                     {
                         MessageBoxShow("Error: Cound not find the treeview item for unloading for RPKG: " + hashDependsRPKGFilePath);
                     }
+
+                    treeview_item_found = false;
+
+                    count = 0;
+
+                    treeview_item_index = 0;
+
+                    foreach (System.Windows.Forms.TreeNode item in HashMapTreeView.Nodes)
+                    {
+                        if (item.Text.ToString() == rpkgFilePath)
+                        {
+                            treeview_item_index = count;
+
+                            treeview_item_found = true;
+                        }
+
+                        count++;
+                    }
+
+                    if (treeview_item_found)
+                    {
+                        HashMapTreeView.Nodes.RemoveAt(treeview_item_index);
+
+                        //ImportRPKGFile(rpkgFilePath);
+
+                        //foreach (System.Windows.Forms.TreeNode item in MainTreeView.Nodes)
+                        //{
+                        //if (item.Text.ToString() == rpkgFilePath)
+                        //{
+                        //MainTreeView.SelectedNode = item;
+                        //}
+                        //}
+                    }
+
                 }
                 else if (return_value == 1)
                 {
@@ -5741,6 +5724,8 @@ namespace rpkg
                     ImportRPKGFile(filePath);
                 }
 
+                string[] nodeData = MainTreeView.SelectedNode.Text.Split(' ');
+
                 string command = "";
                 string input_path = runtimeDirectory;
                 string filter = "";
@@ -5756,9 +5741,9 @@ namespace rpkg
 
                     filter = hashValue;
 
-                    progress.message.Content = "Extracting " + rightClickedOnName + " To GLB/TGA File(s)...";
+                    progress.message.Content = "Extracting " + nodeData[0] + " To GLB/TGA File(s)...";
 
-                    string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + rightClickedOnName + " To:");
+                    string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + nodeData[0] + " To:");
 
                     if (temp_outputFolder == "")
                     {
@@ -5790,9 +5775,9 @@ namespace rpkg
 
                     filter = hashValue;
 
-                    progress.message.Content = "Extracting " + rightClickedOnName + " To GLB/TGA File(s)...";
+                    progress.message.Content = "Extracting " + nodeData[0] + " To GLB/TGA File(s)...";
 
-                    string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + rightClickedOnName + " To:");
+                    string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + nodeData[0] + " To:");
 
                     if (temp_outputFolder == "")
                     {
@@ -5824,9 +5809,9 @@ namespace rpkg
 
                     filter = hashValue;
 
-                    progress.message.Content = "Extracting " + rightClickedOnName + " To GLB/TGA File(s)...";
+                    progress.message.Content = "Extracting " + nodeData[0] + " To GLB/TGA File(s)...";
 
-                    string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + rightClickedOnName + " To:");
+                    string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + nodeData[0] + " To:");
 
                     if (temp_outputFolder == "")
                     {
@@ -5858,9 +5843,9 @@ namespace rpkg
 
                     filter = hashValue;
 
-                    progress.message.Content = "Extracting " + rightClickedOnName + " To GLB/TGA File(s)...";
+                    progress.message.Content = "Extracting " + nodeData[0] + " To GLB/TGA File(s)...";
 
-                    string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + rightClickedOnName + " To:");
+                    string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + nodeData[0] + " To:");
 
                     if (temp_outputFolder == "")
                     {

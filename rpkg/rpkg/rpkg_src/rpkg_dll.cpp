@@ -2185,7 +2185,7 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
 
             for (uint64_t j = 0; j < rpkgs.at(i).hash.size(); j++)
             {
-                if (j < it->second)
+                /*if (j < it->second)
                 {
                     std::memcpy(&char8, &rpkgs.at(i).hash.at(j).hash_value, sizeof(uint64_t));
                     temp_file_output.write(char8, sizeof(uint64_t));
@@ -2197,7 +2197,7 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
                     temp_file_output.write(char4, sizeof(uint32_t));
                 }
                 else
-                {
+                {*/
                     std::memcpy(&char8, &rpkgs.at(i).hash.at(j).hash_value, sizeof(uint64_t));
                     temp_file_output.write(char8, sizeof(uint64_t));
 
@@ -2208,7 +2208,7 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
 
                     std::memcpy(&char4, &rpkgs.at(i).hash.at(j).hash_size, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
-                }                
+                //}                
             }
 
             for (uint64_t j = 0; j < rpkgs.at(i).hash.size(); j++)
