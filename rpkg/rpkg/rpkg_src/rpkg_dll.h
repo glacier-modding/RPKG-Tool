@@ -67,3 +67,15 @@ RPKG_EXPORT char* get_hashes_with_no_reverse_depends_string();
 RPKG_EXPORT int get_direct_hash_depends(char* rpkg_file, char* hash_string);
 
 RPKG_EXPORT char* get_direct_hash_depends_string();
+
+RPKG_EXPORT char* get_patch_deletion_list(char* rpkg_file);
+
+RPKG_EXPORT int search_imported_hashes(char* search_str, char* rpkg_file, char* resource_type, int max_results);
+
+RPKG_EXPORT char* get_search_imported_hashes();
+
+RPKG_EXPORT int search_hash_list(char* search_str, int max_results);
+
+RPKG_EXPORT char* get_search_hash_list();
+
+RPKG_EXPORT char* get_rpkg_file_paths_hash_is_in(char* hash_string);

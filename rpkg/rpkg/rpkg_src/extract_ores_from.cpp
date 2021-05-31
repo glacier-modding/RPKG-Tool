@@ -144,9 +144,9 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
 
             if (pos1 != std::string::npos && pos2 != std::string::npos && (pos2 - pos1) > 11)
             {
-                ores_hash_value_string = hash_list_hash_value_strings.at(h);
+                ores_hash_value_string = util::to_upper_case(hash_list_hash_value_strings.at(h));
 
-                ores_hash_file_name = hash_list_hash_file_names.at(h);
+                ores_hash_file_name = util::to_upper_case(hash_list_hash_file_names.at(h));
 
                 ores_hash_value = std::strtoull(ores_hash_value_string.c_str(), nullptr, 16);
 

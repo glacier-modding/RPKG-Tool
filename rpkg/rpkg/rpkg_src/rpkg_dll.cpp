@@ -4,6 +4,7 @@
 #include "rpkg_function.h"
 #include "crypto.h"
 #include "console.h"
+#include "util.h"
 #include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
@@ -284,6 +285,15 @@ char* get_hash_details(char* rpkg_file, char* hash_string)
 
                 ss << std::endl;
 
+                std::map<uint64_t, uint64_t>::iterator it3 = hash_list_hash_map.find(rpkgs.at(i).hash.at(it->second).hash_value);
+
+                if (it3 != hash_list_hash_map.end())
+                {
+                    ss << "IOI String: " << hash_list_hash_strings.at(it3->second) << std::endl;
+
+                    ss << std::endl;
+                }
+
                 uint32_t hash_reference_count = rpkgs.at(i).hash.at(it->second).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
                 ss << std::dec << "Depends on " << hash_reference_count << " other hash files/resources:" << std::endl;
@@ -294,7 +304,7 @@ char* get_hash_details(char* rpkg_file, char* hash_string)
 
                     if (it2 != hash_list_hash_map.end())
                     {
-                        ss << "  - " << hash_list_hash_file_names.at(it2->second) << " " << hash_list_hash_strings.at(it2->second) << std::endl;
+                        ss << "  - " << util::to_upper_case(hash_list_hash_file_names.at(it2->second)) << " " << hash_list_hash_strings.at(it2->second) << std::endl;
                     }
                     else
                     {
@@ -728,4 +738,166 @@ int get_direct_hash_depends(char* rpkg_file, char* hash_string)
 char* get_direct_hash_depends_string()
 {
     return &hash_direct_depends[0];
+}
+
+char* get_patch_deletion_list(char* rpkg_file)
+{
+    patch_deletion_list_string = "";
+
+    std::stringstream ss;
+
+    for (uint64_t i = 0; i < rpkgs.size(); i++)
+    {
+        if (rpkgs.at(i).rpkg_file_path == rpkg_file)
+        {
+            if (rpkgs.at(i).is_patch_file)
+            {
+                if (rpkgs.at(i).patch_entry_count > 0)
+                {
+                    ss << std::endl << std::endl;
+
+                    ss << std::dec << "Patch file has " << rpkgs.at(i).patch_entry_count << " deleted items:" << std::endl;
+                }
+
+                for (uint32_t j = 0; j < rpkgs.at(i).patch_entry_count; j++)
+                {
+                    std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(i).patch_entry_list.at(j));
+
+                    if (it2 != hash_list_hash_map.end())
+                    {
+                        ss << "  - " << util::to_upper_case(hash_list_hash_file_names.at(it2->second)) << " " << hash_list_hash_strings.at(it2->second) << std::endl;
+                    }
+                    else
+                    {
+                        ss << "  - " << util::uint64_t_to_hex_string(rpkgs.at(i).patch_entry_list.at(j)) << std::endl;
+                    }
+                }
+            }
+        }
+    }
+
+    patch_deletion_list_string = ss.str();
+
+    return &patch_deletion_list_string[0];
+}
+
+int search_imported_hashes(char* search_str, char* rpkg_file, char* resource_type, int max_results)
+{
+    task_single_status = TASK_EXECUTING;
+    task_multiple_status = TASK_EXECUTING;
+
+    timing_string = "Searching for \"" + std::string(search_str) + "\" in imported RPKGs...";
+
+    std::string search_string = std::string(search_str);
+
+    search_string = util::to_lower_case(search_string);
+
+    int search_count = 0;
+
+    search_imported_hashes_string = "";
+
+    for (uint64_t i = 0; i < rpkgs.size(); i++)
+    {
+        if (rpkgs.at(i).rpkg_file_path == rpkg_file)
+        {
+            for (uint64_t j = 0; j < rpkgs.at(i).hash_resource_types.size(); j++)
+            {
+                if (rpkgs.at(i).hash_resource_types.at(j) == resource_type)
+                {
+                    for (uint64_t k = 0; k < rpkgs.at(i).hashes_based_on_resource_types.at(j).size(); k++)
+                    {                    
+                        std::map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(strtoull(rpkgs.at(i).hashes_based_on_resource_types.at(j).at(k).c_str(), nullptr, 16));
+
+                        if (it != hash_list_hash_map.end())
+                        {
+                            if (hash_list_hash_strings.at(it->second).find(search_string) != std::string::npos || hash_list_hash_file_names.at(it->second).find(search_string) != std::string::npos)
+                            {
+                                search_imported_hashes_string.append(util::to_upper_case(hash_list_hash_file_names.at(it->second)));
+                                search_imported_hashes_string.push_back(',');
+
+                                search_count++;
+                            }
+                        }
+
+                        if (search_count >= max_results)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    task_single_status = TASK_SUCCESSFUL;
+    task_multiple_status = TASK_SUCCESSFUL;
+
+    return 0;
+}
+
+char* get_search_imported_hashes()
+{
+    return &search_imported_hashes_string[0];
+}
+
+int search_hash_list(char* search_str, int max_results)
+{
+    task_single_status = TASK_EXECUTING;
+    task_multiple_status = TASK_EXECUTING;
+
+    timing_string = "Searching for \"" + std::string(search_str) + "\" in hash list...";
+
+    std::string search_string = std::string(search_str);
+
+    search_string = util::to_lower_case(search_string);
+
+    int search_count = 0;
+
+    search_hash_list_string = "";
+
+    for (uint64_t i = 0; i < hash_list_hash_strings.size(); i++)
+    {
+        if (hash_list_hash_strings.at(i).find(search_string) != std::string::npos || hash_list_hash_file_names.at(i).find(search_string) != std::string::npos)
+        {
+            search_hash_list_string.append(util::to_upper_case(hash_list_hash_file_names.at(i)));
+            search_hash_list_string.push_back(',');
+
+            search_count++;
+        }
+
+        if (search_count >= max_results)
+        {
+            break;
+        }
+    }
+
+    task_single_status = TASK_SUCCESSFUL;
+    task_multiple_status = TASK_SUCCESSFUL;
+
+    return 0;
+}
+
+char* get_search_hash_list()
+{
+    return &search_hash_list_string[0];
+}
+
+char* get_rpkg_file_paths_hash_is_in(char* hash_string)
+{
+    rpkg_file_paths_hash_is_in = "";
+
+    for (uint64_t i = 0; i < rpkgs.size(); i++)
+    {
+        uint64_t hash_value = std::strtoull(hash_string, nullptr, 16);
+
+        std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(hash_value);
+
+        if (it != rpkgs.at(i).hash_map.end())
+        {
+            rpkg_file_paths_hash_is_in.append(rpkgs.at(i).rpkg_file_path);
+            rpkg_file_paths_hash_is_in.push_back(',');
+        }
+    }
+
+    return &rpkg_file_paths_hash_is_in[0];
 }

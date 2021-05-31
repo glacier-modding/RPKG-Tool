@@ -62,13 +62,13 @@ void generic_function::load_hash_list()
 
                     size_t pos = temp_hash_string.find_first_of(',');
 
-                    temp_hash_string = util::to_upper_case(temp_hash_string);
+                    temp_hash_string = util::to_lower_case(temp_hash_string);
 
                     std::string hash = temp_hash_string.substr(0, (pos - 5));
 
                     std::string hash_file_name = temp_hash_string.substr(0, pos);
 
-                    std::string hash_string = util::to_lower_case(temp_hash_string.substr(pos + 1, temp_hash_string.length() - (pos + 1)));
+                    std::string hash_string = temp_hash_string.substr(pos + 1, temp_hash_string.length() - (pos + 1));
 
                     hash_list_hash_file_names.push_back(hash_file_name);
 

@@ -7,10 +7,10 @@
         xmlns:local="clr-namespace:rpkg"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
-        Title="RPKG v2.0" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
+        Title="RPKG v2.1" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -74,17 +74,75 @@
             <TabItem x:Name="SecondTabLeft" Header="Dependency View">
                 <TreeView x:Name="HashMapTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/>
             </TabItem>
+            <TabItem x:Name="ThirdTabLeft" Header="Search">
+                <TabControl x:Name="LeftTabControl2" Grid.Row="1" Grid.Column="0">
+                    <TabItem x:Name="ThirdTabLeft2" Header="Search RPKGs">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Row="0" Grid.Column="0" Content="Search string:"/>
+                            <TextBox Grid.Row="0" Grid.Column="1" x:Name="SearchRPKGsTextBox" TextChanged="SearchRPKGsTextBox_TextChanged" FontFamily="Consolas" TextWrapping="NoWrap"/>
+                            <Label Grid.Row="0" Grid.Column="2" Content="Max results per RPKG:"/>
+                            <ComboBox Grid.Row="0" Grid.Column="3" x:Name="SearchRPKGsComboBox" FontFamily="Consolas">
+                                <ComboBoxItem Content="100" IsSelected="True"/>
+                                <ComboBoxItem Content="200"/>
+                                <ComboBoxItem Content="500"/>
+                                <ComboBoxItem Content="1000"/>
+                                <ComboBoxItem Content="2000"/>
+                                <ComboBoxItem Content="5000"/>
+                                <ComboBoxItem Content="10000"/>
+                            </ComboBox>
+                            <TreeView Grid.Row="1" Grid.ColumnSpan="4" x:Name="SearchRPKGsTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/>
+                        </Grid>
+                    </TabItem>
+                    <TabItem x:Name="ThirdTabLeft3" Header="Search Hash List">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Row="0" Grid.Column="0" Content="Search string:"/>
+                            <TextBox Grid.Row="0" Grid.Column="1" x:Name="SearchHashListTextBox" TextChanged="SearchHashListTextBox_TextChanged" FontFamily="Consolas" TextWrapping="NoWrap"/>
+                            <Label Grid.Row="0" Grid.Column="2" Content="Max results:"/>
+                            <ComboBox Grid.Row="0" Grid.Column="3" x:Name="SearchHashListComboBox" FontFamily="Consolas">
+                                <ComboBoxItem Content="100" IsSelected="True"/>
+                                <ComboBoxItem Content="200"/>
+                                <ComboBoxItem Content="500"/>
+                                <ComboBoxItem Content="1000"/>
+                                <ComboBoxItem Content="2000"/>
+                                <ComboBoxItem Content="5000"/>
+                                <ComboBoxItem Content="10000"/>
+                            </ComboBox>
+                            <TreeView Grid.Row="1" Grid.ColumnSpan="4" x:Name="SearchHashListTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+            </TabItem>
         </TabControl>
         <GridSplitter HorizontalAlignment="Right" VerticalAlignment="Stretch" Grid.Row="1"  Grid.Column="1" ResizeBehavior="PreviousAndNext" Width="5"/>
         <TabControl x:Name="RightTabControl" Grid.Row="1" Grid.Column="2">
             <TabItem x:Name="FirstTabRight" Header="Details">
-                <TextBox x:Name="DetailsTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" TextWrapping="NoWrap"/>
+                <TextBox x:Name="DetailsTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap"/>
             </TabItem>
             <TabItem x:Name="SecondTabRight" Header="Hex Viewer">
-                <TextBox x:Name="HexViewerTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" TextWrapping="NoWrap"/>
+                <TextBox x:Name="HexViewerTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap"/>
             </TabItem>
             <TabItem x:Name="ThirdTabRight" Header="JSON Viewer" Visibility="Hidden">
-                <TextBox x:Name="LocalizationTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap"/>
+                <TextBox x:Name="LocalizationTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="Wrap"/>
             </TabItem>
         </TabControl>
     </Grid>

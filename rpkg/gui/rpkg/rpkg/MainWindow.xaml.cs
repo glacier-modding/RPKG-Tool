@@ -190,6 +190,166 @@ namespace rpkg
             MainTreeView.SelectedItemChanged += MainTreeView_SelectedItemChanged;
 
             HashMapTreeView.SelectedItemChanged += MainTreeView_SelectedItemChanged;
+
+            SearchRPKGsTreeView.SelectedItemChanged += MainTreeView_SelectedItemChanged;
+
+            SearchHashListTreeView.SelectedItemChanged += SearchHashListTreeView_SelectedItemChanged;
+        }
+
+        private void SearchHashListTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (oneOrMoreRPKGsHaveBeenImported)
+            {
+                if (MainTreeView.Items.Count > 0)
+                {
+                    var treeview = (sender as TreeView);
+
+                    string itemHeader = "";
+
+                    if (treeview.SelectedItem is TreeViewItem item)
+                    {
+                        itemHeader = (item.Header as string);
+                    }
+                    else if (treeview.SelectedItem == null)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        itemHeader = treeview.SelectedItem.ToString();
+                    }
+
+                    string[] header = itemHeader.Split(' ');
+
+                    string hashFile = header[0];
+
+                    string[] hashDetails = hashFile.Split('.');
+
+                    string hash = hashDetails[0];
+                    string resourceType = hashDetails[1];
+
+                    string rpkgHashFilePathString = Marshal.PtrToStringAnsi(get_rpkg_file_paths_hash_is_in(hash));
+
+                    if (rpkgHashFilePathString != "")
+                    {
+                        string[] rpkgHashFilePaths = rpkgHashFilePathString.Trim(',').Split(',');
+
+                        DetailsTextBox.Text = "";
+
+                        HexViewerTextBox.Text = "";
+
+                        LocalizationTextBox.Text = "";
+
+                        foreach (string rpkgHashFilePath in rpkgHashFilePaths)
+                        {
+                            //MessageBoxShow(rpkgHashFilePath);
+
+                            string identifier = rpkgHashFilePath + hash;
+
+                            if (!detailsTextBoxText.ContainsKey(identifier))
+                            {
+                                DetailsTextBox.Text += hash + " in RPKG file " + rpkgHashFilePath + ":\n";
+
+                                DetailsTextBox.Text += Marshal.PtrToStringAnsi(get_hash_details(rpkgHashFilePath, hash));
+
+                                DetailsTextBox.Text += "\n\n";
+
+                                HexViewerTextBox.Text = "Hex view of " + header[0] + ":\n\n";
+
+                                LocalizationTextBox.Text = "";
+
+                                unsafe
+                                {
+                                    HexViewerTextBox.Text += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgHashFilePath, hash));
+                                }
+
+                                if (resourceType == "LOCR" || resourceType == "DLGE" || resourceType == "RTLV")
+                                {
+                                    UInt32 localization_data_size = generate_localization_string(rpkgHashFilePath, hash, resourceType);
+
+                                    unsafe
+                                    {
+                                        byte[] localization_data = new byte[localization_data_size];
+
+                                        Marshal.Copy(get_localization_string(), localization_data, 0, (int)localization_data_size);
+
+                                        if (localization_data_size > 0)
+                                        {
+                                            LocalizationTextBox.Text = Encoding.UTF8.GetString(localization_data);
+                                        }
+                                    }
+
+                                    if (localization_data_size > 0)
+                                    {
+                                        if (ThirdTabRight.Visibility == Visibility.Hidden)
+                                        {
+                                            ThirdTabRight.Visibility = Visibility.Visible;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (ThirdTabRight.Visibility == Visibility.Visible)
+                                        {
+                                            ThirdTabRight.Visibility = Visibility.Hidden;
+                                        }
+                                    }
+
+                                    localizationTextBoxText.Add(identifier, LocalizationTextBox.Text);
+                                }
+                                else
+                                {
+                                    if (ThirdTabRight.Visibility == Visibility.Visible)
+                                    {
+                                        ThirdTabRight.Visibility = Visibility.Hidden;
+                                    }
+                                }
+
+                                int return_value = clear_hash_data_vector();
+
+                                detailsTextBoxText.Add(identifier, DetailsTextBox.Text);
+                                hexViewerTextBoxText.Add(identifier, HexViewerTextBox.Text);
+                            }
+                            else
+                            {
+                                string details = "";
+                                detailsTextBoxText.TryGetValue(identifier, out details);
+                                DetailsTextBox.Text = details;
+
+                                string hex = "";
+                                hexViewerTextBoxText.TryGetValue(identifier, out hex);
+                                HexViewerTextBox.Text = hex;
+
+                                LocalizationTextBox.Text = "";
+
+                                if (resourceType == "LOCR" || resourceType == "DLGE" || resourceType == "RTLV")
+                                {
+                                    string localization = "";
+                                    localizationTextBoxText.TryGetValue(identifier, out localization);
+                                    LocalizationTextBox.Text = localization;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        DetailsTextBox.Text = "Hash is not located in any of the currently imported RPKGs.";
+
+                        HexViewerTextBox.Text = "";
+
+                        LocalizationTextBox.Text = "";
+                    }
+                    
+                    GC.Collect();
+                }
+            }
+            else
+            {
+                DetailsTextBox.Text = "Hash is not located in any of the currently imported RPKGs.";
+
+                HexViewerTextBox.Text = "";
+
+                LocalizationTextBox.Text = "";
+            }
         }
 
         private void MainTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -205,6 +365,10 @@ namespace rpkg
                     if (treeview.SelectedItem is TreeViewItem item)
                     {
                         itemHeader = (item.Header as string);
+                    }
+                    else if (treeview.SelectedItem == null)
+                    {
+                        return;
                     }
                     else
                     {
@@ -238,6 +402,7 @@ namespace rpkg
 
                         DetailsTextBox.Text = rpkgFile + " has " + allHashesInRPKGCount.ToString("N0") + " hash files/resources,\n";
                         DetailsTextBox.Text += "having a combined total data size of " + allHashesInRPKGDataSize.ToString("N0") + " bytes";
+                        DetailsTextBox.Text += Marshal.PtrToStringAnsi(get_patch_deletion_list(itemHeader));
 
                         HexViewerTextBox.Text = "";
                     }
@@ -863,15 +1028,21 @@ namespace rpkg
 
                     RightClickMenu rightClickMenu;
 
+                    int buttonCount = 0;
+
                     if (hashType == "WWEM" || hashType == "WWES" || hashType == "WWEV")
                     {
                         string[] buttons = { "Extract " + rightClickedOnName, "Extract " + rightClickedOnName + " To OGG (IOI Path)", "Cancel" };
+
+                        buttonCount = 3;
 
                         rightClickMenu = new RightClickMenu(buttons);
                     }
                     else if (hashType == "DLGE" || hashType == "LOCR" || hashType == "RTLV")
                     {
                         string[] buttons = { "Extract " + rightClickedOnName, "Extract " + rightClickedOnName + " To JSON (IOI Path)", "Cancel" };
+
+                        buttonCount = 3;
 
                         rightClickMenu = new RightClickMenu(buttons);
                     }
@@ -881,11 +1052,15 @@ namespace rpkg
                         {
                             string[] buttons = { "Extract " + rightClickedOnName, "Extract " + rightClickedOnName + " To Image (IOI Path)", "Cancel" };
 
+                            buttonCount = 3;
+
                             rightClickMenu = new RightClickMenu(buttons);
                         }
                         else
                         {
                             string[] buttons = { "Extract " + rightClickedOnName, "Cancel" };
+
+                            buttonCount = 2;
 
                             rightClickMenu = new RightClickMenu(buttons);
                         }
@@ -896,11 +1071,15 @@ namespace rpkg
                         {
                             string[] buttons = { "Extract " + rightClickedOnName, "Extract " + rightClickedOnName + " To JSON (IOI Path)", "Cancel" };
 
+                            buttonCount = 3;
+
                             rightClickMenu = new RightClickMenu(buttons);
                         }
                         else
                         {
                             string[] buttons = { "Extract " + rightClickedOnName, "Cancel" };
+
+                            buttonCount = 2;
 
                             rightClickMenu = new RightClickMenu(buttons);
                         }
@@ -908,6 +1087,8 @@ namespace rpkg
                     else
                     {
                         string[] buttons = { "Extract " + rightClickedOnName, "Cancel" };
+
+                        buttonCount = 2;
 
                         rightClickMenu = new RightClickMenu(buttons);
                     }
@@ -940,7 +1121,7 @@ namespace rpkg
 
                         output_path = outputFolder;
                     }
-                    else if (rightClickMenu.buttonPressed == "button1")
+                    else if (rightClickMenu.buttonPressed == "button1" && buttonCount == 3)
                     {
                         if (hashType == "WWEM")
                         {
@@ -1389,7 +1570,7 @@ namespace rpkg
 
                 if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
                 {
-                    //MessageBoxShow(progress.task_status_string);
+                    MessageBoxShow(progress.task_status_string);
 
                     return;
                 }
@@ -1746,6 +1927,8 @@ namespace rpkg
         private string rightClickedOnName = "";
         private string rightClickedOnFullName = "";
         private bool oneOrMoreRPKGsHaveBeenImported = false;
+        private System.Windows.Threading.DispatcherTimer searchRPKGsInputTimer;
+        private System.Windows.Threading.DispatcherTimer searchHashListInputTimer;
 
         public delegate int execute_get_hashes_with_no_reverse_depends(string rpkg_file);
         public delegate int execute_get_direct_hash_depends(string rpkg_file, string hash_string);
@@ -1829,6 +2012,24 @@ namespace rpkg
         [DllImport("rpkg.dll", EntryPoint = "get_direct_hash_depends_string", CallingConvention = CallingConvention.Cdecl)]
         public static extern unsafe IntPtr get_direct_hash_depends_string();
 
+        [DllImport("rpkg.dll", EntryPoint = "get_patch_deletion_list", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr get_patch_deletion_list(string rpkg_file);
+
+        [DllImport("rpkg.dll", EntryPoint = "search_imported_hashes", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int search_imported_hashes(string search_str, string rpkg_file, string resource_type, int max_results);
+
+        [DllImport("rpkg.dll", EntryPoint = "get_search_imported_hashes", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr get_search_imported_hashes();
+
+        [DllImport("rpkg.dll", EntryPoint = "search_hash_list", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int search_hash_list(string search_str, int max_results);
+
+        [DllImport("rpkg.dll", EntryPoint = "get_search_hash_list", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr get_search_hash_list();
+
+        [DllImport("rpkg.dll", EntryPoint = "get_rpkg_file_paths_hash_is_in", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr get_rpkg_file_paths_hash_is_in(string hash_string);
+
         [SuppressUnmanagedCodeSecurity]
         internal static class SafeNativeMethods
         {
@@ -1857,6 +2058,233 @@ namespace rpkg
             base.OnClosed(e);
 
             Process.GetCurrentProcess().Kill();
+        }
+
+        private void SearchRPKGsTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (searchRPKGsInputTimer == null)
+            {
+                searchRPKGsInputTimer = new System.Windows.Threading.DispatcherTimer();
+
+                searchRPKGsInputTimer.Interval = TimeSpan.FromMilliseconds(600);
+
+                searchRPKGsInputTimer.Tick += SearchRPKGsTextBox_TimerTimeout;
+            }
+
+            searchRPKGsInputTimer.Stop();
+            searchRPKGsInputTimer.Tag = (sender as TextBox).Text;
+            searchRPKGsInputTimer.Start();
+        }
+
+        private void SearchRPKGsTextBox_TimerTimeout(object sender, EventArgs e)
+        {
+            var timer = (sender as System.Windows.Threading.DispatcherTimer);
+
+            if (timer == null)
+            {
+                return;
+            }
+
+            timer.Stop();
+
+            SearchRPKGsTreeView.Items.Clear();
+
+            if (SearchRPKGsTextBox.Text.Length > 0)
+            {
+                int maxSearchResults = 0;
+
+                int.TryParse(SearchRPKGsComboBox.Text, out maxSearchResults);
+
+                if (maxSearchResults == 0)
+                {
+                    maxSearchResults = 100;
+                }
+
+                int rpkgItemIndex = 0;
+
+                foreach (TreeViewItem mainTreeViewItem in MainTreeView.Items)
+                {
+                    string rpkgPath = mainTreeViewItem.Header.ToString();
+
+                    bool rpkgItemAdded = false;
+
+                    //MessageBoxShow(rpkgPath);
+
+                    int rpkgResultsCount = 0;
+
+                    int resourceTypeItemIndex = 0;
+
+                    foreach (TreeViewItem resourceItems in mainTreeViewItem.Items)
+                    {
+                        if (rpkgResultsCount <= maxSearchResults)
+                        {
+                            string resourceType = resourceItems.Header.ToString();
+
+                            bool resourceTypeItemAdded = false;
+
+                            //MessageBoxShow(resourceType);
+
+                            int return_value = search_imported_hashes(SearchRPKGsTextBox.Text, rpkgPath, resourceType, maxSearchResults);
+
+                            //MessageBoxShow(Marshal.PtrToStringAnsi(get_search_imported_hashes()));
+
+                            string searchResultsString = Marshal.PtrToStringAnsi(get_search_imported_hashes());
+
+                            bool found = false;
+
+                            TreeViewItem item;
+
+                            if (!rpkgItemAdded)
+                            {
+                                item = new TreeViewItem();
+                            }
+                            else
+                            {
+                                item = (SearchRPKGsTreeView.Items.GetItemAt(rpkgItemIndex) as TreeViewItem);
+                            }
+
+                            item.Header = rpkgPath;
+
+                            //item.IsExpanded = true;
+
+                            string rpkgFile = rpkgPath.Substring(rpkgPath.LastIndexOf("\\") + 1);
+
+                            string[] searchResults = searchResultsString.TrimEnd(',').Split(',');
+
+                            if (searchResults.Length > 0)
+                            {
+                                foreach (string searchResult in searchResults)
+                                {
+                                    if (searchResult != "")
+                                    {
+                                        found = true;
+
+                                        rpkgResultsCount++;
+
+                                        //MessageBoxShow(searchResult);
+
+                                        TreeViewItem item2;
+
+                                        if (!resourceTypeItemAdded)
+                                        {
+                                            item2 = new TreeViewItem();
+                                        }
+                                        else
+                                        {
+                                            item2 = (item.Items.GetItemAt(resourceTypeItemIndex) as TreeViewItem);
+                                        }
+
+                                        item2.Header = resourceType;
+
+                                        item2.IsExpanded = true;
+
+                                        //var item3 = new TreeViewItem();
+
+                                        string[] temp_test = searchResult.Split('.');
+
+                                        string ioiString = Marshal.PtrToStringAnsi(get_hash_list_string(temp_test[0]));
+
+                                        //item3.Header = searchResult + " (" + rpkgFile + ") " + ioiString;
+
+                                        item2.Items.Add(searchResult + " (" + rpkgFile + ") " + ioiString);
+
+                                        //item3.Expanded += Item_Expanded;
+
+                                        //item2.Items.Add(item3);
+
+                                        if (!resourceTypeItemAdded)
+                                        {
+                                            item.Items.Add(item2);
+
+                                            resourceTypeItemAdded = true;
+                                        }
+                                    }
+                                }
+
+                                if (!rpkgItemAdded && found)
+                                {
+                                    SearchRPKGsTreeView.Items.Add(item);
+
+                                    rpkgItemAdded = true;
+                                }
+                            }
+
+                            if (resourceTypeItemAdded)
+                            {
+                                resourceTypeItemIndex++;
+                            }
+                        }
+                    }
+
+                    if (rpkgItemAdded)
+                    {
+                        rpkgItemIndex++;
+                    }
+                }
+            }
+        }
+
+        private void SearchHashListTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (searchHashListInputTimer == null)
+            {
+                searchHashListInputTimer = new System.Windows.Threading.DispatcherTimer();
+
+                searchHashListInputTimer.Interval = TimeSpan.FromMilliseconds(600);
+
+                searchHashListInputTimer.Tick += SearchHashListTextBox_TimerTimeout;
+            }
+
+            searchHashListInputTimer.Stop();
+            searchHashListInputTimer.Tag = (sender as TextBox).Text;
+            searchHashListInputTimer.Start();
+        }
+
+        private void SearchHashListTextBox_TimerTimeout(object sender, EventArgs e)
+        {
+            var timer = (sender as System.Windows.Threading.DispatcherTimer);
+
+            if (timer == null)
+            {
+                return;
+            }
+
+            timer.Stop();
+
+            SearchHashListTreeView.Items.Clear();
+
+            if (SearchHashListTextBox.Text.Length > 0)
+            {
+                int maxSearchResults = 0;
+
+                int.TryParse(SearchHashListComboBox.Text, out maxSearchResults);
+
+                if (maxSearchResults == 0)
+                {
+                    maxSearchResults = 100;
+                }
+
+                int return_value = search_hash_list(SearchHashListTextBox.Text, maxSearchResults);
+
+                string searchResultsString = Marshal.PtrToStringAnsi(get_search_hash_list());
+
+                string[] searchResults = searchResultsString.TrimEnd(',').Split(',');
+
+                if (searchResults.Length > 0)
+                {
+                    foreach (string searchResult in searchResults)
+                    {
+                        if (searchResult != "")
+                        {
+                            string[] temp_test = searchResult.Split('.');
+
+                            string ioiString = Marshal.PtrToStringAnsi(get_hash_list_string(temp_test[0]));
+
+                            SearchHashListTreeView.Items.Add(searchResult + " (hashlist) " + ioiString);
+                        }
+                    }
+                }
+            }
         }
     }
 }

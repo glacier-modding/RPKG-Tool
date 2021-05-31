@@ -25,7 +25,13 @@ void rpkg_function::hash_probe_from_file(std::string& input_path, std::string& f
 
     if (file::path_exists(input_rpkg_folder_path))
     {
-        rpkg_function::import_rpkg_files_in_folder(input_rpkg_folder_path);
+        std::string H1 = "Z:\\HITMAN1\\";
+        std::string H2 = "Z:\\HITMAN2\\Runtime\\";
+        std::string H3 = "C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\";
+
+        rpkg_function::import_rpkg_files_in_folder(H1);
+        rpkg_function::import_rpkg_files_in_folder(H2);
+        rpkg_function::import_rpkg_files_in_folder(H3);
 
         std::stringstream ss;
 

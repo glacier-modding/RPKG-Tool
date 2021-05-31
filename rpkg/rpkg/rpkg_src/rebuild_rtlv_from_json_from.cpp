@@ -197,7 +197,16 @@ void rpkg_function::rebuild_rtlv_from_json_from(std::string& input_path, std::st
 
                 json input_json;
 
-                input_json_file >> input_json;
+                try
+                {
+                    input_json_file >> input_json;
+                }
+                catch (json::parse_error& e)
+                {
+                    std::stringstream ss;
+                    ss << "Error: " << json_file_paths.at(p) << "\n" << "Error message: " << e.what() << '\n' << "Error exception id: " << e.id << '\n' << "Error byte position of error: " << e.byte;
+                    LOG_AND_EXIT(ss.str());
+                }
 
                 input_json_file.close();
 

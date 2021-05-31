@@ -26,6 +26,8 @@ std::string hash_direct_depends = "";
 
 std::string hash_list_string = "";
 
+std::string patch_deletion_list_string = "";
+
 std::vector<std::string> hashes_depends_map_rpkg_file_paths;
 
 std::vector<std::map<uint64_t, uint64_t>> hashes_depends_map;
@@ -41,3 +43,9 @@ std::vector<std::string> hash_list_hash_file_names;
 std::vector<std::string> hash_list_hash_value_strings;
 
 std::vector<std::string> hash_list_hash_strings;
+
+std::string search_imported_hashes_string = "";
+
+std::string search_hash_list_string = "";
+
+std::string rpkg_file_paths_hash_is_in = "";
