@@ -10,7 +10,7 @@
         xmlns:local="clr-namespace:rpkg"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
-        Title="RPKG v2.15" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
+        Title="RPKG v2.15.1" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -21,64 +21,78 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <DockPanel Grid.Row="0" Grid.ColumnSpan="5">
-            <Menu DockPanel.Dock="Top">
-                <MenuItem Header="Import">
-                    <MenuItem Click="OpenRPKGFile_Click" Header="Import RPKG File"/>
-                    <MenuItem Click="OpenRPKGFolder_Click" Header="Import RPKGs Folder"/>
-                </MenuItem>
-                <MenuItem Header="Extract">
-                    <MenuItem Click="Extract_Click" Header="Extract from RPKG File"/>
-                </MenuItem>
-                <MenuItem Header="Generate">
-                    <MenuItem Click="GenerateRPKGFromFolder_Click" Header="Generate RPKG From Folder"/>
-                </MenuItem>
-                <MenuItem Header="Mass Extract">
-                    <MenuItem Click="MassExtract_Click" Header="Extract Mesh Primitives (PRIM) To GLB From RPKGs In Folder"/>
-                    <MenuItem Click="MassExtract_Click" Header="Extract Textures (TEXT/TEXD) To TGA From RPKGs In Folder"/>
-                    <MenuItem Click="MassExtract_Click" Header="Extract Images/JSONs (ORES) To IOI Paths From RPKGs In Folder"/>
-                    <MenuItem Click="MassExtract_Click" Header="Extract Sounds (WWEM) To OGG To IOI Paths From RPKGs In Folder"/>
-                    <MenuItem Click="MassExtract_Click" Header="Extract Sounds (WWES) To OGG To IOI Paths From RPKGs In Folder"/>
-                    <MenuItem Click="MassExtract_Click" Header="Extract Sounds (WWEV) To OGG To IOI Paths From RPKGs In Folder"/>
-                    <MenuItem Click="MassExtract_Click" Header="Extract Localization (DLGE) To JSON From RPKGs In Folder"/>
-                    <MenuItem Click="MassExtract_Click" Header="Extract Localization (LOCR) To JSON From RPKGs In Folder"/>
-                    <MenuItem Click="MassExtract_Click" Header="Extract Localization (RTLV) To JSON From RPKGs In Folder"/>
-                    <MenuItem Click="MassExtract_Click" Header="Extract Scaleform GFX/DDS/TGA (GFXF) From RPKGs In Folder"/>
-                </MenuItem>
-                <MenuItem Header="Rebuild">
-                    <MenuItem Click="Rebuild_Click" Header="Rebuild Primitive Models (PRIM/TEXT/TEXD) From Folder"/>
-                    <MenuItem Click="Rebuild_Click" Header="Rebuild Mesh Primitives (PRIM) From Folder"/>
-                    <MenuItem Click="Rebuild_Click" Header="Rebuild Textures (TEXT/TEXD) From Folder"/>
-                    <MenuItem Click="Rebuild_Click" Header="Rebuild Scaleform GFX/DDS/TGA (GFXF) From Folder"/>
-                    <MenuItem Click="Rebuild_Click" Header="Rebuild Localization (DLGE) From Folder"/>
-                    <MenuItem Click="Rebuild_Click" Header="Rebuild Localization (LOCR) From Folder"/>
-                    <MenuItem Click="Rebuild_Click" Header="Rebuild Localization (RTLV) From Folder"/>
-                    <MenuItem Click="Rebuild_Click" Header="Rebuild Sounds (WWEV) From Folder"/>
-                </MenuItem>
-                <MenuItem Header="Color Theme">
-                    <MenuItem Click="ChangeColorTheme_Click" Header="Light/Blue"/>
-                    <MenuItem Click="ChangeColorTheme_Click" Header="Light/Brown"/>
-                    <MenuItem Click="ChangeColorTheme_Click" Header="Light/Green"/>
-                    <MenuItem Click="ChangeColorTheme_Click" Header="Light/Orange"/>
-                    <MenuItem Click="ChangeColorTheme_Click" Header="Light/Purple"/>
-                    <MenuItem Click="ChangeColorTheme_Click" Header="Light/Red"/>
-                    <MenuItem Click="ChangeColorTheme_Click" Header="Light/Yellow"/>
-                    <!--MenuItem Click="ChangeColorTheme_Click" Header="Light/White"/-->
-                    <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Blue"/>
-                    <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Brown"/>
-                    <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Green"/>
-                    <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Orange"/>
-                    <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Purple"/>
-                    <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Red"/>
-                    <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Yellow"/>
-                    <MenuItem Click="ChangeColorTheme_Click" Header="Dark/White"/>
-                </MenuItem>
-                <MenuItem Click="HashCalculator_Click"  Header="Hash Calculator"/>
-                <MenuItem Click="DiscordToggle_Click" Header="Enable Discord Rich Presence"/>
-                <MenuItem Click="About_Click" Header="About"/>
-                <MenuItem Click="Exit_Click" Header="Exit"/>
-            </Menu>
-        </DockPanel>
+        <Grid Grid.Row="0" Grid.ColumnSpan="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <DockPanel Grid.Row="0" Grid.Column="0">
+                <Menu DockPanel.Dock="Top">
+                    <MenuItem Header="Import">
+                        <MenuItem Click="OpenRPKGFile_Click" Header="Import RPKG File"/>
+                        <MenuItem Click="OpenRPKGFolder_Click" Header="Import RPKGs Folder"/>
+                    </MenuItem>
+                    <MenuItem Header="Extract">
+                        <MenuItem Click="Extract_Click" Header="Extract from RPKG File"/>
+                    </MenuItem>
+                    <MenuItem Header="Generate">
+                        <MenuItem Click="GenerateRPKGFromFolder_Click" Header="Generate RPKG From Folder"/>
+                    </MenuItem>
+                    <MenuItem Header="Mass Extract">
+                        <MenuItem Click="MassExtract_Click" Header="Extract Mesh Primitives (PRIM) To GLB From RPKGs In Folder"/>
+                        <MenuItem Click="MassExtract_Click" Header="Extract Textures (TEXT/TEXD) To TGA From RPKGs In Folder"/>
+                        <MenuItem Click="MassExtract_Click" Header="Extract Images/JSONs (ORES) To IOI Paths From RPKGs In Folder"/>
+                        <MenuItem Click="MassExtract_Click" Header="Extract Sounds (WWEM) To OGG To IOI Paths From RPKGs In Folder"/>
+                        <MenuItem Click="MassExtract_Click" Header="Extract Sounds (WWES) To OGG To IOI Paths From RPKGs In Folder"/>
+                        <MenuItem Click="MassExtract_Click" Header="Extract Sounds (WWEV) To OGG To IOI Paths From RPKGs In Folder"/>
+                        <MenuItem Click="MassExtract_Click" Header="Extract Localization (DLGE) To JSON From RPKGs In Folder"/>
+                        <MenuItem Click="MassExtract_Click" Header="Extract Localization (LOCR) To JSON From RPKGs In Folder"/>
+                        <MenuItem Click="MassExtract_Click" Header="Extract Localization (RTLV) To JSON From RPKGs In Folder"/>
+                        <MenuItem Click="MassExtract_Click" Header="Extract Scaleform GFX/DDS/TGA (GFXF) From RPKGs In Folder"/>
+                    </MenuItem>
+                    <MenuItem Header="Rebuild">
+                        <MenuItem Click="Rebuild_Click" Header="Rebuild Primitive Models (PRIM/TEXT/TEXD) From Folder"/>
+                        <MenuItem Click="Rebuild_Click" Header="Rebuild Mesh Primitives (PRIM) From Folder"/>
+                        <MenuItem Click="Rebuild_Click" Header="Rebuild Textures (TEXT/TEXD) From Folder"/>
+                        <MenuItem Click="Rebuild_Click" Header="Rebuild Scaleform GFX/DDS/TGA (GFXF) From Folder"/>
+                        <MenuItem Click="Rebuild_Click" Header="Rebuild Localization (DLGE) From Folder"/>
+                        <MenuItem Click="Rebuild_Click" Header="Rebuild Localization (LOCR) From Folder"/>
+                        <MenuItem Click="Rebuild_Click" Header="Rebuild Localization (RTLV) From Folder"/>
+                        <MenuItem Click="Rebuild_Click" Header="Rebuild Sounds (WWEV) From Folder"/>
+                    </MenuItem>
+                    <MenuItem Header="Color Theme">
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Light/Blue"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Light/Brown"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Light/Green"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Light/Orange"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Light/Purple"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Light/Red"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Light/Yellow"/>
+                        <!--MenuItem Click="ChangeColorTheme_Click" Header="Light/White"/-->
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Blue"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Brown"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Green"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Orange"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Purple"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Red"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Yellow"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Dark/White"/>
+                    </MenuItem>
+                    <MenuItem Click="HashCalculator_Click"  Header="Hash Calculator"/>
+                    <MenuItem Click="About_Click" Header="About"/>
+                    <MenuItem Click="Exit_Click" Header="Exit"/>
+                </Menu>
+            </DockPanel>
+            <Image Grid.Row="0" Grid.Column="2" Source="Discord.png" Cursor="Hand" MouseDown="DiscordInvite_MouseDown"/>
+            <Label Grid.Row="0" Grid.Column="3" Content="Presence " FontSize="14"/>
+            <mah:ToggleSwitch Grid.Row="0" Grid.Column="4" Toggled="DiscordRichPresence_Toggled" Width="90"/>
+        </Grid>
         <TabControl x:Name="LeftTabControl" Grid.Row="1" Grid.Column="0">
             <TabItem x:Name="FirstTabLeft" Header="Resource View">
                 <!--TreeView x:Name="MainTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/-->

@@ -536,13 +536,17 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
     DXGI_FORMAT directx_compression_format;
 
-    if (text_directx_format == 0x34) //R8G8
+    if (text_directx_format == 0x1C) //R8G8B8A8
+    {
+        directx_compression_format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    }
+    else if (text_directx_format == 0x34) //R8G8
     {
         directx_compression_format = DXGI_FORMAT_R8G8_UNORM;
     }
     else if (text_directx_format == 0x42) //A8
     {
-
+        directx_compression_format = DXGI_FORMAT_A8_UNORM;
     }
     else if (text_directx_format == 0x49) //DXT1
     {

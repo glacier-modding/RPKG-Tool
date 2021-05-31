@@ -537,7 +537,7 @@ void text::save_text_to_png(std::string png_path)
 
     if (text_directx_format == 0x1C)
     {
-        dds_header_data.ddspf = DirectX::DDSPF_DXT1;
+        dds_header_data.ddspf = DirectX::DDSPF_A8R8G8B8;
     }
     if (text_directx_format == 0x34)
     {
@@ -746,7 +746,7 @@ void text::save_texd_to_png(std::string png_path)
 
         if (text_directx_format == 0x1C)
         {
-            dds_header_data.ddspf = DirectX::DDSPF_DXT1;
+            dds_header_data.ddspf = DirectX::DDSPF_A8R8G8B8;
         }
         if (text_directx_format == 0x34)
         {
@@ -776,7 +776,8 @@ void text::save_texd_to_png(std::string png_path)
         if (text_directx_format == 0x5A)
         {
             dds_header_data.ddspf = DirectX::DDSPF_DX10;
-            dds_header_data_dxt10.dxgiFormat = DXGI_FORMAT_BC7_UNORM_SRGB;
+            //dds_header_data_dxt10.dxgiFormat = DXGI_FORMAT_BC7_UNORM_SRGB;
+            dds_header_data_dxt10.dxgiFormat = DXGI_FORMAT_BC7_UNORM;
             dds_header_data_dxt10.resourceDimension = DirectX::DDS_DIMENSION_TEXTURE2D;
             dds_header_data_dxt10.miscFlag = 0;
             dds_header_data_dxt10.arraySize = 1;
@@ -975,7 +976,7 @@ void text::save_text_to_tga(std::string tga_path)
 
     if (text_directx_format == 0x1C)
     {
-        dds_header_data.ddspf = DirectX::DDSPF_DXT1;
+        dds_header_data.ddspf = DirectX::DDSPF_A8R8G8B8;
     }
     if (text_directx_format == 0x34)
     {
@@ -1005,7 +1006,8 @@ void text::save_text_to_tga(std::string tga_path)
     if (text_directx_format == 0x5A)
     {
         dds_header_data.ddspf = DirectX::DDSPF_DX10;
-        dds_header_data_dxt10.dxgiFormat = DXGI_FORMAT_BC7_UNORM_SRGB;
+        //dds_header_data_dxt10.dxgiFormat = DXGI_FORMAT_BC7_UNORM_SRGB;
+        dds_header_data_dxt10.dxgiFormat = DXGI_FORMAT_BC7_UNORM;
         dds_header_data_dxt10.resourceDimension = DirectX::DDS_DIMENSION_TEXTURE2D;
         dds_header_data_dxt10.miscFlag = 0;
         dds_header_data_dxt10.arraySize = 1;
@@ -1126,7 +1128,7 @@ void text::save_text_to_tga(std::string tga_path)
     }
     else if (text_directx_format == 0x5A) //BC7
     {
-        HRESULT hresult = DirectX::Decompress(*scratch_image_original.GetImage(0, 0, 0), DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, scratch_image_converted);
+        HRESULT hresult = DirectX::Decompress(*scratch_image_original.GetImage(0, 0, 0), DXGI_FORMAT_R8G8B8A8_UNORM, scratch_image_converted);
 
         if (FAILED(hresult))
         {
@@ -1183,7 +1185,7 @@ void text::save_texd_to_tga(std::string tga_path)
 
         if (text_directx_format == 0x1C)
         {
-            dds_header_data.ddspf = DirectX::DDSPF_DXT1;
+            dds_header_data.ddspf = DirectX::DDSPF_A8B8G8R8;
         }
         if (text_directx_format == 0x34)
         {
@@ -1213,7 +1215,8 @@ void text::save_texd_to_tga(std::string tga_path)
         if (text_directx_format == 0x5A)
         {
             dds_header_data.ddspf = DirectX::DDSPF_DX10;
-            dds_header_data_dxt10.dxgiFormat = DXGI_FORMAT_BC7_UNORM_SRGB;
+            //dds_header_data_dxt10.dxgiFormat = DXGI_FORMAT_BC7_UNORM_SRGB;
+            dds_header_data_dxt10.dxgiFormat = DXGI_FORMAT_BC7_UNORM;
             dds_header_data_dxt10.resourceDimension = DirectX::DDS_DIMENSION_TEXTURE2D;
             dds_header_data_dxt10.miscFlag = 0;
             dds_header_data_dxt10.arraySize = 1;
@@ -1334,7 +1337,7 @@ void text::save_texd_to_tga(std::string tga_path)
         }
         else if (text_directx_format == 0x5A) //BC7
         {
-            HRESULT hresult = DirectX::Decompress(*scratch_image_original.GetImage(0, 0, 0), DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, scratch_image_converted);
+            HRESULT hresult = DirectX::Decompress(*scratch_image_original.GetImage(0, 0, 0), DXGI_FORMAT_R8G8B8A8_UNORM, scratch_image_converted);
 
             if (FAILED(hresult))
             {

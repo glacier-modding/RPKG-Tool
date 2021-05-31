@@ -47,51 +47,70 @@ namespace rpkg
             Client.Initialize();
         }
 
-        public void SetDiscordStatus(string status)
+        public void SetDiscordStatus(string details, string state)
         {
             if (discordOn)
             {
                 Client.SetPresence(new RichPresence()
                 {
-                    Details = "RPKG Tool",
-                    State = status,
+                    Details = details,
+                    State = state,
                     Assets = new Assets()
                     {
                         LargeImageKey = "icon",
-                        LargeImageText = "RPKG Tool",
+                        LargeImageText = "RPKG Tool"
+                    },
+                    Timestamps = timestamp,
+                    Buttons = new DiscordRPC.Button[]
+                    {
+                        new DiscordRPC.Button() { Label = "Download RPKG Tool", Url = "https://notex.app" }
                     }
-                });
+                }); ;
             }
         }
 
-        private void DiscordToggle_Click(object sender, RoutedEventArgs e)
+        private void DiscordRichPresence_Toggled(object sender, RoutedEventArgs e)
         {
-            if (!discordOn)
+            if ((sender as ToggleSwitch).IsOn)
             {
-                discordOn = true;
-
-                DiscordRPCSetup();
-
-                SetDiscordStatus("Idle");
-
-                if (!oneOrMoreRPKGsHaveBeenImported)
+                if (!discordOn)
                 {
-                    if (LeftTabControl.SelectedIndex == 0)
-                    {
-                        SetDiscordStatus("In Resource View");
-                    }
-                    else if (LeftTabControl.SelectedIndex == 1)
-                    {
-                        LoadHashDependsMap();
+                    discordOn = true;
 
-                        SetDiscordStatus("In Dependency View");
-                    }
-                    else if (LeftTabControl.SelectedIndex == 2)
+                    DiscordRPCSetup();
+
+                    SetDiscordStatus("Idle", "");
+
+                    if (oneOrMoreRPKGsHaveBeenImported)
                     {
-                        SetDiscordStatus("In Search View");
+                        if (LeftTabControl.SelectedIndex == 0)
+                        {
+                            SetDiscordStatus("Resource View", "");
+                        }
+                        else if (LeftTabControl.SelectedIndex == 1)
+                        {
+                            SetDiscordStatus("Dependency View", "");
+                        }
+                        else if (LeftTabControl.SelectedIndex == 2)
+                        {
+                            SetDiscordStatus("Search View", "");
+                        }
                     }
                 }
             }
+            else
+            {
+                if (discordOn)
+                {
+                    discordOn = false;
+
+                    Client.Dispose();
+                }
+            }
+        }
+        private void DiscordInvite_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Process.Start("https://discord.com/invite/hxPT9rf");
         }
 
         public MainWindow()
@@ -99,6 +118,8 @@ namespace rpkg
             InitializeComponent();
 
             ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.DodgerBlue)));
+
+            timestamp = Timestamps.Now;
         }
 
         private void DownloadExtractHashList()
@@ -161,12 +182,21 @@ namespace rpkg
                 {
                     DownloadExtractHashList();
                     System.Windows.Forms.Application.Restart();
-                    Client.Dispose();
+
+                    if (discordOn)
+                    {
+                        Client.Dispose();
+                    }
+
                     Environment.Exit(0);
                 }
                 else if (messageBox.buttonPressed == "CancelButton")
                 {
-                    Client.Dispose();
+                    if (discordOn)
+                    {
+                        Client.Dispose();
+                    }
+
                     Environment.Exit(0);
                 }
             }
@@ -189,7 +219,12 @@ namespace rpkg
                 {
                     DownloadExtractHashList();
                     System.Windows.Forms.Application.Restart();
-                    Client.Dispose();
+
+                    if (discordOn)
+                    {
+                        Client.Dispose();
+                    }
+
                     Environment.Exit(0);
                 }
             }
@@ -290,6 +325,19 @@ namespace rpkg
 
                         string rpkgFile = itemHeader.Substring(itemHeader.LastIndexOf("\\") + 1);
 
+                        if (LeftTabControl.SelectedIndex == 0)
+                        {
+                            SetDiscordStatus("Resource View", rpkgFile);
+                        }
+                        else if (LeftTabControl.SelectedIndex == 1)
+                        {
+                            SetDiscordStatus("Dependency View", rpkgFile);
+                        }
+                        else if (LeftTabControl.SelectedIndex == 2)
+                        {
+                            SetDiscordStatus("Search View", rpkgFile);
+                        }
+
                         UInt32 hashBasedOnResourceTypeCount = get_hash_based_on_resource_type_count(rpkgFilePath, resourceType);
 
                         UInt64 resourceTypesDataSize = get_resource_types_data_size(rpkgFilePath, resourceType);
@@ -333,6 +381,19 @@ namespace rpkg
                     else if (itemHeader.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
                     {
                         string rpkgFile = itemHeader.Substring(itemHeader.LastIndexOf("\\") + 1);
+
+                        if (LeftTabControl.SelectedIndex == 0)
+                        {
+                            SetDiscordStatus("Resource View", rpkgFile);
+                        }
+                        else if (LeftTabControl.SelectedIndex == 1)
+                        {
+                            SetDiscordStatus("Dependency View", rpkgFile);
+                        }
+                        else if (LeftTabControl.SelectedIndex == 2)
+                        {
+                            SetDiscordStatus("Search View", rpkgFile);
+                        }
 
                         UInt32 allHashesInRPKGCount = get_all_hashes_in_rpkg_count(itemHeader);
 
@@ -405,6 +466,19 @@ namespace rpkg
 
                         string hash = hashDetails[0];
                         string resourceType = hashDetails[1];
+
+                        if (LeftTabControl.SelectedIndex == 0)
+                        {
+                            SetDiscordStatus("Resource View", hashFile);
+                        }
+                        else if (LeftTabControl.SelectedIndex == 1)
+                        {
+                            SetDiscordStatus("Dependency View", hashFile);
+                        }
+                        else if (LeftTabControl.SelectedIndex == 2)
+                        {
+                            SetDiscordStatus("Search View", hashFile);
+                        }
 
                         currentHashFileName = hashFile;
 
@@ -1808,23 +1882,21 @@ namespace rpkg
                                     entityBrickEditor.currentThemeBrightness = theme[0];
                                     string color = theme[1];
 
-                                    SetDiscordStatus("In Entity/Brick Editor");
+                                    SetDiscordStatus("Brick Editor", hashName);
 
                                     entityBrickEditor.ShowDialog();
 
                                     if (LeftTabControl.SelectedIndex == 0)
                                     {
-                                        SetDiscordStatus("In Resource View");
+                                        SetDiscordStatus("Resource View", "");
                                     }
                                     else if (LeftTabControl.SelectedIndex == 1)
                                     {
-                                        LoadHashDependsMap();
-
-                                        SetDiscordStatus("In Dependency View");
+                                        SetDiscordStatus("Dependency View", "");
                                     }
                                     else if (LeftTabControl.SelectedIndex == 2)
                                     {
-                                        SetDiscordStatus("In Search View");
+                                        SetDiscordStatus("Search View", "");
                                     }
                                     
                                     //GC.Collect();
@@ -2114,23 +2186,21 @@ namespace rpkg
                                     entityBrickEditor.currentThemeBrightness = theme[0];
                                     string color = theme[1];
 
-                                    SetDiscordStatus("In Entity/Brick Editor");
+                                    SetDiscordStatus("Brick Editor", hashName);
 
                                     entityBrickEditor.ShowDialog();
 
                                     if (LeftTabControl.SelectedIndex == 0)
                                     {
-                                        SetDiscordStatus("In Resource View");
+                                        SetDiscordStatus("Resource View", "");
                                     }
                                     else if (LeftTabControl.SelectedIndex == 1)
                                     {
-                                        LoadHashDependsMap();
-
-                                        SetDiscordStatus("In Dependency View");
+                                        SetDiscordStatus("Dependency View", "");
                                     }
                                     else if (LeftTabControl.SelectedIndex == 2)
                                     {
-                                        SetDiscordStatus("In Search View");
+                                        SetDiscordStatus("Search View", "");
                                     }
 
                                     //GC.Collect();
@@ -2757,17 +2827,17 @@ namespace rpkg
 
             if (tab.SelectedIndex == 0)
             {
-                SetDiscordStatus("In Resource View");
+                SetDiscordStatus("Resource View", "");
             }
             else if (tab.SelectedIndex == 1)
             {
                 LoadHashDependsMap();
 
-                SetDiscordStatus("In Dependency View");
+                SetDiscordStatus("Dependency View", "");
             }
             else if (tab.SelectedIndex == 2)
             {
-                SetDiscordStatus("In Search View");
+                SetDiscordStatus("Search View", "");
             }
         }
 
@@ -2994,17 +3064,15 @@ namespace rpkg
             {
                 if (LeftTabControl.SelectedIndex == 0)
                 {
-                    SetDiscordStatus("In Resource View");
+                    SetDiscordStatus("Resource View", "");
                 }
                 else if (LeftTabControl.SelectedIndex == 1)
                 {
-                    LoadHashDependsMap();
-
-                    SetDiscordStatus("In Dependency View");
+                    SetDiscordStatus("Dependency View", "");
                 }
                 else if (LeftTabControl.SelectedIndex == 2)
                 {
-                    SetDiscordStatus("In Search View");
+                    SetDiscordStatus("Search View", "");
                 }
             }
 
@@ -3122,17 +3190,15 @@ namespace rpkg
             {
                 if (LeftTabControl.SelectedIndex == 0)
                 {
-                    SetDiscordStatus("In Resource View");
+                    SetDiscordStatus("Resource View", "");
                 }
                 else if (LeftTabControl.SelectedIndex == 1)
                 {
-                    LoadHashDependsMap();
-
-                    SetDiscordStatus("In Dependency View");
+                    SetDiscordStatus("Dependency View", "");
                 }
                 else if (LeftTabControl.SelectedIndex == 2)
                 {
-                    SetDiscordStatus("In Search View");
+                    SetDiscordStatus("Search View", "");
                 }
             }
 
@@ -4055,7 +4121,11 @@ namespace rpkg
 
         private void Exit_Click(object sender, RoutedEventArgs e)
         {
-            Client.Dispose();
+            if (discordOn)
+            {
+                Client.Dispose();
+            }
+
             Close();
         }
 
@@ -4084,6 +4154,7 @@ namespace rpkg
         public List<string> hashDependsFlagsList;
         public int hashDependsPage;
         public bool discordOn = false;
+        public DiscordRPC.Timestamps timestamp;
 
         private enum OggPlayerState
         {
@@ -6491,7 +6562,22 @@ namespace rpkg
         {
             HashCalculator hashCalculator = new HashCalculator();
 
+            SetDiscordStatus("Hash Calculator", "");
+
             hashCalculator.ShowDialog();
+
+            if (LeftTabControl.SelectedIndex == 0)
+            {
+                SetDiscordStatus("Resource View", "");
+            }
+            else if (LeftTabControl.SelectedIndex == 1)
+            {
+                SetDiscordStatus("Dependency View", "");
+            }
+            else if (LeftTabControl.SelectedIndex == 2)
+            {
+                SetDiscordStatus("Search View", "");
+            }
         }
     }
 }
