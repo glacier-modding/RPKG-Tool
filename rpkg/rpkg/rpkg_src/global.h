@@ -87,7 +87,8 @@ enum Types
     TYPE_BOOL,
     TYPE_ZSTRING,
     TYPE_ZVARIANT,
-    TYPE_ENUM
+    TYPE_ENUM,
+    TYPE_NULL
 };
 
 extern std::string DirectXFormatsStrings[116];
@@ -237,14 +238,18 @@ extern int pcm_sample_rate;
 extern int pcm_channels;
 extern std::string extracted_wem_string;
 extern std::map<uint32_t, std::string>* property_map;
-extern std::map<std::string, uint32_t>* type_map;
-extern std::map<std::string, std::map<uint32_t, std::string>>* enum_map;
-extern void initialize_enum_map();
-extern void initialize_type_map();
-extern bool resource_tool_initialized;
-extern bool property_map_initialized;
-extern bool enum_map_initialized;
-extern bool type_map_initialized;
+extern std::map<std::string, uint32_t>* type_map_h2;
+extern std::map<std::string, uint32_t>* type_map_h3;
+extern std::map<std::string, std::map<int32_t, std::string>>* enum_map_h2;
+extern std::map<std::string, std::map<int32_t, std::string>>* enum_map_h3;
+extern void initialize_enum_map_h2();
+extern void initialize_enum_map_h3();
+extern void initialize_type_map_h2();
+extern void initialize_type_map_h3();
+extern bool enum_map_h2_initialized;
+extern bool enum_map_h3_initialized;
+extern bool type_map_h2_initialized;
+extern bool type_map_h3_initialized;
 extern std::vector<temp> temps;
 extern std::map<uint64_t, uint32_t> temps_map;
 extern std::vector<matrix43> temp_world_coordinates;

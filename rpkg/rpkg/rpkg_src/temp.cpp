@@ -18,6 +18,9 @@
 #include <fstream>
 #include <set>
 
+#pragma comment(lib, "../rpkg_src/thirdparty/zhmtools/ResourceLib_HM2.lib")
+#pragma comment(lib, "../rpkg_src/thirdparty/zhmtools/ResourceLib_HM3.lib")
+
 temp::temp()
 {
     
@@ -26,12 +29,14 @@ temp::temp()
 temp::temp(uint64_t rpkgs_index, uint64_t hash_index)
 {
 #ifdef RPKG_DLL
-    util::initialize_resource_tool();
+    //util::initialize_resource_tool();
 #endif
     
-    initialize_enum_map();
+    initialize_enum_map_h2();
+    initialize_enum_map_h3();
 
-    initialize_type_map();
+    initialize_type_map_h2();
+    initialize_type_map_h3();
 
 	temp_rpkg_index = rpkgs_index;
 	temp_hash_index = hash_index;
@@ -48,12 +53,14 @@ temp::temp(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
     temp_file_version = temp_version;
 
 #ifdef RPKG_DLL
-    util::initialize_resource_tool();
+    //util::initialize_resource_tool();
 #endif
 
-    initialize_enum_map();
+    initialize_enum_map_h2();
+    initialize_enum_map_h3();
 
-    initialize_type_map();
+    initialize_type_map_h2();
+    initialize_type_map_h3();
 
     temp_rpkg_index = rpkgs_index;
     temp_hash_index = hash_index;
@@ -193,19 +200,32 @@ void temp::load_temp_data()
 
     std::string type = "TEMP";
 
-    if (temp_file_version == 2)
-    {
-        type = "TEMPH2";
-    }
+    //if (temp_file_version == 2)
+    //{
+        //type = "TEMPH2";
+    //}
 
 #ifdef RPKG_DLL
-    resource_tool_ConvertMemoryResourceToJson(&type[0], (void*)temp_data.data(), (uint64_t)temp_data.size());
+    if (temp_file_version == 2)
+    {
+        resource_tool_converter = HM2_GetConverterForResource("TEMP");
+    }
+    else
+    {
+        resource_tool_converter = HM3_GetConverterForResource("TEMP");
+    }
 
-    temp_json_input = resource_tool_GetJsonFromMemory();
+    temp_json_input = resource_tool_converter->FromMemoryToJsonString((const void*)temp_data.data(), (size_t)temp_data.size(), true);
 
-    rapidjson::StringStream ss(temp_json_input);
+    //resource_tool_ConvertMemoryResourceToJson(&type[0], (void*)temp_data.data(), (uint64_t)temp_data.size());
+
+    //temp_json_input = resource_tool_GetJsonFromMemory();
+
+    rapidjson::StringStream ss(temp_json_input->JsonData);
 
     temp_json_document.ParseStream(ss);
+
+    resource_tool_converter->FreeJsonString(temp_json_input);
 #endif
 }
 
@@ -268,13 +288,26 @@ void temp::load_tblu_data()
     std::string type = "TBLU";
 
 #ifdef RPKG_DLL
-    resource_tool_ConvertMemoryResourceToJson(&type[0], (void*)tblu_data.data(), (uint64_t)tblu_data.size());
+    if (temp_file_version == 2)
+    {
+        resource_tool_converter = HM2_GetConverterForResource("TBLU");
+    }
+    else
+    {
+        resource_tool_converter = HM3_GetConverterForResource("TBLU");
+    }
 
-    tblu_json_input = resource_tool_GetJsonFromMemory();
+    tblu_json_input = resource_tool_converter->FromMemoryToJsonString((const void*)tblu_data.data(), (size_t)tblu_data.size(), true);
 
-    rapidjson::StringStream ss(tblu_json_input);
+    //resource_tool_ConvertMemoryResourceToJson(&type[0], (void*)tblu_data.data(), (uint64_t)tblu_data.size());
+
+    //tblu_json_input = resource_tool_GetJsonFromMemory();
+
+    rapidjson::StringStream ss(tblu_json_input->JsonData);
 
     tblu_json_document.ParseStream(ss);
+
+    resource_tool_converter->FreeJsonString(tblu_json_input);
 #endif
 }
 
@@ -885,7 +918,7 @@ void temp::get_temp_entries_data(std::string value_type, std::string type_string
     {
         if (it1->value.IsArray() || it1->value.IsObject())
         {
-            json_temp_node_scan(it1->value, propertyValues_string, nPropertyID_string, type_string, "/" + value_type, type_string, type_string);
+            json_temp_node_scan(it1->value, propertyValues_string, nPropertyID_string, type_string, "/" + value_type, type_string);
         }
         else
         {
@@ -895,126 +928,248 @@ void temp::get_temp_entries_data(std::string value_type, std::string type_string
 
             //std::cout << it4->value.GetString() << std::endl;
 
-            std::map<std::string, uint32_t>::iterator it = type_map->find("STemplateEntityFactory/" + type_string);
+            std::map<std::string, uint32_t>::iterator it;
 
-            if (it != type_map->end())
+            if (temp_file_version == 2)
             {
-                //std::cout << "Type: " << it->second << std::endl;
+                it = type_map_h2->find("STemplateEntityFactory/" + type_string);
 
-                if (it->second == TYPE_INT8)
+                if (it != type_map_h2->end())
                 {
-                    ss << json_pointer << " int8 " << it1->value.GetInt();
-                }
-                else if (it->second == TYPE_UINT8)
-                {
-                    ss << json_pointer << " uint8 " << it1->value.GetUint();
-                }
-                else if (it->second == TYPE_INT16)
-                {
-                    ss << json_pointer << " int16 " << it1->value.GetInt();
-                }
-                else if (it->second == TYPE_UINT16)
-                {
-                    ss << json_pointer << " uint16 " << it1->value.GetUint();
-                }
-                else if (it->second == TYPE_INT32)
-                {
-                    ss << json_pointer << " int32 " << it1->value.GetInt();
-                }
-                else if (it->second == TYPE_UINT32)
-                {
-                    ss << json_pointer << " uint32 " << it1->value.GetUint();
-                }
-                else if (it->second == TYPE_INT64)
-                {
-                    ss << json_pointer << " int64 " << it1->value.GetInt64();
-                }
-                else if (it->second == TYPE_UINT64)
-                {
-                    ss << json_pointer << " uint64 " << it1->value.GetUint64();
-                }
-                else if (it->second == TYPE_FLOAT32)
-                {
-                    ss << json_pointer << " float32 " << it1->value.GetFloat();
-                }
-                else if (it->second == TYPE_FLOAT64)
-                {
-                    ss << json_pointer << " float64 " << it1->value.GetDouble();
-                }
-                else if (it->second == TYPE_BOOL)
-                {
-                    ss << json_pointer << " bool " << it1->value.GetBool();
-                }
-                else if (it->second == TYPE_ZSTRING)
-                {
-                    ss << json_pointer << " ZString " << it1->value.GetString();
-                }
-                else if (it->second == TYPE_ENUM)
-                {
-                    ss << json_pointer << " enum " << it1->value.GetString();
+                    //std::cout << "Type: " << it->second << std::endl;
+
+                    if (it->second == TYPE_INT8)
+                    {
+                        ss << json_pointer << " int8 " << it1->value.GetInt();
+                    }
+                    else if (it->second == TYPE_UINT8)
+                    {
+                        ss << json_pointer << " uint8 " << it1->value.GetUint();
+                    }
+                    else if (it->second == TYPE_INT16)
+                    {
+                        ss << json_pointer << " int16 " << it1->value.GetInt();
+                    }
+                    else if (it->second == TYPE_UINT16)
+                    {
+                        ss << json_pointer << " uint16 " << it1->value.GetUint();
+                    }
+                    else if (it->second == TYPE_INT32)
+                    {
+                        ss << json_pointer << " int32 " << it1->value.GetInt();
+                    }
+                    else if (it->second == TYPE_UINT32)
+                    {
+                        ss << json_pointer << " uint32 " << it1->value.GetUint();
+                    }
+                    else if (it->second == TYPE_INT64)
+                    {
+                        ss << json_pointer << " int64 " << it1->value.GetInt64();
+                    }
+                    else if (it->second == TYPE_UINT64)
+                    {
+                        ss << json_pointer << " uint64 " << it1->value.GetUint64();
+                    }
+                    else if (it->second == TYPE_FLOAT32)
+                    {
+                        ss << json_pointer << " float32 " << it1->value.GetFloat();
+                    }
+                    else if (it->second == TYPE_FLOAT64)
+                    {
+                        ss << json_pointer << " float64 " << it1->value.GetDouble();
+                    }
+                    else if (it->second == TYPE_BOOL)
+                    {
+                        ss << json_pointer << " bool " << it1->value.GetBool();
+                    }
+                    else if (it->second == TYPE_ZSTRING)
+                    {
+                        ss << json_pointer << " ZString " << it1->value.GetString();
+                    }
+                    else if (it->second == TYPE_ENUM)
+                    {
+                        ss << json_pointer << " enum " << it1->value.GetString();
+                    }
+                    else
+                    {
+                        ss << json_pointer << " none none";
+
+                        response_string += util::uint32_t_to_string(it->second) + "Error: The type for " + json_pointer + " could not be determined.\n";
+                    }
+                    /*if (it->second == 12)
+                    {
+                        ss << json_pointer << " ZVariant " << node.GetBool();
+                    }
+                    if (it->second == 13)
+                    {
+                        ss << json_pointer << " enum " << node.GetBool();
+                    }*/
                 }
                 else
                 {
-                    ss << json_pointer << " none none";
+                    if (it1->value.IsInt64())
+                    {
+                        ss << json_pointer << " int64 " << it1->value.GetInt64();
+                    }
+                    else if (it1->value.IsUint64())
+                    {
+                        ss << json_pointer << " uint64 " << it1->value.GetUint64();
+                    }
+                    else if (it1->value.IsDouble())
+                    {
+                        ss << json_pointer << " float64 " << it1->value.GetDouble();
+                    }
+                    else if (it1->value.IsInt())
+                    {
+                        ss << json_pointer << " int32 " << it1->value.GetInt();
+                    }
+                    else if (it1->value.IsUint())
+                    {
+                        ss << json_pointer << " uint32 " << it1->value.GetUint();
+                    }
+                    else if (it1->value.IsFloat())
+                    {
+                        ss << json_pointer << " float32 " << it1->value.GetFloat();
+                    }
+                    else if (it1->value.IsBool())
+                    {
+                        ss << json_pointer << " bool " << it1->value.GetBool();
+                    }
+                    else if (it1->value.IsString())
+                    {
+                        ss << json_pointer << " ZString " << it1->value.GetString();
+                    }
+                    else if (it1->value.IsString())
+                    {
+                        ss << json_pointer << " enum " << it1->value.GetString();
+                    }
+                    else
+                    {
+                        ss << json_pointer << " none none";
 
-                    response_string += util::uint32_t_to_string(it->second) + "Error: The type for " + json_pointer + " could not be determined.\n";
+                        response_string += "Error: The type for " + json_pointer + " could not be determined.\n";
+                    }
                 }
-                /*if (it->second == 12)
-                {
-                    ss << json_pointer << " ZVariant " << node.GetBool();
-                }
-                if (it->second == 13)
-                {
-                    ss << json_pointer << " enum " << node.GetBool();
-                }*/
-            }
-            else if (type_string.find("ZCurve") != std::string::npos)
-            {
-                ss << json_pointer << " float32 " << it1->value.GetFloat();
             }
             else
             {
-                if (it1->value.IsInt64())
+                it = type_map_h3->find("STemplateEntityFactory/" + type_string);
+
+                if (it != type_map_h3->end())
                 {
-                    ss << json_pointer << " int64 " << it1->value.GetInt64();
-                }
-                else if (it1->value.IsUint64())
-                {
-                    ss << json_pointer << " uint64 " << it1->value.GetUint64();
-                }
-                else if (it1->value.IsDouble())
-                {
-                    ss << json_pointer << " float64 " << it1->value.GetDouble();
-                }
-                else if (it1->value.IsInt())
-                {
-                    ss << json_pointer << " int32 " << it1->value.GetInt();
-                }
-                else if (it1->value.IsUint())
-                {
-                    ss << json_pointer << " uint32 " << it1->value.GetUint();
-                }
-                else if (it1->value.IsFloat())
-                {
-                    ss << json_pointer << " float32 " << it1->value.GetFloat();
-                }
-                else if (it1->value.IsBool())
-                {
-                    ss << json_pointer << " bool " << it1->value.GetBool();
-                }
-                else if (it1->value.IsString())
-                {
-                    ss << json_pointer << " ZString " << it1->value.GetString();
-                }
-                else if (it1->value.IsString())
-                {
-                    ss << json_pointer << " enum " << it1->value.GetString();
+                    //std::cout << "Type: " << it->second << std::endl;
+
+                    if (it->second == TYPE_INT8)
+                    {
+                        ss << json_pointer << " int8 " << it1->value.GetInt();
+                    }
+                    else if (it->second == TYPE_UINT8)
+                    {
+                        ss << json_pointer << " uint8 " << it1->value.GetUint();
+                    }
+                    else if (it->second == TYPE_INT16)
+                    {
+                        ss << json_pointer << " int16 " << it1->value.GetInt();
+                    }
+                    else if (it->second == TYPE_UINT16)
+                    {
+                        ss << json_pointer << " uint16 " << it1->value.GetUint();
+                    }
+                    else if (it->second == TYPE_INT32)
+                    {
+                        ss << json_pointer << " int32 " << it1->value.GetInt();
+                    }
+                    else if (it->second == TYPE_UINT32)
+                    {
+                        ss << json_pointer << " uint32 " << it1->value.GetUint();
+                    }
+                    else if (it->second == TYPE_INT64)
+                    {
+                        ss << json_pointer << " int64 " << it1->value.GetInt64();
+                    }
+                    else if (it->second == TYPE_UINT64)
+                    {
+                        ss << json_pointer << " uint64 " << it1->value.GetUint64();
+                    }
+                    else if (it->second == TYPE_FLOAT32)
+                    {
+                        ss << json_pointer << " float32 " << it1->value.GetFloat();
+                    }
+                    else if (it->second == TYPE_FLOAT64)
+                    {
+                        ss << json_pointer << " float64 " << it1->value.GetDouble();
+                    }
+                    else if (it->second == TYPE_BOOL)
+                    {
+                        ss << json_pointer << " bool " << it1->value.GetBool();
+                    }
+                    else if (it->second == TYPE_ZSTRING)
+                    {
+                        ss << json_pointer << " ZString " << it1->value.GetString();
+                    }
+                    else if (it->second == TYPE_ENUM)
+                    {
+                        ss << json_pointer << " enum " << it1->value.GetString();
+                    }
+                    else
+                    {
+                        ss << json_pointer << " none none";
+
+                        response_string += util::uint32_t_to_string(it->second) + "Error: The type for " + json_pointer + " could not be determined.\n";
+                    }
+                    /*if (it->second == 12)
+                    {
+                        ss << json_pointer << " ZVariant " << node.GetBool();
+                    }
+                    if (it->second == 13)
+                    {
+                        ss << json_pointer << " enum " << node.GetBool();
+                    }*/
                 }
                 else
                 {
-                    ss << json_pointer << " none none";
+                    if (it1->value.IsInt64())
+                    {
+                        ss << json_pointer << " int64 " << it1->value.GetInt64();
+                    }
+                    else if (it1->value.IsUint64())
+                    {
+                        ss << json_pointer << " uint64 " << it1->value.GetUint64();
+                    }
+                    else if (it1->value.IsDouble())
+                    {
+                        ss << json_pointer << " float64 " << it1->value.GetDouble();
+                    }
+                    else if (it1->value.IsInt())
+                    {
+                        ss << json_pointer << " int32 " << it1->value.GetInt();
+                    }
+                    else if (it1->value.IsUint())
+                    {
+                        ss << json_pointer << " uint32 " << it1->value.GetUint();
+                    }
+                    else if (it1->value.IsFloat())
+                    {
+                        ss << json_pointer << " float32 " << it1->value.GetFloat();
+                    }
+                    else if (it1->value.IsBool())
+                    {
+                        ss << json_pointer << " bool " << it1->value.GetBool();
+                    }
+                    else if (it1->value.IsString())
+                    {
+                        ss << json_pointer << " ZString " << it1->value.GetString();
+                    }
+                    else if (it1->value.IsString())
+                    {
+                        ss << json_pointer << " enum " << it1->value.GetString();
+                    }
+                    else
+                    {
+                        ss << json_pointer << " none none";
 
-                    response_string += "Error: The type for " + json_pointer + " could not be determined.\n";
+                        response_string += "Error: The type for " + json_pointer + " could not be determined.\n";
+                    }
                 }
             }
 
@@ -1085,7 +1240,7 @@ void temp::get_temp_entries_data(std::string value_type, std::string type_string
     }
 }
 
-void temp::json_temp_node_scan(const rapidjson::Value& node, std::string& propertyValues_string, std::string& nPropertyID_string, std::string& type_string, std::string json_pointer, std::string json_type, std::string last_name)
+void temp::json_temp_node_scan(const rapidjson::Value& node, std::string& propertyValues_string, std::string& nPropertyID_string, std::string& type_string, std::string json_pointer, std::string json_type)
 {
     bool output = true;
 
@@ -1097,7 +1252,7 @@ void temp::json_temp_node_scan(const rapidjson::Value& node, std::string& proper
 
         for (rapidjson::SizeType i = 0; i < node.Size(); ++i)
         {
-            json_temp_node_scan(node[i], propertyValues_string, nPropertyID_string, type_string, json_pointer + "/" + std::to_string(i), json_type, last_name);
+            json_temp_node_scan(node[i], propertyValues_string, nPropertyID_string, type_string, json_pointer + "/" + std::to_string(i), json_type);
         }
     }
     else if (node.IsObject())
@@ -1106,133 +1261,255 @@ void temp::json_temp_node_scan(const rapidjson::Value& node, std::string& proper
 
         for (rapidjson::Value::ConstMemberIterator it = node.MemberBegin(); it != node.MemberEnd(); it++)
         {
-            json_temp_node_scan(it->value, propertyValues_string, nPropertyID_string, type_string, json_pointer + "/" + it->name.GetString(), json_type, it->name.GetString());
+            json_temp_node_scan(it->value, propertyValues_string, nPropertyID_string, type_string, json_pointer + "/" + it->name.GetString(), json_type + "/" + it->name.GetString());
         }
     }
     else
     {
         //std::cout << json_type << "/" << last_name << std::endl;
 
-        std::map<std::string, uint32_t>::iterator it = type_map->find("STemplateEntityFactory/" + last_name);
+        std::map<std::string, uint32_t>::iterator it;
 
-        if (it != type_map->end())
+        if (temp_file_version == 2)
         {
-            //std::cout << "Type: " << it->second << std::endl;
+            it = type_map_h2->find("STemplateEntityFactory/" + type_string);
 
-            if (it->second == TYPE_INT8)
+            if (it != type_map_h2->end())
             {
-                ss << json_pointer << " int8 " << node.GetInt();
-            }
-            else if (it->second == TYPE_UINT8)
-            {
-                ss << json_pointer << " uint8 " << node.GetUint();
-            }
-            else if (it->second == TYPE_INT16)
-            {
-                ss << json_pointer << " int16 " << node.GetInt();
-            }
-            else if (it->second == TYPE_UINT16)
-            {
-                ss << json_pointer << " uint16 " << node.GetUint();
-            }
-            else if (it->second == TYPE_INT32)
-            {
-                ss << json_pointer << " int32 " << node.GetInt();
-            }
-            else if (it->second == TYPE_UINT32)
-            {
-                ss << json_pointer << " uint32 " << node.GetUint();
-            }
-            else if (it->second == TYPE_INT64)
-            {
-                ss << json_pointer << " int64 " << node.GetInt64();
-            }
-            else if (it->second == TYPE_UINT64)
-            {
-                ss << json_pointer << " uint64 " << node.GetUint64();
-            }
-            else if (it->second == TYPE_FLOAT32)
-            {
-                ss << json_pointer << " float32 " << node.GetFloat();
-            }
-            else if (it->second == TYPE_FLOAT64)
-            {
-                ss << json_pointer << " float64 " << node.GetDouble();
-            }
-            else if (it->second == TYPE_BOOL)
-            {
-                ss << json_pointer << " bool " << node.GetBool();
-            }
-            else if (it->second == TYPE_ZSTRING)
-            {
-                ss << json_pointer << " ZString " << node.GetString();
-            }
-            else if (it->second == TYPE_ENUM)
-            {
-                ss << json_pointer << " enum " << node.GetString();
+                //std::cout << "Type: " << it->second << std::endl;
+
+                if (it->second == TYPE_INT8)
+                {
+                    ss << json_pointer << " int8 " << node.GetInt();
+                }
+                else if (it->second == TYPE_UINT8)
+                {
+                    ss << json_pointer << " uint8 " << node.GetUint();
+                }
+                else if (it->second == TYPE_INT16)
+                {
+                    ss << json_pointer << " int16 " << node.GetInt();
+                }
+                else if (it->second == TYPE_UINT16)
+                {
+                    ss << json_pointer << " uint16 " << node.GetUint();
+                }
+                else if (it->second == TYPE_INT32)
+                {
+                    ss << json_pointer << " int32 " << node.GetInt();
+                }
+                else if (it->second == TYPE_UINT32)
+                {
+                    ss << json_pointer << " uint32 " << node.GetUint();
+                }
+                else if (it->second == TYPE_INT64)
+                {
+                    ss << json_pointer << " int64 " << node.GetInt64();
+                }
+                else if (it->second == TYPE_UINT64)
+                {
+                    ss << json_pointer << " uint64 " << node.GetUint64();
+                }
+                else if (it->second == TYPE_FLOAT32)
+                {
+                    ss << json_pointer << " float32 " << node.GetFloat();
+                }
+                else if (it->second == TYPE_FLOAT64)
+                {
+                    ss << json_pointer << " float64 " << node.GetDouble();
+                }
+                else if (it->second == TYPE_BOOL)
+                {
+                    ss << json_pointer << " bool " << node.GetBool();
+                }
+                else if (it->second == TYPE_ZSTRING)
+                {
+                    ss << json_pointer << " ZString " << node.GetString();
+                }
+                else if (it->second == TYPE_ENUM)
+                {
+                    ss << json_pointer << " enum " << node.GetString();
+                }
+                else
+                {
+                    ss << json_pointer << " none none";
+
+                    response_string += util::uint32_t_to_string(it->second) + "Error: The type for " + json_pointer + " could not be determined.\n";
+                }
+                /*if (it->second == 12)
+                {
+                    ss << json_pointer << " ZVariant " << node.GetBool();
+                }
+                if (it->second == 13)
+                {
+                    ss << json_pointer << " enum " << node.GetBool();
+                }*/
             }
             else
             {
-                ss << json_pointer << " none none";
+                if (node.IsInt64())
+                {
+                    ss << json_pointer << " int64 " << node.GetInt64();
+                }
+                else if (node.IsUint64())
+                {
+                    ss << json_pointer << " uint64 " << node.GetUint64();
+                }
+                else if (node.IsDouble())
+                {
+                    ss << json_pointer << " float64 " << node.GetDouble();
+                }
+                else if (node.IsInt())
+                {
+                    ss << json_pointer << " int32 " << node.GetInt();
+                }
+                else if (node.IsUint())
+                {
+                    ss << json_pointer << " uint32 " << node.GetUint();
+                }
+                else if (node.IsFloat())
+                {
+                    ss << json_pointer << " float32 " << node.GetFloat();
+                }
+                else if (node.IsBool())
+                {
+                    ss << json_pointer << " bool " << node.GetBool();
+                }
+                else if (node.IsString())
+                {
+                    ss << json_pointer << " ZString " << node.GetString();
+                }
+                else if (node.IsString())
+                {
+                    ss << json_pointer << " enum " << node.GetString();
+                }
+                else
+                {
+                    ss << json_pointer << " none none";
 
-                response_string += util::uint32_t_to_string(it->second) + "Error: The type for " + json_pointer + " could not be determined.\n";
+                    response_string += "Error: The type for " + json_pointer + " could not be determined.\n";
+                }
             }
-            /*if (it->second == 12)
-            {
-                ss << json_pointer << " ZVariant " << node.GetBool();
-            }
-            if (it->second == 13)
-            {
-                ss << json_pointer << " enum " << node.GetBool();
-            }*/
-        }
-        else if (json_type.find("ZCurve") != std::string::npos)
-        {
-            ss << json_pointer << " float32 " << node.GetFloat();
         }
         else
         {
-            if (node.IsInt64())
+            it = type_map_h3->find("STemplateEntityFactory/" + type_string);
+
+            if (it != type_map_h3->end())
             {
-                ss << json_pointer << " int64 " << node.GetInt64();
-            }
-            else if (node.IsUint64())
-            {
-                ss << json_pointer << " uint64 " << node.GetUint64();
-            }
-            else if (node.IsDouble())
-            {
-                ss << json_pointer << " float64 " << node.GetDouble();
-            }
-            else if (node.IsInt())
-            {
-                ss << json_pointer << " int32 " << node.GetInt();
-            }
-            else if (node.IsUint())
-            {
-                ss << json_pointer << " uint32 " << node.GetUint();
-            }
-            else if (node.IsFloat())
-            {
-                ss << json_pointer << " float32 " << node.GetFloat();
-            }
-            else if (node.IsBool())
-            {
-                ss << json_pointer << " bool " << node.GetBool();
-            }
-            else if (node.IsString())
-            {
-                ss << json_pointer << " ZString " << node.GetString();
-            }
-            else if (node.IsString())
-            {
-                ss << json_pointer << " enum " << node.GetString();
+                //std::cout << "Type: " << it->second << std::endl;
+
+                if (it->second == TYPE_INT8)
+                {
+                    ss << json_pointer << " int8 " << node.GetInt();
+                }
+                else if (it->second == TYPE_UINT8)
+                {
+                    ss << json_pointer << " uint8 " << node.GetUint();
+                }
+                else if (it->second == TYPE_INT16)
+                {
+                    ss << json_pointer << " int16 " << node.GetInt();
+                }
+                else if (it->second == TYPE_UINT16)
+                {
+                    ss << json_pointer << " uint16 " << node.GetUint();
+                }
+                else if (it->second == TYPE_INT32)
+                {
+                    ss << json_pointer << " int32 " << node.GetInt();
+                }
+                else if (it->second == TYPE_UINT32)
+                {
+                    ss << json_pointer << " uint32 " << node.GetUint();
+                }
+                else if (it->second == TYPE_INT64)
+                {
+                    ss << json_pointer << " int64 " << node.GetInt64();
+                }
+                else if (it->second == TYPE_UINT64)
+                {
+                    ss << json_pointer << " uint64 " << node.GetUint64();
+                }
+                else if (it->second == TYPE_FLOAT32)
+                {
+                    ss << json_pointer << " float32 " << node.GetFloat();
+                }
+                else if (it->second == TYPE_FLOAT64)
+                {
+                    ss << json_pointer << " float64 " << node.GetDouble();
+                }
+                else if (it->second == TYPE_BOOL)
+                {
+                    ss << json_pointer << " bool " << node.GetBool();
+                }
+                else if (it->second == TYPE_ZSTRING)
+                {
+                    ss << json_pointer << " ZString " << node.GetString();
+                }
+                else if (it->second == TYPE_ENUM)
+                {
+                    ss << json_pointer << " enum " << node.GetString();
+                }
+                else
+                {
+                    ss << json_pointer << " none none";
+
+                    response_string += util::uint32_t_to_string(it->second) + "Error: The type for " + json_pointer + " could not be determined.\n";
+                }
+                /*if (it->second == 12)
+                {
+                    ss << json_pointer << " ZVariant " << node.GetBool();
+                }
+                if (it->second == 13)
+                {
+                    ss << json_pointer << " enum " << node.GetBool();
+                }*/
             }
             else
             {
-                ss << json_pointer << " none none";
+                if (node.IsInt64())
+                {
+                    ss << json_pointer << " int64 " << node.GetInt64();
+                }
+                else if (node.IsUint64())
+                {
+                    ss << json_pointer << " uint64 " << node.GetUint64();
+                }
+                else if (node.IsDouble())
+                {
+                    ss << json_pointer << " float64 " << node.GetDouble();
+                }
+                else if (node.IsInt())
+                {
+                    ss << json_pointer << " int32 " << node.GetInt();
+                }
+                else if (node.IsUint())
+                {
+                    ss << json_pointer << " uint32 " << node.GetUint();
+                }
+                else if (node.IsFloat())
+                {
+                    ss << json_pointer << " float32 " << node.GetFloat();
+                }
+                else if (node.IsBool())
+                {
+                    ss << json_pointer << " bool " << node.GetBool();
+                }
+                else if (node.IsString())
+                {
+                    ss << json_pointer << " ZString " << node.GetString();
+                }
+                else if (node.IsString())
+                {
+                    ss << json_pointer << " enum " << node.GetString();
+                }
+                else
+                {
+                    ss << json_pointer << " none none";
 
-                response_string += "Error: The type for " + json_pointer + " could not be determined.\n";
+                    response_string += "Error: The type for " + json_pointer + " could not be determined.\n";
+                }
             }
         }
 
@@ -1370,7 +1647,7 @@ void temp::get_entries_data(uint32_t entry_index, std::string value_type)
                 {
                     if (it5->value.IsArray() || it5->value.IsObject())
                     {
-                        json_node_scan(it5->value, propertyValues_string, nPropertyID_string, type_string, "/subEntities/" + std::to_string(entry_index) + "/" + value_type + "/" + std::to_string(p) + "/value/$val", type_string, "");
+                        json_node_scan(it5->value, propertyValues_string, nPropertyID_string, type_string, "/subEntities/" + std::to_string(entry_index) + "/" + value_type + "/" + std::to_string(p) + "/value/$val", type_string);
                     }
                     else
                     {
@@ -1380,126 +1657,248 @@ void temp::get_entries_data(uint32_t entry_index, std::string value_type)
 
                         //std::cout << it4->value.GetString() << std::endl;
 
-                        std::map<std::string, uint32_t>::iterator it = type_map->find(type_string);
+                        std::map<std::string, uint32_t>::iterator it;
 
-                        if (it != type_map->end())
+                        if (temp_file_version == 2)
                         {
-                            //std::cout << "Type: " << it->second << std::endl;
+                            it = type_map_h2->find(type_string);
 
-                            if (it->second == TYPE_INT8)
+                            if (it != type_map_h2->end())
                             {
-                                ss << json_pointer << " int8 " << it5->value.GetInt();
-                            }
-                            else if (it->second == TYPE_UINT8)
-                            {
-                                ss << json_pointer << " uint8 " << it5->value.GetUint();
-                            }
-                            else if (it->second == TYPE_INT16)
-                            {
-                                ss << json_pointer << " int16 " << it5->value.GetInt();
-                            }
-                            else if (it->second == TYPE_UINT16)
-                            {
-                                ss << json_pointer << " uint16 " << it5->value.GetUint();
-                            }
-                            else if (it->second == TYPE_INT32)
-                            {
-                                ss << json_pointer << " int32 " << it5->value.GetInt();
-                            }
-                            else if (it->second == TYPE_UINT32)
-                            {
-                                ss << json_pointer << " uint32 " << it5->value.GetUint();
-                            }
-                            else if (it->second == TYPE_INT64)
-                            {
-                                ss << json_pointer << " int64 " << it5->value.GetInt64();
-                            }
-                            else if (it->second == TYPE_UINT64)
-                            {
-                                ss << json_pointer << " uint64 " << it5->value.GetUint64();
-                            }
-                            else if (it->second == TYPE_FLOAT32)
-                            {
-                                ss << json_pointer << " float32 " << it5->value.GetFloat();
-                            }
-                            else if (it->second == TYPE_FLOAT64)
-                            {
-                                ss << json_pointer << " float64 " << it5->value.GetDouble();
-                            }
-                            else if (it->second == TYPE_BOOL)
-                            {
-                                ss << json_pointer << " bool " << it5->value.GetBool();
-                            }
-                            else if (it->second == TYPE_ZSTRING)
-                            {
-                                ss << json_pointer << " ZString " << it5->value.GetString();
-                            }
-                            else if (it->second == TYPE_ENUM)
-                            {
-                                ss << json_pointer << " enum " << it5->value.GetString();
+                                //std::cout << "Type: " << it->second << std::endl;
+
+                                if (it->second == TYPE_INT8)
+                                {
+                                    ss << json_pointer << " int8 " << it5->value.GetInt();
+                                }
+                                else if (it->second == TYPE_UINT8)
+                                {
+                                    ss << json_pointer << " uint8 " << it5->value.GetUint();
+                                }
+                                else if (it->second == TYPE_INT16)
+                                {
+                                    ss << json_pointer << " int16 " << it5->value.GetInt();
+                                }
+                                else if (it->second == TYPE_UINT16)
+                                {
+                                    ss << json_pointer << " uint16 " << it5->value.GetUint();
+                                }
+                                else if (it->second == TYPE_INT32)
+                                {
+                                    ss << json_pointer << " int32 " << it5->value.GetInt();
+                                }
+                                else if (it->second == TYPE_UINT32)
+                                {
+                                    ss << json_pointer << " uint32 " << it5->value.GetUint();
+                                }
+                                else if (it->second == TYPE_INT64)
+                                {
+                                    ss << json_pointer << " int64 " << it5->value.GetInt64();
+                                }
+                                else if (it->second == TYPE_UINT64)
+                                {
+                                    ss << json_pointer << " uint64 " << it5->value.GetUint64();
+                                }
+                                else if (it->second == TYPE_FLOAT32)
+                                {
+                                    ss << json_pointer << " float32 " << it5->value.GetFloat();
+                                }
+                                else if (it->second == TYPE_FLOAT64)
+                                {
+                                    ss << json_pointer << " float64 " << it5->value.GetDouble();
+                                }
+                                else if (it->second == TYPE_BOOL)
+                                {
+                                    ss << json_pointer << " bool " << it5->value.GetBool();
+                                }
+                                else if (it->second == TYPE_ZSTRING)
+                                {
+                                    ss << json_pointer << " ZString " << it5->value.GetString();
+                                }
+                                else if (it->second == TYPE_ENUM)
+                                {
+                                    ss << json_pointer << " enum " << it5->value.GetString();
+                                }
+                                else
+                                {
+                                    ss << json_pointer << " none none";
+
+                                    response_string += util::uint32_t_to_string(it->second) + "Error: The type for " + json_pointer + " could not be determined.\n";
+                                }
+                                /*if (it->second == 12)
+                                {
+                                    ss << json_pointer << " ZVariant " << node.GetBool();
+                                }
+                                if (it->second == 13)
+                                {
+                                    ss << json_pointer << " enum " << node.GetBool();
+                                }*/
                             }
                             else
                             {
-                                ss << json_pointer << " none none";
+                                if (it5->value.IsInt64())
+                                {
+                                    ss << json_pointer << " int64 " << it5->value.GetInt64();
+                                }
+                                else if (it5->value.IsUint64())
+                                {
+                                    ss << json_pointer << " uint64 " << it5->value.GetUint64();
+                                }
+                                else if (it5->value.IsDouble())
+                                {
+                                    ss << json_pointer << " float64 " << it5->value.GetDouble();
+                                }
+                                else if (it5->value.IsInt())
+                                {
+                                    ss << json_pointer << " int32 " << it5->value.GetInt();
+                                }
+                                else if (it5->value.IsUint())
+                                {
+                                    ss << json_pointer << " uint32 " << it5->value.GetUint();
+                                }
+                                else if (it5->value.IsFloat())
+                                {
+                                    ss << json_pointer << " float32 " << it5->value.GetFloat();
+                                }
+                                else if (it5->value.IsBool())
+                                {
+                                    ss << json_pointer << " bool " << it5->value.GetBool();
+                                }
+                                else if (it5->value.IsString())
+                                {
+                                    ss << json_pointer << " ZString " << it5->value.GetString();
+                                }
+                                else if (it5->value.IsString())
+                                {
+                                    ss << json_pointer << " enum " << it5->value.GetString();
+                                }
+                                else
+                                {
+                                    ss << json_pointer << " none none";
 
-                                response_string += util::uint32_t_to_string(it->second) + "Error: The type for " + json_pointer + " could not be determined.\n";
+                                    response_string += "Error: The type for " + json_pointer + " could not be determined.\n";
+                                }
                             }
-                            /*if (it->second == 12)
-                            {
-                                ss << json_pointer << " ZVariant " << node.GetBool();
-                            }
-                            if (it->second == 13)
-                            {
-                                ss << json_pointer << " enum " << node.GetBool();
-                            }*/
-                        }
-                        else if (type_string.find("ZCurve") != std::string::npos)
-                        {
-                            ss << json_pointer << " float32 " << it5->value.GetFloat();
                         }
                         else
                         {
-                            if (it5->value.IsInt64())
+                            it = type_map_h3->find(type_string);
+
+                            if (it != type_map_h3->end())
                             {
-                                ss << json_pointer << " int64 " << it5->value.GetInt64();
-                            }
-                            else if (it5->value.IsUint64())
-                            {
-                                ss << json_pointer << " uint64 " << it5->value.GetUint64();
-                            }
-                            else if (it5->value.IsDouble())
-                            {
-                                ss << json_pointer << " float64 " << it5->value.GetDouble();
-                            }
-                            else if (it5->value.IsInt())
-                            {
-                                ss << json_pointer << " int32 " << it5->value.GetInt();
-                            }
-                            else if (it5->value.IsUint())
-                            {
-                                ss << json_pointer << " uint32 " << it5->value.GetUint();
-                            }
-                            else if (it5->value.IsFloat())
-                            {
-                                ss << json_pointer << " float32 " << it5->value.GetFloat();
-                            }
-                            else if (it5->value.IsBool())
-                            {
-                                ss << json_pointer << " bool " << it5->value.GetBool();
-                            }
-                            else if (it5->value.IsString())
-                            {
-                                ss << json_pointer << " ZString " << it5->value.GetString();
-                            }
-                            else if (it5->value.IsString())
-                            {
-                                ss << json_pointer << " enum " << it5->value.GetString();
+                                //std::cout << "Type: " << it->second << std::endl;
+
+                                if (it->second == TYPE_INT8)
+                                {
+                                    ss << json_pointer << " int8 " << it5->value.GetInt();
+                                }
+                                else if (it->second == TYPE_UINT8)
+                                {
+                                    ss << json_pointer << " uint8 " << it5->value.GetUint();
+                                }
+                                else if (it->second == TYPE_INT16)
+                                {
+                                    ss << json_pointer << " int16 " << it5->value.GetInt();
+                                }
+                                else if (it->second == TYPE_UINT16)
+                                {
+                                    ss << json_pointer << " uint16 " << it5->value.GetUint();
+                                }
+                                else if (it->second == TYPE_INT32)
+                                {
+                                    ss << json_pointer << " int32 " << it5->value.GetInt();
+                                }
+                                else if (it->second == TYPE_UINT32)
+                                {
+                                    ss << json_pointer << " uint32 " << it5->value.GetUint();
+                                }
+                                else if (it->second == TYPE_INT64)
+                                {
+                                    ss << json_pointer << " int64 " << it5->value.GetInt64();
+                                }
+                                else if (it->second == TYPE_UINT64)
+                                {
+                                    ss << json_pointer << " uint64 " << it5->value.GetUint64();
+                                }
+                                else if (it->second == TYPE_FLOAT32)
+                                {
+                                    ss << json_pointer << " float32 " << it5->value.GetFloat();
+                                }
+                                else if (it->second == TYPE_FLOAT64)
+                                {
+                                    ss << json_pointer << " float64 " << it5->value.GetDouble();
+                                }
+                                else if (it->second == TYPE_BOOL)
+                                {
+                                    ss << json_pointer << " bool " << it5->value.GetBool();
+                                }
+                                else if (it->second == TYPE_ZSTRING)
+                                {
+                                    ss << json_pointer << " ZString " << it5->value.GetString();
+                                }
+                                else if (it->second == TYPE_ENUM)
+                                {
+                                    ss << json_pointer << " enum " << it5->value.GetString();
+                                }
+                                else
+                                {
+                                    ss << json_pointer << " none none";
+
+                                    response_string += util::uint32_t_to_string(it->second) + "Error: The type for " + json_pointer + " could not be determined.\n";
+                                }
+                                /*if (it->second == 12)
+                                {
+                                    ss << json_pointer << " ZVariant " << node.GetBool();
+                                }
+                                if (it->second == 13)
+                                {
+                                    ss << json_pointer << " enum " << node.GetBool();
+                                }*/
                             }
                             else
                             {
-                                ss << json_pointer << " none none";
+                                if (it5->value.IsInt64())
+                                {
+                                    ss << json_pointer << " int64 " << it5->value.GetInt64();
+                                }
+                                else if (it5->value.IsUint64())
+                                {
+                                    ss << json_pointer << " uint64 " << it5->value.GetUint64();
+                                }
+                                else if (it5->value.IsDouble())
+                                {
+                                    ss << json_pointer << " float64 " << it5->value.GetDouble();
+                                }
+                                else if (it5->value.IsInt())
+                                {
+                                    ss << json_pointer << " int32 " << it5->value.GetInt();
+                                }
+                                else if (it5->value.IsUint())
+                                {
+                                    ss << json_pointer << " uint32 " << it5->value.GetUint();
+                                }
+                                else if (it5->value.IsFloat())
+                                {
+                                    ss << json_pointer << " float32 " << it5->value.GetFloat();
+                                }
+                                else if (it5->value.IsBool())
+                                {
+                                    ss << json_pointer << " bool " << it5->value.GetBool();
+                                }
+                                else if (it5->value.IsString())
+                                {
+                                    ss << json_pointer << " ZString " << it5->value.GetString();
+                                }
+                                else if (it5->value.IsString())
+                                {
+                                    ss << json_pointer << " enum " << it5->value.GetString();
+                                }
+                                else
+                                {
+                                    ss << json_pointer << " none none";
 
-                                response_string += "Error: The type for " + json_pointer + " could not be determined.\n";
+                                    response_string += "Error: The type for " + json_pointer + " could not be determined.\n";
+                                }
                             }
                         }
 
@@ -1581,7 +1980,7 @@ void temp::get_entries_data(uint32_t entry_index, std::string value_type)
     }
 }
 
-void temp::json_node_scan(const rapidjson::Value& node, std::string& propertyValues_string, std::string& nPropertyID_string, std::string& type_string, std::string json_pointer, std::string json_type, std::string last_name)
+void temp::json_node_scan(const rapidjson::Value& node, std::string& propertyValues_string, std::string& nPropertyID_string, std::string& type_string, std::string json_pointer, std::string json_type)
 {
     bool output = true;
 
@@ -1593,7 +1992,7 @@ void temp::json_node_scan(const rapidjson::Value& node, std::string& propertyVal
 
         for (rapidjson::SizeType i = 0; i < node.Size(); ++i)
         {
-            json_node_scan(node[i], propertyValues_string, nPropertyID_string, type_string, json_pointer + "/" + std::to_string(i), json_type, "");
+            json_node_scan(node[i], propertyValues_string, nPropertyID_string, type_string, json_pointer + "/" + std::to_string(i), json_type);
         }
     }
     else if (node.IsObject())
@@ -1602,133 +2001,255 @@ void temp::json_node_scan(const rapidjson::Value& node, std::string& propertyVal
 
         for (rapidjson::Value::ConstMemberIterator it = node.MemberBegin(); it != node.MemberEnd(); it++)
         {
-            json_node_scan(it->value, propertyValues_string, nPropertyID_string, type_string, json_pointer + "/" + it->name.GetString(), json_type, it->name.GetString());
+            json_node_scan(it->value, propertyValues_string, nPropertyID_string, type_string, json_pointer + "/" + it->name.GetString(), json_type + "/" + it->name.GetString());
         }
     }
     else
     {
         //std::cout << json_type << "/" << last_name << std::endl;
 
-        std::map<std::string, uint32_t>::iterator it = type_map->find(json_type + "/" + last_name);
+        std::map<std::string, uint32_t>::iterator it;
 
-        if (it != type_map->end())
+        if (temp_file_version == 2)
         {
-            //std::cout << "Type: " << it->second << std::endl;
+            it = type_map_h2->find(json_type);
 
-            if (it->second == TYPE_INT8)
+            if (it != type_map_h2->end())
             {
-                ss << json_pointer << " int8 " << node.GetInt();
-            }
-            else if (it->second == TYPE_UINT8)
-            {
-                ss << json_pointer << " uint8 " << node.GetUint();
-            }
-            else if (it->second == TYPE_INT16)
-            {
-                ss << json_pointer << " int16 " << node.GetInt();
-            }
-            else if (it->second == TYPE_UINT16)
-            {
-                ss << json_pointer << " uint16 " << node.GetUint();
-            }
-            else if (it->second == TYPE_INT32)
-            {
-                ss << json_pointer << " int32 " << node.GetInt();
-            }
-            else if (it->second == TYPE_UINT32)
-            {
-                ss << json_pointer << " uint32 " << node.GetUint();
-            }
-            else if (it->second == TYPE_INT64)
-            {
-                ss << json_pointer << " int64 " << node.GetInt64();
-            }
-            else if (it->second == TYPE_UINT64)
-            {
-                ss << json_pointer << " uint64 " << node.GetUint64();
-            }
-            else if (it->second == TYPE_FLOAT32)
-            {
-                ss << json_pointer << " float32 " << node.GetFloat();
-            }
-            else if (it->second == TYPE_FLOAT64)
-            {
-                ss << json_pointer << " float64 " << node.GetDouble();
-            }
-            else if (it->second == TYPE_BOOL)
-            {
-                ss << json_pointer << " bool " << node.GetBool();
-            }
-            else if (it->second == TYPE_ZSTRING)
-            {
-                ss << json_pointer << " ZString " << node.GetString();
-            }
-            else if (it->second == TYPE_ENUM)
-            {
-                ss << json_pointer << " enum " << node.GetString();
+                //std::cout << "Type: " << it->second << std::endl;
+
+                if (it->second == TYPE_INT8)
+                {
+                    ss << json_pointer << " int8 " << node.GetInt();
+                }
+                else if (it->second == TYPE_UINT8)
+                {
+                    ss << json_pointer << " uint8 " << node.GetUint();
+                }
+                else if (it->second == TYPE_INT16)
+                {
+                    ss << json_pointer << " int16 " << node.GetInt();
+                }
+                else if (it->second == TYPE_UINT16)
+                {
+                    ss << json_pointer << " uint16 " << node.GetUint();
+                }
+                else if (it->second == TYPE_INT32)
+                {
+                    ss << json_pointer << " int32 " << node.GetInt();
+                }
+                else if (it->second == TYPE_UINT32)
+                {
+                    ss << json_pointer << " uint32 " << node.GetUint();
+                }
+                else if (it->second == TYPE_INT64)
+                {
+                    ss << json_pointer << " int64 " << node.GetInt64();
+                }
+                else if (it->second == TYPE_UINT64)
+                {
+                    ss << json_pointer << " uint64 " << node.GetUint64();
+                }
+                else if (it->second == TYPE_FLOAT32)
+                {
+                    ss << json_pointer << " float32 " << node.GetFloat();
+                }
+                else if (it->second == TYPE_FLOAT64)
+                {
+                    ss << json_pointer << " float64 " << node.GetDouble();
+                }
+                else if (it->second == TYPE_BOOL)
+                {
+                    ss << json_pointer << " bool " << node.GetBool();
+                }
+                else if (it->second == TYPE_ZSTRING)
+                {
+                    ss << json_pointer << " ZString " << node.GetString();
+                }
+                else if (it->second == TYPE_ENUM)
+                {
+                    ss << json_pointer << " enum " << node.GetString();
+                }
+                else
+                {
+                    ss << json_pointer << " none none";
+
+                    response_string += util::uint32_t_to_string(it->second) + "Error: The type for " + json_pointer + " could not be determined.\n";
+                }
+                /*if (it->second == 12)
+                {
+                    ss << json_pointer << " ZVariant " << node.GetBool();
+                }
+                if (it->second == 13)
+                {
+                    ss << json_pointer << " enum " << node.GetBool();
+                }*/
             }
             else
             {
-                ss << json_pointer << " none none";
+                if (node.IsInt64())
+                {
+                    ss << json_pointer << " int64 " << node.GetInt64();
+                }
+                else if (node.IsUint64())
+                {
+                    ss << json_pointer << " uint64 " << node.GetUint64();
+                }
+                else if (node.IsDouble())
+                {
+                    ss << json_pointer << " float64 " << node.GetDouble();
+                }
+                else if (node.IsInt())
+                {
+                    ss << json_pointer << " int32 " << node.GetInt();
+                }
+                else if (node.IsUint())
+                {
+                    ss << json_pointer << " uint32 " << node.GetUint();
+                }
+                else if (node.IsFloat())
+                {
+                    ss << json_pointer << " float32 " << node.GetFloat();
+                }
+                else if (node.IsBool())
+                {
+                    ss << json_pointer << " bool " << node.GetBool();
+                }
+                else if (node.IsString())
+                {
+                    ss << json_pointer << " ZString " << node.GetString();
+                }
+                else if (node.IsString())
+                {
+                    ss << json_pointer << " enum " << node.GetString();
+                }
+                else
+                {
+                    ss << json_pointer << " none none";
 
-                response_string += util::uint32_t_to_string(it->second) + "Error: The type for " + json_pointer + " could not be determined.\n";
+                    response_string += "Error: The type for " + json_pointer + " could not be determined.\n";
+                }
             }
-            /*if (it->second == 12)
-            {
-                ss << json_pointer << " ZVariant " << node.GetBool();
-            }
-            if (it->second == 13)
-            {
-                ss << json_pointer << " enum " << node.GetBool();
-            }*/
-        }
-        else if (json_type.find("ZCurve") != std::string::npos)
-        {
-            ss << json_pointer << " float32 " << node.GetFloat();
         }
         else
         {
-            if (node.IsInt64())
+            it = type_map_h3->find(json_type);
+
+            if (it != type_map_h3->end())
             {
-                ss << json_pointer << " int64 " << node.GetInt64();
-            }
-            else if (node.IsUint64())
-            {
-                ss << json_pointer << " uint64 " << node.GetUint64();
-            }
-            else if (node.IsDouble())
-            {
-                ss << json_pointer << " float64 " << node.GetDouble();
-            }
-            else if (node.IsInt())
-            {
-                ss << json_pointer << " int32 " << node.GetInt();
-            }
-            else if (node.IsUint())
-            {
-                ss << json_pointer << " uint32 " << node.GetUint();
-            }
-            else if (node.IsFloat())
-            {
-                ss << json_pointer << " float32 " << node.GetFloat();
-            }
-            else if (node.IsBool())
-            {
-                ss << json_pointer << " bool " << node.GetBool();
-            }
-            else if (node.IsString())
-            {
-                ss << json_pointer << " ZString " << node.GetString();
-            }
-            else if (node.IsString())
-            {
-                ss << json_pointer << " enum " << node.GetString();
+                //std::cout << "Type: " << it->second << std::endl;
+
+                if (it->second == TYPE_INT8)
+                {
+                    ss << json_pointer << " int8 " << node.GetInt();
+                }
+                else if (it->second == TYPE_UINT8)
+                {
+                    ss << json_pointer << " uint8 " << node.GetUint();
+                }
+                else if (it->second == TYPE_INT16)
+                {
+                    ss << json_pointer << " int16 " << node.GetInt();
+                }
+                else if (it->second == TYPE_UINT16)
+                {
+                    ss << json_pointer << " uint16 " << node.GetUint();
+                }
+                else if (it->second == TYPE_INT32)
+                {
+                    ss << json_pointer << " int32 " << node.GetInt();
+                }
+                else if (it->second == TYPE_UINT32)
+                {
+                    ss << json_pointer << " uint32 " << node.GetUint();
+                }
+                else if (it->second == TYPE_INT64)
+                {
+                    ss << json_pointer << " int64 " << node.GetInt64();
+                }
+                else if (it->second == TYPE_UINT64)
+                {
+                    ss << json_pointer << " uint64 " << node.GetUint64();
+                }
+                else if (it->second == TYPE_FLOAT32)
+                {
+                    ss << json_pointer << " float32 " << node.GetFloat();
+                }
+                else if (it->second == TYPE_FLOAT64)
+                {
+                    ss << json_pointer << " float64 " << node.GetDouble();
+                }
+                else if (it->second == TYPE_BOOL)
+                {
+                    ss << json_pointer << " bool " << node.GetBool();
+                }
+                else if (it->second == TYPE_ZSTRING)
+                {
+                    ss << json_pointer << " ZString " << node.GetString();
+                }
+                else if (it->second == TYPE_ENUM)
+                {
+                    ss << json_pointer << " enum " << node.GetString();
+                }
+                else
+                {
+                    ss << json_pointer << " none none";
+
+                    response_string += util::uint32_t_to_string(it->second) + "Error: The type for " + json_pointer + " could not be determined.\n";
+                }
+                /*if (it->second == 12)
+                {
+                    ss << json_pointer << " ZVariant " << node.GetBool();
+                }
+                if (it->second == 13)
+                {
+                    ss << json_pointer << " enum " << node.GetBool();
+                }*/
             }
             else
             {
-                ss << json_pointer << " none none";
+                if (node.IsInt64())
+                {
+                    ss << json_pointer << " int64 " << node.GetInt64();
+                }
+                else if (node.IsUint64())
+                {
+                    ss << json_pointer << " uint64 " << node.GetUint64();
+                }
+                else if (node.IsDouble())
+                {
+                    ss << json_pointer << " float64 " << node.GetDouble();
+                }
+                else if (node.IsInt())
+                {
+                    ss << json_pointer << " int32 " << node.GetInt();
+                }
+                else if (node.IsUint())
+                {
+                    ss << json_pointer << " uint32 " << node.GetUint();
+                }
+                else if (node.IsFloat())
+                {
+                    ss << json_pointer << " float32 " << node.GetFloat();
+                }
+                else if (node.IsBool())
+                {
+                    ss << json_pointer << " bool " << node.GetBool();
+                }
+                else if (node.IsString())
+                {
+                    ss << json_pointer << " ZString " << node.GetString();
+                }
+                else if (node.IsString())
+                {
+                    ss << json_pointer << " enum " << node.GetString();
+                }
+                else
+                {
+                    ss << json_pointer << " none none";
 
-                response_string += "Error: The type for " + json_pointer + " could not be determined.\n";
+                    response_string += "Error: The type for " + json_pointer + " could not be determined.\n";
+                }
             }
         }
 
@@ -1801,14 +2322,32 @@ void temp::get_enum_values(std::string& property_type_string)
 {
     response_string = "";
 
-    std::map<std::string, std::map<uint32_t, std::string>>::iterator it = enum_map->find(property_type_string);
+    std::map<std::string, std::map<int32_t, std::string>>::iterator it;
 
-    if (it != enum_map->end())
+    if (temp_file_version == 2)
     {
-        for (std::map<uint32_t, std::string>::iterator it2 = it->second.begin(); it2 != it->second.end(); it2++)
+        it = enum_map_h2->find(property_type_string);
+
+        if (it != enum_map_h2->end())
         {
-            response_string.append(it2->second);
-            response_string.push_back(',');
+            for (std::map<int32_t, std::string>::iterator it2 = it->second.begin(); it2 != it->second.end(); it2++)
+            {
+                response_string.append(it2->second);
+                response_string.push_back(',');
+            }
+        }
+    }
+    else
+    {
+        it = enum_map_h3->find(property_type_string);
+
+        if (it != enum_map_h3->end())
+        {
+            for (std::map<int32_t, std::string>::iterator it2 = it->second.begin(); it2 != it->second.end(); it2++)
+            {
+                response_string.append(it2->second);
+                response_string.push_back(',');
+            }
         }
     }
 }
@@ -1966,19 +2505,31 @@ void temp::update_temp_file(uint32_t entry_index, char* update_data, uint32_t up
     //file.close();
 }
 
-void temp::export_json_file(std::string& json_file_path)
+void temp::export_json_files(std::string& json_file_path)
 {
-    std::ofstream file = std::ofstream(json_file_path, std::ofstream::binary);
+    std::ofstream file_temp = std::ofstream(json_file_path + rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_file_name + ".JSON", std::ofstream::binary);
 
-    rapidjson::StringBuffer buffer;
-    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
-    temp_json_document.Accept(writer);
+    rapidjson::StringBuffer buffer_temp;
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer_temp(buffer_temp);
+    temp_json_document.Accept(writer_temp);
 
     //std::cout << buffer.GetString() << std::endl;
 
-    file.write(buffer.GetString(), buffer.GetSize());
+    file_temp.write(buffer_temp.GetString(), buffer_temp.GetSize());
 
-    file.close();
+    file_temp.close();
+
+    std::ofstream file_tblu = std::ofstream(json_file_path + rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_file_name + ".JSON", std::ofstream::binary);
+
+    rapidjson::StringBuffer buffer_tblu;
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer_tblu(buffer_tblu);
+    tblu_json_document.Accept(writer_tblu);
+
+    //std::cout << buffer.GetString() << std::endl;
+
+    file_tblu.write(buffer_tblu.GetString(), buffer_tblu.GetSize());
+
+    file_tblu.close();
 }
 
 int temp::generate_temp_file_from_data(std::string temp_path)
@@ -1987,16 +2538,27 @@ int temp::generate_temp_file_from_data(std::string temp_path)
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     temp_json_document.Accept(writer);
 
-    std::cout << buffer.GetString() << std::endl;
+    //std::cout << buffer.GetString() << std::endl;
 
     std::string type = "TEMP";
 
+    //if (temp_file_version == 2)
+    //{
+        //type = "TEMPH2";
+    //}
+
     if (temp_file_version == 2)
     {
-        type = "TEMPH2";
+        resource_tool_generator = HM2_GetGeneratorForResource("TEMP");
+    }
+    else
+    {
+        resource_tool_generator = HM3_GetGeneratorForResource("TEMP");
     }
 
-    resource_tool_ConvertMemoryJsonToResource(&type[0], buffer.GetString(), buffer.GetSize(), &temp_path[0]);
+    resource_tool_generator->FromJsonStringToResourceFile(buffer.GetString(), buffer.GetSize(), &temp_path[0], true);
+
+    //resource_tool_ConvertMemoryJsonToResource(&type[0], buffer.GetString(), buffer.GetSize(), &temp_path[0]);
 
     rpkg_function::extract_hash_meta(temp_rpkg_index, temp_hash_index, temp_path);
 
@@ -2040,6 +2602,18 @@ void temp::get_all_bricks()
                 }
             }
         }
+    }
+}
+
+void temp::get_entry_name_string(int entry_index)
+{
+    if (entry_index < 0 || entry_index >= tblu_entityName.size())
+    {
+        response_string.append("");
+    }
+    else
+    {
+        response_string.append(tblu_entityName.at(entry_index));
     }
 }
 #endif

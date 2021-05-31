@@ -14,55 +14,11 @@
 #include <Windows.h>
 #include "thirdparty/rapidjson/document.h"
 #include "thirdparty/rapidjson/writer.h"
+#include "thirdparty/rapidjson/pointer.h"
 #include "thirdparty/rapidjson/stringbuffer.h"
 
-static void json_node_scan(const rapidjson::Value& node, std::string json_pointer, std::string json_type, std::string last_name)
+static void json_node_scan(const rapidjson::Value& doc, const rapidjson::Value& node, std::string json_pointer, std::string json_type)
 {
-    /*if (node.IsNull())
-    {
-        std::cout << json_pointer << " (null): " << node.GetBool() << std::endl;
-        std::cout << json_type << "/" << last_name << std::endl;
-    }
-    else if (node.IsBool())
-    {
-        std::cout << json_pointer << " (bool): " << node.GetBool() << std::endl;
-        std::cout << json_type << "/" << last_name << std::endl;
-    }
-    else if (node.IsInt())
-    {
-        std::cout << json_pointer << " (int): " << node.GetInt() << std::endl;
-        std::cout << json_type << "/" << last_name << std::endl;
-    }
-    else if (node.IsInt64())
-    {
-        std::cout << json_pointer << " (int64): " << node.GetInt64() << std::endl;
-        std::cout << json_type << "/" << last_name << std::endl;
-    }
-    else if (node.IsUint())
-    {
-        std::cout << json_pointer << " (uint): " << node.GetUint() << std::endl;
-        std::cout << json_type << "/" << last_name << std::endl;
-    }
-    else if (node.IsUint64())
-    {
-        std::cout << json_pointer << " (uint64) : " << node.GetUint64() << std::endl;
-        std::cout << json_type << "/" << last_name << std::endl;
-    }
-    else if (node.IsFloat())
-    {
-        std::cout << json_pointer << " (float): " << node.GetFloat() << std::endl;
-        std::cout << json_type << "/" << last_name << std::endl;
-    }
-    else if (node.IsDouble())
-    {
-        std::cout << json_pointer << " (double): " << node.GetDouble() << std::endl;
-        std::cout << json_type << "/" << last_name << std::endl;
-    }
-    else if (node.IsString())
-    {
-        std::cout << json_pointer << " (string): " << node.GetString() << std::endl;
-        std::cout << json_type << "/" << last_name << std::endl;
-    }*/
     if (node.IsArray())
     {
         if (node.Size() == 0)
@@ -72,7 +28,7 @@ static void json_node_scan(const rapidjson::Value& node, std::string json_pointe
 
         for (rapidjson::SizeType i = 0; i < node.Size(); ++i)
         {
-            json_node_scan(node[i], json_pointer + "/" + std::to_string(i), json_type, "");
+            json_node_scan(doc, node[i], json_pointer + "/" + std::to_string(i), json_type);
         }
     }
     else if (node.IsObject())
@@ -84,60 +40,172 @@ static void json_node_scan(const rapidjson::Value& node, std::string json_pointe
 
         for (rapidjson::Value::ConstMemberIterator it = node.MemberBegin(); it != node.MemberEnd(); it++)
         {
-            json_node_scan(it->value, json_pointer + "/" + it->name.GetString(), json_type, it->name.GetString());
+            if (std::strcmp(it->name.GetString(), "$type") == 0)
+            {
+                std::cout << json_pointer << "/$type" << " (string): " << it->value.GetString() << std::endl;
+                std::cout << json_type << std::endl;
+
+                std::string json_pointer_value = json_pointer + "/$val";
+
+                const rapidjson::Value& val = *rapidjson::GetValueByPointer(doc, rapidjson::Pointer(json_pointer_value.c_str()));
+
+                json_node_scan(doc, val, json_pointer + "/$val", it->value.GetString());
+            }
+            else if (std::strcmp(it->name.GetString(), "$val") == 0)
+            {
+                
+            }
+            else if (std::strcmp(it->name.GetString(), "exposedInterfaces") == 0)
+            {
+                if (it->value.IsArray())
+                {
+                    std::cout << it->value.Size() << std::endl;
+
+                    for (uint64_t a = 0; a < it->value.Size(); a++)
+                    {
+                        if (it->value[a].IsArray())
+                        {
+                            if (it->value[a].Size() == 2)
+                            {
+                                std::cout << json_pointer << "/exposedInterfaces/" << a << "/0 (ZString): " << it->value[a][0].GetString() << std::endl;
+
+                                std::cout << json_pointer << "/exposedInterfaces/" << a << "/1 (in32): " << it->value[a][0].GetInt() << std::endl;
+                            }
+                        }
+                    }
+                }
+            }
+            else if (std::strcmp(it->name.GetString(), "entitySubsets") == 0)
+            {
+                if (it->value.IsArray())
+                {
+                    std::cout << it->value.Size() << std::endl;
+
+                    for (uint64_t a = 0; a < it->value.Size(); a++)
+                    {
+                        if (it->value[a].IsArray())
+                        {
+                            if (it->value[a].Size() == 2)
+                            {
+                                std::cout << json_pointer << "/entitySubsets/" << a << "/0 (ZString): " << it->value[a][0].GetString() << std::endl;
+
+                                json_node_scan(doc, it->value[a][1], json_pointer + "/entitySubsets/" + std::to_string(a) + "/1", json_type + "/entitySubsets");
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                json_node_scan(doc, it->value, json_pointer + "/" + it->name.GetString(), json_type + "/" + it->name.GetString());
+            }
         }
     }
     else
     {
-        std::cout << json_type << "/" << last_name << std::endl;
+        std::string_view temp_string_view(json_pointer.c_str(), json_pointer.length());
 
-        std::map<std::string, uint32_t>::iterator it = type_map->find(json_type + "/" + last_name);
+        std::cout << json_pointer << ": " << json_type << std::endl;
 
-        if (it != type_map->end())
+        std::map<std::string, uint32_t>::iterator it = type_map_h3->find(json_type);
+
+        if (it != type_map_h3->end())
         {
             std::cout << "Type: " << it->second << std::endl;
 
-            if (it->second == 0)
+            if (it->second == TYPE_INT8)
                 std::cout << "TYPE_INT8" << std::endl;
-            if (it->second == 1)
+            if (it->second == TYPE_UINT8)
                 std::cout << "TYPE_UINT8" << std::endl;
-            if (it->second == 2)
+            if (it->second == TYPE_INT16)
                 std::cout << "TYPE_INT16" << std::endl;
-            if (it->second == 3)
+            if (it->second == TYPE_UINT16)
                 std::cout << "TYPE_UINT16" << std::endl;
-            if (it->second == 4)
+            if (it->second == TYPE_INT32)
                 std::cout << "TYPE_INT32" << std::endl;
-            if (it->second == 5)
+            if (it->second == TYPE_UINT32)
                 std::cout << "TYPE_UINT32" << std::endl;
-            if (it->second == 6)
+            if (it->second == TYPE_INT64)
                 std::cout << "TYPE_INT64" << std::endl;
-            if (it->second == 7)
+            if (it->second == TYPE_UINT64)
                 std::cout << "TYPE_UINT64" << std::endl;
-            if (it->second == 8)
+            if (it->second == TYPE_FLOAT32)
                 std::cout << "TYPE_FLOAT32" << std::endl;
-            if (it->second == 9)
+            if (it->second == TYPE_FLOAT64)
                 std::cout << "TYPE_FLOAT64" << std::endl;
-            if (it->second == 10)
+            if (it->second == TYPE_BOOL)
                 std::cout << "TYPE_BOOL" << std::endl;
-            if (it->second == 11)
+            if (it->second == TYPE_ZSTRING)
                 std::cout << "TYPE_ZSTRING" << std::endl;
-            if (it->second == 12)
+            if (it->second == TYPE_ZVARIANT)
                 std::cout << "TYPE_ZVARIANT" << std::endl;
-            if (it->second == 13)
+            if (it->second == TYPE_ENUM)
                 std::cout << "TYPE_ENUM" << std::endl;
+            if (it->second == TYPE_NULL)
+                std::cout << "TYPE_NULL" << std::endl;
         }
         else
         {
-            std::cout << "Type: Not found" << std::endl;
+            if (node.IsNull())
+            {
+                std::cout << json_pointer << " (null): null" << std::endl;
+                std::cout << json_type << std::endl;
+            }
+            else if (node.IsBool())
+            {
+                std::cout << json_pointer << " (bool): " << node.GetBool() << std::endl;
+                std::cout << json_type << std::endl;
+            }
+            else if (node.IsInt())
+            {
+                std::cout << json_pointer << " (int): " << node.GetInt() << std::endl;
+                std::cout << json_type << std::endl;
+            }
+            else if (node.IsInt64())
+            {
+                std::cout << json_pointer << " (int64): " << node.GetInt64() << std::endl;
+                std::cout << json_type << std::endl;
+            }
+            else if (node.IsUint())
+            {
+                std::cout << json_pointer << " (uint): " << node.GetUint() << std::endl;
+                std::cout << json_type << std::endl;
+            }
+            else if (node.IsUint64())
+            {
+                std::cout << json_pointer << " (uint64) : " << node.GetUint64() << std::endl;
+                std::cout << json_type << std::endl;
+            }
+            else if (node.IsFloat())
+            {
+                std::cout << json_pointer << " (float): " << node.GetFloat() << std::endl;
+                std::cout << json_type << std::endl;
+            }
+            else if (node.IsDouble())
+            {
+                std::cout << json_pointer << " (double): " << node.GetDouble() << std::endl;
+                std::cout << json_type << std::endl;
+            }
+            else if (node.IsString())
+            {
+                std::cout << json_pointer << " (string): " << node.GetString() << std::endl;
+                std::cout << json_type << std::endl;
+            }
+            else
+            {
+                std::cout << "Type: Not found" << std::endl;
+            }
         }
     }
 }
 
 void dev_function::dev_resource_tool(std::string& input_path, std::string& filter, std::string& output_path)
 {
-    initialize_enum_map();
+    initialize_enum_map_h2();
+    initialize_enum_map_h3();
 
-    initialize_type_map();
+    initialize_type_map_h2();
+    initialize_type_map_h3();
 
     bool input_path_is_rpkg_file = false;
 
@@ -187,21 +255,127 @@ void dev_function::dev_resource_tool(std::string& input_path, std::string& filte
 
                 if (it != rpkgs.at(rpkg_index).hash_map.end())
                 {
-                    //temp temp_temp(i, it->second);
+                    temp temp_temp(i, it->second, 3);
 
-                    std::map<uint32_t, uint32_t> parents_map;
+                    temp_temp.load_data();
 
-                    std::vector<uint32_t> temps_indexes;
+                    std::cout << "LOL!!!" << std::endl;
 
-                    rpkg_function::recursive_temp_loader(rpkg_index, it->second, 3, parents_map, temps_indexes, 0, 0, 0);
-
-                    for (uint64_t t = 0; t < temps.size(); t++)
+                    if (temp_temp.tblu_return_value == TEMP_TBLU_FOUND)
                     {
+                        const rapidjson::Value& temp_json_subEntities = temp_temp.temp_json_document;
+
+                        json_node_scan(temp_temp.temp_json_document, temp_json_subEntities, "", "STemplateEntityFactory");
+
+                        const rapidjson::Value& tblu_json_subEntities = temp_temp.tblu_json_document;
+
+                        json_node_scan(temp_temp.tblu_json_document, tblu_json_subEntities, "", "STemplateEntityBlueprint");
+
+                        std::string l1 = "logicalParent";
+                        std::string l2 = "logicalParent";
+                        std::string l3 = "SEntityTemplateReference";
+
+                        //temp_temp.get_tblu_subentities_data(0, l1, l2, l3);
+
+                        /*for (uint64_t s = 0; s < tblu_json_subEntities.Size(); s++)
+                        {
+                            rapidjson::Value::ConstMemberIterator it1 = tblu_json_subEntities[s].FindMember("exposedInterfaces");
+
+                            if (it1 != tblu_json_subEntities[s].MemberEnd())
+                            {
+                                for (uint64_t a = 0; a < it1->value.Size(); a++)
+                                {
+                                    for (uint64_t p = 0; p < it1->value[a].Size(); p++)
+                                    {
+                                        if (it1->value[a][p].IsArray())
+                                        {
+                                            std::cout << "LOL!!!" << std::endl;
+                                        }
+                                        else if (it1->value[a][p].IsObject())
+                                        {
+                                            std::cout << "LOL!!!" << std::endl;
+                                        }
+
+                                        if (it1->value[a][p].IsNull())
+                                        {
+                                            std::cout << 1 << " (null): null" << std::endl;
+                                            std::cout << 1 << std::endl;
+                                        }
+                                        else if (it1->value[a][p].IsBool())
+                                        {
+                                            std::cout << 1 << " (bool): " << it1->value[a][p].GetBool() << std::endl;
+                                            std::cout << 1 << std::endl;
+                                        }
+                                        else if (it1->value[a][p].IsInt())
+                                        {
+                                            std::cout << 1 << " (int): " << it1->value[a][p].GetInt() << std::endl;
+                                            std::cout << 1 << std::endl;
+                                        }
+                                        else if (it1->value[a][p].IsInt64())
+                                        {
+                                            std::cout << 1 << " (int64): " << it1->value[a][p].GetInt64() << std::endl;
+                                            std::cout << 1 << std::endl;
+                                        }
+                                        else if (it1->value[a][p].IsUint())
+                                        {
+                                            std::cout << 1 << " (uint): " << it1->value[a][p].GetUint() << std::endl;
+                                            std::cout << 1 << std::endl;
+                                        }
+                                        else if (it1->value[a][p].IsUint64())
+                                        {
+                                            std::cout << 1 << " (uint64) : " << it1->value[a][p].GetUint64() << std::endl;
+                                            std::cout << 1 << std::endl;
+                                        }
+                                        else if (it1->value[a][p].IsFloat())
+                                        {
+                                            std::cout << 1 << " (float): " << it1->value[a][p].GetFloat() << std::endl;
+                                            std::cout << 1 << std::endl;
+                                        }
+                                        else if (it1->value[a][p].IsDouble())
+                                        {
+                                            std::cout << 1 << " (double): " << it1->value[a][p].GetDouble() << std::endl;
+                                            std::cout << 1 << std::endl;
+                                        }
+                                        else if (it1->value[a][p].IsString())
+                                        {
+                                            std::cout << 1 << " (string): " << it1->value[a][p].GetString() << std::endl;
+                                            std::cout << 1 << std::endl;
+                                        }
+                                        else
+                                        {
+                                            std::cout << "Type: Not found" << std::endl;
+                                        }
+                                    }
+                                }
+                            }
+
+                            it1 = tblu_json_subEntities[s].FindMember("entitySubsets");
+
+                            if (it1 != tblu_json_subEntities[s].MemberEnd())
+                            {
+                                for (uint64_t a = 0; a < it1->value.Size(); a++)
+                                {
+                                    json_node_scan(it1->value[a][1], temp_json_subEntities, "", it1->value[a][0].GetString());
+                                }
+                            }
+                        }*/
+                    }
+
+                    //json_node_scan(temp_json_subEntities, "/subEntities");
+
+                    //std::map<uint32_t, uint32_t> parents_map;
+
+                    //std::vector<uint32_t> temps_indexes;
+
+                    //rpkg_function::recursive_temp_loader(rpkg_index, it->second, 3, parents_map, temps_indexes, 0, 0, 0);
+
+                    //for (uint64_t t = 0; t < temps.size(); t++)
+                    //{
                         //const rapidjson::Value& temp_json_subEntities = temps.at(t).temp_json_document["subEntities"];
 
                         //json_node_scan(temp_json_subEntities, "/subEntities");
 
-                        const rapidjson::Value& temp_json_subEntities = temps.at(t).temp_json_document["subEntities"];
+                        /*const rapidjson::Value& temp_json_subEntities = temps.at(t).temp_json_document["subEntities"];
 
                         for (uint64_t s = 0; s < temp_json_subEntities.Size(); s++)
                         {
@@ -302,7 +476,7 @@ void dev_function::dev_resource_tool(std::string& input_path, std::string& filte
                                     }
                                 }
                             }
-                        }
+                        }*/
 
                         
 
@@ -414,7 +588,7 @@ void dev_function::dev_resource_tool(std::string& input_path, std::string& filte
 
                         //resource_tool_ConvertResource(&convert[0], &type[0], &input_path[0], &output_path[0]);
 
-                        std::cout << temps.at(t).temp_file_name << std::endl;
+                        //std::cout << temps.at(t).temp_file_name << std::endl;
 
                         //if (temps.at(t).tblu_return_value == TEMP_TBLU_FOUND)
                         //{
@@ -706,7 +880,7 @@ void dev_function::dev_resource_tool(std::string& input_path, std::string& filte
                         yyjson_arr_foreach(subEntities, idx, max, hit) {
                             printf("subEntities%d: %d\n", (int)idx, (int)yyjson_get_int(hit));
                         }*/
-                    }
+                    //}
                 }
             }
         }

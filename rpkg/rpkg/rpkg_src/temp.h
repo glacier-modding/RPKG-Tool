@@ -7,6 +7,12 @@
 #include "thirdparty/rapidjson/document.h"
 #include "thirdparty/rapidjson/writer.h"
 #include "thirdparty/rapidjson/stringbuffer.h"
+#include "thirdparty/zhmtools/ResourceConverter.h"
+#include "thirdparty/zhmtools/ResourceGenerator.h"
+#include "thirdparty/zhmtools/ResourceLib.h"
+#include "thirdparty/zhmtools/ResourceLibCommon.h"
+#include "thirdparty/zhmtools/ResourceLib_HM2.h"
+#include "thirdparty/zhmtools/ResourceLib_HM3.h"
 
 class temp
 {
@@ -28,14 +34,15 @@ public:
 	void get_entries_hash_references(uint32_t entry_index);
 	void get_entries_hash_reference_data(uint32_t entry_index);
 	void get_temp_entries_data(std::string value_type, std::string type_string);
-	void json_temp_node_scan(const rapidjson::Value& node, std::string& propertyValues_string, std::string& nPropertyID_string, std::string& type_string, std::string json_pointer, std::string json_type, std::string last_name);
+	void json_temp_node_scan(const rapidjson::Value& node, std::string& propertyValues_string, std::string& nPropertyID_string, std::string& type_string, std::string json_pointer, std::string json_type);
 	void get_entries_data(uint32_t entry_index, std::string value_type);
-	void json_node_scan(const rapidjson::Value& node, std::string& propertyValues_string, std::string& nPropertyID_string, std::string& type_string, std::string json_pointer, std::string json_type, std::string last_name);
+	void json_node_scan(const rapidjson::Value& node, std::string& propertyValues_string, std::string& nPropertyID_string, std::string& type_string, std::string json_pointer, std::string json_type);
 	void get_enum_values(std::string& property_type_string);
 	void update_temp_file(uint32_t entry_index, char* update_data, uint32_t update_data_size);
-	void export_json_file(std::string& json_file_path);
+	void export_json_files(std::string& json_file_path);
 	int generate_temp_file_from_data(std::string temp_path);
 	void get_all_bricks();
+	void get_entry_name_string(int entry_index);
 #endif
 
 	std::string temp_file_name = "";
@@ -44,7 +51,7 @@ public:
 	uint32_t temp_hash_index = 0;
 	uint32_t tblu_rpkg_index = 0;
 	uint32_t tblu_hash_index = 0;
-	uint32_t temp_file_version = 0;
+	uint32_t temp_file_version = 3;
 	uint32_t temp_subentity_count = 0;
 	uint32_t tblu_subentity_count = 0;
 	uint32_t parent = 0;
@@ -61,8 +68,8 @@ public:
 	std::vector<std::string> tblu_entityName;
 	std::vector<uint32_t> temp_entityTypeResourceIndex;
 	std::vector<uint32_t> tblu_entityTypeResourceIndex;
-	char* temp_json_input = nullptr;
-	char* tblu_json_input = nullptr;
+	JsonString* temp_json_input = nullptr;
+	JsonString* tblu_json_input = nullptr;
 	rapidjson::Document temp_json_document;
 	rapidjson::Document tblu_json_document;
 	std::vector<std::string> temp_depends_file_name;
@@ -96,4 +103,6 @@ public:
 	std::vector<uint32_t> prim_depends_rpkg_index_index;
 	std::vector<std::vector<uint32_t>> prim_depends_hash_index;
 	std::vector<uint32_t> prim_depends_hash_index_index;
+	ResourceConverter* resource_tool_converter;
+	ResourceGenerator* resource_tool_generator;
 };

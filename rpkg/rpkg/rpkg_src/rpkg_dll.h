@@ -166,3 +166,7 @@ RPKG_EXPORT int search_hash_list_by_hash_value(char* hash_value);
 RPKG_EXPORT int get_temp_subentity_count(uint32_t temps_index);
 
 RPKG_EXPORT int get_tblu_subentity_count(uint32_t temps_index);
+
+RPKG_EXPORT char* get_entry_name(uint32_t temp_index, int entry_index);
+
+RPKG_EXPORT int generate_json_files_from_data(char* temp_path);

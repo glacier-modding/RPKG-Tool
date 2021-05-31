@@ -75,6 +75,9 @@
     <Reference Include="Cyotek.Drawing.BitmapFont, Version=1.0.0.0, Culture=neutral, PublicKeyToken=58daa28b0b2de221, processorArchitecture=MSIL">
       <HintPath>..\packages\Cyotek.Drawing.BitmapFont.2.0.0\lib\net472\Cyotek.Drawing.BitmapFont.dll</HintPath>
     </Reference>
+    <Reference Include="DiscordRPC, Version=1.0.175.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DiscordRichPresence.1.0.175\lib\net35\DiscordRPC.dll</HintPath>
+    </Reference>
     <Reference Include="HelixToolkit, Version=2.15.0.0, Culture=neutral, PublicKeyToken=52aa3500039caf0d, processorArchitecture=MSIL">
       <HintPath>..\packages\HelixToolkit.2.15.0\lib\netstandard1.1\HelixToolkit.dll</HintPath>
     </Reference>
@@ -121,6 +124,9 @@
     </Reference>
     <Reference Include="NAudio.WinMM, Version=2.0.0.0, Culture=neutral, PublicKeyToken=e279aa5131008a41, processorArchitecture=MSIL">
       <HintPath>..\packages\NAudio.WinMM.2.0.0\lib\netstandard2.0\NAudio.WinMM.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Ookii.Dialogs.Wpf, Version=3.0.0.0, Culture=neutral, PublicKeyToken=66aa232afad40158, processorArchitecture=MSIL">
       <HintPath>..\packages\Ookii.Dialogs.Wpf.3.1.0\lib\net45\Ookii.Dialogs.Wpf.dll</HintPath>
@@ -337,7 +343,8 @@
     <Resource Include="rpkg.ico" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Costura64\ResourceTool.dll" />
+    <EmbeddedResource Include="Costura64\ResourceLib_HM2.dll" />
+    <EmbeddedResource Include="Costura64\ResourceLib_HM3.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.6.0.0\build\Fody.targets" Condition="Exists('..\packages\Fody.6.0.0\build\Fody.targets')" />

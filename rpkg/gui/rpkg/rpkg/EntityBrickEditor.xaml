@@ -23,6 +23,7 @@
             <Menu DockPanel.Dock="Top">
                 <MenuItem Click="GenerateTEMPFile_Click" Header="Generate TEMP File"/>
                 <MenuItem Click="GenerateRPKGFile_Click" Header="Generate RPKG With TEMP File"/>
+                <MenuItem Click="GenerateTEMPJSONFiles_Click" Header="Generate TEMP JSON Files"/>
                 <MenuItem Click="Exit_Click" Header="Exit"/>
             </Menu>
         </DockPanel>
@@ -46,11 +47,13 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Row="0" Grid.Column="0" Content="Filter Nodes By:"/>
                         <TextBox Grid.Row="0" Grid.Column="1" x:Name="FilterTextBox" TextChanged="SearchTEMPsTextBox_TextChanged" FontFamily="Consolas" TextWrapping="NoWrap"/>
                         <Button Grid.Row="0" Grid.Column="2" x:Name="ExpandAllNodes" Click="ExpandAllNodes_Click" Content="Expand All Nodes"/>
                         <Button Grid.Row="0" Grid.Column="3" x:Name="CollapseAllNodes" Click="CollapseAllNodes_Click" Content="Collapse All Nodes"/>
+                        <Button Grid.Row="0" Grid.Column="4" x:Name="PreviousNode" Click="PreviousNode_Click" Content="Previous Node"/>
                     </Grid>
                     <WindowsFormsHost Grid.Row="2" Grid.ColumnSpan="2" x:Name="MainWindowsFormsHost">
                         <wf:TreeView x:Name="MainTreeView" Font="Consolas,10"/>
@@ -60,10 +63,14 @@
             </TabItem>
         </TabControl>
         <GridSplitter HorizontalAlignment="Right" VerticalAlignment="Stretch" Grid.Row="1"  Grid.Column="1" ResizeBehavior="PreviousAndNext" Width="5"/>
-        <ScrollViewer x:Name="MainScrollViewer" Grid.Row="1"  Grid.Column="2" VerticalScrollBarVisibility="Auto">
-            <StackPanel x:Name="MainStackPanel">
-                
-            </StackPanel>
-        </ScrollViewer>
+        <TabControl x:Name="RightTabControl" Grid.Row="1"  Grid.Column="2" >
+            <TabItem x:Name="FirstTabRight" Header="TEMP">
+                <ScrollViewer x:Name="MainScrollViewerTEMP" VerticalScrollBarVisibility="Auto">
+                    <StackPanel x:Name="MainStackPanelTEMP">
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>        
     </Grid>
 </mah:MetroWindow>

@@ -41,6 +41,7 @@
     <ClCompile Include="..\rpkg_src\dev_extract_wwes_strings.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_wwev_strings.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_wwise_ids.cpp" />
+    <ClCompile Include="..\rpkg_src\dev_map_editor.cpp" />
     <ClCompile Include="..\rpkg_src\dev_resource_tool.cpp" />
     <ClCompile Include="..\rpkg_src\encrypt_packagedefinition_thumbs.cpp" />
     <ClCompile Include="..\rpkg_src\extract_all_hash_depends_from.cpp" />

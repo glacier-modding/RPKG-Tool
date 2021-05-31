@@ -23,7 +23,8 @@ void dev_function::dev_extract_temp_pointers(std::string& input_path, std::strin
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
-    initialize_enum_map();
+    initialize_enum_map_h2();
+    initialize_enum_map_h3();
 
     bool input_path_is_rpkg_file = false;
 

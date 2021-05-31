@@ -29,6 +29,8 @@ using HelixToolkit;
 using System.ComponentModel;
 using System.Drawing;
 using System.Runtime.CompilerServices;
+using DiscordRPC;
+using Button = System.Windows.Controls.Button;
 
 namespace rpkg
 {
@@ -37,9 +39,65 @@ namespace rpkg
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
+        public DiscordRpcClient Client { get; private set; }
+
+        private void DiscordRPCSetup()
+        {
+            Client = new DiscordRpcClient("845255830110732290");
+            Client.Initialize();
+        }
+
+        public void SetDiscordStatus(string status)
+        {
+            if (discordOn)
+            {
+                Client.SetPresence(new RichPresence()
+                {
+                    Details = "RPKG Tool",
+                    State = status,
+                    Assets = new Assets()
+                    {
+                        LargeImageKey = "icon",
+                        LargeImageText = "RPKG Tool",
+                    }
+                });
+            }
+        }
+
+        private void DiscordToggle_Click(object sender, RoutedEventArgs e)
+        {
+            if (!discordOn)
+            {
+                discordOn = true;
+
+                DiscordRPCSetup();
+
+                SetDiscordStatus("Idle");
+
+                if (!oneOrMoreRPKGsHaveBeenImported)
+                {
+                    if (LeftTabControl.SelectedIndex == 0)
+                    {
+                        SetDiscordStatus("In Resource View");
+                    }
+                    else if (LeftTabControl.SelectedIndex == 1)
+                    {
+                        LoadHashDependsMap();
+
+                        SetDiscordStatus("In Dependency View");
+                    }
+                    else if (LeftTabControl.SelectedIndex == 2)
+                    {
+                        SetDiscordStatus("In Search View");
+                    }
+                }
+            }
+        }
+
         public MainWindow()
         {
             InitializeComponent();
+
             ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.DodgerBlue)));
         }
 
@@ -103,10 +161,12 @@ namespace rpkg
                 {
                     DownloadExtractHashList();
                     System.Windows.Forms.Application.Restart();
+                    Client.Dispose();
                     Environment.Exit(0);
                 }
                 else if (messageBox.buttonPressed == "CancelButton")
                 {
+                    Client.Dispose();
                     Environment.Exit(0);
                 }
             }
@@ -129,6 +189,7 @@ namespace rpkg
                 {
                     DownloadExtractHashList();
                     System.Windows.Forms.Application.Restart();
+                    Client.Dispose();
                     Environment.Exit(0);
                 }
             }
@@ -1711,8 +1772,30 @@ namespace rpkg
                                         entityBrickEditor = new EntityBrickEditor();
                                     }
 
-                                    entityBrickEditor.inputFolder = userSettings.InputFolder;
-                                    entityBrickEditor.outputFolder = userSettings.OutputFolder;
+                                    string initialFolder = "";
+
+                                    if (File.Exists(userSettings.InputFolder))
+                                    {
+                                        initialFolder = userSettings.InputFolder;
+                                    }
+                                    else
+                                    {
+                                        initialFolder = System.IO.Directory.GetCurrentDirectory();
+                                    }
+
+                                    entityBrickEditor.inputFolder = initialFolder;
+
+
+                                    if (File.Exists(userSettings.OutputFolder))
+                                    {
+                                        initialFolder = userSettings.OutputFolder;
+                                    }
+                                    else
+                                    {
+                                        initialFolder = System.IO.Directory.GetCurrentDirectory();
+                                    }
+
+                                    entityBrickEditor.outputFolder = initialFolder;
 
                                     entityBrickEditor.temps_index = (UInt32)temp_index;
                                     entityBrickEditor.temp_file_version = temp_file_version;
@@ -1725,8 +1808,25 @@ namespace rpkg
                                     entityBrickEditor.currentThemeBrightness = theme[0];
                                     string color = theme[1];
 
+                                    SetDiscordStatus("In Entity/Brick Editor");
+
                                     entityBrickEditor.ShowDialog();
 
+                                    if (LeftTabControl.SelectedIndex == 0)
+                                    {
+                                        SetDiscordStatus("In Resource View");
+                                    }
+                                    else if (LeftTabControl.SelectedIndex == 1)
+                                    {
+                                        LoadHashDependsMap();
+
+                                        SetDiscordStatus("In Dependency View");
+                                    }
+                                    else if (LeftTabControl.SelectedIndex == 2)
+                                    {
+                                        SetDiscordStatus("In Search View");
+                                    }
+                                    
                                     //GC.Collect();
                                     GC.WaitForPendingFinalizers();
                                     //GC.Collect();
@@ -1978,8 +2078,30 @@ namespace rpkg
                                         entityBrickEditor = new EntityBrickEditor();
                                     }
 
-                                    entityBrickEditor.inputFolder = userSettings.InputFolder;
-                                    entityBrickEditor.outputFolder = userSettings.OutputFolder;
+                                    string initialFolder = "";
+
+                                    if (File.Exists(userSettings.InputFolder))
+                                    {
+                                        initialFolder = userSettings.InputFolder;
+                                    }
+                                    else
+                                    {
+                                        initialFolder = System.IO.Directory.GetCurrentDirectory();
+                                    }
+
+                                    entityBrickEditor.inputFolder = initialFolder;
+
+
+                                    if (File.Exists(userSettings.OutputFolder))
+                                    {
+                                        initialFolder = userSettings.OutputFolder;
+                                    }
+                                    else
+                                    {
+                                        initialFolder = System.IO.Directory.GetCurrentDirectory();
+                                    }
+
+                                    entityBrickEditor.outputFolder = initialFolder;
 
                                     entityBrickEditor.temps_index = (UInt32)temp_index;
                                     entityBrickEditor.temp_file_version = temp_file_version;
@@ -1992,7 +2114,24 @@ namespace rpkg
                                     entityBrickEditor.currentThemeBrightness = theme[0];
                                     string color = theme[1];
 
+                                    SetDiscordStatus("In Entity/Brick Editor");
+
                                     entityBrickEditor.ShowDialog();
+
+                                    if (LeftTabControl.SelectedIndex == 0)
+                                    {
+                                        SetDiscordStatus("In Resource View");
+                                    }
+                                    else if (LeftTabControl.SelectedIndex == 1)
+                                    {
+                                        LoadHashDependsMap();
+
+                                        SetDiscordStatus("In Dependency View");
+                                    }
+                                    else if (LeftTabControl.SelectedIndex == 2)
+                                    {
+                                        SetDiscordStatus("In Search View");
+                                    }
 
                                     //GC.Collect();
                                     GC.WaitForPendingFinalizers();
@@ -2616,9 +2755,19 @@ namespace rpkg
 
             //MessageBoxShow(tab.SelectedIndex.ToString());
 
-            if (tab.SelectedIndex == 1)
+            if (tab.SelectedIndex == 0)
+            {
+                SetDiscordStatus("In Resource View");
+            }
+            else if (tab.SelectedIndex == 1)
             {
                 LoadHashDependsMap();
+
+                SetDiscordStatus("In Dependency View");
+            }
+            else if (tab.SelectedIndex == 2)
+            {
+                SetDiscordStatus("In Search View");
             }
         }
 
@@ -2841,6 +2990,24 @@ namespace rpkg
                 item.Nodes.Add(item2);
             }
 
+            if (oneOrMoreRPKGsHaveBeenImported)
+            {
+                if (LeftTabControl.SelectedIndex == 0)
+                {
+                    SetDiscordStatus("In Resource View");
+                }
+                else if (LeftTabControl.SelectedIndex == 1)
+                {
+                    LoadHashDependsMap();
+
+                    SetDiscordStatus("In Dependency View");
+                }
+                else if (LeftTabControl.SelectedIndex == 2)
+                {
+                    SetDiscordStatus("In Search View");
+                }
+            }
+
             oneOrMoreRPKGsHaveBeenImported = true;
         }
 
@@ -2951,6 +3118,24 @@ namespace rpkg
                 }
             }
 
+            if (oneOrMoreRPKGsHaveBeenImported)
+            {
+                if (LeftTabControl.SelectedIndex == 0)
+                {
+                    SetDiscordStatus("In Resource View");
+                }
+                else if (LeftTabControl.SelectedIndex == 1)
+                {
+                    LoadHashDependsMap();
+
+                    SetDiscordStatus("In Dependency View");
+                }
+                else if (LeftTabControl.SelectedIndex == 2)
+                {
+                    SetDiscordStatus("In Search View");
+                }
+            }
+
             oneOrMoreRPKGsHaveBeenImported = true;
         }
 
@@ -2995,9 +3180,20 @@ namespace rpkg
 
             fileDialog.Filter = "RPKG file|*.rpkg|All files|*.*";
 
-            fileDialog.InitialDirectory = userSettings.InputFolder;
+            string initialFolder = "";
 
-            fileDialog.FileName = userSettings.InputFolder;
+            if (File.Exists(userSettings.InputFolder))
+            {
+                initialFolder = userSettings.InputFolder;
+            }
+            else
+            {
+                initialFolder = System.IO.Directory.GetCurrentDirectory();
+            }
+
+            fileDialog.InitialDirectory = initialFolder;
+
+            fileDialog.FileName = initialFolder;
 
             var fileDialogResult = fileDialog.ShowDialog();
 
@@ -3644,11 +3840,33 @@ namespace rpkg
 
             if (type == "input")
             {
-                folderDialog.SelectedPath = userSettings.InputFolder;
+                string initialFolder = "";
+
+                if (File.Exists(userSettings.InputFolder))
+                {
+                    initialFolder = userSettings.InputFolder;
+                }
+                else
+                {
+                    initialFolder = System.IO.Directory.GetCurrentDirectory();
+                }
+
+                folderDialog.SelectedPath = initialFolder;
             }
             else if (type == "output")
             {
-                folderDialog.SelectedPath = userSettings.OutputFolder;
+                string initialFolder = "";
+
+                if (File.Exists(userSettings.OutputFolder))
+                {
+                    initialFolder = userSettings.OutputFolder;
+                }
+                else
+                {
+                    initialFolder = System.IO.Directory.GetCurrentDirectory();
+                }
+
+                folderDialog.SelectedPath = initialFolder;
             }
 
             var folderDialogResult = folderDialog.ShowDialog();
@@ -3837,6 +4055,7 @@ namespace rpkg
 
         private void Exit_Click(object sender, RoutedEventArgs e)
         {
+            Client.Dispose();
             Close();
         }
 
@@ -3855,15 +4074,16 @@ namespace rpkg
         private int pcmSampleSize;
         private int pcmSampleRate;
         private int pcmChannels;
-        EntityBrickEditor entityBrickEditor;
-        List<string> patchHashOriginalList;
-        List<string> patchHashList;
-        List<string> patchHashNamesList;
-        List<string> hashDependsOriginalList;
-        List<string> hashDependsList;
-        List<string> hashDependsNamesList;
-        List<string> hashDependsFlagsList;
-        int hashDependsPage;
+        public EntityBrickEditor entityBrickEditor;
+        public List<string> patchHashOriginalList;
+        public List<string> patchHashList;
+        public List<string> patchHashNamesList;
+        public List<string> hashDependsOriginalList;
+        public List<string> hashDependsList;
+        public List<string> hashDependsNamesList;
+        public List<string> hashDependsFlagsList;
+        public int hashDependsPage;
+        public bool discordOn = false;
 
         private enum OggPlayerState
         {
