@@ -72,6 +72,24 @@ enum FileType3D
     OBJ_SINGLE
 };
 
+enum Types
+{
+    TYPE_INT8,
+    TYPE_UINT8,
+    TYPE_INT16,
+    TYPE_UINT16,
+    TYPE_INT32,
+    TYPE_UINT32,
+    TYPE_INT64,
+    TYPE_UINT64,
+    TYPE_FLOAT32,
+    TYPE_FLOAT64,
+    TYPE_BOOL,
+    TYPE_ZSTRING,
+    TYPE_ZVARIANT,
+    TYPE_ENUM
+};
+
 extern std::string DirectXFormatsStrings[116];
 
 struct vector2
@@ -219,11 +237,14 @@ extern int pcm_sample_rate;
 extern int pcm_channels;
 extern std::string extracted_wem_string;
 extern std::map<uint32_t, std::string>* property_map;
+extern std::map<std::string, uint32_t>* type_map;
 extern std::map<std::string, std::map<uint32_t, std::string>>* enum_map;
-extern void initialize_property_map();
 extern void initialize_enum_map();
+extern void initialize_type_map();
+extern bool resource_tool_initialized;
 extern bool property_map_initialized;
 extern bool enum_map_initialized;
+extern bool type_map_initialized;
 extern std::vector<temp> temps;
 extern std::map<uint64_t, uint32_t> temps_map;
 extern std::vector<matrix43> temp_world_coordinates;
@@ -254,9 +275,9 @@ extern std::vector<uint64_t> entity_id_m_eidParent;
 extern std::vector<bool> entity_id_has_matrix;
 extern bool interative_mode;
 extern void* resource_tool_dll;
-typedef int(__cdecl* ConvertResource)(char*, char*, char*, char*);
-typedef int(__cdecl* ConvertMemoryResource)(char*, char*, void*, uint64_t, char*);
-typedef char*(__cdecl* GetTEMPEntities)();
-extern ConvertResource resource_tool_ConvertResource;
-extern ConvertMemoryResource resource_tool_ConvertMemoryResource;
-extern GetTEMPEntities resource_tool_GetTEMPEntities;
+typedef int(__cdecl* ConvertMemoryResourceToJson)(char*, void*, uint64_t);
+typedef int(__cdecl* ConvertMemoryJsonToResource)(char*, const char*, size_t, char*);
+typedef char* (__cdecl* GetJsonFromMemory)();
+extern ConvertMemoryResourceToJson resource_tool_ConvertMemoryResourceToJson;
+extern ConvertMemoryJsonToResource resource_tool_ConvertMemoryJsonToResource;
+extern GetJsonFromMemory resource_tool_GetJsonFromMemory;

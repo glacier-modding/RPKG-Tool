@@ -1,4 +1,5 @@
 #include "util.h"
+#include "global.h"
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
 #include "thirdparty/directxtex/DirectXTex.h"
@@ -8,6 +9,22 @@
 #include <iomanip>
 #include <regex>
 #include <Windows.h>
+
+void util::initialize_resource_tool()
+{
+    if (!resource_tool_initialized)
+    {
+        resource_tool_initialized = true;
+
+        resource_tool_dll = LoadLibraryW(L"ResourceTool.dll");
+
+        resource_tool_ConvertMemoryResourceToJson = (ConvertMemoryResourceToJson)GetProcAddress((HMODULE)resource_tool_dll, "ConvertMemoryResourceToJson");
+
+        resource_tool_ConvertMemoryJsonToResource = (ConvertMemoryJsonToResource)GetProcAddress((HMODULE)resource_tool_dll, "ConvertMemoryJsonToResource");
+
+        resource_tool_GetJsonFromMemory = (GetJsonFromMemory)GetProcAddress((HMODULE)resource_tool_dll, "GetJsonFromMemory");
+    }
+}
 
 std::vector<std::string> util::parse_input_filter(std::string input_string)
 {

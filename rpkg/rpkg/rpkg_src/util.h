@@ -5,6 +5,7 @@
 class util
 {
 public:
+    static void initialize_resource_tool();
     static std::vector<std::string> parse_input_filter(std::string input_string);
     static std::string to_upper_case(std::string s);
     static std::string to_lower_case(std::string s);

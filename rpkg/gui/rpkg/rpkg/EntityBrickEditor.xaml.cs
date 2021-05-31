@@ -43,6 +43,43 @@ namespace rpkg
                 MainTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
             }
 
+            LoadLoadingWindow();
+        }
+
+        private void LoadLoadingWindow()
+        {
+            message = new Message();
+
+            message.message.Content = "Loading Entity/Brick (TEMP/TBLU) Editor Treeview Nodes.\n\nThe GUI will seem frozen for a short time while the nodes are loaded.\n\nThe more recursive TEMP/TBLU files found, the longer the loading time will be.\n\nThis window will disappear once all the nodes have been loaded.";
+
+            message.Topmost = true;
+
+            message.Show();
+
+            if (loadingWindowTimer == null)
+            {
+                loadingWindowTimer = new System.Windows.Threading.DispatcherTimer();
+
+                loadingWindowTimer.Interval = TimeSpan.FromMilliseconds(400);
+
+                loadingWindowTimer.Tick += LoadingWindowTimer_Tick;
+            }
+
+            loadingWindowTimer.Stop();
+            loadingWindowTimer.Start();
+        }
+
+        private void LoadingWindowTimer_Tick(object sender, EventArgs e)
+        {
+            var timer = (sender as System.Windows.Threading.DispatcherTimer);
+
+            if (timer == null)
+            {
+                return;
+            }
+
+            timer.Stop();
+
             LoadMainTreeView();
         }
 
@@ -61,7 +98,7 @@ namespace rpkg
                     MainTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
                 }
 
-                LoadMainTreeView();
+                LoadLoadingWindow();
 
                 hidden = false;
             }
@@ -78,11 +115,23 @@ namespace rpkg
                 MainStackPanel.Children.RemoveAt(MainStackPanel.Children.Count - 1);
             }
 
-            controlNames = null;
-
-            controlNames = new List<string>();
+            controls = null;
+            controls = new List<string>();
+            controlsChanged = null;
+            controlsChanged = new List<bool>();
+            controlsTEMPIndexes = null;
+            controlsTEMPIndexes = new List<UInt32>();
+            controlJSONPointers = null;
+            controlJSONPointers = new List<string>();
+            controlJSONPointersTypes = null;
+            controlJSONPointersTypes = new List<string>();
+            controlZGuids = null;
+            controlZGuids = new List<ZGuid>();
 
             controlCount = 0;
+
+            tempFilesChanged = null;
+            tempFilesChanged = new List<UInt32>();
 
             MainTreeView.BeginUpdate();
 
@@ -105,32 +154,34 @@ namespace rpkg
 
                     UInt32.TryParse(topLevelParent, out logical_parent);
 
-                    responseString = Marshal.PtrToStringAnsi(get_entries_with_logical_parent(temps_index, logical_parent));
+                    int entry_data_size = get_entries_with_logical_parent(temps_index, logical_parent);
 
-                    if (responseString != "")
+                    byte[] entry_data = new byte[entry_data_size];
+
+                    Marshal.Copy(get_entries_with_logical_parent_data(), entry_data, 0, entry_data_size);
+
+                    int data_pointer = 0;
+
+                    while (data_pointer < entry_data_size)
                     {
-                        string[] topLevelEntries = responseString.Trim(',').Split(',');
+                        UInt32 entryIndex = BitConverter.ToUInt32(entry_data, data_pointer);
+                        data_pointer += 4;
 
-                        foreach (string entry in topLevelEntries)
-                        {
-                            string[] entryData = entry.Split('|');
-                            string entityName = entryData[1];
-                            UInt32 entryIndex = 0;
+                        UInt32 entryNameLength = BitConverter.ToUInt32(entry_data, data_pointer);
+                        data_pointer += 4;
 
-                            UInt32.TryParse(entryData[0], out entryIndex);
+                        string entryName = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryNameLength);
+                        data_pointer += (int)entryNameLength;
 
-                            var item = new System.Windows.Forms.TreeNode();
+                        //MessageBoxShow(entryIndex.ToString() + ", " + entryNameLength.ToString() + ", " + entryName);
 
-                            item.Text = entityName + " (" + entryData[0] + ") (" + temps_index.ToString() + ")";
+                        var item = new System.Windows.Forms.TreeNode();
 
-                            //item.Expanded += Item_Expanded;
+                        item.Text = entryName + " (" + entryIndex.ToString() + ") (" + temps_index.ToString() + ")";
 
-                            //item.Items.Add(null);
+                        LoadTreeView(ref item);
 
-                            LoadTreeView(ref item);
-
-                            topItem.Nodes.Add(item);
-                        }
+                        topItem.Nodes.Add(item);
                     }
                 }
 
@@ -140,7 +191,7 @@ namespace rpkg
 
                 MainTreeView.Nodes.Add(topItem);
             }
-
+            
             {
                 string responseString = Marshal.PtrToStringAnsi(get_all_bricks(temps_index));
 
@@ -176,32 +227,34 @@ namespace rpkg
 
                             UInt32.TryParse(topLevelParent, out logical_parent);
 
-                            responseString = Marshal.PtrToStringAnsi(get_entries_with_logical_parent((UInt32)temp_index_hash_reference, logical_parent));
+                            int entry_data_size = get_entries_with_logical_parent((UInt32)temp_index_hash_reference, logical_parent);
 
-                            if (responseString != "")
+                            byte[] entry_data = new byte[entry_data_size];
+
+                            Marshal.Copy(get_entries_with_logical_parent_data(), entry_data, 0, entry_data_size);
+
+                            int data_pointer = 0;
+
+                            while (data_pointer < entry_data_size)
                             {
-                                string[] topLevelEntries = responseString.Trim(',').Split(',');
+                                UInt32 entryIndex = BitConverter.ToUInt32(entry_data, data_pointer);
+                                data_pointer += 4;
 
-                                foreach (string entry in topLevelEntries)
-                                {
-                                    string[] entryData = entry.Split('|');
-                                    string entityName = entryData[1];
-                                    UInt32 entryIndex = 0;
+                                UInt32 entryNameLength = BitConverter.ToUInt32(entry_data, data_pointer);
+                                data_pointer += 4;
 
-                                    UInt32.TryParse(entryData[0], out entryIndex);
+                                string entryName = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryNameLength);
+                                data_pointer += (int)entryNameLength;
 
-                                    var item = new System.Windows.Forms.TreeNode();
+                                //MessageBoxShow(entryIndex.ToString() + ", " + entryNameLength.ToString() + ", " + entryName);
 
-                                    item.Text = entityName + " (" + entryData[0] + ") (" + temp_index_hash_reference.ToString() + ")";
+                                var item = new System.Windows.Forms.TreeNode();
 
-                                    //item.Expanded += Item_Expanded;
+                                item.Text = entryName + " (" + entryIndex.ToString() + ") (" + temp_index_hash_reference.ToString() + ")";
 
-                                    //item.Items.Add(null);
+                                LoadTreeView(ref item);
 
-                                    LoadTreeView(ref item);
-
-                                    topItem.Nodes.Add(item);
-                                }
+                                topItem.Nodes.Add(item);
                             }
                         }
 
@@ -213,77 +266,17 @@ namespace rpkg
                     }
                 }
             }
-
+            
             MainTreeView.EndUpdate();
 
             treeViewBackup = new TreeViewBackup(MainTreeView.Nodes);
 
-            /*UInt32 logical_parent = 0xFFFFFFFF;
-
-            responseString = Marshal.PtrToStringAnsi(get_entries_with_logical_parent(temps_index, logical_parent));
-
-            if (responseString != "")
-            {
-                string[] topLevelEntries = responseString.Trim(',').Split(',');
-
-                foreach (string entry in topLevelEntries)
-                {
-                    string[] entryData = entry.Split('|');
-                    string entityName = entryData[1];
-                    UInt32 entryIndex = 0;
-
-                    UInt32.TryParse(entryData[0], out entryIndex);
-
-                    var item = new TreeViewItem();
-
-                    item.Header = entityName + " (" + entryData[0] + ") (" + temps_index.ToString() + ")";
-
-                    item.Expanded += Item_Expanded;
-
-                    item.Items.Add(null);
-
-                    //LoadTreeView(entryIndex, entityName, ref item);
-
-                    MainTreeView.Items.Add(item);
-                }
-            }
-
-            logical_parent = 0xFFFFFFFE;
-
-            responseString = Marshal.PtrToStringAnsi(get_entries_with_logical_parent(temps_index, logical_parent));
-
-            if (responseString != "")
-            {
-                string[] topLevelEntries = responseString.Trim(',').Split(',');
-
-                foreach (string entry in topLevelEntries)
-                {
-                    string[] entryData = entry.Split('|');
-                    string entityName = entryData[1];
-                    UInt32 entryIndex = 0;
-
-                    UInt32.TryParse(entryData[0], out entryIndex);
-
-                    var item = new TreeViewItem();
-
-                    item.Header = entityName + " (" + entryData[0] + ") (" + temps_index.ToString() + ")";
-
-                    item.Expanded += Item_Expanded;
-
-                    item.Items.Add(null);
-
-                    //LoadTreeView(entryIndex, entityName, ref item);
-
-                    MainTreeView.Items.Add(item);
-                }
-            }*/
+            message.Close();
         }
 
         private void LoadTreeView(ref System.Windows.Forms.TreeNode masterTreeViewItem)
         {
             string[] header = masterTreeViewItem.Text.Replace("(", "").Replace(")", "").Split(' ');
-
-            var testing = 0;
 
             string entityName = "";
 
@@ -305,8 +298,6 @@ namespace rpkg
 
             UInt32.TryParse(header[header.Length - 1], out temp_temp_index);
 
-            string responseString = Marshal.PtrToStringAnsi(get_entries_with_logical_parent(temp_temp_index, temp_entryIndex));
-
             string hashReferenceData = Marshal.PtrToStringAnsi(get_entries_hash_references(temp_temp_index, temp_entryIndex));
 
             string[] hashReferences = hashReferenceData.Split(',');
@@ -317,23 +308,32 @@ namespace rpkg
             {
                 UInt32 logical_parent = 0xFFFFFFFF;
 
-                string responseStringHashReference = Marshal.PtrToStringAnsi(get_entries_with_logical_parent((UInt32)temp_index_hash_reference, logical_parent));
+                int hash_entry_data_size = get_entries_with_logical_parent((UInt32)temp_index_hash_reference, logical_parent);
 
-                if (responseStringHashReference != "")
+                if (hash_entry_data_size > 0)
                 {
-                    string[] topLevelEntriesHashReference = responseStringHashReference.Trim(',').Split(',');
+                    byte[] entry_data = new byte[hash_entry_data_size];
 
-                    foreach (string entryHashReference in topLevelEntriesHashReference)
+                    Marshal.Copy(get_entries_with_logical_parent_data(), entry_data, 0, hash_entry_data_size);
+
+                    int data_pointer = 0;
+
+                    while (data_pointer < hash_entry_data_size)
                     {
-                        string[] entryDataHashReference = entryHashReference.Split('|');
-                        string entityNameHashReference = entryDataHashReference[1];
-                        UInt32 entryIndexHashReference = 0;
+                        UInt32 entryIndex = BitConverter.ToUInt32(entry_data, data_pointer);
+                        data_pointer += 4;
 
-                        UInt32.TryParse(entryDataHashReference[0], out entryIndexHashReference);
+                        UInt32 entryNameLength = BitConverter.ToUInt32(entry_data, data_pointer);
+                        data_pointer += 4;
+
+                        string entryName = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryNameLength);
+                        data_pointer += (int)entryNameLength;
+
+                        //MessageBoxShow(entryIndex.ToString() + ", " + entryNameLength.ToString() + ", " + entryName);
 
                         var itemHashReference = new System.Windows.Forms.TreeNode();
 
-                        itemHashReference.Text = entityNameHashReference + " (" + entryDataHashReference[0] + ") (" + temp_index_hash_reference.ToString() + ")";
+                        itemHashReference.Text = entryName + " (" + entryIndex.ToString() + ") (" + temp_index_hash_reference.ToString() + ")";
 
                         LoadTreeView(ref itemHashReference);
 
@@ -342,8 +342,41 @@ namespace rpkg
                 }
             }
 
-            //MessageBoxShow(temp_index_hash_reference.ToString());
+            int entry_data_size = get_entries_with_logical_parent(temp_temp_index, temp_entryIndex);
 
+            if (entry_data_size > 0)
+            {
+                byte[] entry_data = new byte[entry_data_size];
+
+                Marshal.Copy(get_entries_with_logical_parent_data(), entry_data, 0, entry_data_size);
+
+                int data_pointer = 0;
+
+                while (data_pointer < entry_data_size)
+                {
+                    UInt32 entryIndex = BitConverter.ToUInt32(entry_data, data_pointer);
+                    data_pointer += 4;
+
+                    UInt32 entryNameLength = BitConverter.ToUInt32(entry_data, data_pointer);
+                    data_pointer += 4;
+
+                    string entryName = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryNameLength);
+                    data_pointer += (int)entryNameLength;
+
+                    //MessageBoxShow(entryIndex.ToString() + ", " + entryNameLength.ToString() + ", " + entryName);
+
+                    var item2 = new System.Windows.Forms.TreeNode();
+
+                    item2.Text = entryName + " (" + entryIndex.ToString() + ") (" + temp_temp_index.ToString() + ")";
+
+                    LoadTreeView(ref item2);
+
+                    masterTreeViewItem.Nodes.Add(item2);
+                }
+            }
+
+            //MessageBoxShow(temp_index_hash_reference.ToString());
+            /*
             string[] topLevelEntries = responseString.Trim(',').Split(',');
 
             foreach (string entry in topLevelEntries)
@@ -364,101 +397,174 @@ namespace rpkg
 
                     masterTreeViewItem.Nodes.Add(item2);
                 }
-            }
+            }*/
         }
 
         private void UpdateTempFile()
         {
-            if (controlNames != null)
+            if (controls != null)
             {
-                foreach (string controlName in controlNames)
+                if (controlZGuids.Count > 0)
                 {
-                    DependencyObject descendant = FindDescendant(EditorWindow, controlName);
-
-                    string[] controlData = controlName.Split('_');
-
-                    if (descendant != null)
+                    foreach (ZGuid zguid in controlZGuids)
                     {
-                        if (descendant is TextBox)
+                        DependencyObject descendant = FindDescendant(EditorWindow, zguid.controlName);
+
+                        if (descendant != null)
                         {
-                            string value = (descendant as TextBox).Text;
-
-                            //MessageBoxShow("TextBox: " + controlName + ", Type: " + controlData[1] + ", Shared: " + controlData[2] + ", Temp Index: " + controlData[3] + ", EntityIndex: " + controlData[4] + ", Index: " + controlData[5] + ", offset:" + controlData[6] + ", Value: " + value);
-
-                            if (value != "")
+                            if (descendant is TextBox)
                             {
-                                UInt32 temp_index = 0;
-
-                                UInt32.TryParse(controlData[3], out temp_index);
-
-                                if (controlData[2] == "s")
+                                if (ProcessZGuid(zguid.controlName, (descendant as TextBox).Text))
                                 {
-                                    string[] valueData = value.Replace("(offset=0x", "").Replace(")", "").Split(' ');
+                                    DependencyObject descendant2 = FindDescendant(EditorWindow, zguid.subControlNames[0]);
+                                    (descendant2 as TextBox).Text = zguid._a.ToString().PadLeft(8, '0');
+                                    TextBoxChanged((descendant2 as TextBox).Name);
 
-                                    //MessageBoxShow("update_temp_file_pointer(" + controlData[3] + ", " + controlData[4] + ", " + valueData[1]);
+                                    descendant2 = FindDescendant(EditorWindow, zguid.subControlNames[1]);
+                                    (descendant2 as TextBox).Text = zguid._b.ToString().PadLeft(4, '0');
+                                    TextBoxChanged((descendant2 as TextBox).Name);
 
-                                    int return_value = update_temp_file_pointer(temp_index, controlData[4], controlData[5], valueData[1]);
-                                }
-                                else
-                                {
-                                    //MessageBoxShow("update_temp_file(" + controlData[5] + ", " + controlData[1] + ", " + value);
+                                    descendant2 = FindDescendant(EditorWindow, zguid.subControlNames[2]);
+                                    (descendant2 as TextBox).Text = zguid._c.ToString().PadLeft(4, '0');
+                                    TextBoxChanged((descendant2 as TextBox).Name);
 
-                                    if (controlData[1] == "enum")
-                                    {
-                                        string[] valueData = value.Replace("offset=0x", "").Replace("(", "").Replace(")", "").Split(' ');
+                                    descendant2 = FindDescendant(EditorWindow, zguid.subControlNames[3]);
+                                    (descendant2 as TextBox).Text = zguid._d.ToString().PadLeft(2, '0');
+                                    TextBoxChanged((descendant2 as TextBox).Name);
 
-                                        //MessageBoxShow("update_temp_file(" + controlData[5] + ", " + controlData[1] + ", " + valueData[1]);
+                                    descendant2 = FindDescendant(EditorWindow, zguid.subControlNames[4]);
+                                    (descendant2 as TextBox).Text = zguid._e.ToString().PadLeft(2, '0');
+                                    TextBoxChanged((descendant2 as TextBox).Name);
 
-                                        int return_value = update_temp_file(temp_index, controlData[6], controlData[1], valueData[1]);
-                                    }
-                                    else
-                                    {
-                                        int return_value = update_temp_file(temp_index, controlData[6], controlData[1], value);
-                                    }                                    
+                                    descendant2 = FindDescendant(EditorWindow, zguid.subControlNames[5]);
+                                    (descendant2 as TextBox).Text = zguid._f.ToString().PadLeft(2, '0');
+                                    TextBoxChanged((descendant2 as TextBox).Name);
+
+                                    descendant2 = FindDescendant(EditorWindow, zguid.subControlNames[6]);
+                                    (descendant2 as TextBox).Text = zguid._g.ToString().PadLeft(2, '0');
+                                    TextBoxChanged((descendant2 as TextBox).Name);
+
+                                    descendant2 = FindDescendant(EditorWindow, zguid.subControlNames[7]);
+                                    (descendant2 as TextBox).Text = zguid._h.ToString().PadLeft(2, '0');
+                                    TextBoxChanged((descendant2 as TextBox).Name);
+
+                                    descendant2 = FindDescendant(EditorWindow, zguid.subControlNames[8]);
+                                    (descendant2 as TextBox).Text = zguid._i.ToString().PadLeft(2, '0');
+                                    TextBoxChanged((descendant2 as TextBox).Name);
+
+                                    descendant2 = FindDescendant(EditorWindow, zguid.subControlNames[9]);
+                                    (descendant2 as TextBox).Text = zguid._j.ToString().PadLeft(2, '0');
+                                    TextBoxChanged((descendant2 as TextBox).Name);
+
+                                    descendant2 = FindDescendant(EditorWindow, zguid.subControlNames[10]);
+                                    (descendant2 as TextBox).Text = zguid._k.ToString().PadLeft(2, '0');
+                                    TextBoxChanged((descendant2 as TextBox).Name);
                                 }
                             }
                         }
-                        else if (descendant is ComboBox)
+                    }
+                }
+
+                bool update = false;
+
+                foreach (bool controlChange in controlsChanged)
+                {
+                    if (controlChange)
+                    {
+                        update = true;
+                    }
+                }
+
+                if (update)
+                {
+                    MemoryStream updateDataMemoryStream = new MemoryStream();
+                    BinaryWriter updateDataWriter = new BinaryWriter(updateDataMemoryStream);
+
+                    for (int i = 0; i < controls.Count; i++)
+                    {
+                        DependencyObject descendant = FindDescendant(EditorWindow, controls[i]);
+
+                        if (descendant != null)
                         {
-                            string value = (descendant as ComboBox).SelectedItem.ToString();
-
-                            //MessageBoxShow("ComboBox: " + controlName + ", Type: " + controlData[1] + ", Shared: " + controlData[2] + ", Temp Index: " + controlData[3] + ", EntityIndex: " + controlData[4] + ", Index: " + controlData[5] + ", offset:" + controlData[6] + ", Value: " + value);
-
-                            if (value != "")
+                            if (descendant is TextBox)
                             {
-                                UInt32 temp_index = 0;
+                                string value = (descendant as TextBox).Text;
 
-                                UInt32.TryParse(controlData[3], out temp_index);
-
-                                if (controlData[2] == "s")
+                                if (value != "" && controlsChanged[i])
                                 {
-                                    string[] valueData = value.Replace("(offset=0x", "").Replace(")", "").Split(' ');
+                                    //MessageBoxShow("Textbox: " + controlJSONPointers[i] + ": " + value);
 
-                                    //MessageBoxShow("update_temp_file_pointer(" + controlData[3] + ", " + controlData[4] + ", " + valueData[1]);
+                                    UInt32 controlJSONPointersLength = (UInt32)controlJSONPointers[i].Length;
+                                    UInt32 controlJSONPointersTypesLength = (UInt32)controlJSONPointersTypes[i].Length;
+                                    UInt32 valueLength = (UInt32)value.Length;
 
-                                    //MessageBoxShow("update_temp_file(" + controlData[5] + ", " + controlData[1] + ", " + valueData[1]);
-
-                                    int return_value = update_temp_file_pointer(temp_index, controlData[4], controlData[5], valueData[1]);
+                                    updateDataWriter.Write(controlJSONPointersLength);
+                                    updateDataWriter.Write(Encoding.UTF8.GetBytes(controlJSONPointers[i]));
+                                    updateDataWriter.Write(controlJSONPointersTypesLength);
+                                    updateDataWriter.Write(Encoding.UTF8.GetBytes(controlJSONPointersTypes[i]));
+                                    updateDataWriter.Write(valueLength);
+                                    updateDataWriter.Write(Encoding.UTF8.GetBytes(value));
                                 }
-                                else
+                                else if (value == "" && controlJSONPointersTypes[i] != "ZString")
                                 {
-                                    //MessageBoxShow("update_temp_file(" + controlData[5] + ", " + controlData[1] + ", " + value);
+                                    MessageBoxShow("Error: The textbox for " + controlJSONPointers[i] + " is empty, can not proceed.");
 
-                                    if (controlData[1] == "enum")
-                                    {
-                                        string[] valueData = value.Replace("offset=0x", "").Replace("(", "").Replace(")", "").Split(' ');
+                                    return;
+                                }
+                            }
+                            else if (descendant is ComboBox)
+                            {
+                                string value = (descendant as ComboBox).SelectedItem.ToString();
 
-                                        //MessageBoxShow("update_temp_file(" + controlData[5] + ", " + controlData[1] + ", " + valueData[1]);
-                                        
-                                        int return_value = update_temp_file(temp_index, controlData[6], controlData[1], valueData[1]);
-                                    }
-                                    else
-                                    {
-                                        int return_value = update_temp_file(temp_index, controlData[6], controlData[1], value);
-                                    }
+                                if (value != "" && controlsChanged[i])
+                                {
+                                    //MessageBoxShow("Textbox: " + controlJSONPointers[i] + ": " + value + ", length: " + value.Length.ToString());
+
+                                    UInt32 controlJSONPointersLength = (UInt32)controlJSONPointers[i].Length;
+                                    UInt32 controlJSONPointersTypesLength = (UInt32)controlJSONPointersTypes[i].Length;
+                                    UInt32 valueLength = (UInt32)value.Length;
+
+                                    updateDataWriter.Write(controlJSONPointersLength);
+                                    updateDataWriter.Write(Encoding.UTF8.GetBytes(controlJSONPointers[i]));
+                                    updateDataWriter.Write(controlJSONPointersTypesLength);
+                                    updateDataWriter.Write(Encoding.UTF8.GetBytes(controlJSONPointersTypes[i]));
+                                    updateDataWriter.Write(valueLength);
+                                    updateDataWriter.Write(Encoding.UTF8.GetBytes(value));
+                                }
+                                else if (value == "" && controlJSONPointersTypes[i] != "ZString")
+                                {
+                                    MessageBoxShow("Error: The combobox for " + controlJSONPointers[i] + " is empty, can not proceed.");
+
+                                    return;
                                 }
                             }
                         }
+                    }
+
+                    updateDataWriter.Flush();
+
+                    byte[] updateData = updateDataMemoryStream.ToArray();
+
+                    GCHandle updateDataHandle = GCHandle.Alloc(updateData, GCHandleType.Pinned);
+                    try
+                    {
+                        IntPtr address = updateDataHandle.AddrOfPinnedObject();
+
+                        int return_value = update_temp_file(temp_index, entity_index, address, (UInt32)updateData.Length);
+                    }
+                    finally
+                    {
+                        if (updateDataHandle.IsAllocated)
+                        {
+                            updateDataHandle.Free();
+                        }
+                    }
+
+                    string responseString = Marshal.PtrToStringAnsi(get_response_string());
+
+                    if (responseString != "")
+                    {
+                        MessageBoxShow(responseString);
                     }
                 }
             }
@@ -478,6 +584,8 @@ namespace rpkg
                 {
                     UpdateTempFile();
 
+                    textBoxesLoaded = false;
+
                     //MessageBoxShow(header);
 
                     while (MainStackPanel.Children.Count > 0)
@@ -485,9 +593,18 @@ namespace rpkg
                         MainStackPanel.Children.RemoveAt(MainStackPanel.Children.Count - 1);
                     }
 
-                    controlNames = null;
-
-                    controlNames = new List<string>();
+                    controls = null;
+                    controls = new List<string>();
+                    controlsChanged = null;
+                    controlsChanged = new List<bool>();
+                    controlsTEMPIndexes = null;
+                    controlsTEMPIndexes = new List<UInt32>();
+                    controlJSONPointers = null;
+                    controlJSONPointers = new List<string>();
+                    controlJSONPointersTypes = null;
+                    controlJSONPointersTypes = new List<string>();
+                    controlZGuids = null;
+                    controlZGuids = new List<ZGuid>();
 
                     controlCount = 0;
 
@@ -511,7 +628,9 @@ namespace rpkg
 
                         UInt32.TryParse(headerData[headerData.Length - 2], out entryIndex);
 
-                        UInt32 temp_index = 0;
+                        entity_index = entryIndex;
+
+                        temp_index = 0;
 
                         UInt32.TryParse(headerData[headerData.Length - 1], out temp_index);
 
@@ -523,11 +642,7 @@ namespace rpkg
 
                         string hashReferenceData = Marshal.PtrToStringAnsi(get_entries_hash_reference_data(temp_index, entryIndex));
 
-                        string responseString = Marshal.PtrToStringAnsi(get_entries_data(temp_index, entryIndex));
-
                         //MessageBoxShow(hashReferenceData);
-
-                        //MessageBoxShow(responseString);
 
                         Label label1 = new Label();
                         label1.Content = entityName + "'s Data:";
@@ -555,154 +670,233 @@ namespace rpkg
 
                         MainStackPanel.Children.Add(label1);
 
-                        if (responseString == "")
-                        {
-                            label2 = new Label();
-                            label2.Content = "  None";
+                        int entry_data_size = get_entries(temp_index, entryIndex);
 
-                            MainStackPanel.Children.Add(label2);
+                        string responseString = Marshal.PtrToStringAnsi(get_response_string());
+
+                        if (responseString != "")
+                        {
+                            MessageBoxShow(responseString);
                         }
                         else
                         {
-                            string[] entryDataStrings = responseString.Trim(',').Split(',');
-
-                            foreach (string entryDataString in entryDataStrings)
+                            if (entry_data_size > 0)
                             {
-                                if (entryDataString != "")
+                                byte[] entry_data = new byte[entry_data_size];
+
+                                Marshal.Copy(get_entries_with_logical_parent_data(), entry_data, 0, entry_data_size);
+
+                                int data_pointer = 0;
+
+                                List<string> propertyValuesNumbers = new List<string>();
+                                List<string> propertyValuePropertyIDs = new List<string>();
+                                List<string> propertyValueTypes = new List<string>();
+                                List<string> propertyValuePropertyIDsInput = new List<string>();
+                                List<string> propertyValueTypesInput = new List<string>();
+                                List<string> propertyValuesInput = new List<string>();
+
+                                while (data_pointer < entry_data_size)
                                 {
-                                    string[] entryData = entryDataString.Split('|');
+                                    UInt32 entryDataLength = BitConverter.ToUInt32(entry_data, data_pointer);
+                                    data_pointer += 4;
 
-                                    UInt32 propertyCRC32 = 0;
-                                    UInt32.TryParse(entryData[0], out propertyCRC32);
+                                    string entryData = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryDataLength);
+                                    data_pointer += (int)entryDataLength;
 
-                                    string propertyCRC32String = entryData[1];
+                                    //MessageBoxShow(entryDataLength.ToString() + ", " + entryData);
 
-                                    if (propertyCRC32String == "")
+                                    bool added = false;
+
+                                    if (!propertyValuesNumbers.Contains(entryData))
                                     {
-                                        propertyCRC32String = "Unknown (CRC32=" + entryData[0] + ")";
+                                        propertyValuesNumbers.Add(entryData);
+
+                                        added = true;
                                     }
 
-                                    string propertyType = entryData[2];
+                                    entryDataLength = BitConverter.ToUInt32(entry_data, data_pointer);
+                                    data_pointer += 4;
 
-                                    string propertyTypeIndex = entryData[3];
+                                    entryData = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryDataLength);
+                                    data_pointer += (int)entryDataLength;
 
-                                    string propertyTypeIndexIndex = entryData[4];
+                                    //MessageBoxShow(entryDataLength.ToString() + ", " + entryData);
 
-                                    UInt32 propertyOffset = 0;
-                                    UInt32.TryParse(entryData[5], out propertyOffset);
+                                    propertyValuePropertyIDsInput.Add(entryData);
 
-                                    string logicalParent = entryData[6];
+                                    if (added)
+                                    {
+                                        propertyValuePropertyIDs.Add(entryData);
+                                    }
 
-                                    string propertyData = entryData[7];
+                                    entryDataLength = BitConverter.ToUInt32(entry_data, data_pointer);
+                                    data_pointer += 4;
 
-                                    //MessageBoxShow(entryDataString);
+                                    entryData = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryDataLength);
+                                    data_pointer += (int)entryDataLength;
 
-                                    //MessageBoxShow(propertyData);
+                                    //MessageBoxShow(entryDataLength.ToString() + ", " + entryData);
 
-                                    responseString = Marshal.PtrToStringAnsi(get_enum_values(temp_index, propertyType));
+                                    propertyValueTypesInput.Add(entryData);
 
-                                    //MessageBoxShow(responseString);
+                                    if (added)
+                                    {
+                                        propertyValueTypes.Add(entryData);
+                                    }
 
-                                    if (responseString != "")
+                                    entryDataLength = BitConverter.ToUInt32(entry_data, data_pointer);
+                                    data_pointer += 4;
+
+                                    entryData = Encoding.UTF8.GetString(entry_data, data_pointer, (int)entryDataLength);
+                                    data_pointer += (int)entryDataLength;
+
+                                    //MessageBoxShow(entryDataLength.ToString() + ", " + entryData);
+
+                                    propertyValuesInput.Add(entryData);
+                                }
+
+                                List<string>[] propertyValues = new List<string>[propertyValuesNumbers.Count];
+                                List<string>[] propertyValueVals = new List<string>[propertyValuesNumbers.Count];
+                                List<string>[] propertyValueValNames = new List<string>[propertyValuesNumbers.Count];
+                                List<string>[] propertyValueJSONPointers = new List<string>[propertyValuesNumbers.Count];
+                                List<string>[] propertyValueJSONPointersTypes = new List<string>[propertyValuesNumbers.Count];
+
+                                for (int i = 0; i < propertyValuesNumbers.Count; i++)
+                                {
+                                    propertyValues[i] = new List<string>();
+                                    propertyValueVals[i] = new List<string>();
+                                    propertyValueValNames[i] = new List<string>();
+                                    propertyValueJSONPointers[i] = new List<string>();
+                                    propertyValueJSONPointersTypes[i] = new List<string>();
+                                }
+
+                                //string output = "";
+
+                                for (int i = 0; i < propertyValuesNumbers.Count; i++)
+                                {
+                                    for (int j = 0; j < propertyValuesInput.Count; j++)
                                     {
-                                        AppendInput_enum(temp_index, entryIndexString, propertyCRC32String.Replace("_", "__"), propertyData, propertyOffset, propertyTypeIndex, propertyTypeIndexIndex, responseString);
+                                        string[] propertyValue = propertyValuesInput[j].Split(' ');
+
+                                        if (propertyValue.Length >= 3)
+                                        {
+                                            string propertyValuesString = "propertyValues/" + propertyValuesNumbers[i] + "/value/$val";
+
+                                            int position2 = propertyValue[0].IndexOf(propertyValuesString);
+
+                                            if (position2 >= 0)
+                                            {
+                                                propertyValues[i].Add(propertyValuesInput[j]);
+
+                                                propertyValueValNames[i].Add(propertyValue[0].Substring(position2 + propertyValuesString.Length));
+
+                                                propertyValueJSONPointers[i].Add(propertyValue[0]);
+
+                                                propertyValueJSONPointersTypes[i].Add(propertyValue[1]);
+
+                                                string valueString = "";
+
+                                                for (int k = 2; k < propertyValue.Length; k++)
+                                                {
+                                                    valueString += propertyValue[k];
+
+                                                    if (k != (propertyValue.Length - 1))
+                                                    {
+                                                        valueString += " ";
+                                                    }
+                                                }
+
+                                                propertyValueVals[i].Add(valueString);
+
+                                                string debugString = propertyValuePropertyIDs[i] + "\n";
+                                                debugString += propertyValueTypes[i] + "\n";
+                                                debugString += propertyValues[i][propertyValueValNames[i].Count - 1] + "\n";
+                                                debugString += propertyValueValNames[i][propertyValueValNames[i].Count - 1] + "\n";
+                                                debugString += propertyValueJSONPointers[i][propertyValueJSONPointers[i].Count - 1] + "\n";
+                                                debugString += propertyValueJSONPointersTypes[i][propertyValueJSONPointersTypes[i].Count - 1] + "\n";
+                                                debugString += propertyValueVals[i][propertyValueVals[i].Count - 1] + "\n";
+
+                                                //MessageBoxShow(debugString);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            MessageBoxShow("Error: Property value string is malformed: " + propertyValues[j]);
+                                        }
                                     }
-                                    else if (propertyType == "bool")
+                                }
+
+                                //MessageBoxShow(output);
+
+                                for (int i = 0; i < propertyValuesNumbers.Count; i++)
+                                {
+                                    if (propertyValueVals[i].Count > 0)
                                     {
-                                        AppendInput_bool(temp_index, entryIndexString, propertyCRC32String.Replace("_", "__"), propertyData, propertyOffset, propertyTypeIndex, propertyTypeIndexIndex);
-                                    }
-                                    else if (propertyType == "uint8")
-                                    {
-                                        AppendInput_uint8(temp_index, entryIndexString, propertyCRC32String.Replace("_", "__"), propertyData, propertyOffset, propertyTypeIndex, propertyTypeIndexIndex);
-                                    }
-                                    else if (propertyType == "int32")
-                                    {
-                                        AppendInput_int32(temp_index, entryIndexString, propertyCRC32String.Replace("_", "__"), propertyData, propertyOffset, propertyTypeIndex, propertyTypeIndexIndex);
-                                    }
-                                    else if (propertyType == "uint32")
-                                    {
-                                        AppendInput_uint32(temp_index, entryIndexString, propertyCRC32String.Replace("_", "__"), propertyData, propertyOffset, propertyTypeIndex, propertyTypeIndexIndex);
-                                    }
-                                    else if (propertyType == "float32")
-                                    {
-                                        AppendInput_float32(temp_index, entryIndexString, propertyCRC32String.Replace("_", "__"), propertyData, propertyOffset, propertyTypeIndex, propertyTypeIndexIndex);
-                                    }
-                                    else if (propertyType == "SMatrix43")
-                                    {
-                                        AppendInput_SMatrix43(temp_index, entryIndexString, propertyCRC32String.Replace("_", "__"), propertyData, propertyOffset, propertyTypeIndex, propertyTypeIndexIndex, logicalParent);
-                                    }
-                                    else if (propertyType == "SVector2")
-                                    {
-                                        AppendInput_SVector2(temp_index, entryIndexString, propertyCRC32String.Replace("_", "__"), propertyData, propertyOffset, propertyTypeIndex, propertyTypeIndexIndex);
-                                    }
-                                    else if (propertyType == "SVector3")
-                                    {
-                                        AppendInput_SVector3(temp_index, entryIndexString, propertyCRC32String.Replace("_", "__"), propertyData, propertyOffset, propertyTypeIndex, propertyTypeIndexIndex);
-                                    }
-                                    else if (propertyType == "SVector4")
-                                    {
-                                        AppendInput_SVector4(temp_index, entryIndexString, propertyCRC32String.Replace("_", "__"), propertyData, propertyOffset, propertyTypeIndex, propertyTypeIndexIndex);
-                                    }
-                                    else if (propertyType == "SColorRGB")
-                                    {
-                                        AppendInput_SColorRGB(temp_index, entryIndexString, propertyCRC32String.Replace("_", "__"), propertyData, propertyOffset, propertyTypeIndex, propertyTypeIndexIndex);
-                                    }
-                                    else if (propertyType == "ZGuid")
-                                    {
-                                        AppendInput_ZGuid(temp_index, entryIndexString, propertyCRC32String.Replace("_", "__"), propertyData, propertyOffset, propertyTypeIndex, propertyTypeIndexIndex);
-                                    }
-                                    else if (propertyType == "ZString")
-                                    {
-                                        AppendInput_ZString(temp_index, entryIndexString, propertyCRC32String.Replace("_", "__"), propertyData, propertyOffset, propertyTypeIndex, propertyTypeIndexIndex);
-                                    }
-                                    else
-                                    {
-                                        AppendInput_NotImplementedYet(temp_index, entryIndexString, propertyCRC32String.Replace("_", "__"), propertyData, propertyOffset, propertyType, propertyTypeIndex, propertyTypeIndexIndex);
+                                        string enumValues = Marshal.PtrToStringAnsi(get_enum_values(temp_index, propertyValueTypes[i]));
+
+                                        if (enumValues != "")
+                                        {
+                                            AppendInput_enum(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes, ref enumValues);
+                                        }
+                                        else if (propertyValueTypes[i] == "bool")
+                                        {
+                                            AppendInput_bool(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
+                                        }
+                                        else if (propertyValueTypes[i] == "SColorRGB")
+                                        {
+                                            AppendInput_SColorRGB(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes, false);
+                                        }
+                                        else if (propertyValueTypes[i] == "SColorRGBA")
+                                        {
+                                            AppendInput_SColorRGB(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes, true);
+                                        }
+                                        else if (propertyValueTypes[i] == "SMatrix43")
+                                        {
+                                            AppendInput_SMatrix43(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
+                                        }
+                                        else if (propertyValueTypes[i] == "SVector2")
+                                        {
+                                            AppendInput_SVector2(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
+                                        }
+                                        else if (propertyValueTypes[i] == "SVector3")
+                                        {
+                                            AppendInput_SVector3(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
+                                        }
+                                        else if (propertyValueTypes[i] == "SVector4")
+                                        {
+                                            AppendInput_SVector4(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
+                                        }
+                                        else if (propertyValueTypes[i] == "ZGuid")
+                                        {
+                                            AppendInput_ZGuid(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
+                                        }
+                                        else
+                                        {
+                                            AppendInput_Default(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
+                                        }
                                     }
                                 }
                             }
+                            else
+                            {
+                                label2 = new Label();
+                                label2.Content = "  None";
+
+                                MainStackPanel.Children.Add(label2);
+                            }
                         }
                     }
+
+                    textBoxesLoaded = true;
                 }
             }
         }
-        private void AppendInput_enum(UInt32 temp_index, string entryIndexString, string propertyCRC32String, string propertyData, UInt32 propertyOffset, string propertyTypeIndex, string propertyTypeIndexIndex, string enum_values)
+
+        private void AppendInput_Default(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
-            bool isShared = false;
-
-            int return_value = is_offset_shared(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-            string shared_values = "";
-
-            int shared_index = 0;
-
-            int shared_count = 0;
-
-            if (return_value == 1)
-            {
-                isShared = true;
-
-                shared_index = get_shared_index(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-                shared_count = get_shared_count(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-                //shared_values = Marshal.PtrToStringAnsi(get_all_shared_values(propertyOffset.ToString(), propertyTypeIndex));
-            }
-
-            int enumInt = 0;
-
-            int.TryParse(propertyData, out enumInt);
-
             Label label1 = new Label();
 
-            if (isShared)
-            {
-                label1.Content = propertyCRC32String + " (enum) (shared by " + shared_count + ") (offset=0x" + propertyOffset.ToString("X") + "):";
-            }
-            else
-            {
-                label1.Content = propertyCRC32String + " (enum) (offset=0x" + propertyOffset.ToString("X") + "):";
-            }
+            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + " (" + propertyValueTypes[propertyIndex].Replace("_", "__") + "):";
 
             label1.FontSize = 14;
             label1.FontWeight = FontWeights.Bold;
@@ -711,112 +905,6 @@ namespace rpkg
 
             Grid grid = new Grid();
 
-            RowDefinition rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            ColumnDefinition columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-            grid.ColumnDefinitions.Add(columnDefinition);
-
-            ComboBox comboBox = new ComboBox();
-                        
-            comboBox.Name = GetNewControlName("ComboBox_enum_ns_" + temp_index.ToString() + "_" + entryIndexString + "_" + propertyTypeIndexIndex + "_" + propertyOffset.ToString());
-
-            string[] valuesStrings = enum_values.Trim(',').Split(',');
-
-            int index = 0;
-            int indexCount = 0;
-
-            foreach (string valueString in valuesStrings)
-            {
-                string[] valueData = valueString.Split('|');
-
-                UInt32 enumNum = 0;
-                UInt32.TryParse(valueData[0], out enumNum);
-
-                if (enumInt == enumNum)
-                {
-                    index = indexCount;
-                }
-                
-                indexCount++;
-
-                comboBox.Items.Add(valueData[1] + " (" + valueData[0] + ") (offset=0x" + propertyOffset.ToString("X") + ")");
-            }
-
-            comboBox.SelectedIndex = index;
-
-            comboBox.Margin = new Thickness(4, 0, 4, 0);
-            grid.Children.Add(comboBox);
-            Grid.SetRow(comboBox, 1);
-            Grid.SetColumn(comboBox, 1);
-
-            MainStackPanel.Children.Add(grid);
-        }
-
-        private void AppendInput_NotImplementedYet(UInt32 temp_index, string entryIndexString, string propertyCRC32String, string propertyData, UInt32 propertyOffset, string propertyType, string propertyTypeIndex, string propertyTypeIndexIndex)
-        {
-            Label label1 = new Label();
-
-            label1.Content = propertyCRC32String + " (" + propertyType + ") (offset=0x" + propertyOffset.ToString("X") + "):";
-
-            label1.FontSize = 14;
-            label1.FontWeight = FontWeights.Bold;
-
-            MainStackPanel.Children.Add(label1);
-
-            Grid grid = new Grid();
-
-            RowDefinition rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            ColumnDefinition columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = GridLength.Auto;
-            grid.ColumnDefinitions.Add(columnDefinition);
-
-            Label label = new Label();
-            label.Content = "  - Resource display/parsing for this type has not implemented yet.";
-            grid.Children.Add(label);
-            Grid.SetRow(label, 1);
-            Grid.SetColumn(label, 0);
-
-            MainStackPanel.Children.Add(grid);
-        }
-
-        private void AppendInput_ZString(UInt32 temp_index, string entryIndexString, string propertyCRC32String, string propertyData, UInt32 propertyOffset, string propertyTypeIndex, string propertyTypeIndexIndex)
-        {
-            Label label1 = new Label();
-
-            label1.Content = propertyCRC32String + " (ZString) (offset=0x" + propertyOffset.ToString("X") + "):";
-
-            label1.FontSize = 14;
-            label1.FontWeight = FontWeights.Bold;
-
-            MainStackPanel.Children.Add(label1);
-
-            Grid grid = new Grid();
-
-            RowDefinition rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
             ColumnDefinition columnDefinition = new ColumnDefinition();
             columnDefinition.Width = GridLength.Auto;
             grid.ColumnDefinitions.Add(columnDefinition);
@@ -824,211 +912,132 @@ namespace rpkg
             columnDefinition.Width = new GridLength(1, GridUnitType.Star);
             grid.ColumnDefinitions.Add(columnDefinition);
 
-            Label label = new Label();
-            label.Content = "ZString:";
-            grid.Children.Add(label);
-            Grid.SetRow(label, 1);
-            Grid.SetColumn(label, 0);
+            int rowCount = 1;
 
-            TextBox textBox = new TextBox();
-            textBox.IsReadOnly = true;
-            textBox.ToolTip = "Set to read only until a future update when entity/brick rebuilding is working.";
-            textBox.Name = GetNewControlName("TextBox_ZString_ns_" + temp_index.ToString() + "_" + entryIndexString + "_" + propertyTypeIndexIndex + "_" + propertyOffset.ToString());
-            controlNames.Add(textBox.Name);
-            textBox.Text = propertyData.Replace('@', ',');
-            textBox.Margin = new Thickness(4, 0, 4, 0);
-            grid.Children.Add(textBox);
-            Grid.SetRow(textBox, 1);
-            Grid.SetColumn(textBox, 1);
-
-            MainStackPanel.Children.Add(grid);
-        }
-
-        private void AppendInput_ZGuid(UInt32 temp_index, string entryIndexString, string propertyCRC32String, string propertyData, UInt32 propertyOffset, string propertyTypeIndex, string propertyTypeIndexIndex)
-        {
-            Label label1 = new Label();
-
-            label1.Content = propertyCRC32String + " (ZGuid) (offset=0x" + propertyOffset.ToString("X") + "):";
-
-            label1.FontSize = 14;
-            label1.FontWeight = FontWeights.Bold;
-
-            MainStackPanel.Children.Add(label1);
-
-            Grid grid = new Grid();
-
-            RowDefinition rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            ColumnDefinition columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = GridLength.Auto;
-            grid.ColumnDefinitions.Add(columnDefinition);
-            columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-            grid.ColumnDefinitions.Add(columnDefinition);
-
-            Label label = new Label();
-            label.Content = "ZGuid:";
-            grid.Children.Add(label);
-            Grid.SetRow(label, 1);
-            Grid.SetColumn(label, 0);
-
-            TextBox textBox = new TextBox();
-            textBox.IsReadOnly = true;
-            textBox.ToolTip = "Set to read only until a future update when entity/brick rebuilding is working.";
-            textBox.Name = GetNewControlName("TextBox_ZGuid_ns_" + temp_index.ToString() + "_" + entryIndexString + "_" + propertyTypeIndexIndex + "_" + propertyOffset.ToString());
-            controlNames.Add(textBox.Name);
-            textBox.Text = propertyData;
-            textBox.Margin = new Thickness(4, 0, 4, 0);
-            grid.Children.Add(textBox);
-            Grid.SetRow(textBox, 1);
-            Grid.SetColumn(textBox, 1);
-
-            MainStackPanel.Children.Add(grid);
-        }
-
-        private void AppendInput_bool(UInt32 temp_index, string entryIndexString, string propertyCRC32String, string propertyData, UInt32 propertyOffset, string propertyTypeIndex, string propertyTypeIndexIndex)
-        {
-            bool isShared = false;
-
-            int return_value = is_offset_shared(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-            string shared_values = "";
-
-            int shared_index = 0;
-
-            int shared_count = 0;
-
-            if (return_value == 1)
+            for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
             {
-                isShared = true;
-
-                shared_index = get_shared_index(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-                shared_count = get_shared_count(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-                shared_values = Marshal.PtrToStringAnsi(get_all_shared_values(temp_index, propertyOffset.ToString(), propertyTypeIndex));
-            }
-
-            int boolInt = 0;
-
-            int.TryParse(propertyData, out boolInt);
-
-            Label label1 = new Label();
-
-            if (isShared)
-            {
-                label1.Content = propertyCRC32String + " (bool) (shared by " + shared_count + ") (offset=0x" + propertyOffset.ToString("X") + "):";
-            }
-            else
-            {
-                label1.Content = propertyCRC32String + " (bool) (offset=0x" + propertyOffset.ToString("X") + "):";
-            }
-
-            label1.FontSize = 14;
-            label1.FontWeight = FontWeights.Bold;
-
-            MainStackPanel.Children.Add(label1);
-
-            Grid grid = new Grid();
-
-            RowDefinition rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            ColumnDefinition columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-            grid.ColumnDefinitions.Add(columnDefinition);
-
-            ComboBox comboBox = new ComboBox();
-
-            if (isShared)
-            {
-                comboBox.Name = GetNewControlName("ComboBox_bool_s_" + temp_index.ToString() + "_" + entryIndexString + "_" + propertyTypeIndexIndex + "_" + propertyOffset.ToString());
-
-                string[] valuesStrings = shared_values.Trim(',').Split(',');
-
-                foreach (string valueString in valuesStrings)
+                if (propertyValueValNames[propertyIndex][i].Length > 0)
                 {
-                    string[] valueData = valueString.Split('|');
+                    RowDefinition rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(8);
+                    grid.RowDefinitions.Add(rowDefinition);
+                    rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+                    grid.RowDefinitions.Add(rowDefinition);
+                    rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+                    grid.RowDefinitions.Add(rowDefinition);
+                    rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(8);
+                    grid.RowDefinitions.Add(rowDefinition);
 
-                    UInt32 offset = 0;
-                    UInt32.TryParse(valueData[0], out offset);
+                    Label label = new Label();
+                    label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + " (" + propertyValueJSONPointersTypes[propertyIndex][i] + "):";
+                    grid.Children.Add(label);
+                    Grid.SetRow(label, rowCount);
+                    Grid.SetColumn(label, 0);
 
-                    comboBox.Items.Add(valueData[1] + " (offset=0x" + offset.ToString("X") + ")");
-                }
+                    string enumValues = Marshal.PtrToStringAnsi(get_enum_values(temp_index, propertyValueTypes[propertyIndex]));
 
-                comboBox.SelectedIndex = shared_index;
-            }
-            else
-            {
-                comboBox.Name = GetNewControlName("ComboBox_bool_ns_" + temp_index.ToString() + "_" + entryIndexString + "_" + propertyTypeIndexIndex + "_" + propertyOffset.ToString());
+                    if (enumValues != "")
+                    {
+                        ComboBox comboBox = new ComboBox();
+                        comboBox.Name = GetNewControlName(temp_index, propertyValueJSONPointers[propertyIndex][i], propertyValueJSONPointersTypes[propertyIndex][i]);
 
-                comboBox.Items.Add("True");
-                comboBox.Items.Add("False");
+                        string[] enumValuesStrings = enumValues.Trim(',').Split(',');
 
-                if (boolInt == 0)
-                {
-                    comboBox.SelectedIndex = 1;
+                        int index = 0;
+                        int indexCount = 0;
+
+                        foreach (string enumValue in enumValuesStrings)
+                        {
+                            if (propertyValueVals[propertyIndex][i] == enumValue)
+                            {
+                                index = indexCount;
+                            }
+
+                            indexCount++;
+
+                            comboBox.Items.Add(enumValue);
+                        }
+
+                        comboBox.SelectedIndex = index;
+
+                        comboBox.Margin = new Thickness(4, 0, 4, 0);
+                        comboBox.SelectionChanged += ComboBox_SelectionChanged;
+                        grid.Children.Add(comboBox);
+                        Grid.SetRow(comboBox, rowCount);
+                        Grid.SetColumn(comboBox, 1);
+                    }
+                    else if (propertyValueJSONPointersTypes[propertyIndex][i] == "bool")
+                    {
+                        ComboBox comboBox = new ComboBox();
+                        comboBox.Name = GetNewControlName(temp_index, propertyValueJSONPointers[propertyIndex][i], propertyValueJSONPointersTypes[propertyIndex][i]);
+                        comboBox.Items.Add("True");
+                        comboBox.Items.Add("False");
+
+                        if (propertyValueVals[propertyIndex][i] == "0")
+                        {
+                            comboBox.SelectedIndex = 1;
+                        }
+                        else
+                        {
+                            comboBox.SelectedIndex = 0;
+                        }
+
+                        comboBox.Margin = new Thickness(4, 0, 4, 0);
+                        comboBox.SelectionChanged += ComboBox_SelectionChanged;
+                        grid.Children.Add(comboBox);
+                        Grid.SetRow(comboBox, rowCount);
+                        Grid.SetColumn(comboBox, 1);
+                    }
+                    else
+                    {
+                        TextBox textBox = new TextBox();
+                        textBox.Name = GetNewControlName(temp_index, propertyValueJSONPointers[propertyIndex][i], propertyValueJSONPointersTypes[propertyIndex][i]);
+                        textBox.Text = propertyValueVals[propertyIndex][i];
+                        textBox.Margin = new Thickness(4, 0, 4, 0);
+                        textBox.TextChanged += TextBox_TextChanged;
+                        grid.Children.Add(textBox);
+                        Grid.SetRow(textBox, rowCount);
+                        Grid.SetColumn(textBox, 1);
+                    }
+
+                    rowCount += 4;
                 }
                 else
                 {
-                    comboBox.SelectedIndex = 0;
+                    RowDefinition rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(8);
+                    grid.RowDefinitions.Add(rowDefinition);
+                    rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+                    grid.RowDefinitions.Add(rowDefinition);
+                    rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(8);
+                    grid.RowDefinitions.Add(rowDefinition);
+
+                    TextBox textBox = new TextBox();
+                    textBox.Name = GetNewControlName(temp_index, propertyValueJSONPointers[propertyIndex][i], propertyValueJSONPointersTypes[propertyIndex][i]);
+                    textBox.Text = propertyValueVals[propertyIndex][i];
+                    textBox.Margin = new Thickness(4, 0, 4, 0);
+                    textBox.TextChanged += TextBox_TextChanged;
+                    grid.Children.Add(textBox);
+                    Grid.SetRow(textBox, rowCount);
+                    Grid.SetColumnSpan(textBox, 2);
+
+                    rowCount += 3;
                 }
             }
-            
-            comboBox.Margin = new Thickness(4, 0, 4, 0);
-            grid.Children.Add(comboBox);
-            Grid.SetRow(comboBox, 1);
-            Grid.SetColumn(comboBox, 1);
 
             MainStackPanel.Children.Add(grid);
         }
 
-        private void AppendInput_uint8(UInt32 temp_index, string entryIndexString, string propertyCRC32String, string propertyData, UInt32 propertyOffset, string propertyTypeIndex, string propertyTypeIndexIndex)
+        private void AppendInput_bool(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
-            bool isShared = false;
-
-            int return_value = is_offset_shared(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-            string shared_values = "";
-
-            int shared_index = 0;
-
-            int shared_count = 0;
-
-            if (return_value == 1)
-            {
-                isShared = true;
-
-                shared_index = get_shared_index(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-                shared_count = get_shared_count(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-                shared_values = Marshal.PtrToStringAnsi(get_all_shared_values(temp_index, propertyOffset.ToString(), propertyTypeIndex));
-            }
-
             Label label1 = new Label();
 
-            if (isShared)
-            {
-                label1.Content = propertyCRC32String + " (uint8) (shared by " + shared_count + ") (offset=0x" + propertyOffset.ToString("X") + "):";
-            }
-            else
-            {
-                label1.Content = propertyCRC32String + " (uint8) (offset=0x" + propertyOffset.ToString("X") + "):";
-            }
+            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + " (" + propertyValueTypes[propertyIndex].Replace("_", "__") + "):";
 
             label1.FontSize = 14;
             label1.FontWeight = FontWeights.Bold;
@@ -1037,506 +1046,104 @@ namespace rpkg
 
             Grid grid = new Grid();
 
-            RowDefinition rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            ColumnDefinition columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-            grid.ColumnDefinitions.Add(columnDefinition);
-
-            if (isShared)
-            {
-                ComboBox comboBox = new ComboBox();
-
-                comboBox.Name = GetNewControlName("ComboBox_uint8_s_" + temp_index.ToString() + "_" + entryIndexString + "_" + propertyTypeIndexIndex + "_" + propertyOffset.ToString());
-
-                string[] valuesStrings = shared_values.Trim(',').Split(',');
-
-                foreach (string valueString in valuesStrings)
-                {
-                    string[] valueData = valueString.Split('|');
-
-                    UInt32 offset = 0;
-                    UInt32.TryParse(valueData[0], out offset);
-
-                    comboBox.Items.Add(valueData[1] + " (offset=0x" + offset.ToString("X") + ")");
-                }
-
-                comboBox.SelectedIndex = shared_index;
-
-                comboBox.Margin = new Thickness(4, 0, 4, 0);
-                grid.Children.Add(comboBox);
-                Grid.SetRow(comboBox, 1);
-                Grid.SetColumn(comboBox, 1);
-            }
-            else
-            {
-                TextBox textBox = new TextBox();
-                textBox.Name = GetNewControlName("TextBox_uint8_ns_" + temp_index.ToString() + "_" + entryIndexString + "_" + propertyTypeIndexIndex + "_" + propertyOffset.ToString());
-                textBox.Text = propertyData;
-                textBox.Margin = new Thickness(4, 0, 4, 0);
-                grid.Children.Add(textBox);
-                Grid.SetRow(textBox, 1);
-                Grid.SetColumn(textBox, 1);
-            }
-
-            MainStackPanel.Children.Add(grid);
-        }
-
-        private void AppendInput_int32(UInt32 temp_index, string entryIndexString, string propertyCRC32String, string propertyData, UInt32 propertyOffset, string propertyTypeIndex, string propertyTypeIndexIndex)
-        {
-            bool isShared = false;
-
-            int return_value = is_offset_shared(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-            string shared_values = "";
-
-            int shared_index = 0;
-
-            int shared_count = 0;
-
-            if (return_value == 1)
-            {
-                isShared = true;
-
-                shared_index = get_shared_index(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-                shared_count = get_shared_count(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-                shared_values = Marshal.PtrToStringAnsi(get_all_shared_values(temp_index, propertyOffset.ToString(), propertyTypeIndex));
-            }
-
-            Label label1 = new Label();
-
-            if (isShared)
-            {
-                label1.Content = propertyCRC32String + " (int32) (shared by " + shared_count + ") (offset=0x" + propertyOffset.ToString("X") + "):";
-            }
-            else
-            {
-                label1.Content = propertyCRC32String + " (int32) (offset=0x" + propertyOffset.ToString("X") + "):";
-            }
-
-            label1.FontSize = 14;
-            label1.FontWeight = FontWeights.Bold;
-
-            MainStackPanel.Children.Add(label1);
-
-            Grid grid = new Grid();
-
-            RowDefinition rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            ColumnDefinition columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-            grid.ColumnDefinitions.Add(columnDefinition);
-
-            if (isShared)
-            {
-                ComboBox comboBox = new ComboBox();
-
-                comboBox.Name = GetNewControlName("ComboBox_int32_s_" + temp_index.ToString() + "_" + entryIndexString + "_" + propertyTypeIndexIndex + "_" + propertyOffset.ToString());
-
-                string[] valuesStrings = shared_values.Trim(',').Split(',');
-
-                foreach (string valueString in valuesStrings)
-                {
-                    string[] valueData = valueString.Split('|');
-
-                    UInt32 offset = 0;
-                    UInt32.TryParse(valueData[0], out offset);
-
-                    comboBox.Items.Add(valueData[1] + " (offset=0x" + offset.ToString("X") + ")");
-                }
-
-                comboBox.SelectedIndex = shared_index;
-
-                comboBox.Margin = new Thickness(4, 0, 4, 0);
-                grid.Children.Add(comboBox);
-                Grid.SetRow(comboBox, 1);
-                Grid.SetColumn(comboBox, 1);
-            }
-            else
-            {
-                TextBox textBox = new TextBox();
-                textBox.Name = GetNewControlName("TextBox_int32_ns_" + temp_index.ToString() + "_" + entryIndexString + "_" + propertyTypeIndexIndex + "_" + propertyOffset.ToString());
-                textBox.Text = propertyData;
-                textBox.Margin = new Thickness(4, 0, 4, 0);
-                grid.Children.Add(textBox);
-                Grid.SetRow(textBox, 1);
-                Grid.SetColumn(textBox, 1);
-            }
-
-            MainStackPanel.Children.Add(grid);
-        }
-
-        private void AppendInput_uint32(UInt32 temp_index, string entryIndexString, string propertyCRC32String, string propertyData, UInt32 propertyOffset, string propertyTypeIndex, string propertyTypeIndexIndex)
-        {
-            bool isShared = false;
-
-            int return_value = is_offset_shared(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-            string shared_values = "";
-
-            int shared_index = 0;
-
-            int shared_count = 0;
-
-            if (return_value == 1)
-            {
-                isShared = true;
-
-                shared_index = get_shared_index(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-                shared_count = get_shared_count(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-                shared_values = Marshal.PtrToStringAnsi(get_all_shared_values(temp_index, propertyOffset.ToString(), propertyTypeIndex));
-            }
-
-            Label label1 = new Label();
-
-            if (isShared)
-            {
-                label1.Content = propertyCRC32String + " (uint32) (shared by " + shared_count + ") (offset=0x" + propertyOffset.ToString("X") + "):";
-            }
-            else
-            {
-                label1.Content = propertyCRC32String + " (uint32) (offset=0x" + propertyOffset.ToString("X") + "):";
-            }
-
-            label1.FontSize = 14;
-            label1.FontWeight = FontWeights.Bold;
-
-            MainStackPanel.Children.Add(label1);
-
-            Grid grid = new Grid();
-
-            RowDefinition rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            ColumnDefinition columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-            grid.ColumnDefinitions.Add(columnDefinition);
-
-            if (isShared)
-            {
-                ComboBox comboBox = new ComboBox();
-
-                comboBox.Name = GetNewControlName("ComboBox_uint32_s_" + temp_index.ToString() + "_" + entryIndexString + "_" + propertyTypeIndexIndex + "_" + propertyOffset.ToString());
-
-                string[] valuesStrings = shared_values.Trim(',').Split(',');
-
-                foreach (string valueString in valuesStrings)
-                {
-                    string[] valueData = valueString.Split('|');
-
-                    UInt32 offset = 0;
-                    UInt32.TryParse(valueData[0], out offset);
-
-                    comboBox.Items.Add(valueData[1] + " (offset=0x" + offset.ToString("X") + ")");
-                }
-
-                comboBox.SelectedIndex = shared_index;
-
-                comboBox.Margin = new Thickness(4, 0, 4, 0);
-                grid.Children.Add(comboBox);
-                Grid.SetRow(comboBox, 1);
-                Grid.SetColumn(comboBox, 1);
-            }
-            else
-            {
-                TextBox textBox = new TextBox();
-                textBox.Name = GetNewControlName("TextBox_uint32_ns_" + temp_index.ToString() + "_" + entryIndexString + "_" + propertyTypeIndexIndex + "_" + propertyOffset.ToString());
-                textBox.Text = propertyData;
-                textBox.Margin = new Thickness(4, 0, 4, 0);
-                grid.Children.Add(textBox);
-                Grid.SetRow(textBox, 1);
-                Grid.SetColumn(textBox, 1);
-            }
-
-            MainStackPanel.Children.Add(grid);
-        }
-
-        private void AppendInput_float32(UInt32 temp_index, string entryIndexString, string propertyCRC32String, string propertyData, UInt32 propertyOffset, string propertyTypeIndex, string propertyTypeIndexIndex)
-        {
-            bool isShared = false;
-
-            int return_value = is_offset_shared(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-            string shared_values = "";
-
-            int shared_index = 0;
-
-            int shared_count = 0;
-
-            if (return_value == 1)
-            {
-                isShared = true;
-
-                shared_index = get_shared_index(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-                shared_count = get_shared_count(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-                shared_values = Marshal.PtrToStringAnsi(get_all_shared_values(temp_index, propertyOffset.ToString(), propertyTypeIndex));
-            }
-
-            Label label1 = new Label();
-
-            if (isShared)
-            {
-                label1.Content = propertyCRC32String + " (float32) (shared by " + shared_count + ") (offset=0x" + propertyOffset.ToString("X") + "):";
-            }
-            else
-            {
-                label1.Content = propertyCRC32String + " (float32) (offset=0x" + propertyOffset.ToString("X") + "):";
-            }
-
-            label1.FontSize = 14;
-            label1.FontWeight = FontWeights.Bold;
-
-            MainStackPanel.Children.Add(label1);
-
-            Grid grid = new Grid();
-
-            RowDefinition rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            ColumnDefinition columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-            grid.ColumnDefinitions.Add(columnDefinition);
-
-            if (isShared)
-            {
-                ComboBox comboBox = new ComboBox();
-
-                comboBox.Name = GetNewControlName("ComboBox_float32_s_" + temp_index.ToString() + "_" + entryIndexString + "_" + propertyTypeIndexIndex + "_" + propertyOffset.ToString());
-
-                string[] valuesStrings = shared_values.Trim(',').Split(',');
-
-                foreach (string valueString in valuesStrings)
-                {
-                    string[] valueData = valueString.Split('|');
-
-                    UInt32 offset = 0;
-                    UInt32.TryParse(valueData[0], out offset);
-
-                    comboBox.Items.Add(valueData[1] + " (offset=0x" + offset.ToString("X") + ")");
-                }
-
-                comboBox.SelectedIndex = shared_index;
-
-                comboBox.Margin = new Thickness(4, 0, 4, 0);
-                grid.Children.Add(comboBox);
-                Grid.SetRow(comboBox, 1);
-                Grid.SetColumn(comboBox, 1);
-            }
-            else
-            {
-                TextBox textBox = new TextBox();
-                textBox.Name = GetNewControlName("TextBox_float32_ns_" + temp_index.ToString() + "_" + entryIndexString + "_" + propertyTypeIndexIndex + "_" + propertyOffset.ToString());
-                textBox.Text = propertyData;
-                textBox.Margin = new Thickness(4, 0, 4, 0);
-                grid.Children.Add(textBox);
-                Grid.SetRow(textBox, 1);
-                Grid.SetColumn(textBox, 1);
-            }            
-
-            MainStackPanel.Children.Add(grid);
-        }
-
-        private void AppendInput_SMatrix43(UInt32 temp_index, string entryIndexString, string propertyCRC32String, string propertyData, UInt32 propertyOffset, string propertyTypeIndex, string propertyTypeIndexIndex, string logicalParent)
-        {
-            string[] vectorData = propertyData.Split('!');
-
-            bool isShared = false;
-
-            int return_value = is_offset_shared(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-            string shared_values = "";
-
-            int shared_index = 0;
-
-            int shared_count = 0;
-
-            if (return_value == 1)
-            {
-                isShared = true;
-
-                shared_index = get_shared_index(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-                shared_count = get_shared_count(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-                //shared_values = Marshal.PtrToStringAnsi(get_all_shared_values(propertyOffset.ToString(), propertyTypeIndex));
-            }
-
-            Label label1 = new Label();
-
-            if (isShared)
-            {
-                label1.Content = propertyCRC32String + " (SMatrix43) (shared by " + shared_count + ") (offset=0x" + propertyOffset.ToString("X") + ") (Relative to " + logicalParent + "):";
-            }
-            else
-            {
-                label1.Content = propertyCRC32String + " (SMatrix43) (offset=0x" + propertyOffset.ToString("X") + ") (Relative to " + logicalParent + "):";
-            }
-
-            label1.FontSize = 14;
-            label1.FontWeight = FontWeights.Bold;
-
-            MainStackPanel.Children.Add(label1);
-
-            Grid grid = new Grid();
-
-            RowDefinition rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
             ColumnDefinition columnDefinition = new ColumnDefinition();
             columnDefinition.Width = GridLength.Auto;
             grid.ColumnDefinitions.Add(columnDefinition);
             columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = GridLength.Auto;
-            grid.ColumnDefinitions.Add(columnDefinition);
-            columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-            grid.ColumnDefinitions.Add(columnDefinition);
-            columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = GridLength.Auto;
-            grid.ColumnDefinitions.Add(columnDefinition);
-            columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-            grid.ColumnDefinitions.Add(columnDefinition);
-            columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = GridLength.Auto;
-            grid.ColumnDefinitions.Add(columnDefinition);
-            columnDefinition = new ColumnDefinition();
             columnDefinition.Width = new GridLength(1, GridUnitType.Star);
             grid.ColumnDefinitions.Add(columnDefinition);
 
-            string[][] labelStrings = { new String[] { "X Axis:", "x:", "y:", "z:" }, new String[] { "Y Axis:", "x:", "y:", "z:" }, new String[] { "Z Axis:", "x:", "y:", "z:" }, new String[] { "Transform:", "x:", "y:", "z:" } };
+            int rowCount = 1;
 
-            int rowCount = 0;
-
-            int textBoxCount = 0;
-
-            foreach (string[] tempLabelStrings in labelStrings)
+            for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
             {
-                int columnCount = 0;
-
-                rowCount++;
-
-                foreach (string labelString in tempLabelStrings)
+                if (propertyValueValNames[propertyIndex][i].Length > 0)
                 {
+                    RowDefinition rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(8);
+                    grid.RowDefinitions.Add(rowDefinition);
+                    rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+                    grid.RowDefinitions.Add(rowDefinition);
+                    rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+                    grid.RowDefinitions.Add(rowDefinition);
+                    rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(8);
+                    grid.RowDefinitions.Add(rowDefinition);
+
                     Label label = new Label();
-                    label.Content = labelString;
+                    label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + " (" + propertyValueJSONPointersTypes[propertyIndex][i] + "):";
                     grid.Children.Add(label);
                     Grid.SetRow(label, rowCount);
-                    Grid.SetColumn(label, columnCount);
-                    columnCount++;
+                    Grid.SetColumn(label, 0);
 
-                    if (columnCount > 1)
+                    ComboBox comboBox = new ComboBox();
+                    comboBox.Name = GetNewControlName(temp_index, propertyValueJSONPointers[propertyIndex][i], propertyValueJSONPointersTypes[propertyIndex][i]);
+                    comboBox.Items.Add("True");
+                    comboBox.Items.Add("False");
+
+                    if (propertyValueVals[propertyIndex][i] == "0")
                     {
-                        TextBox textBox = new TextBox();
-                        textBox.Name = GetNewControlName("TextBox_float32_ns_" + temp_index.ToString() + "_" + entryIndexString + "_" + propertyTypeIndexIndex + "_" + propertyOffset.ToString());                        
-                        propertyOffset += 4;
-                        textBox.Text = vectorData[textBoxCount];
-                        textBox.Margin = new Thickness(4, 0, 4, 0);
-                        grid.Children.Add(textBox);
-                        Grid.SetRow(textBox, rowCount);
-                        Grid.SetColumn(textBox, columnCount);
-                        textBoxCount++;
-                        columnCount++;
+                        comboBox.SelectedIndex = 1;
                     }
+                    else
+                    {
+                        comboBox.SelectedIndex = 0;
+                    }
+
+                    comboBox.Margin = new Thickness(4, 0, 4, 0);
+                    comboBox.SelectionChanged += ComboBox_SelectionChanged;
+                    grid.Children.Add(comboBox);
+                    Grid.SetRow(comboBox, rowCount);
+                    Grid.SetColumn(comboBox, 1);
+
+                    rowCount += 4;
                 }
+                else
+                {
+                    RowDefinition rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(8);
+                    grid.RowDefinitions.Add(rowDefinition);
+                    rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+                    grid.RowDefinitions.Add(rowDefinition);
+                    rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(8);
+                    grid.RowDefinitions.Add(rowDefinition);
 
-                rowCount++;
+                    ComboBox comboBox = new ComboBox();
+                    comboBox.Name = GetNewControlName(temp_index, propertyValueJSONPointers[propertyIndex][i], propertyValueJSONPointersTypes[propertyIndex][i]);
+                    comboBox.Items.Add("True");
+                    comboBox.Items.Add("False");
+
+                    if (propertyValueVals[propertyIndex][i] == "0")
+                    {
+                        comboBox.SelectedIndex = 1;
+                    }
+                    else
+                    {
+                        comboBox.SelectedIndex = 0;
+                    }
+
+                    comboBox.Margin = new Thickness(4, 0, 4, 0);
+                    comboBox.SelectionChanged += ComboBox_SelectionChanged;
+                    grid.Children.Add(comboBox);
+                    Grid.SetRow(comboBox, rowCount);
+                    Grid.SetColumnSpan(comboBox, 2);
+
+                    rowCount += 3;
+                }
             }
 
             MainStackPanel.Children.Add(grid);
         }
 
-        private void AppendInput_SVector2(UInt32 temp_index, string entryIndexString, string propertyCRC32String, string propertyData, UInt32 propertyOffset, string propertyTypeIndex, string propertyTypeIndexIndex)
+        private void AppendInput_enum(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes, ref string enumValues)
         {
-            string[] vectorData = propertyData.Split('!');
-
-            bool isShared = false;
-
-            int return_value = is_offset_shared(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-            string shared_values = "";
-
-            int shared_index = 0;
-
-            int shared_count = 0;
-
-            if (return_value == 1)
-            {
-                isShared = true;
-
-                shared_index = get_shared_index(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-                shared_count = get_shared_count(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-                //shared_values = Marshal.PtrToStringAnsi(get_all_shared_values(propertyOffset.ToString(), propertyTypeIndex));
-            }
-
             Label label1 = new Label();
 
-            if (isShared)
-            {
-                label1.Content = propertyCRC32String + " (SVector2) (shared by " + shared_count + ") (offset=0x" + propertyOffset.ToString("X") + "):";
-            }
-            else
-            {
-                label1.Content = propertyCRC32String + " (SVector2) (offset=0x" + propertyOffset.ToString("X") + "):";
-            }
+            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + " (" + propertyValueTypes[propertyIndex].Replace("_", "__") + "):";
 
             label1.FontSize = 14;
             label1.FontWeight = FontWeights.Bold;
@@ -1545,309 +1152,120 @@ namespace rpkg
 
             Grid grid = new Grid();
 
-            RowDefinition rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
             ColumnDefinition columnDefinition = new ColumnDefinition();
             columnDefinition.Width = GridLength.Auto;
             grid.ColumnDefinitions.Add(columnDefinition);
             columnDefinition = new ColumnDefinition();
             columnDefinition.Width = new GridLength(1, GridUnitType.Star);
             grid.ColumnDefinitions.Add(columnDefinition);
-            columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = GridLength.Auto;
-            grid.ColumnDefinitions.Add(columnDefinition);
-            columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-            grid.ColumnDefinitions.Add(columnDefinition);
-
-            string[] labelStrings = { "x:", "y:" };
 
             int rowCount = 1;
 
-            int textBoxCount = 0;
-
-            int columnCount = 0;
-
-            foreach (string labelString in labelStrings)
+            for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
             {
-                Label label = new Label();
-                label.Content = labelString;
-                grid.Children.Add(label);
-                Grid.SetRow(label, rowCount);
-                Grid.SetColumn(label, columnCount);
-                columnCount++;
+                if (propertyValueValNames[propertyIndex][i].Length > 0)
+                {
+                    RowDefinition rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(8);
+                    grid.RowDefinitions.Add(rowDefinition);
+                    rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+                    grid.RowDefinitions.Add(rowDefinition);
+                    rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+                    grid.RowDefinitions.Add(rowDefinition);
+                    rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(8);
+                    grid.RowDefinitions.Add(rowDefinition);
 
-                TextBox textBox = new TextBox();
-                textBox.Name = GetNewControlName("TextBox_float32_ns_" + temp_index.ToString() + "_" + entryIndexString + "_" + propertyTypeIndexIndex + "_" + propertyOffset.ToString());
-                propertyOffset += 4;
-                textBox.Text = vectorData[textBoxCount];
-                textBox.Margin = new Thickness(4, 0, 4, 0);
-                grid.Children.Add(textBox);
-                Grid.SetRow(textBox, rowCount);
-                Grid.SetColumn(textBox, columnCount);
-                textBoxCount++;
-                columnCount++;
+                    Label label = new Label();
+                    label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + " (" + propertyValueJSONPointersTypes[propertyIndex][i] + "):";
+                    grid.Children.Add(label);
+                    Grid.SetRow(label, rowCount);
+                    Grid.SetColumn(label, 0);
+
+                    ComboBox comboBox = new ComboBox();
+                    comboBox.Name = GetNewControlName(temp_index, propertyValueJSONPointers[propertyIndex][i], propertyValueJSONPointersTypes[propertyIndex][i]);
+
+                    string[] enumValuesStrings = enumValues.Trim(',').Split(',');
+
+                    int index = 0;
+                    int indexCount = 0;
+
+                    foreach (string enumValue in enumValuesStrings)
+                    {
+                        if (propertyValueVals[propertyIndex][i] == enumValue)
+                        {
+                            index = indexCount;
+                        }
+
+                        indexCount++;
+
+                        comboBox.Items.Add(enumValue);
+                    }
+
+                    comboBox.SelectedIndex = index;
+
+                    comboBox.Margin = new Thickness(4, 0, 4, 0);
+                    comboBox.SelectionChanged += ComboBox_SelectionChanged;
+                    grid.Children.Add(comboBox);
+                    Grid.SetRow(comboBox, rowCount);
+                    Grid.SetColumn(comboBox, 1);
+
+                    rowCount += 4;
+                }
+                else
+                {
+                    RowDefinition rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(8);
+                    grid.RowDefinitions.Add(rowDefinition);
+                    rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+                    grid.RowDefinitions.Add(rowDefinition);
+                    rowDefinition = new RowDefinition();
+                    rowDefinition.Height = new GridLength(8);
+                    grid.RowDefinitions.Add(rowDefinition);
+
+                    ComboBox comboBox = new ComboBox();
+                    comboBox.Name = GetNewControlName(temp_index, propertyValueJSONPointers[propertyIndex][i], propertyValueJSONPointersTypes[propertyIndex][i]);
+
+                    string[] enumValuesStrings = enumValues.Trim(',').Split(',');
+
+                    int index = 0;
+                    int indexCount = 0;
+
+                    foreach (string enumValue in enumValuesStrings)
+                    {
+                        if (propertyValueVals[propertyIndex][i] == enumValue)
+                        {
+                            index = indexCount;
+                        }
+
+                        indexCount++;
+
+                        comboBox.Items.Add(enumValue);
+                    }
+
+                    comboBox.SelectedIndex = index;
+
+                    comboBox.Margin = new Thickness(4, 0, 4, 0);
+                    comboBox.SelectionChanged += ComboBox_SelectionChanged;
+                    grid.Children.Add(comboBox);
+                    Grid.SetRow(comboBox, rowCount);
+                    Grid.SetColumnSpan(comboBox, 2);
+
+                    rowCount += 3;
+                }
             }
 
             MainStackPanel.Children.Add(grid);
         }
 
-        private void AppendInput_SVector3(UInt32 temp_index, string entryIndexString, string propertyCRC32String, string propertyData, UInt32 propertyOffset, string propertyTypeIndex, string propertyTypeIndexIndex)
+        private void AppendInput_SColorRGB(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes, bool rgba_mode)
         {
-            string[] vectorData = propertyData.Split('!');
-
-            bool isShared = false;
-
-            int return_value = is_offset_shared(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-            string shared_values = "";
-
-            int shared_index = 0;
-
-            int shared_count = 0;
-
-            if (return_value == 1)
-            {
-                isShared = true;
-
-                shared_index = get_shared_index(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-                shared_count = get_shared_count(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-                //shared_values = Marshal.PtrToStringAnsi(get_all_shared_values(propertyOffset.ToString(), propertyTypeIndex));
-            }
-
             Label label1 = new Label();
 
-            if (isShared)
-            {
-                label1.Content = propertyCRC32String + " (SVector3) (shared by " + shared_count + ") (offset=0x" + propertyOffset.ToString("X") + "):";
-            }
-            else
-            {
-                label1.Content = propertyCRC32String + " (SVector3) (offset=0x" + propertyOffset.ToString("X") + "):";
-            }
-
-            label1.FontSize = 14;
-            label1.FontWeight = FontWeights.Bold;
-
-            MainStackPanel.Children.Add(label1);
-
-            Grid grid = new Grid();
-
-            RowDefinition rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            ColumnDefinition columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = GridLength.Auto;
-            grid.ColumnDefinitions.Add(columnDefinition);
-            columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-            grid.ColumnDefinitions.Add(columnDefinition);
-            columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = GridLength.Auto;
-            grid.ColumnDefinitions.Add(columnDefinition);
-            columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-            grid.ColumnDefinitions.Add(columnDefinition);
-            columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = GridLength.Auto;
-            grid.ColumnDefinitions.Add(columnDefinition);
-            columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-            grid.ColumnDefinitions.Add(columnDefinition);
-
-            string[] labelStrings = { "x:", "y:", "z:" };
-
-            int rowCount = 1;
-
-            int textBoxCount = 0;
-
-            int columnCount = 0;
-
-            foreach (string labelString in labelStrings)
-            {
-                Label label = new Label();
-                label.Content = labelString;
-                grid.Children.Add(label);
-                Grid.SetRow(label, rowCount);
-                Grid.SetColumn(label, columnCount);
-                columnCount++;
-
-                TextBox textBox = new TextBox();
-                textBox.Name = GetNewControlName("TextBox_float32_ns_" + temp_index.ToString() + "_" + entryIndexString + "_" + propertyTypeIndexIndex + "_" + propertyOffset.ToString());
-                propertyOffset += 4;
-                textBox.Text = vectorData[textBoxCount];
-                textBox.Margin = new Thickness(4, 0, 4, 0);
-                grid.Children.Add(textBox);
-                Grid.SetRow(textBox, rowCount);
-                Grid.SetColumn(textBox, columnCount);
-                textBoxCount++;
-                columnCount++;
-            }
-
-            MainStackPanel.Children.Add(grid);
-        }
-
-        private void AppendInput_SVector4(UInt32 temp_index, string entryIndexString, string propertyCRC32String, string propertyData, UInt32 propertyOffset, string propertyTypeIndex, string propertyTypeIndexIndex)
-        {
-            string[] vectorData = propertyData.Split('!');
-
-            bool isShared = false;
-
-            int return_value = is_offset_shared(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-            string shared_values = "";
-
-            int shared_index = 0;
-
-            int shared_count = 0;
-
-            if (return_value == 1)
-            {
-                isShared = true;
-
-                shared_index = get_shared_index(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-                shared_count = get_shared_count(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-                //shared_values = Marshal.PtrToStringAnsi(get_all_shared_values(propertyOffset.ToString(), propertyTypeIndex));
-            }
-
-            Label label1 = new Label();
-
-            if (isShared)
-            {
-                label1.Content = propertyCRC32String + " (SVector4) (shared by " + shared_count + ") (offset=0x" + propertyOffset.ToString("X") + "):";
-            }
-            else
-            {
-                label1.Content = propertyCRC32String + " (SVector4) (offset=0x" + propertyOffset.ToString("X") + "):";
-            }
-
-            label1.FontSize = 14;
-            label1.FontWeight = FontWeights.Bold;
-
-            MainStackPanel.Children.Add(label1);
-
-            Grid grid = new Grid();
-
-            RowDefinition rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
-            grid.RowDefinitions.Add(rowDefinition);
-            rowDefinition = new RowDefinition();
-            rowDefinition.Height = new GridLength(8);
-            grid.RowDefinitions.Add(rowDefinition);
-            ColumnDefinition columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = GridLength.Auto;
-            grid.ColumnDefinitions.Add(columnDefinition);
-            columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-            grid.ColumnDefinitions.Add(columnDefinition);
-            columnDefinition.Width = GridLength.Auto;
-            grid.ColumnDefinitions.Add(columnDefinition);
-            columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-            grid.ColumnDefinitions.Add(columnDefinition);
-            columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = GridLength.Auto;
-            grid.ColumnDefinitions.Add(columnDefinition);
-            columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-            grid.ColumnDefinitions.Add(columnDefinition);
-            columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = GridLength.Auto;
-            grid.ColumnDefinitions.Add(columnDefinition);
-            columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-            grid.ColumnDefinitions.Add(columnDefinition);
-
-            string[] labelStrings = { "w:", "x:", "y:", "z:" };
-
-            int rowCount = 1;
-
-            int textBoxCount = 0;
-
-            int columnCount = 0;
-
-            foreach (string labelString in labelStrings)
-            {
-                Label label = new Label();
-                label.Content = labelString;
-                grid.Children.Add(label);
-                Grid.SetRow(label, rowCount);
-                Grid.SetColumn(label, columnCount);
-                columnCount++;
-
-                TextBox textBox = new TextBox();
-                textBox.Name = GetNewControlName("TextBox_float32_ns_" + temp_index.ToString() + "_" + entryIndexString + "_" + propertyTypeIndexIndex + "_" + propertyOffset.ToString());
-                propertyOffset += 4;
-                textBox.Text = vectorData[textBoxCount];
-                textBox.Margin = new Thickness(4, 0, 4, 0);
-                grid.Children.Add(textBox);
-                Grid.SetRow(textBox, rowCount);
-                Grid.SetColumn(textBox, columnCount);
-                textBoxCount++;
-                columnCount++;
-            }
-
-            MainStackPanel.Children.Add(grid);
-        }
-
-        private void AppendInput_SColorRGB(UInt32 temp_index, string entryIndexString, string propertyCRC32String, string propertyData, UInt32 propertyOffset, string propertyTypeIndex, string propertyTypeIndexIndex)
-        {
-            Random random = new Random();
-            int randomNum = random.Next(0, 10000);
-
-            string[] vectorData = propertyData.Split('!');
-
-            bool isShared = false;
-
-            int return_value = is_offset_shared(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-            string shared_values = "";
-
-            int shared_index = 0;
-
-            int shared_count = 0;
-
-            if (return_value == 1)
-            {
-                isShared = true;
-
-                shared_index = get_shared_index(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-                shared_count = get_shared_count(temp_index, propertyOffset.ToString(), propertyTypeIndex);
-
-                //shared_values = Marshal.PtrToStringAnsi(get_all_shared_values(propertyOffset.ToString(), propertyTypeIndex));
-            }
-
-            Label label1 = new Label();
-
-            if (isShared)
-            {
-                label1.Content = propertyCRC32String + " (SColorRGB) (shared by " + shared_count + ") (offset=0x" + propertyOffset.ToString("X") + "):";
-            }
-            else
-            {
-                label1.Content = propertyCRC32String + " (SColorRGB) (offset=0x" + propertyOffset.ToString("X") + "):";
-            }
+            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + " (" + propertyValueTypes[propertyIndex].Replace("_", "__") + "):";
 
             label1.FontSize = 14;
             label1.FontWeight = FontWeights.Bold;
@@ -1871,6 +1289,7 @@ namespace rpkg
             rowDefinition = new RowDefinition();
             rowDefinition.Height = new GridLength(8);
             grid.RowDefinitions.Add(rowDefinition);
+
             ColumnDefinition columnDefinition = new ColumnDefinition();
             columnDefinition.Width = GridLength.Auto;
             grid.ColumnDefinitions.Add(columnDefinition);
@@ -1889,64 +1308,89 @@ namespace rpkg
             columnDefinition = new ColumnDefinition();
             columnDefinition.Width = new GridLength(1, GridUnitType.Star);
             grid.ColumnDefinitions.Add(columnDefinition);
+
+            if (rgba_mode)
+            {
+                columnDefinition = new ColumnDefinition();
+                columnDefinition.Width = GridLength.Auto;
+                grid.ColumnDefinitions.Add(columnDefinition);
+                columnDefinition = new ColumnDefinition();
+                columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+                grid.ColumnDefinitions.Add(columnDefinition);
+            }
+
             columnDefinition = new ColumnDefinition();
             columnDefinition.Width = new GridLength(1, GridUnitType.Star);
             grid.ColumnDefinitions.Add(columnDefinition);
 
-            string[] labelStrings = { "r:", "g:", "b:" };
-
-            int rowCount = 1;
-
-            int textBoxCount = 0;
-
             int columnCount = 0;
 
-            foreach (string labelString in labelStrings)
+            string colorPickerName = "";
+
+            for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
             {
                 Label label = new Label();
-                label.Content = labelString;
+                label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + " (" + propertyValueJSONPointersTypes[propertyIndex][i] + "):";
                 grid.Children.Add(label);
-                Grid.SetRow(label, rowCount);
+                Grid.SetRow(label, 1);
                 Grid.SetColumn(label, columnCount);
+
                 columnCount++;
 
                 TextBox textBox = new TextBox();
-                textBox.Name = "TextBox_float32_ns_" + temp_index.ToString() + "_" + entryIndexString + "_" + propertyTypeIndexIndex + "_" + propertyOffset.ToString() + "_" + textBoxCount.ToString() + "_" + randomNum.ToString();
-                propertyOffset += 4;
-                controlNames.Add(textBox.Name);
-                textBox.Text = vectorData[textBoxCount];
+                textBox.Name = GetNewControlName(temp_index, propertyValueJSONPointers[propertyIndex][i], propertyValueJSONPointersTypes[propertyIndex][i]);
+
+                colorPickerName += textBox.Name + "x";
+
+                textBox.Text = propertyValueVals[propertyIndex][i];
                 textBox.Margin = new Thickness(4, 0, 4, 0);
+                textBox.TextChanged += TextBox_TextChanged;
                 grid.Children.Add(textBox);
-                Grid.SetRow(textBox, rowCount);
+                Grid.SetRow(textBox, 1);
                 Grid.SetColumn(textBox, columnCount);
-                textBoxCount++;
+
                 columnCount++;
             }
-
-            propertyOffset -= 4;
 
             float r = 0;
             float g = 0;
             float b = 0;
+            float a = 0;
 
-            float.TryParse(vectorData[0], out r);
-            float.TryParse(vectorData[1], out g);
-            float.TryParse(vectorData[2], out b);
+            float.TryParse(propertyValueVals[propertyIndex][0], out r);
+            float.TryParse(propertyValueVals[propertyIndex][1], out g);
+            float.TryParse(propertyValueVals[propertyIndex][2], out b);
+
+            if (rgba_mode)
+            {
+                float.TryParse(propertyValueVals[propertyIndex][3], out a);
+            }
 
             MahApps.Metro.Controls.ColorCanvas colorCanvas = new ColorCanvas();
-            colorCanvas.Name = "ColorCanvas_" + temp_index.ToString() + "_" + entryIndexString + "_" + propertyTypeIndexIndex + "_" + propertyOffset.ToString() + "_" + randomNum.ToString();
+            colorCanvas.Name = "cc_" + colorPickerName;
 
             colorCanvas.R = FloatToByte(r);
             colorCanvas.G = FloatToByte(g);
             colorCanvas.B = FloatToByte(b);
 
+            if (rgba_mode)
+            {
+                colorCanvas.A = FloatToByte(a);
+            }
+
             colorCanvas.SelectedColorChanged += ColorCanvas_SelectedColorChanged;
 
             grid.Children.Add(colorCanvas);
             Grid.SetRow(colorCanvas, 3);
-            Grid.SetColumnSpan(colorCanvas, 7);
 
-            //LoadColorPicker(r, g, b);
+            if (rgba_mode)
+            {
+                Grid.SetColumnSpan(colorCanvas, 9);
+            }
+            else
+            {
+                Grid.SetColumnSpan(colorCanvas, 7);
+            }
 
             MainStackPanel.Children.Add(grid);
         }
@@ -1955,24 +1399,678 @@ namespace rpkg
         {
             ColorCanvas colorCanvas = (sender as ColorCanvas);
 
-            string[] propertyOffset = colorCanvas.Name.Split('_');
+            string[] textBoxes = colorCanvas.Name.Replace("cc_","").Split('x');
 
-            UInt32 offset = 0;
+            DependencyObject descendant = FindDescendant(EditorWindow, textBoxes[0]);
+            (descendant as TextBox).Text = StringByteToStringFloat(colorCanvas.R);
 
-            UInt32.TryParse(propertyOffset[4], out offset);
-
-            DependencyObject descendant = FindDescendant(EditorWindow, "TextBox_float32_ns_" + propertyOffset[1] + "_" + propertyOffset[2] + "_" + propertyOffset[3] + "_" + offset.ToString() + "_2_" + propertyOffset[5]);
-            (descendant as TextBox).Text = StringByteToStringFloat(colorCanvas.B);
-
-            offset -= 4;
-
-            descendant = FindDescendant(EditorWindow, "TextBox_float32_ns_" + propertyOffset[1] + "_" + propertyOffset[2] + "_" + propertyOffset[3] + "_" + offset.ToString() + "_1_" + propertyOffset[5]);
+            descendant = FindDescendant(EditorWindow, textBoxes[1]);
             (descendant as TextBox).Text = StringByteToStringFloat(colorCanvas.G);
 
-            offset -= 4;
+            descendant = FindDescendant(EditorWindow, textBoxes[2]);
+            (descendant as TextBox).Text = StringByteToStringFloat(colorCanvas.B);
 
-            descendant = FindDescendant(EditorWindow, "TextBox_float32_ns_" + propertyOffset[1] + "_" + propertyOffset[2] + "_" + propertyOffset[3] + "_" + offset.ToString() + "_0_" + propertyOffset[5]);
-            (descendant as TextBox).Text = StringByteToStringFloat(colorCanvas.R);
+            if (textBoxes.Length == 5)
+            {
+                descendant = FindDescendant(EditorWindow, textBoxes[3]);
+                (descendant as TextBox).Text = StringByteToStringFloat(colorCanvas.A);
+            }
+        }
+
+        private void AppendInput_SMatrix43(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
+        {
+            Label label1 = new Label();
+
+            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + " (" + propertyValueTypes[propertyIndex].Replace("_", "__") + "):";
+
+            label1.FontSize = 14;
+            label1.FontWeight = FontWeights.Bold;
+
+            MainStackPanel.Children.Add(label1);
+
+            Grid grid = new Grid();
+
+            RowDefinition rowDefinition = new RowDefinition();
+            rowDefinition.Height = new GridLength(8);
+            grid.RowDefinitions.Add(rowDefinition);
+            rowDefinition = new RowDefinition();
+            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+            grid.RowDefinitions.Add(rowDefinition);
+            rowDefinition = new RowDefinition();
+            rowDefinition.Height = new GridLength(8);
+            grid.RowDefinitions.Add(rowDefinition);
+            rowDefinition = new RowDefinition();
+            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+            grid.RowDefinitions.Add(rowDefinition);
+            rowDefinition = new RowDefinition();
+            rowDefinition.Height = new GridLength(8);
+            grid.RowDefinitions.Add(rowDefinition);
+            rowDefinition = new RowDefinition();
+            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+            grid.RowDefinitions.Add(rowDefinition);
+            rowDefinition = new RowDefinition();
+            rowDefinition.Height = new GridLength(8);
+            grid.RowDefinitions.Add(rowDefinition);
+            rowDefinition = new RowDefinition();
+            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+            grid.RowDefinitions.Add(rowDefinition);
+            rowDefinition = new RowDefinition();
+            rowDefinition.Height = new GridLength(8);
+            grid.RowDefinitions.Add(rowDefinition);
+            ColumnDefinition columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = GridLength.Auto;
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = GridLength.Auto;
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = GridLength.Auto;
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
+
+            int rowCount = 1;
+
+            int columnCount = 0;
+
+            for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
+            {
+                Label label = new Label();
+                label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + " (" + propertyValueJSONPointersTypes[propertyIndex][i] + "):";
+                grid.Children.Add(label);
+                Grid.SetRow(label, rowCount);
+                Grid.SetColumn(label, columnCount);
+
+                columnCount++;
+
+                TextBox textBox = new TextBox();
+                textBox.Name = GetNewControlName(temp_index, propertyValueJSONPointers[propertyIndex][i], propertyValueJSONPointersTypes[propertyIndex][i]);
+                textBox.Text = propertyValueVals[propertyIndex][i];
+                textBox.Margin = new Thickness(4, 0, 4, 0);
+                textBox.TextChanged += TextBox_TextChanged;
+                grid.Children.Add(textBox);
+                Grid.SetRow(textBox, rowCount);
+                Grid.SetColumn(textBox, columnCount);
+
+                columnCount++;
+
+                if ((i + 1) % 3 == 0 && i > 0)
+                {
+                    rowCount += 2;
+                }
+
+                if (columnCount == 6)
+                {
+                    columnCount = 0;
+                }
+            }
+
+            MainStackPanel.Children.Add(grid);
+        }
+
+        private void AppendInput_SVector2(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
+        {
+            Label label1 = new Label();
+
+            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + " (" + propertyValueTypes[propertyIndex].Replace("_", "__") + "):";
+
+            label1.FontSize = 14;
+            label1.FontWeight = FontWeights.Bold;
+
+            MainStackPanel.Children.Add(label1);
+
+            Grid grid = new Grid();
+
+            RowDefinition rowDefinition = new RowDefinition();
+            rowDefinition.Height = new GridLength(8);
+            grid.RowDefinitions.Add(rowDefinition);
+            rowDefinition = new RowDefinition();
+            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+            grid.RowDefinitions.Add(rowDefinition);
+            rowDefinition = new RowDefinition();
+            rowDefinition.Height = new GridLength(8);
+            grid.RowDefinitions.Add(rowDefinition);
+            ColumnDefinition columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = GridLength.Auto;
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = GridLength.Auto;
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
+
+            int rowCount = 1;
+
+            int columnCount = 0;
+
+            for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
+            {
+                Label label = new Label();
+                label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + " (" + propertyValueJSONPointersTypes[propertyIndex][i] + "):";
+                grid.Children.Add(label);
+                Grid.SetRow(label, rowCount);
+                Grid.SetColumn(label, columnCount);
+
+                columnCount++;
+
+                TextBox textBox = new TextBox();
+                textBox.Name = GetNewControlName(temp_index, propertyValueJSONPointers[propertyIndex][i], propertyValueJSONPointersTypes[propertyIndex][i]);
+                textBox.Text = propertyValueVals[propertyIndex][i];
+                textBox.Margin = new Thickness(4, 0, 4, 0);
+                textBox.TextChanged += TextBox_TextChanged;
+                grid.Children.Add(textBox);
+                Grid.SetRow(textBox, rowCount);
+                Grid.SetColumn(textBox, columnCount);
+
+                columnCount++;
+
+                if ((i + 1) % 3 == 0 && i > 0)
+                {
+                    rowCount += 2;
+                }
+
+                if (columnCount == 6)
+                {
+                    columnCount = 0;
+                }
+            }
+
+            MainStackPanel.Children.Add(grid);
+        }
+
+        private void AppendInput_SVector3(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
+        {
+            Label label1 = new Label();
+
+            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + " (" + propertyValueTypes[propertyIndex].Replace("_", "__") + "):";
+
+            label1.FontSize = 14;
+            label1.FontWeight = FontWeights.Bold;
+
+            MainStackPanel.Children.Add(label1);
+
+            Grid grid = new Grid();
+
+            RowDefinition rowDefinition = new RowDefinition();
+            rowDefinition.Height = new GridLength(8);
+            grid.RowDefinitions.Add(rowDefinition);
+            rowDefinition = new RowDefinition();
+            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+            grid.RowDefinitions.Add(rowDefinition);
+            rowDefinition = new RowDefinition();
+            rowDefinition.Height = new GridLength(8);
+            grid.RowDefinitions.Add(rowDefinition);
+            ColumnDefinition columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = GridLength.Auto;
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = GridLength.Auto;
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = GridLength.Auto;
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
+
+            int rowCount = 1;
+
+            int columnCount = 0;
+
+            for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
+            {
+                Label label = new Label();
+                label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + " (" + propertyValueJSONPointersTypes[propertyIndex][i] + "):";
+                grid.Children.Add(label);
+                Grid.SetRow(label, rowCount);
+                Grid.SetColumn(label, columnCount);
+
+                columnCount++;
+
+                TextBox textBox = new TextBox();
+                textBox.Name = GetNewControlName(temp_index, propertyValueJSONPointers[propertyIndex][i], propertyValueJSONPointersTypes[propertyIndex][i]);
+                textBox.Text = propertyValueVals[propertyIndex][i];
+                textBox.Margin = new Thickness(4, 0, 4, 0);
+                textBox.TextChanged += TextBox_TextChanged;
+                grid.Children.Add(textBox);
+                Grid.SetRow(textBox, rowCount);
+                Grid.SetColumn(textBox, columnCount);
+
+                columnCount++;
+
+                if ((i + 1) % 3 == 0 && i > 0)
+                {
+                    rowCount += 2;
+                }
+
+                if (columnCount == 6)
+                {
+                    columnCount = 0;
+                }
+            }
+
+            MainStackPanel.Children.Add(grid);
+        }
+
+        private void AppendInput_SVector4(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
+        {
+            Label label1 = new Label();
+
+            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + " (" + propertyValueTypes[propertyIndex].Replace("_", "__") + "):";
+
+            label1.FontSize = 14;
+            label1.FontWeight = FontWeights.Bold;
+
+            MainStackPanel.Children.Add(label1);
+
+            Grid grid = new Grid();
+
+            RowDefinition rowDefinition = new RowDefinition();
+            rowDefinition.Height = new GridLength(8);
+            grid.RowDefinitions.Add(rowDefinition);
+            rowDefinition = new RowDefinition();
+            rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+            grid.RowDefinitions.Add(rowDefinition);
+            rowDefinition = new RowDefinition();
+            rowDefinition.Height = new GridLength(8);
+            grid.RowDefinitions.Add(rowDefinition);
+            ColumnDefinition columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = GridLength.Auto;
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = GridLength.Auto;
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = GridLength.Auto;
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = GridLength.Auto;
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
+
+            int rowCount = 1;
+
+            int columnCount = 0;
+
+            for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
+            {
+                Label label = new Label();
+                label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + " (" + propertyValueJSONPointersTypes[propertyIndex][i] + "):";
+                grid.Children.Add(label);
+                Grid.SetRow(label, rowCount);
+                Grid.SetColumn(label, columnCount);
+
+                columnCount++;
+
+                TextBox textBox = new TextBox();
+                textBox.Name = GetNewControlName(temp_index, propertyValueJSONPointers[propertyIndex][i], propertyValueJSONPointersTypes[propertyIndex][i]);
+                textBox.Text = propertyValueVals[propertyIndex][i];
+                textBox.Margin = new Thickness(4, 0, 4, 0);
+                textBox.TextChanged += TextBox_TextChanged;
+                grid.Children.Add(textBox);
+                Grid.SetRow(textBox, rowCount);
+                Grid.SetColumn(textBox, columnCount);
+
+                columnCount++;
+
+                if ((i + 1) % 4 == 0 && i > 0)
+                {
+                    rowCount += 2;
+                }
+
+                if (columnCount == 8)
+                {
+                    columnCount = 0;
+                }
+            }
+
+            MainStackPanel.Children.Add(grid);
+        }
+
+        private void AppendInput_ZGuid(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
+        {
+            Label label1 = new Label();
+
+            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + " (" + propertyValueTypes[propertyIndex].Replace("_", "__") + "):";
+
+            label1.FontSize = 14;
+            label1.FontWeight = FontWeights.Bold;
+
+            MainStackPanel.Children.Add(label1);
+
+            Grid grid = new Grid();
+
+            ColumnDefinition columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = GridLength.Auto;
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
+
+            int rowCount = 1;
+
+            if (propertyValueVals[propertyIndex].Count == 11 && propertyValueValNames[propertyIndex].Count == 11)
+            {
+                RowDefinition rowDefinition = new RowDefinition();
+                rowDefinition.Height = new GridLength(8);
+                grid.RowDefinitions.Add(rowDefinition);
+                rowDefinition = new RowDefinition();
+                rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+                grid.RowDefinitions.Add(rowDefinition);
+                rowDefinition = new RowDefinition();
+                rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+                grid.RowDefinitions.Add(rowDefinition);
+                rowDefinition = new RowDefinition();
+                rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+                grid.RowDefinitions.Add(rowDefinition);
+                rowDefinition = new RowDefinition();
+                rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+                grid.RowDefinitions.Add(rowDefinition);
+                rowDefinition = new RowDefinition();
+                rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+                grid.RowDefinitions.Add(rowDefinition);
+                rowDefinition = new RowDefinition();
+                rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+                grid.RowDefinitions.Add(rowDefinition);
+                rowDefinition = new RowDefinition();
+                rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+                grid.RowDefinitions.Add(rowDefinition);
+                rowDefinition = new RowDefinition();
+                rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+                grid.RowDefinitions.Add(rowDefinition);
+                rowDefinition = new RowDefinition();
+                rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+                grid.RowDefinitions.Add(rowDefinition);
+                rowDefinition = new RowDefinition();
+                rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+                grid.RowDefinitions.Add(rowDefinition);
+                rowDefinition = new RowDefinition();
+                rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+                grid.RowDefinitions.Add(rowDefinition);
+                rowDefinition = new RowDefinition();
+                rowDefinition.Height = new GridLength(1, GridUnitType.Star);
+                grid.RowDefinitions.Add(rowDefinition);
+                rowDefinition = new RowDefinition();
+                rowDefinition.Height = new GridLength(8);
+                grid.RowDefinitions.Add(rowDefinition);
+
+                Label label = new Label();
+                label.Content = "ZGuid:";
+                grid.Children.Add(label);
+                Grid.SetRow(label, rowCount);
+                Grid.SetColumn(label, 0);
+
+                TextBox textBox = new TextBox();
+                textBox.Name = "ZGuid" + controlZGuids.Count.ToString();
+
+                string zguidString = GenerateZGuid(ref propertyValueVals[propertyIndex]);
+
+                ZGuid zguid = new ZGuid();
+                zguid.controlName = textBox.Name;
+
+                zguid.subControlNames = new string[11];
+
+                zguid.zguidString = zguidString;
+
+                textBox.Text = zguidString;
+                textBox.Margin = new Thickness(4, 0, 4, 0);
+                grid.Children.Add(textBox);
+                Grid.SetRow(textBox, rowCount);
+                Grid.SetColumn(textBox, 1);
+
+                for (int t = 0; t < 11; t++)
+                {
+                    rowCount += 1;
+
+                    textBox = new TextBox();
+                    textBox.Name = GetNewControlName(temp_index, propertyValueJSONPointers[propertyIndex][t], propertyValueJSONPointersTypes[propertyIndex][t]);
+
+                    zguid.subControlNames[t] = textBox.Name;
+
+                    textBox.Text = propertyValueVals[propertyIndex][t];
+                    textBox.Margin = new Thickness(4, 0, 4, 0);
+                    //textBox.TextChanged += TextBox_TextChanged;
+                    textBox.Visibility = Visibility.Collapsed;
+                    grid.Children.Add(textBox);
+                    Grid.SetRow(textBox, rowCount);
+                    Grid.SetColumn(textBox, 1);
+                }
+
+                controlZGuids.Add(zguid);
+
+                rowCount += 4;
+            }
+
+            MainStackPanel.Children.Add(grid);
+        }
+
+        void TextBoxChanged(string controlName)
+        {
+            if (textBoxesLoaded)
+            {
+                string[] controlData = controlName.Split('_');
+
+                UInt32 controlNumber = 0;
+
+                UInt32.TryParse(controlData[1], out controlNumber);
+
+                tempFilesChanged.Add(controlsTEMPIndexes[(int)controlNumber]);
+
+                controlsChanged[(int)controlNumber] = true;
+
+                //MessageBoxShow(controlsTEMPIndexes[(int)controlNumber].ToString());
+            }
+        }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            TextBoxChanged((sender as TextBox).Name);
+        }
+
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (textBoxesLoaded)
+            {
+                string[] controlData = (sender as ComboBox).Name.Split('_');
+
+                UInt32 controlNumber = 0;
+
+                UInt32.TryParse(controlData[1], out controlNumber);
+
+                tempFilesChanged.Add(controlsTEMPIndexes[(int)controlNumber]);
+
+                controlsChanged[(int)controlNumber] = true;
+
+                //MessageBoxShow(controlsTEMPIndexes[(int)controlNumber].ToString());
+            }
+        }
+
+        private bool ProcessZGuid(string controlName, string zguidString)
+        {
+            foreach (ZGuid zguid in controlZGuids)
+            {
+                if (zguid.controlName == controlName)
+                {
+                    string[] zguidData = zguidString.Split('-');
+
+                    if (zguidData.Length == 5)
+                    {
+                        if (zguidData[0].Length == 8 && zguidData[1].Length == 4 && zguidData[2].Length == 4 && zguidData[3].Length == 4 && zguidData[4].Length == 12)
+                        {
+                            bool return_value = UInt32.TryParse(zguidData[0], System.Globalization.NumberStyles.HexNumber, null, out zguid._a);
+
+                            if (!return_value)
+                            {
+                                MessageBoxShow("Error: ZGuid value " + zguidData[0] + " could not be converted to a UInt32 value.");
+                                return false;
+                            }
+
+                            return_value = UInt16.TryParse(zguidData[1], System.Globalization.NumberStyles.HexNumber, null, out zguid._b);
+
+                            if (!return_value)
+                            {
+                                MessageBoxShow("Error: ZGuid value " + zguidData[1] + " could not be converted to a UInt16 value.");
+                                return false;
+                            }
+
+                            return_value = UInt16.TryParse(zguidData[2], System.Globalization.NumberStyles.HexNumber, null, out zguid._c);
+
+                            if (!return_value)
+                            {
+                                MessageBoxShow("Error: ZGuid value " + zguidData[2] + " could not be converted to a UInt16 value.");
+                                return false;
+                            }
+
+                            return_value = byte.TryParse(zguidData[3].Substring(0,2), System.Globalization.NumberStyles.HexNumber, null, out zguid._d);
+
+                            if (!return_value)
+                            {
+                                MessageBoxShow("Error: ZGuid value " + zguidData[3].Substring(0, 2) + " could not be converted to a byte value.");
+                                return false;
+                            }
+
+                            return_value = byte.TryParse(zguidData[3].Substring(2, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._e);
+
+                            if (!return_value)
+                            {
+                                MessageBoxShow("Error: ZGuid value " + zguidData[3].Substring(2, 2) + " could not be converted to a byte value.");
+                                return false;
+                            }
+
+                            return_value = byte.TryParse(zguidData[4].Substring(0, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._f);
+
+                            if (!return_value)
+                            {
+                                MessageBoxShow("Error: ZGuid value " + zguidData[4].Substring(0, 2) + " could not be converted to a byte value.");
+                                return false;
+                            }
+
+                            return_value = byte.TryParse(zguidData[4].Substring(2, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._g);
+
+                            if (!return_value)
+                            {
+                                MessageBoxShow("Error: ZGuid value " + zguidData[4].Substring(2, 2) + " could not be converted to a byte value.");
+                                return false;
+                            }
+
+                            return_value = byte.TryParse(zguidData[4].Substring(4, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._h);
+
+                            if (!return_value)
+                            {
+                                MessageBoxShow("Error: ZGuid value " + zguidData[4].Substring(4, 2) + " could not be converted to a byte value.");
+                                return false;
+                            }
+
+                            return_value = byte.TryParse(zguidData[4].Substring(6, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._i);
+
+                            if (!return_value)
+                            {
+                                MessageBoxShow("Error: ZGuid value " + zguidData[4].Substring(6, 2) + " could not be converted to a byte value.");
+                                return false;
+                            }
+
+                            return_value = byte.TryParse(zguidData[4].Substring(8, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._j);
+
+                            if (!return_value)
+                            {
+                                MessageBoxShow("Error: ZGuid value " + zguidData[4].Substring(8, 2) + " could not be converted to a byte value.");
+                                return false;
+                            }
+
+                            return_value = byte.TryParse(zguidData[4].Substring(10, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._k);
+
+                            if (!return_value)
+                            {
+                                MessageBoxShow("Error: ZGuid value " + zguidData[4].Substring(10, 2) + " could not be converted to a byte value.");
+                                return false;
+                            }
+
+                            return true;
+                        }
+                        else
+                        {
+                            MessageBoxShow("Error: ZGuid value is not 36 characters long and in the format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX.\n\nWhere the Xs are in the range 0-9 and A-F.");
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        MessageBoxShow("Error: ZGuid value is not 36 characters long and in the format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX.\n\nWhere the Xs are in the range 0-9 and A-F.");
+                        return false;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private string GenerateZGuid(ref List<string> zguidData)
+        {
+            string zguidString = "";
+
+            ZGuid zguid = new ZGuid();
+
+            bool return_value = UInt32.TryParse(zguidData[0], out zguid._a);
+            zguidString += zguid._a.ToString("X2").PadLeft(8, '0') + "-";
+
+            return_value = UInt16.TryParse(zguidData[1], out zguid._b);
+            zguidString += zguid._b.ToString("X2").PadLeft(4, '0') + "-";
+
+            return_value = UInt16.TryParse(zguidData[2], out zguid._c);
+            zguidString += zguid._c.ToString("X2").PadLeft(4, '0') + "-";
+
+            return_value = byte.TryParse(zguidData[3], out zguid._d);
+            zguidString += zguid._d.ToString("X2").PadLeft(2, '0');
+
+            return_value = byte.TryParse(zguidData[4], out zguid._e);
+            zguidString += zguid._e.ToString("X2").PadLeft(2, '0') + "-";
+
+            return_value = byte.TryParse(zguidData[5], out zguid._f);
+            zguidString += zguid._f.ToString("X2").PadLeft(2, '0');
+
+            return_value = byte.TryParse(zguidData[6], out zguid._g);
+            zguidString += zguid._g.ToString("X2").PadLeft(2, '0');
+
+            return_value = byte.TryParse(zguidData[7], out zguid._h);
+            zguidString += zguid._h.ToString("X2").PadLeft(2, '0');
+
+            return_value = byte.TryParse(zguidData[8], out zguid._i);
+            zguidString += zguid._i.ToString("X2").PadLeft(2, '0');
+
+            return_value = byte.TryParse(zguidData[9], out zguid._j);
+            zguidString += zguid._j.ToString("X2").PadLeft(2, '0');
+
+            return_value = byte.TryParse(zguidData[10], out zguid._k);
+            zguidString += zguid._k.ToString("X2").PadLeft(2, '0');
+
+            return zguidString;
         }
 
         private byte FloatToByte(float input)
@@ -2004,15 +2102,23 @@ namespace rpkg
             return temp_float.ToString();
         }
 
-        public string GetNewControlName(string input)
+        public string GetNewControlName(UInt32 temp_index, string input, string type)
         {
-            input += "_" + controlCount.ToString();
+            controlsTEMPIndexes.Add(temp_index);
 
-            controlNames.Add(input);
+            controlJSONPointers.Add(input);
+
+            controlJSONPointersTypes.Add(type);
+
+            controlsChanged.Add(false);
+
+            string control = "c_" + controlCount.ToString();
+
+            controls.Add(control);
 
             controlCount++;
 
-            return input;
+            return control;
         }
 
         private static DependencyObject FindDescendant(DependencyObject parent, string name)
@@ -2077,11 +2183,11 @@ namespace rpkg
 
                 UInt32.TryParse(header[header.Length - 2], out entryIndex);
 
-                UInt32 temp_index = 0;
+                temp_index = 0;
 
                 UInt32.TryParse(header[header.Length - 1], out temp_index);
 
-                string responseString = Marshal.PtrToStringAnsi(get_entries_with_logical_parent(temp_index, entryIndex));
+                string responseString = "";//Marshal.PtrToStringAnsi(get_entries_with_logical_parent(temp_index, entryIndex));
 
                 string hashReferenceData = Marshal.PtrToStringAnsi(get_entries_hash_references(temp_index, entryIndex));
 
@@ -2093,7 +2199,7 @@ namespace rpkg
                 {
                     UInt32 logical_parent = 0xFFFFFFFF;
 
-                    string responseStringHashReference = Marshal.PtrToStringAnsi(get_entries_with_logical_parent((UInt32)temp_index_hash_reference, logical_parent));
+                    string responseStringHashReference = "";//Marshal.PtrToStringAnsi(get_entries_with_logical_parent((UInt32)temp_index_hash_reference, logical_parent));
 
                     if (responseStringHashReference != "")
                     {
@@ -2335,7 +2441,7 @@ namespace rpkg
 
                 //if (parentNode.Text.ToLower().Contains("pier_area_entrance_stairs_a (9425)"))
                 //{
-                    //MessageBoxShow("LOL!!!");
+                //MessageBoxShow("LOL!!!");
                 //}
 
                 if (!parentNode.Text.ToLower().Contains(filter) && currentChildrenVisibleCount == 0)
@@ -2416,14 +2522,40 @@ namespace rpkg
             messageBox.ShowDialog();
         }
 
+        public class ZGuid
+        {
+            public string controlName;
+            public string[] subControlNames;
+            public string zguidString;
+            public UInt32 _a;
+            public UInt16 _b;
+            public UInt16 _c;
+            public byte _d;
+            public byte _e;
+            public byte _f;
+            public byte _g;
+            public byte _h;
+            public byte _i;
+            public byte _j;
+            public byte _k;
+        }
+
         public List<string> matrixStringList;
         public List<string> propertyNamesList;
         public List<string> gltfNamesList;
         public List<string> gltfParentList;
         public List<string> gltfNodeEntryList;
         public List<int> gltfGodotIndexList;
-        public List<string> controlNames;
+        public List<UInt32> tempFilesChanged;
+        public List<string> controls;
+        public List<bool> controlsChanged;
+        public List<UInt32> controlsTEMPIndexes;
+        public List<string> controlJSONPointers;
+        public List<string> controlJSONPointersTypes;
+        public List<ZGuid> controlZGuids;
         public int controlCount = 0;
+        public UInt32 entity_index = 0;
+        public UInt32 temp_index = 0;
         public UInt32 temps_index = 0;
         public string tempFileName = "";
         public string tbluFileName = "";
@@ -2432,9 +2564,12 @@ namespace rpkg
         public string inputFolder = "";
         public string outputFolder = "";
         public bool hidden = false;
+        public bool textBoxesLoaded = false;
         private System.Windows.Threading.DispatcherTimer searchTEMPsInputTimer;
+        private System.Windows.Threading.DispatcherTimer loadingWindowTimer;
         public string currentThemeBrightness = "Dark";
         public TreeViewBackup treeViewBackup;
+        public Message message;
 
         enum RPKGStatus
         {
@@ -2506,10 +2641,19 @@ namespace rpkg
         public static extern int clear_temp_tblu_data();
 
         [DllImport("rpkg.dll", EntryPoint = "get_entries_with_logical_parent", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_entries_with_logical_parent(UInt32 temps_index, UInt32 logical_parent);
+        public static extern int get_entries_with_logical_parent(UInt32 temps_index, UInt32 logical_parent);
+
+        [DllImport("rpkg.dll", EntryPoint = "get_entries_with_logical_parent_string", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr get_entries_with_logical_parent_string(UInt32 vector_index);
+
+        [DllImport("rpkg.dll", EntryPoint = "get_entries_with_logical_parent_data", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr get_entries_with_logical_parent_data();
+
+        [DllImport("rpkg.dll", EntryPoint = "get_entries", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int get_entries(UInt32 temps_index, UInt32 entry_index);
 
         [DllImport("rpkg.dll", EntryPoint = "get_entries_data", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_entries_data(UInt32 temps_index, UInt32 entry_index);
+        public static extern IntPtr get_entries_data();
 
         [DllImport("rpkg.dll", EntryPoint = "get_entries_hash_reference_data", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr get_entries_hash_reference_data(UInt32 temps_index, UInt32 entry_index);
@@ -2518,40 +2662,19 @@ namespace rpkg
         public static extern IntPtr get_entries_hash_references(UInt32 temps_index, UInt32 entry_index);
 
         [DllImport("rpkg.dll", EntryPoint = "update_temp_file", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int update_temp_file(UInt32 temps_index, string offset, string type, string value);
+        public static extern int update_temp_file(UInt32 temps_index, UInt32 entry_index, IntPtr update_data, UInt32 update_data_size);
 
         [DllImport("rpkg.dll", EntryPoint = "generate_temp_file_from_data", CallingConvention = CallingConvention.Cdecl)]
         public static extern int generate_temp_file_from_data(UInt32 temps_index, string temp_file_path);
 
-        [DllImport("rpkg.dll", EntryPoint = "is_offset_shared", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int is_offset_shared(UInt32 temps_index, string offset, string property_type_index);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_all_shared_values", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_all_shared_values(UInt32 temps_index, string offset, string property_type_index);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_shared_index", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_shared_index(UInt32 temps_index, string offset, string property_type_index);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_shared_count", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_shared_count(UInt32 temps_index, string offset, string property_type_index);
-
-        [DllImport("rpkg.dll", EntryPoint = "update_temp_file_pointer", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int update_temp_file_pointer(UInt32 temps_index, string entry_index, string property_index, string offset);
-
         [DllImport("rpkg.dll", EntryPoint = "get_enum_values", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr get_enum_values(UInt32 temps_index, string property_type);
-
-        [DllImport("rpkg.dll", EntryPoint = "get_prim_from_temp", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_prim_from_temp(UInt32 temps_index, UInt32 entry_index);
 
         [DllImport("rpkg.dll", EntryPoint = "get_temp_index", CallingConvention = CallingConvention.Cdecl)]
         public static extern int get_temp_index(string temp_hash_string);
 
         [DllImport("rpkg.dll", EntryPoint = "get_number_of_changed_temps", CallingConvention = CallingConvention.Cdecl)]
         public static extern int get_number_of_changed_temps();
-
-        [DllImport("rpkg.dll", EntryPoint = "get_changed_temp_data", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_changed_temp_data(UInt32 temp_changed_index);
 
         [DllImport("rpkg.dll", EntryPoint = "generate_temp_files_from_data", CallingConvention = CallingConvention.Cdecl)]
         public static extern int generate_temp_files_from_data(string temp_path);
@@ -2573,6 +2696,9 @@ namespace rpkg
 
         [DllImport("rpkg.dll", EntryPoint = "get_search_temp_files", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr get_search_temp_files();
+
+        [DllImport("rpkg.dll", EntryPoint = "get_response_string", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr get_response_string();
 
         private void ExpandAllNodes_Click(object sender, RoutedEventArgs e)
         {

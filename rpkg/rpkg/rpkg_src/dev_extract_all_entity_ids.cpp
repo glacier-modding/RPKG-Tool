@@ -20,7 +20,7 @@
 #include <filesystem>
 #include <set>
 #include <string_view>
-
+/*
 void dev_function::dev_extract_all_entity_ids(std::string& input_path, std::string& filter, std::string& output_path)
 {
     input_path = file::parse_input_folder_path(input_path);
@@ -244,4 +244,4 @@ void dev_function::dev_extract_all_parent_strings(uint32_t temps_index, uint32_t
             }
         }
     }
-}
+}*/

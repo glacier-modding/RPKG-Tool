@@ -13,7 +13,7 @@
 #include <fstream>
 #include <regex>
 #include <filesystem>
-
+/*
 void dev_function::dev_extract_temp_strings(std::string& input_path, std::string& filter, std::string& output_path)
 {
     initialize_property_map();
@@ -95,4 +95,4 @@ void dev_function::dev_extract_temp_strings(std::string& input_path, std::string
             }
         }
     }
-}
+}*/

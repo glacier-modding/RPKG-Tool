@@ -16,13 +16,11 @@
 #include <regex>
 #include <filesystem>
 #include <string_view>
-
+/*
 void rpkg_function::dev_extract_temp_from(std::string& input_path, std::string& filter, std::string& output_path)
 {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
-
-    initialize_property_map();
 
     initialize_enum_map();
 
@@ -229,67 +227,6 @@ void rpkg_function::dev_extract_temp_from(std::string& input_path, std::string& 
                                 //std::cout << "  - hash_index (rpkgs): " << temps.at(j).prim_depends_hash_index.at(k).at(temps.at(j).prim_depends_hash_index_index.at(k)) << std::endl;
                             }
                         }
-
-                        /*if (temps.at(j).tblu_return_value == TEMP_TBLU_FOUND)
-                        {
-                            //std::cout << "  - TBLU Return Value: TEMP_TBLU_FOUND" << std::endl;
-
-                            for (uint64_t k = 0; k < temps.at(j).tblu_depends_file_name.size(); k++)
-                            {
-                                //std::cout << "  - TBLU File Name: " << temps.at(j).tblu_depends_file_name.at(k) << std::endl;
-
-                                bool tblu_patch_name_found = false;
-
-                                long patch_level = 0;
-
-                                for (uint64_t d = 0; d < temps.at(j).tblu_depends_in_rpkgs.at(k).size(); d++)
-                                {
-                                    std::string tblu_depends_in_rpkgs_upper_case = util::to_upper_case(temps.at(j).tblu_depends_in_rpkgs.at(k).at(d));
-
-                                    std::string_view tblu_depends_in_rpkgs_string_view(tblu_depends_in_rpkgs_upper_case.c_str(), tblu_depends_in_rpkgs_upper_case.length());
-
-                                    size_t pos1 = tblu_depends_in_rpkgs_string_view.find("PATCH");
-
-                                    if (pos1 != std::string::npos)
-                                    {
-                                        size_t pos2 = tblu_depends_in_rpkgs_string_view.substr(pos1).find(".");
-
-                                        if (pos2 != std::string::npos)
-                                        {
-                                            tblu_patch_name_found = true;
-
-                                            long new_patch_level = std::strtol(std::string(tblu_depends_in_rpkgs_string_view.substr(pos1 + 5, pos2)).c_str(), nullptr, 10);
-
-                                            if (new_patch_level > patch_level)
-                                            {
-                                                patch_level = new_patch_level;
-
-                                                temps.at(j).tblu_depends_rpkg_index_index.at(k) = d;
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (!tblu_patch_name_found)
-                                        {
-                                            temps.at(j).tblu_depends_rpkg_index_index.at(k) = d;
-                                        }
-                                    }
-
-                                    //std::cout << "  - TBLU File Name In RPKG: " << temps.at(j).tblu_depends_in_rpkgs.at(k).at(d) << std::endl;
-                                }
-
-                                //std::cout << "  - TBLU File Name In RPKG Used: " << temps.at(j).tblu_depends_in_rpkgs.at(k).at(temps.at(j).tblu_depends_rpkg_index_index.at(k)) << std::endl;
-                            }
-                        }
-                        else if (temps.at(j).tblu_return_value == TEMP_TBLU_TOO_MANY)
-                        {
-                            //std::cout << "  - TBLU Return Value: TEMP_TBLU_TOO_MANY" << std::endl;
-                        }
-                        else if (temps.at(j).tblu_return_value == TEMP_TBLU_NOT_FOUND_IN_DEPENDS)
-                        {
-                            //std::cout << "  - TBLU Return Value: TEMP_TBLU_NOT_FOUND_IN_DEPENDS" << std::endl;
-                        }*/
                     }
                 }
             }
@@ -302,4 +239,4 @@ void rpkg_function::dev_extract_temp_from(std::string& input_path, std::string& 
     {
         LOG_AND_EXIT("Error: The folder " + input_path + " to with the input RPKGs does not exist.");
     }
-}
+}*/

@@ -97,27 +97,21 @@ RPKG_EXPORT int get_pcm_channels();
 
 RPKG_EXPORT int clear_temp_tblu_data();
 
-RPKG_EXPORT char* get_entries_with_logical_parent(uint32_t temps_index, uint32_t logical_parent);
+RPKG_EXPORT int get_entries_with_logical_parent(uint32_t temps_index, uint32_t logical_parent);
 
-RPKG_EXPORT char* get_entries_data(uint32_t temps_index, uint32_t entry_index);
+RPKG_EXPORT char* get_entries_with_logical_parent_data();
+
+RPKG_EXPORT int get_entries(uint32_t temps_index, uint32_t entry_index);
+
+RPKG_EXPORT char* get_entries_data();
 
 RPKG_EXPORT char* get_entries_hash_reference_data(uint32_t temps_index, uint32_t entry_index);
 
 RPKG_EXPORT char* get_entries_hash_references(uint32_t temps_index, uint32_t entry_index);
 
-RPKG_EXPORT int update_temp_file(uint32_t temps_index, char* offset, char* type, char* value);
+RPKG_EXPORT int update_temp_file(uint32_t temps_index, uint32_t entry_index, char* update_data, uint32_t update_data_size);
 
 RPKG_EXPORT int generate_temp_file_from_data(uint32_t temps_index, char* temp_file_path);
-
-RPKG_EXPORT int is_offset_shared(uint32_t temps_index, char* offset, char* property_type_index);
-
-RPKG_EXPORT char* get_all_shared_values(uint32_t temps_index, char* offset, char* property_type_index);
-
-RPKG_EXPORT int get_shared_index(uint32_t temps_index, char* offset, char* property_type_index);
-
-RPKG_EXPORT int get_shared_count(uint32_t temps_index, char* offset, char* property_type_index);
-
-RPKG_EXPORT int update_temp_file_pointer(uint32_t temps_index, char* entry_index, char* property_index, char* offset);
 
 RPKG_EXPORT char* get_enum_values(uint32_t temps_index, char* property_type);
 
@@ -153,8 +147,4 @@ RPKG_EXPORT int modify_patch_deletion_list(char* rpkg_file, char* patch_list, ui
 
 RPKG_EXPORT int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, char* hash_flag_list, uint32_t hash_count, uint32_t backup_rpkg);
 
-RPKG_EXPORT int load_resource_tool_dll();
-
-RPKG_EXPORT int resource_tool_convert_resource(char* c_OperatingMode, char* c_ResourceType, char* c_InputPath, char* c_OutputPath);
-
-RPKG_EXPORT char* resource_tool_get_resource_json();
+RPKG_EXPORT char* get_response_string();

@@ -178,7 +178,6 @@
     <ClCompile Include="..\rpkg_src\thirdparty\ww2ogg\crc.c" />
     <ClCompile Include="..\rpkg_src\thirdparty\ww2ogg\ww2oggcodebook.cpp" />
     <ClCompile Include="..\rpkg_src\thirdparty\ww2ogg\wwriff.cpp" />
-    <ClCompile Include="..\rpkg_src\thirdparty\yyjson\yyjson.c" />
     <ClCompile Include="..\rpkg_src\util.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -224,7 +223,6 @@
     <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\packed_codebooks_aoTuV_603.h" />
     <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\ww2oggcodebook.h" />
     <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\wwriff.h" />
-    <ClInclude Include="..\rpkg_src\thirdparty\yyjson\yyjson.h" />
     <ClInclude Include="..\rpkg_src\util.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

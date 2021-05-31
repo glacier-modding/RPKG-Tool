@@ -1450,181 +1450,6 @@ int clear_temp_tblu_data()
     return 0;
 }
 
-char* get_entries_with_logical_parent(uint32_t temps_index, uint32_t logical_parent)
-{
-    response_string = "";
-
-    if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND)
-    {
-        temps.at(temps_index).get_entries_with_logical_parent(logical_parent);
-    }
-
-    return &response_string[0];
-}
-
-char* get_entries_data(uint32_t temps_index, uint32_t entry_index)
-{
-    response_string = "";
-
-    if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND)
-    {
-        temps.at(temps_index).get_entries_data(entry_index);
-    }
-
-    return &response_string[0];
-}
-
-char* get_entries_hash_reference_data(uint32_t temps_index, uint32_t entry_index)
-{
-    response_string = "";
-
-    if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND)
-    {
-        temps.at(temps_index).get_entries_hash_reference_data(entry_index);
-    }
-
-    return &response_string[0];
-}
-
-char* get_entries_hash_references(uint32_t temps_index, uint32_t entry_index)
-{
-    response_string = "";
-
-    if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND)
-    {
-        temps.at(temps_index).get_entries_hash_references(entry_index);
-    }
-
-    return &response_string[0];
-}
-
-int update_temp_file(uint32_t temps_index, char* offset, char* type, char* value)
-{
-    int return_value = 0;
-
-    if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND)
-    {
-        std::string offset_string = std::string(offset);
-        std::string type_string = std::string(type);
-        std::string value_string = std::string(value);
-
-        return_value = temps.at(temps_index).update_temp_file(offset_string, type_string, value_string);
-    }
-
-    return return_value;
-}
-
-int generate_temp_file_from_data(uint32_t temps_index, char* temp_file_path)
-{
-    int return_value = 0;
-
-    if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND)
-    {
-        std::string temp_path = std::string(temp_file_path);
-
-        return_value = temps.at(temps_index).generate_temp_file_from_data(temp_path);
-    }
-
-    return return_value;
-}
-
-int is_offset_shared(uint32_t temps_index, char* offset, char* property_type_index)
-{
-    int return_value = 0;
-
-    if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND)
-    {
-        std::string offset_string = std::string(offset);
-        std::string property_type_index_string = std::string(property_type_index);
-
-        return_value = temps.at(temps_index).is_offset_shared(offset_string, property_type_index_string);
-    }
-
-    return return_value;
-}
-
-char* get_all_shared_values(uint32_t temps_index, char* offset, char* property_type_index)
-{
-    response_string = "";
-
-    if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND)
-    {
-        std::string offset_string = std::string(offset);
-        std::string property_type_index_string = std::string(property_type_index);
-
-        temps.at(temps_index).get_all_shared_values(offset_string, property_type_index_string);
-    }
-
-    return &response_string[0];
-}
-
-int get_shared_index(uint32_t temps_index, char* offset, char* property_type_index)
-{
-    int return_value = 0;
-
-    if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND)
-    {
-        std::string offset_string = std::string(offset);
-        std::string property_type_index_string = std::string(property_type_index);
-
-        return_value = temps.at(temps_index).get_shared_index(offset_string, property_type_index_string);
-    }
-
-    return return_value;
-}
-
-int get_shared_count(uint32_t temps_index, char* offset, char* property_type_index)
-{
-    int return_value = 0;
-
-    if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND)
-    {
-        std::string offset_string = std::string(offset);
-        std::string property_type_index_string = std::string(property_type_index);
-
-        return_value = temps.at(temps_index).get_shared_count(offset_string, property_type_index_string);
-    }
-
-    return return_value;
-}
-
-int update_temp_file_pointer(uint32_t temps_index, char* entry_index, char* property_index, char* offset)
-{
-    int return_value = 0;
-
-    if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND)
-    {
-        std::string entry_index_string = std::string(entry_index);
-        std::string property_index_string = std::string(property_index);
-        std::string offset_string = std::string(offset);
-
-        return_value = temps.at(temps_index).update_temp_file_pointer(entry_index_string, property_index_string, offset_string);
-    }
-
-    return return_value;
-}
-
-char* get_enum_values(uint32_t temps_index, char* property_type)
-{
-    response_string = "";
-
-    if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND)
-    {
-        std::string property_type_string = std::string(property_type);
-
-        temps.at(temps_index).get_enum_values(property_type_string);
-    }
-
-    return &response_string[0];
-}
-
-char* get_prim_from_temp(uint32_t temps_index, uint32_t entry_index)
-{
-    temps.at(temps_index).get_prim_from_temp(entry_index);
-
-    return &response_string[0];
-}
-
 int get_temp_index(char* temp_hash_string)
 {
     response_string = "";
@@ -1648,7 +1473,7 @@ int load_recursive_temps(char* temp_hash, char* rpkg_file_path)
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
-    initialize_property_map();
+    //initialize_property_map();
 
     initialize_enum_map();
 
@@ -1674,6 +1499,29 @@ int load_recursive_temps(char* temp_hash, char* rpkg_file_path)
                 std::vector<uint32_t> temps_indexes;
 
                 rpkg_function::recursive_temp_loader(rpkg_index, it->second, parents_map, temps_indexes, 0, 0, 0);
+
+                std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
+                int stringstream_length = 80;
+
+                timing_string = "Found " + util::uint32_t_to_string(temps.size()) + " TEMP/TBLU recursively linked file(s).\n\nLoading recursive TEMP/TBLU file data: 0% done";
+
+                percent_progress = 0;
+
+                std::string message = "Found " + util::uint32_t_to_string(temps.size()) + " TEMP/TBLU recursively linked file(s).\n\nLoading recursive TEMP/TBLU file data: ";
+
+                for (uint64_t t = 0; t < temps.size(); t++)
+                {
+                    if (((t * (uint64_t)100000) / (uint64_t)temps.size()) % (uint64_t)100 == 0 && t > 0)
+                    {
+                        stringstream_length = console::update_console(message, temps.size(), t, start_time, stringstream_length);
+                    }
+
+                    temps.at(t).load_data();
+                }
+
+                timing_string = "Found " + util::uint32_t_to_string(temps.size()) + " TEMP/TBLU recursively linked file(s).\n\nLoading recursive TEMP/TBLU file data: 100% done";
+
+                percent_progress = 100;
 
                 if (temps.at(0).tblu_return_value == TEMP_TBLU_FOUND)
                 {
@@ -1748,25 +1596,26 @@ int generate_temp_files_from_data(char* temp_path)
     {
         if (temps.at(i).file_has_been_changed)
         {
-            temp_path_string.append(rpkgs.at(temps.at(i).temp_rpkg_index).rpkg_file_name);
+            std::string rpkg_base_file_name = file::get_root_file_name(rpkgs.at(temps.at(i).temp_rpkg_index).rpkg_file_name);
+
+            rpkg_base_file_name = util::to_lower_case(rpkg_base_file_name);
+
+            size_t pos = rpkg_base_file_name.find("patch");
+
+            if (pos != std::string::npos)
+            {
+                rpkg_base_file_name = rpkg_base_file_name.substr(0, pos);
+            }
+
+            temp_path_string.append(rpkg_base_file_name);
 
             file::create_directories(temp_path_string);
 
             temp_path_string.push_back('\\');
+
             temp_path_string.append(rpkgs.at(temps.at(i).temp_rpkg_index).hash.at(temps.at(i).temp_hash_index).hash_file_name);
 
-            std::ofstream temp_file = std::ofstream(temp_path_string, std::ofstream::binary);
-
-            if (!temp_file.good())
-            {
-                return 1;
-            }
-
-            temp_file.write(temps.at(i).temp_data.data(), temps.at(i).temp_data.size());
-
-            temp_file.close();
-
-            rpkg_function::extract_hash_meta(temps.at(i).temp_rpkg_index, temps.at(i).temp_hash_index, temp_path_string);
+            temps.at(i).generate_temp_file_from_data(temp_path_string);
         }
     }
 
@@ -1790,7 +1639,18 @@ int generate_rpkg_files_from_data(char* temp_path)
         {
             std::string temp_path_string = std::string(temp_path);
 
-            temp_path_string.append(file::get_root_file_name(rpkgs.at(temps.at(i).temp_rpkg_index).rpkg_file_name));
+            std::string rpkg_base_file_name = file::get_root_file_name(rpkgs.at(temps.at(i).temp_rpkg_index).rpkg_file_name);
+
+            rpkg_base_file_name = util::to_lower_case(rpkg_base_file_name);
+
+            size_t pos = rpkg_base_file_name.find("patch");
+
+            if (pos != std::string::npos)
+            {
+                rpkg_base_file_name = rpkg_base_file_name.substr(0, pos);
+            }
+
+            temp_path_string.append(rpkg_base_file_name);
 
             directory_set.insert(temp_path_string);
 
@@ -1799,18 +1659,7 @@ int generate_rpkg_files_from_data(char* temp_path)
             temp_path_string.push_back('\\');
             temp_path_string.append(rpkgs.at(temps.at(i).temp_rpkg_index).hash.at(temps.at(i).temp_hash_index).hash_file_name);
 
-            std::ofstream temp_file = std::ofstream(temp_path_string, std::ofstream::binary);
-
-            if (!temp_file.good())
-            {
-                return 1;
-            }
-
-            temp_file.write(temps.at(i).temp_data.data(), temps.at(i).temp_data.size());
-
-            temp_file.close();
-
-            rpkg_function::extract_hash_meta(temps.at(i).temp_rpkg_index, temps.at(i).temp_hash_index, temp_path_string);
+            temps.at(i).generate_temp_file_from_data(temp_path_string);
         }
     }
 
@@ -1838,75 +1687,103 @@ char* get_top_level_logical_parents(uint32_t temps_index)
     return &response_string[0];
 }
 
+int get_entries_with_logical_parent(uint32_t temps_index, uint32_t logical_parent)
+{
+    std::vector<char>().swap(response_data);
+
+    if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND)
+    {
+        temps.at(temps_index).get_entries_with_logical_parent(logical_parent);
+    }
+
+    return response_data.size();
+}
+
+char* get_entries_with_logical_parent_data()
+{
+    return &response_data[0];
+}
+
+char* get_entries_hash_references(uint32_t temps_index, uint32_t entry_index)
+{
+    response_string = "";
+
+    if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND)
+    {
+        temps.at(temps_index).get_entries_hash_references(entry_index);
+    }
+
+    return &response_string[0];
+}
+
+char* get_entries_hash_reference_data(uint32_t temps_index, uint32_t entry_index)
+{
+    response_string = "";
+
+    if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND)
+    {
+        temps.at(temps_index).get_entries_hash_reference_data(entry_index);
+    }
+
+    return &response_string[0];
+}
+
+int get_entries(uint32_t temps_index, uint32_t entry_index)
+{
+    response_string = "";
+
+    if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND)
+    {
+        temps.at(temps_index).get_entries_data(entry_index);
+    }
+
+    return response_data.size();
+}
+
+char* get_entries_data()
+{
+    return &response_data[0];
+}
+
+char* get_enum_values(uint32_t temps_index, char* property_type)
+{
+    response_string = "";
+
+    if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND)
+    {
+        std::string property_type_string = std::string(property_type);
+
+        temps.at(temps_index).get_enum_values(property_type_string);
+    }
+
+    return &response_string[0];
+}
+
+int update_temp_file(uint32_t temps_index, uint32_t entry_index, char* update_data, uint32_t update_data_size)
+{
+    response_string = "";
+
+    int return_value = 0;
+
+    if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND)
+    {
+        temps.at(temps_index).update_temp_file(entry_index, update_data, update_data_size);
+    }
+
+    return return_value;
+}
+
+char* get_response_string()
+{
+    return &response_string[0];
+}
+
 char* get_all_bricks(uint32_t temps_index)
 {
     response_string = "";
 
     temps.at(temps_index).get_all_bricks();
 
-    return &response_string[0];
-}
-
-int search_temp_files(uint32_t temps_index, char* search_str, int max_results)
-{
-    task_single_status = TASK_EXECUTING;
-    task_multiple_status = TASK_EXECUTING;
-
-    timing_string = "Searching for \"" + std::string(search_str) + "\" in recursively loaded TEMPs...";
-
-    std::string search_string = std::string(search_str);
-
-    search_string = util::to_lower_case(search_string);
-
-    int search_count = 0;
-
-    response_string = "";
-
-    std::set<uint32_t> logical_parents_set;
-
-    for (uint32_t e = 0; e < temps.at(temps_index).tblu_logicalParent.size(); e++)
-    {
-        if (temps.at(temps_index).tblu_logicalParent.at(e) >= temps.at(temps_index).tblu_logicalParent.size())
-        {
-            logical_parents_set.insert(temps.at(temps_index).tblu_logicalParent.at(e));
-        }
-    }
-
-    for (uint32_t e = 0; e < temps.at(temps_index).tblu_logicalParent.size(); e++)
-    {
-        for (std::set<uint32_t>::iterator it = logical_parents_set.begin(); it != logical_parents_set.end(); it++)
-        {
-            if (temps.at(temps_index).tblu_logicalParent.at(e) == (*it))
-            {
-                //response_string.append(util::uint32_t_to_string(temps.at(temps_index).tblu_entry_index.at(e)));
-                //response_string.push_back('|');
-                //response_string.append(temps.at(temps_index).tblu_entityName.at(e));
-                //response_string.push_back(',');
-            }
-        }
-    }
-
-    for (uint32_t e = 0; e < temps.at(temps_index).tblu_entityName.size(); e++)
-    {
-        std::string tblu_entityName_lowercase = util::to_lower_case(temps.at(temps_index).tblu_entityName.at(e));
-
-        if (tblu_entityName_lowercase.find(search_string) != std::string::npos)
-        {
-            response_string.append(util::uint32_t_to_string(temps.at(temps_index).tblu_entry_index.at(e)));
-            response_string.push_back('|');
-            response_string.append(temps.at(temps_index).tblu_entityName.at(e));
-            response_string.push_back(',');
-        }
-    }
-
-    task_single_status = TASK_SUCCESSFUL;
-    task_multiple_status = TASK_SUCCESSFUL;
-
-    return 0;
-}
-
-char* get_search_temp_files()
-{
     return &response_string[0];
 }
 
@@ -2400,23 +2277,9 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
     return 0;
 }
 
-int load_resource_tool_dll()
+char* get_prim_from_temp(uint32_t temps_index, uint32_t entry_index)
 {
-    resource_tool_dll = LoadLibrary(L"ResourceTool.dll");
+    temps.at(temps_index).get_prim_from_temp(entry_index);
 
-    resource_tool_ConvertResource = (ConvertResource)GetProcAddress((HMODULE)resource_tool_dll, "ConvertResource");
-    
-    resource_tool_GetTEMPEntities = (GetTEMPEntities)GetProcAddress((HMODULE)resource_tool_dll, "GetTEMPEntities");
-
-    return 0;
-}
-
-int resource_tool_convert_resource(char* c_OperatingMode, char* c_ResourceType, char* c_InputPath, char* c_OutputPath)
-{
-    return resource_tool_ConvertResource(c_OperatingMode, c_ResourceType, c_InputPath, c_OutputPath);
-}
-
-char* resource_tool_get_resource_json()
-{
-    return resource_tool_GetTEMPEntities();
+    return &response_string[0];
 }

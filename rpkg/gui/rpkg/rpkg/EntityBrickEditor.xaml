@@ -49,8 +49,6 @@
                         <Label Grid.Row="0" Grid.Column="0" Content="Filter Nodes By String:"/>
                         <TextBox Grid.Row="0" Grid.Column="1" x:Name="FilterTextBox" TextChanged="SearchTEMPsTextBox_TextChanged" FontFamily="Consolas" TextWrapping="NoWrap"/>
                     </Grid>
-                    <Button Grid.Row="1" Grid.Column="0" x:Name="ExpandAllNodes" Click="ExpandAllNodes_Click" Content="Expand All Nodes"/>
-                    <Button Grid.Row="1" Grid.Column="1" x:Name="CollapseAllNodes" Click="CollapseAllNodes_Click" Content="Collapse All Nodes"/>
                     <WindowsFormsHost Grid.Row="2" Grid.ColumnSpan="2" x:Name="MainWindowsFormsHost">
                         <wf:TreeView x:Name="MainTreeView" Font="Consolas,10"/>
                     </WindowsFormsHost>

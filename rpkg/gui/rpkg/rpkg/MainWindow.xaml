@@ -10,7 +10,7 @@
         xmlns:local="clr-namespace:rpkg"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
-        Title="RPKG v2.11.2" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
+        Title="RPKG v2.12" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

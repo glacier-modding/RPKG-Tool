@@ -62,18 +62,18 @@ void rpkg_function::recursive_temp_loader(uint32_t rpkgs_index, uint32_t hash_in
 		}
 		else
 		{
-			std::cout << "Recursive loop detected at level " << level << " and the duplicate TEMP file is: " << rpkgs.at(rpkgs_index).hash.at(hash_index).hash_file_name << std::endl;
+			LOG("Recursive loop detected at level " + util::uint32_t_to_string(level) + " and the duplicate TEMP file is: " + rpkgs.at(rpkgs_index).hash.at(hash_index).hash_file_name);
 
 			std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value);
 
 			if (it2 != hash_list_hash_map.end())
 			{
-				std::cout << "IOI String is: " << hash_list_hash_strings.at(it2->second) << std::endl;
+				LOG("IOI String is: " + hash_list_hash_strings.at(it2->second));
 			}
 
 			for (uint64_t i = 0; i < temps_indexes.size(); i++)
 			{
-				std::cout << "Parent temps index(" << i << "): " << temps_indexes.at(i) << ", TEMP File Name: " << temps.at(temps_indexes.at(i)).temp_file_name << std::endl;
+				LOG("Parent temps index(" + util::uint32_t_to_string(i) + "): " + util::uint32_t_to_string(temps_indexes.at(i)) + ", TEMP File Name: " + temps.at(temps_indexes.at(i)).temp_file_name);
 			}
 		}
 	}
