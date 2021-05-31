@@ -276,7 +276,7 @@ void dev_function::dev_extract_rpkg_supermetas(std::string& input_path, std::str
 
                 std::string final_path = output_metas_path + "\\" + file::get_root_file_name(rpkg_file_name) + ".supermeta";
 
-                std::ofstream rpkg_super_meta_data_file = std::ofstream(final_path, std::ifstream::binary);
+                std::ofstream rpkg_super_meta_data_file = std::ofstream(final_path, std::ofstream::binary);
 
                 if (!rpkg_super_meta_data_file.good())
                 {

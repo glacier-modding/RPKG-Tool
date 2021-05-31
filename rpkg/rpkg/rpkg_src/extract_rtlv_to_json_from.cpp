@@ -401,7 +401,7 @@ void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::stri
                                     {
                                         std::string json_path = current_path + "\\" + hash_file_name + ".JSON";
 
-                                        std::ofstream json_file = std::ofstream(json_path, std::ifstream::binary);
+                                        std::ofstream json_file = std::ofstream(json_path, std::ofstream::binary);
 
                                         if (!json_file.good())
                                         {
@@ -414,7 +414,7 @@ void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::stri
 
                                         std::string json_meta_path = current_path + "\\" + hash_file_name + ".JSON.meta";
 
-                                        std::ofstream json_meta_file = std::ofstream(json_meta_path, std::ifstream::binary);
+                                        std::ofstream json_meta_file = std::ofstream(json_meta_path, std::ofstream::binary);
 
                                         if (!json_meta_file.good())
                                         {

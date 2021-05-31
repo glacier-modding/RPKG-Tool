@@ -8,7 +8,7 @@
         xmlns:local="clr-namespace:rpkg"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
-        Title="RPKG v2.2" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
+        Title="RPKG v2.3" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -39,9 +39,11 @@
                     <MenuItem Click="MassExtract_Click" Header="Extract Localization (DLGE) To JSON From RPKGs In Folder"/>
                     <MenuItem Click="MassExtract_Click" Header="Extract Localization (LOCR) To JSON From RPKGs In Folder"/>
                     <MenuItem Click="MassExtract_Click" Header="Extract Localization (RTLV) To JSON From RPKGs In Folder"/>
+                    <MenuItem Click="MassExtract_Click" Header="Extract Scaleform GFX/DDS/TGA (GFXF) From RPKGs In Folder"/>
                 </MenuItem>
                 <MenuItem Header="Rebuild">
                     <MenuItem Click="Rebuild_Click" Header="Rebuild DLGE From Folder"/>
+                    <MenuItem Click="Rebuild_Click" Header="Rebuild GFXF From Folder"/>
                     <MenuItem Click="Rebuild_Click" Header="Rebuild LOCR From Folder"/>
                     <MenuItem Click="Rebuild_Click" Header="Rebuild RTLV From Folder"/>
                     <MenuItem Click="Rebuild_Click" Header="Rebuild WWEV From Folder"/>

@@ -21,6 +21,7 @@ struct rpkg_extraction_vars
 class rpkg_function
 {
 public:
+	static void extract_prel_refs(std::string& input_path, std::string& filter, std::string& output_path);
 	static void get_unique_name(std::map<std::string, uint32_t>& wwem_name_map, std::string& wem_base_name);
 	static void hash_probe_from_file(std::string& input_path, std::string& filter, std::string& output_path);
 	static void hash_probe(std::string& input_path, std::string& filter, std::string& output_path);
@@ -33,12 +34,14 @@ public:
 	static void extract_locr_to_json_from(std::string& input_path, std::string& filter, std::string& output_path, bool output_to_string);
 	static void extract_dlge_to_json_from(std::string& input_path, std::string& filter, std::string& output_path, bool output_to_string);
 	static void generate_rpkg_from(std::string& input_path, std::string& filter, std::string& output_path);
+	static void rebuild_gfxf_in(std::string& input_path, std::string& filter, std::string& output_path);
 	static void rebuild_wwev_in(std::string& input_path, std::string& filter, std::string& output_path);
 	static void extract_wwem_to_ogg_from(std::string& input_path, std::string& filter, std::string& output_path);
 	static void extract_wwev_to_ogg_from(std::string& input_path, std::string& filter, std::string& output_path);
 	static void extract_wwes_to_ogg_from(std::string& input_path, std::string& filter, std::string& output_path);
 	static void extract_from_rpkg_with_map(rpkg_extraction_vars& rpkg_vars);
 	static void import_rpkg_files_in_folder(std::string& input_rpkg_folder_path);
+	static void extract_gfxf_from(std::string& input_path, std::string& filter, std::string& output_path);
 	static void extract_ores_from(std::string& input_path, std::string& filter, std::string& output_path);
 	static void search_hash_data(std::string& search_type, std::string& search, std::vector<char>& search_data, std::string& hash_file_name);
 	static void import_hash_meta(hash& hash_meta_data, std::string& rpkg_meta_file_path);

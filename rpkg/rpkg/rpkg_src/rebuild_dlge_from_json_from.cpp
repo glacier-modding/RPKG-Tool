@@ -370,7 +370,7 @@ void rpkg_function::rebuild_dlge_from_json_from(std::string& input_path, std::st
 
                 file::create_directories(current_path);
 
-                std::ofstream output_file = std::ofstream(current_path + "\\" + dlge_file_names.at(p), std::ifstream::binary);
+                std::ofstream output_file = std::ofstream(current_path + "\\" + dlge_file_names.at(p), std::ofstream::binary);
 
                 if (!output_file.good())
                 {

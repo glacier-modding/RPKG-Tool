@@ -551,6 +551,21 @@ namespace rpkg
                                 string localization = "";
                                 localizationTextBoxText.TryGetValue(identifier, out localization);
                                 LocalizationTextBox.Text = localization;
+
+                                if (LocalizationTextBox.Text.Length > 0)
+                                {
+                                    if (ThirdTabRight.Visibility == Visibility.Collapsed)
+                                    {
+                                        ThirdTabRight.Visibility = Visibility.Visible;
+                                    }
+                                }
+                                else
+                                {
+                                    if (ThirdTabRight.Visibility == Visibility.Visible)
+                                    {
+                                        ThirdTabRight.Visibility = Visibility.Collapsed;
+                                    }
+                                }
                             }
                         }
 
@@ -898,6 +913,17 @@ namespace rpkg
             fileDialog.Title = "Select an RPKG file to import:";
 
             fileDialog.Filter = "RPKG file|*.rpkg|All files|*.*";
+
+            if (!System.IO.Directory.Exists(userSettings.InputFolder))
+            {
+                userSettings.InputFolder = System.IO.Directory.GetCurrentDirectory();
+
+                var options = new JsonSerializerOptions { WriteIndented = true };
+
+                string jsonString = JsonSerializer.Serialize(userSettings, options);
+
+                File.WriteAllText("rpkg.json", jsonString);
+            }
 
             fileDialog.InitialDirectory = userSettings.InputFolder;
 
@@ -1652,6 +1678,10 @@ namespace rpkg
             {
                 massExtractName = "RTLV";
             }
+            else if (massExtractButton.Contains("GFXF"))
+            {
+                massExtractName = "GFXF";
+            }
 
             string inputFolder = SelectFolder("input", "Select Input Folder (Runtime folder or other folder with multiple RPKGs) To Extract " + massExtractName + " From:");
 
@@ -1708,12 +1738,12 @@ namespace rpkg
 
             filterDialog.message1.Content = "Enter extraction filter for " + massExtractName + " below.";
 
-            filterDialog.ShowDialog();
-
-            filter = filterDialog.filterString;
-
             if (massExtractName == "ORES")
             {
+                filterDialog.ShowDialog();
+
+                filter = filterDialog.filterString;
+
                 command = "-extract_ores_from";
 
                 progress.ProgressBar.IsIndeterminate = true;
@@ -1722,18 +1752,30 @@ namespace rpkg
             }
             else if (massExtractName == "WWEM")
             {
+                filterDialog.ShowDialog();
+
+                filter = filterDialog.filterString;
+
                 command = "-extract_wwem_to_ogg_from";
 
                 progress.message.Content = "Extracting WWEM To IOI Paths...";
             }
             else if (massExtractName == "WWES")
             {
+                filterDialog.ShowDialog();
+
+                filter = filterDialog.filterString;
+
                 command = "-extract_wwes_to_ogg_from";
 
                 progress.message.Content = "Extracting WWES To IOI Paths...";
             }
             else if (massExtractName == "WWEV")
             {
+                filterDialog.ShowDialog();
+
+                filter = filterDialog.filterString;
+
                 command = "-extract_wwev_to_ogg_from";
 
                 progress.message.Content = "Extracting WWEV To IOI Paths...";
@@ -1755,6 +1797,12 @@ namespace rpkg
                 command = "-extract_rtlv_to_json_from";
 
                 progress.message.Content = "Extracting RTLVs To JSONs...";
+            }
+            else if (massExtractName == "GFXF")
+            {
+                command = "-extract_gfxf_from";
+
+                progress.message.Content = "Extracting GFXF...";
             }
 
             int return_value = reset_task_status();
@@ -1782,6 +1830,10 @@ namespace rpkg
             if (rebuildButton.Contains("DLGE"))
             {
                 rebuildType = "DLGE";
+            }
+            else if (rebuildButton.Contains("GFXF"))
+            {
+                rebuildType = "GFXF";
             }
             else if (rebuildButton.Contains("LOCR"))
             {
@@ -1818,6 +1870,12 @@ namespace rpkg
                     command = "-rebuild_dlge_from_json_from";
 
                     progress.message.Content = "Rebuilding All DLGE from JSON in " + input_path + "...";
+                }
+                else if (rebuildType == "GFXF")
+                {
+                    command = "-rebuild_gfxf_in";
+
+                    progress.message.Content = "Rebuilding All GFXF in " + input_path + "...";
                 }
                 else if (rebuildType == "LOCR")
                 {
@@ -1897,27 +1955,24 @@ namespace rpkg
             {
                 string outputFolder = SelectFolder("output", "Select Output Folder To Save Generated RPKG To:");
 
-                foreach (var filePath in Directory.GetFiles(inputFolder))
-                {
-                    string command = "-generate_rpkg_from";
-                    string input_path = inputFolder;
-                    string filter = "";
-                    string search = "";
-                    string search_type = "";
-                    string output_path = outputFolder;
+                string command = "-generate_rpkg_from";
+                string input_path = inputFolder;
+                string filter = "";
+                string search = "";
+                string search_type = "";
+                string output_path = outputFolder;
 
-                    string rpkgFile = inputFolder.Substring(inputFolder.LastIndexOf("\\") + 1);
+                string rpkgFile = inputFolder.Substring(inputFolder.LastIndexOf("\\") + 1);
 
-                    execute_task rpkgExecute = task_execute;
+                execute_task rpkgExecute = task_execute;
 
-                    IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
+                IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
-                    Progress progress = new Progress();
+                Progress progress = new Progress();
 
-                    progress.message.Content = "Importing RPKG file " + rpkgFile + "...";
+                progress.message.Content = "Importing RPKG file " + rpkgFile + "...";
 
-                    progress.ShowDialog();
-                }
+                progress.ShowDialog();
             }
         }
 

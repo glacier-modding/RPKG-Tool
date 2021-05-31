@@ -357,7 +357,7 @@ void rpkg_function::extract_wwes_to_ogg_from(std::string& input_path, std::strin
                                             extracted.at(input_filter_index) = true;
                                         }
 
-                                        std::ofstream wem_file = std::ofstream(wem_file_name, std::ifstream::binary);
+                                        std::ofstream wem_file = std::ofstream(wem_file_name, std::ofstream::binary);
 
                                         if (!wem_file.good())
                                         {
@@ -368,7 +368,7 @@ void rpkg_function::extract_wwes_to_ogg_from(std::string& input_path, std::strin
 
                                         wem_file.close();
 
-                                        std::ofstream wwes_meta_data_file = std::ofstream(wwes_meta_data_file_name, std::ifstream::binary);
+                                        std::ofstream wwes_meta_data_file = std::ofstream(wwes_meta_data_file_name, std::ofstream::binary);
 
                                         if (!wwes_meta_data_file.good())
                                         {
@@ -382,7 +382,7 @@ void rpkg_function::extract_wwes_to_ogg_from(std::string& input_path, std::strin
                                             LOG("Error: Missing packed_codebooks_aoTuV_603.bin file.");
                                             LOG("       Attempting to create the packed_codebooks_aoTuV_603.bin file.");
 
-                                            std::ofstream output_file = std::ofstream("packed_codebooks_aoTuV_603.bin", std::ifstream::binary);
+                                            std::ofstream output_file = std::ofstream("packed_codebooks_aoTuV_603.bin", std::ofstream::binary);
 
                                             if (!output_file.good())
                                             {
@@ -392,7 +392,7 @@ void rpkg_function::extract_wwes_to_ogg_from(std::string& input_path, std::strin
                                             output_file.write((const char*)codebook, sizeof(codebook));
                                         }
 
-                                        std::ofstream output_file = std::ofstream(ogg_file, std::ifstream::binary);
+                                        std::ofstream output_file = std::ofstream(ogg_file, std::ofstream::binary);
 
                                         if (!output_file.good())
                                         {

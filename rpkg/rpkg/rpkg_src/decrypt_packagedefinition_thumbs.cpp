@@ -75,7 +75,7 @@ void generic_function::decrypt_packagedefinition_thumbs(std::string& input_path,
 
     std::string output_file_base_name = file::output_path_append(file::get_base_file_name(input_path), output_path);
 
-    std::ofstream output_file = std::ofstream(output_file_base_name + ".decrypted", std::ifstream::binary);
+    std::ofstream output_file = std::ofstream(output_file_base_name + ".decrypted", std::ofstream::binary);
 
     if (!output_file.good())
     {
@@ -86,7 +86,7 @@ void generic_function::decrypt_packagedefinition_thumbs(std::string& input_path,
 
     LOG("Successfully decrypted " << output_file_base_name << " and saved to " << output_file_base_name + ".decrypted" << std::endl);
 
-    std::ofstream output_file_meta = std::ofstream(output_file_base_name + ".decrypted.meta", std::ifstream::binary);
+    std::ofstream output_file_meta = std::ofstream(output_file_base_name + ".decrypted.meta", std::ofstream::binary);
 
     if (!output_file_meta.good())
     {

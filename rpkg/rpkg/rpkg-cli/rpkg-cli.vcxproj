@@ -34,14 +34,17 @@
     <ClCompile Include="..\rpkg_src\dev_extract_wwem_strings.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_wwes_strings.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_wwev_strings.cpp" />
+    <ClCompile Include="..\rpkg_src\dev_extract_wwise_ids.cpp" />
     <ClCompile Include="..\rpkg_src\encrypt_packagedefinition_thumbs.cpp" />
     <ClCompile Include="..\rpkg_src\extract_direct_hash_depends.cpp" />
     <ClCompile Include="..\rpkg_src\extract_dlge_to_json_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_from_rpkg.cpp" />
     <ClCompile Include="..\rpkg_src\extract_from_rpkg_with_map.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_gfxf_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_hash_meta.cpp" />
     <ClCompile Include="..\rpkg_src\extract_locr_to_json_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_ores_from.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_prel_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_rpkg_meta.cpp" />
     <ClCompile Include="..\rpkg_src\extract_rtlv_to_json_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_wwem_to_ogg_from.cpp" />
@@ -62,6 +65,7 @@
     <ClCompile Include="..\rpkg_src\load_master_hash_list.cpp" />
     <ClCompile Include="..\rpkg_src\main.cpp" />
     <ClCompile Include="..\rpkg_src\rebuild_dlge_from_json_from.cpp" />
+    <ClCompile Include="..\rpkg_src\rebuild_gfxf_in.cpp" />
     <ClCompile Include="..\rpkg_src\rebuild_locr_from_json_from.cpp" />
     <ClCompile Include="..\rpkg_src\rebuild_rtlv_from_json_from.cpp" />
     <ClCompile Include="..\rpkg_src\rebuild_wwev_in.cpp" />

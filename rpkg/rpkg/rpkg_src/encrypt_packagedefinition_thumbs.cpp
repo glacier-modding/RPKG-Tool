@@ -78,7 +78,7 @@ void generic_function::encrypt_packagedefinition_thumbs(std::string& input_path,
 
         std::string output_file_base_name = file::output_path_append(file::get_base_file_name(input_path), output_path);
 
-        std::ofstream output_file = std::ofstream(output_file_base_name + ".encrypted", std::ifstream::binary);
+        std::ofstream output_file = std::ofstream(output_file_base_name + ".encrypted", std::ofstream::binary);
 
         if (!output_file.good())
         {

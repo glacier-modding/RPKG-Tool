@@ -82,3 +82,10 @@ std::string util::uint64_t_to_hex_string(uint64_t bytes8)
     ss << std::hex << std::setw(16) << std::setfill('0') << std::uppercase << bytes8;
     return ss.str();
 }
+
+std::string util::uint32_t_to_hex_string(uint32_t bytes4)
+{
+    std::stringstream ss;
+    ss << std::hex << std::setw(8) << std::setfill('0') << std::uppercase << bytes4;
+    return ss.str();
+}

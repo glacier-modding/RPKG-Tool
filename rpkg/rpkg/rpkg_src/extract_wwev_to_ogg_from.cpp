@@ -358,7 +358,7 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
                                     file::create_directories(ogg_path);
 
-                                    std::ofstream wwev_meta_data_file = std::ofstream(current_path + "\\" + "meta", std::ifstream::binary);
+                                    std::ofstream wwev_meta_data_file = std::ofstream(current_path + "\\" + "meta", std::ofstream::binary);
 
                                     if (!wwev_meta_data_file.good())
                                     {
@@ -389,7 +389,7 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
                                             std::string wem_file = wem_path + "\\" + std::to_string(k) + ".wem";
 
-                                            std::ofstream output_file = std::ofstream(wem_file, std::ifstream::binary);
+                                            std::ofstream output_file = std::ofstream(wem_file, std::ofstream::binary);
 
                                             if (!output_file.good())
                                             {
@@ -405,7 +405,7 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
                                                 LOG("Error: Missing packed_codebooks_aoTuV_603.bin file.");
                                                 LOG("       Attempting to create the packed_codebooks_aoTuV_603.bin file.");
 
-                                                output_file = std::ofstream("packed_codebooks_aoTuV_603.bin", std::ifstream::binary);
+                                                output_file = std::ofstream("packed_codebooks_aoTuV_603.bin", std::ofstream::binary);
 
                                                 if (!output_file.good())
                                                 {
@@ -417,7 +417,7 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
                                             std::string ogg_file = ogg_path + "\\" + std::to_string(k) + ".ogg";
 
-                                            output_file = std::ofstream(ogg_file, std::ifstream::binary);
+                                            output_file = std::ofstream(ogg_file, std::ofstream::binary);
 
                                             if (!output_file.good())
                                             {

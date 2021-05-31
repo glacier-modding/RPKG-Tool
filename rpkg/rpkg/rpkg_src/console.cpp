@@ -382,7 +382,7 @@ void console::display_usage_info()
     LOG("");
     LOG("");
     LOG("");
-    LOG("rpkg-cli v2.2 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files.");
+    LOG("rpkg-cli v2.3 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files.");
     LOG("--------------------------------------------------------------------------------");
     LOG("Note: All the information used to build this program was gleaned");
     LOG("      in a completely 'clean room' environment.");
@@ -411,6 +411,10 @@ void console::display_usage_info()
     LOG("        scans all available RPKG files for dependency information.");
     LOG("    -extract_from_rpkg <path to rpkg file>");
     LOG("        Extracts all hash linked files/resources from an RPKG file.");
+    LOG("    -extract_gfxf_from <path to folder containing RPKG files>");
+    LOG("        Extracts all hash linked files/resources located in the GFXF files");
+    LOG("        and unpacks them to GFX and if available DDS/TGA files from all");
+    LOG("        the RPKG files in a given directory.");
     LOG("    -extract_ores_from <path to folder containing RPKG files>");
     LOG("        Extracts all hash linked files/resources located in the ORES files");
     LOG("        by their full IOI path names from all the RPKG files in a given directory.");
@@ -465,6 +469,12 @@ void console::display_usage_info()
     LOG("        argument can contain any number of sub folders, where each subfolder's");
     LOG("        name is linked to an individual WWEV that will be built from the *.wem");
     LOG("        files in that folder.");
+    LOG("    -rebuild_gfxf_in <path to folders containing GFFX/(DDS/TGA) files>");
+    LOG("        Rebuilds sets of GFX and if available DDS/TGA files that were previously");
+    LOG("        extracted with (-extract_gfxf_from). The folder specified by the");
+    LOG("        argument can contain any number of sub folders, where each subfolder's");
+    LOG("        name is linked to an individual GFXF that will be built from");
+    LOG("        the GFX and if available DDS/TGA files in that folder.");
     LOG("    -rebuild_dlge_from_json_from <path to folder containing JSON (DLGE) files>");
     LOG("        Rebuilds DLGE files/resources from JSON (DLGE) files that were previously");
     LOG("        extracted with (-extract_dlge_to_json_from).");

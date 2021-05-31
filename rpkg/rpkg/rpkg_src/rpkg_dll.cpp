@@ -511,7 +511,7 @@ int create_ogg_file_from_hash_in_rpkg(char* rpkg_file, char* hash_string, int co
                     std::string wem_file_name = rpkgs.at(i).hash.at(it->second).hash_string + ".wem";
                     std::string ogg_file = rpkgs.at(i).hash.at(it->second).hash_string + ".ogg";
 
-                    std::ofstream wem_file = std::ofstream(wem_file_name, std::ifstream::binary);
+                    std::ofstream wem_file = std::ofstream(wem_file_name, std::ofstream::binary);
 
                     if (!wem_file.good())
                     {
@@ -526,7 +526,7 @@ int create_ogg_file_from_hash_in_rpkg(char* rpkg_file, char* hash_string, int co
                     {
                         response_string = "failed";
 
-                        std::ofstream output_file = std::ofstream("packed_codebooks_aoTuV_603.bin", std::ifstream::binary);
+                        std::ofstream output_file = std::ofstream("packed_codebooks_aoTuV_603.bin", std::ofstream::binary);
 
                         if (!output_file.good())
                         {
@@ -538,7 +538,7 @@ int create_ogg_file_from_hash_in_rpkg(char* rpkg_file, char* hash_string, int co
                         output_file.close();
                     }
 
-                    std::ofstream output_file = std::ofstream(ogg_file, std::ifstream::binary);
+                    std::ofstream output_file = std::ofstream(ogg_file, std::ofstream::binary);
 
                     if (!output_file.good())
                     {
@@ -644,7 +644,7 @@ int create_ogg_file_from_hash_in_rpkg(char* rpkg_file, char* hash_string, int co
                             {
                                 std::string wem_file = wem_ogg_path + ".wem";
 
-                                std::ofstream output_file = std::ofstream(wem_file, std::ifstream::binary);
+                                std::ofstream output_file = std::ofstream(wem_file, std::ofstream::binary);
 
                                 if (!output_file.good())
                                 {
@@ -659,7 +659,7 @@ int create_ogg_file_from_hash_in_rpkg(char* rpkg_file, char* hash_string, int co
                                 {
                                     response_string = "failed";
 
-                                    std::ofstream output_file = std::ofstream("packed_codebooks_aoTuV_603.bin", std::ifstream::binary);
+                                    std::ofstream output_file = std::ofstream("packed_codebooks_aoTuV_603.bin", std::ofstream::binary);
 
                                     if (!output_file.good())
                                     {
@@ -673,7 +673,7 @@ int create_ogg_file_from_hash_in_rpkg(char* rpkg_file, char* hash_string, int co
 
                                 std::string ogg_file = wem_ogg_path + ".ogg";
 
-                                output_file = std::ofstream(ogg_file, std::ifstream::binary);
+                                output_file = std::ofstream(ogg_file, std::ofstream::binary);
 
                                 if (!output_file.good())
                                 {
@@ -1247,7 +1247,7 @@ int convert_ogg_to_pcm(char* input_path, char* output_path)
         position += return_value;
     }
 
-    std::ofstream output_file = std::ofstream(output_file_path, std::ifstream::binary);
+    std::ofstream output_file = std::ofstream(output_file_path, std::ofstream::binary);
 
     output_file.write(reinterpret_cast<char*>(pcm_data.data()), pcm_data_size);
 

@@ -38,9 +38,17 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
 
         rpkg_function::extract_from_rpkg(rpkg_vars);
     }
+    else if (command == "-extract_gfxf_from")
+    {
+        rpkg_function::extract_gfxf_from(input_path, filter, output_path);
+    }
     else if (command == "-extract_ores_from")
     {
         rpkg_function::extract_ores_from(input_path, filter, output_path);
+    }
+    else if (command == "-extract_prel_refs")
+    {
+        rpkg_function::extract_prel_refs(input_path, filter, output_path);
     }
     else if (command == "-extract_wwem_to_ogg_from")
     {
@@ -91,6 +99,10 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     else if (command == "-import_rpkg")
     {
         rpkg_function::import_rpkg(input_path);
+    }
+    else if (command == "-rebuild_gfxf_in")
+    {
+        rpkg_function::rebuild_gfxf_in(input_path, filter, output_path);
     }
     else if (command == "-rebuild_wwev_in")
     {
@@ -153,6 +165,10 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     {
         dev_function::dev_extract_materials_textures_strings(input_path, filter, output_path);
     }
+    else if (command == "-dev_extract_wwise_ids")
+    {
+        dev_function::dev_extract_wwise_ids(input_path, filter, output_path);
+    }
 }
 
 void task::process_and_execute_files_draged_and_dropped(std::vector<std::string>& dragged_and_dropped_files)
@@ -194,9 +210,12 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                      "-dev_extract_wwem_strings",
                                                      "-dev_extract_wwes_strings",
                                                      "-dev_extract_wwev_strings",
+                                                     "-dev_extract_wwise_ids",
                                                      "-encrypt_packagedefinition_thumbs",
                                                      "-extract_from_rpkg",
+                                                     "-extract_gfxf_from",
                                                      "-extract_ores_from",
+                                                     "-extract_prel_refs",
                                                      "-extract_wwem_to_ogg_from",
                                                      "-extract_wwes_to_ogg_from",
                                                      "-extract_wwev_to_ogg_from",
@@ -208,6 +227,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                      "-extract_direct_hash_depends",
                                                      "-hash_probe",
                                                      "-hash_probe_from_file",
+                                                     "-rebuild_gfxf_in",
                                                      "-rebuild_wwev_in",
                                                      "-rebuild_dlge_from_json_from",
                                                      "-rebuild_locr_from_json_from",

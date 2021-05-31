@@ -473,7 +473,7 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& fil
             }
         }
 
-        std::ofstream file = std::ofstream(file::output_path_append(rpkg_file_name, output_path), std::ifstream::binary);
+        std::ofstream file = std::ofstream(file::output_path_append(rpkg_file_name, output_path), std::ofstream::binary);
 
         if (!file.good())
         {

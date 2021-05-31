@@ -104,7 +104,7 @@ void rpkg_function::extract_hash_meta(uint64_t i, uint64_t j, std::string& final
     }
 
     final_path += ".meta";
-    std::ofstream output_file = std::ofstream(final_path, std::ifstream::binary);
+    std::ofstream output_file = std::ofstream(final_path, std::ofstream::binary);
 
     if (!output_file.good())
     {

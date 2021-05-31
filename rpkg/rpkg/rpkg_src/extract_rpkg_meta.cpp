@@ -13,7 +13,7 @@ void rpkg_function::extract_rpkg_meta(uint64_t i, std::string& hash_file_path)
 
     std::string final_path = hash_file_path + "\\" + file::get_root_file_name(rpkgs.at(i).rpkg_file_name) + ".meta";
 
-    rpkg_meta_data_file = std::ofstream(final_path, std::ifstream::binary);
+    rpkg_meta_data_file = std::ofstream(final_path, std::ofstream::binary);
 
     if (!rpkg_meta_data_file.good())
     {

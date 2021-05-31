@@ -519,7 +519,7 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
                                     {
                                         std::string json_path = current_path + "\\" + hash_file_name + ".JSON";
 
-                                        std::ofstream json_file = std::ofstream(json_path, std::ifstream::binary);
+                                        std::ofstream json_file = std::ofstream(json_path, std::ofstream::binary);
 
                                         if (!json_file.good())
                                         {
@@ -532,7 +532,7 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
 
                                         std::string json_meta_path = current_path + "\\" + hash_file_name + ".JSON.meta";
 
-                                        std::ofstream json_meta_file = std::ofstream(json_meta_path, std::ifstream::binary);
+                                        std::ofstream json_meta_file = std::ofstream(json_meta_path, std::ofstream::binary);
 
                                         if (!json_meta_file.good())
                                         {
@@ -593,7 +593,7 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
                                                                     {
                                                                         if (!file::path_exists(hash_link_file_name))
                                                                         {
-                                                                            std::ofstream json_meta_hash_link_file = std::ofstream(hash_link_file_name, std::ifstream::binary);
+                                                                            std::ofstream json_meta_hash_link_file = std::ofstream(hash_link_file_name, std::ofstream::binary);
 
                                                                             if (!json_meta_hash_link_file.good())
                                                                             {

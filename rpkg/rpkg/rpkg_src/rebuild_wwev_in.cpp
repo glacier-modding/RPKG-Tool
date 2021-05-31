@@ -265,7 +265,7 @@ void rpkg_function::rebuild_wwev_in(std::string& input_path, std::string& filter
 
                 std::string wwev_hash_file_name = wwev_folders.at(i) + "\\" + util::uint64_t_to_hex_string(wwev_hash) + ".WWEV";
 
-                std::ofstream wwev_file = std::ofstream(wwev_hash_file_name, std::ifstream::binary);
+                std::ofstream wwev_file = std::ofstream(wwev_hash_file_name, std::ofstream::binary);
 
                 if (!wwev_file.good())
                 {

@@ -164,7 +164,7 @@ void rpkg_function::extract_from_rpkg(rpkg_extraction_vars& rpkg_vars)
                             final_path = rpkg_vars.ores_path;
                         }
 
-                        std::ofstream output_file = std::ofstream(final_path, std::ifstream::binary);
+                        std::ofstream output_file = std::ofstream(final_path, std::ofstream::binary);
 
                         if (!output_file.good())
                         {
