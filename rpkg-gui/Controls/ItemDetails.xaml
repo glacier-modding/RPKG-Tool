@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="rpkg.Controls.ItemDetails"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:rpkg.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Button Grid.Row="0" Grid.Column="0" Click="EditPatchDeletionListButton_Click" x:Name="EditPatchDeletionListButton" Content="Edit Patch Deletion List" Visibility="Collapsed"/>
+        <Button Grid.Row="0" Grid.Column="0" Click="SaveChangesToPatchDeletionListButton_Click" x:Name="SaveChangesToPatchDeletionListButton" Content="Save Changes To Patch Deletion List" Visibility="Collapsed"/>
+        <Button Grid.Row="0" Grid.Column="1" Click="DiscardChangesToPatchDeletionListButton_Click" x:Name="DiscardChangesToPatchDeletionListButton" Content="Discard Changes To Patch Deletion List" Visibility="Collapsed"/>
+        <Button Grid.Row="0" Grid.Column="0" Click="EditHashDependsButton_Click" x:Name="EditHashDependsButton" Content="Edit Hash Depends" Visibility="Collapsed"/>
+        <Button Grid.Row="0" Grid.Column="0" Click="SaveChangesToHashDependsButton_Click" x:Name="SaveChangesToHashDependsButton" Content="Save Changes To Hash Depends" Visibility="Collapsed"/>
+        <Button Grid.Row="0" Grid.Column="1" Click="DiscardChangesToHashDependsButton_Click" x:Name="DiscardChangesToHashDependsButton" Content="Discard Changes To Hash Depends" Visibility="Collapsed"/>
+        <Button Grid.Row="0" Grid.Column="1" Click="ExtractHashDependsButton_Click" x:Name="ExtractHashDependsButton" Content="Extract Hash Depends" Visibility="Collapsed"/>
+        <TextBox Grid.Row="1" Grid.ColumnSpan="3" x:Name="DetailsTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap"/>
+        <ScrollViewer Grid.Row="1" Grid.ColumnSpan="3" x:Name="MainScrollViewer" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+            <StackPanel x:Name="MainStackPanel" Visibility="Collapsed">
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

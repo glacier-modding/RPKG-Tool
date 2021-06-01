@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 
 namespace rpkg
 {
     public class UserSettings
     {
-        public string InputFolder { get; set; }
-        public string OutputFolder { get; set; }
-        public string ColorTheme { get; set; }
+        public string InputFolder { get; set; } = Directory.GetCurrentDirectory();
+        public string OutputFolder { get; set; } = Directory.GetCurrentDirectory();
+        public string ColorTheme { get; set; } = "Dark/Red";
     }
 }
