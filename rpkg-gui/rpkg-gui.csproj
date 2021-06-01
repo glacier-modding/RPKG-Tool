@@ -32,7 +32,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <DisableFody Condition="'$(Configuration)' == 'Debug'">true</DisableFody>
+    <DisableFody Condition="'$(Configuration)' != 'Release'">true</DisableFody>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>
@@ -59,6 +59,17 @@
     <PlatformTarget>x64</PlatformTarget>
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DebugWithRelRpkg|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\_build\DebugWithRelRpkg\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.DwayneNeed">
@@ -98,8 +109,20 @@
     <Compile Include="ColorPicker.xaml.cs">
       <DependentUpon>ColorPicker.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\AudioPlayer.xaml.cs">
+      <DependentUpon>AudioPlayer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ImageViewer.xaml.cs">
+      <DependentUpon>ImageViewer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\ItemDetails.xaml.cs">
       <DependentUpon>ItemDetails.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\JsonViewer.xaml.cs">
+      <DependentUpon>JsonViewer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ThreeDViewer.xaml.cs">
+      <DependentUpon>ThreeDViewer.xaml</DependentUpon>
     </Compile>
     <Compile Include="DownloadExtractionProgress.xaml.cs">
       <DependentUpon>DownloadExtractionProgress.xaml</DependentUpon>
@@ -123,6 +146,9 @@
     <Compile Include="MessageQuestion.xaml.cs">
       <DependentUpon>MessageQuestion.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Resources\CommonActions\ExtractResourceAction.cs" />
+    <Compile Include="Resources\IResourceActions.cs" />
+    <Compile Include="Resources\ResourceAction.cs" />
     <Compile Include="RightClickMenu.xaml.cs">
       <DependentUpon>RightClickMenu.xaml</DependentUpon>
     </Compile>
@@ -135,7 +161,23 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\AudioPlayer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ImageViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\ItemDetails.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\JsonViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ThreeDViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -287,6 +329,19 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Condition="'$(Configuration)' == 'Release'" Include="..\_build\$(Configuration)\rpkg.dll" LogicalName="costura64.rpkg.dll" ManifestResourceName="costura64.rpkg.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\DLGE\" />
+    <Folder Include="Resources\GFXI\" />
+    <Folder Include="Resources\JSON\" />
+    <Folder Include="Resources\LOCR\" />
+    <Folder Include="Resources\PRIM\" />
+    <Folder Include="Resources\RTLV\" />
+    <Folder Include="Resources\TEMP\" />
+    <Folder Include="Resources\TEXT\" />
+    <Folder Include="Resources\WWEM\" />
+    <Folder Include="Resources\WWES\" />
+    <Folder Include="Resources\WWEV\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

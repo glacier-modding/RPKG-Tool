@@ -389,3 +389,4 @@ FodyWeavers.xsd
 
 # Custom patterns
 /rpkg-gui/Costura64/
+_build/

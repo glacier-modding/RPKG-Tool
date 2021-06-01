@@ -15,19 +15,26 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
+		DebugWithRelRpkg|x64 = DebugWithRelRpkg|x64
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{00000000-0000-0000-0000-000000000001}.Debug|x64.ActiveCfg = Debug|x64
 		{00000000-0000-0000-0000-000000000001}.Debug|x64.Build.0 = Debug|x64
+		{00000000-0000-0000-0000-000000000001}.DebugWithRelRpkg|x64.ActiveCfg = Debug|x64
+		{00000000-0000-0000-0000-000000000001}.DebugWithRelRpkg|x64.Build.0 = Debug|x64
 		{00000000-0000-0000-0000-000000000001}.Release|x64.ActiveCfg = Release|x64
 		{00000000-0000-0000-0000-000000000001}.Release|x64.Build.0 = Release|x64
 		{00000000-0000-0000-0000-000000000002}.Debug|x64.ActiveCfg = Debug|x64
 		{00000000-0000-0000-0000-000000000002}.Debug|x64.Build.0 = Debug|x64
+		{00000000-0000-0000-0000-000000000002}.DebugWithRelRpkg|x64.ActiveCfg = DebugWithRelRpkg|x64
+		{00000000-0000-0000-0000-000000000002}.DebugWithRelRpkg|x64.Build.0 = DebugWithRelRpkg|x64
 		{00000000-0000-0000-0000-000000000002}.Release|x64.ActiveCfg = Release|x64
 		{00000000-0000-0000-0000-000000000002}.Release|x64.Build.0 = Release|x64
 		{00000000-0000-0000-0000-000000000069}.Debug|x64.ActiveCfg = Debug|x64
 		{00000000-0000-0000-0000-000000000069}.Debug|x64.Build.0 = Debug|x64
+		{00000000-0000-0000-0000-000000000069}.DebugWithRelRpkg|x64.ActiveCfg = DebugWithRelRpkg|x64
+		{00000000-0000-0000-0000-000000000069}.DebugWithRelRpkg|x64.Build.0 = DebugWithRelRpkg|x64
 		{00000000-0000-0000-0000-000000000069}.Release|x64.ActiveCfg = Release|x64
 		{00000000-0000-0000-0000-000000000069}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
