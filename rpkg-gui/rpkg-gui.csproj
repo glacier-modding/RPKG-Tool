@@ -224,10 +224,6 @@
     <Resource Include="rpkg.ico" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Costura64\ResourceLib_HM2.dll" />
-    <EmbeddedResource Include="Costura64\ResourceLib_HM3.dll" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Discord.png" />
   </ItemGroup>
   <ItemGroup>
