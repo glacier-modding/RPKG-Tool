@@ -32,6 +32,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <DisableFody Condition="'$(Configuration)' == 'Debug'">true</DisableFody>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>
@@ -224,10 +225,6 @@
     <Resource Include="rpkg.ico" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Costura64\ResourceLib_HM2.dll" />
-    <EmbeddedResource Include="Costura64\ResourceLib_HM3.dll" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Discord.png" />
   </ItemGroup>
   <ItemGroup>
@@ -276,6 +273,9 @@
     <PackageReference Include="System.ValueTuple">
       <Version>4.5.0</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Condition="'$(Configuration)' == 'Release'" Include="..\_build\$(Configuration)\rpkg.dll" LogicalName="costura64.rpkg.dll" ManifestResourceName="costura64.rpkg.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
