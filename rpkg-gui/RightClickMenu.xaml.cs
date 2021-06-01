@@ -21,6 +21,9 @@ namespace rpkg
     /// </summary>
     public partial class RightClickMenu : MetroWindow
     {
+        public string buttonPressed = "";
+        public int PressedButtonIndex = -1;
+
         public RightClickMenu(string[] buttons)
         {
             InitializeComponent();
@@ -59,10 +62,9 @@ namespace rpkg
         public void Button_Click(object sender, RoutedEventArgs e)
         {
             buttonPressed = (sender as Button).Name;
+            PressedButtonIndex = int.Parse(buttonPressed.Substring(6));
 
             this.Close();
         }
-
-        public string buttonPressed = "";
     }
 }

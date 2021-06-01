@@ -146,9 +146,35 @@
     <Compile Include="MessageQuestion.xaml.cs">
       <DependentUpon>MessageQuestion.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Resources\CommonActions\ExtractResourceAction.cs" />
-    <Compile Include="Resources\IResourceActions.cs" />
-    <Compile Include="Resources\ResourceAction.cs" />
+    <Compile Include="ResourceActions\ActionRegistry.cs" />
+    <Compile Include="ResourceActions\Attributes\BulkCommonActionAttribute.cs" />
+    <Compile Include="ResourceActions\Attributes\CommonActionAttribute.cs" />
+    <Compile Include="ResourceActions\Attributes\BulkResourceActionAttribute.cs" />
+    <Compile Include="ResourceActions\Attributes\ResourceActionAttribute.cs" />
+    <Compile Include="ResourceActions\CommonActions\BulkExtractAction.cs" />
+    <Compile Include="ResourceActions\CommonActions\ExtractAction.cs" />
+    <Compile Include="ResourceActions\IBulkAction.cs" />
+    <Compile Include="ResourceActions\IAction.cs" />
+    <Compile Include="Resources\DLGE\Actions\ConvertJsonAction.cs" />
+    <Compile Include="Resources\LOCR\Actions\ConvertJsonAction.cs" />
+    <Compile Include="Resources\ORES\Actions\BulkExtractAction.cs" />
+    <Compile Include="Resources\ORES\Actions\ExtractAction.cs" />
+    <Compile Include="Resources\PRIM\Actions\BulkConvertGlbAction.cs" />
+    <Compile Include="Resources\PRIM\Actions\ConvertGlbTgaAction.cs" />
+    <Compile Include="Resources\PRIM\Actions\ConvertGlbAction.cs" />
+    <Compile Include="Resources\RTLV\Actions\ConvertJsonAction.cs" />
+    <Compile Include="Resources\TEMP\Actions\EditNonRecursiveAction.cs" />
+    <Compile Include="Resources\TEMP\Actions\EditRecursiveAction.cs" />
+    <Compile Include="Resources\TEMP\Actions\ConvertModelsGlbAction.cs" />
+    <Compile Include="Resources\TEMP\Actions\ConvertModelsGlbTgaAction.cs" />
+    <Compile Include="Resources\TEXT\Actions\BulkConvertTgaAction.cs" />
+    <Compile Include="Resources\TEXT\Actions\ConvertTgaAction.cs" />
+    <Compile Include="Resources\WWEM\Actions\BulkConvertOggAction.cs" />
+    <Compile Include="Resources\WWEM\Actions\ConvertOggAction.cs" />
+    <Compile Include="Resources\WWES\Actions\BulkConvertOggAction.cs" />
+    <Compile Include="Resources\WWES\Actions\ConvertOggAction.cs" />
+    <Compile Include="Resources\WWEV\Actions\BulkConvertOggAction.cs" />
+    <Compile Include="Resources\WWEV\Actions\ConvertOggAction.cs" />
     <Compile Include="RightClickMenu.xaml.cs">
       <DependentUpon>RightClickMenu.xaml</DependentUpon>
     </Compile>
@@ -330,19 +356,7 @@
   <ItemGroup>
     <EmbeddedResource Condition="'$(Configuration)' == 'Release'" Include="..\_build\$(Configuration)\rpkg.dll" LogicalName="costura64.rpkg.dll" ManifestResourceName="costura64.rpkg.dll" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\DLGE\" />
-    <Folder Include="Resources\GFXI\" />
-    <Folder Include="Resources\JSON\" />
-    <Folder Include="Resources\LOCR\" />
-    <Folder Include="Resources\PRIM\" />
-    <Folder Include="Resources\RTLV\" />
-    <Folder Include="Resources\TEMP\" />
-    <Folder Include="Resources\TEXT\" />
-    <Folder Include="Resources\WWEM\" />
-    <Folder Include="Resources\WWES\" />
-    <Folder Include="Resources\WWEV\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>
