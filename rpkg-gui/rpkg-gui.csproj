@@ -32,6 +32,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <DisableFody Condition="'$(Configuration)' == 'Debug'">true</DisableFody>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>
@@ -275,6 +276,9 @@
     <PackageReference Include="System.ValueTuple">
       <Version>4.5.0</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Condition="'$(Configuration)' == 'Release'" Include="..\_build\$(Configuration)\rpkg.dll" LogicalName="costura64.rpkg.dll" ManifestResourceName="costura64.rpkg.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
