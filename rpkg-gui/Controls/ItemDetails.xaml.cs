@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using MahApps.Metro.Controls;
+using rpkg.Extensions;
 using rpkg.Utils;
 
 namespace rpkg.Controls
@@ -27,12 +28,6 @@ namespace rpkg.Controls
         private string resourcePath;
         private string currentHashFileName;
         private string hashDependsRPKGFilePath;
-
-        public delegate void UnloadRpkgEventHandler(object sender, string rpkgToUnload);
-        public event UnloadRpkgEventHandler UnloadRpkg;
-
-        public delegate void ImportRpkgEventHandler(object sender, string rpkgToUnload);
-        public event ImportRpkgEventHandler ImportRpkg;
 
         public ItemDetails()
         {
@@ -496,7 +491,7 @@ namespace rpkg.Controls
                 if (return_value == 0)
                 {
                     WindowUtils.MessageBoxShow("Patch deletion list has been successfully updated for RPKG: " + rpkgFilePath);
-                    UnloadRpkg?.Invoke(this, rpkgFilePath);
+                    RpkgManager.ReloadRpkg(rpkgFilePath);
                 }
                 else if (return_value == 1)
                 {
@@ -1479,9 +1474,7 @@ namespace rpkg.Controls
                 if (return_value == 0)
                 {
                     WindowUtils.MessageBoxShow("Hash Depends has been successfully updated for RPKG: " + hashDependsRPKGFilePath);
-
-                    UnloadRpkg?.Invoke(this, hashDependsRPKGFilePath);
-
+                    RpkgManager.ReloadRpkg(rpkgFilePath);
                 }
                 else if (return_value == 1)
                 {
@@ -1598,12 +1591,8 @@ namespace rpkg.Controls
                     }
                 }
 
-                rpkgFiles.Sort(new MainWindow.NaturalStringComparer());
-
-                foreach (string filePath in rpkgFiles)
-                {
-                    ImportRpkg?.Invoke(this, filePath);
-                }
+                rpkgFiles = rpkgFiles.SortNaturally();
+                RpkgManager.LoadRpkgs(rpkgFiles);
 
                 string command = "";
                 string input_path = runtimeDirectory;

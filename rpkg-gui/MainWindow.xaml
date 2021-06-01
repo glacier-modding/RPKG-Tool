@@ -185,7 +185,7 @@
         <GridSplitter HorizontalAlignment="Right" VerticalAlignment="Stretch" Grid.Row="1"  Grid.Column="1" ResizeBehavior="PreviousAndNext" Width="5"/>
         <TabControl x:Name="RightTabControl" Grid.Row="1" Grid.Column="2">
             <TabItem x:Name="TabDetails" Header="Details">
-                <controls:ItemDetails x:Name="ItemDetails" UnloadRpkg="ItemDetails_OnUnloadRpkg" />
+                <controls:ItemDetails x:Name="ItemDetails" />
             </TabItem>
             <TabItem x:Name="TabHexViewer" Header="Hex Viewer">
                 <TextBox x:Name="HexViewerTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap"/>

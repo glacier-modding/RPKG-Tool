@@ -107,6 +107,7 @@
     <Compile Include="EntityBrickEditor.xaml.cs">
       <DependentUpon>EntityBrickEditor.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Filter.xaml.cs">
       <DependentUpon>Filter.xaml</DependentUpon>
     </Compile>
@@ -126,6 +127,7 @@
       <DependentUpon>RightClickMenu.xaml</DependentUpon>
     </Compile>
     <Compile Include="RpkgLib.cs" />
+    <Compile Include="RpkgManager.cs" />
     <Compile Include="UserSettings.cs" />
     <Compile Include="Utils\HashUtils.cs" />
     <Compile Include="Utils\WindowUtils.cs" />
