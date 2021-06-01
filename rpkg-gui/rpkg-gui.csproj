@@ -109,20 +109,8 @@
     <Compile Include="ColorPicker.xaml.cs">
       <DependentUpon>ColorPicker.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\AudioPlayer.xaml.cs">
-      <DependentUpon>AudioPlayer.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\ImageViewer.xaml.cs">
-      <DependentUpon>ImageViewer.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\ItemDetails.xaml.cs">
       <DependentUpon>ItemDetails.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\JsonViewer.xaml.cs">
-      <DependentUpon>JsonViewer.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\ThreeDViewer.xaml.cs">
-      <DependentUpon>ThreeDViewer.xaml</DependentUpon>
     </Compile>
     <Compile Include="DownloadExtractionProgress.xaml.cs">
       <DependentUpon>DownloadExtractionProgress.xaml</DependentUpon>
@@ -187,23 +175,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\AudioPlayer.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\ImageViewer.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Controls\ItemDetails.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\JsonViewer.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\ThreeDViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
