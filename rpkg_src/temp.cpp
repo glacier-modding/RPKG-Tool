@@ -16,6 +16,7 @@
 #include <iostream>
 #include <map>
 #include <fstream>
+#include <sstream>
 #include <set>
 
 #pragma comment(lib, "../rpkg_src/thirdparty/zhmtools/ResourceLib_HM2.lib")
