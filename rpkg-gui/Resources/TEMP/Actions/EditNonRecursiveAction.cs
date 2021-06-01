@@ -197,6 +197,8 @@ namespace rpkg.Resources.TEMP.Actions
                 entityBrickEditor.currentThemeBrightness = theme[0];
                 string color = theme[1];
 
+                entityBrickEditor.ShowDialog();
+
                 // TODO (OrfeasZ)
                 /*SetDiscordStatus("Brick Editor", hashName);
 
