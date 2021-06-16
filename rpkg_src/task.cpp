@@ -382,26 +382,26 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
             filter = commands.at(i).at(1);
             command_count++;
         }
-        else if (util::to_lower_case(commands.at(i).at(0)) == "-text_search")
+        else if (util::to_lower_case(commands.at(i).at(0)) == "--text-search")
         {
             search_type = "text";
             search = commands.at(i).at(1);
         }
-        else if (util::to_lower_case(commands.at(i).at(0)) == "-hex_search")
+        else if (util::to_lower_case(commands.at(i).at(0)) == "--hex-search")
         {
             search_type = "hex";
             search = commands.at(i).at(1);
         }
-        else if (util::to_lower_case(commands.at(i).at(0)) == "-regex_search")
+        else if (util::to_lower_case(commands.at(i).at(0)) == "--regex-search")
         {
             search_type = "regex";
             search = commands.at(i).at(1);
         }
-        else if (util::to_lower_case(commands.at(i).at(0)) == "-filter")
+        else if (util::to_lower_case(commands.at(i).at(0)) == "--filter")
         {
             filter = commands.at(i).at(1);
         }
-        else if (util::to_lower_case(commands.at(i).at(0)) == "-output_path")
+        else if (util::to_lower_case(commands.at(i).at(0)) == "--output-path")
         {
             output_path = commands.at(i).at(1);
         }
