@@ -117,7 +117,7 @@ jobs:
       with:
         source: ${{ matrix.artifact }}
         find: "rpkg"
-        replace: "rpkg-${{ steps.get_version.outputs.VERSION }}"
+        replace: "rpkg_${{ steps.get_version.outputs.VERSION }}"
         
     - name: Download artifact
       uses: actions/download-artifact@v2
