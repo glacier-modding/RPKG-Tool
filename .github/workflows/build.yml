@@ -1,0 +1,142 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - v*
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+
+jobs:
+  build_windows:
+    name: Build (Windows)
+    runs-on: windows-latest
+
+    steps:    
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Restore NuGet packages
+      run: nuget restore rpkg.sln
+
+    - name: Build
+      run: |
+        msbuild /m /p:Configuration=Release /p:Platform=x64 rpkg.sln
+      
+    - name: Collect artifacts
+      run: |
+        cd _build
+        mkdir _rpkg
+        Copy-Item Release/rpkg.exe -Destination _rpkg/
+        Copy-Item Release/rpkg-cli.exe -Destination _rpkg/
+        
+    - name: Get the latest release of ResourceLib
+      uses: robinraju/release-downloader@v1
+      with:
+        repository: "OrfeasZ/ZHMTools"
+        latest: true
+        fileName: "ResourceLib-win-x64.zip"
+        out-file-path: _build
+        
+    - name: Get the latest hash list
+      run: |
+        Invoke-WebRequest -Uri "http://hitmandb.notex.app/latest-hashes.7z" -OutFile "_build\latest-hashes.7z"
+        
+    - name: Prepare artifacts
+      run: |
+        cd _build
+        7z e latest-hashes.7z -o_rpkg
+        7z e ResourceLib-win-x64.zip -o_rpkg -i!"ResourceLib_*.dll"
+        git clone https://github.com/glacier-modding/RPKG-Tool _rpkg-src
+        
+    - name: Upload build artifact - RPKG
+      uses: actions/upload-artifact@v2
+      with:
+        name: "rpkg"
+        path: |
+          _build/_rpkg/*
+          
+    - name: Upload build artifact - RPKG-src
+      uses: actions/upload-artifact@v2
+      with:
+        name: "rpkg-src"
+        path: |
+          _build/_rpkg-src/**/*
+          !_build/_rpkg-src/.git/**/*
+          !_build/_rpkg-src/.github/**/*
+          !_build/_rpkg-src/.gitignore
+  
+  create_release:
+    name: Create release
+    needs: [build_windows]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+      
+    steps:
+    - name: Get version
+      id: get_version
+      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+    
+    - name: Create release
+      id: release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.get_version.outputs.VERSION }}
+        release_name: "RPKG ${{ steps.get_version.outputs.VERSION }}"
+        draft: true
+        prerelease: ${{ contains(github.ref, '-pre') }}
+    
+    outputs:
+      upload_url: ${{ steps.release.outputs.upload_url }}
+  
+  upload_release_asset:
+    name: Upload release asset
+    needs: [create_release]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        artifact: [ "rpkg", "rpkg-src" ]
+    
+    steps:
+    - name: Get version
+      id: get_version
+      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      
+    - name: Format file name
+      id: file_name
+      uses: mad9000/actions-find-and-replace-string@2
+      with:
+        source: ${{ matrix.artifact }}
+        find: "rpkg"
+        replace: "rpkg-${{ steps.get_version.outputs.VERSION }}"
+        
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ${{ matrix.artifact }}
+        path: ${{ matrix.artifact }}
+    
+    - name: Package artifact for release
+      run: |
+        cd ${{ matrix.artifact }}
+        zip -r ${{ matrix.artifact }}.zip *
+
+    - name: Upload release asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create_release.outputs.upload_url }}
+        asset_path: ${{ matrix.artifact }}/${{ matrix.artifact }}.zip
+        asset_name: ${{ steps.file_name.outputs.value }}.zip
+        asset_content_type: application/zip
+    
