@@ -224,12 +224,25 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
                                 uint8_t bytes1 = 0;
                                 uint32_t bytes4 = 0;
                                 uint64_t bytes8 = 0;
+								bool isLOCRv2 = false;
 
-                                position += 1;
+								if ((unsigned int)locr_data->data()[0] == 0) {
+									position += 1;
+									std::memcpy(&number_of_languages, &locr_data->data()[position], sizeof(bytes4));
+									number_of_languages = (number_of_languages - 1) / 4;
+									isLOCRv2 = true;
+								}
+								else
+								{
+									std::memcpy(&number_of_languages, &locr_data->data()[position], sizeof(bytes4));
+									number_of_languages = (number_of_languages) / 4;
+								}
 
-                                std::memcpy(&number_of_languages, &locr_data->data()[position], sizeof(bytes4));
+								LOG((isLOCRv2 ? "LOCRv2 identified" : "LOCRv1 identified"));
 
-                                number_of_languages = (number_of_languages - 1) / 4;
+								if (number_of_languages == 10) {
+									LOG_AND_EXIT("Error: This version of LOCR is not supported.");
+								}
 
                                 for (uint64_t k = 0; k < number_of_languages; k++)
                                 {
@@ -239,10 +252,10 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
                                     language_offsets.push_back(bytes4);
                                 }
 
-                                for (uint64_t k = 0; k < (number_of_languages * (uint64_t)0x4 + (uint64_t)0x1); k++)
-                                {
-                                    json_meta_data.push_back(locr_data->data()[k]);
-                                }
+								for (uint64_t k = 0; k < (number_of_languages * (uint64_t)0x4 + (isLOCRv2 ? (uint64_t)0x1 : (uint64_t)0x0)); k++)
+								{
+									json_meta_data.push_back(locr_data->data()[k]);
+								}
 
                                 for (uint64_t k = 0; k < number_of_languages; k++)
                                 {
