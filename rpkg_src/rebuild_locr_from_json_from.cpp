@@ -177,7 +177,7 @@ void rpkg_function::rebuild_locr_from_json_from(std::string &input_path, std::st
                 }
 
                 bool isLOCRv2 = false;
-				bool symKey = false;
+                bool symKey = false;
 
                 if (input_json_meta_file.get() == 0)
                 {
@@ -293,22 +293,22 @@ void rpkg_function::rebuild_locr_from_json_from(std::string &input_path, std::st
                     languages.push_back("cn");
                     languages.push_back("jp");
                 }
-				else if (input_json_meta_file_size == 0x28)
-				{
-					languages.push_back("xx");
-					languages.push_back("en");
-					languages.push_back("fr");
-					languages.push_back("it");
-					languages.push_back("de");
-					languages.push_back("es");
-					languages.push_back("ru");
-					languages.push_back("mx");
-					languages.push_back("br");
-					languages.push_back("pl");
+                else if (input_json_meta_file_size == 0x28)
+                {
+                    languages.push_back("xx");
+                    languages.push_back("en");
+                    languages.push_back("fr");
+                    languages.push_back("it");
+                    languages.push_back("de");
+                    languages.push_back("es");
+                    languages.push_back("ru");
+                    languages.push_back("mx");
+                    languages.push_back("br");
+                    languages.push_back("pl");
 
-					LOG("Symmetric key cipher identified");
-					symKey = true;
-				}
+                    LOG("Symmetric key cipher identified");
+                    symKey = true;
+                }
 
                 std::vector<bool> language_in_locr;
 
@@ -328,7 +328,8 @@ void rpkg_function::rebuild_locr_from_json_from(std::string &input_path, std::st
                     }
                 }
 
-                if (isLOCRv2) locr_data.push_back(input_json_meta_header.data()[0]);
+                if (isLOCRv2)
+                    locr_data.push_back(input_json_meta_header.data()[0]);
 
                 uint32_t offset = input_json_meta_file_size;
                 uint32_t prevoffset;
@@ -366,21 +367,21 @@ void rpkg_function::rebuild_locr_from_json_from(std::string &input_path, std::st
 
                                                 uint32_t string_length = (uint32_t)temp_string.length();
 
-												if (symKey)
-												{
-													locr_section_size += (uint32_t)temp_string.size() + (uint32_t)0x9;
-												}
-												else
-												{
-													while (string_length % 8 != 0)
-													{
-														string_length++;
+                                                if (symKey)
+                                                {
+                                                    locr_section_size += (uint32_t)temp_string.size() + (uint32_t)0x9;
+                                                }
+                                                else
+                                                {
+                                                    while (string_length % 8 != 0)
+                                                    {
+                                                        string_length++;
 
-														temp_string.push_back(0x0);
-													}
+                                                        temp_string.push_back(0x0);
+                                                    }
 
-													locr_section_size += (uint32_t)temp_string.size() + (uint32_t)0x9;
-												}
+                                                    locr_section_size += (uint32_t)temp_string.size() + (uint32_t)0x9;
+                                                }
 
                                                 temp_locr_language_section_strings.push_back(temp_string);
                                                 temp_locr_language_section_string_lengths.push_back((uint32_t)temp_string.size());
@@ -461,32 +462,32 @@ void rpkg_function::rebuild_locr_from_json_from(std::string &input_path, std::st
                                             locr_data.push_back(char4[k]);
                                         }
 
-										if (symKey)
-										{
-											for (uint32_t k = 0; k < locr_language_section_string_lengths.at(i).at(j); k++)
-											{
-												locr_data.push_back(crypto::symmetric_key_encrypt_localization(locr_language_section_strings.at(i).at(j)[(uint64_t)k]));
-											}
-										}
-										else
-										{
-											for (uint32_t k = 0; k < locr_language_section_string_lengths.at(i).at(j) / 8; k++)
-											{
-												uint32_t data[2];
-												std::memcpy(data, &locr_language_section_strings.at(i).at(j)[(uint64_t)k * (uint64_t)8], sizeof(uint32_t));
-												std::memcpy(data + 1, &locr_language_section_strings.at(i).at(j)[(uint64_t)k * (uint64_t)8 + (uint64_t)4], sizeof(uint32_t));
+                                        if (symKey)
+                                        {
+                                            for (uint32_t k = 0; k < locr_language_section_string_lengths.at(i).at(j); k++)
+                                            {
+                                                locr_data.push_back(crypto::symmetric_key_encrypt_localization(locr_language_section_strings.at(i).at(j)[(uint64_t)k]));
+                                            }
+                                        }
+                                        else
+                                        {
+                                            for (uint32_t k = 0; k < locr_language_section_string_lengths.at(i).at(j) / 8; k++)
+                                            {
+                                                uint32_t data[2];
+                                                std::memcpy(data, &locr_language_section_strings.at(i).at(j)[(uint64_t)k * (uint64_t)8], sizeof(uint32_t));
+                                                std::memcpy(data + 1, &locr_language_section_strings.at(i).at(j)[(uint64_t)k * (uint64_t)8 + (uint64_t)4], sizeof(uint32_t));
 
-												crypto::xtea_encrypt_localization(data);
+                                                crypto::xtea_encrypt_localization(data);
 
-												std::memcpy(&locr_language_section_strings.at(i).at(j)[(uint64_t)k * (uint64_t)8], data, sizeof(uint32_t));
-												std::memcpy(&locr_language_section_strings.at(i).at(j)[(uint64_t)k * (uint64_t)8 + (uint64_t)4], data + 1, sizeof(uint32_t));
-											}
+                                                std::memcpy(&locr_language_section_strings.at(i).at(j)[(uint64_t)k * (uint64_t)8], data, sizeof(uint32_t));
+                                                std::memcpy(&locr_language_section_strings.at(i).at(j)[(uint64_t)k * (uint64_t)8 + (uint64_t)4], data + 1, sizeof(uint32_t));
+                                            }
 
-											for (uint64_t k = 0; k < locr_language_section_string_lengths.at(i).at(j); k++)
-											{
-												locr_data.push_back(locr_language_section_strings.at(i).at(j)[k]);
-											}
-										}
+                                            for (uint64_t k = 0; k < locr_language_section_string_lengths.at(i).at(j); k++)
+                                            {
+                                                locr_data.push_back(locr_language_section_strings.at(i).at(j)[k]);
+                                            }
+                                        }
 
                                         locr_data.push_back(0x0);
                                     }

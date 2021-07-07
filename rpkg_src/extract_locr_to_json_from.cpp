@@ -225,7 +225,7 @@ void rpkg_function::extract_locr_to_json_from(std::string &input_path, std::stri
                                 uint32_t bytes4 = 0;
                                 uint64_t bytes8 = 0;
                                 bool isLOCRv2 = false;
-								bool symKey = false;
+                                bool symKey = false;
 
                                 if ((unsigned int)locr_data->data()[0] == 0)
                                 {
@@ -244,8 +244,8 @@ void rpkg_function::extract_locr_to_json_from(std::string &input_path, std::stri
 
                                 if (number_of_languages == 10)
                                 {
-									LOG("Symmetric key cipher identified");
-									symKey = true;
+                                    LOG("Symmetric key cipher identified");
+                                    symKey = true;
                                 }
 
                                 for (uint64_t k = 0; k < number_of_languages; k++)
@@ -304,79 +304,78 @@ void rpkg_function::extract_locr_to_json_from(std::string &input_path, std::stri
 
                                             position += 1;
 
-											if (symKey)
-											{
-												for (uint32_t m = 0; m < temp_language_string_length.back(); m++)
-												{
-													temp_string.at(m) = crypto::symmetric_key_decrypt_localization(temp_string.at(m));
-												}
+                                            if (symKey)
+                                            {
+                                                for (uint32_t m = 0; m < temp_language_string_length.back(); m++)
+                                                {
+                                                    temp_string.at(m) = crypto::symmetric_key_decrypt_localization(temp_string.at(m));
+                                                }
 
-												json temp_json_object2;
+                                                json temp_json_object2;
 
-												temp_json_object2["StringHash"] = temp_language_string_hash.back();
-												temp_json_object2["String"] = std::string(temp_string.begin(), temp_string.end());
+                                                temp_json_object2["StringHash"] = temp_language_string_hash.back();
+                                                temp_json_object2["String"] = std::string(temp_string.begin(), temp_string.end());
 
-												temp_language_json_object.push_back(temp_json_object2);
-											}
-											else
-											{
-												if (temp_language_string_length.back() % 8 != 0)
-												{
-													LOG_AND_EXIT("Error: LOCR file " + hash_file_name + " in " + rpkgs.at(i).rpkg_file_name + " is malformed.");
-												}
+                                                temp_language_json_object.push_back(temp_json_object2);
+                                            }
+                                            else
+                                            {
+                                                if (temp_language_string_length.back() % 8 != 0)
+                                                {
+                                                    LOG_AND_EXIT("Error: LOCR file " + hash_file_name + " in " + rpkgs.at(i).rpkg_file_name + " is malformed.");
+                                                }
 
-												for (uint32_t m = 0; m < temp_language_string_length.back() / 8; m++)
-												{
-													uint32_t data[2];
-													std::memcpy(data, &temp_string[(uint64_t)m * (uint64_t)8], sizeof(uint32_t));
-													std::memcpy(data + 1, &temp_string[(uint64_t)m * (uint64_t)8 + (uint64_t)4], sizeof(uint32_t));
+                                                for (uint32_t m = 0; m < temp_language_string_length.back() / 8; m++)
+                                                {
+                                                    uint32_t data[2];
+                                                    std::memcpy(data, &temp_string[(uint64_t)m * (uint64_t)8], sizeof(uint32_t));
+                                                    std::memcpy(data + 1, &temp_string[(uint64_t)m * (uint64_t)8 + (uint64_t)4], sizeof(uint32_t));
 
-													crypto::xtea_decrypt_localization(data);
+                                                    crypto::xtea_decrypt_localization(data);
 
-													std::memcpy(&temp_string[(uint64_t)m * (uint64_t)8], data, sizeof(uint32_t));
-													std::memcpy(&temp_string[(uint64_t)m * (uint64_t)8 + (uint64_t)4], data + 1, sizeof(uint32_t));
-												}
+                                                    std::memcpy(&temp_string[(uint64_t)m * (uint64_t)8], data, sizeof(uint32_t));
+                                                    std::memcpy(&temp_string[(uint64_t)m * (uint64_t)8 + (uint64_t)4], data + 1, sizeof(uint32_t));
+                                                }
 
-												uint32_t last_zero_position = (uint32_t)temp_string.size();
+                                                uint32_t last_zero_position = (uint32_t)temp_string.size();
 
-												if (temp_string.size() > 0)
-												{
-													uint32_t m = (uint32_t)(temp_string.size() - 1);
+                                                if (temp_string.size() > 0)
+                                                {
+                                                    uint32_t m = (uint32_t)(temp_string.size() - 1);
 
-													while (m >= 0)
-													{
-														if (temp_string.at(m) != 0)
-														{
-															break;
-														}
-														else
-														{
-															last_zero_position--;
-														}
+                                                    while (m >= 0)
+                                                    {
+                                                        if (temp_string.at(m) != 0)
+                                                        {
+                                                            break;
+                                                        }
+                                                        else
+                                                        {
+                                                            last_zero_position--;
+                                                        }
 
-														m--;
-													}
-												}
+                                                        m--;
+                                                    }
+                                                }
 
-												std::string temp_string_with_zero_pad_removed = std::string(temp_string.begin(), temp_string.end()).substr(0, last_zero_position);
+                                                std::string temp_string_with_zero_pad_removed = std::string(temp_string.begin(), temp_string.end()).substr(0, last_zero_position);
 
-												temp_language_string.push_back(temp_string_with_zero_pad_removed);
+                                                temp_language_string.push_back(temp_string_with_zero_pad_removed);
 
-												std::pair<uint32_t, std::string> temp_pair;
+                                                std::pair<uint32_t, std::string> temp_pair;
 
-												temp_pair.first = temp_language_string_hash.back();
-												temp_pair.second = temp_language_string.back();
+                                                temp_pair.first = temp_language_string_hash.back();
+                                                temp_pair.second = temp_language_string.back();
 
-												temp_language_string_set.insert(temp_pair);
-											
+                                                temp_language_string_set.insert(temp_pair);
 
-												json temp_json_object2;
+                                                json temp_json_object2;
 
-												temp_json_object2["StringHash"] = temp_language_string_hash.back();
-												temp_json_object2["String"] = temp_language_string.back();
+                                                temp_json_object2["StringHash"] = temp_language_string_hash.back();
+                                                temp_json_object2["String"] = temp_language_string.back();
 
-												temp_language_json_object.push_back(temp_json_object2);
-											}
+                                                temp_language_json_object.push_back(temp_json_object2);
+                                            }
                                         }
 
                                         json_object.push_back(temp_language_json_object);
