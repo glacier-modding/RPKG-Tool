@@ -8,9 +8,23 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <windows.h>
 
 int main(int argc, char* argv[])
 {
+	// Gets the folder of the executable (OSX/Linux not tested)
+	#if defined(PLATFORM_POSIX) || defined(__linux__)
+		std::string sp;
+		std::ifstream("/proc/self/comm") >> sp;
+		exe_path = sp;
+	#elif defined(_WIN32)
+		char buf[MAX_PATH];
+		GetModuleFileNameA(nullptr, buf, MAX_PATH);
+		exe_path = std::string(buf).substr(0, std::string(buf).find_last_of("\\"));
+	#else
+		exe_path = "";
+	#endif
+
     if (argc < 2)
     {
         console::display_usage_info();

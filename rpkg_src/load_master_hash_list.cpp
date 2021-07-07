@@ -9,9 +9,10 @@ void generic_function::load_hash_list(bool exit_if_no_hash_list)
 {
     if (!hash_list_loaded)
     {
-        std::ifstream hash_list_file = std::ifstream("hash_list.txt", std::ifstream::binary);
+		std::string hash_path = exe_path + std::string("\\hash_list.txt");
+		std::ifstream hash_list_file = std::ifstream(hash_path, std::ifstream::binary);
 
-        if (file::path_exists("hash_list.txt"))
+        if (file::path_exists(hash_path))
         {
             if (!hash_list_file.good())
             {

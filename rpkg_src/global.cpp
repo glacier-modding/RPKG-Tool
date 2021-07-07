@@ -71,6 +71,7 @@ void* resource_tool_dll;
 ConvertMemoryResourceToJson resource_tool_ConvertMemoryResourceToJson;
 ConvertMemoryJsonToResource resource_tool_ConvertMemoryJsonToResource;
 GetJsonFromMemory resource_tool_GetJsonFromMemory;
+std::string exe_path;
 
 void initialize_type_map_h2()
 {

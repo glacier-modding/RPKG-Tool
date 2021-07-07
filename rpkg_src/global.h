@@ -286,3 +286,4 @@ typedef char* (__cdecl* GetJsonFromMemory)();
 extern ConvertMemoryResourceToJson resource_tool_ConvertMemoryResourceToJson;
 extern ConvertMemoryJsonToResource resource_tool_ConvertMemoryJsonToResource;
 extern GetJsonFromMemory resource_tool_GetJsonFromMemory;
+extern std::string exe_path;
