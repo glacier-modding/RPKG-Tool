@@ -25,9 +25,9 @@
 
 using json = nlohmann::ordered_json;
 
-int load_hash_list()
+int load_hash_list(char* path)
 {
-    generic_function::load_hash_list(true);
+    generic_function::load_hash_list(true, std::string(path));
 
     return hash_list_version;
 }

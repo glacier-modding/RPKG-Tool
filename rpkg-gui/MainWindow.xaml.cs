@@ -201,7 +201,7 @@ namespace rpkg
                 }
             }
 
-            int currentVersion = load_hash_list();
+            int currentVersion = load_hash_list(AppDomain.CurrentDomain.BaseDirectory + "\\hash_list.txt");
 
             DownloadExtractionProgress downloadExtractionProgress = new DownloadExtractionProgress();
             downloadExtractionProgress.operation = (int)Progress.Operation.MASS_EXTRACT;
@@ -4248,7 +4248,7 @@ namespace rpkg
         public static extern IntPtr get_hashes_with_no_reverse_depends();
 
         [DllImport("rpkg.dll", EntryPoint = "load_hash_list", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int load_hash_list();
+        public static extern int load_hash_list(string path);
 
         [DllImport("rpkg.dll", EntryPoint = "get_hash_list_string", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr get_hash_list_string(string hash_string);

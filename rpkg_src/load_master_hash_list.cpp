@@ -5,11 +5,11 @@
 #include <fstream>
 #include <iostream>
 
-void generic_function::load_hash_list(bool exit_if_no_hash_list)
+void generic_function::load_hash_list(bool exit_if_no_hash_list, std::string path)
 {
     if (!hash_list_loaded)
     {
-		std::string hash_path = exe_path + std::string("\\hash_list.txt");
+		std::string hash_path = (path == "" ? (exe_path + std::string("\\hash_list.txt")) : path);
 		std::ifstream hash_list_file = std::ifstream(hash_path, std::ifstream::binary);
 
         if (file::path_exists(hash_path))
