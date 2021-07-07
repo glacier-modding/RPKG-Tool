@@ -62,3 +62,14 @@ void crypto::xtea_decrypt_packagedefinition_thumbs(uint32_t v[2])
     }
     v[0] = v0; v[1] = v1;
 }
+
+int crypto::symmetric_key_encrypt_localization(char value) {
+	value ^= 226;
+	return (value & 0x81) | (value & 2) << 1 | (value & 4) << 2 | (value & 8) << 3 | (value & 0x10) >> 3 | (value & 0x20) >> 2 | (value & 0x40) >> 1;
+}
+
+int crypto::symmetric_key_decrypt_localization(char value) {
+	int bits[] = { value & 1, (value & 2) >> 1, (value & 4) >> 2, (value & 8) >> 3, (value & 16) >> 4, (value & 32) >> 5, (value & 64) >> 6, (value & 128) >> 7 };
+	int output = (bits[0] << 0) | (bits[1] << 4) | (bits[2] << 1) | (bits[3] << 5) | (bits[4] << 2) | (bits[5] << 6) | (bits[6] << 3) | (bits[7] << 7);
+	return output ^ 226;
+}
