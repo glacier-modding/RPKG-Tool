@@ -227,7 +227,7 @@ void rpkg_function::extract_locr_to_json_from(std::string &input_path, std::stri
                                 bool isLOCRv2 = false;
                                 bool symKey = false;
 
-                                if ((unsigned int)locr_data->data()[0] == 0)
+                                if ((unsigned int)locr_data->data()[0] == 0 || (unsigned int)locr_data->data()[0] == 1)
                                 {
                                     position += 1;
                                     std::memcpy(&number_of_languages, &locr_data->data()[position], sizeof(bytes4));
@@ -240,7 +240,9 @@ void rpkg_function::extract_locr_to_json_from(std::string &input_path, std::stri
                                     number_of_languages = (number_of_languages) / 4;
                                 }
 
+                            #ifdef _DEBUG
                                 LOG((isLOCRv2 ? "LOCRv2 identified" : "LOCRv1 identified"));
+                            #endif
 
                                 if (number_of_languages == 10)
                                 {

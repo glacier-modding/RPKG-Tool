@@ -178,13 +178,16 @@ void rpkg_function::rebuild_locr_from_json_from(std::string &input_path, std::st
 
                 bool isLOCRv2 = false;
                 bool symKey = false;
+				int identifyByte = input_json_meta_file.get();
 
-                if (input_json_meta_file.get() == 0)
+                if (identifyByte == 0 || identifyByte == 1)
                 {
                     isLOCRv2 = true;
                 }
 
-                LOG((isLOCRv2 ? "LOCRv2 identified" : "LOCRv1 identified"));
+				#ifdef _DEBUG
+					LOG((isLOCRv2 ? "LOCRv2 identified" : "LOCRv1 identified"));
+				#endif
 
                 input_json_meta_file.seekg(0, std::ios_base::end);
 
