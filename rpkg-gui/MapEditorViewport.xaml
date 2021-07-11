@@ -1,0 +1,27 @@
+﻿<Window x:Class="rpkg.MapEditorViewport"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:rpkg"
+        mc:Ignorable="d"
+        Title="MapEditorViewport" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="4*"/>
+            <RowDefinition Height="4*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+
+        <Button x:Name="testBtn" Content="Rocco" Click="testBtn_Click" Grid.Row="0"/>
+
+        <Image Source="823028032012025906.png" VerticalAlignment="Top" Grid.Row="1"/>
+        
+        <Border x:Name="testViewPort" Grid.Row="2">
+        </Border>
+    </Grid>
+</Window>

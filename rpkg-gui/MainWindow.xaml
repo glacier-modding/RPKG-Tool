@@ -91,6 +91,7 @@
                     </MenuItem>
                     <MenuItem Click="About_Click" Header="About"/>
                     <MenuItem Click="Exit_Click" Header="Exit"/>
+                    <MenuItem Click="Test_Click" Header="Test"/>
                 </Menu>
             </DockPanel>
             <Image Grid.Row="0" Grid.Column="2" Source="Discord.png" Cursor="Hand" MouseDown="DiscordInvite_MouseDown"/>

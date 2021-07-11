@@ -107,11 +107,15 @@
     <Compile Include="Filter.xaml.cs">
       <DependentUpon>Filter.xaml</DependentUpon>
     </Compile>
+    <Compile Include="G3dHwndHost.cs" />
     <Compile Include="HashCalculator.xaml.cs">
       <DependentUpon>HashCalculator.xaml</DependentUpon>
     </Compile>
     <Compile Include="Licenses.xaml.cs">
       <DependentUpon>Licenses.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MapEditorViewport.xaml.cs">
+      <DependentUpon>MapEditorViewport.xaml</DependentUpon>
     </Compile>
     <Compile Include="Message.xaml.cs">
       <DependentUpon>Message.xaml</DependentUpon>
@@ -159,6 +163,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="MapEditorViewport.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Message.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -275,6 +283,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Condition="'$(Configuration)' == 'Release'" Include="..\_build\$(Configuration)\rpkg.dll" LogicalName="costura64.rpkg.dll" ManifestResourceName="costura64.rpkg.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="823028032012025906.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

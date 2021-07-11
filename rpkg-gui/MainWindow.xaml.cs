@@ -4128,6 +4128,12 @@ namespace rpkg
 
             Close();
         }
+        
+        private void Test_Click(object sender, RoutedEventArgs e)
+        {
+            MapEditorViewport foo = new MapEditorViewport();
+        }
+
 
         private UserSettings userSettings;
         private bool oneOrMoreRPKGsHaveBeenImported = false;
