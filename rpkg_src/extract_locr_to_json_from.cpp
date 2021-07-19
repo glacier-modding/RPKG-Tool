@@ -244,7 +244,7 @@ void rpkg_function::extract_locr_to_json_from(std::string &input_path, std::stri
                                 LOG((isLOCRv2 ? "LOCRv2 identified" : "LOCRv1 identified"));
                             #endif
 
-                                if (number_of_languages == 10)
+                                if (number_of_languages == 10 && !isLOCRv2)
                                 {
                                     LOG("Symmetric key cipher identified");
                                     symKey = true;
