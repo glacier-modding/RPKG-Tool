@@ -178,16 +178,16 @@ void rpkg_function::rebuild_locr_from_json_from(std::string &input_path, std::st
 
                 bool isLOCRv2 = false;
                 bool symKey = false;
-				int identifyByte = input_json_meta_file.get();
+                int identifyByte = input_json_meta_file.get();
 
                 if (identifyByte == 0 || identifyByte == 1)
                 {
                     isLOCRv2 = true;
                 }
 
-				#ifdef _DEBUG
-					LOG((isLOCRv2 ? "LOCRv2 identified" : "LOCRv1 identified"));
-				#endif
+#ifdef _DEBUG
+                LOG((isLOCRv2 ? "LOCRv2 identified" : "LOCRv1 identified"));
+#endif
 
                 input_json_meta_file.seekg(0, std::ios_base::end);
 
@@ -258,6 +258,7 @@ void rpkg_function::rebuild_locr_from_json_from(std::string &input_path, std::st
 
                 if (input_json_meta_file_size == 0x19)
                 {
+                    // Old Hitman 3 LOCR
                     languages.push_back("xx");
                     languages.push_back("en");
                     languages.push_back("fr");
@@ -265,8 +266,22 @@ void rpkg_function::rebuild_locr_from_json_from(std::string &input_path, std::st
                     languages.push_back("de");
                     languages.push_back("es");
                 }
+                else if (input_json_meta_file_size == 0x25)
+                {
+                    // New Hitman 3 LOCR
+                    languages.push_back("xx");
+                    languages.push_back("en");
+                    languages.push_back("fr");
+                    languages.push_back("it");
+                    languages.push_back("de");
+                    languages.push_back("es");
+                    languages.push_back("ru");
+                    languages.push_back("cn");
+                    languages.push_back("tc");
+                }
                 else if (input_json_meta_file_size == 0x35)
                 {
+                    // Hitman 2
                     languages.push_back("xx");
                     languages.push_back("en");
                     languages.push_back("fr");
@@ -283,6 +298,7 @@ void rpkg_function::rebuild_locr_from_json_from(std::string &input_path, std::st
                 }
                 else if (input_json_meta_file_size == 0x30)
                 {
+                    // Hitman 2016 (post GOTY?)
                     languages.push_back("xx");
                     languages.push_back("en");
                     languages.push_back("fr");
@@ -298,6 +314,7 @@ void rpkg_function::rebuild_locr_from_json_from(std::string &input_path, std::st
                 }
                 else if (input_json_meta_file_size == 0x28)
                 {
+                    // Hitman 2016 (pre GOTY?)
                     languages.push_back("xx");
                     languages.push_back("en");
                     languages.push_back("fr");

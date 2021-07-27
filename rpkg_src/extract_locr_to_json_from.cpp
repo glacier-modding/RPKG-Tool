@@ -201,19 +201,6 @@ void rpkg_function::extract_locr_to_json_from(std::string &input_path, std::stri
                                 std::vector<std::vector<std::string>> language_string;
                                 std::vector<std::set<std::pair<uint32_t, std::string>>> language_string_set;
                                 std::vector<std::string> languages;
-                                languages.push_back("xx");
-                                languages.push_back("en");
-                                languages.push_back("fr");
-                                languages.push_back("it");
-                                languages.push_back("de");
-                                languages.push_back("es");
-                                languages.push_back("ru");
-                                languages.push_back("mx");
-                                languages.push_back("br");
-                                languages.push_back("pl");
-                                languages.push_back("cn");
-                                languages.push_back("jp");
-                                languages.push_back("tc");
 
                                 std::vector<char> json_meta_data;
 
@@ -240,14 +227,44 @@ void rpkg_function::extract_locr_to_json_from(std::string &input_path, std::stri
                                     number_of_languages = (number_of_languages) / 4;
                                 }
 
-                            #ifdef _DEBUG
+#ifdef _DEBUG
                                 LOG((isLOCRv2 ? "LOCRv2 identified" : "LOCRv1 identified"));
-                            #endif
+#endif
 
                                 if (number_of_languages == 10 && !isLOCRv2)
                                 {
                                     LOG("Symmetric key cipher identified");
                                     symKey = true;
+                                }
+
+                                // Quick fix for New Hitman 3 LOCR
+                                if (number_of_languages == 9 && isLOCRv2)
+                                {
+                                    languages.push_back("xx");
+                                    languages.push_back("en");
+                                    languages.push_back("fr");
+                                    languages.push_back("it");
+                                    languages.push_back("de");
+                                    languages.push_back("es");
+                                    languages.push_back("ru");
+                                    languages.push_back("cn");
+                                    languages.push_back("tc");
+                                }
+                                else
+                                {
+                                    languages.push_back("xx");
+                                    languages.push_back("en");
+                                    languages.push_back("fr");
+                                    languages.push_back("it");
+                                    languages.push_back("de");
+                                    languages.push_back("es");
+                                    languages.push_back("ru");
+                                    languages.push_back("mx");
+                                    languages.push_back("br");
+                                    languages.push_back("pl");
+                                    languages.push_back("cn");
+                                    languages.push_back("jp");
+                                    languages.push_back("tc");
                                 }
 
                                 for (uint64_t k = 0; k < number_of_languages; k++)

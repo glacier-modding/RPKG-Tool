@@ -20,7 +20,7 @@
 
 using json = nlohmann::ordered_json;
 
-void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::string& filter, std::string& output_path, bool output_to_string)
+void rpkg_function::extract_rtlv_to_json_from(std::string &input_path, std::string &filter, std::string &output_path, bool output_to_string)
 {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
@@ -180,7 +180,7 @@ void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::stri
 
                                 std::vector<char> output_data(decompressed_size, 0);
 
-                                std::vector<char>* rtlv_data;
+                                std::vector<char> *rtlv_data;
 
                                 if (rpkgs.at(i).hash.at(hash_index).is_lz4ed)
                                 {
@@ -201,6 +201,7 @@ void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::stri
                                 std::vector<char> rtlv_header;
                                 uint32_t languages_starting_offset = 0;
                                 uint32_t number_of_languages = 0;
+                                uint32_t check_for_languages = 0;
                                 std::vector<uint32_t> language_offsets;
                                 std::vector<std::vector<char>> language_data;
                                 std::vector<uint16_t> language_data_sizes;
@@ -208,19 +209,6 @@ void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::stri
                                 std::vector<std::vector<std::string>> language_string;
                                 std::vector<std::set<std::pair<uint32_t, std::string>>> language_string_set;
                                 std::vector<std::string> languages;
-                                languages.push_back("xx");
-                                languages.push_back("en");
-                                languages.push_back("fr");
-                                languages.push_back("it");
-                                languages.push_back("de");
-                                languages.push_back("es");
-                                languages.push_back("ru");
-                                languages.push_back("mx");
-                                languages.push_back("br");
-                                languages.push_back("pl");
-                                languages.push_back("cn");
-                                languages.push_back("jp");
-                                languages.push_back("tc");
 
                                 std::vector<char> json_meta_data;
 
@@ -236,6 +224,37 @@ void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::stri
 
                                 position = 0x58;
                                 std::memcpy(&languages_starting_offset, &rtlv_data->data()[position], sizeof(bytes4));
+
+                                // Quick fix for New Hitman 3 LOCR
+                                std::memcpy(&check_for_languages, &rtlv_data->data()[0xA4], sizeof(bytes4));
+                                if (check_for_languages == 9)
+                                {
+                                    languages.push_back("xx");
+                                    languages.push_back("en");
+                                    languages.push_back("fr");
+                                    languages.push_back("it");
+                                    languages.push_back("de");
+                                    languages.push_back("es");
+                                    languages.push_back("ru");
+                                    languages.push_back("cn");
+                                    languages.push_back("tc");
+                                }
+                                else
+                                {
+                                    languages.push_back("xx");
+                                    languages.push_back("en");
+                                    languages.push_back("fr");
+                                    languages.push_back("it");
+                                    languages.push_back("de");
+                                    languages.push_back("es");
+                                    languages.push_back("ru");
+                                    languages.push_back("mx");
+                                    languages.push_back("br");
+                                    languages.push_back("pl");
+                                    languages.push_back("cn");
+                                    languages.push_back("jp");
+                                    languages.push_back("tc");
+                                }
 
                                 position = 0;
                                 std::memcpy(&rtlv_header_value, &rtlv_data->data()[position], sizeof(bytes8));
