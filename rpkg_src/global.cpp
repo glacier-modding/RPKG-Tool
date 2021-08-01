@@ -38318,6 +38318,16 @@ void initialize_enum_map_h3()
 			{ 3, "QUALITY_LEAVE" },
 		};
 
+		(*enum_map_h3)["ZModalDialogCondition.EPriorityBit"] = {
+			{ 1, "Critical" },
+			{ 2, "GDPRConsent" },
+			{ 4, "MultiplayerSystem" },
+			{ 8, "Disconnect" },
+			{ 16, "System" },
+			{ 32, "Normal" },
+			{ 64, "Low" },
+		};
+
 		(*enum_map_h3)["ZMoveToOrder.EMoveSpeed"] = {
 			{ 0, "MS_AUTO" },
 			{ 1, "MS_SPRINT" },
