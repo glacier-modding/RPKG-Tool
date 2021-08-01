@@ -115,6 +115,10 @@ int main(int argc, char* argv[])
                 std::cout << std::endl << "RPKG> ";
             }
         }
+        else if (std::string(argv[1]) == "-licenses")
+        {
+            console::display_licenses();
+        }
         else
         {
             console::display_usage_info();
