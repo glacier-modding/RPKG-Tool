@@ -7,62 +7,50 @@
 void rpkg_function::extract_hash_meta(uint64_t i, uint64_t j, std::string& final_path)
 {
     std::vector<char> meta_data;
-    char char1[1];
-    char char4[4];
-    char char8[8];
 
-    std::memcpy(&char8, &rpkgs.at(i).hash.at(j).hash_value, sizeof(uint64_t));
-    for (uint64_t k = 0; k < sizeof(uint64_t); k++)
+    for (int k = 0; k < sizeof(hash::hash_value); k++)
     {
-        meta_data.push_back(char8[k]);
+        meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).hash_value + k));
     }
 
-    std::memcpy(&char8, &rpkgs.at(i).hash.at(j).hash_offset, sizeof(uint64_t));
-    for (uint64_t k = 0; k < sizeof(uint64_t); k++)
+    for (int k = 0; k < sizeof(hash::hash_offset); k++)
     {
-        meta_data.push_back(char8[k]);
+        meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).hash_offset + k));
     }
 
-    std::memcpy(&char4, &rpkgs.at(i).hash.at(j).hash_size, sizeof(uint32_t));
-    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+    for (int k = 0; k < sizeof(hash::hash_size); k++)
     {
-        meta_data.push_back(char4[k]);
+        meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).hash_size + k));
     }
 
-    std::memcpy(&char4, &rpkgs.at(i).hash.at(j).hash_resource_type, sizeof(uint32_t));
-    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+    for (int k = 0; k < rpkgs.at(i).hash.at(j).hash_resource_type.length(); k++)
     {
-        meta_data.push_back(char4[k]);
+        meta_data.push_back(*(rpkgs.at(i).hash.at(j).hash_resource_type.data() + k));
     }
 
-    std::memcpy(&char4, &rpkgs.at(i).hash.at(j).hash_reference_table_size, sizeof(uint32_t));
-    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+    for (int k = 0; k < sizeof(hash::hash_reference_table_size); k++)
     {
-        meta_data.push_back(char4[k]);
+        meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).hash_reference_table_size + k));
     }
 
-    std::memcpy(&char4, &rpkgs.at(i).hash.at(j).hash_reference_table_dummy, sizeof(uint32_t));
-    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+    for (int k = 0; k < sizeof(hash::hash_reference_table_dummy); k++)
     {
-        meta_data.push_back(char4[k]);
+        meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).hash_reference_table_dummy + k));
     }
 
-    std::memcpy(&char4, &rpkgs.at(i).hash.at(j).hash_size_final, sizeof(uint32_t));
-    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+    for (int k = 0; k < sizeof(hash::hash_size_final); k++)
     {
-        meta_data.push_back(char4[k]);
+        meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).hash_size_final + k));
     }
 
-    std::memcpy(&char4, &rpkgs.at(i).hash.at(j).hash_size_in_memory, sizeof(uint32_t));
-    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+    for (int k = 0; k < sizeof(hash::hash_size_in_memory); k++)
     {
-        meta_data.push_back(char4[k]);
+        meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).hash_size_in_memory + k));
     }
 
-    std::memcpy(&char4, &rpkgs.at(i).hash.at(j).hash_size_in_video_memory, sizeof(uint32_t));
-    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+    for (int k = 0; k < sizeof(hash::hash_size_in_video_memory); k++)
     {
-        meta_data.push_back(char4[k]);
+        meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).hash_size_in_video_memory + k));
     }
 
     if (rpkgs.at(i).hash.at(j).hash_reference_table_size > 0)
@@ -70,31 +58,28 @@ void rpkg_function::extract_hash_meta(uint64_t i, uint64_t j, std::string& final
         uint32_t hash_reference_table_size_count = 0;
         uint32_t temp_hash_reference_count = rpkgs.at(i).hash.at(j).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
-        std::memcpy(&char4, &rpkgs.at(i).hash.at(j).hash_reference_data.hash_reference_count, sizeof(uint32_t));
-        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
+        for (int k = 0; k < sizeof(hash_reference_variables::hash_reference_count); k++)
         {
-            meta_data.push_back(char4[k]);
+            meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).hash_reference_data.hash_reference_count + k));
         }
-        hash_reference_table_size_count += 4;
+        hash_reference_table_size_count += sizeof(hash_reference_variables::hash_reference_count);
 
         for (uint64_t k = 0; k < temp_hash_reference_count; k++)
         {
-            std::memcpy(&char1, &rpkgs.at(i).hash.at(j).hash_reference_data.hash_reference_type.at(k), sizeof(uint8_t));
-            for (uint64_t l = 0; l < sizeof(uint8_t); l++)
+            for (int l = 0; l < sizeof(decltype(hash_reference_variables::hash_reference_type)::value_type); l++)
             {
-                meta_data.push_back(char1[l]);
+                meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).hash_reference_data.hash_reference_type.at(k) + l));
             }
-            hash_reference_table_size_count += 1;
+            hash_reference_table_size_count += sizeof(decltype(hash_reference_variables::hash_reference_type)::value_type);
         }
 
         for (uint64_t k = 0; k < temp_hash_reference_count; k++)
         {
-            std::memcpy(&char8, &rpkgs.at(i).hash.at(j).hash_reference_data.hash_reference.at(k), sizeof(uint64_t));
-            for (uint64_t l = 0; l < sizeof(uint64_t); l++)
+            for (int l = 0; l < sizeof(decltype(hash_reference_variables::hash_reference)::value_type); l++)
             {
-                meta_data.push_back(char8[l]);
+                meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).hash_reference_data.hash_reference.at(k) + l));
             }
-            hash_reference_table_size_count += 8;
+            hash_reference_table_size_count += sizeof(decltype(hash_reference_variables::hash_reference)::value_type);
         }
 
         if (hash_reference_table_size_count != rpkgs.at(i).hash.at(j).hash_reference_table_size)

@@ -17,6 +17,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using MahApps.Metro.Controls;
 using ControlzEx.Theming;
+using System.Globalization;
 
 namespace rpkg
 {
@@ -1831,13 +1832,13 @@ namespace rpkg
             float b = 0;
             float a = 0;
 
-            float.TryParse(propertyValueVals[propertyIndex][0], out r);
-            float.TryParse(propertyValueVals[propertyIndex][1], out g);
-            float.TryParse(propertyValueVals[propertyIndex][2], out b);
+            float.TryParse(propertyValueVals[propertyIndex][0], NumberStyles.Float, CultureInfo.InvariantCulture, out r);
+            float.TryParse(propertyValueVals[propertyIndex][1], NumberStyles.Float, CultureInfo.InvariantCulture, out g);
+            float.TryParse(propertyValueVals[propertyIndex][2], NumberStyles.Float, CultureInfo.InvariantCulture, out b);
 
             if (rgba_mode)
             {
-                float.TryParse(propertyValueVals[propertyIndex][3], out a);
+                float.TryParse(propertyValueVals[propertyIndex][3], NumberStyles.Float, CultureInfo.InvariantCulture, out a);
             }
 
             MahApps.Metro.Controls.ColorCanvas colorCanvas = new ColorCanvas();
@@ -2573,7 +2574,7 @@ namespace rpkg
 
             float temp_float = (float)temp_int / 255.0F;
 
-            return temp_float.ToString();
+            return temp_float.ToString(CultureInfo.InvariantCulture);
         }
 
         public string GetNewControlName(UInt32 temp_index, string input, string type)
