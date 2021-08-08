@@ -173,7 +173,7 @@ namespace rpkg
 			if (!File.Exists("hash_list.txt"))
 			{
 				MessageQuestion messageBox = new MessageQuestion();
-				messageBox.message.Content = "Error: The hash list file (hash_list.txt) is missing.\n\nIt is necessary to have this file for the optimal functioning of this program.\n\nClick OK to have it downloaded and extracted manually.\n\nThe program will automatically restart when done.\n\nYou can also download it manually from https://hitmandb.notex.app/latest-hashes.7z and extract it to the same directory as this program.";
+				messageBox.message.Content = "Error: The hash list file (hash_list.txt) is missing.\n\nIt is necessary to have this file for the optimal functioning of this program.\n\nClick OK to have it downloaded and extracted automatically.\n\nThe program will automatically restart when done.\n\nYou can also download it manually from https://hitmandb.notex.app/latest-hashes.7z and extract it to the same directory as this program.";
 				messageBox.ShowDialog();
 
 				//MessageBoxShow(messageBox.buttonPressed);
@@ -212,7 +212,7 @@ namespace rpkg
 			if (currentVersion < downloadExtractionProgress.currentVersionAvailable)
 			{
 				MessageQuestion messageBox = new MessageQuestion();
-				messageBox.message.Content = "There is a new version of the hash list available.\n\nWould you like to download it now and update your current hash list?\n\nClick OK to have it downloaded and extracted manually.\n\nThe program will automatically restart when done.";
+				messageBox.message.Content = "There is a new version of the hash list available.\n\nWould you like to download it now and update your current hash list?\n\nClick OK to have it downloaded and extracted automatically.\n\nThe program will automatically restart when done.";
 				messageBox.ShowDialog();
 
 				if (messageBox.buttonPressed == "OKButton")
