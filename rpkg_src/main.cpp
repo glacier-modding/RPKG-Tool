@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
 
             std::cout << "Type q or quit to exit rpkg-cli, and type h or help to display usage info." << std::endl << std::endl;
 
-            std::cout << "RPKG> ";
+            std::cout << "RPKG> " << std::flush;
 
             while (std::getline(std::cin, input))
             {
@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
                     std::cout << "Invalid command: " << input << std::endl << std::endl;
                 }
 
-                std::cout << std::endl << "RPKG> ";
+                std::cout << std::endl << "RPKG> " << std::flush;
             }
         }
         else if (std::string(argv[1]) == "-licenses")
