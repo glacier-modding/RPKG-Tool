@@ -60,11 +60,7 @@ void console::display_usage_info()
     LOG("        This causes rpkg-cli.exe to automatically enter RPKG extraction mode and");
     LOG("        will fully extract all the hash files/resources from each RPKG dragged");
     LOG("        and dropped upon rpkg-cli.exe. It mimics (-extract_from_rpkg) in behaviour.");
-    LOG("        One or more RPKG files can be dragged and dropped onto rpkg-cli.exe at a time.");
-    LOG("    - rpkg-cli.exe command JSON files can be dragged and dropped onto the rpkg-cli.exe file.");
-    LOG("        This causes rpkg-cli.exe to automatically enter rpkg-cli.exe command JSON mode and");
-    LOG("        will import, parse, and run all the commands listed in the input JSON file.");
-    LOG("        One or more JSON files can be dragged and dropped onto rpkg-cli.exe at a time." << std::endl);
+    LOG("        One or more RPKG files can be dragged and dropped onto rpkg-cli.exe at a time." << std::endl);
     LOG("  Command Line Options:");
     LOG("    -compute_ioi_hash <string>");
     LOG("        Computes the IOI style truncated md5 hash/runtimeid from a string.");
@@ -205,10 +201,6 @@ void console::display_usage_info()
     LOG("        extracted with (-extract_text_from or -extract_all_text_from).");
     LOG("    -regex_search <regex>");
     LOG("        Specifies the regex which is used to find within hash files/resources.");
-    LOG("    -rpkg_command_json <path to rpkg command json file>");
-    LOG("        Imports, parses, and runs all the commands listed in the input JSON file.");
-    LOG("        See included rpkg_command_reference.JSON for complete JSON command descriptions.");
-    LOG("        See included rpkg_command_JSON_examples\\*.JSON for some command JSON examples.");
     LOG("    -search_rpkg <path to RPKG file>");
     LOG("        Specifies RPKG file whose hash files/resources will to be searched through.");
     LOG("    -text_search <text string>");
@@ -314,9 +306,6 @@ void console::display_usage_info()
     LOG("        rpkg-cli.exe -text_search assembly -search_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"");
     LOG("    Search a RPKG file's hash files/resources by regex and filter by type ORES:");
     LOG("        rpkg-cli.exe -filter ORES -regex_search \"assembly:[\\w/_.]+\" -search_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"");
-    LOG("    Imports, parses, and runs all the commands listed in the input JSON file:");
-    LOG("      The JSON input below batch extracts from all the RPKGs in the Hitman 3 Runtime folder:");
-    LOG("        rpkg-cli.exe -rpkg_command_json rpkg_command-batch_extract_chunk_rpkgs.JSON");
     std::system("pause");
 }
 

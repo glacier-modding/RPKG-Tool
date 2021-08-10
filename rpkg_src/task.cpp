@@ -194,10 +194,6 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     {
         rpkg_function::rebuild_rtlv_from_json_from(input_path, filter, output_path);
     }
-    else if (command == "-rpkg_command_json")
-    {
-        generic_function::command_json(input_path);
-    }
     else if (command == "-search_rpkg")
     {
         rpkg_extraction_vars rpkg_vars;
@@ -251,10 +247,6 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     {
         dev_function::dev_extract_ores_strings(input_path, filter, output_path);
     }
-    else if (command == "-dev_extract_all_entity_ids")
-    {
-        //dev_function::dev_extract_all_entity_ids(input_path, filter, output_path);
-    }
     else if (command == "-dev_resource_tool")
     {
         dev_function::dev_resource_tool(input_path, filter, output_path);
@@ -281,14 +273,7 @@ void task::process_and_execute_files_draged_and_dropped(std::vector<std::string>
 {
     for (int i = 0; i < dragged_and_dropped_files.size(); i++)
     {
-        if (file::is_json_file(dragged_and_dropped_files.at(i)))
-        {
-            std::string command = "-rpkg_command_json";
-            std::string empty = "";
-
-            task::execute(command, dragged_and_dropped_files.at(i), empty, empty, empty, empty);
-        }
-        else if (file::is_rpkg_file(dragged_and_dropped_files.at(i)))
+        if (file::is_rpkg_file(dragged_and_dropped_files.at(i)))
         {
             std::string command = "-extract_from_rpkg";
             std::string empty = "";
@@ -363,7 +348,6 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                      "-rebuild_dlge_from_json_from",
                                                      "-rebuild_locr_from_json_from",
                                                      "-rebuild_rtlv_from_json_from",
-                                                     "-rpkg_command_json",
                                                      "-search_rpkg" };
 
     int command_count = 0;
