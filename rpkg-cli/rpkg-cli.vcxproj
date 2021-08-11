@@ -177,7 +177,6 @@
   <ItemGroup>
     <ClInclude Include="..\rpkg_src\borg.h" />
     <ClInclude Include="..\rpkg_src\command_line.h" />
-    <ClInclude Include="..\rpkg_src\compressed_master_hash_list.h" />
     <ClInclude Include="..\rpkg_src\console.h" />
     <ClInclude Include="..\rpkg_src\crypto.h" />
     <ClInclude Include="..\rpkg_src\dev_function.h" />
@@ -216,9 +215,6 @@
     <ClInclude Include="..\rpkg_src\thirdparty\lz4\xxhash.h" />
     <ClInclude Include="..\rpkg_src\thirdparty\md5\md5.h" />
     <ClInclude Include="..\rpkg_src\thirdparty\mikktspace\mikktspace.h" />
-    <ClInclude Include="..\rpkg_src\thirdparty\quaternions\quaternion.h" />
-    <ClInclude Include="..\rpkg_src\thirdparty\quaternions\quaternion_io.h" />
-    <ClInclude Include="..\rpkg_src\thirdparty\quaternions\quaternion_utils.h" />
     <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\Bit_stream.h" />
     <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\crc.h" />
     <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\errors.h" />

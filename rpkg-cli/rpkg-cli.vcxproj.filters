@@ -596,9 +596,6 @@
     <ClInclude Include="..\rpkg_src\util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\rpkg_src\compressed_master_hash_list.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\ww2oggcodebook.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -654,15 +651,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\rpkg_src\gpudevice.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\rpkg_src\thirdparty\quaternions\quaternion.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\rpkg_src\thirdparty\quaternions\quaternion_io.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\rpkg_src\thirdparty\quaternions\quaternion_utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\rpkg_src\thirdparty\directxmath\DirectXCollision.h">
