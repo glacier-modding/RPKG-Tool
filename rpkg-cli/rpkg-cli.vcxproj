@@ -12,7 +12,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\rpkg_src\borg.cpp" />
-    <ClCompile Include="..\rpkg_src\command_json.cpp" />
     <ClCompile Include="..\rpkg_src\command_line.cpp" />
     <ClCompile Include="..\rpkg_src\compute_ioi_hash.cpp" />
     <ClCompile Include="..\rpkg_src\compute_ioi_hash_from_file.cpp" />
@@ -22,7 +21,6 @@
     <ClCompile Include="..\rpkg_src\decrypt_packagedefinition_thumbs.cpp" />
     <ClCompile Include="..\rpkg_src\dev_compute_ioi_hash.cpp" />
     <ClCompile Include="..\rpkg_src\dev_diff_rpkg_supermetas.cpp" />
-    <ClCompile Include="..\rpkg_src\dev_extract_all_entity_ids.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_all_strings.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_materials_textures_strings.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_ores_strings.cpp" />

@@ -111,9 +111,6 @@
     <ClCompile Include="..\rpkg_src\thirdparty\vorbis\lib\window.c">
       <Filter>Source Files\oggvorbis</Filter>
     </ClCompile>
-    <ClCompile Include="..\rpkg_src\command_json.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\rpkg_src\command_line.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -322,9 +319,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\rpkg_src\dev_extract_ores_strings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\rpkg_src\dev_extract_all_entity_ids.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\rpkg_src\extract_all_prim_of_temp_from.cpp">
