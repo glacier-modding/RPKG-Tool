@@ -2751,8 +2751,6 @@ namespace rpkg
 
                 if (messageBox.buttonPressed == "OKButton")
                 {
-                    MessageBoxShow("WARNING: When selecting the output folder on the next dialog window...\n\nDo not select the Hitman Runtime folder as the output folder otherwise your Hitman game RPKGs could be overwritten!");
-
                     var folderDialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
 
                     folderDialog.Description = "Save Changes And Generate New TEMP file(s):";
@@ -2875,8 +2873,6 @@ namespace rpkg
 
                 if (messageBox.buttonPressed == "OKButton")
                 {
-                    MessageBoxShow("WARNING: When selecting the output folder on the next dialog window...\n\nDo not select the Hitman Runtime folder as the output folder otherwise your Hitman game RPKGs could be overwritten!");
-
                     var folderDialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
 
                     folderDialog.Description = "Save Changes And Generate New TEMP JSON file(s):";
