@@ -226,7 +226,7 @@ void rpkg_function::extract_rtlv_to_json_from(std::string &input_path, std::stri
                                 std::memcpy(&languages_starting_offset, &rtlv_data->data()[position], sizeof(bytes4));
 
                                 // Quick fix for New Hitman 3 LOCR
-                                std::memcpy(&check_for_languages, &rtlv_data->data()[0xA4], sizeof(bytes4));
+                                std::memcpy(&check_for_languages, &rtlv_data->data()[0xC4], sizeof(bytes4));
                                 if (check_for_languages == 9)
                                 {
                                     languages.push_back("xx");
