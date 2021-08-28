@@ -19,7 +19,7 @@
 
 using json = nlohmann::ordered_json;
 
-void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::string& filter, std::string& output_path, bool output_to_string)
+void rpkg_function::extract_dlge_to_json_from(std::string &input_path, std::string &filter, std::string &output_path, bool output_to_string)
 {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
@@ -179,7 +179,7 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
 
                                 std::vector<char> output_data(decompressed_size, 0);
 
-                                std::vector<char>* dlge_data;
+                                std::vector<char> *dlge_data;
 
                                 if (rpkgs.at(i).hash.at(hash_index).is_lz4ed)
                                 {
@@ -323,6 +323,18 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
                                         break;
                                     }
 
+                                    std::memcpy(&bytes4, &dlge_data->data()[position], sizeof(bytes4));
+
+                                    if (bytes4 == 0)
+                                    {
+                                        for (uint64_t k = 0; k < sizeof(bytes4); k++)
+                                        {
+                                            json_meta_data.push_back(dlge_data->data()[position + k]);
+                                        }
+
+                                        position += sizeof(bytes4);
+                                    }
+
                                     uint32_t check_variable_1 = 0;
                                     uint32_t check_variable_2 = 0;
 
@@ -440,6 +452,18 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
 
                                         if ((position + 0x8) <= decompressed_size)
                                         {
+                                            std::memcpy(&bytes4, &dlge_data->data()[position], sizeof(bytes4));
+
+                                            if (bytes4 == 0)
+                                            {
+                                                for (uint64_t k = 0; k < sizeof(bytes4); k++)
+                                                {
+                                                    json_meta_data.push_back(dlge_data->data()[position + k]);
+                                                }
+
+                                                position += sizeof(bytes4);
+                                            }
+
                                             std::memcpy(&check_variable_1, &dlge_data->data()[position], sizeof(bytes4));
                                             position += sizeof(bytes4);
 

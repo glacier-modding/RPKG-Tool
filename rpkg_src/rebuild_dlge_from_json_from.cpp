@@ -20,7 +20,7 @@
 
 using json = nlohmann::ordered_json;
 
-void rpkg_function::rebuild_dlge_from_json_from(std::string& input_path, std::string& filter, std::string& output_path)
+void rpkg_function::rebuild_dlge_from_json_from(std::string &input_path, std::string &filter, std::string &output_path)
 {
     task_single_status = TASK_EXECUTING;
 
@@ -40,7 +40,7 @@ void rpkg_function::rebuild_dlge_from_json_from(std::string& input_path, std::st
         double console_update_rate = 1.0 / 2.0;
         int period_count = 1;
 
-        for (const auto& entry : std::filesystem::recursive_directory_iterator(input_folder_path))
+        for (const auto &entry : std::filesystem::recursive_directory_iterator(input_folder_path))
         {
             std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
 
@@ -201,18 +201,21 @@ void rpkg_function::rebuild_dlge_from_json_from(std::string& input_path, std::st
                 {
                     input_json_file >> input_json;
                 }
-                catch (json::parse_error& e)
+                catch (json::parse_error &e)
                 {
                     std::stringstream ss;
-                    ss <<"Error: " << json_file_paths.at(p) << "\n" << "Error message: " << e.what() << '\n' << "Error exception id: " << e.id << '\n' << "Error byte position of error: " << e.byte;
+                    ss << "Error: " << json_file_paths.at(p) << "\n"
+                       << "Error message: " << e.what() << '\n'
+                       << "Error exception id: " << e.id << '\n'
+                       << "Error byte position of error: " << e.byte;
                     LOG_AND_EXIT(ss.str());
                 }
-                
+
                 input_json_file.close();
 
                 int category_language_count = 0;
 
-                for (const auto& it : input_json.items())
+                for (const auto &it : input_json.items())
                 {
                     bool language_found = false;
 
@@ -232,6 +235,7 @@ void rpkg_function::rebuild_dlge_from_json_from(std::string& input_path, std::st
                 std::vector<char> dlge_data;
 
                 char char4[4] = "";
+                uint32_t zerocheck;
                 uint32_t bytes4 = 0;
 
                 uint32_t position = 0;
@@ -301,10 +305,22 @@ void rpkg_function::rebuild_dlge_from_json_from(std::string& input_path, std::st
                     uint32_t key_range_max = key_range_min + number_of_languages;
                     uint32_t key_current = 0;
 
-                    for (const auto& it : input_json.items())
+                    for (const auto &it : input_json.items())
                     {
                         if (key_current >= key_range_min && key_current < key_range_max)
                         {
+                            std::memcpy(&zerocheck, &input_json_meta.data()[position], sizeof(uint32_t));
+
+                            if (zerocheck == 0)
+                            {
+                                dlge_data.push_back(0x0);
+                                dlge_data.push_back(0x0);
+                                dlge_data.push_back(0x0);
+                                dlge_data.push_back(0x0);
+
+                                position += 4;
+                            }
+
                             std::memcpy(&char4, &input_json_meta.data()[position], sizeof(uint32_t));
                             position += sizeof(uint32_t);
 
@@ -381,7 +397,8 @@ void rpkg_function::rebuild_dlge_from_json_from(std::string& input_path, std::st
             }
             else
             {
-                LOG("Error: JSON meta file " << json_file_paths.at(p) + ".meta" << " could not be found.");
+                LOG("Error: JSON meta file " << json_file_paths.at(p) + ".meta"
+                                             << " could not be found.");
                 LOG("       Can not rebuild " << dlge_file_names.at(p) << " from JSON file " << json_file_paths.at(p));
             }
         }
