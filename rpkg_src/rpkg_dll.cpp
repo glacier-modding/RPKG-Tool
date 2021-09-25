@@ -2515,6 +2515,22 @@ int search_hash_list_by_hash_value(char* hash_value)
     return 0;
 }
 
+char* search_hash_name_by_hash_value(char* hash_value)
+{
+    std::string hash_value_string = std::string(hash_value);
+    std::string hash_name = "";
+
+    for (size_t i = 0; i < hash_list_hash_file_names.size(); i++)
+    {
+        if ((hash_list_hash_file_names.at(i))._Starts_with((std::string(hash_value)))) {
+            hash_name = (hash_list_hash_file_names.at(i));
+            return _strdup(hash_name.c_str());
+        }
+        
+    }
+    return hash_value;
+}
+
 int get_temp_subentity_count(uint32_t temps_index)
 {
     return temps.at(temps_index).temp_subentity_count;

@@ -163,6 +163,8 @@ RPKG_EXPORT int is_rpkg_valid(char* rpkg_file_path);
 
 RPKG_EXPORT int search_hash_list_by_hash_value(char* hash_value);
 
+RPKG_EXPORT char* search_hash_name_by_hash_value(char* hash_value);
+
 RPKG_EXPORT int get_temp_subentity_count(uint32_t temps_index);
 
 RPKG_EXPORT int get_tblu_subentity_count(uint32_t temps_index);

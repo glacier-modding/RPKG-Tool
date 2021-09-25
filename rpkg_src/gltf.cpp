@@ -9,6 +9,7 @@
 #include <sstream>
 #include <fstream>
 #include <filesystem>
+#include <sstream>
 #include <assert.h>
 
 using namespace Microsoft::glTF;
