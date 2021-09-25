@@ -966,22 +966,22 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
                                             uint32_t z = v * 4 + 2;
                                             uint32_t w = v * 4 + 3;
 
-                                            uint8_t temp_uint8_t = static_cast<unsigned char>(std::roundf(weights_0_data[x] * 255.0f));
+                                            uint8_t temp_uint8_t = static_cast<unsigned char>((weights_0_data[x] * 255.0f));
 
                                             std::memcpy(&char1, &temp_uint8_t, sizeof(uint8_t));
                                             prim_file_data.push_back(char1);
 
-                                            temp_uint8_t = static_cast<unsigned char>(std::roundf(weights_0_data[y] * 255.0f));
+                                            temp_uint8_t = static_cast<unsigned char>((weights_0_data[y] * 255.0f));
 
                                             std::memcpy(&char1, &temp_uint8_t, sizeof(uint8_t));
                                             prim_file_data.push_back(char1);
 
-                                            temp_uint8_t = static_cast<unsigned char>(std::roundf(weights_0_data[z] * 255.0f));
+                                            temp_uint8_t = static_cast<unsigned char>((weights_0_data[z] * 255.0f));
 
                                             std::memcpy(&char1, &temp_uint8_t, sizeof(uint8_t));
                                             prim_file_data.push_back(char1);
 
-                                            temp_uint8_t = static_cast<unsigned char>(std::roundf(weights_0_data[w] * 255.0f));
+                                            temp_uint8_t = static_cast<unsigned char>((weights_0_data[w] * 255.0f));
 
                                             std::memcpy(&char1, &temp_uint8_t, sizeof(uint8_t));
                                             prim_file_data.push_back(char1);
@@ -1006,12 +1006,12 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
                                             std::memcpy(&char1, &temp_uint8_t, sizeof(uint8_t));
                                             prim_file_data.push_back(char1);
 
-                                            temp_uint8_t = static_cast<unsigned char>(std::roundf(weights_1_data[x] * 255.0f));
+                                            temp_uint8_t = static_cast<unsigned char>((weights_1_data[x] * 255.0f));
 
                                             std::memcpy(&char1, &temp_uint8_t, sizeof(uint8_t));
                                             prim_file_data.push_back(char1);
 
-                                            temp_uint8_t = static_cast<unsigned char>(std::roundf(weights_1_data[y] * 255.0f));
+                                            temp_uint8_t = static_cast<unsigned char>((weights_1_data[y] * 255.0f));
 
                                             std::memcpy(&char1, &temp_uint8_t, sizeof(uint8_t));
                                             prim_file_data.push_back(char1);
