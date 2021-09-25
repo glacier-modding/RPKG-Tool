@@ -26,6 +26,8 @@ namespace rpkg
     /// </summary>
     public partial class HashCalculator : MetroWindow
     {
+        private List<String> newlyFoundHashes = new List<string>();
+
         public HashCalculator()
         {
             InitializeComponent();
@@ -89,6 +91,14 @@ namespace rpkg
 
                     if (return_value == 1)
                     {
+
+                        byte[] hash_name_data = new byte[21]; //21 is the length of a hash_name. example: "123456789ABCDEF.EXTN"
+                        Marshal.Copy(search_hash_name_by_hash_value(ioiHash.ToLower()), hash_name_data, 0, (int)21);
+                        string hash_name = Encoding.UTF8.GetString(hash_name_data); 
+
+                        string hashlistEntryFormatted = $"{hash_name.ToUpper()},{lineString}";
+                        if (!newlyFoundHashes.Contains(hashlistEntryFormatted)) newlyFoundHashes.Add(hashlistEntryFormatted);
+
                         OutputTextBox.Text += ioiHash + " - Found in hash list" + "\n";
                     }
                     else
@@ -105,9 +115,29 @@ namespace rpkg
             this.Close();
         }
 
+        private void Save_Click(object sender, RoutedEventArgs e)
+        {
+
+            string foundHashes = "";
+
+            foreach (string foundHash in newlyFoundHashes)
+            {
+                foundHashes += (foundHash) + "\n";
+            }
+
+            Clipboard.SetText(foundHashes);
+        }
+
+
+
         private System.Windows.Threading.DispatcherTimer hashInputTimer;
 
         [DllImport("rpkg.dll", EntryPoint = "search_hash_list_by_hash_value", CallingConvention = CallingConvention.Cdecl)]
         public static extern int search_hash_list_by_hash_value(string hash_value);
+
+        [DllImport("rpkg.dll", EntryPoint = "search_hash_name_by_hash_value", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr search_hash_name_by_hash_value(string hash_value);
+
     }
+
 }

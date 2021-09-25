@@ -22,6 +22,7 @@
         <DockPanel Grid.Row="0" Grid.ColumnSpan="3">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Click="Exit_Click" Header="Exit"/>
+                <MenuItem Click="Save_Click" Header="Save to clipboard"/>
             </Menu>
         </DockPanel>
         <Label Grid.Row="1" Grid.Column="0" Content="Input strings to hash (one per line):"/>
