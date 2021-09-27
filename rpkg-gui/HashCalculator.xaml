@@ -17,6 +17,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <DockPanel Grid.Row="0" Grid.ColumnSpan="3">
@@ -27,8 +28,9 @@
         </DockPanel>
         <Label Grid.Row="1" Grid.Column="0" Content="Input strings to hash (one per line):"/>
         <Label Grid.Row="1" Grid.Column="2" Content="Output IOI Hashes of input strings:"/>
+        <Label Grid.Row="1" x:Name="CalculatingLabel" Grid.Column="3" Content="(calculating...)" Visibility="Hidden"/>
         <TextBox Grid.Row="2" Grid.Column="0" x:Name="InputTextBox" TextChanged="InputTextBox_TextChanged" AcceptsReturn="True" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap"/>
         <GridSplitter HorizontalAlignment="Right" VerticalAlignment="Stretch" Grid.Row="2"  Grid.Column="1" ResizeBehavior="PreviousAndNext" Width="5"/>
-        <TextBox Grid.Row="2" Grid.Column="2" x:Name="OutputTextBox" IsReadOnly="True" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap"/>
+        <TextBox Grid.Row="2" Grid.ColumnSpan="2" Grid.Column="2" x:Name="OutputTextBox" IsReadOnly="True" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap"/>
     </Grid>
 </mah:MetroWindow>

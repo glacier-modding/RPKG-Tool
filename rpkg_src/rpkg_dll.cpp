@@ -2531,6 +2531,23 @@ char* search_hash_name_by_hash_value(char* hash_value)
     return hash_value;
 }
 
+bool get_hash_name_from_hash_value(uint64_t hash_value, char *hash_name)
+{
+    if (!hash_name)
+    {
+        return false;
+    }
+    std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(hash_value);
+
+    if (it2 != hash_list_hash_map.end())
+    {
+        // 16 hex chars, 1 period, 4 extension chars, 1 null-ternimator
+        strncpy(hash_name, hash_list_hash_file_names.at(it2->second).c_str(), 22);
+        return true;
+    }
+    return false;
+}
+
 int get_temp_subentity_count(uint32_t temps_index)
 {
     return temps.at(temps_index).temp_subentity_count;

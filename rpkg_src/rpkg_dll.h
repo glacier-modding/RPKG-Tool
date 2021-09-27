@@ -165,6 +165,8 @@ RPKG_EXPORT int search_hash_list_by_hash_value(char* hash_value);
 
 RPKG_EXPORT char* search_hash_name_by_hash_value(char* hash_value);
 
+RPKG_EXPORT bool get_hash_name_from_hash_value(uint64_t hash_value, char *hash_name);
+
 RPKG_EXPORT int get_temp_subentity_count(uint32_t temps_index);
 
 RPKG_EXPORT int get_tblu_subentity_count(uint32_t temps_index);

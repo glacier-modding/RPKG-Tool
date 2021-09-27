@@ -18,6 +18,7 @@ using System.Threading;
 using MahApps.Metro.Controls;
 using ControlzEx.Theming;
 using System.Security.Cryptography;
+using System.Buffers;
 
 namespace rpkg
 {
@@ -26,7 +27,15 @@ namespace rpkg
     /// </summary>
     public partial class HashCalculator : MetroWindow
     {
-        private List<String> newlyFoundHashes = new List<string>();
+        private class Canceller
+        {
+            // I tried using CancellationTokenSource, but that was giving me weird slowdowns
+            // -grappigegovert
+            public bool shouldCancel = false;
+        }
+
+        private HashSet<String> newlyFoundHashes = new HashSet<string>();
+        private Canceller hashCalculationCanceller;
 
         public HashCalculator()
         {
@@ -38,75 +47,86 @@ namespace rpkg
             InputTextBox.Focus();
         }
 
-        private void InputTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private async void InputTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (hashInputTimer == null)
+            if (hashCalculationCanceller != null)
             {
-                hashInputTimer = new System.Windows.Threading.DispatcherTimer();
-
-                hashInputTimer.Interval = TimeSpan.FromMilliseconds(600);
-
-                hashInputTimer.Tick += SearchTEMPsTextBox_TimerTimeout;
+                // cancel the ongoing calculation
+                hashCalculationCanceller.shouldCancel = true;
             }
+            Canceller canceller = new Canceller();
+            hashCalculationCanceller = canceller;
 
-            hashInputTimer.Stop();
-            hashInputTimer.Start();
+            string input = InputTextBox.Text;
+            CalculatingLabel.Visibility = Visibility.Visible;
+            string output = await Task.Run(() => checkHashes(input, canceller));
+            if (output != null)
+            {
+                OutputTextBox.Text = output;
+                CalculatingLabel.Visibility = Visibility.Hidden;
+            }
         }
 
-        private void SearchTEMPsTextBox_TimerTimeout(object sender, EventArgs e)
+        private string checkHashes(string inputtext, Canceller canceller)
         {
-            var timer = (sender as System.Windows.Threading.DispatcherTimer);
+            MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
 
-            if (timer == null)
+            if (canceller.shouldCancel)
             {
-                return;
+                return null;
             }
 
-            timer.Stop();
+            string[] lines = inputtext.Split('\n', '\r');
 
-            OutputTextBox.Clear();
+            StringBuilder outputTextBuilder = new StringBuilder(lines.Length * 37);
 
-            foreach (string line in InputTextBox.Text.Split('\n'))
+            foreach (string line in lines)
             {
-                string lineString = line.Replace("\r", "").Replace("\n", "").ToLower();
+                if (canceller.shouldCancel)
+                {
+                    return null;
+                }
+
+                string lineString = line.Trim().ToLower();
 
                 if (lineString != "")
                 {
-                    var md5 = new MD5CryptoServiceProvider();
-
                     byte[] stringBytes = Encoding.UTF8.GetBytes(lineString);
+                    byte[] hashBytes = md5.ComputeHash(stringBytes);
 
-                    var buffer = md5.ComputeHash(stringBytes);
-
-                    var sb = new StringBuilder();
-
-                    for (var i = 1; i < 8; i++)
+                    StringBuilder ioiHashsb = new StringBuilder("00", 16);
+                    for (int i = 1; i < 8; i++)
                     {
-                        sb.Append(buffer[i].ToString("X2").PadLeft(2, '0'));
+                        ioiHashsb.Append(hashBytes[i].ToString("X2"));
+                    }
+                    string ioiHash = ioiHashsb.ToString();
+
+                    // 16 hex chars + 1 period + 4 extension chars + 1 null-ternimator = 22 chars
+                    char[] charbuffer = ArrayPool<char>.Shared.Rent(22);
+                    bool found = false;
+                    string hash_name = "";
+                    try
+                    {
+                        found = get_hash_name_from_hash_value(Convert.ToUInt64(ioiHash, 16), charbuffer);
+                        hash_name = new string(charbuffer, 0, 21);
+                    }
+                    finally
+                    {
+                        ArrayPool<char>.Shared.Return(charbuffer);
                     }
 
-                    string ioiHash = "00" + sb.ToString();
-
-                    int return_value = search_hash_list_by_hash_value(ioiHash);
-
-                    if (return_value == 1)
+                    if (found)
                     {
-
-                        byte[] hash_name_data = new byte[21]; //21 is the length of a hash_name. example: "123456789ABCDEF.EXTN"
-                        Marshal.Copy(search_hash_name_by_hash_value(ioiHash.ToLower()), hash_name_data, 0, (int)21);
-                        string hash_name = Encoding.UTF8.GetString(hash_name_data); 
-
-                        string hashlistEntryFormatted = $"{hash_name.ToUpper()},{lineString}";
-                        if (!newlyFoundHashes.Contains(hashlistEntryFormatted)) newlyFoundHashes.Add(hashlistEntryFormatted);
-
-                        OutputTextBox.Text += ioiHash + " - Found in hash list" + "\n";
+                        newlyFoundHashes.Add($"{hash_name.ToUpper()},{lineString}");
+                        outputTextBuilder.AppendLine($"{ioiHash} - Found in hash list");
                     }
                     else
                     {
-                        OutputTextBox.Text += ioiHash + " - Not found in hash list" + "\n";
+                        outputTextBuilder.AppendLine($"{ioiHash} - Not found in hash list");
                     }
                 }
             }
+            return outputTextBuilder.ToString();
         }
 
 
@@ -130,13 +150,9 @@ namespace rpkg
 
 
 
-        private System.Windows.Threading.DispatcherTimer hashInputTimer;
 
-        [DllImport("rpkg.dll", EntryPoint = "search_hash_list_by_hash_value", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int search_hash_list_by_hash_value(string hash_value);
-
-        [DllImport("rpkg.dll", EntryPoint = "search_hash_name_by_hash_value", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr search_hash_name_by_hash_value(string hash_value);
+        [DllImport("rpkg.dll", EntryPoint = "get_hash_name_from_hash_value", CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool get_hash_name_from_hash_value(UInt64 hash_value, [Out, MarshalAs(UnmanagedType.LPArray, SizeConst = 22)] char[] hash_name);
 
     }
 
