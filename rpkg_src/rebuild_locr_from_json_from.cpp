@@ -279,6 +279,20 @@ void rpkg_function::rebuild_locr_from_json_from(std::string &input_path, std::st
                     languages.push_back("cn");
                     languages.push_back("tc");
                 }
+                else if (input_json_meta_file_size == 0x29)
+                {
+                    // New Hitman 3 LOCR
+                    languages.push_back("xx");
+                    languages.push_back("en");
+                    languages.push_back("fr");
+                    languages.push_back("it");
+                    languages.push_back("de");
+                    languages.push_back("es");
+                    languages.push_back("ru");
+                    languages.push_back("cn");
+                    languages.push_back("tc");
+                    languages.push_back("jp");
+                }
                 else if (input_json_meta_file_size == 0x35)
                 {
                     // Hitman 2
