@@ -2531,7 +2531,7 @@ char* search_hash_name_by_hash_value(char* hash_value)
     return hash_value;
 }
 
-bool get_hash_name_from_hash_value(uint64_t hash_value, char *hash_name)
+int get_hash_name_from_hash_value(uint64_t hash_value, char *hash_name)
 {
     if (!hash_name)
     {
