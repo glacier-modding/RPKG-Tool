@@ -110,7 +110,7 @@ namespace rpkg
 		}
 		private void DiscordInvite_MouseDown(object sender, MouseButtonEventArgs e)
 		{
-			Process.Start("https://discord.com/invite/hxPT9rf");
+			Process.Start("https://discord.gg/6UDtuYhZP6");
 		}
 
 		public MainWindow()
