@@ -2515,6 +2515,39 @@ int search_hash_list_by_hash_value(char* hash_value)
     return 0;
 }
 
+char* search_hash_name_by_hash_value(char* hash_value)
+{
+    std::string hash_value_string = std::string(hash_value);
+    std::string hash_name = "";
+
+    for (size_t i = 0; i < hash_list_hash_file_names.size(); i++)
+    {
+        if ((hash_list_hash_file_names.at(i))._Starts_with((std::string(hash_value)))) {
+            hash_name = (hash_list_hash_file_names.at(i));
+            return _strdup(hash_name.c_str());
+        }
+        
+    }
+    return hash_value;
+}
+
+int get_hash_name_from_hash_value(uint64_t hash_value, char *hash_name)
+{
+    if (!hash_name)
+    {
+        return false;
+    }
+    std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(hash_value);
+
+    if (it2 != hash_list_hash_map.end())
+    {
+        // 16 hex chars, 1 period, 4 extension chars, 1 null-ternimator
+        strncpy(hash_name, hash_list_hash_file_names.at(it2->second).c_str(), 22);
+        return true;
+    }
+    return false;
+}
+
 int get_temp_subentity_count(uint32_t temps_index)
 {
     return temps.at(temps_index).temp_subentity_count;

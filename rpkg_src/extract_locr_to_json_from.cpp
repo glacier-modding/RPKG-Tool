@@ -250,6 +250,19 @@ void rpkg_function::extract_locr_to_json_from(std::string &input_path, std::stri
                                     languages.push_back("cn");
                                     languages.push_back("tc");
                                 }
+                                else if (number_of_languages == 10 && isLOCRv2)
+                                {
+                                    languages.push_back("xx");
+                                    languages.push_back("en");
+                                    languages.push_back("fr");
+                                    languages.push_back("it");
+                                    languages.push_back("de");
+                                    languages.push_back("es");
+                                    languages.push_back("ru");
+                                    languages.push_back("cn");
+                                    languages.push_back("tc");
+                                    languages.push_back("jp");
+                                }
                                 else
                                 {
                                     languages.push_back("xx");
