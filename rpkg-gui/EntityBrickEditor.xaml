@@ -19,8 +19,6 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-
-
         <DockPanel Grid.Row="0" Grid.ColumnSpan="3">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Click="GenerateTEMPFile_Click" Header="Generate TEMP File"/>
@@ -29,23 +27,18 @@
                 <MenuItem Click="Exit_Click" Header="Exit"/>
             </Menu>
         </DockPanel>
-
-
         <TabControl x:Name="LeftTabControl" Grid.Row="1" Grid.Column="0">
             <TabItem x:Name="FirstTabLeft" Header="Resource View">
                 <Grid>
-
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    
                     <Grid Grid.Row="0" Grid.ColumnSpan="2">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -70,8 +63,6 @@
                                 <Button  x:Name="PreviousNode" Click="PreviousNode_Click" Content="Previous Node"/>
                             </ComboBoxItem>
                         </ComboBox>
-
-                        
                     </Grid>
                     <WindowsFormsHost Grid.Row="2" Grid.ColumnSpan="2" x:Name="MainWindowsFormsHost">
                         <wf:TreeView x:Name="MainTreeView" Font="Consolas,10" AfterSelect="MainTreeView_OnAfterSelect"/>
@@ -80,18 +71,14 @@
                     <Grid Grid.Row="3" Grid.ColumnSpan="2" >
                         <TextBox Name="NodePathTextBox" Text="" TextChanged="NodePathTextBox_OnTextChanged"> </TextBox>
                     </Grid>
-
                 </Grid>
-
             </TabItem>
         </TabControl>
         <GridSplitter HorizontalAlignment="Right" VerticalAlignment="Stretch" Grid.Row="1"  Grid.Column="1" ResizeBehavior="PreviousAndNext" Width="5"/>
         <TabControl x:Name="RightTabControl" Grid.Row="1"  Grid.Column="2" >
             <TabItem x:Name="FirstTabRight" Header="Properties">
                 <ScrollViewer x:Name="MainScrollViewerTEMP" VerticalScrollBarVisibility="Auto">
-                    <StackPanel x:Name="MainStackPanelTEMP">
-
-                    </StackPanel>
+                    <StackPanel x:Name="MainStackPanelTEMP"/>
                 </ScrollViewer>
             </TabItem>
         </TabControl>        
