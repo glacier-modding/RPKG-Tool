@@ -276,6 +276,24 @@
   <ItemGroup>
     <EmbeddedResource Condition="'$(Configuration)' == 'Release'" Include="..\_build\$(Configuration)\rpkg.dll" LogicalName="costura64.rpkg.dll" ManifestResourceName="costura64.rpkg.dll" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource files\bricks.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource files\disk.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource files\sound.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource files\shape_square.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource files\timeline_marker.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource files\dots.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>
