@@ -81,7 +81,7 @@
                         <TextBox Name="NodePathTextBox" Text="" TextChanged="NodePathTextBox_OnTextChanged"> </TextBox>
                     </Grid>
 
-                    </Grid>
+                </Grid>
 
             </TabItem>
         </TabControl>
