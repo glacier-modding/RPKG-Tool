@@ -34,6 +34,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -49,26 +50,35 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Label Grid.Row="0" Grid.Column="0" Content="Filter Nodes By:"/>
+                        <Label Grid.Row="0" Grid.Column="0" Content="Filter By:"/>
                         <TextBox Grid.Row="0" Grid.Column="1" x:Name="FilterTextBox" TextChanged="SearchTEMPsTextBox_TextChanged" FontFamily="Consolas" TextWrapping="NoWrap"/>
-                        <Button Grid.Row="0" Grid.Column="2" x:Name="ExpandAllNodes" Click="ExpandAllNodes_Click" Content="Expand All Nodes"/>
-                        <Button Grid.Row="0" Grid.Column="3" x:Name="CollapseAllNodes" Click="CollapseAllNodes_Click" Content="Collapse All Nodes"/>
-                        <Button Grid.Row="0" Grid.Column="4" x:Name="PreviousNode" Click="PreviousNode_Click" Content="Previous Node"/>
+                        <ComboBox Grid.Row="0" Grid.Column="2"  >
+                            <ComboBoxItem>
+                                <Button  x:Name="ExpandAllNodes" Click="ExpandAllNodes_Click" Content="Expand All Nodes"/>
+                                </ComboBoxItem>
+                            <ComboBoxItem>
+                                <Button  x:Name="CollapseAllNodes" Click="CollapseAllNodes_Click" Content="Collapse All Nodes"/>
+                            </ComboBoxItem>
+                            <ComboBoxItem>
+                                <Button  x:Name="PreviousNode" Click="PreviousNode_Click" Content="Previous Node"/>
+                            </ComboBoxItem>
+                        </ComboBox>
                     </Grid>
                     <WindowsFormsHost Grid.Row="2" Grid.ColumnSpan="2" x:Name="MainWindowsFormsHost">
-                        <wf:TreeView x:Name="MainTreeView" Font="Consolas,10"/>
+                        <wf:TreeView x:Name="MainTreeView" Font="Consolas,10" AfterSelect="MainTreeView_OnAfterSelect"/>
                     </WindowsFormsHost>
                     <!--TreeView x:Name="MainTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/-->
+                    <Grid Grid.Row="3" Grid.ColumnSpan="2" >
+                        <TextBox Name="NodePathTextBox" Text="" TextChanged="NodePathTextBox_OnTextChanged" IsReadOnly="True"/>
+                    </Grid>
                 </Grid>
             </TabItem>
         </TabControl>
         <GridSplitter HorizontalAlignment="Right" VerticalAlignment="Stretch" Grid.Row="1"  Grid.Column="1" ResizeBehavior="PreviousAndNext" Width="5"/>
         <TabControl x:Name="RightTabControl" Grid.Row="1"  Grid.Column="2" >
-            <TabItem x:Name="FirstTabRight" Header="TEMP">
+            <TabItem x:Name="FirstTabRight" Header="Properties">
                 <ScrollViewer x:Name="MainScrollViewerTEMP" VerticalScrollBarVisibility="Auto">
-                    <StackPanel x:Name="MainStackPanelTEMP">
-
-                    </StackPanel>
+                    <StackPanel x:Name="MainStackPanelTEMP"/>
                 </ScrollViewer>
             </TabItem>
         </TabControl>        

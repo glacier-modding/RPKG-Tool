@@ -13,11 +13,23 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.IO;
 using System.ComponentModel;
+using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading;
 using MahApps.Metro.Controls;
 using ControlzEx.Theming;
 using System.Globalization;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
+using Application = System.Windows.Application;
+using Brushes = System.Windows.Media.Brushes;
+using Button = System.Windows.Controls.Button;
+using Color = System.Windows.Media.Color;
+using ComboBox = System.Windows.Controls.ComboBox;
+using Label = System.Windows.Controls.Label;
+using ListBox = System.Windows.Forms.ListBox;
+using TextBox = System.Windows.Controls.TextBox;
+using TreeView = System.Windows.Controls.TreeView;
 
 namespace rpkg
 {
@@ -110,6 +122,21 @@ namespace rpkg
             }
         }
 
+        private void LoadImageList()
+        {
+            ImageList imageList = new ImageList();
+            imageList.ImageSize = new System.Drawing.Size(16, 16);
+            Console.WriteLine();
+            imageList.Images.Add("empty", Properties.Resources.dots);
+            imageList.Images.Add("entity", Properties.Resources.disk);
+            imageList.Images.Add("actor", Properties.Resources.bricks);
+            imageList.Images.Add("speak", Properties.Resources.sound);
+            imageList.Images.Add("aiarea", Properties.Resources.shape_square);
+            imageList.Images.Add("disguise", Properties.Resources.timeline_marker);
+
+            MainTreeView.ImageList = imageList;
+        }
+
         private void LoadMainTreeView()
         {
             //clear_temp_tblu_data();
@@ -184,10 +211,14 @@ namespace rpkg
 
                         //MessageBoxShow(entryIndex.ToString() + ", " + entryNameLength.ToString() + ", " + entryName);
 
+                        if (MainTreeView.ImageList == null) LoadImageList();
+
                         var item = new System.Windows.Forms.TreeNode();
 
-                        item.Text = entryName + " (" + entryIndex.ToString() + ") (" + temps_index.ToString() + ")";
-
+                        item.Text = entryName + " (" + entryIndex.ToString() + ")";
+                        item.Name = entryName.ToString();
+                        item.Tag = entryIndex.ToString() + "," + temps_index.ToString();
+                        
                         LoadTreeView(ref item);
 
                         topItem.Nodes.Add(item);
@@ -200,7 +231,7 @@ namespace rpkg
 
                 MainTreeView.Nodes.Add(topItem);
             }
-            
+
             {
                 string responseString = Marshal.PtrToStringAnsi(get_all_bricks(temps_index));
 
@@ -257,9 +288,15 @@ namespace rpkg
 
                                 //MessageBoxShow(entryIndex.ToString() + ", " + entryNameLength.ToString() + ", " + entryName);
 
+                                if (MainTreeView.ImageList == null) LoadImageList();
+
                                 var item = new System.Windows.Forms.TreeNode();
 
-                                item.Text = entryName + " (" + entryIndex.ToString() + ") (" + temp_index_hash_reference.ToString() + ")";
+                                item.Text = entryName + " (" + entryIndex.ToString() + ")";
+                                item.Name = entryName.ToString();
+                                item.Tag = entryIndex.ToString() + "," + temp_index_hash_reference.ToString();
+                                
+                                
 
                                 LoadTreeView(ref item);
 
@@ -275,7 +312,7 @@ namespace rpkg
                     }
                 }
             }
-            
+
             MainTreeView.EndUpdate();
 
             treeViewBackup = new TreeViewBackup(MainTreeView.Nodes);
@@ -294,28 +331,22 @@ namespace rpkg
 
         private void LoadTreeView(ref System.Windows.Forms.TreeNode masterTreeViewItem)
         {
-            string[] header = masterTreeViewItem.Text.Replace("(", "").Replace(")", "").Split(' ');
+            List<TreeNode> nodesToAdd = new List<TreeNode>();
 
-            string entityName = "";
+            string entityName = masterTreeViewItem.Name;
 
-            for (int i = 0; i < (header.Length - 2); i++)
-            {
-                entityName += header[i];
-
-                if (i != (header.Length - 3))
-                {
-                    entityName += " ";
-                }
-            }
 
             UInt32 temp_entryIndex = 0;
 
-            UInt32.TryParse(header[header.Length - 2], out temp_entryIndex);
+            string nodeData = masterTreeViewItem.Tag.ToString();
+
+            UInt32.TryParse(nodeData.Split(',')[0], out temp_entryIndex);
 
             UInt32 temp_temp_index = 0;
 
-            UInt32.TryParse(header[header.Length - 1], out temp_temp_index);
+            UInt32.TryParse(nodeData.Split(',')[1], out temp_temp_index);
 
+            
             string hashReferenceData = Marshal.PtrToStringAnsi(get_entries_hash_references(temp_temp_index, temp_entryIndex));
 
             string[] hashReferences = hashReferenceData.Split(',');
@@ -352,10 +383,13 @@ namespace rpkg
                         var itemHashReference = new System.Windows.Forms.TreeNode();
 
                         itemHashReference.Text = entryName + " (" + entryIndex.ToString() + ") (" + temp_index_hash_reference.ToString() + ")";
+                        itemHashReference.Name = entryName.ToString();
+                        itemHashReference.Tag = entryIndex.ToString();
 
                         LoadTreeView(ref itemHashReference);
 
-                        masterTreeViewItem.Nodes.Add(itemHashReference);
+                        //masterTreeViewItem.Nodes.Add(itemHashReference);
+                        nodesToAdd.Add(itemHashReference);
                     }
                 }
             }
@@ -385,37 +419,71 @@ namespace rpkg
 
                     var item2 = new System.Windows.Forms.TreeNode();
 
-                    item2.Text = entryName + " (" + entryIndex.ToString() + ") (" + temp_temp_index.ToString() + ")";
+                    item2.Text = entryName + " (" + entryIndex.ToString() + ")";
+                    item2.Name = entryName.ToString();
+                    item2.Tag = entryIndex.ToString() + "," + temp_temp_index.ToString();
+
+                    hashReferenceData = Marshal.PtrToStringAnsi(get_entries_hash_references(temp_temp_index, entryIndex));
+                    hashReferences = hashReferenceData.Split(',');
+
+                    if (entityName.StartsWith("CHAR_Greedy_Unique_CEO_F"))
+                    {
+                        Console.WriteLine("gottcha");
+                    }
 
                     LoadTreeView(ref item2);
 
-                    masterTreeViewItem.Nodes.Add(item2);
+                    loadNodeIcon(ref item2, hashReferences[0]);
+                    
+
+                    //masterTreeViewItem.Nodes.Add(item2);
+                    nodesToAdd.Add(item2);
                 }
             }
 
-            //MessageBoxShow(temp_index_hash_reference.ToString());
-            /*
-            string[] topLevelEntries = responseString.Trim(',').Split(',');
+            nodesToAdd = nodesToAdd.OrderBy(tn => tn.Name).ToList();
 
-            foreach (string entry in topLevelEntries)
+            foreach (TreeNode tn in nodesToAdd)
             {
-                if (entry != "")
-                {
-                    string[] tempEntryData = entry.Split('|');
-                    string tempEntityName = tempEntryData[1];
-                    UInt32 tempEntryIndex = 0;
+                masterTreeViewItem.Nodes.Add(tn);
+            }
 
-                    UInt32.TryParse(tempEntryData[0], out tempEntryIndex);
 
-                    var item2 = new System.Windows.Forms.TreeNode();
 
-                    item2.Text = tempEntityName + " (" + tempEntryData[0] + ") (" + temp_temp_index.ToString() + ")";
+        }
 
-                    LoadTreeView(ref item2);
+        private void loadNodeIcon(ref TreeNode tn, string hashReference)
+        {
+            int iconIndex = 0;
+            switch (hashReference)
+            {
+                case "0031B66C16E8815D.CPPT": //zentity class
+                    iconIndex = 1;
+                    break;
 
-                    masterTreeViewItem.Nodes.Add(item2);
-                }
-            }*/
+                case "00DDCC74AD917CAA.TEMP": //actor.template
+                    iconIndex = 2;
+                    break;
+
+                case "001782DC89EA0A62.CPPT": //sounddefs class
+                    iconIndex = 3;
+                    break;
+
+                case "000F13E2D42C882E.CPPT": //aiareaentity class
+                    iconIndex = 4;
+                    break;
+
+                case "002C17D9CCE5419D.CPPT": //disguisezoneentity class
+                    iconIndex = 5;
+                    break;
+                //more could be added here
+            }
+
+            tn.ImageIndex = iconIndex;
+            tn.SelectedImageIndex = iconIndex;
+
+
+            
         }
 
         private void GoToNode_Click(object sender, RoutedEventArgs e)
@@ -462,9 +530,9 @@ namespace rpkg
 
                     //if (foundNode)
                     //{
-                        //node.Expand();
+                    //node.Expand();
 
-                        //MessageBoxShow(node.Text);
+                    //MessageBoxShow(node.Text);
                     //}
                 }
             }
@@ -802,31 +870,22 @@ namespace rpkg
                     }
                     else if (item.Text.Contains("("))
                     {
-                        string[] headerData = item.Text.Replace("(", "").Replace(")", "").Split(' ');
 
-                        string entityName = "";
+                        string entityName = item.Name;
 
-                        for (int i = 0; i < (headerData.Length - 2); i++)
-                        {
-                            entityName += headerData[i];
-
-                            if (i != (headerData.Length - 3))
-                            {
-                                entityName += " ";
-                            }
-                        }
+                        string nodeData = item.Tag.ToString();
 
                         UInt32 entryIndex = 0;
 
-                        UInt32.TryParse(headerData[headerData.Length - 2], out entryIndex);
+                        UInt32.TryParse(nodeData.Split(',')[0], out entryIndex);
 
                         entity_index = entryIndex;
 
                         temp_index = 0;
 
-                        UInt32.TryParse(headerData[headerData.Length - 1], out temp_index);
+                        UInt32.TryParse(nodeData.Split(',')[1], out temp_index);
 
-                        string entryIndexString = headerData[headerData.Length - 2];
+                        string entryIndexString = nodeData.Split(',')[0];
 
                         //MessageBoxShow(entryIndexString);
                         //MessageBoxShow(temp_index.ToString());
@@ -890,6 +949,8 @@ namespace rpkg
                 }
             }
         }
+
+
 
         private void AppendInput_TEMP(string valueType, string typeString)
         {
@@ -1268,6 +1329,10 @@ namespace rpkg
                             {
                                 AppendInput_SColorRGB(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes, true);
                             }
+                            else if (propertyValueTypes[i] == "SEntityTemplateReference")
+                            {
+                                AppendInput_SEntityTemplateReference(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
+                            }
                             else if (propertyValueTypes[i] == "SMatrix43")
                             {
                                 AppendInput_SMatrix43(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
@@ -1305,21 +1370,15 @@ namespace rpkg
             }
         }
 
+        #region build and append entries
+
         private void AppendInput_Default(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
-            Label label1 = new Label();
-
-            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + " (" + propertyValueTypes[propertyIndex].Replace("_", "__") + "):";
-
-            label1.FontSize = 14;
-            label1.FontWeight = FontWeights.Bold;
-
-            MainStackPanelTEMP.Children.Add(label1);
 
             Grid grid = new Grid();
 
             ColumnDefinition columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = GridLength.Auto;
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
             grid.ColumnDefinitions.Add(columnDefinition);
             columnDefinition = new ColumnDefinition();
             columnDefinition.Width = new GridLength(1, GridUnitType.Star);
@@ -1335,6 +1394,13 @@ namespace rpkg
 
             for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
             {
+
+                //filters these out of the gui, since they are not needed
+                if (propertyValueValNames[propertyIndex][i].Contains("/entityID")) continue;
+                if (propertyValueValNames[propertyIndex][i].Contains("/externalSceneIndex")) continue;
+                if (propertyValueValNames[propertyIndex][i].Contains("/exposedEntity")) continue;
+
+
                 if (propertyValueValNames[propertyIndex][i].Length > 0)
                 {
                     RowDefinition rowDefinition = new RowDefinition();
@@ -1350,8 +1416,9 @@ namespace rpkg
                     rowDefinition.Height = new GridLength(8);
                     grid.RowDefinitions.Add(rowDefinition);
 
+                    
                     Label label = new Label();
-                    label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + " (" + propertyValueJSONPointersTypes[propertyIndex][i] + "):";
+                    label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
                     grid.Children.Add(label);
                     Grid.SetRow(label, rowCount);
                     Grid.SetColumn(label, 0);
@@ -1414,6 +1481,8 @@ namespace rpkg
                     }
                     else
                     {
+                        
+
                         if (propertyValueValNames[propertyIndex][i].Contains("/entityIndex"))
                         {
                             int temp_entity_index = 0;
@@ -1492,6 +1561,13 @@ namespace rpkg
                     rowDefinition.Height = new GridLength(8);
                     grid.RowDefinitions.Add(rowDefinition);
 
+
+                    Label label = new Label();
+                    label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":";
+                    grid.Children.Add(label);
+                    Grid.SetRow(label, rowCount);
+                    Grid.SetColumn(label, 0);
+
                     TextBox textBox = new TextBox();
                     textBox.Name = GetNewControlName(temp_index, propertyValueJSONPointers[propertyIndex][i], propertyValueJSONPointersTypes[propertyIndex][i]);
                     textBox.Text = propertyValueVals[propertyIndex][i];
@@ -1499,7 +1575,8 @@ namespace rpkg
                     textBox.TextChanged += TextBox_TextChanged;
                     grid.Children.Add(textBox);
                     Grid.SetRow(textBox, rowCount);
-                    Grid.SetColumnSpan(textBox, 4);
+                    Grid.SetColumn(textBox, 1);
+                    Grid.SetColumnSpan(textBox, 3);
 
                     rowCount += 3;
                 }
@@ -1510,22 +1587,20 @@ namespace rpkg
 
         private void AppendInput_bool(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
-            Label label1 = new Label();
-
-            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + " (" + propertyValueTypes[propertyIndex].Replace("_", "__") + "):";
-
-            label1.FontSize = 14;
-            label1.FontWeight = FontWeights.Bold;
-
-            MainStackPanelTEMP.Children.Add(label1);
 
             Grid grid = new Grid();
 
             ColumnDefinition columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = GridLength.Auto;
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
             grid.ColumnDefinitions.Add(columnDefinition);
             columnDefinition = new ColumnDefinition();
             columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = GridLength.Auto;
             grid.ColumnDefinitions.Add(columnDefinition);
 
             int rowCount = 1;
@@ -1548,7 +1623,7 @@ namespace rpkg
                     grid.RowDefinitions.Add(rowDefinition);
 
                     Label label = new Label();
-                    label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + " (" + propertyValueJSONPointersTypes[propertyIndex][i] + "):";
+                    label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
                     grid.Children.Add(label);
                     Grid.SetRow(label, rowCount);
                     Grid.SetColumn(label, 0);
@@ -1572,6 +1647,7 @@ namespace rpkg
                     grid.Children.Add(comboBox);
                     Grid.SetRow(comboBox, rowCount);
                     Grid.SetColumn(comboBox, 1);
+                    Grid.SetColumnSpan(comboBox, 2);
 
                     rowCount += 4;
                 }
@@ -1586,6 +1662,12 @@ namespace rpkg
                     rowDefinition = new RowDefinition();
                     rowDefinition.Height = new GridLength(8);
                     grid.RowDefinitions.Add(rowDefinition);
+
+                    Label label = new Label();
+                    label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
+                    grid.Children.Add(label);
+                    Grid.SetRow(label, rowCount);
+                    Grid.SetColumn(label, 0);
 
                     ComboBox comboBox = new ComboBox();
                     comboBox.Name = GetNewControlName(temp_index, propertyValueJSONPointers[propertyIndex][i], propertyValueJSONPointersTypes[propertyIndex][i]);
@@ -1606,6 +1688,7 @@ namespace rpkg
                     grid.Children.Add(comboBox);
                     Grid.SetRow(comboBox, rowCount);
                     Grid.SetColumnSpan(comboBox, 2);
+                    Grid.SetColumn(comboBox, 1);
 
                     rowCount += 3;
                 }
@@ -1616,22 +1699,21 @@ namespace rpkg
 
         private void AppendInput_enum(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes, ref string enumValues)
         {
-            Label label1 = new Label();
-
-            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + " (" + propertyValueTypes[propertyIndex].Replace("_", "__") + "):";
-
-            label1.FontSize = 14;
-            label1.FontWeight = FontWeights.Bold;
-
-            MainStackPanelTEMP.Children.Add(label1);
+            
 
             Grid grid = new Grid();
 
             ColumnDefinition columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = GridLength.Auto;
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
             grid.ColumnDefinitions.Add(columnDefinition);
             columnDefinition = new ColumnDefinition();
             columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = GridLength.Auto;
             grid.ColumnDefinitions.Add(columnDefinition);
 
             int rowCount = 1;
@@ -1643,18 +1725,23 @@ namespace rpkg
                     RowDefinition rowDefinition = new RowDefinition();
                     rowDefinition.Height = new GridLength(8);
                     grid.RowDefinitions.Add(rowDefinition);
+
                     rowDefinition = new RowDefinition();
                     rowDefinition.Height = new GridLength(1, GridUnitType.Star);
                     grid.RowDefinitions.Add(rowDefinition);
+
                     rowDefinition = new RowDefinition();
                     rowDefinition.Height = new GridLength(1, GridUnitType.Star);
                     grid.RowDefinitions.Add(rowDefinition);
+
                     rowDefinition = new RowDefinition();
                     rowDefinition.Height = new GridLength(8);
                     grid.RowDefinitions.Add(rowDefinition);
 
+
+
                     Label label = new Label();
-                    label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + " (" + propertyValueJSONPointersTypes[propertyIndex][i] + "):";
+                    label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
                     grid.Children.Add(label);
                     Grid.SetRow(label, rowCount);
                     Grid.SetColumn(label, 0);
@@ -1686,6 +1773,7 @@ namespace rpkg
                     grid.Children.Add(comboBox);
                     Grid.SetRow(comboBox, rowCount);
                     Grid.SetColumn(comboBox, 1);
+                    Grid.SetColumnSpan(comboBox, 2);
 
                     rowCount += 4;
                 }
@@ -1700,6 +1788,12 @@ namespace rpkg
                     rowDefinition = new RowDefinition();
                     rowDefinition.Height = new GridLength(8);
                     grid.RowDefinitions.Add(rowDefinition);
+
+                    Label label = new Label();
+                    label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
+                    grid.Children.Add(label);
+                    Grid.SetRow(label, rowCount);
+                    Grid.SetColumn(label, 0);
 
                     ComboBox comboBox = new ComboBox();
                     comboBox.Name = GetNewControlName(temp_index, propertyValueJSONPointers[propertyIndex][i], propertyValueJSONPointersTypes[propertyIndex][i]);
@@ -1727,6 +1821,7 @@ namespace rpkg
                     comboBox.SelectionChanged += ComboBox_SelectionChanged;
                     grid.Children.Add(comboBox);
                     Grid.SetRow(comboBox, rowCount);
+                    Grid.SetColumn(comboBox, 1);
                     Grid.SetColumnSpan(comboBox, 2);
 
                     rowCount += 3;
@@ -1740,7 +1835,7 @@ namespace rpkg
         {
             Label label1 = new Label();
 
-            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + " (" + propertyValueTypes[propertyIndex].Replace("_", "__") + "):";
+            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + ":";
 
             label1.FontSize = 14;
             label1.FontWeight = FontWeights.Bold;
@@ -1870,33 +1965,93 @@ namespace rpkg
             MainStackPanelTEMP.Children.Add(grid);
         }
 
-        private void ColorCanvas_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        private void AppendInput_SEntityTemplateReference(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
-            ColorCanvas colorCanvas = (sender as ColorCanvas);
+            Grid grid = new Grid();
 
-            string[] textBoxes = colorCanvas.Name.Replace("cc_","").Split('x');
+            ColumnDefinition columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
 
-            DependencyObject descendant = FindDescendant(EditorWindow, textBoxes[0]);
-            (descendant as TextBox).Text = StringByteToStringFloat(colorCanvas.R);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
 
-            descendant = FindDescendant(EditorWindow, textBoxes[1]);
-            (descendant as TextBox).Text = StringByteToStringFloat(colorCanvas.G);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
 
-            descendant = FindDescendant(EditorWindow, textBoxes[2]);
-            (descendant as TextBox).Text = StringByteToStringFloat(colorCanvas.B);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = GridLength.Auto;
+            grid.ColumnDefinitions.Add(columnDefinition);
 
-            if (textBoxes.Length == 5)
+            int rowCount = 1;
+
+            SEntityTemplateReference reference = new SEntityTemplateReference(propertyValueVals[propertyIndex][0],
+                Int64.Parse(propertyValueVals[propertyIndex][1]), Int32.Parse(propertyValueVals[propertyIndex][2]),
+                propertyValueVals[propertyIndex][3]);
+
+
+            int temp_entity_index = 0;
+
+            int.TryParse(propertyValueVals[propertyIndex][2], out temp_entity_index);
+
+            string temp_entity_name = Marshal.PtrToStringAnsi(get_entry_name(temp_index, temp_entity_index));
+
+            Label label = new Label();
+            label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":";
+            grid.Children.Add(label);
+            Grid.SetRow(label, rowCount);
+            Grid.SetColumn(label, 0);
+
+
+            if (temp_entity_name == "")
             {
-                descendant = FindDescendant(EditorWindow, textBoxes[3]);
-                (descendant as TextBox).Text = StringByteToStringFloat(colorCanvas.A);
+                TextBox textBox = new TextBox();
+                textBox.Name = GetNewControlName(temp_index, propertyValueJSONPointers[propertyIndex][2], propertyValueJSONPointersTypes[propertyIndex][2]);
+                textBox.Text = propertyValueVals[propertyIndex][2];
+                textBox.Margin = new Thickness(4, 0, 4, 0);
+                textBox.TextChanged += TextBox_TextChanged;
+                grid.Children.Add(textBox);
+                Grid.SetRow(textBox, rowCount);
+                Grid.SetColumn(textBox, 1);
+                Grid.SetColumnSpan(textBox, 3);
             }
+            else
+            {
+
+                TextBox textBox = new TextBox();
+                string nodePath = EntityIndexToNodePath(reference.entityIndex.ToString());
+                textBox.Name = GetNewControlName(entity_index, propertyValueJSONPointers[propertyIndex][2], propertyValueJSONPointersTypes[propertyIndex][2]);
+                textBox.Text = entity_index + "";
+                textBox.Margin = new Thickness(4, 0, 4, 0);
+                textBox.IsReadOnly = true;
+                grid.Children.Add(textBox);
+                Grid.SetRow(textBox, rowCount);
+                Grid.SetColumn(textBox, 1);
+                Grid.SetColumnSpan(textBox, 2);
+
+                Button button = new Button();
+                button.Content = "  GO  ";
+                button.Margin = new Thickness(4, 0, 4, 0);
+                button.Background = Brushes.Red;
+                button.Tag = temp_entity_name + " (" + propertyValueVals[propertyIndex][2] + ") (" + temp_index.ToString() + ")";
+                button.Click += GoToNode_Click;
+                grid.Children.Add(button);
+                Grid.SetRow(button, rowCount);
+                Grid.SetColumn(button, 3);
+            }
+
+
+
+            MainStackPanelTEMP.Children.Add(grid);
         }
 
         private void AppendInput_SMatrix43(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
             Label label1 = new Label();
 
-            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + " (" + propertyValueTypes[propertyIndex].Replace("_", "__") + "):";
+            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + ":";
 
             label1.FontSize = 14;
             label1.FontWeight = FontWeights.Bold;
@@ -1908,30 +2063,39 @@ namespace rpkg
             RowDefinition rowDefinition = new RowDefinition();
             rowDefinition.Height = new GridLength(8);
             grid.RowDefinitions.Add(rowDefinition);
+
             rowDefinition = new RowDefinition();
             rowDefinition.Height = new GridLength(1, GridUnitType.Star);
             grid.RowDefinitions.Add(rowDefinition);
+
             rowDefinition = new RowDefinition();
             rowDefinition.Height = new GridLength(8);
             grid.RowDefinitions.Add(rowDefinition);
+
             rowDefinition = new RowDefinition();
             rowDefinition.Height = new GridLength(1, GridUnitType.Star);
             grid.RowDefinitions.Add(rowDefinition);
+
             rowDefinition = new RowDefinition();
             rowDefinition.Height = new GridLength(8);
             grid.RowDefinitions.Add(rowDefinition);
+
             rowDefinition = new RowDefinition();
             rowDefinition.Height = new GridLength(1, GridUnitType.Star);
             grid.RowDefinitions.Add(rowDefinition);
+
             rowDefinition = new RowDefinition();
             rowDefinition.Height = new GridLength(8);
             grid.RowDefinitions.Add(rowDefinition);
+
             rowDefinition = new RowDefinition();
             rowDefinition.Height = new GridLength(1, GridUnitType.Star);
             grid.RowDefinitions.Add(rowDefinition);
+
             rowDefinition = new RowDefinition();
             rowDefinition.Height = new GridLength(8);
             grid.RowDefinitions.Add(rowDefinition);
+
             ColumnDefinition columnDefinition = new ColumnDefinition();
             columnDefinition.Width = GridLength.Auto;
             grid.ColumnDefinitions.Add(columnDefinition);
@@ -1955,10 +2119,13 @@ namespace rpkg
 
             int columnCount = 0;
 
+
+
+
             for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
             {
                 Label label = new Label();
-                label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + " (" + propertyValueJSONPointersTypes[propertyIndex][i] + "):";
+                label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + ":";
                 grid.Children.Add(label);
                 Grid.SetRow(label, rowCount);
                 Grid.SetColumn(label, columnCount);
@@ -1994,7 +2161,7 @@ namespace rpkg
         {
             Label label1 = new Label();
 
-            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + " (" + propertyValueTypes[propertyIndex].Replace("_", "__") + "):";
+            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + ":";
 
             label1.FontSize = 14;
             label1.FontWeight = FontWeights.Bold;
@@ -2032,7 +2199,7 @@ namespace rpkg
             for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
             {
                 Label label = new Label();
-                label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + " (" + propertyValueJSONPointersTypes[propertyIndex][i] + "):";
+                label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + ":";
                 grid.Children.Add(label);
                 Grid.SetRow(label, rowCount);
                 Grid.SetColumn(label, columnCount);
@@ -2068,7 +2235,7 @@ namespace rpkg
         {
             Label label1 = new Label();
 
-            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + " (" + propertyValueTypes[propertyIndex].Replace("_", "__") + "):";
+            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + ":";
 
             label1.FontSize = 14;
             label1.FontWeight = FontWeights.Bold;
@@ -2112,7 +2279,7 @@ namespace rpkg
             for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
             {
                 Label label = new Label();
-                label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + " (" + propertyValueJSONPointersTypes[propertyIndex][i] + "):";
+                label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + ":";
                 grid.Children.Add(label);
                 Grid.SetRow(label, rowCount);
                 Grid.SetColumn(label, columnCount);
@@ -2148,7 +2315,7 @@ namespace rpkg
         {
             Label label1 = new Label();
 
-            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + " (" + propertyValueTypes[propertyIndex].Replace("_", "__") + "):";
+            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + ":";
 
             label1.FontSize = 14;
             label1.FontWeight = FontWeights.Bold;
@@ -2198,7 +2365,7 @@ namespace rpkg
             for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
             {
                 Label label = new Label();
-                label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + " (" + propertyValueJSONPointersTypes[propertyIndex][i] + "):";
+                label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + ":";
                 grid.Children.Add(label);
                 Grid.SetRow(label, rowCount);
                 Grid.SetColumn(label, columnCount);
@@ -2232,22 +2399,21 @@ namespace rpkg
 
         private void AppendInput_ZGuid(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
-            Label label1 = new Label();
-
-            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + " (" + propertyValueTypes[propertyIndex].Replace("_", "__") + "):";
-
-            label1.FontSize = 14;
-            label1.FontWeight = FontWeights.Bold;
-
-            MainStackPanelTEMP.Children.Add(label1);
+            //get data type: propertyValueTypes[propertyIndex]
 
             Grid grid = new Grid();
 
             ColumnDefinition columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = GridLength.Auto;
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
             grid.ColumnDefinitions.Add(columnDefinition);
             columnDefinition = new ColumnDefinition();
             columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+            grid.ColumnDefinitions.Add(columnDefinition);
+            columnDefinition = new ColumnDefinition();
+            columnDefinition.Width = GridLength.Auto;
             grid.ColumnDefinitions.Add(columnDefinition);
 
             int rowCount = 1;
@@ -2298,13 +2464,16 @@ namespace rpkg
                 grid.RowDefinitions.Add(rowDefinition);
 
                 Label label = new Label();
-                label.Content = "ZGuid:";
+                label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":";
                 grid.Children.Add(label);
                 Grid.SetRow(label, rowCount);
                 Grid.SetColumn(label, 0);
 
                 TextBox textBox = new TextBox();
                 textBox.Name = "ZGuid" + controlZGuids.Count.ToString();
+                textBox.TextChanged += new TextChangedEventHandler(ZGuidTextBoxChanged);
+
+
 
                 string zguidString = GenerateZGuid(ref propertyValueVals[propertyIndex]);
 
@@ -2320,6 +2489,7 @@ namespace rpkg
                 grid.Children.Add(textBox);
                 Grid.SetRow(textBox, rowCount);
                 Grid.SetColumn(textBox, 1);
+                Grid.SetColumnSpan(textBox, 2);
 
                 for (int t = 0; t < 11; t++)
                 {
@@ -2346,6 +2516,32 @@ namespace rpkg
 
             MainStackPanelTEMP.Children.Add(grid);
         }
+
+        #endregion
+
+        #region inputFormatFilters
+
+        private void ZGuidTextBoxChanged(object sender, TextChangedEventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            if (textBox != null)
+            {
+                string value = textBox.Text;
+                var regex = new Regex(@"[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?");
+                if (!regex.IsMatch(value))
+                {
+                    textBox.Foreground = Brushes.Firebrick;
+                }
+                else
+                {
+                    //because of the themes it gets difficult to find the correct foreground color.
+                    //it will now use the same color as the filter textbox, since the filters color is unlikely to ever change.
+                    textBox.Foreground = FilterTextBox.Foreground;
+                }
+            }
+        }
+
+        #endregion
 
         void TextBoxChanged(string controlName)
         {
@@ -2424,7 +2620,7 @@ namespace rpkg
                                 return false;
                             }
 
-                            return_value = byte.TryParse(zguidData[3].Substring(0,2), System.Globalization.NumberStyles.HexNumber, null, out zguid._d);
+                            return_value = byte.TryParse(zguidData[3].Substring(0, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._d);
 
                             if (!return_value)
                             {
@@ -2548,34 +2744,7 @@ namespace rpkg
             return zguidString;
         }
 
-        private byte FloatToByte(float input)
-        {
-            float temp_float = 255.0F * input;
 
-            int temp_int = (int)temp_float;
-
-            if (temp_int > 255)
-            {
-                temp_int = 255;
-            }
-            else if (temp_int < 0)
-            {
-                temp_int = 0;
-            }
-
-            byte[] value = BitConverter.GetBytes(temp_int);
-
-            return value[0];
-        }
-
-        private string StringByteToStringFloat(byte input)
-        {
-            int temp_int = (int)input;
-
-            float temp_float = (float)temp_int / 255.0F;
-
-            return temp_float.ToString(CultureInfo.InvariantCulture);
-        }
 
         public string GetNewControlName(UInt32 temp_index, string input, string type)
         {
@@ -2730,6 +2899,8 @@ namespace rpkg
                 }
             }
         }
+
+        #region generateMenuClickEvents
 
         private void GenerateTEMPFile_Click(object sender, RoutedEventArgs e)
         {
@@ -2912,7 +3083,9 @@ namespace rpkg
                 }
             }
         }
-        
+
+        #endregion
+
         private void SearchTEMPsTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (searchTEMPsInputTimer == null)
@@ -2958,6 +3131,7 @@ namespace rpkg
             MainTreeView.EndUpdate();
         }
 
+        #region treeView navigation
         private int FilterNodes(System.Windows.Forms.TreeNode parentNode, ref string filter, int childrenVisibleCount)
         {
             int currentChildrenVisibleCount = 0;
@@ -3020,6 +3194,19 @@ namespace rpkg
             MainTreeView.CollapseAll();
         }
 
+        #endregion
+
+        private void MainTreeView_OnAfterSelect(object sender, TreeViewEventArgs e)
+        {
+
+            string nodePath = NodeToPath(e.Node);
+            if (nodePath.Length > 0)
+            {
+                if(nodePath.EndsWith(@"\")) nodePath = nodePath.Substring(0, nodePath.Length - 1);
+                NodePathTextBox.Text = nodePath;
+            }
+        }
+
         public class TreeViewBackup : List<TreeViewBackup>
         {
             public System.Windows.Forms.TreeNode Parent { get; }
@@ -3065,23 +3252,115 @@ namespace rpkg
             messageBox.ShowDialog();
         }
 
-        public class ZGuid
+        private void ColorCanvas_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
-            public string controlName;
-            public string[] subControlNames;
-            public string zguidString;
-            public UInt32 _a;
-            public UInt16 _b;
-            public UInt16 _c;
-            public byte _d;
-            public byte _e;
-            public byte _f;
-            public byte _g;
-            public byte _h;
-            public byte _i;
-            public byte _j;
-            public byte _k;
+            ColorCanvas colorCanvas = (sender as ColorCanvas);
+
+            string[] textBoxes = colorCanvas.Name.Replace("cc_", "").Split('x');
+
+            DependencyObject descendant = FindDescendant(EditorWindow, textBoxes[0]);
+            (descendant as TextBox).Text = StringByteToStringFloat(colorCanvas.R);
+
+            descendant = FindDescendant(EditorWindow, textBoxes[1]);
+            (descendant as TextBox).Text = StringByteToStringFloat(colorCanvas.G);
+
+            descendant = FindDescendant(EditorWindow, textBoxes[2]);
+            (descendant as TextBox).Text = StringByteToStringFloat(colorCanvas.B);
+
+            if (textBoxes.Length == 5)
+            {
+                descendant = FindDescendant(EditorWindow, textBoxes[3]);
+                (descendant as TextBox).Text = StringByteToStringFloat(colorCanvas.A);
+            }
         }
+
+        private void NodePathTextBox_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+
+        #region util methods
+
+
+
+        private byte FloatToByte(float input)
+        {
+            float temp_float = 255.0F * input;
+
+            int temp_int = (int)temp_float;
+
+            if (temp_int > 255)
+            {
+                temp_int = 255;
+            }
+            else if (temp_int < 0)
+            {
+                temp_int = 0;
+            }
+
+            byte[] value = BitConverter.GetBytes(temp_int);
+
+            return value[0];
+        }
+
+        private string StringByteToStringFloat(byte input)
+        {
+            int temp_int = (int)input;
+
+            float temp_float = (float)temp_int / 255.0F;
+
+            return temp_float.ToString(CultureInfo.InvariantCulture);
+        }
+
+        private string NodeToPath(TreeNode node)
+        {
+            string nodePath = "";
+
+            while (node.Parent != null)
+            {
+                nodePath = node.Name + @"\" + nodePath;
+                node = node.Parent;
+            }
+
+            return nodePath;
+        }
+
+        private string EntityIndexToNodePath(string entityID)
+        {
+            var items = MainTreeView.Nodes.Find(entityID, true);
+            if (items.Length > 0) return NodeToPath(items[0]);
+            else return entityID;
+        }
+
+
+        private string formatPropertyName(string propertyName)
+        {
+
+            string formattedPropertyName = propertyName;
+            if (!propertyName.StartsWith("m_")) return formattedPropertyName;
+            else formattedPropertyName = formattedPropertyName.Substring(2);
+
+            if (!Char.IsUpper(formattedPropertyName, 0)) formattedPropertyName = formattedPropertyName.Substring(1);
+
+            string temp_propertyName = formattedPropertyName;
+            int found = 0;
+            for (int i = 1; i < formattedPropertyName.Length - 1; i++)
+            {
+
+                if (Char.IsUpper(formattedPropertyName, i) && !Char.IsUpper(formattedPropertyName, i + 1))
+                {
+                    temp_propertyName = temp_propertyName.Insert(i + found, " ");
+                    found++;
+                }
+
+            }
+
+            formattedPropertyName = temp_propertyName;
+            return formattedPropertyName;
+
+        }
+
+        #endregion
 
         public List<string> matrixStringList;
         public List<string> propertyNamesList;
@@ -3115,6 +3394,26 @@ namespace rpkg
         public TreeViewBackup treeViewBackup;
         public Message message;
         public List<System.Windows.Forms.TreeNode> visitedNodes;
+
+        #region defined data types
+
+        public class ZGuid
+        {
+            public string controlName;
+            public string[] subControlNames;
+            public string zguidString;
+            public UInt32 _a;
+            public UInt16 _b;
+            public UInt16 _c;
+            public byte _d;
+            public byte _e;
+            public byte _f;
+            public byte _g;
+            public byte _h;
+            public byte _i;
+            public byte _j;
+            public byte _k;
+        }
 
         enum RPKGStatus
         {
@@ -3170,11 +3469,35 @@ namespace rpkg
             public vector3 transform;
         };
 
+        struct SEntityTemplateReference
+        {
+
+            public string entityID;
+            public Int64 externalSceneIndex;
+            public Int32 entityIndex;
+            public string exposedEntity;
+
+            public SEntityTemplateReference(string entityID, Int64 externalSceneIndex, Int32 entityIndex,
+                string exposedEntity)
+            {
+                this.entityID = entityID;
+                this.externalSceneIndex = externalSceneIndex;
+                this.entityIndex = entityIndex;
+                this.exposedEntity = exposedEntity;
+            }
+
+
+        }
+
+        #endregion
+
         public delegate int execute_generate_rpkg_files_from_data(string outputFolder);
 
         public delegate int execute_export_map_data_to_folder(UInt32 temps_index, string map_name, string output_path);
 
         public delegate int execute_task(string csharp_command, string csharp_input_path, string csharp_filter, string search, string search_type, string csharp_output_path);
+
+        #region imported methods
 
         [DllImport("rpkg.dll", EntryPoint = "task_execute", CallingConvention = CallingConvention.Cdecl)]
         public static extern int task_execute(string csharp_command, string csharp_input_path, string csharp_filter, string search, string search_type, string csharp_output_path);
@@ -3262,5 +3585,9 @@ namespace rpkg
 
         [DllImport("rpkg.dll", EntryPoint = "generate_json_files_from_data", CallingConvention = CallingConvention.Cdecl)]
         public static extern int generate_json_files_from_data(string temp_path);
+
+        #endregion
+
+
     }
 }
