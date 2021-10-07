@@ -384,7 +384,7 @@ namespace rpkg
 
                         itemHashReference.Text = entryName + " (" + entryIndex.ToString() + ") (" + temp_index_hash_reference.ToString() + ")";
                         itemHashReference.Name = entryName.ToString();
-                        itemHashReference.Tag = entryIndex.ToString();
+                        itemHashReference.Tag = entryIndex.ToString() + "," + temp_index_hash_reference.ToString();
 
                         LoadTreeView(ref itemHashReference);
 
