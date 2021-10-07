@@ -40,7 +40,7 @@ int console::update_console(std::string& message, uint64_t indexMax, uint64_t in
 
 void console::display_usage_info()
 {
-    LOG("rpkg-cli v2.17.0 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files.");
+    LOG("rpkg-cli v2.17.1 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files.");
     LOG("--------------------------------------------------------------------------------");
     LOG("Note: All the information used to build this program was gleaned");
     LOG("      in a completely 'clean room' environment.");
@@ -1458,4 +1458,29 @@ void console::display_licenses() {
     LOG("the library.  If this is what you want to do, use the GNU Lesser General");
     LOG("Public License instead of this License.  But first, please read");
     LOG("<https://www.gnu.org/licenses/why-not-lgpl.html>.");
+    LOG("");
+    LOG("");
+    LOG("");
+    LOG("LICENSE FOR Silk icon set 1.3");
+    LOG("");
+    LOG("_________________________________________");
+    LOG("Mark James");
+    LOG("http://www.famfamfam.com/lab/icons/silk/");
+    LOG("_________________________________________");
+    LOG("");
+    LOG("This work is licensed under a");
+    LOG("Creative Commons Attribution 2.5 License.");
+    LOG("[http://creativecommons.org/licenses/by/2.5/ ]");
+    LOG("");
+    LOG("This means you may use it for any purpose,");
+    LOG("and make any changes you like.");
+    LOG("All I ask is that you include a link back");
+    LOG("to this page in your credits.");
+    LOG("");
+    LOG("Are you using this icon set ? Send me an email");
+    LOG("(including a link or picture if available) to");
+    LOG("mjames@gmail.com");
+    LOG("");
+    LOG("Any other questions about this icon set please");
+    LOG("contact mjames@gmail.com");
 }
