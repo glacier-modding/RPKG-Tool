@@ -294,6 +294,9 @@
   <ItemGroup>
     <Resource Include="Resource files\dots.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resource files\bullet_black.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>

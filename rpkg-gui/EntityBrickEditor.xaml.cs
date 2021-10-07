@@ -128,7 +128,7 @@ namespace rpkg
             imageList.ImageSize = new System.Drawing.Size(16, 16);
             Console.WriteLine();
             imageList.Images.Add("empty", Properties.Resources.dots);
-            imageList.Images.Add("entity", Properties.Resources.disk);
+            imageList.Images.Add("entity", Properties.Resources.bullet_black);
             imageList.Images.Add("actor", Properties.Resources.bricks);
             imageList.Images.Add("speak", Properties.Resources.sound);
             imageList.Images.Add("aiarea", Properties.Resources.shape_square);
@@ -425,11 +425,6 @@ namespace rpkg
 
                     hashReferenceData = Marshal.PtrToStringAnsi(get_entries_hash_references(temp_temp_index, entryIndex));
                     hashReferences = hashReferenceData.Split(',');
-
-                    if (entityName.StartsWith("CHAR_Greedy_Unique_CEO_F"))
-                    {
-                        Console.WriteLine("gottcha");
-                    }
 
                     LoadTreeView(ref item2);
 
@@ -1329,10 +1324,6 @@ namespace rpkg
                             {
                                 AppendInput_SColorRGB(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes, true);
                             }
-                            else if (propertyValueTypes[i] == "SEntityTemplateReference")
-                            {
-                                AppendInput_SEntityTemplateReference(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
-                            }
                             else if (propertyValueTypes[i] == "SMatrix43")
                             {
                                 AppendInput_SMatrix43(temp_index, i, ref propertyValuePropertyIDs, ref propertyValueTypes, ref propertyValueVals, ref propertyValueValNames, ref propertyValueJSONPointers, ref propertyValueJSONPointersTypes);
@@ -1526,7 +1517,7 @@ namespace rpkg
                                 button.Content = "  GO  ";
                                 button.Margin = new Thickness(4, 0, 4, 0);
                                 button.Background = Brushes.Red;
-                                button.Tag = temp_entity_name + " (" + propertyValueVals[propertyIndex][i] + ") (" + temp_index.ToString() + ")";
+                                button.Tag = temp_entity_name + " (" + propertyValueVals[propertyIndex][i] + ")";
                                 button.Click += GoToNode_Click;
                                 grid.Children.Add(button);
                                 Grid.SetRow(button, rowCount);
@@ -1961,88 +1952,6 @@ namespace rpkg
             {
                 Grid.SetColumnSpan(colorCanvas, 7);
             }
-
-            MainStackPanelTEMP.Children.Add(grid);
-        }
-
-        private void AppendInput_SEntityTemplateReference(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
-        {
-            Grid grid = new Grid();
-
-            ColumnDefinition columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-            grid.ColumnDefinitions.Add(columnDefinition);
-
-            columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-            grid.ColumnDefinitions.Add(columnDefinition);
-
-            columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-            grid.ColumnDefinitions.Add(columnDefinition);
-
-            columnDefinition = new ColumnDefinition();
-            columnDefinition.Width = GridLength.Auto;
-            grid.ColumnDefinitions.Add(columnDefinition);
-
-            int rowCount = 1;
-
-            SEntityTemplateReference reference = new SEntityTemplateReference(propertyValueVals[propertyIndex][0],
-                Int64.Parse(propertyValueVals[propertyIndex][1]), Int32.Parse(propertyValueVals[propertyIndex][2]),
-                propertyValueVals[propertyIndex][3]);
-
-
-            int temp_entity_index = 0;
-
-            int.TryParse(propertyValueVals[propertyIndex][2], out temp_entity_index);
-
-            string temp_entity_name = Marshal.PtrToStringAnsi(get_entry_name(temp_index, temp_entity_index));
-
-            Label label = new Label();
-            label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":";
-            grid.Children.Add(label);
-            Grid.SetRow(label, rowCount);
-            Grid.SetColumn(label, 0);
-
-
-            if (temp_entity_name == "")
-            {
-                TextBox textBox = new TextBox();
-                textBox.Name = GetNewControlName(temp_index, propertyValueJSONPointers[propertyIndex][2], propertyValueJSONPointersTypes[propertyIndex][2]);
-                textBox.Text = propertyValueVals[propertyIndex][2];
-                textBox.Margin = new Thickness(4, 0, 4, 0);
-                textBox.TextChanged += TextBox_TextChanged;
-                grid.Children.Add(textBox);
-                Grid.SetRow(textBox, rowCount);
-                Grid.SetColumn(textBox, 1);
-                Grid.SetColumnSpan(textBox, 3);
-            }
-            else
-            {
-
-                TextBox textBox = new TextBox();
-                string nodePath = EntityIndexToNodePath(reference.entityIndex.ToString());
-                textBox.Name = GetNewControlName(entity_index, propertyValueJSONPointers[propertyIndex][2], propertyValueJSONPointersTypes[propertyIndex][2]);
-                textBox.Text = entity_index + "";
-                textBox.Margin = new Thickness(4, 0, 4, 0);
-                textBox.IsReadOnly = true;
-                grid.Children.Add(textBox);
-                Grid.SetRow(textBox, rowCount);
-                Grid.SetColumn(textBox, 1);
-                Grid.SetColumnSpan(textBox, 2);
-
-                Button button = new Button();
-                button.Content = "  GO  ";
-                button.Margin = new Thickness(4, 0, 4, 0);
-                button.Background = Brushes.Red;
-                button.Tag = temp_entity_name + " (" + propertyValueVals[propertyIndex][2] + ") (" + temp_index.ToString() + ")";
-                button.Click += GoToNode_Click;
-                grid.Children.Add(button);
-                Grid.SetRow(button, rowCount);
-                Grid.SetColumn(button, 3);
-            }
-
-
 
             MainStackPanelTEMP.Children.Add(grid);
         }
