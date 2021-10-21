@@ -1,4 +1,4 @@
-﻿<mah:MetroWindow x:Class="rpkg.MainWindow"
+<mah:MetroWindow x:Class="rpkg.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
@@ -90,7 +90,6 @@
 						<MenuItem Click="ConvertJSONToHashMetaFile_Click" Header="Convert JSON To Hash Meta File"/>
 					</MenuItem>
 					<MenuItem Click="About_Click" Header="About"/>
-					<MenuItem Click="Exit_Click" Header="Exit"/>
 				</Menu>
 			</DockPanel>
 			<Image Grid.Row="0" Grid.Column="2" Source="Discord.png" Cursor="Hand" MouseDown="DiscordInvite_MouseDown"/>
