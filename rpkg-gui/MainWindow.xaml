@@ -1,4 +1,4 @@
-<mah:MetroWindow x:Class="rpkg.MainWindow"
+﻿<mah:MetroWindow x:Class="rpkg.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
@@ -84,11 +84,11 @@
 						<MenuItem Click="ChangeColorTheme_Click" Header="Dark/Yellow"/>
 						<MenuItem Click="ChangeColorTheme_Click" Header="Dark/White"/>
 					</MenuItem>
-					<MenuItem Click="HashCalculator_Click"  Header="Hash Calculator"/>
 					<MenuItem Header="Utilities">
 						<MenuItem Click="ConvertHashMetaFileToJSON_Click" Header="Convert Hash Meta File To JSON"/>
 						<MenuItem Click="ConvertJSONToHashMetaFile_Click" Header="Convert JSON To Hash Meta File"/>
-					</MenuItem>
+                        <MenuItem Click="HashCalculator_Click"  Header="Hash Calculator"/>
+                    </MenuItem>
 					<MenuItem Click="About_Click" Header="About"/>
 				</Menu>
 			</DockPanel>
