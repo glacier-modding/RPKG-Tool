@@ -146,7 +146,6 @@ namespace rpkg
             }
 
             Clipboard.SetText(foundHashes);
-            newlyFoundHashes.Clear();
         }
 
 
