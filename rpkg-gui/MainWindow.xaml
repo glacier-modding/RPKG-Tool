@@ -84,13 +84,12 @@
 						<MenuItem Click="ChangeColorTheme_Click" Header="Dark/Yellow"/>
 						<MenuItem Click="ChangeColorTheme_Click" Header="Dark/White"/>
 					</MenuItem>
-					<MenuItem Click="HashCalculator_Click"  Header="Hash Calculator"/>
 					<MenuItem Header="Utilities">
 						<MenuItem Click="ConvertHashMetaFileToJSON_Click" Header="Convert Hash Meta File To JSON"/>
 						<MenuItem Click="ConvertJSONToHashMetaFile_Click" Header="Convert JSON To Hash Meta File"/>
-					</MenuItem>
+                        <MenuItem Click="HashCalculator_Click"  Header="Hash Calculator"/>
+                    </MenuItem>
 					<MenuItem Click="About_Click" Header="About"/>
-					<MenuItem Click="Exit_Click" Header="Exit"/>
 				</Menu>
 			</DockPanel>
 			<Image Grid.Row="0" Grid.Column="2" Source="Discord.png" Cursor="Hand" MouseDown="DiscordInvite_MouseDown"/>

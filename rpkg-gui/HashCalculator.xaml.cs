@@ -71,6 +71,8 @@ namespace rpkg
         {
             MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
 
+            newlyFoundHashes.Clear();
+
             if (canceller.shouldCancel)
             {
                 return null;
