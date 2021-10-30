@@ -21,9 +21,10 @@ void generic_function::decrypt_packagedefinition_thumbs(std::string& input_path,
 
     uint64_t packagedefinitions_thumbs_file_size = file.tellg();
 
-    int packagedefinitions_thumbs_header_size = 20;
+    int packagedefinitions_thumbs_header_size = 16;
 
-    packagedefinitions_thumbs_file_size -= packagedefinitions_thumbs_header_size;
+	packagedefinitions_thumbs_file_size -= packagedefinitions_thumbs_header_size;
+	packagedefinitions_thumbs_file_size -= 4; // -4 to skip over checksum
 
     file.seekg(0, file.beg);
 
@@ -33,6 +34,7 @@ void generic_function::decrypt_packagedefinition_thumbs(std::string& input_path,
 
     std::vector<char> input_data(packagedefinitions_thumbs_file_size, 0);
 
+	file.seekg(4, file.cur);
     file.read(input_data.data(), packagedefinitions_thumbs_file_size);
 
     file.close();
@@ -85,16 +87,4 @@ void generic_function::decrypt_packagedefinition_thumbs(std::string& input_path,
     output_file.write(input_data.data(), last_zero_position);
 
     LOG("Successfully decrypted " << output_file_base_name << " and saved to " << output_file_base_name + ".decrypted" << std::endl);
-
-    std::ofstream output_file_meta = std::ofstream(output_file_base_name + ".decrypted.meta", std::ofstream::binary);
-
-    if (!output_file_meta.good())
-    {
-        LOG_AND_EXIT("Error: Output (packagedefinitions.txt / thumbs.dat).decrypted.meta file " + output_file_base_name + ".decrypted.meta" + " could not be created.");
-    }
-
-    output_file_meta.write(packagedefinitions_thumbs_header.data(), packagedefinitions_thumbs_header_size);
-
-    LOG("Successfully created decrypted meta file " << output_file_base_name + ".decrypted.meta" << std::endl);
-    LOG("The meta file is used when re-encrypting back to " << output_file_base_name << std::endl);
 }
