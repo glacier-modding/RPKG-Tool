@@ -46,7 +46,6 @@ void generic_function::encrypt_packagedefinition_thumbs(std::string& input_path,
 	uint32_t crc = crc32::update(table, 0, input_data.data(), input_data.size() - 4);
 	
 	std::vector<char> checksum(4, 0);
-	LOG(std::hex << crc);
 	checksum[0] = (char)(crc);
 	checksum[1] = (char)(crc >> 8);
 	checksum[2] = (char)(crc >> 16);
