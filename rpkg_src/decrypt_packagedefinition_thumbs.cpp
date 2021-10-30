@@ -89,7 +89,7 @@ void generic_function::decrypt_packagedefinition_thumbs(std::string& input_path,
 	std::string output_file_base_name = file::output_path_append(file::get_base_file_name(input_path), output_path);
 
 	if (crc != old_crc) {
-		LOG("Could not decrypt " + output_file_base_name + "!\nReason: Checksum mismatch! Exiting...");
+		LOG_AND_EXIT("Could not decrypt " + output_file_base_name + "!\nReason: Checksum mismatch! Exiting...");
 	}
 
     std::ofstream output_file = std::ofstream(output_file_base_name + ".decrypted", std::ofstream::binary);
