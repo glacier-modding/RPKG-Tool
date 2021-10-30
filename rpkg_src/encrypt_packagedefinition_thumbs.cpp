@@ -41,17 +41,17 @@ void generic_function::encrypt_packagedefinition_thumbs(std::string& input_path,
         input_data.push_back(0x0);
     }
 
+	uint32_t zero_pad_length = (uint32_t)(packagedefinitions_thumbs_file_size - input_data.size());
+
 	uint32_t table[256];
 	crc32::generate_table(table);
-	uint32_t crc = crc32::update(table, 0, input_data.data(), input_data.size() - 4);
+	uint32_t crc = crc32::update(table, 0, input_data.data(), input_data.size() - zero_pad_length);
 	
 	std::vector<char> checksum(4, 0);
 	checksum[0] = (char)(crc);
 	checksum[1] = (char)(crc >> 8);
 	checksum[2] = (char)(crc >> 16);
 	checksum[3] = (char)(crc >> 24);
-
-    uint32_t zero_pad_length = (uint32_t)(packagedefinitions_thumbs_file_size - input_data.size());
 
     for (uint64_t i = 0; i < input_data.size() / 8; i++)
     {
