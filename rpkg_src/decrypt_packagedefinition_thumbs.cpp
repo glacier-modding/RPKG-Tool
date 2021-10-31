@@ -9,7 +9,7 @@
 #include <iostream>
 #include <sstream>
 
-void generic_function::decrypt_packagedefinition_thumbs(std::string& input_path, std::string& output_path)
+void generic_function::decrypt_packagedefinition_thumbs(std::string &input_path, std::string &output_path)
 {
     std::ifstream file = std::ifstream(input_path, std::ifstream::binary);
 
@@ -24,8 +24,8 @@ void generic_function::decrypt_packagedefinition_thumbs(std::string& input_path,
 
     int packagedefinitions_thumbs_header_size = 16;
 
-	packagedefinitions_thumbs_file_size -= packagedefinitions_thumbs_header_size;
-	packagedefinitions_thumbs_file_size -= 4; // -4 to skip the checksum
+    packagedefinitions_thumbs_file_size -= packagedefinitions_thumbs_header_size;
+    packagedefinitions_thumbs_file_size -= 4; // -4 to skip the checksum
 
     file.seekg(0, file.beg);
 
@@ -33,9 +33,9 @@ void generic_function::decrypt_packagedefinition_thumbs(std::string& input_path,
 
     file.read(packagedefinitions_thumbs_header.data(), packagedefinitions_thumbs_header_size);
 
-	std::vector<char> checksum_raw(4, 0);
+    std::vector<char> checksum_raw(4, 0);
 
-	file.read(checksum_raw.data(), 4);
+    file.read(checksum_raw.data(), 4);
 
     std::vector<char> input_data(packagedefinitions_thumbs_file_size, 0);
 
@@ -79,18 +79,19 @@ void generic_function::decrypt_packagedefinition_thumbs(std::string& input_path,
         }
     }
 
-	uint32_t table[256];
-	crc32::generate_table(table);
-	uint32_t crc = crc32::update(table, 0, input_data.data(), last_zero_position);
+    uint32_t table[256];
+    crc32::generate_table(table);
+    uint32_t crc = crc32::update(table, 0, input_data.data(), last_zero_position);
 
-	uint32_t old_crc = 0;
-	memcpy(&old_crc, &checksum_raw.data()[0], sizeof(old_crc));
+    uint32_t old_crc = 0;
+    memcpy(&old_crc, &checksum_raw.data()[0], sizeof(old_crc));
 
-	std::string output_file_base_name = file::output_path_append(file::get_base_file_name(input_path), output_path);
+    std::string output_file_base_name = file::output_path_append(file::get_base_file_name(input_path), output_path);
 
-	if (crc != old_crc) {
-		LOG_AND_EXIT("Could not decrypt " + output_file_base_name + "!\nReason: Checksum mismatch! Exiting...");
-	}
+    if (crc != old_crc)
+    {
+        LOG_AND_EXIT("Could not decrypt " + output_file_base_name + "!\nReason: Checksum mismatch! Exiting...");
+    }
 
     std::ofstream output_file = std::ofstream(output_file_base_name + ".decrypted", std::ofstream::binary);
 

@@ -9,13 +9,12 @@
 #include <iostream>
 #include <sstream>
 
-void generic_function::encrypt_packagedefinition_thumbs(std::string& input_path, std::string& output_path)
+void generic_function::encrypt_packagedefinition_thumbs(std::string &input_path, std::string &output_path)
 {
     int packagedefinitions_thumbs_header_size = 16;
 
-	std::vector<char> packagedefinitions_thumbs_header{
-		0x22, 0x3d, 0x6f, (char)0x9a, (char)0xb3, (char)0xf8, (char)0xfe, (char)0xb6, 0x61, (char)0xd9, (char)0xcc, 0x1c, 0x62, (char)0xde, (char)0x83, 0x41
-	};
+    std::vector<char> packagedefinitions_thumbs_header{
+        0x22, 0x3d, 0x6f, (char)0x9a, (char)0xb3, (char)0xf8, (char)0xfe, (char)0xb6, 0x61, (char)0xd9, (char)0xcc, 0x1c, 0x62, (char)0xde, (char)0x83, 0x41};
 
     std::ifstream file = std::ifstream(input_path, std::ifstream::binary);
 
@@ -41,15 +40,15 @@ void generic_function::encrypt_packagedefinition_thumbs(std::string& input_path,
         input_data.push_back(0x0);
     }
 
-	uint32_t table[256];
-	crc32::generate_table(table);
-	uint32_t crc = crc32::update(table, 0, input_data.data(), packagedefinitions_thumbs_file_size);
-	
-	std::vector<char> checksum(4, 0);
-	checksum[0] = (char)(crc);
-	checksum[1] = (char)(crc >> 8);
-	checksum[2] = (char)(crc >> 16);
-	checksum[3] = (char)(crc >> 24);
+    uint32_t table[256];
+    crc32::generate_table(table);
+    uint32_t crc = crc32::update(table, 0, input_data.data(), packagedefinitions_thumbs_file_size);
+
+    std::vector<char> checksum(4, 0);
+    checksum[0] = (char)(crc);
+    checksum[1] = (char)(crc >> 8);
+    checksum[2] = (char)(crc >> 16);
+    checksum[3] = (char)(crc >> 24);
 
     for (uint64_t i = 0; i < input_data.size() / 8; i++)
     {
@@ -74,7 +73,7 @@ void generic_function::encrypt_packagedefinition_thumbs(std::string& input_path,
 
     output_file.write(packagedefinitions_thumbs_header.data(), packagedefinitions_thumbs_header_size);
 
-	output_file.write(checksum.data(), checksum.size());
+    output_file.write(checksum.data(), checksum.size());
 
     output_file.write(input_data.data(), input_data.size());
 
