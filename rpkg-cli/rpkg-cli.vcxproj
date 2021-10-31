@@ -178,6 +178,7 @@
     <ClInclude Include="..\rpkg_src\borg.h" />
     <ClInclude Include="..\rpkg_src\command_line.h" />
     <ClInclude Include="..\rpkg_src\console.h" />
+    <ClInclude Include="..\rpkg_src\crc32.h" />
     <ClInclude Include="..\rpkg_src\crypto.h" />
     <ClInclude Include="..\rpkg_src\dev_function.h" />
     <ClInclude Include="..\rpkg_src\file.h" />

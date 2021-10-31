@@ -656,5 +656,8 @@
     <ClInclude Include="..\rpkg_src\thirdparty\mikktspace\mikktspace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\rpkg_src\crc32.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
