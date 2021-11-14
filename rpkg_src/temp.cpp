@@ -2557,7 +2557,7 @@ int temp::generate_temp_file_from_data(std::string temp_path)
         resource_tool_generator = HM3_GetGeneratorForResource("TEMP");
     }
 
-    resource_tool_generator->FromJsonStringToResourceFile(buffer.GetString(), buffer.GetSize(), &temp_path[0], true);
+    resource_tool_generator->FromJsonStringToResourceFile(buffer.GetString(), buffer.GetSize(), &temp_path[0], true, true);
 
     //resource_tool_ConvertMemoryJsonToResource(&type[0], buffer.GetString(), buffer.GetSize(), &temp_path[0]);
 

@@ -16,9 +16,14 @@ extern "C"
 		 * The [p_Simple] parameter specifies whether the json input is in its simplified for
 		 * or not.
 		 *
+		 * The [p_GenerateCompatible] parameter specifies whether the generated resource should try to
+		 * maintain compatibility with the quirks of the original BIN1 format. Doesn't matter when
+		 * producing files for use in the game, but certain third party tools might behave better with them.
+		 * Generating "compatible" resources can take significantly longer.
+		 *
 		 * Returns [true] on success, or [false] otherwise.
 		 */
-		bool (*FromJsonFileToResourceFile)(const char* p_JsonFilePath, const char* p_ResourceFilePath, bool p_Simple);
+		bool (*FromJsonFileToResourceFile)(const char* p_JsonFilePath, const char* p_ResourceFilePath, bool p_Simple, bool p_GenerateCompatible);
 
 		/**
 		 * Generate a new binary resource from the specified json string and store it in the
@@ -29,9 +34,14 @@ extern "C"
 		 * The [p_Simple] parameter specifies whether the json input is in its simplified for
 		 * or not.
 		 *
+		 * The [p_GenerateCompatible] parameter specifies whether the generated resource should try to
+		 * maintain compatibility with the quirks of the original BIN1 format. Doesn't matter when
+		 * producing files for use in the game, but certain third party tools might behave better with them.
+		 * Generating "compatible" resources can take significantly longer.
+		 *
 		 * Returns [true] on success, or [false] otherwise.
 		 */
-		bool (*FromJsonStringToResourceFile)(const char* p_JsonStr, size_t p_JsonStrLength, const char* p_ResourceFilePath, bool p_Simple);
+		bool (*FromJsonStringToResourceFile)(const char* p_JsonStr, size_t p_JsonStrLength, const char* p_ResourceFilePath, bool p_Simple, bool p_GenerateCompatible);
 
 		/**
 		 * Generate a new binary resource from the json file found at [p_JsonFilePath] and store it
@@ -41,9 +51,14 @@ extern "C"
 		 * The [p_Simple] parameter specifies whether the json input is in its simplified for
 		 * or not.
 		 *
+		 * The [p_GenerateCompatible] parameter specifies whether the generated resource should try to
+		 * maintain compatibility with the quirks of the original BIN1 format. Doesn't matter when
+		 * producing files for use in the game, but certain third party tools might behave better with them.
+		 * Generating "compatible" resources can take significantly longer.
+		 *
 		 * If the operation fails, this function will return [nullptr].
 		 */
-		ResourceMem* (*FromJsonFileToResourceMem)(const char* p_JsonFilePath, bool p_Simple);
+		ResourceMem* (*FromJsonFileToResourceMem)(const char* p_JsonFilePath, bool p_Simple, bool p_GenerateCompatible);
 
 		/**
 		 * Generate a new binary resource from the specified json string and store it in memory as
@@ -55,9 +70,14 @@ extern "C"
 		 * The [p_Simple] parameter specifies whether the json input is in its simplified for
 		 * or not.
 		 *
+		 * The [p_GenerateCompatible] parameter specifies whether the generated resource should try to
+		 * maintain compatibility with the quirks of the original BIN1 format. Doesn't matter when
+		 * producing files for use in the game, but certain third party tools might behave better with them.
+		 * Generating "compatible" resources can take significantly longer.
+		 *
 		 * If the operation fails, this function will return [nullptr].
 		 */
-		ResourceMem* (*FromJsonStringToResourceMem)(const char* p_JsonStr, size_t p_JsonStrLength, bool p_Simple);
+		ResourceMem* (*FromJsonStringToResourceMem)(const char* p_JsonStr, size_t p_JsonStrLength, bool p_Simple, bool p_GenerateCompatible);
 
 		/**
 		 * Clean up an in-memory binary resource. The [ResourceMem] becomes invalid after a call
