@@ -249,7 +249,7 @@
 				<Grid>
 					<hx:HelixViewport3D x:Name="helixViewport">
 						<hx:HelixViewport3D.Camera>
-							<OrthographicCamera />
+							<OrthographicCamera NearPlaneDistance="-1.7976931348623157E+8" FarPlaneDistance="1.7976931348623157E+8" />
 						</hx:HelixViewport3D.Camera>
 						<hx:SunLight/>
 						<hx:DefaultLights></hx:DefaultLights>
