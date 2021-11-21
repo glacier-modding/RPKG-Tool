@@ -512,6 +512,11 @@ namespace rpkg
 							LoadHexEditor();
 						}
 
+						if (RightTabControl.SelectedIndex == 3 && resourceType == "TEXT")
+						{
+							LoadImageViewer(hashFile, hash);
+						}
+
 						string currentRPKGFilePath = rpkgFilePath;
 
 						currentHash = header[0];
@@ -716,53 +721,9 @@ namespace rpkg
 
 						if (resourceType == "TEXT")
 						{
-							try
+							if (FourthTabRight.Visibility == Visibility.Collapsed)
 							{
-								BitmapImage bitmapImage = new BitmapImage();
-
-								bitmapImage.BeginInit();
-
-								string currentDirectory = System.IO.Directory.GetCurrentDirectory();
-
-								string png_file_name = currentDirectory + "\\" + hashFile + ".png";
-
-								//return_value = generate_png_from_text(rpkgFilePath, hash, png_file_name);
-
-								Thread thread = new Thread(() => TEXTToPNGThread(rpkgFilePath, hash, png_file_name));
-								thread.SetApartmentState(ApartmentState.MTA);
-								thread.Start();
-								thread.Join();
-
-								if (File.Exists(png_file_name))
-								{
-									MemoryStream memoryStream = new MemoryStream(File.ReadAllBytes(png_file_name));
-
-									bitmapImage.StreamSource = memoryStream;
-
-									bitmapImage.EndInit();
-
-									ImageViewer.Source = bitmapImage;
-
-									if (FourthTabRight.Visibility == Visibility.Collapsed)
-									{
-										FourthTabRight.Visibility = Visibility.Visible;
-									}
-
-									File.Delete(png_file_name);
-								}
-								else
-								{
-									if (FourthTabRight.Visibility == Visibility.Visible)
-									{
-										FourthTabRight.Visibility = Visibility.Collapsed;
-									}
-								}
-
-								int return_value_clear = clear_hash_data_vector();
-							}
-							catch
-							{
-								return;
+								FourthTabRight.Visibility = Visibility.Visible;
 							}
 						}
 
@@ -2865,6 +2826,14 @@ namespace rpkg
 			{
 				LoadHexEditor();
 			}
+
+			if (tab.SelectedIndex == 3)
+			{
+				string[] hashDetails = currentHash.Split('.');
+				string hash = hashDetails[0];
+
+				LoadImageViewer(currentHash, hash);
+			}
 		}
 
 		private System.Windows.Forms.TreeNode GetRootTreeNode(System.Windows.Forms.TreeNode node)
@@ -2888,6 +2857,58 @@ namespace rpkg
 			string hash = hashDetails[0];
 
 			HexViewerTextBox.Text += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgFilePath, hash));
+		}
+
+		private void LoadImageViewer(string hashFile, string hash)
+		{
+			try
+			{
+				BitmapImage bitmapImage = new BitmapImage();
+
+				bitmapImage.BeginInit();
+
+				string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+
+				string png_file_name = currentDirectory + "\\" + hashFile + ".png";
+
+				//return_value = generate_png_from_text(rpkgFilePath, hash, png_file_name);
+
+				Thread thread = new Thread(() => TEXTToPNGThread(rpkgFilePath, hash, png_file_name));
+				thread.SetApartmentState(ApartmentState.MTA);
+				thread.Start();
+				thread.Join();
+
+				if (File.Exists(png_file_name))
+				{
+					MemoryStream memoryStream = new MemoryStream(File.ReadAllBytes(png_file_name));
+
+					bitmapImage.StreamSource = memoryStream;
+
+					bitmapImage.EndInit();
+
+					ImageViewer.Source = bitmapImage;
+
+					if (FourthTabRight.Visibility == Visibility.Collapsed)
+					{
+						FourthTabRight.Visibility = Visibility.Visible;
+					}
+
+					File.Delete(png_file_name);
+				}
+				else
+				{
+					if (FourthTabRight.Visibility == Visibility.Visible)
+					{
+						FourthTabRight.Visibility = Visibility.Collapsed;
+					}
+				}
+
+				int return_value_clear = clear_hash_data_vector();
+			}
+			catch
+			{
+				return;
+			}
 		}
 
 		public static void TEXTToPNGThread(string rpkgFilePathLocal, string hash, string png_file_name)
