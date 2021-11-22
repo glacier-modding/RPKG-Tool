@@ -3244,7 +3244,7 @@ namespace rpkg
 
         private string formatPropertyName(string propertyName)
         {
-            return propertyName; // we have formatted the property name
+            return propertyName.Replace("_", "__"); // we have formatted the property name
         }
 
         #endregion
