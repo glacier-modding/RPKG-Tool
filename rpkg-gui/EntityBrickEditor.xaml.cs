@@ -891,7 +891,7 @@ namespace rpkg
                         //MessageBoxShow(hashReferenceData);
 
                         Label label1 = new Label();
-                        label1.Content = entityName + "'s Data:";
+                        label1.Content = entityName.Replace("_", "__") + "'s Data:";
                         label1.FontSize = 18;
                         label1.FontWeight = FontWeights.Bold;
 
@@ -3244,29 +3244,7 @@ namespace rpkg
 
         private string formatPropertyName(string propertyName)
         {
-
-            string formattedPropertyName = propertyName;
-            if (!propertyName.StartsWith("m_")) return formattedPropertyName;
-            else formattedPropertyName = formattedPropertyName.Substring(2);
-
-            if (!Char.IsUpper(formattedPropertyName, 0)) formattedPropertyName = formattedPropertyName.Substring(1);
-
-            string temp_propertyName = formattedPropertyName;
-            int found = 0;
-            for (int i = 1; i < formattedPropertyName.Length - 1; i++)
-            {
-
-                if (Char.IsUpper(formattedPropertyName, i) && !Char.IsUpper(formattedPropertyName, i + 1))
-                {
-                    temp_propertyName = temp_propertyName.Insert(i + found, " ");
-                    found++;
-                }
-
-            }
-
-            formattedPropertyName = temp_propertyName;
-            return formattedPropertyName;
-
+            return propertyName.Replace("_", "__"); // we have formatted the property name
         }
 
         #endregion
