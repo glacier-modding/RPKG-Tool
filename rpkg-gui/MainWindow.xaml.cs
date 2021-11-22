@@ -173,7 +173,7 @@ namespace rpkg
 			if (!File.Exists("hash_list.txt"))
 			{
 				MessageQuestion messageBox = new MessageQuestion();
-				messageBox.message.Content = "Error: The hash list file (hash_list.txt) is missing.\n\nIt's necessary for several functions.\n\nClick OK to automatically download it.\n\nYou can also download it manually from https://hitmandb.notex.app/latest-hashes.7z and extract it to the same directory as this program.";
+				messageBox.message.Content = "Error: The hash list file (hash__list.txt) is missing.\n\nIt's necessary for several functions.\n\nClick OK to automatically download it.\n\nYou can also download it manually from https://hitmandb.notex.app/latest-hashes.7z and extract it to the same directory as this program.";
 				messageBox.ShowDialog();
 
 				//MessageBoxShow(messageBox.buttonPressed);
