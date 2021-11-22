@@ -891,7 +891,7 @@ namespace rpkg
                         //MessageBoxShow(hashReferenceData);
 
                         Label label1 = new Label();
-                        label1.Content = entityName + "'s Data:";
+                        label1.Content = entityName.Replace("_", "__") + "'s Data:";
                         label1.FontSize = 18;
                         label1.FontWeight = FontWeights.Bold;
 
