@@ -813,7 +813,7 @@ namespace rpkg
 
                         MainStackPanelTEMP.Children.Add(label1);
 
-                        TextBox label2 = new TextBlock();
+                        TextBlock label2 = new TextBlock();
                         label2.Text = ioiString;
 
                         MainStackPanelTEMP.Children.Add(label2);
@@ -904,7 +904,7 @@ namespace rpkg
 
                         MainStackPanelTEMP.Children.Add(label1);
 
-                        TextBox label2 = new TextBlock();
+                        TextBlock label2 = new TextBlock();
                         label2.Text = hashReferenceData;
 
                         MainStackPanelTEMP.Children.Add(label2);
