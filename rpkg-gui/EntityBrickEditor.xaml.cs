@@ -1524,7 +1524,7 @@ namespace rpkg
                                 textBox = new TextBox();
                                 textBox.Text = temp_entity_name;
                                 textBox.Margin = new Thickness(4, 0, 4, 0);
-                                textBox.I.IsReadOnly = true;
+                                textBox.IsReadOnly = true;
                                 grid.Children.Add(textBox);
                                 Grid.SetRow(textBox, rowCount);
                                 Grid.SetColumn(textBox, 2);
@@ -1846,7 +1846,7 @@ namespace rpkg
         private void AppendInput_SColorRGB(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes, bool rgba_mode)
         {
             TextBox label1 = new TextBox();
-            label.IsReadOnly = true;
+            label1.IsReadOnly = true;
 
             label1.Text = propertyValuePropertyIDs[propertyIndex] + ":";
 
