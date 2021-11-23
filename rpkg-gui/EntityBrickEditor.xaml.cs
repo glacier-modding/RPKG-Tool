@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,10 +26,10 @@ using Brushes = System.Windows.Media.Brushes;
 using Button = System.Windows.Controls.Button;
 using Color = System.Windows.Media.Color;
 using ComboBox = System.Windows.Controls.ComboBox;
-using Label = System.Windows.Controls.Label;
 using ListBox = System.Windows.Forms.ListBox;
 using TextBox = System.Windows.Controls.TextBox;
 using TreeView = System.Windows.Controls.TreeView;
+using TextBlock = System.Windows.Controls.TextBlock;
 
 namespace rpkg
 {
@@ -68,7 +68,7 @@ namespace rpkg
 
             message = new Message();
 
-            message.message.Content = "Loading Entity/Brick (TEMP/TBLU) Editor Treeview Nodes.\n\nThe GUI will seem frozen for a short time while the nodes are loaded.\n\nThe more recursive TEMP/TBLU files found, the longer the loading time will be.\n\nThis window will disappear once all the nodes have been loaded.";
+            message.message.Content = "Please wait for all entity nodes to load.\n\nThis window will disappear once all the nodes have been loaded.";
 
             message.Topmost = true;
 
@@ -799,27 +799,27 @@ namespace rpkg
 
                         temp_index = (UInt32)get_temp_index(hashFileName);
 
-                        Label label1 = new Label();
-                        label1.Content = hashFileName + "'s Data:";
+                        TextBlock label1 = new TextBlock();
+                        label1.Text = hashFileName + "'s Data:";
                         label1.FontSize = 18;
                         label1.FontWeight = FontWeights.Bold;
 
                         MainStackPanelTEMP.Children.Add(label1);
 
-                        label1 = new Label();
-                        label1.Content = "IOI String:";
+                        label1 = new TextBlock();
+                        label1.Text = "IOI String:";
                         label1.FontSize = 16;
                         label1.FontWeight = FontWeights.Bold;
 
                         MainStackPanelTEMP.Children.Add(label1);
 
-                        Label label2 = new Label();
-                        label2.Content = ioiString;
+                        TextBlock label2 = new TextBlock();
+                        label2.Text = ioiString;
 
                         MainStackPanelTEMP.Children.Add(label2);
 
-                        label1 = new Label();
-                        label1.Content = "Property data (subType):";
+                        label1 = new TextBlock();
+                        label1.Text = "Property data (subType):";
                         label1.FontSize = 16;
                         label1.FontWeight = FontWeights.Bold;
 
@@ -827,8 +827,8 @@ namespace rpkg
 
                         AppendInput_TEMP("subType", "int32");
 
-                        label1 = new Label();
-                        label1.Content = "Property data (blueprintIndexInResourceHeader):";
+                        label1 = new TextBlock();
+                        label1.Text = "Property data (blueprintIndexInResourceHeader):";
                         label1.FontSize = 16;
                         label1.FontWeight = FontWeights.Bold;
 
@@ -836,8 +836,8 @@ namespace rpkg
 
                         AppendInput_TEMP("blueprintIndexInResourceHeader", "int32");
 
-                        label1 = new Label();
-                        label1.Content = "Property data (rootEntityIndex):";
+                        label1 = new TextBlock();
+                        label1.Text = "Property data (rootEntityIndex):";
                         label1.FontSize = 16;
                         label1.FontWeight = FontWeights.Bold;
 
@@ -845,8 +845,8 @@ namespace rpkg
 
                         AppendInput_TEMP("rootEntityIndex", "int32");
 
-                        label1 = new Label();
-                        label1.Content = "Property data (propertyOverrides):";
+                        label1 = new TextBlock();
+                        label1.Text = "Property data (propertyOverrides):";
                         label1.FontSize = 16;
                         label1.FontWeight = FontWeights.Bold;
 
@@ -854,8 +854,8 @@ namespace rpkg
 
                         AppendInput_TEMP("propertyOverrides", "TArray<SEntityTemplatePropertyOverride>");
 
-                        label1 = new Label();
-                        label1.Content = "Property data (externalSceneTypeIndicesInResourceHeader):";
+                        label1 = new TextBlock();
+                        label1.Text = "Property data (externalSceneTypeIndicesInResourceHeader):";
                         label1.FontSize = 16;
                         label1.FontWeight = FontWeights.Bold;
 
@@ -890,27 +890,27 @@ namespace rpkg
 
                         //MessageBoxShow(hashReferenceData);
 
-                        Label label1 = new Label();
-                        label1.Content = entityName.Replace("_", "__") + "'s Data:";
+                        TextBlock label1 = new TextBlock();
+                        label1.Text = entityName + "'s Data:";
                         label1.FontSize = 18;
                         label1.FontWeight = FontWeights.Bold;
 
                         MainStackPanelTEMP.Children.Add(label1);
 
-                        label1 = new Label();
-                        label1.Content = "Hash reference data:";
+                        label1 = new TextBlock();
+                        label1.Text = "Hash reference data:";
                         label1.FontSize = 16;
                         label1.FontWeight = FontWeights.Bold;
 
                         MainStackPanelTEMP.Children.Add(label1);
 
-                        Label label2 = new Label();
-                        label2.Content = hashReferenceData;
+                        TextBlock label2 = new TextBlock();
+                        label2.Text = hashReferenceData;
 
                         MainStackPanelTEMP.Children.Add(label2);
 
-                        label1 = new Label();
-                        label1.Content = "Property data (propertyValues):";
+                        label1 = new TextBlock();
+                        label1.Text = "Property data (propertyValues):";
                         label1.FontSize = 16;
                         label1.FontWeight = FontWeights.Bold;
 
@@ -918,8 +918,8 @@ namespace rpkg
 
                         AppendInput(entryIndex, "propertyValues");
 
-                        label1 = new Label();
-                        label1.Content = "Property data (postInitPropertyValues):";
+                        label1 = new TextBlock();
+                        label1.Text = "Property data (postInitPropertyValues):";
                         label1.FontSize = 16;
                         label1.FontWeight = FontWeights.Bold;
 
@@ -929,8 +929,8 @@ namespace rpkg
 
                         if (temp_file_version == 3)
                         {
-                            label1 = new Label();
-                            label1.Content = "Property data (platformSpecificPropertyValues):";
+                            label1 = new TextBlock();
+                            label1.Text = "Property data (platformSpecificPropertyValues):";
                             label1.FontSize = 16;
                             label1.FontWeight = FontWeights.Bold;
 
@@ -1134,8 +1134,8 @@ namespace rpkg
                 }
                 else
                 {
-                    Label label2 = new Label();
-                    label2.Content = "  None";
+                    TextBlock label2 = new TextBlock();
+                    label2.Text = "  None";
 
                     MainStackPanelTEMP.Children.Add(label2);
                 }
@@ -1353,8 +1353,8 @@ namespace rpkg
                 }
                 else
                 {
-                    Label label2 = new Label();
-                    label2.Content = "  None";
+                    TextBlock label2 = new TextBlock();
+                    label2.Text = "  None";
 
                     MainStackPanelTEMP.Children.Add(label2);
                 }
@@ -1408,8 +1408,8 @@ namespace rpkg
                     grid.RowDefinitions.Add(rowDefinition);
 
                     
-                    Label label = new Label();
-                    label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
+                    TextBlock label = new TextBlock();
+                    label.Text = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
                     grid.Children.Add(label);
                     Grid.SetRow(label, rowCount);
                     Grid.SetColumn(label, 0);
@@ -1553,8 +1553,8 @@ namespace rpkg
                     grid.RowDefinitions.Add(rowDefinition);
 
 
-                    Label label = new Label();
-                    label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":";
+                    TextBlock label = new TextBlock();
+                    label.Text = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":";
                     grid.Children.Add(label);
                     Grid.SetRow(label, rowCount);
                     Grid.SetColumn(label, 0);
@@ -1613,8 +1613,8 @@ namespace rpkg
                     rowDefinition.Height = new GridLength(8);
                     grid.RowDefinitions.Add(rowDefinition);
 
-                    Label label = new Label();
-                    label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
+                    TextBlock label = new TextBlock();
+                    label.Text = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
                     grid.Children.Add(label);
                     Grid.SetRow(label, rowCount);
                     Grid.SetColumn(label, 0);
@@ -1654,8 +1654,8 @@ namespace rpkg
                     rowDefinition.Height = new GridLength(8);
                     grid.RowDefinitions.Add(rowDefinition);
 
-                    Label label = new Label();
-                    label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
+                    TextBlock label = new TextBlock();
+                    label.Text = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
                     grid.Children.Add(label);
                     Grid.SetRow(label, rowCount);
                     Grid.SetColumn(label, 0);
@@ -1731,8 +1731,8 @@ namespace rpkg
 
 
 
-                    Label label = new Label();
-                    label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
+                    TextBlock label = new TextBlock();
+                    label.Text = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
                     grid.Children.Add(label);
                     Grid.SetRow(label, rowCount);
                     Grid.SetColumn(label, 0);
@@ -1780,8 +1780,8 @@ namespace rpkg
                     rowDefinition.Height = new GridLength(8);
                     grid.RowDefinitions.Add(rowDefinition);
 
-                    Label label = new Label();
-                    label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
+                    TextBlock label = new TextBlock();
+                    label.Text = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
                     grid.Children.Add(label);
                     Grid.SetRow(label, rowCount);
                     Grid.SetColumn(label, 0);
@@ -1824,9 +1824,9 @@ namespace rpkg
 
         private void AppendInput_SColorRGB(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes, bool rgba_mode)
         {
-            Label label1 = new Label();
+            TextBlock label1 = new TextBlock();
 
-            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + ":";
+            label1.Text = propertyValuePropertyIDs[propertyIndex] + ":";
 
             label1.FontSize = 14;
             label1.FontWeight = FontWeights.Bold;
@@ -1890,8 +1890,8 @@ namespace rpkg
 
             for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
             {
-                Label label = new Label();
-                label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + " (" + propertyValueJSONPointersTypes[propertyIndex][i] + "):";
+                TextBlock label = new TextBlock();
+                label.Text = propertyValueValNames[propertyIndex][i] + " (" + propertyValueJSONPointersTypes[propertyIndex][i] + "):";
                 grid.Children.Add(label);
                 Grid.SetRow(label, 1);
                 Grid.SetColumn(label, columnCount);
@@ -1958,9 +1958,9 @@ namespace rpkg
 
         private void AppendInput_SMatrix43(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
-            Label label1 = new Label();
+            TextBlock label1 = new TextBlock();
 
-            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + ":";
+            label1.Text = propertyValuePropertyIDs[propertyIndex] + ":";
 
             label1.FontSize = 14;
             label1.FontWeight = FontWeights.Bold;
@@ -2033,8 +2033,8 @@ namespace rpkg
 
             for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
             {
-                Label label = new Label();
-                label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + ":";
+                TextBlock label = new TextBlock();
+                label.Text = propertyValueValNames[propertyIndex][i] + ":";
                 grid.Children.Add(label);
                 Grid.SetRow(label, rowCount);
                 Grid.SetColumn(label, columnCount);
@@ -2068,9 +2068,9 @@ namespace rpkg
 
         private void AppendInput_SVector2(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
-            Label label1 = new Label();
+            TextBlock label1 = new TextBlock();
 
-            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + ":";
+            label1.Text = propertyValuePropertyIDs[propertyIndex] + ":";
 
             label1.FontSize = 14;
             label1.FontWeight = FontWeights.Bold;
@@ -2107,8 +2107,8 @@ namespace rpkg
 
             for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
             {
-                Label label = new Label();
-                label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + ":";
+                TextBlock label = new TextBlock();
+                label.Text = propertyValueValNames[propertyIndex][i] + ":";
                 grid.Children.Add(label);
                 Grid.SetRow(label, rowCount);
                 Grid.SetColumn(label, columnCount);
@@ -2142,9 +2142,9 @@ namespace rpkg
 
         private void AppendInput_SVector3(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
-            Label label1 = new Label();
+            TextBlock label1 = new TextBlock();
 
-            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + ":";
+            label1.Text = propertyValuePropertyIDs[propertyIndex] + ":";
 
             label1.FontSize = 14;
             label1.FontWeight = FontWeights.Bold;
@@ -2187,8 +2187,8 @@ namespace rpkg
 
             for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
             {
-                Label label = new Label();
-                label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + ":";
+                TextBlock label = new TextBlock();
+                label.Text = propertyValueValNames[propertyIndex][i] + ":";
                 grid.Children.Add(label);
                 Grid.SetRow(label, rowCount);
                 Grid.SetColumn(label, columnCount);
@@ -2222,9 +2222,9 @@ namespace rpkg
 
         private void AppendInput_SVector4(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
-            Label label1 = new Label();
+            TextBlock label1 = new TextBlock();
 
-            label1.Content = propertyValuePropertyIDs[propertyIndex].Replace("_", "__") + ":";
+            label1.Text = propertyValuePropertyIDs[propertyIndex] + ":";
 
             label1.FontSize = 14;
             label1.FontWeight = FontWeights.Bold;
@@ -2273,8 +2273,8 @@ namespace rpkg
 
             for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
             {
-                Label label = new Label();
-                label.Content = propertyValueValNames[propertyIndex][i].Replace("_", "__") + ":";
+                TextBlock label = new TextBlock();
+                label.Text = propertyValueValNames[propertyIndex][i] + ":";
                 grid.Children.Add(label);
                 Grid.SetRow(label, rowCount);
                 Grid.SetColumn(label, columnCount);
@@ -2372,8 +2372,8 @@ namespace rpkg
                 rowDefinition.Height = new GridLength(8);
                 grid.RowDefinitions.Add(rowDefinition);
 
-                Label label = new Label();
-                label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":";
+                TextBlock label = new TextBlock();
+                label.Text = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":";
                 grid.Children.Add(label);
                 Grid.SetRow(label, rowCount);
                 Grid.SetColumn(label, 0);
@@ -3244,7 +3244,7 @@ namespace rpkg
 
         private string formatPropertyName(string propertyName)
         {
-            return propertyName.Replace("_", "__"); // we have formatted the property name
+            return propertyName; // we have formatted the property name
         }
 
         #endregion
