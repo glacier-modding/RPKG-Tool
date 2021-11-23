@@ -67,7 +67,7 @@ namespace rpkg
 
             message = new Message();
 
-            message.message.Content = "Loading Entity/Brick (TEMP/TBLU) Editor Treeview Nodes.\n\nThe GUI will seem frozen for a short time while the nodes are loaded.\n\nThe more recursive TEMP/TBLU files found, the longer the loading time will be.\n\nThis window will disappear once all the nodes have been loaded.";
+            message.message.Content = "Please wait for all entity nodes to load.\n\nThis window will disappear once all the nodes have been loaded.";
 
             message.Topmost = true;
 
@@ -799,30 +799,30 @@ namespace rpkg
                         temp_index = (UInt32)get_temp_index(hashFileName);
 
                         TextBox label1 = new TextBox();
-                        label1.ReadOnly = true;
-                        label1.Content = hashFileName + "'s Data:";
+                        label1.IsReadOnly = true;
+                        label1.Text = hashFileName + "'s Data:";
                         label1.FontSize = 18;
                         label1.FontWeight = FontWeights.Bold;
 
                         MainStackPanelTEMP.Children.Add(label1);
 
                         label1 = new TextBox();
-                        label1.ReadOnly = true;
-                        label1.Content = "IOI String:";
+                        label1.IsReadOnly = true;
+                        label1.Text = "IOI String:";
                         label1.FontSize = 16;
                         label1.FontWeight = FontWeights.Bold;
 
                         MainStackPanelTEMP.Children.Add(label1);
 
                         TextBox label2 = new TextBox();
-                        label2.ReadOnly = true;
-                        label2.Content = ioiString;
+                        label2.IsReadOnly = true;
+                        label2.Text = ioiString;
 
                         MainStackPanelTEMP.Children.Add(label2);
 
                         label1 = new TextBox();
-                        label1.ReadOnly = true;
-                        label1.Content = "Property data (subType):";
+                        label1.IsReadOnly = true;
+                        label1.Text = "Property data (subType):";
                         label1.FontSize = 16;
                         label1.FontWeight = FontWeights.Bold;
 
@@ -831,8 +831,8 @@ namespace rpkg
                         AppendInput_TEMP("subType", "int32");
 
                         label1 = new TextBox();
-                        label1.ReadOnly = true;
-                        label1.Content = "Property data (blueprintIndexInResourceHeader):";
+                        label1.IsReadOnly = true;
+                        label1.Text = "Property data (blueprintIndexInResourceHeader):";
                         label1.FontSize = 16;
                         label1.FontWeight = FontWeights.Bold;
 
@@ -841,8 +841,8 @@ namespace rpkg
                         AppendInput_TEMP("blueprintIndexInResourceHeader", "int32");
 
                         label1 = new TextBox();
-                        label1.ReadOnly = true;
-                        label1.Content = "Property data (rootEntityIndex):";
+                        label1.IsReadOnly = true;
+                        label1.Text = "Property data (rootEntityIndex):";
                         label1.FontSize = 16;
                         label1.FontWeight = FontWeights.Bold;
 
@@ -851,8 +851,8 @@ namespace rpkg
                         AppendInput_TEMP("rootEntityIndex", "int32");
 
                         label1 = new TextBox();
-                        label1.ReadOnly = true;
-                        label1.Content = "Property data (propertyOverrides):";
+                        label1.IsReadOnly = true;
+                        label1.Text = "Property data (propertyOverrides):";
                         label1.FontSize = 16;
                         label1.FontWeight = FontWeights.Bold;
 
@@ -861,8 +861,8 @@ namespace rpkg
                         AppendInput_TEMP("propertyOverrides", "TArray<SEntityTemplatePropertyOverride>");
 
                         label1 = new TextBox();
-                        label1.ReadOnly = true;
-                        label1.Content = "Property data (externalSceneTypeIndicesInResourceHeader):";
+                        label1.IsReadOnly = true;
+                        label1.Text = "Property data (externalSceneTypeIndicesInResourceHeader):";
                         label1.FontSize = 16;
                         label1.FontWeight = FontWeights.Bold;
 
@@ -898,30 +898,30 @@ namespace rpkg
                         //MessageBoxShow(hashReferenceData);
 
                         TextBox label1 = new TextBox();
-                        label1.ReadOnly = true;
-                        label1.Content = entityName + "'s Data:";
+                        label1.IsReadOnly = true;
+                        label1.Text = entityName + "'s Data:";
                         label1.FontSize = 18;
                         label1.FontWeight = FontWeights.Bold;
 
                         MainStackPanelTEMP.Children.Add(label1);
 
                         label1 = new TextBox();
-                        label1.ReadOnly = true;
-                        label1.Content = "Hash reference data:";
+                        label1.IsReadOnly = true;
+                        label1.Text = "Hash reference data:";
                         label1.FontSize = 16;
                         label1.FontWeight = FontWeights.Bold;
 
                         MainStackPanelTEMP.Children.Add(label1);
 
                         TextBox label2 = new TextBox();
-                        label2.ReadOnly = true;
-                        label2.Content = hashReferenceData;
+                        label2.IsReadOnly = true;
+                        label2.Text = hashReferenceData;
 
                         MainStackPanelTEMP.Children.Add(label2);
 
                         label1 = new TextBox();
-                        label1.ReadOnly = true;
-                        label1.Content = "Property data (propertyValues):";
+                        label1.IsReadOnly = true;
+                        label1.Text = "Property data (propertyValues):";
                         label1.FontSize = 16;
                         label1.FontWeight = FontWeights.Bold;
 
@@ -930,8 +930,8 @@ namespace rpkg
                         AppendInput(entryIndex, "propertyValues");
 
                         label1 = new TextBox();
-                        label1.ReadOnly = true;
-                        label1.Content = "Property data (postInitPropertyValues):";
+                        label1.IsReadOnly = true;
+                        label1.Text = "Property data (postInitPropertyValues):";
                         label1.FontSize = 16;
                         label1.FontWeight = FontWeights.Bold;
 
@@ -942,8 +942,8 @@ namespace rpkg
                         if (temp_file_version == 3)
                         {
                             label1 = new TextBox();
-                            label1.ReadOnly = true;
-                            label1.Content = "Property data (platformSpecificPropertyValues):";
+                            label1.IsReadOnly = true;
+                            label1.Text = "Property data (platformSpecificPropertyValues):";
                             label1.FontSize = 16;
                             label1.FontWeight = FontWeights.Bold;
 
@@ -1148,8 +1148,8 @@ namespace rpkg
                 else
                 {
                     TextBox label2 = new TextBox();
-                    label2.ReadOnly = true;
-                    label2.Content = "  None";
+                    label2.IsReadOnly = true;
+                    label2.Text = "  None";
 
                     MainStackPanelTEMP.Children.Add(label2);
                 }
@@ -1368,8 +1368,8 @@ namespace rpkg
                 else
                 {
                     TextBox label2 = new TextBox();
-                    label2.ReadOnly = true;
-                    label2.Content = "  None";
+                    label2.IsReadOnly = true;
+                    label2.Text = "  None";
 
                     MainStackPanelTEMP.Children.Add(label2);
                 }
@@ -1424,8 +1424,8 @@ namespace rpkg
 
                     
                     TextBox label = new TextBox();
-                    label.ReadOnly = true;
-                    label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
+                    label.IsReadOnly = true;
+                    label.Text = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
                     grid.Children.Add(label);
                     Grid.SetRow(label, rowCount);
                     Grid.SetColumn(label, 0);
@@ -1524,7 +1524,7 @@ namespace rpkg
                                 textBox = new TextBox();
                                 textBox.Text = temp_entity_name;
                                 textBox.Margin = new Thickness(4, 0, 4, 0);
-                                textBox.IsReadOnly = true;
+                                textBox.I.IsReadOnly = true;
                                 grid.Children.Add(textBox);
                                 Grid.SetRow(textBox, rowCount);
                                 Grid.SetColumn(textBox, 2);
@@ -1570,8 +1570,8 @@ namespace rpkg
 
 
                     TextBox label = new TextBox();
-                    label.ReadOnly = true;
-                    label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":";
+                    label.IsReadOnly = true;
+                    label.Text = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":";
                     grid.Children.Add(label);
                     Grid.SetRow(label, rowCount);
                     Grid.SetColumn(label, 0);
@@ -1631,8 +1631,8 @@ namespace rpkg
                     grid.RowDefinitions.Add(rowDefinition);
 
                     TextBox label = new TextBox();
-                    label.ReadOnly = true;
-                    label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
+                    label.IsReadOnly = true;
+                    label.Text = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
                     grid.Children.Add(label);
                     Grid.SetRow(label, rowCount);
                     Grid.SetColumn(label, 0);
@@ -1673,8 +1673,8 @@ namespace rpkg
                     grid.RowDefinitions.Add(rowDefinition);
 
                     TextBox label = new TextBox();
-                    label.ReadOnly = true;
-                    label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
+                    label.IsReadOnly = true;
+                    label.Text = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
                     grid.Children.Add(label);
                     Grid.SetRow(label, rowCount);
                     Grid.SetColumn(label, 0);
@@ -1751,8 +1751,8 @@ namespace rpkg
 
 
                     TextBox label = new TextBox();
-                    label.ReadOnly = true;
-                    label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
+                    label.IsReadOnly = true;
+                    label.Text = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
                     grid.Children.Add(label);
                     Grid.SetRow(label, rowCount);
                     Grid.SetColumn(label, 0);
@@ -1801,8 +1801,8 @@ namespace rpkg
                     grid.RowDefinitions.Add(rowDefinition);
 
                     TextBox label = new TextBox();
-                    label.ReadOnly = true;
-                    label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
+                    label.IsReadOnly = true;
+                    label.Text = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
                     grid.Children.Add(label);
                     Grid.SetRow(label, rowCount);
                     Grid.SetColumn(label, 0);
@@ -1846,9 +1846,9 @@ namespace rpkg
         private void AppendInput_SColorRGB(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes, bool rgba_mode)
         {
             TextBox label1 = new TextBox();
-            label.ReadOnly = true;
+            label.IsReadOnly = true;
 
-            label1.Content = propertyValuePropertyIDs[propertyIndex] + ":";
+            label1.Text = propertyValuePropertyIDs[propertyIndex] + ":";
 
             label1.FontSize = 14;
             label1.FontWeight = FontWeights.Bold;
@@ -1913,8 +1913,8 @@ namespace rpkg
             for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
             {
                 TextBox label = new TextBox();
-                label.ReadOnly = true;
-                label.Content = propertyValueValNames[propertyIndex][i] + " (" + propertyValueJSONPointersTypes[propertyIndex][i] + "):";
+                label.IsReadOnly = true;
+                label.Text = propertyValueValNames[propertyIndex][i] + " (" + propertyValueJSONPointersTypes[propertyIndex][i] + "):";
                 grid.Children.Add(label);
                 Grid.SetRow(label, 1);
                 Grid.SetColumn(label, columnCount);
@@ -1982,9 +1982,9 @@ namespace rpkg
         private void AppendInput_SMatrix43(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
             TextBox label1 = new TextBox();
-            label1.ReadOnly = true;
+            label1.IsReadOnly = true;
 
-            label1.Content = propertyValuePropertyIDs[propertyIndex] + ":";
+            label1.Text = propertyValuePropertyIDs[propertyIndex] + ":";
 
             label1.FontSize = 14;
             label1.FontWeight = FontWeights.Bold;
@@ -2058,8 +2058,8 @@ namespace rpkg
             for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
             {
                 TextBox label = new TextBox();
-                label.ReadOnly = true;
-                label.Content = propertyValueValNames[propertyIndex][i] + ":";
+                label.IsReadOnly = true;
+                label.Text = propertyValueValNames[propertyIndex][i] + ":";
                 grid.Children.Add(label);
                 Grid.SetRow(label, rowCount);
                 Grid.SetColumn(label, columnCount);
@@ -2094,9 +2094,9 @@ namespace rpkg
         private void AppendInput_SVector2(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
             TextBox label1 = new TextBox();
-            label1.ReadOnly = true;
+            label1.IsReadOnly = true;
 
-            label1.Content = propertyValuePropertyIDs[propertyIndex] + ":";
+            label1.Text = propertyValuePropertyIDs[propertyIndex] + ":";
 
             label1.FontSize = 14;
             label1.FontWeight = FontWeights.Bold;
@@ -2134,8 +2134,8 @@ namespace rpkg
             for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
             {
                 TextBox label = new TextBox();
-                label.ReadOnly = true;
-                label.Content = propertyValueValNames[propertyIndex][i] + ":";
+                label.IsReadOnly = true;
+                label.Text = propertyValueValNames[propertyIndex][i] + ":";
                 grid.Children.Add(label);
                 Grid.SetRow(label, rowCount);
                 Grid.SetColumn(label, columnCount);
@@ -2170,9 +2170,9 @@ namespace rpkg
         private void AppendInput_SVector3(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
             TextBox label1 = new TextBox();
-            label1.ReadOnly = true;
+            label1.IsReadOnly = true;
 
-            label1.Content = propertyValuePropertyIDs[propertyIndex] + ":";
+            label1.Text = propertyValuePropertyIDs[propertyIndex] + ":";
 
             label1.FontSize = 14;
             label1.FontWeight = FontWeights.Bold;
@@ -2216,8 +2216,8 @@ namespace rpkg
             for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
             {
                 TextBox label = new TextBox();
-                label.ReadOnly = true;
-                label.Content = propertyValueValNames[propertyIndex][i] + ":";
+                label.IsReadOnly = true;
+                label.Text = propertyValueValNames[propertyIndex][i] + ":";
                 grid.Children.Add(label);
                 Grid.SetRow(label, rowCount);
                 Grid.SetColumn(label, columnCount);
@@ -2252,9 +2252,9 @@ namespace rpkg
         private void AppendInput_SVector4(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
             TextBox label1 = new TextBox();
-            label1.ReadOnly = true;
+            label1.IsReadOnly = true;
 
-            label1.Content = propertyValuePropertyIDs[propertyIndex] + ":";
+            label1.Text = propertyValuePropertyIDs[propertyIndex] + ":";
 
             label1.FontSize = 14;
             label1.FontWeight = FontWeights.Bold;
@@ -2304,8 +2304,8 @@ namespace rpkg
             for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
             {
                 TextBox label = new TextBox();
-                label.ReadOnly = true;
-                label.Content = propertyValueValNames[propertyIndex][i] + ":";
+                label.IsReadOnly = true;
+                label.Text = propertyValueValNames[propertyIndex][i] + ":";
                 grid.Children.Add(label);
                 Grid.SetRow(label, rowCount);
                 Grid.SetColumn(label, columnCount);
@@ -2404,8 +2404,8 @@ namespace rpkg
                 grid.RowDefinitions.Add(rowDefinition);
 
                 TextBox label = new TextBox();
-                label.ReadOnly = true;
-                label.Content = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":";
+                label.IsReadOnly = true;
+                label.Text = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":";
                 grid.Children.Add(label);
                 Grid.SetRow(label, rowCount);
                 Grid.SetColumn(label, 0);
