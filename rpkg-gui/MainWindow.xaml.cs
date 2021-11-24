@@ -514,7 +514,17 @@ namespace rpkg
 
 						if (RightTabControl.SelectedIndex == 3 && resourceType == "TEXT")
 						{
-							LoadImageViewer(hashFile, hash);
+							LoadImageViewer_TEXT(hashFile, hash);
+						}
+
+						if (RightTabControl.SelectedIndex == 3 && resourceType == "GFXI")
+						{
+							LoadImageViewer_GFXI(hash);
+						}
+
+						if (RightTabControl.SelectedIndex == 5 && resourceType == "PRIM")
+						{
+							LoadModelViewer(hash);
 						}
 
 						string currentRPKGFilePath = rpkgFilePath;
@@ -604,118 +614,17 @@ namespace rpkg
 
 						if (resourceType == "PRIM")
 						{
-							string command = "-extract_prim_to_obj_from";
-							string input_path = rpkgFilePath;
-							string filter = hash;
-							string search = "";
-							string search_type = "";
-							string output_path = "";
-
-							return_value = reset_task_status();
-
-							return_value = task_execute(command, input_path, filter, search, search_type, output_path);
-
-							string currentDirectory = System.IO.Directory.GetCurrentDirectory();
-
-							List<string> objFileNames = new List<string>();
-							List<int> objFileSizes = new List<int>();
-
-							int fileSizeMax = 0;
-
-							int objIndex = 0;
-							int objIndexCount = 0;
-
-							foreach (var filePath in Directory.GetFiles(currentDirectory))
+							if (SixthTabRight.Visibility == Visibility.Collapsed)
 							{
-								if (filePath.ToUpper().Contains(hash) && filePath.EndsWith(".obj"))
-								{
-									objFileNames.Add(filePath);
-
-									if (filePath.Length > fileSizeMax)
-									{
-										fileSizeMax = filePath.Length;
-
-										objIndex = objIndexCount;
-									}
-
-									objIndexCount++;
-								}
-							}
-
-							if (objFileNames.Count > 0)
-							{
-								if (SixthTabRight.Visibility == Visibility.Collapsed)
-								{
-									SixthTabRight.Visibility = Visibility.Visible;
-								}
-
-								ModelImporter import = new ModelImporter();
-								System.Windows.Media.Media3D.Model3DGroup model1 = import.Load(objFileNames[objIndex]);
-								System.Windows.Media.Media3D.Material mat = MaterialHelper.CreateMaterial(new SolidColorBrush(System.Windows.Media.Color.FromRgb(200, 200, 200)));
-								foreach (System.Windows.Media.Media3D.GeometryModel3D geometryModel in model1.Children)
-								{
-									geometryModel.Material = mat;
-									geometryModel.BackMaterial = mat;
-								}
-								model.Content = model1;
-								CameraHelper.ZoomExtents(helixViewport.Camera, helixViewport.Viewport, 1000);
-
-								foreach (string filePath in objFileNames)
-								{
-									File.Delete(filePath);
-								}
-							}
-							else
-							{
-								if (SixthTabRight.Visibility == Visibility.Visible)
-								{
-									SixthTabRight.Visibility = Visibility.Collapsed;
-								}
+								SixthTabRight.Visibility = Visibility.Visible;
 							}
 						}
 
 						if (resourceType == "GFXI")
 						{
-							try
+							if (FourthTabRight.Visibility == Visibility.Collapsed)
 							{
-								BitmapImage bitmapImage = new BitmapImage();
-
-								bitmapImage.BeginInit();
-
-								UInt32 hash_size = get_hash_in_rpkg_size(rpkgFilePath, hash);
-
-								byte[] hash_data = new byte[hash_size];
-
-								Marshal.Copy(get_hash_in_rpkg_data(rpkgFilePath, hash), hash_data, 0, (int)hash_size);
-
-								MemoryStream memoryStream = new MemoryStream(hash_data);
-
-								bitmapImage.StreamSource = memoryStream;
-
-								bitmapImage.EndInit();
-
-								ImageViewer.Source = bitmapImage;
-
-								if (hash_size > 0)
-								{
-									if (FourthTabRight.Visibility == Visibility.Collapsed)
-									{
-										FourthTabRight.Visibility = Visibility.Visible;
-									}
-								}
-								else
-								{
-									if (FourthTabRight.Visibility == Visibility.Visible)
-									{
-										FourthTabRight.Visibility = Visibility.Collapsed;
-									}
-								}
-
-								int return_value_clear = clear_hash_data_vector();
-							}
-							catch
-							{
-								return;
+								FourthTabRight.Visibility = Visibility.Visible;
 							}
 						}
 
@@ -2832,7 +2741,25 @@ namespace rpkg
 				string[] hashDetails = currentHash.Split('.');
 				string hash = hashDetails[0];
 
-				LoadImageViewer(currentHash, hash);
+				if (hashDetails[1] == "TEXT")
+				{
+					LoadImageViewer_TEXT(currentHash, hash);
+				}
+				else if (hashDetails[1] == "GFXI")
+				{
+					LoadImageViewer_GFXI(hash);
+				}
+			}
+
+			if (tab.SelectedIndex == 5)
+			{
+				string[] hashDetails = currentHash.Split('.');
+				string hash = hashDetails[0];
+
+				if (hashDetails[1] == "PRIM")
+				{
+					LoadModelViewer(hash);
+				}
 			}
 		}
 
@@ -2859,7 +2786,7 @@ namespace rpkg
 			HexViewerTextBox.Text += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgFilePath, hash));
 		}
 
-		private void LoadImageViewer(string hashFile, string hash)
+		private void LoadImageViewer_TEXT(string hashFile, string hash)
 		{
 			try
 			{
@@ -2900,6 +2827,7 @@ namespace rpkg
 					if (FourthTabRight.Visibility == Visibility.Visible)
 					{
 						FourthTabRight.Visibility = Visibility.Collapsed;
+						RightTabControl.SelectedIndex = 0;
 					}
 				}
 
@@ -2908,6 +2836,125 @@ namespace rpkg
 			catch
 			{
 				return;
+			}
+		}
+
+		private void LoadImageViewer_GFXI(string hash)
+		{
+			try
+			{
+				BitmapImage bitmapImage = new BitmapImage();
+
+				bitmapImage.BeginInit();
+
+				UInt32 hash_size = get_hash_in_rpkg_size(rpkgFilePath, hash);
+
+				byte[] hash_data = new byte[hash_size];
+
+				Marshal.Copy(get_hash_in_rpkg_data(rpkgFilePath, hash), hash_data, 0, (int)hash_size);
+
+				MemoryStream memoryStream = new MemoryStream(hash_data);
+
+				bitmapImage.StreamSource = memoryStream;
+
+				bitmapImage.EndInit();
+
+				ImageViewer.Source = bitmapImage;
+
+				if (hash_size > 0)
+				{
+					if (FourthTabRight.Visibility == Visibility.Collapsed)
+					{
+						FourthTabRight.Visibility = Visibility.Visible;
+					}
+				}
+				else
+				{
+					if (FourthTabRight.Visibility == Visibility.Visible)
+					{
+						FourthTabRight.Visibility = Visibility.Collapsed;
+						RightTabControl.SelectedIndex = 0;
+					}
+				}
+
+				int return_value_clear = clear_hash_data_vector();
+			}
+			catch
+			{
+				return;
+			}
+		}
+
+		private void LoadModelViewer(string hash)
+		{
+			string command = "-extract_prim_to_obj_from";
+			string input_path = rpkgFilePath;
+			string filter = hash;
+			string search = "";
+			string search_type = "";
+			string output_path = "";
+
+			int return_value = reset_task_status();
+
+			return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+
+			string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+
+			List<string> objFileNames = new List<string>();
+			List<int> objFileSizes = new List<int>();
+
+			int fileSizeMax = 0;
+
+			int objIndex = 0;
+			int objIndexCount = 0;
+
+			foreach (var filePath in Directory.GetFiles(currentDirectory))
+			{
+				if (filePath.ToUpper().Contains(hash) && filePath.EndsWith(".obj"))
+				{
+					objFileNames.Add(filePath);
+
+					if (filePath.Length > fileSizeMax)
+					{
+						fileSizeMax = filePath.Length;
+
+						objIndex = objIndexCount;
+					}
+
+					objIndexCount++;
+				}
+			}
+
+			if (objFileNames.Count > 0)
+			{
+				if (SixthTabRight.Visibility == Visibility.Collapsed)
+				{
+					SixthTabRight.Visibility = Visibility.Visible;
+				}
+
+				ModelImporter import = new ModelImporter();
+				System.Windows.Media.Media3D.Model3DGroup model1 = import.Load(objFileNames[objIndex]);
+				System.Windows.Media.Media3D.Material mat = MaterialHelper.CreateMaterial(new SolidColorBrush(System.Windows.Media.Color.FromRgb(200, 200, 200)));
+				foreach (System.Windows.Media.Media3D.GeometryModel3D geometryModel in model1.Children)
+				{
+					geometryModel.Material = mat;
+					geometryModel.BackMaterial = mat;
+				}
+				model.Content = model1;
+				CameraHelper.ZoomExtents(helixViewport.Camera, helixViewport.Viewport, 1000);
+
+				foreach (string filePath in objFileNames)
+				{
+					File.Delete(filePath);
+				}
+			}
+			else
+			{
+				if (SixthTabRight.Visibility == Visibility.Visible)
+				{
+					SixthTabRight.Visibility = Visibility.Collapsed;
+					RightTabControl.SelectedIndex = 0;
+				}
 			}
 		}
 
