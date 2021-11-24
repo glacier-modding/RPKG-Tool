@@ -6367,7 +6367,7 @@ namespace rpkg
 
 		private void ExtractHashDependsButton_Click(object sender, RoutedEventArgs e)
 		{
-			string[] buttons = { "Extract All Hash Depends", "Extract All Hash Depends With PRIM Models (GLB/TGA)", "Extract Direct Hash Depends", "Extract Direct Hash Depends With PRIM Models (GLB/TGA)", "Cancel" };
+			string[] buttons = { "Extract Recursive Hash Depends", "Extract Recursive Hash Depends With PRIM Models (GLB/TGA)", "Extract Direct Hash Depends", "Extract Direct Hash Depends With PRIM Models (GLB/TGA)", "Extract Recursive Depends w/o chunk0/chunk1", "Cancel" };
 
 			RightClickMenu rightClickMenu = new RightClickMenu(buttons);
 
@@ -6392,7 +6392,7 @@ namespace rpkg
 				{
 					if (!runtimeDirectory.EndsWith("runtime", StringComparison.OrdinalIgnoreCase))
 					{
-						MessageBoxShow("The current RPKG does not exist in the Hitman runtime directory, can not perform all hash depends extraction.");
+						MessageBoxShow("The current RPKG does not exist in the Hitman runtime directory, can not perform recursive hash depends extraction.");
 
 						return;
 					}
@@ -6401,7 +6401,7 @@ namespace rpkg
 				{
 					if (!runtimeDirectory.EndsWith("runtime", StringComparison.OrdinalIgnoreCase))
 					{
-						MessageBoxShow("The current RPKG does not exist in the Hitman runtime directory, can not perform all hash depends PRIM models extraction.");
+						MessageBoxShow("The current RPKG does not exist in the Hitman runtime directory, can not perform recursive hash depends PRIM models extraction.");
 
 						return;
 					}
@@ -6424,6 +6424,15 @@ namespace rpkg
 						return;
 					}
 				}
+				else if (rightClickMenu.buttonPressed == "button4")
+				{
+					if (!runtimeDirectory.EndsWith("runtime", StringComparison.OrdinalIgnoreCase))
+					{
+						MessageBoxShow("The current RPKG does not exist in the Hitman runtime directory, can not perform recursive hash depends extraction.");
+
+						return;
+					}
+				}
 				else
 				{
 					return;
@@ -6431,11 +6440,27 @@ namespace rpkg
 
 				List<string> rpkgFiles = new List<string>();
 
-				foreach (var filePath in Directory.GetFiles(runtimeDirectory))
+				if (rightClickMenu.buttonPressed == "button4")
 				{
-					if (filePath.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
+					foreach (var filePath in Directory.GetFiles(runtimeDirectory))
 					{
-						rpkgFiles.Add(filePath);
+						if (filePath.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
+						{
+							if (!filePath.Contains("chunk0") && !filePath.Contains("chunk1"))
+							{
+								rpkgFiles.Add(filePath);
+							}
+						}
+					}
+				}
+				else
+				{
+					foreach (var filePath in Directory.GetFiles(runtimeDirectory))
+					{
+						if (filePath.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
+						{
+							rpkgFiles.Add(filePath);
+						}
 					}
 				}
 
@@ -6577,6 +6602,40 @@ namespace rpkg
 					int temp_return_value = reset_task_status();
 
 					execute_task temp_rpkgExecute = ExtractMODEL;
+
+					IAsyncResult temp_ar = temp_rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
+
+					progress.ShowDialog();
+
+					if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
+					{
+						//MessageBoxShow(progress.task_status_string);
+
+						return;
+					}
+				}
+				else if (rightClickMenu.buttonPressed == "button4")
+				{
+					command = "-extract_non_base_hash_depends_from";
+
+					progress.operation = (int)Progress.Operation.MASS_EXTRACT;
+
+					filter = hashValue;
+
+					progress.message.Content = "Extracting " + nodeData[0] + " To GLB/TGA File(s)...";
+
+					string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + nodeData[0] + " To:");
+
+					if (temp_outputFolder == "")
+					{
+						return;
+					}
+
+					output_path = temp_outputFolder;
+
+					int temp_return_value = reset_task_status();
+
+					execute_task temp_rpkgExecute = task_execute;
 
 					IAsyncResult temp_ar = temp_rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 

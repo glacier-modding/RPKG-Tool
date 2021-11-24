@@ -138,6 +138,10 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     {
         rpkg_function::extract_all_hash_depends_from(input_path, filter, output_path, false);
     }
+    else if (command == "-extract_non_base_hash_depends_from")
+    {
+        rpkg_function::extract_non_base_hash_depends_from(input_path, filter, output_path, false);
+    }
     else if (command == "-extract_all_hash_depends_prim_models_from")
     {
         rpkg_function::extract_all_hash_depends_from(input_path, filter, output_path, true);
@@ -335,6 +339,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                      "-hash_meta_to_json",
                                                      "-json_to_hash_meta",
                                                      "-extract_all_hash_depends_from",
+                                                     "-extract_non_base_hash_depends_from",
                                                      "-extract_all_hash_depends_prim_models_from",
                                                      "-extract_direct_hash_depends_from",
                                                      "-extract_direct_hash_depends_prim_models_from",
