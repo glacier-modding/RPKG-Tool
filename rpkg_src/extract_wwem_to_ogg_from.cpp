@@ -247,7 +247,7 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
 
                                     if (pos1 != std::string::npos && pos2 != std::string::npos && (pos2 - pos1) > 12)
                                     {
-                                        wwem_ioi_path.append(hash_list_string.substr((pos1 + 10), hash_list_string.length() - 22));
+                                        wwem_ioi_path.append(hash_list_string.substr((pos1 + 10), hash_list_string.length()));
 
                                         std::replace(wwem_ioi_path.begin(), wwem_ioi_path.end(), '/', '\\');
 
