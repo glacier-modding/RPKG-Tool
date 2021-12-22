@@ -10,7 +10,7 @@
 #include <iostream>
 #include <sstream>
 
-void task::execute(std::string& command, std::string& input_path, std::string& filter, std::string& search, std::string& search_type, std::string& output_path)
+void task::execute(std::string &command, std::string &input_path, std::string &filter, std::string &search, std::string &search_type, std::string &output_path)
 {
     if (command == "-compute_ioi_hash")
     {
@@ -37,6 +37,16 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
         rpkg_vars.output_path = output_path;
 
         rpkg_function::extract_from_rpkg(rpkg_vars);
+    }
+    else if (command == "-extract_from_rpkgs")
+    {
+        rpkg_extraction_vars rpkg_vars;
+
+        rpkg_vars.input_path = input_path;
+        rpkg_vars.filter = filter;
+        rpkg_vars.output_path = output_path;
+
+        rpkg_function::extract_from_rpkgs(rpkg_vars);
     }
     else if (command == "-dev_extract_temp_from")
     {
@@ -128,7 +138,7 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     }
     else if (command == "-generate_rpkg_from")
     {
-        rpkg_function::generate_rpkg_from(input_path, filter,output_path);
+        rpkg_function::generate_rpkg_from(input_path, filter, output_path);
     }
     else if (command == "-hash_depends")
     {
@@ -273,7 +283,7 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     }
 }
 
-void task::process_and_execute_files_draged_and_dropped(std::vector<std::string>& dragged_and_dropped_files)
+void task::process_and_execute_files_draged_and_dropped(std::vector<std::string> &dragged_and_dropped_files)
 {
     for (int i = 0; i < dragged_and_dropped_files.size(); i++)
     {
@@ -287,7 +297,7 @@ void task::process_and_execute_files_draged_and_dropped(std::vector<std::string>
     }
 }
 
-void task::process_and_execute_command_line_args(std::vector<std::vector<std::string>>& commands)
+void task::process_and_execute_command_line_args(std::vector<std::vector<std::string>> &commands)
 {
     std::string command = "";
     std::string input_path = "";
@@ -295,65 +305,66 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
     std::string search = "";
     std::string search_type = "";
     std::string output_path = "";
-    std::vector<std::string> commands_without_paths = { "-compute_ioi_hash" };
-    std::vector<std::string> commands_with_paths = { "-compute_ioi_hash_from_file",
-                                                     "-decrypt_packagedefinition_thumbs",
-                                                     "-dev_extract_temp_from",
-                                                     "-dev_diff_rpkg_supermetas",
-                                                     "-dev_extract_rpkg_supermetas",
-                                                     "-dev_extract_all_strings",
-                                                     "-dev_extract_all_entity_ids",
-                                                     "-dev_extract_temp_pointers",
-                                                     "-dev_extract_temp_strings",
-                                                     "-dev_extract_ores_strings",
-                                                     "-dev_extract_materials_textures_strings",
-                                                     "-dev_extract_wwem_strings",
-                                                     "-dev_extract_wwes_strings",
-                                                     "-dev_extract_wwev_strings",
-                                                     "-dev_extract_wwise_ids",
-                                                     "-dev_resource_tool",
-                                                     "-dev_map_editor",
-                                                     "-encrypt_packagedefinition_thumbs",
-                                                     "-extract_from_rpkg",
-                                                     "-extract_gfxf_from",
-                                                     "-extract_ores_from",
-                                                     "-extract_prel_refs",
-                                                     "-extract_prim_model_from",
-                                                     "-extract_all_prim_model_from",
-                                                     "-extract_all_prim_model_of_temp_from",
-                                                     "-extract_all_prim_of_temp_from",
-                                                     "-extract_all_prim_to_glb_from",
-                                                     "-extract_prim_to_glb_from",
-                                                     "-extract_prim_to_obj_from",
-                                                     "-extract_temp_from",
-                                                     "-extract_all_text_from",
-                                                     "-extract_text_from",
-                                                     "-extract_wwem_to_ogg_from",
-                                                     "-extract_wwes_to_ogg_from",
-                                                     "-extract_wwev_to_ogg_from",
-                                                     "-extract_dlge_to_json_from",
-                                                     "-extract_locr_to_json_from",
-                                                     "-extract_rtlv_to_json_from",
-                                                     "-generate_rpkg_from",
-                                                     "-hash_depends",
-                                                     "-hash_meta_to_json",
-                                                     "-json_to_hash_meta",
-                                                     "-extract_all_hash_depends_from",
-                                                     "-extract_non_base_hash_depends_from",
-                                                     "-extract_all_hash_depends_prim_models_from",
-                                                     "-extract_direct_hash_depends_from",
-                                                     "-extract_direct_hash_depends_prim_models_from",
-                                                     "-hash_probe",
-                                                     "-hash_probe_from_file",
-                                                     "-rebuild_prim_model_in",
-                                                     "-rebuild_prim_in",
-                                                     "-rebuild_text_in",
-                                                     "-rebuild_gfxf_in",
-                                                     "-rebuild_wwev_in",
-                                                     "-rebuild_dlge_from_json_from",
-                                                     "-rebuild_locr_from_json_from",
-                                                     "-rebuild_rtlv_from_json_from",
-                                                     "-search_rpkg" };
+    std::vector<std::string> commands_without_paths = {"-compute_ioi_hash"};
+    std::vector<std::string> commands_with_paths = {"-compute_ioi_hash_from_file",
+                                                    "-decrypt_packagedefinition_thumbs",
+                                                    "-dev_extract_temp_from",
+                                                    "-dev_diff_rpkg_supermetas",
+                                                    "-dev_extract_rpkg_supermetas",
+                                                    "-dev_extract_all_strings",
+                                                    "-dev_extract_all_entity_ids",
+                                                    "-dev_extract_temp_pointers",
+                                                    "-dev_extract_temp_strings",
+                                                    "-dev_extract_ores_strings",
+                                                    "-dev_extract_materials_textures_strings",
+                                                    "-dev_extract_wwem_strings",
+                                                    "-dev_extract_wwes_strings",
+                                                    "-dev_extract_wwev_strings",
+                                                    "-dev_extract_wwise_ids",
+                                                    "-dev_resource_tool",
+                                                    "-dev_map_editor",
+                                                    "-encrypt_packagedefinition_thumbs",
+                                                    "-extract_from_rpkg",
+                                                    "-extract_from_rpkgs",
+                                                    "-extract_gfxf_from",
+                                                    "-extract_ores_from",
+                                                    "-extract_prel_refs",
+                                                    "-extract_prim_model_from",
+                                                    "-extract_all_prim_model_from",
+                                                    "-extract_all_prim_model_of_temp_from",
+                                                    "-extract_all_prim_of_temp_from",
+                                                    "-extract_all_prim_to_glb_from",
+                                                    "-extract_prim_to_glb_from",
+                                                    "-extract_prim_to_obj_from",
+                                                    "-extract_temp_from",
+                                                    "-extract_all_text_from",
+                                                    "-extract_text_from",
+                                                    "-extract_wwem_to_ogg_from",
+                                                    "-extract_wwes_to_ogg_from",
+                                                    "-extract_wwev_to_ogg_from",
+                                                    "-extract_dlge_to_json_from",
+                                                    "-extract_locr_to_json_from",
+                                                    "-extract_rtlv_to_json_from",
+                                                    "-generate_rpkg_from",
+                                                    "-hash_depends",
+                                                    "-hash_meta_to_json",
+                                                    "-json_to_hash_meta",
+                                                    "-extract_all_hash_depends_from",
+                                                    "-extract_non_base_hash_depends_from",
+                                                    "-extract_all_hash_depends_prim_models_from",
+                                                    "-extract_direct_hash_depends_from",
+                                                    "-extract_direct_hash_depends_prim_models_from",
+                                                    "-hash_probe",
+                                                    "-hash_probe_from_file",
+                                                    "-rebuild_prim_model_in",
+                                                    "-rebuild_prim_in",
+                                                    "-rebuild_text_in",
+                                                    "-rebuild_gfxf_in",
+                                                    "-rebuild_wwev_in",
+                                                    "-rebuild_dlge_from_json_from",
+                                                    "-rebuild_locr_from_json_from",
+                                                    "-rebuild_rtlv_from_json_from",
+                                                    "-search_rpkg"};
 
     int command_count = 0;
 

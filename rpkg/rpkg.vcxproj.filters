@@ -525,6 +525,9 @@
     <ClCompile Include="..\rpkg_src\compute_ioi_hash_string.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\rpkg_src\extract_from_rpkgs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\rpkg_src\command_line.h">
