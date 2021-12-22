@@ -95,6 +95,8 @@ void console::display_usage_info()
     LOG("        scans all available RPKG files for dependency information.");
     LOG("    -extract_from_rpkg <path to RPKG file>");
     LOG("        Extracts all hash linked files/resources from an RPKG file.");
+	LOG("    -extract_from_rpkgs <path to folder containing RPKGs>");
+	LOG("        Extracts all hash linked files/resources from a folder of RPKG files.");
     LOG("    -extract_gfxf_from <path to folder containing RPKG files>");
     LOG("        Extracts all hash linked files/resources located in the GFXF files");
     LOG("        and unpacks them to GFX and if available DDS/TGA files from all");

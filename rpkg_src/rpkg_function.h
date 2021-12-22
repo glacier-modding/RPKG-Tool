@@ -72,4 +72,5 @@ public:
 	static bool import_rpkg_meta(rpkg& rpkg_meta_data, std::string& rpkg_meta_file_path, std::string& input_rpkg_folder_path);
 	static void import_rpkg(std::string& rpkg_file_name, bool with_timing);
 	static void extract_from_rpkg(rpkg_extraction_vars& rpkg_vars);
+	static void extract_from_rpkgs(rpkg_extraction_vars& rpkg_vars);
 };

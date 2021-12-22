@@ -38,6 +38,16 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
 
         rpkg_function::extract_from_rpkg(rpkg_vars);
     }
+    else if (command == "-extract_from_rpkgs")
+    {
+        rpkg_extraction_vars rpkg_vars;
+
+        rpkg_vars.input_path = input_path;
+        rpkg_vars.filter = filter;
+        rpkg_vars.output_path = output_path;
+
+        rpkg_function::extract_from_rpkgs(rpkg_vars);
+    }
     else if (command == "-dev_extract_temp_from")
     {
         rpkg_function::dev_extract_temp_from(input_path, filter, output_path);
@@ -315,6 +325,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                      "-dev_map_editor",
                                                      "-encrypt_packagedefinition_thumbs",
                                                      "-extract_from_rpkg",
+													 "-extract_from_rpkgs",
                                                      "-extract_gfxf_from",
                                                      "-extract_ores_from",
                                                      "-extract_prel_refs",
