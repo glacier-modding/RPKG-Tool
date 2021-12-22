@@ -39,7 +39,7 @@ void rpkg_function::extract_from_rpkgs(rpkg_extraction_vars &rpkg_vars)
     }
     else
     {
-		rpkg_vars.input_path = file::parse_input_folder_path(rpkg_vars.input_path);
+        rpkg_vars.input_path = file::parse_input_folder_path(rpkg_vars.input_path);
     }
 
     if (file::path_exists(rpkg_vars.input_path))
@@ -93,13 +93,13 @@ void rpkg_function::extract_from_rpkgs(rpkg_extraction_vars &rpkg_vars)
 
                 if (found || rpkg_vars.filter == "")
                 {
-					std::string hash_file_path = file::output_path_append(rpkgs.at(i).rpkg_file_name, rpkg_vars.output_path);
-					std::string final_path;
+                    std::string hash_file_path = file::output_path_append(rpkgs.at(i).rpkg_file_name, rpkg_vars.output_path);
+                    std::string final_path;
 
-					if (!rpkg_vars.search_mode && !rpkg_vars.ores_mode)
-					{
-						rpkg_function::extract_rpkg_meta(i, hash_file_path);
-					}
+                    if (!rpkg_vars.search_mode && !rpkg_vars.ores_mode)
+                    {
+                        rpkg_function::extract_rpkg_meta(i, hash_file_path);
+                    }
 
                     if (filters.size() > 0)
                     {
