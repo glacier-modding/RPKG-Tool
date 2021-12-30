@@ -20,7 +20,7 @@ std::string generic_function::compute_ioi_hash_string(std::string& input_to_ioi_
 
     for (int i = 0; i < input_to_ioi_hash.length(); i++)
     {
-        lowercase.push_back(std::tolower(input_to_ioi_hash[i]));
+        lowercase += std::tolower(input_to_ioi_hash[i]);
     }
 
     //LOG(main_data->console_prefix << "Input: " << main_data->input_to_ioi_hash << ", " << lowercase);
