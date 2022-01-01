@@ -15,7 +15,7 @@ extern "C" void MD5Transform(uint32 buf[4], uint32 in[16]);
 void generic_function::compute_ioi_hash_from_file(std::string& input_path)
 {
     std::ifstream file = std::ifstream(input_path, std::ifstream::binary);
-
+    
     if (!file.good())
     {
         std::cout << "Error: " + input_path + " could not be read." << std::endl;
@@ -59,7 +59,7 @@ void generic_function::compute_ioi_hash_from_file(std::string& input_path)
 
         for (int i = 0; i < ioi_strings.at(j).length(); i++)
         {
-            lowercase.push_back(std::tolower(ioi_strings.at(j)[i]));
+            lowercase += std::tolower(ioi_strings.at(j)[i]);
         }
 
         //LOG(main_data->console_prefix << "Input: " << main_data->input_to_ioi_hash << ", " << lowercase);
