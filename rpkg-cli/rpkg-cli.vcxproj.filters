@@ -513,9 +513,6 @@
     <ClCompile Include="..\rpkg_src\dev_extract_temp_strings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\rpkg_src\dev_map_editor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\rpkg_src\hash_meta_to_json.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -526,6 +523,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\rpkg_src\extract_from_rpkgs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\get_latest_hash.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\latest_hash.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\map.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\extract_prim_textured_from.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\dev_hash_list_percent_found.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -672,6 +684,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\rpkg_src\crc32.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\map.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,9 +2,26 @@
 #include "util.h"
 #include "global.h"
 #include <string>
+#include <fstream>
 #include <filesystem>
 #include <iostream>
 #include <sstream>
+
+bool file::write_to_file(std::string file_path, std::string& data)
+{
+    std::ofstream output_file = std::ofstream(file_path, std::ofstream::binary);
+
+    if (!output_file.good())
+    {
+        return false;
+    }
+
+    output_file.write(data.c_str(), data.length());
+
+    output_file.close();
+
+    return true;
+}
 
 bool file::path_exists(const std::string& path)
 {

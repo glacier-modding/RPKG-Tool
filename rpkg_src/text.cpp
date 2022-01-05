@@ -519,7 +519,7 @@ void text::load_hash_depends()
     }
 }
 
-void text::save_text_to_png(std::string png_path)
+bool text::save_text_to_png(std::string png_path)
 {
     dds_header_data.size = 124;
     dds_header_data.flags = DDS_HEADER_FLAGS_TEXTURE | DDS_HEADER_FLAGS_MIPMAP;
@@ -537,7 +537,7 @@ void text::save_text_to_png(std::string png_path)
 
     if (text_directx_format == 0x1C)
     {
-        dds_header_data.ddspf = DirectX::DDSPF_A8R8G8B8;
+        dds_header_data.ddspf = DirectX::DDSPF_A8B8G8R8;
     }
     if (text_directx_format == 0x34)
     {
@@ -613,7 +613,9 @@ void text::save_text_to_png(std::string png_path)
 
         if (FAILED(hresult))
         {
-            LOG_AND_EXIT("Error: DDS conversion failed.");
+            LOG("Error: DDS conversion failed.");
+
+            return false;
         }
 
         scratch_image_to_export = &scratch_image_converted;
@@ -624,7 +626,9 @@ void text::save_text_to_png(std::string png_path)
 
         if (FAILED(hresult))
         {
-            LOG_AND_EXIT("Error: DDS conversion failed.");
+            LOG("Error: DDS conversion failed.");
+
+            return false;
         }
 
         for (uint32_t d = 2; d < scratch_image_converted.GetPixelsSize(); d += 4)
@@ -644,7 +648,9 @@ void text::save_text_to_png(std::string png_path)
 
         if (FAILED(hresult))
         {
-            LOG_AND_EXIT("Error: DDS conversion failed.");
+            LOG("Error: DDS conversion failed.");
+
+            return false;
         }
 
         scratch_image_to_export = &scratch_image_converted;
@@ -655,7 +661,9 @@ void text::save_text_to_png(std::string png_path)
 
         if (FAILED(hresult))
         {
-            LOG_AND_EXIT("Error: DDS conversion failed.");
+            LOG("Error: DDS conversion failed.");
+
+            return false;
         }
 
         scratch_image_to_export = &scratch_image_converted;
@@ -666,7 +674,9 @@ void text::save_text_to_png(std::string png_path)
 
         if (FAILED(hresult))
         {
-            LOG_AND_EXIT("Error: DDS conversion failed.");
+            LOG("Error: DDS conversion failed.");
+
+            return false;
         }
 
         scratch_image_to_export = &scratch_image_converted;
@@ -677,7 +687,9 @@ void text::save_text_to_png(std::string png_path)
 
         if (FAILED(hresult))
         {
-            LOG_AND_EXIT("Error: DDS conversion failed.");
+            LOG("Error: DDS conversion failed.");
+
+            return false;
         }
 
         for (uint32_t d = 2; d < scratch_image_converted.GetPixelsSize(); d += 4)
@@ -693,7 +705,9 @@ void text::save_text_to_png(std::string png_path)
 
         if (FAILED(hresult))
         {
-            LOG_AND_EXIT("Error: DDS conversion failed.");
+            LOG("Error: DDS conversion failed.");
+
+            return false;
         }
 
         scratch_image_to_export = &scratch_image_converted;
@@ -702,7 +716,7 @@ void text::save_text_to_png(std::string png_path)
     {
         LOG("Error: DirectX format (" + util::uint16_t_to_hex_string(text_directx_format) + ") unsupported.");
 
-        return;
+        return false;
     }
 
     std::filesystem::path texture_file_path = png_path;
@@ -713,20 +727,35 @@ void text::save_text_to_png(std::string png_path)
 
     if (FAILED(hresult))
     {
-        LOG_AND_EXIT("Failed to initilize COM.");
+        LOG("Failed to initilize COM.");
+
+        return false;
     }
 
-    REFGUID png_format = DirectX::GetWICCodec(DirectX::WIC_CODEC_PNG);
+    REFGUID png_format = DirectX::GetWICCodec(DirectX::WIC_CODEC_JPEG);
 
-    hresult = DirectX::SaveToWICFile(*scratch_image_to_export->GetImage(0, 0, 0), DirectX::WIC_FLAGS_NONE, DirectX::GetWICCodec(DirectX::WIC_CODEC_PNG), texture_file_path.generic_wstring().c_str());
+    DirectX::Blob directx_blob;
+
+    //hresult = DirectX::SaveToWICFile(*scratch_image_to_export->GetImage(0, 0, 0), DirectX::WIC_FLAGS_NONE, DirectX::GetWICCodec(DirectX::WIC_CODEC_PNG), texture_file_path.generic_wstring().c_str());
+    hresult = DirectX::SaveToWICMemory(*scratch_image_to_export->GetImage(0, 0, 0), DirectX::WIC_FLAGS_NONE, DirectX::GetWICCodec(DirectX::WIC_CODEC_JPEG), directx_blob);
+
+    text_data_png_size = directx_blob.GetBufferSize();
+
+    text_data_png = std::vector<char>(text_data_png_size, 0);
+
+    std::memcpy(text_data_png.data(), directx_blob.GetBufferPointer(), text_data_png_size);
 
     if (FAILED(hresult))
     {
-        LOG_AND_EXIT("Error: PNG file " + texture_file_path.generic_string() + " exporting failed.");
+        LOG("Error: PNG file " + texture_file_path.generic_string() + " exporting failed.");
+
+        return false;
     }
+
+    return true;
 }
 
-void text::save_texd_to_png(std::string png_path)
+bool text::save_texd_to_png(std::string png_path)
 {
     if (texd_found)
     {
@@ -746,7 +775,7 @@ void text::save_texd_to_png(std::string png_path)
 
         if (text_directx_format == 0x1C)
         {
-            dds_header_data.ddspf = DirectX::DDSPF_A8R8G8B8;
+            dds_header_data.ddspf = DirectX::DDSPF_A8B8G8R8;
         }
         if (text_directx_format == 0x34)
         {
@@ -822,7 +851,9 @@ void text::save_texd_to_png(std::string png_path)
 
             if (FAILED(hresult))
             {
-                LOG_AND_EXIT("Error: DDS conversion failed.");
+                LOG("Error: DDS conversion failed.");
+
+                return false;
             }
 
             scratch_image_to_export = &scratch_image_converted;
@@ -833,7 +864,9 @@ void text::save_texd_to_png(std::string png_path)
 
             if (FAILED(hresult))
             {
-                LOG_AND_EXIT("Error: DDS conversion failed.");
+                LOG("Error: DDS conversion failed.");
+
+                return false;
             }
 
             for (uint32_t d = 2; d < scratch_image_converted.GetPixelsSize(); d += 4)
@@ -853,7 +886,9 @@ void text::save_texd_to_png(std::string png_path)
 
             if (FAILED(hresult))
             {
-                LOG_AND_EXIT("Error: DDS conversion failed.");
+                LOG("Error: DDS conversion failed.");
+
+                return false;
             }
 
             scratch_image_to_export = &scratch_image_converted;
@@ -864,7 +899,9 @@ void text::save_texd_to_png(std::string png_path)
 
             if (FAILED(hresult))
             {
-                LOG_AND_EXIT("Error: DDS conversion failed.");
+                LOG("Error: DDS conversion failed.");
+
+                return false;
             }
 
             scratch_image_to_export = &scratch_image_converted;
@@ -875,7 +912,9 @@ void text::save_texd_to_png(std::string png_path)
 
             if (FAILED(hresult))
             {
-                LOG_AND_EXIT("Error: DDS conversion failed.");
+                LOG("Error: DDS conversion failed.");
+
+                return false;
             }
 
             scratch_image_to_export = &scratch_image_converted;
@@ -886,7 +925,9 @@ void text::save_texd_to_png(std::string png_path)
 
             if (FAILED(hresult))
             {
-                LOG_AND_EXIT("Error: DDS conversion failed.");
+                LOG("Error: DDS conversion failed.");
+
+                return false;
             }
 
             for (uint32_t d = 2; d < scratch_image_converted.GetPixelsSize(); d += 4)
@@ -902,7 +943,9 @@ void text::save_texd_to_png(std::string png_path)
 
             if (FAILED(hresult))
             {
-                LOG_AND_EXIT("Error: DDS conversion failed.");
+                LOG("Error: DDS conversion failed.");
+
+                return false;
             }
 
             scratch_image_to_export = &scratch_image_converted;
@@ -911,7 +954,7 @@ void text::save_texd_to_png(std::string png_path)
         {
             LOG("Error: DirectX format (" + util::uint16_t_to_hex_string(text_directx_format) + ") unsupported.");
 
-            return;
+            return false;
         }
 
         std::filesystem::path texture_file_path = png_path;
@@ -922,18 +965,33 @@ void text::save_texd_to_png(std::string png_path)
 
         if (FAILED(hresult))
         {
-            LOG_AND_EXIT("Failed to initilize COM.");
+            LOG("Failed to initilize COM.");
+
+            return false;
         }
 
-        REFGUID png_format = DirectX::GetWICCodec(DirectX::WIC_CODEC_PNG);
+        REFGUID png_format = DirectX::GetWICCodec(DirectX::WIC_CODEC_JPEG);
 
-        hresult = DirectX::SaveToWICFile(*scratch_image_to_export->GetImage(0, 0, 0), DirectX::WIC_FLAGS_NONE, DirectX::GetWICCodec(DirectX::WIC_CODEC_PNG), texture_file_path.generic_wstring().c_str());
+        DirectX::Blob directx_blob;
+
+        //hresult = DirectX::SaveToWICFile(*scratch_image_to_export->GetImage(0, 0, 0), DirectX::WIC_FLAGS_NONE, DirectX::GetWICCodec(DirectX::WIC_CODEC_PNG), texture_file_path.generic_wstring().c_str());
+        hresult = DirectX::SaveToWICMemory(*scratch_image_to_export->GetImage(0, 0, 0), DirectX::WIC_FLAGS_NONE, DirectX::GetWICCodec(DirectX::WIC_CODEC_JPEG), directx_blob);
+
+        texd_data_png_size = directx_blob.GetBufferSize();
+
+        texd_data_png = std::vector<char>(texd_data_png_size, 0);
+
+        std::memcpy(texd_data_png.data(), directx_blob.GetBufferPointer(), texd_data_png_size);
 
         if (FAILED(hresult))
         {
-            LOG_AND_EXIT("Error: PNG file " + texture_file_path.generic_string() + " exporting failed.");
+            LOG("Error: PNG file " + texture_file_path.generic_string() + " exporting failed.");
+
+            return false;
         }
     }
+
+    return true;
 }
 
 uint32_t text::calculate_mips_count(uint32_t width, uint32_t height)
@@ -976,7 +1034,7 @@ void text::save_text_to_tga(std::string tga_path)
 
     if (text_directx_format == 0x1C)
     {
-        dds_header_data.ddspf = DirectX::DDSPF_A8R8G8B8;
+        dds_header_data.ddspf = DirectX::DDSPF_A8B8G8R8;
     }
     if (text_directx_format == 0x34)
     {

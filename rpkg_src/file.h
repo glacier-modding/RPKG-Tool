@@ -4,6 +4,7 @@
 class file
 {
 public:
+    static bool write_to_file(std::string file_name, std::string& data);
     static bool path_exists(const std::string& s);
     static void create_directories(std::string s);
     static std::string output_path_append(std::string file_name, std::string output_path);

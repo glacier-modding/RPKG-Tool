@@ -254,7 +254,7 @@ void rpkg_function::extract_all_prim_from(std::string& input_path, std::string& 
 
                                     //std::cout << "rpkg_function::extract_prim_to_gltf_from(" << rpkgs.at(i).rpkg_file_path << ", " << rpkgs.at(i).hash.at(hash_index).hash_string << ", " << prim_output_dir << ");" << std::endl;
 
-                                    rpkg_function::extract_prim_from(rpkgs.at(i).rpkg_file_path, rpkgs.at(i).hash.at(hash_index).hash_string, prim_output_dir, type);
+                                    rpkg_function::extract_prim_from(rpkgs.at(i).rpkg_file_path, rpkgs.at(i).hash.at(hash_index).hash_string, prim_output_dir, type, true);
                                     
                                     /*std::vector<uint32_t>().swap(temp_entry_index);
                                     std::vector<uint32_t>().swap(temp_logicalParent);

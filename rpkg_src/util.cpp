@@ -10,6 +10,20 @@
 #include <regex>
 #include <Windows.h>
 
+std::string util::string_to_hex_string(std::string input_string)
+{
+    std::string output_string;
+
+    for (uint64_t k = 0; k < input_string.size(); k++)
+    {
+        char value[5];
+        sprintf_s(value, "\\x%02X", (int)(unsigned char)input_string.data()[k]);
+        output_string += value;
+    }
+
+    return output_string;
+}
+
 std::vector<std::string> util::parse_input_filter(std::string input_string)
 {
     std::vector<std::string> filters;

@@ -5,6 +5,7 @@
 #include "generic_function.h"
 #include "rpkg_function.h"
 #include "dev_function.h"
+#include "map.h"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -90,15 +91,19 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-extract_prim_to_glb_from")
     {
-        rpkg_function::extract_prim_from(input_path, filter, output_path, GLB_SINGLE);
+        rpkg_function::extract_prim_from(input_path, filter, output_path, GLB_SINGLE, true);
     }
     else if (command == "-extract_prim_to_gltf_from")
     {
-        rpkg_function::extract_prim_from(input_path, filter, output_path, GLTF_SINGLE);
+        rpkg_function::extract_prim_from(input_path, filter, output_path, GLTF_SINGLE, true);
     }
     else if (command == "-extract_prim_to_obj_from")
     {
-        rpkg_function::extract_prim_from(input_path, filter, output_path, OBJ_SINGLE);
+        rpkg_function::extract_prim_from(input_path, filter, output_path, OBJ_SINGLE, true);
+    }
+    else if (command == "-extract_prim_textured_from")
+    {
+        rpkg_function::extract_prim_textured_from(input_path, filter, output_path, true);
     }
     else if (command == "-extract_temp_from")
     {
@@ -269,9 +274,9 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     {
         //dev_function::dev_extract_temp_strings(input_path, filter, output_path);
     }
-    else if (command == "-dev_map_editor")
+    else if (command == "-dev_hash_list_percent_found")
     {
-        dev_function::dev_map_editor(input_path, filter, output_path);
+        dev_function::dev_hash_list_percent_found(input_path, filter, output_path);
     }
     else if (command == "-hash_meta_to_json")
     {
@@ -280,6 +285,22 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     else if (command == "-json_to_hash_meta")
     {
         rpkg_function::json_to_hash_meta(input_path, filter, output_path);
+    }
+    else if (command == "-latest_hash")
+    {
+        rpkg_function::latest_hash(input_path, filter, output_path);
+    }
+    else if (command == "-export_map")
+    {
+        map::export_map(input_path, filter, output_path, false);
+    }
+    else if (command == "-export_map_textured")
+    {
+        map::export_map(input_path, filter, output_path, true);
+    }
+    else if (command == "-import_map")
+    {
+        map::import_map(input_path, filter, output_path);
     }
 }
 
@@ -322,7 +343,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-dev_extract_wwev_strings",
                                                     "-dev_extract_wwise_ids",
                                                     "-dev_resource_tool",
-                                                    "-dev_map_editor",
+                                                    "-dev_hash_list_percent_found",
                                                     "-encrypt_packagedefinition_thumbs",
                                                     "-extract_from_rpkg",
                                                     "-extract_from_rpkgs",
@@ -336,6 +357,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-extract_all_prim_to_glb_from",
                                                     "-extract_prim_to_glb_from",
                                                     "-extract_prim_to_obj_from",
+                                                    "-extract_prim_textured_from",
                                                     "-extract_temp_from",
                                                     "-extract_all_text_from",
                                                     "-extract_text_from",
@@ -345,8 +367,12 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-extract_dlge_to_json_from",
                                                     "-extract_locr_to_json_from",
                                                     "-extract_rtlv_to_json_from",
+                                                    "-export_map",
+                                                    "-export_map_textured",
+                                                    "-import_map",
                                                     "-generate_rpkg_from",
                                                     "-hash_depends",
+                                                    "-latest_hash",
                                                     "-hash_meta_to_json",
                                                     "-json_to_hash_meta",
                                                     "-extract_all_hash_depends_from",

@@ -25,7 +25,6 @@ public:
 	void get_prim_from_temp(uint32_t entry_index);
 	void temp_version_check();
 	void set_temp_version(uint32_t temp_version);
-#ifdef RPKG_DLL
 	void get_top_level_logical_parents();
 	void get_entries_with_logical_parent(uint32_t logical_parent);
 	void get_entries_hash_references(uint32_t entry_index);
@@ -40,7 +39,6 @@ public:
 	int generate_temp_file_from_data(std::string temp_path);
 	void get_all_bricks();
 	void get_entry_name_string(int entry_index);
-#endif
 
 	std::string temp_file_name = "";
 	uint32_t temp_temps_index = 0;
@@ -63,8 +61,11 @@ public:
 	std::vector<char> tblu_data;
 	std::vector<uint32_t> temp_logicalParent;
 	std::vector<std::string> tblu_entityName;
+	std::vector<uint64_t> tblu_entityId;
 	std::vector<uint32_t> temp_entityTypeResourceIndex;
 	std::vector<uint32_t> tblu_entityTypeResourceIndex;
+	std::vector<int32_t> temp_externalSceneTypeIndicesInResourceHeader;
+	std::vector<uint64_t> temp_externalSceneHashes;
 	JsonString* temp_json_input = nullptr;
 	JsonString* tblu_json_input = nullptr;
 	rapidjson::Document temp_json_document;

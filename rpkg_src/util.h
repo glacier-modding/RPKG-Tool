@@ -5,6 +5,7 @@
 class util
 {
 public:
+    static std::string string_to_hex_string(std::string input_string);
     static std::vector<std::string> parse_input_filter(std::string input_string);
     static std::string to_upper_case(std::string s);
     static std::string to_lower_case(std::string s);

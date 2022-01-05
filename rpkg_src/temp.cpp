@@ -29,10 +29,6 @@ temp::temp()
 
 temp::temp(uint64_t rpkgs_index, uint64_t hash_index)
 {
-#ifdef RPKG_DLL
-    //util::initialize_resource_tool();
-#endif
-    
     initialize_enum_map_h2();
     initialize_enum_map_h3();
 
@@ -52,10 +48,6 @@ temp::temp(uint64_t rpkgs_index, uint64_t hash_index)
 temp::temp(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
 {
     temp_file_version = temp_version;
-
-#ifdef RPKG_DLL
-    //util::initialize_resource_tool();
-#endif
 
     initialize_enum_map_h2();
     initialize_enum_map_h3();
@@ -77,7 +69,6 @@ void temp::load_data()
 {
     load_temp_data();
 
-#ifdef RPKG_DLL
     const rapidjson::Value& temp_json_subEntities = temp_json_document["subEntities"];
 
     temp_subentity_count = temp_json_subEntities.Size();
@@ -98,6 +89,8 @@ void temp::load_data()
 
         tblu_entityName.push_back("");
 
+        tblu_entityId.push_back(0);
+
         rapidjson::Value::ConstMemberIterator it2 = temp_json_subEntities[i].FindMember("entityTypeResourceIndex");
 
         if (it2 != temp_json_subEntities[i].MemberEnd())
@@ -107,13 +100,23 @@ void temp::load_data()
             tblu_entityTypeResourceIndex.push_back(0);
         }
     }
-#endif
+
+    const rapidjson::Value& temp_json_externalSceneTypeIndicesInResourceHeader = temp_json_document["externalSceneTypeIndicesInResourceHeader"];
+
+    for (rapidjson::SizeType e = 0; e < temp_json_externalSceneTypeIndicesInResourceHeader.Size(); e++)
+    {
+        temp_externalSceneTypeIndicesInResourceHeader.push_back(temp_json_externalSceneTypeIndicesInResourceHeader[e].GetInt());
+
+        temp_externalSceneHashes.push_back(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(temp_externalSceneTypeIndicesInResourceHeader.back()));
+
+        //std::cout << "temp_externalSceneTypeIndicesInResourceHeader: " << temp_externalSceneTypeIndicesInResourceHeader.back() << std::endl;
+        //std::cout << "temp_externalSceneHashes: " << temp_externalSceneHashes.back() << std::endl;
+    }
 
     if (tblu_return_value == TEMP_TBLU_FOUND)
     {
         load_tblu_data();
 
-#ifdef RPKG_DLL
         const rapidjson::Value& tblu_json_subEntities = tblu_json_document["subEntities"];
 
         tblu_subentity_count = tblu_json_subEntities.Size();
@@ -129,16 +132,21 @@ void temp::load_data()
                     tblu_entityName.at(i) = it1->value.GetString();
                 }
 
-                rapidjson::Value::ConstMemberIterator it2 = tblu_json_subEntities[i].FindMember("entityTypeResourceIndex");
+                rapidjson::Value::ConstMemberIterator it2 = tblu_json_subEntities[i].FindMember("entityId");
 
                 if (it2 != tblu_json_subEntities[i].MemberEnd())
                 {
-                    tblu_entityTypeResourceIndex.at(i) = it2->value.GetInt();
+                    tblu_entityId.at(i) = it2->value.GetUint64();
+                }
+
+                rapidjson::Value::ConstMemberIterator it3 = tblu_json_subEntities[i].FindMember("entityTypeResourceIndex");
+
+                if (it3 != tblu_json_subEntities[i].MemberEnd())
+                {
+                    tblu_entityTypeResourceIndex.at(i) = it3->value.GetInt();
                 }
             }
         }
-#endif
-
     }
 }
 
@@ -201,12 +209,6 @@ void temp::load_temp_data()
 
     std::string type = "TEMP";
 
-    //if (temp_file_version == 2)
-    //{
-        //type = "TEMPH2";
-    //}
-
-#ifdef RPKG_DLL
     if (temp_file_version == 2)
     {
         resource_tool_converter = HM2_GetConverterForResource("TEMP");
@@ -227,7 +229,6 @@ void temp::load_temp_data()
     temp_json_document.ParseStream(ss);
 
     resource_tool_converter->FreeJsonString(temp_json_input);
-#endif
 }
 
 void temp::load_tblu_data()
@@ -288,7 +289,6 @@ void temp::load_tblu_data()
 
     std::string type = "TBLU";
 
-#ifdef RPKG_DLL
     if (temp_file_version == 2)
     {
         resource_tool_converter = HM2_GetConverterForResource("TBLU");
@@ -309,7 +309,6 @@ void temp::load_tblu_data()
     tblu_json_document.ParseStream(ss);
 
     resource_tool_converter->FreeJsonString(tblu_json_input);
-#endif
 }
 
 void temp::load_hash_depends()
@@ -775,7 +774,6 @@ void temp::set_temp_version(uint32_t temp_version)
     temp_file_version = temp_version;
 }
 
-#ifdef RPKG_DLL
 void temp::get_top_level_logical_parents()
 {
     std::set<std::string> logical_parents_set;
@@ -2617,4 +2615,3 @@ void temp::get_entry_name_string(int entry_index)
         response_string.append(tblu_entityName.at(entry_index));
     }
 }
-#endif

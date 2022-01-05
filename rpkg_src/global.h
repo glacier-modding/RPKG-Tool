@@ -206,6 +206,18 @@ struct asset3ds
     std::vector<bone_data> bones_data;
     std::vector<float> bones_positions;
     std::vector<float> bones_inverse_matrices;
+    std::vector<uint32_t> material_ids;
+};
+
+struct png_textures
+{
+    uint32_t material_id = 0;
+    bool has_diffuse_texture = false;
+    std::vector<char> texture_diffuse_png;
+    bool has_normal_texture = false;
+    std::vector<char> texture_normal_png;
+    bool has_emissive_texture = false;
+    std::vector<char> texture_emissive_png;
 };
 
 extern std::vector<rpkg> rpkgs;
@@ -287,3 +299,6 @@ extern ConvertMemoryResourceToJson resource_tool_ConvertMemoryResourceToJson;
 extern ConvertMemoryJsonToResource resource_tool_ConvertMemoryJsonToResource;
 extern GetJsonFromMemory resource_tool_GetJsonFromMemory;
 extern std::string exe_path;
+extern std::vector<float> prim_float_values;
+extern bool prim_float_values_initialized;
+void initialize_prim_float_values();

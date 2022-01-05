@@ -9,6 +9,7 @@
 class dev_function
 {
 public:
+	static void dev_hash_list_percent_found(std::string& input_path, std::string& filter, std::string& output_path);
 	static void dev_map_editor(std::string& input_path, std::string& filter, std::string& output_path);
 	static void dev_extract_temp_strings(std::string& input_path, std::string& filter, std::string& output_path);
 	static void dev_resource_tool(std::string& input_path, std::string& filter, std::string& output_path);

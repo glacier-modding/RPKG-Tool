@@ -21,6 +21,9 @@ struct rpkg_extraction_vars
 class rpkg_function
 {
 public:
+	static void extract_prim_textured_from(std::string& input_path, std::string& filter, std::string& output_path, bool rotate);
+	static void latest_hash(std::string& input_path, std::string& filter, std::string& output_path);
+	static uint32_t get_latest_hash(uint64_t hash_value, bool log_output);
 	static void json_to_hash_meta(std::string& input_path, std::string& filter, std::string& output_path);
 	static void hash_meta_to_json(std::string& input_path, std::string& filter, std::string& output_path);
 	static void edit_hash_depends(std::string& input_path, std::string& filter, std::string& search, std::string& search_type, std::string& output_path);
@@ -39,7 +42,7 @@ public:
 	static void extract_all_prim_of_temp_from(std::string& input_path, std::string& filter, std::string& output_path, int type);
 	static void recursive_temp_loader(uint32_t rpkgs_index, uint32_t hash_index, uint32_t temp_version, std::map<uint32_t, uint32_t>& parents_map, std::vector<uint32_t> temps_indexes, uint32_t level, uint32_t level_max, uint32_t temps_max);
 	static void extract_all_prim_from(std::string& input_path, std::string& filter, std::string& output_path, int type);
-	static void extract_prim_from(std::string& input_path, std::string& filter, std::string& output_path, int type);
+	static void extract_prim_from(std::string& input_path, std::string& filter, std::string& output_path, int type, bool rotate);
 	static int load_temp_tblu_hash_depends(uint64_t rpkg_index, uint64_t hash_index);
 	static void dev_extract_temp_from(std::string& input_path, std::string& filter, std::string& output_path);
 	static void extract_temp_from(std::string& input_path, std::string& filter, std::string& output_path);

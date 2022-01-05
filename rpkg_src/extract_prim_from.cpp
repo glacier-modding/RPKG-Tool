@@ -19,7 +19,7 @@
 #include <filesystem>
 #include <set>
 
-void rpkg_function::extract_prim_from(std::string& input_path, std::string& filter, std::string& output_path, int type)
+void rpkg_function::extract_prim_from(std::string& input_path, std::string& filter, std::string& output_path, int type, bool rotate)
 {
     task_single_status = TASK_EXECUTING;
     //task_multiple_status = TASK_EXECUTING;
@@ -114,7 +114,7 @@ void rpkg_function::extract_prim_from(std::string& input_path, std::string& filt
 
                                 rpkg_function::extract_hash_meta(rpkg_index, it->second, hash_meta_file_name);
 
-                                gltf::output_to_single_file(temp_prim.asset3ds_data, asset_file_name, type);
+                                gltf::output_to_single_file(temp_prim.asset3ds_data, asset_file_name, type, rotate);
                             }
                             else if (type == GLTF_SINGLE)
                             {
@@ -124,7 +124,7 @@ void rpkg_function::extract_prim_from(std::string& input_path, std::string& filt
 
                                 temp_prim.extract_meta(output_path);
 
-                                gltf::output_to_single_file(temp_prim.asset3ds_data, asset_file_name, type);
+                                gltf::output_to_single_file(temp_prim.asset3ds_data, asset_file_name, type, rotate);
                             }
                             else if (type == OBJ_SINGLE)
                             {

@@ -128,7 +128,7 @@ void rpkg_function::extract_prim_model_from(std::string& input_path, std::string
 
                             rpkg_function::extract_hash_meta(rpkg_index, it->second, hash_meta_file_name);
 
-                            gltf::output_to_single_file(temp_prim.asset3ds_data, asset_file_name, GLB_SINGLE);
+                            gltf::output_to_single_file(temp_prim.asset3ds_data, asset_file_name, GLB_SINGLE, true);
 
                             for (uint64_t j = 0; j < temp_prim.mati_depends_file_name.size(); j++)
                             {

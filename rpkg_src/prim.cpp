@@ -238,6 +238,7 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
                 asset3ds_data.bones_nodes.push_back(temp_prim_sub_mesh.bones_nodes_data);
                 asset3ds_data.bones_infos.push_back(temp_prim_sub_mesh.bones_info_data);
                 asset3ds_data.bones_indices.push_back(temp_prim_sub_mesh.bones_indices_data);
+                asset3ds_data.material_ids.push_back(temp_prim_mesh.prim_object_instance.material_id);
 
                 prim_weighted_mesh temp_prim_weighted_mesh;
                 prim_weighted_meshes.push_back(temp_prim_weighted_mesh);
@@ -268,6 +269,7 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
                 asset3ds_data.bones_nodes.push_back(temp_prim_weighted_sub_mesh.bones_nodes_data);
                 asset3ds_data.bones_infos.push_back(temp_prim_weighted_sub_mesh.bones_info_data);
                 asset3ds_data.bones_indices.push_back(temp_prim_weighted_sub_mesh.bones_indices_data);
+                asset3ds_data.material_ids.push_back(temp_prim_weighted_mesh.prim_mesh_instance.prim_object_instance.material_id);
 
                 prim_mesh temp_prim_mesh;
                 prim_meshes.push_back(temp_prim_mesh);
@@ -326,13 +328,13 @@ prim::prim(std::string prim_file_path)
     file.read(char4, 0x4);
     std::memcpy(&rpkg_file_name_length, &char4, 0x4);
 
-    LOG("  - TEXT meta RPKG file name length: " + util::uint64_t_to_hex_string(rpkg_file_name_length));
+    //LOG("  - TEXT meta RPKG file name length: " + util::uint64_t_to_hex_string(rpkg_file_name_length));
 
     file.read(input, rpkg_file_name_length);
 
     rpkg_output_file = std::string(input);
 
-    LOG("  - TEXT meta RPKG file name: " + rpkg_output_file);
+    //LOG("  - TEXT meta RPKG file name: " + rpkg_output_file);
 
     file.read(char4, 0x4);
     std::memcpy(&prim_decompressed_size, &char4, 0x4);

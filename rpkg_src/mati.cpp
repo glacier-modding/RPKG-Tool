@@ -281,3 +281,251 @@ void mati::load_hash_depends()
         //LOG("  - MATE File Name In RPKG Used: " + mate_depends_in_rpkgs.at(k).at(mate_depends_rpkg_index_index.at(k)));
     }
 }
+
+void mati::map_textures()
+{
+    uint32_t position = 0;
+    uint8_t bytes1 = 0;
+    uint32_t bytes4 = 0;
+    uint64_t bytes8 = 0;
+
+    std::memcpy(&header_offset, &mati_data.data()[position], sizeof(bytes4));
+    position = header_offset;
+
+    std::cout << "MATI header_offset: " << util::uint32_t_to_hex_string(header_offset) << std::endl;
+
+    std::memcpy(&type_offset, &mati_data.data()[position], sizeof(bytes4));
+    position += 4;
+
+    std::cout << "MATI type_offset: " << util::uint32_t_to_hex_string(type_offset) << std::endl;
+
+    type = std::string(&mati_data.data()[type_offset]);
+
+    std::cout << "MATI type: " << type << std::endl;
+
+    std::memcpy(&texture_count, &mati_data.data()[position], sizeof(bytes4));
+    position += 0x18;
+
+    std::cout << "MATI texture_count: " << texture_count << std::endl;
+
+    std::memcpy(&instance_offset, &mati_data.data()[position], sizeof(bytes4));
+    position = instance_offset;
+
+    std::cout << "MATI instance_offset: " << util::uint32_t_to_hex_string(instance_offset) << std::endl;
+
+    read_properties(position, -1);
+
+    uint32_t temp_hash_reference_count = rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+
+    for (uint32_t p = 0; p < mati_properties.size(); p++)
+    {
+        if (!has_diffuse_texture)
+        {
+            if (mati_properties.at(p).value_string == "mapTexture2D_01")
+            {
+                for (uint32_t r = 0; r < mati_properties.size(); r++)
+                {
+                    if (mati_properties.at(p).parent == mati_properties.at(r).parent && mati_properties.at(r).name == "TXID")
+                    {
+                        std::cout << "Diffuse texture found at index: " << mati_properties.at(r).value_int << std::endl;
+
+                        if (mati_properties.at(r).value_int < temp_hash_reference_count)
+                        {
+                            has_diffuse_texture = true;
+
+                            diffuse_texture_hash = rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).hash_reference_data.hash_reference.at(mati_properties.at(r).value_int);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!has_normal_texture)
+        {
+            if (mati_properties.at(p).value_string == "mapTexture2DNormal_01")
+            {
+                for (uint32_t r = 0; r < mati_properties.size(); r++)
+                {
+                    if (mati_properties.at(p).parent == mati_properties.at(r).parent && mati_properties.at(r).name == "TXID")
+                    {
+                        std::cout << "Normal texture found at index: " << mati_properties.at(r).value_int << std::endl;
+
+                        if (mati_properties.at(r).value_int < temp_hash_reference_count)
+                        {
+                            has_normal_texture = true;
+
+                            normal_texture_hash = rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).hash_reference_data.hash_reference.at(mati_properties.at(r).value_int);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (!has_diffuse_texture || !has_normal_texture)
+    {
+        for (uint32_t d = 0; d < temp_hash_reference_count; d++)
+        {
+            uint32_t temp_rpkg_index = rpkg_function::get_latest_hash(rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).hash_reference_data.hash_reference.at(d), false);
+
+            if (temp_rpkg_index != UINT32_MAX)
+            {
+                std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(temp_rpkg_index).hash_map.find(rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).hash_reference_data.hash_reference.at(d));
+
+                if (it != rpkgs.at(temp_rpkg_index).hash_map.end())
+                {
+                    if (!has_diffuse_texture || !has_normal_texture || !has_emissive_texture)
+                    {
+                        if (rpkgs.at(temp_rpkg_index).hash.at(it->second).hash_resource_type == "TEXT")
+                        {
+                            std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(temp_rpkg_index).hash.at(it->second).hash_value);
+
+                            if (it2 != hash_list_hash_map.end())
+                            {
+                                if (!has_diffuse_texture)
+                                {
+                                    if (hash_list_hash_strings.at(it2->second).find("diffuse_") != std::string::npos)
+                                    {
+                                        has_diffuse_texture = true;
+
+                                        diffuse_texture_hash = rpkgs.at(temp_rpkg_index).hash.at(it->second).hash_value;
+                                    }
+                                }
+
+                                if (!has_normal_texture)
+                                {
+                                    if (hash_list_hash_strings.at(it2->second).find("normal_") != std::string::npos)
+                                    {
+                                        has_normal_texture = true;
+
+                                        normal_texture_hash = rpkgs.at(temp_rpkg_index).hash.at(it->second).hash_value;
+                                    }
+                                }
+
+                                if (!has_emissive_texture)
+                                {
+                                    if (hash_list_hash_strings.at(it2->second).find("emissive_") != std::string::npos)
+                                    {
+                                        has_emissive_texture = true;
+
+                                        emissive_texture_hash = rpkgs.at(temp_rpkg_index).hash.at(it->second).hash_value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void mati::read_properties(uint32_t position, uint32_t parent)
+{
+    uint8_t bytes1 = 0;
+    uint32_t bytes4 = 0;
+    uint64_t bytes8 = 0;
+
+    mati_property temp_mati_property;
+
+    temp_mati_property.parent = parent;
+
+    temp_mati_property.name[3] = mati_data.data()[position];
+    position++;
+    temp_mati_property.name[2] = mati_data.data()[position];
+    position++;
+    temp_mati_property.name[1] = mati_data.data()[position];
+    position++;
+    temp_mati_property.name[0] = mati_data.data()[position];
+    position++;
+
+    std::map<std::string, std::string>::iterator it = mati_property_name_map.find(temp_mati_property.name);
+
+    if (it != mati_property_name_map.end())
+    {
+        std::cout << "MATI temp_mati_property.name: " << temp_mati_property.name << " (" << it->second << ")" << std::endl;
+    }
+    else
+    {
+        std::cout << "MATI temp_mati_property.name: " << temp_mati_property.name << std::endl;
+    }
+
+    std::memcpy(&temp_mati_property.data, &mati_data.data()[position], sizeof(bytes4));
+    position += 0x4;
+
+    std::cout << "MATI temp_mati_property.data: " << temp_mati_property.data << std::endl;
+
+    std::memcpy(&temp_mati_property.size, &mati_data.data()[position], sizeof(bytes4));
+    position += 0x4;
+
+    std::cout << "MATI temp_mati_property.size: " << temp_mati_property.size << std::endl;
+
+    std::memcpy(&temp_mati_property.type, &mati_data.data()[position], sizeof(bytes4));
+    position += 0x4;
+
+    std::cout << "MATI temp_mati_property.type: " << temp_mati_property.type << std::endl;
+
+    if (temp_mati_property.type == 0)
+    {
+        std::cout << "MATI temp_property_type: FLOAT" << std::endl;
+
+        if (temp_mati_property.size == 1)
+        {
+            std::memcpy(&temp_mati_property.value_float, &temp_mati_property.data, sizeof(bytes4));
+
+            std::cout << "MATI temp_mati_property.value: " << temp_mati_property.value_float << std::endl;
+        }
+        else
+        {
+            std::memcpy(&temp_mati_property.value_float, &mati_data.data()[temp_mati_property.data], sizeof(bytes4));
+
+            std::cout << "MATI temp_mati_property.value: " << temp_mati_property.value_float << std::endl;
+        }
+
+        mati_properties.push_back(temp_mati_property);
+    }
+    else if (temp_mati_property.type == 1)
+    {
+        std::cout << "MATI temp_property_type: STRING" << std::endl;
+
+        temp_mati_property.value_string = std::string(&mati_data.data()[temp_mati_property.data]);
+
+        std::cout << "MATI temp_mati_property.value: " << temp_mati_property.value_string << std::endl;
+
+        mati_properties.push_back(temp_mati_property);
+    }
+    else if (temp_mati_property.type == 2)
+    {
+        std::cout << "MATI temp_property_type: INT" << std::endl;
+
+        if (temp_mati_property.size == 1)
+        {
+            temp_mati_property.value_int = temp_mati_property.data;
+
+            std::cout << "MATI temp_mati_property.value: " << temp_mati_property.value_int << std::endl;
+        }
+        else
+        {
+            std::memcpy(&temp_mati_property.value_int, &mati_data.data()[temp_mati_property.data], sizeof(bytes4));
+
+            std::cout << "MATI temp_mati_property.value: " << temp_mati_property.value_int << std::endl;
+        }
+
+        mati_properties.push_back(temp_mati_property);
+    }
+    else if (temp_mati_property.type == 3)
+    {
+        std::cout << "MATI temp_property_type: PROPERTY" << std::endl;
+
+        position = temp_mati_property.data;
+
+        parent = mati_properties.size();
+
+        for (uint32_t p = 0; p < temp_mati_property.size; p++)
+        {
+            read_properties(position, parent);
+
+            position += 0x10;
+        }
+    }
+}

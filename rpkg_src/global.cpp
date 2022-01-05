@@ -72,6 +72,21 @@ ConvertMemoryResourceToJson resource_tool_ConvertMemoryResourceToJson;
 ConvertMemoryJsonToResource resource_tool_ConvertMemoryJsonToResource;
 GetJsonFromMemory resource_tool_GetJsonFromMemory;
 std::string exe_path;
+std::vector<float> prim_float_values;
+bool prim_float_values_initialized = false;
+
+void initialize_prim_float_values()
+{
+	if (!prim_float_values_initialized)
+	{
+		prim_float_values_initialized = true;
+
+		for (uint32_t a = 0; a < 256; a++)
+		{
+			prim_float_values.push_back(static_cast<float>(a) / 255.0f);
+		}
+	}
+}
 
 void initialize_type_map_h2()
 {

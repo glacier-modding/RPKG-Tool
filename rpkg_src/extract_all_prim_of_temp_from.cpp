@@ -90,7 +90,7 @@ void rpkg_function::extract_all_prim_of_temp_from(std::string& input_path, std::
 
                             for (uint64_t j = 0; j < temp_temp.prim_depends_file_name.size(); j++)
                             {
-                                rpkg_function::extract_prim_from(rpkgs.at(temp_temp.prim_depends_rpkg_index.at(j).at(temp_temp.prim_depends_rpkg_index_index.at(j))).rpkg_file_path, temp_temp.prim_depends_file_name.at(j), output_path, type);
+                                rpkg_function::extract_prim_from(rpkgs.at(temp_temp.prim_depends_rpkg_index.at(j).at(temp_temp.prim_depends_rpkg_index_index.at(j))).rpkg_file_path, temp_temp.prim_depends_file_name.at(j), output_path, type, true);
                             }
                         }
                     }

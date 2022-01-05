@@ -248,6 +248,8 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
 
         timing_string = message;
 
+        initialize_prim_float_values();
+
         std::set<std::string> directory_set;
 
         for (uint64_t i = 0; i < prim_folders.size(); i++)
@@ -966,22 +968,146 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
                                             uint32_t z = v * 4 + 2;
                                             uint32_t w = v * 4 + 3;
 
-                                            uint8_t temp_uint8_t = static_cast<unsigned char>(std::roundf(weights_0_data[x] * 255.0f));
+                                            float weights[] = { weights_0_data[x] , weights_0_data[y], weights_0_data[z], weights_0_data[w], weights_1_data[x], weights_1_data[y] };
+                                            std::vector<std::pair<float, uint32_t>> weights_map;
+                                            
+                                            for (uint32_t w = 0; w < 6; w++)
+                                            {
+                                                if (weights[w] != 0.0f)
+                                                {
+                                                    weights_map.push_back(std::pair(weights[w], w));
+                                                }
+                                            }
+
+                                            std::sort(weights_map.begin(), weights_map.end());
+
+                                            //std::reverse(weights_new.begin(), weights_new.end());
+
+                                            float weights_total = 0.0f;
+
+                                            for (uint32_t w = 0; w < weights_map.size(); w++)
+                                            {
+                                                bool value_found = false;
+
+                                                if (w < (weights_map.size() - 1))
+                                                {
+                                                    for (uint32_t a = 0; a < (prim_float_values.size() - 1); a++)
+                                                    {
+                                                        if (weights_map[w].first >= prim_float_values[a] && weights_map[w].first <= prim_float_values[a + 1])
+                                                        {
+                                                            if (!value_found)
+                                                            {
+                                                                //if (w == (weights_new.size() - 2))
+                                                                //{
+                                                                if (prim_float_values[a] == 0.0f)
+                                                                {
+                                                                    weights_map[w].first = prim_float_values[a + 1];
+
+                                                                    value_found = true;
+                                                                }
+                                                                else
+                                                                {
+                                                                    weights_map[w].first = prim_float_values[a];
+
+                                                                    value_found = true;
+                                                                }
+                                                                /* }
+                                                                else
+                                                                {
+                                                                    float diff_a = weights_new[w] - prim_float_values[a];
+                                                                    float diff_b = prim_float_values[a + 1] - weights_new[w];
+
+                                                                    if (diff_a < diff_b)
+                                                                    {
+                                                                        weights_new[w] = prim_float_values[a];
+
+                                                                        value_found = true;
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        weights_new[w] = prim_float_values[a + 1];
+
+                                                                        value_found = true;
+                                                                    }
+                                                                }*/
+                                                            }
+                                                        }
+                                                    }
+
+                                                    weights_total += weights_map[w].first;
+
+                                                    weights[weights_map[w].second] = weights_map[w].first;
+                                                }
+                                                else
+                                                {
+                                                    for (uint32_t a = 0; a < (prim_float_values.size() - 1); a++)
+                                                    {
+                                                        if ((1.0f - weights_total) >= prim_float_values[a] && (1.0f - weights_total) <= prim_float_values[a + 1])
+                                                        {
+                                                            if (!value_found)
+                                                            {
+                                                                float diff_a = (1.0f - weights_total) - prim_float_values[a];
+                                                                float diff_b = prim_float_values[a + 1] - (1.0f - weights_total);
+
+                                                                if (diff_a < diff_b)
+                                                                {
+                                                                    weights_map[w].first = prim_float_values[a];
+
+                                                                    value_found = true;
+                                                                }
+                                                                else
+                                                                {
+                                                                    weights_map[w].first = prim_float_values[a + 1];
+
+                                                                    value_found = true;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+
+                                                    weights[weights_map[w].second] = weights_map[w].first;
+                                                }
+                                            }
+
+                                            float total = 0.0f;
+
+                                            for (uint32_t w = 0; w < 6; w++)
+                                            {
+                                                total += weights[w];
+                                            }
+
+                                            /*for (uint32_t w = 0; w < 6; w++)
+                                            {
+                                                bool done = false;
+
+                                                for (uint32_t a = 0; a < prim_float_values.size(); a++)
+                                                {
+                                                    if (weights[w] == prim_float_values[a])
+                                                    {
+                                                        done = true;
+                                                    }
+                                                }
+                                            }*/
+
+                                            //float weights_total = weights_0_data[x] + weights_0_data[y] + weights_0_data[z] + weights_0_data[w] + weights_1_data[x] + weights_1_data[y];
+                                            //float normalize_value = 1.0f / weights_total;
+
+                                            uint8_t temp_uint8_t = static_cast<unsigned char>(std::roundf(weights[0] * 255.0f));
 
                                             std::memcpy(&char1, &temp_uint8_t, sizeof(uint8_t));
                                             prim_file_data.push_back(char1);
 
-                                            temp_uint8_t = static_cast<unsigned char>(std::roundf(weights_0_data[y] * 255.0f));
+                                            temp_uint8_t = static_cast<unsigned char>(std::roundf(weights[1] * 255.0f));
 
                                             std::memcpy(&char1, &temp_uint8_t, sizeof(uint8_t));
                                             prim_file_data.push_back(char1);
 
-                                            temp_uint8_t = static_cast<unsigned char>(std::roundf(weights_0_data[z] * 255.0f));
+                                            temp_uint8_t = static_cast<unsigned char>(std::roundf(weights[2] * 255.0f));
 
                                             std::memcpy(&char1, &temp_uint8_t, sizeof(uint8_t));
                                             prim_file_data.push_back(char1);
 
-                                            temp_uint8_t = static_cast<unsigned char>(std::roundf(weights_0_data[w] * 255.0f));
+                                            temp_uint8_t = static_cast<unsigned char>(std::roundf(weights[3] * 255.0f));
 
                                             std::memcpy(&char1, &temp_uint8_t, sizeof(uint8_t));
                                             prim_file_data.push_back(char1);
@@ -1006,12 +1132,12 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
                                             std::memcpy(&char1, &temp_uint8_t, sizeof(uint8_t));
                                             prim_file_data.push_back(char1);
 
-                                            temp_uint8_t = static_cast<unsigned char>(std::roundf(weights_1_data[x] * 255.0f));
+                                            temp_uint8_t = static_cast<unsigned char>(std::roundf(weights[4] * 255.0f));
 
                                             std::memcpy(&char1, &temp_uint8_t, sizeof(uint8_t));
                                             prim_file_data.push_back(char1);
 
-                                            temp_uint8_t = static_cast<unsigned char>(std::roundf(weights_1_data[y] * 255.0f));
+                                            temp_uint8_t = static_cast<unsigned char>(std::roundf(weights[5] * 255.0f));
 
                                             std::memcpy(&char1, &temp_uint8_t, sizeof(uint8_t));
                                             prim_file_data.push_back(char1);
@@ -1047,25 +1173,146 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
                                             uint32_t z = v * 4 + 2;
                                             uint32_t w = v * 4 + 3;
 
-                                            float weights_total = weights_0_data[x] + weights_0_data[y] + weights_0_data[z] + weights_0_data[w];
-                                            float normalize_value = 1.0f / weights_total;
+                                            float weights[] = { weights_0_data[x] , weights_0_data[y], weights_0_data[z], weights_0_data[w] };
+                                            std::vector<std::pair<float, uint32_t>> weights_map;
 
-                                            uint8_t temp_uint8_t = static_cast<unsigned char>(std::roundf((weights_0_data[x] * normalize_value) * 255.0f));
+                                            for (uint32_t w = 0; w < 4; w++)
+                                            {
+                                                if (weights[w] != 0.0f)
+                                                {
+                                                    weights_map.push_back(std::pair(weights[w], w));
+                                                }
+                                            }
+
+                                            std::sort(weights_map.begin(), weights_map.end());
+
+                                            //std::reverse(weights_new.begin(), weights_new.end());
+
+                                            float weights_total = 0.0f;
+
+                                            for (uint32_t w = 0; w < weights_map.size(); w++)
+                                            {
+                                                bool value_found = false;
+
+                                                if (w < (weights_map.size() - 1))
+                                                {
+                                                    for (uint32_t a = 0; a < (prim_float_values.size() - 1); a++)
+                                                    {
+                                                        if (weights_map[w].first >= prim_float_values[a] && weights_map[w].first <= prim_float_values[a + 1])
+                                                        {
+                                                            if (!value_found)
+                                                            {
+                                                                //if (w == (weights_new.size() - 2))
+                                                                //{
+                                                                if (prim_float_values[a] == 0.0f)
+                                                                {
+                                                                    weights_map[w].first = prim_float_values[a + 1];
+
+                                                                    value_found = true;
+                                                                }
+                                                                else
+                                                                {
+                                                                    weights_map[w].first = prim_float_values[a];
+
+                                                                    value_found = true;
+                                                                }
+                                                                /* }
+                                                                else
+                                                                {
+                                                                    float diff_a = weights_new[w] - prim_float_values[a];
+                                                                    float diff_b = prim_float_values[a + 1] - weights_new[w];
+
+                                                                    if (diff_a < diff_b)
+                                                                    {
+                                                                        weights_new[w] = prim_float_values[a];
+
+                                                                        value_found = true;
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        weights_new[w] = prim_float_values[a + 1];
+
+                                                                        value_found = true;
+                                                                    }
+                                                                }*/
+                                                            }
+                                                        }
+                                                    }
+
+                                                    weights_total += weights_map[w].first;
+
+                                                    weights[weights_map[w].second] = weights_map[w].first;
+                                                }
+                                                else
+                                                {
+                                                    for (uint32_t a = 0; a < (prim_float_values.size() - 1); a++)
+                                                    {
+                                                        if ((1.0f - weights_total) >= prim_float_values[a] && (1.0f - weights_total) <= prim_float_values[a + 1])
+                                                        {
+                                                            if (!value_found)
+                                                            {
+                                                                float diff_a = (1.0f - weights_total) - prim_float_values[a];
+                                                                float diff_b = prim_float_values[a + 1] - (1.0f - weights_total);
+
+                                                                if (diff_a < diff_b)
+                                                                {
+                                                                    weights_map[w].first = prim_float_values[a];
+
+                                                                    value_found = true;
+                                                                }
+                                                                else
+                                                                {
+                                                                    weights_map[w].first = prim_float_values[a + 1];
+
+                                                                    value_found = true;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+
+                                                    weights[weights_map[w].second] = weights_map[w].first;
+                                                }
+                                            }
+
+                                            float total = 0.0f;
+
+                                            for (uint32_t w = 0; w < 4; w++)
+                                            {
+                                                total += weights[w];
+                                            }
+
+                                            /*for (uint32_t w = 0; w < 4; w++)
+                                            {
+                                                bool done = false;
+
+                                                for (uint32_t a = 0; a < prim_float_values.size(); a++)
+                                                {
+                                                    if (weights[w] == prim_float_values[a])
+                                                    {
+                                                        done = true;
+                                                    }
+                                                }
+                                            }*/
+
+                                            //float weights_total = weights_0_data[x] + weights_0_data[y] + weights_0_data[z] + weights_0_data[w];
+                                            //float normalize_value = 1.0f / weights_total;
+
+                                            uint8_t temp_uint8_t = static_cast<unsigned char>(std::roundf(weights[0] * 255.0f));
 
                                             std::memcpy(&char1, &temp_uint8_t, sizeof(uint8_t));
                                             prim_file_data.push_back(char1);
 
-                                            temp_uint8_t = static_cast<unsigned char>(std::roundf((weights_0_data[y] * normalize_value) * 255.0f));
+                                            temp_uint8_t = static_cast<unsigned char>(std::roundf(weights[1] * 255.0f));
 
                                             std::memcpy(&char1, &temp_uint8_t, sizeof(uint8_t));
                                             prim_file_data.push_back(char1);
 
-                                            temp_uint8_t = static_cast<unsigned char>(std::roundf((weights_0_data[z] * normalize_value) * 255.0f));
+                                            temp_uint8_t = static_cast<unsigned char>(std::roundf(weights[2] * 255.0f));
 
                                             std::memcpy(&char1, &temp_uint8_t, sizeof(uint8_t));
                                             prim_file_data.push_back(char1);
 
-                                            temp_uint8_t = static_cast<unsigned char>(std::roundf((weights_0_data[w] * normalize_value) * 255.0f));
+                                            temp_uint8_t = static_cast<unsigned char>(std::roundf(weights[3] * 255.0f));
 
                                             std::memcpy(&char1, &temp_uint8_t, sizeof(uint8_t));
                                             prim_file_data.push_back(char1);
