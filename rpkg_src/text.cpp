@@ -519,7 +519,7 @@ void text::load_hash_depends()
     }
 }
 
-bool text::save_text_to_png(std::string png_path)
+bool text::save_text_to_jpg(std::string png_path)
 {
     dds_header_data.size = 124;
     dds_header_data.flags = DDS_HEADER_FLAGS_TEXTURE | DDS_HEADER_FLAGS_MIPMAP;
@@ -739,11 +739,11 @@ bool text::save_text_to_png(std::string png_path)
     //hresult = DirectX::SaveToWICFile(*scratch_image_to_export->GetImage(0, 0, 0), DirectX::WIC_FLAGS_NONE, DirectX::GetWICCodec(DirectX::WIC_CODEC_PNG), texture_file_path.generic_wstring().c_str());
     hresult = DirectX::SaveToWICMemory(*scratch_image_to_export->GetImage(0, 0, 0), DirectX::WIC_FLAGS_NONE, DirectX::GetWICCodec(DirectX::WIC_CODEC_JPEG), directx_blob);
 
-    text_data_png_size = directx_blob.GetBufferSize();
+    text_data_jpg_size = directx_blob.GetBufferSize();
 
-    text_data_png = std::vector<char>(text_data_png_size, 0);
+    text_data_jpg = std::vector<char>(text_data_jpg_size, 0);
 
-    std::memcpy(text_data_png.data(), directx_blob.GetBufferPointer(), text_data_png_size);
+    std::memcpy(text_data_jpg.data(), directx_blob.GetBufferPointer(), text_data_jpg_size);
 
     if (FAILED(hresult))
     {
@@ -755,7 +755,7 @@ bool text::save_text_to_png(std::string png_path)
     return true;
 }
 
-bool text::save_texd_to_png(std::string png_path)
+bool text::save_texd_to_jpg(std::string png_path)
 {
     if (texd_found)
     {
@@ -977,11 +977,11 @@ bool text::save_texd_to_png(std::string png_path)
         //hresult = DirectX::SaveToWICFile(*scratch_image_to_export->GetImage(0, 0, 0), DirectX::WIC_FLAGS_NONE, DirectX::GetWICCodec(DirectX::WIC_CODEC_PNG), texture_file_path.generic_wstring().c_str());
         hresult = DirectX::SaveToWICMemory(*scratch_image_to_export->GetImage(0, 0, 0), DirectX::WIC_FLAGS_NONE, DirectX::GetWICCodec(DirectX::WIC_CODEC_JPEG), directx_blob);
 
-        texd_data_png_size = directx_blob.GetBufferSize();
+        texd_data_jpg_size = directx_blob.GetBufferSize();
 
-        texd_data_png = std::vector<char>(texd_data_png_size, 0);
+        texd_data_jpg = std::vector<char>(texd_data_jpg_size, 0);
 
-        std::memcpy(texd_data_png.data(), directx_blob.GetBufferPointer(), texd_data_png_size);
+        std::memcpy(texd_data_jpg.data(), directx_blob.GetBufferPointer(), texd_data_jpg_size);
 
         if (FAILED(hresult))
         {
@@ -992,6 +992,423 @@ bool text::save_texd_to_png(std::string png_path)
     }
 
     return true;
+}
+
+void text::save_text_to_png(std::string png_path)
+{
+    dds_header_data.size = 124;
+    dds_header_data.flags = DDS_HEADER_FLAGS_TEXTURE | DDS_HEADER_FLAGS_MIPMAP;
+    dds_header_data.width = text_width;
+    dds_header_data.height = text_height;
+    dds_header_data.pitchOrLinearSize = 0;
+    dds_header_data.depth = 0;
+    dds_header_data.mipMapCount = 1;// calculate_mips_count(dds_header_data.width, dds_header_data.height);
+    std::fill(dds_header_data.reserved1, &dds_header_data.reserved1[11], 0);
+    dds_header_data.caps = DDS_SURFACE_FLAGS_TEXTURE | DDS_SURFACE_FLAGS_MIPMAP;
+    dds_header_data.caps2 = NULL;
+    dds_header_data.caps3 = NULL;
+    dds_header_data.caps4 = NULL;
+    dds_header_data.reserved2 = NULL;
+
+    if (text_directx_format == 0x1C)
+    {
+        dds_header_data.ddspf = DirectX::DDSPF_A8B8G8R8;
+    }
+    if (text_directx_format == 0x34)
+    {
+        dds_header_data.ddspf = DirectX::DDSPF_R8G8_B8G8;
+    }
+    if (text_directx_format == 0x42)
+    {
+        //assert((header.type == TextureType::Color));
+        dds_header_data.ddspf = DirectX::DDSPF_A8;
+    }
+    if (text_directx_format == 0x49)
+    {
+        dds_header_data.ddspf = DirectX::DDSPF_DXT1;
+    }
+    if (text_directx_format == 0x4F)
+    {
+        dds_header_data.ddspf = DirectX::DDSPF_DXT5;
+    }
+    if (text_directx_format == 0x52)
+    {
+        dds_header_data.ddspf = DirectX::DDSPF_BC4_UNORM;
+    }
+    if (text_directx_format == 0x55)
+    {
+        dds_header_data.ddspf = DirectX::DDSPF_BC5_UNORM;
+    }
+    if (text_directx_format == 0x5A)
+    {
+        dds_header_data.ddspf = DirectX::DDSPF_DX10;
+        //dds_header_data_dxt10.dxgiFormat = DXGI_FORMAT_BC7_UNORM_SRGB;
+        dds_header_data_dxt10.dxgiFormat = DXGI_FORMAT_BC7_UNORM;
+        dds_header_data_dxt10.resourceDimension = DirectX::DDS_DIMENSION_TEXTURE2D;
+        dds_header_data_dxt10.miscFlag = 0;
+        dds_header_data_dxt10.arraySize = 1;
+        dds_header_data_dxt10.miscFlags2 = 0;
+    }
+
+    dds_file_buffer_size += sizeof(DirectX::DDS_MAGIC);
+    dds_file_buffer_size += sizeof(DirectX::DDS_HEADER);
+
+    if (text_directx_format == 0x5A)
+    {
+        dds_file_buffer_size += sizeof(DirectX::DDS_HEADER_DXT10);
+    }
+
+    dds_file_buffer_size += text_data_size;
+
+    directx_blob.Initialize(dds_file_buffer_size);
+
+    char* dds_data = reinterpret_cast<char*>(directx_blob.GetBufferPointer());
+
+    uint32_t dds_position = 0;
+
+    std::memcpy(&dds_data[dds_position], &DirectX::DDS_MAGIC, sizeof(DirectX::DDS_MAGIC));
+    dds_position += sizeof(DirectX::DDS_MAGIC);
+
+    std::memcpy(&dds_data[dds_position], &dds_header_data, sizeof(dds_header_data));
+    dds_position += sizeof(dds_header_data);
+
+    if (text_directx_format == 0x5A)
+    {
+        std::memcpy(&dds_data[dds_position], &dds_header_data_dxt10, sizeof(dds_header_data_dxt10));
+        dds_position += sizeof(dds_header_data_dxt10);
+    }
+
+    std::memcpy(&dds_data[dds_position], text_data.data(), text_data_size);
+
+    DirectX::LoadFromDDSMemory(directx_blob.GetBufferPointer(), directx_blob.GetBufferSize(), (DirectX::DDS_FLAGS)0, &texture_meta_data, scratch_image_original);
+
+    if (text_directx_format == 0x1C) //
+    {
+        HRESULT hresult = DirectX::Decompress(*scratch_image_original.GetImage(0, 0, 0), DXGI_FORMAT_R8G8B8A8_UNORM, scratch_image_converted);
+
+        if (FAILED(hresult))
+        {
+            LOG_AND_EXIT("Error: DDS conversion failed.");
+        }
+
+        scratch_image_to_export = &scratch_image_converted;
+    }
+    else if (text_directx_format == 0x34) //R8G8
+    {
+        HRESULT hresult = DirectX::Convert(*scratch_image_original.GetImage(0, 0, 0), DXGI_FORMAT_R8G8B8A8_UNORM, (DirectX::TEX_FILTER_FLAGS)0, 0, scratch_image_converted);
+
+        if (FAILED(hresult))
+        {
+            LOG_AND_EXIT("Error: DDS conversion failed.");
+        }
+
+        for (uint32_t d = 2; d < scratch_image_converted.GetPixelsSize(); d += 4)
+        {
+            scratch_image_converted.GetPixels()[d] = 0xFF;
+        }
+
+        scratch_image_to_export = &scratch_image_converted;
+    }
+    else if (text_directx_format == 0x42) //A8
+    {
+        scratch_image_to_export = &scratch_image_original;
+    }
+    else if (text_directx_format == 0x49) //DXT1
+    {
+        HRESULT hresult = DirectX::Decompress(*scratch_image_original.GetImage(0, 0, 0), DXGI_FORMAT_R8G8B8A8_UNORM, scratch_image_converted);
+
+        if (FAILED(hresult))
+        {
+            LOG_AND_EXIT("Error: DDS conversion failed.");
+        }
+
+        scratch_image_to_export = &scratch_image_converted;
+    }
+    else if (text_directx_format == 0x4F) //DXT5
+    {
+        HRESULT hresult = DirectX::Decompress(*scratch_image_original.GetImage(0, 0, 0), DXGI_FORMAT_R8G8B8A8_UNORM, scratch_image_converted);
+
+        if (FAILED(hresult))
+        {
+            LOG_AND_EXIT("Error: DDS conversion failed.");
+        }
+
+        scratch_image_to_export = &scratch_image_converted;
+    }
+    else if (text_directx_format == 0x52) //BC4
+    {
+        HRESULT hresult = DirectX::Decompress(*scratch_image_original.GetImage(0, 0, 0), DXGI_FORMAT_A8_UNORM, scratch_image_converted);
+
+        if (FAILED(hresult))
+        {
+            LOG_AND_EXIT("Error: DDS conversion failed.");
+        }
+
+        scratch_image_to_export = &scratch_image_converted;
+    }
+    else if (text_directx_format == 0x55) //BC5
+    {
+        HRESULT hresult = DirectX::Decompress(*scratch_image_original.GetImage(0, 0, 0), DXGI_FORMAT_R8G8B8A8_UNORM, scratch_image_converted);
+
+        if (FAILED(hresult))
+        {
+            LOG_AND_EXIT("Error: DDS conversion failed.");
+        }
+
+        for (uint32_t d = 2; d < scratch_image_converted.GetPixelsSize(); d += 4)
+        {
+            scratch_image_converted.GetPixels()[d] = 0xFF;
+        }
+
+        scratch_image_to_export = &scratch_image_converted;
+    }
+    else if (text_directx_format == 0x5A) //BC7
+    {
+        HRESULT hresult = DirectX::Decompress(*scratch_image_original.GetImage(0, 0, 0), DXGI_FORMAT_R8G8B8A8_UNORM, scratch_image_converted);
+
+        if (FAILED(hresult))
+        {
+            LOG_AND_EXIT("Error: DDS conversion failed.");
+        }
+
+        scratch_image_to_export = &scratch_image_converted;
+    }
+    else
+    {
+        LOG("Error: DirectX format (" + util::uint16_t_to_hex_string(text_directx_format) + ") unsupported.");
+
+        return;
+    }
+
+    std::filesystem::path texture_file_path = png_path;
+
+    //HRESULT hresult = DirectX::SaveToTGAFile(*scratch_image_to_export->GetImage(0, 0, 0), texture_file_path.generic_wstring().c_str(), &texture_meta_data);
+
+    HRESULT hresult = CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
+
+    if (FAILED(hresult))
+    {
+        LOG_AND_EXIT("Failed to initilize COM.");
+    }
+
+    REFGUID png_format = DirectX::GetWICCodec(DirectX::WIC_CODEC_PNG);
+
+    hresult = DirectX::SaveToWICFile(*scratch_image_to_export->GetImage(0, 0, 0), DirectX::WIC_FLAGS_NONE, DirectX::GetWICCodec(DirectX::WIC_CODEC_PNG), texture_file_path.generic_wstring().c_str());
+
+    if (FAILED(hresult))
+    {
+        LOG_AND_EXIT("Error: PNG file " + texture_file_path.generic_string() + " exporting failed.");
+    }
+}
+
+void text::save_texd_to_png(std::string png_path)
+{
+    if (texd_found)
+    {
+        dds_header_data.size = 124;
+        dds_header_data.flags = DDS_HEADER_FLAGS_TEXTURE | DDS_HEADER_FLAGS_MIPMAP;
+        dds_header_data.width = texd_width;
+        dds_header_data.height = texd_height;
+        dds_header_data.pitchOrLinearSize = 0;
+        dds_header_data.depth = 0;
+        dds_header_data.mipMapCount = 1;// text_mips_count;
+        std::fill(dds_header_data.reserved1, &dds_header_data.reserved1[11], 0);
+        dds_header_data.caps = DDS_SURFACE_FLAGS_TEXTURE | DDS_SURFACE_FLAGS_MIPMAP;
+        dds_header_data.caps2 = NULL;
+        dds_header_data.caps3 = NULL;
+        dds_header_data.caps4 = NULL;
+        dds_header_data.reserved2 = NULL;
+
+        if (text_directx_format == 0x1C)
+        {
+            dds_header_data.ddspf = DirectX::DDSPF_A8B8G8R8;
+        }
+        if (text_directx_format == 0x34)
+        {
+            dds_header_data.ddspf = DirectX::DDSPF_R8G8_B8G8;
+        }
+        if (text_directx_format == 0x42)
+        {
+            //assert((header.type == TextureType::Color));
+            dds_header_data.ddspf = DirectX::DDSPF_A8;
+        }
+        if (text_directx_format == 0x49)
+        {
+            dds_header_data.ddspf = DirectX::DDSPF_DXT1;
+        }
+        if (text_directx_format == 0x4F)
+        {
+            dds_header_data.ddspf = DirectX::DDSPF_DXT5;
+        }
+        if (text_directx_format == 0x52)
+        {
+            dds_header_data.ddspf = DirectX::DDSPF_BC4_UNORM;
+        }
+        if (text_directx_format == 0x55)
+        {
+            dds_header_data.ddspf = DirectX::DDSPF_BC5_UNORM;
+        }
+        if (text_directx_format == 0x5A)
+        {
+            dds_header_data.ddspf = DirectX::DDSPF_DX10;
+            //dds_header_data_dxt10.dxgiFormat = DXGI_FORMAT_BC7_UNORM_SRGB;
+            dds_header_data_dxt10.dxgiFormat = DXGI_FORMAT_BC7_UNORM;
+            dds_header_data_dxt10.resourceDimension = DirectX::DDS_DIMENSION_TEXTURE2D;
+            dds_header_data_dxt10.miscFlag = 0;
+            dds_header_data_dxt10.arraySize = 1;
+            dds_header_data_dxt10.miscFlags2 = 0;
+        }
+
+        dds_file_buffer_size += sizeof(DirectX::DDS_MAGIC);
+        dds_file_buffer_size += sizeof(DirectX::DDS_HEADER);
+
+        if (text_directx_format == 0x5A)
+        {
+            dds_file_buffer_size += sizeof(DirectX::DDS_HEADER_DXT10);
+        }
+
+        dds_file_buffer_size += texd_data_size;
+
+        directx_blob.Initialize(dds_file_buffer_size);
+
+        char* dds_data = reinterpret_cast<char*>(directx_blob.GetBufferPointer());
+
+        uint32_t dds_position = 0;
+
+        std::memcpy(&dds_data[dds_position], &DirectX::DDS_MAGIC, sizeof(DirectX::DDS_MAGIC));
+        dds_position += sizeof(DirectX::DDS_MAGIC);
+
+        std::memcpy(&dds_data[dds_position], &dds_header_data, sizeof(dds_header_data));
+        dds_position += sizeof(dds_header_data);
+
+        if (text_directx_format == 0x5A)
+        {
+            std::memcpy(&dds_data[dds_position], &dds_header_data_dxt10, sizeof(dds_header_data_dxt10));
+            dds_position += sizeof(dds_header_data_dxt10);
+        }
+
+        std::memcpy(&dds_data[dds_position], texd_data.data(), texd_data_size);
+
+        DirectX::LoadFromDDSMemory(directx_blob.GetBufferPointer(), directx_blob.GetBufferSize(), (DirectX::DDS_FLAGS)0, &texture_meta_data, scratch_image_original);
+
+        if (text_directx_format == 0x1C) //
+        {
+            HRESULT hresult = DirectX::Decompress(*scratch_image_original.GetImage(0, 0, 0), DXGI_FORMAT_R8G8B8A8_UNORM, scratch_image_converted);
+
+            if (FAILED(hresult))
+            {
+                LOG_AND_EXIT("Error: DDS conversion failed.");
+            }
+
+            scratch_image_to_export = &scratch_image_converted;
+        }
+        else if (text_directx_format == 0x34) //R8G8
+        {
+            HRESULT hresult = DirectX::Convert(*scratch_image_original.GetImage(0, 0, 0), DXGI_FORMAT_R8G8B8A8_UNORM, (DirectX::TEX_FILTER_FLAGS)0, 0, scratch_image_converted);
+
+            if (FAILED(hresult))
+            {
+                LOG_AND_EXIT("Error: DDS conversion failed.");
+            }
+
+            for (uint32_t d = 2; d < scratch_image_converted.GetPixelsSize(); d += 4)
+            {
+                scratch_image_converted.GetPixels()[d] = 0xFF;
+            }
+
+            scratch_image_to_export = &scratch_image_converted;
+        }
+        else if (text_directx_format == 0x42) //A8
+        {
+            scratch_image_to_export = &scratch_image_original;
+        }
+        else if (text_directx_format == 0x49) //DXT1
+        {
+            HRESULT hresult = DirectX::Decompress(*scratch_image_original.GetImage(0, 0, 0), DXGI_FORMAT_R8G8B8A8_UNORM, scratch_image_converted);
+
+            if (FAILED(hresult))
+            {
+                LOG_AND_EXIT("Error: DDS conversion failed.");
+            }
+
+            scratch_image_to_export = &scratch_image_converted;
+        }
+        else if (text_directx_format == 0x4F) //DXT5
+        {
+            HRESULT hresult = DirectX::Decompress(*scratch_image_original.GetImage(0, 0, 0), DXGI_FORMAT_R8G8B8A8_UNORM, scratch_image_converted);
+
+            if (FAILED(hresult))
+            {
+                LOG_AND_EXIT("Error: DDS conversion failed.");
+            }
+
+            scratch_image_to_export = &scratch_image_converted;
+        }
+        else if (text_directx_format == 0x52) //BC4
+        {
+            HRESULT hresult = DirectX::Decompress(*scratch_image_original.GetImage(0, 0, 0), DXGI_FORMAT_A8_UNORM, scratch_image_converted);
+
+            if (FAILED(hresult))
+            {
+                LOG_AND_EXIT("Error: DDS conversion failed.");
+            }
+
+            scratch_image_to_export = &scratch_image_converted;
+        }
+        else if (text_directx_format == 0x55) //BC5
+        {
+            HRESULT hresult = DirectX::Decompress(*scratch_image_original.GetImage(0, 0, 0), DXGI_FORMAT_R8G8B8A8_UNORM, scratch_image_converted);
+
+            if (FAILED(hresult))
+            {
+                LOG_AND_EXIT("Error: DDS conversion failed.");
+            }
+
+            for (uint32_t d = 2; d < scratch_image_converted.GetPixelsSize(); d += 4)
+            {
+                scratch_image_converted.GetPixels()[d] = 0xFF;
+            }
+
+            scratch_image_to_export = &scratch_image_converted;
+        }
+        else if (text_directx_format == 0x5A) //BC7
+        {
+            HRESULT hresult = DirectX::Decompress(*scratch_image_original.GetImage(0, 0, 0), DXGI_FORMAT_R8G8B8A8_UNORM, scratch_image_converted);
+
+            if (FAILED(hresult))
+            {
+                LOG_AND_EXIT("Error: DDS conversion failed.");
+            }
+
+            scratch_image_to_export = &scratch_image_converted;
+        }
+        else
+        {
+            LOG("Error: DirectX format (" + util::uint16_t_to_hex_string(text_directx_format) + ") unsupported.");
+
+            return;
+        }
+
+        std::filesystem::path texture_file_path = png_path;
+
+        //HRESULT hresult = DirectX::SaveToTGAFile(*scratch_image_to_export->GetImage(0, 0, 0), texture_file_path.generic_wstring().c_str(), &texture_meta_data);
+
+        HRESULT hresult = CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
+
+        if (FAILED(hresult))
+        {
+            LOG_AND_EXIT("Failed to initilize COM.");
+        }
+
+        REFGUID png_format = DirectX::GetWICCodec(DirectX::WIC_CODEC_PNG);
+
+        hresult = DirectX::SaveToWICFile(*scratch_image_to_export->GetImage(0, 0, 0), DirectX::WIC_FLAGS_NONE, DirectX::GetWICCodec(DirectX::WIC_CODEC_PNG), texture_file_path.generic_wstring().c_str());
+
+        if (FAILED(hresult))
+        {
+            LOG_AND_EXIT("Error: PNG file " + texture_file_path.generic_string() + " exporting failed.");
+        }
+    }
 }
 
 uint32_t text::calculate_mips_count(uint32_t width, uint32_t height)

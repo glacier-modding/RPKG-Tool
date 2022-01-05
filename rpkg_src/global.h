@@ -209,15 +209,15 @@ struct asset3ds
     std::vector<uint32_t> material_ids;
 };
 
-struct png_textures
+struct jpg_textures
 {
     uint32_t material_id = 0;
     bool has_diffuse_texture = false;
-    std::vector<char> texture_diffuse_png;
+    std::vector<char> texture_diffuse_jpg;
     bool has_normal_texture = false;
-    std::vector<char> texture_normal_png;
+    std::vector<char> texture_normal_jpg;
     bool has_emissive_texture = false;
-    std::vector<char> texture_emissive_png;
+    std::vector<char> texture_emissive_jpg;
 };
 
 extern std::vector<rpkg> rpkgs;

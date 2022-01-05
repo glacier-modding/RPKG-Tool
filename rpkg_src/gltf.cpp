@@ -304,7 +304,7 @@ void gltf::output_to_single_file(asset3ds& asset3ds_data, std::string& file_path
     glbResourceWriter->Flush(manifest, glb_file_name.u8string());
 }
 
-void gltf::output_to_single_file_with_textures(asset3ds& asset3ds_data, std::string& file_path, int type, bool rotate, std::vector<png_textures> textures)
+void gltf::output_to_single_file_with_textures(asset3ds& asset3ds_data, std::string& file_path, int type, bool rotate, std::vector<jpg_textures> textures)
 {
     std::vector<std::vector<float>> vertexes_min;
     std::vector<std::vector<float>> vertexes_max;
@@ -394,7 +394,7 @@ void gltf::output_to_single_file_with_textures(asset3ds& asset3ds_data, std::str
         if (textures.at(t).has_diffuse_texture)
         {
             Image image;
-            image.bufferViewId = bufferBuilder.AddBufferView(textures.at(t).texture_diffuse_png.data(), textures.at(t).texture_diffuse_png.size()).id;
+            image.bufferViewId = bufferBuilder.AddBufferView(textures.at(t).texture_diffuse_jpg.data(), textures.at(t).texture_diffuse_jpg.size()).id;
             image.mimeType = "image/jpeg";
             std::string image_id = document.images.Append(std::move(image), AppendIdPolicy::GenerateOnEmpty).id;
 
@@ -408,7 +408,7 @@ void gltf::output_to_single_file_with_textures(asset3ds& asset3ds_data, std::str
         if (textures.at(t).has_normal_texture)
         {
             Image image;
-            image.bufferViewId = bufferBuilder.AddBufferView(textures.at(t).texture_normal_png.data(), textures.at(t).texture_normal_png.size()).id;
+            image.bufferViewId = bufferBuilder.AddBufferView(textures.at(t).texture_normal_jpg.data(), textures.at(t).texture_normal_jpg.size()).id;
             image.mimeType = "image/jpeg";
             std::string image_id = document.images.Append(std::move(image), AppendIdPolicy::GenerateOnEmpty).id;
 
@@ -422,7 +422,7 @@ void gltf::output_to_single_file_with_textures(asset3ds& asset3ds_data, std::str
         if (textures.at(t).has_emissive_texture)
         {
             Image image;
-            image.bufferViewId = bufferBuilder.AddBufferView(textures.at(t).texture_emissive_png.data(), textures.at(t).texture_emissive_png.size()).id;
+            image.bufferViewId = bufferBuilder.AddBufferView(textures.at(t).texture_emissive_jpg.data(), textures.at(t).texture_emissive_jpg.size()).id;
             image.mimeType = "image/jpeg";
             std::string image_id = document.images.Append(std::move(image), AppendIdPolicy::GenerateOnEmpty).id;
 
