@@ -243,7 +243,7 @@ void rpkg_function::extract_wwes_to_ogg_from(std::string& input_path, std::strin
                                     }
 
                                     size_t pos1 = hash_list_string.find("[assembly:");
-                                    size_t pos2 = hash_list_string.find(".pc_wem");
+                                    size_t pos2 = hash_list_string.find(".pc_wes");
 
                                     if (pos1 != std::string::npos && pos2 != std::string::npos && (pos2 - pos1) > 12)
                                     {
