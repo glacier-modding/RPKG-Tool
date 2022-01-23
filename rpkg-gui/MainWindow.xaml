@@ -49,11 +49,11 @@
 						<MenuItem Click="MassExtract_Click" Header="Extract Textures (TEXT/TEXD) To TGA From RPKGs In Folder"/>
 						<MenuItem Click="MassExtract_Click" Header="Extract Images/JSONs (ORES) To IOI Paths From RPKGs In Folder"/>
 						<MenuItem Click="MassExtract_Click" Header="Extract Sounds (WWEM) To OGG To IOI Paths From RPKGs In Folder"/>
-						<MenuItem Click="MassExtract_Click" Header="Extract Sounds (WWES) To OGG To IOI Paths From RPKGs In Folder"/>
-						<MenuItem Click="MassExtract_Click" Header="Extract Sounds (WWEV) To OGG To IOI Paths From RPKGs In Folder"/>
-						<MenuItem Click="MassExtract_Click" Header="Extract Localization (DLGE) To JSON From RPKGs In Folder"/>
-						<MenuItem Click="MassExtract_Click" Header="Extract Localization (LOCR) To JSON From RPKGs In Folder"/>
-						<MenuItem Click="MassExtract_Click" Header="Extract Localization (RTLV) To JSON From RPKGs In Folder"/>
+						<MenuItem Click="MassExtract_Click" Header="Extract Speech (WWES) To OGG To IOI Paths From RPKGs In Folder"/>
+						<MenuItem Click="MassExtract_Click" Header="Extract Sound Events (WWEV) To OGG To IOI Paths From RPKGs In Folder"/>
+						<MenuItem Click="MassExtract_Click" Header="Extract Dialogue Subtitles (DLGE) To JSON From RPKGs In Folder"/>
+						<MenuItem Click="MassExtract_Click" Header="Extract Localised Strings (LOCR) To JSON From RPKGs In Folder"/>
+						<MenuItem Click="MassExtract_Click" Header="Extract Video Subtitles (RTLV) To JSON From RPKGs In Folder"/>
 						<MenuItem Click="MassExtract_Click" Header="Extract Scaleform GFX/DDS/TGA (GFXF) From RPKGs In Folder"/>
 					</MenuItem>
 					<MenuItem Header="Rebuild">
@@ -61,10 +61,10 @@
 						<MenuItem Click="Rebuild_Click" Header="Rebuild Mesh Primitives (PRIM) From Folder"/>
 						<MenuItem Click="Rebuild_Click" Header="Rebuild Textures (TEXT/TEXD) From Folder"/>
 						<MenuItem Click="Rebuild_Click" Header="Rebuild Scaleform GFX/DDS/TGA (GFXF) From Folder"/>
-						<MenuItem Click="Rebuild_Click" Header="Rebuild Localization (DLGE) From Folder"/>
-						<MenuItem Click="Rebuild_Click" Header="Rebuild Localization (LOCR) From Folder"/>
-						<MenuItem Click="Rebuild_Click" Header="Rebuild Localization (RTLV) From Folder"/>
-						<MenuItem Click="Rebuild_Click" Header="Rebuild Sounds (WWEV) From Folder"/>
+						<MenuItem Click="Rebuild_Click" Header="Rebuild Dialogue Subtitles (DLGE) From Folder"/>
+						<MenuItem Click="Rebuild_Click" Header="Rebuild Localised Strings (LOCR) From Folder"/>
+						<MenuItem Click="Rebuild_Click" Header="Rebuild Video Subtitles (RTLV) From Folder"/>
+						<MenuItem Click="Rebuild_Click" Header="Rebuild Sound Events (WWEV) From Folder"/>
                     </MenuItem>
                     <MenuItem Header="Map Editing">
                         <MenuItem Header="Export Main Hitman Map to Godot v4 project">
