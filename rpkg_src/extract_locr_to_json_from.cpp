@@ -49,7 +49,7 @@ void rpkg_function::extract_locr_to_json_from(std::string &input_path, std::stri
 
         timing_string = ss.str();
 
-        LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+        //LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
 
         if (output_to_string)
         {

@@ -37,7 +37,7 @@ void rpkg_function::hash_probe_from_file(std::string& input_path, std::string& f
 
         ss << "Scanning folder: Done";
 
-        LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+        //LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
 
         std::ifstream file = std::ifstream(filter, std::ifstream::binary);
 

@@ -9,6 +9,85 @@
 #include <iomanip>
 #include <regex>
 #include <Windows.h>
+#include <iostream>
+
+bool util::floats_equal(float value1, float value2)
+{
+    if (value1 == 0.0f)
+    {
+        if (value2 < 0.00000001f)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if (value2 == 0.0f)
+    {
+        if (value1 < 0.00000001f)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if (std::fabs(value1 - value2) <= 0.00000001f)
+    {
+        return true;
+    }
+    else
+    {
+        return (std::fabs(value1 - value2) <= 1E-5 * std::fmax(std::fabs(value1), std::fabs(value2)));
+    }
+}
+
+std::string util::find_string_between_strings(std::string_view& input_string, std::string string_before, std::string string_after)
+{
+    std::string output_string = "";
+
+    size_t pos1 = input_string.find(string_before);
+
+    if (pos1 != std::string::npos)
+    {
+        size_t position_after_string_before = pos1 + string_before.length();
+
+        size_t pos2 = input_string.substr(position_after_string_before).find(string_after);
+
+        if (pos2 != std::string::npos)
+        {
+            output_string = input_string.substr(position_after_string_before, pos2);
+        }
+    }
+
+    return output_string;
+}
+
+void util::split_string_view(std::string_view& temp_string_view, std::string split_string, std::vector<uint64_t>& split_positions)
+{
+    bool done = false;
+
+    uint64_t position = 0;
+
+    while (!done)
+    {
+        size_t pos1 = temp_string_view.substr(position).find(split_string);
+
+        if (pos1 != std::string::npos)
+        {
+            split_positions.push_back(position + pos1);
+        }
+        else
+        {
+            done = true;
+        }
+
+        position += pos1 + 1;
+    }
+}
 
 std::string util::string_to_hex_string(std::string input_string)
 {
@@ -95,6 +174,13 @@ std::string util::remove_all_string_from_string(std::string input_string, std::s
     return input_string;
 }
 
+std::string util::uint64_t_to_hex_string_for_qn(uint64_t bytes8)
+{
+    std::stringstream ss;
+    ss << std::hex << bytes8;
+    return ss.str();
+}
+
 std::string util::uint64_t_to_hex_string(uint64_t bytes8)
 {
     std::stringstream ss;
@@ -149,6 +235,18 @@ std::string util::short_to_string(short bytes2)
     std::stringstream ss;
     ss << bytes2;
     return ss.str();
+}
+
+std::string util::bool_to_string(bool value)
+{
+    if (value)
+    {
+        return "True";
+    }
+    else
+    {
+        return "False";
+    }
 }
 
 std::string util::uint8_t_to_string(uint8_t bytes1)

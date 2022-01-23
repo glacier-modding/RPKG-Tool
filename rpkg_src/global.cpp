@@ -8,6 +8,7 @@ std::vector<char> response_data;
 std::string task_status_string = "";
 int task_single_status = READY;
 int task_multiple_status = READY;
+int task_map_status = READY;
 int gui_control = READY;
 std::string localization_string = "";
 std::string hashes_with_no_reverse_depends = "";
@@ -74,6 +75,15 @@ GetJsonFromMemory resource_tool_GetJsonFromMemory;
 std::string exe_path;
 std::vector<float> prim_float_values;
 bool prim_float_values_initialized = false;
+bool log_output = true;
+int map_percent_progress_recursive_temp = 0;
+int map_percent_progress_map_nodes = 0;
+int map_percent_progress_map_nodes_prim = 0;
+int map_percent_progress_godot_files = 0;
+int map_percent_progress_godot_map_nodes = 0;
+int map_percent_progress_map_node_temp_loading = 0;
+int map_percent_progress_map_node_changes_check = 0;
+int map_percent_progress_map_writing_changes_to_qn = 0;
 
 void initialize_prim_float_values()
 {

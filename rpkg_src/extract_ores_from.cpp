@@ -32,11 +32,12 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
 
     if (file::path_exists(input_path))
     {
-        LOG("Loading Hash List...");
-
-        generic_function::load_hash_list(true);
-
-        LOG("Loading Hash List: Done");
+        if (!hash_list_loaded)
+        {
+            LOG("Loading Hash List...");
+            generic_function::load_hash_list(true);
+            LOG("Loading Hash List: Done");
+        }
 
         if (!input_path_is_rpkg_file)
         {
@@ -49,7 +50,7 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
 
         timing_string = ss.str();
 
-        LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+        //LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
 
         file::create_directories(file::output_path_append("ORES", output_path));
 

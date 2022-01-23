@@ -10,6 +10,9 @@
 #include "thirdparty/rapidjson/stringbuffer.h"
 #include "thirdparty/zhmtools/ResourceLib_HM2.h"
 #include "thirdparty/zhmtools/ResourceLib_HM3.h"
+#include "thirdparty/json/json.hpp"
+
+using json = nlohmann::ordered_json;
 
 class temp
 {
@@ -39,6 +42,12 @@ public:
 	int generate_temp_file_from_data(std::string temp_path);
 	void get_all_bricks();
 	void get_entry_name_string(int entry_index);
+	bool rt_json_to_qn_json();
+	void convert_to_qn_reference(rapidjson::Document& json_document, rapidjson::Value& reference, std::string pointer_string);
+	void convert_to_qn_property(rapidjson::Document& json_document, rapidjson::Value& property);
+	void write_qn_json_to_file(std::string output_path);
+	void generate_qn_patch_json();
+	void write_qn_patch_json_to_file(std::string output_path);
 
 	std::string temp_file_name = "";
 	uint32_t temp_temps_index = 0;
@@ -59,9 +68,14 @@ public:
 	std::vector<char> tblu_input_data;
 	std::vector<char> tblu_output_data;
 	std::vector<char> tblu_data;
+	std::vector<std::string> temp_meta_strings;
+	std::vector<std::string> temp_meta_flags;
+	std::vector<std::string> tblu_meta_strings;
+	std::vector<std::string> tblu_meta_flags;
 	std::vector<uint32_t> temp_logicalParent;
 	std::vector<std::string> tblu_entityName;
 	std::vector<uint64_t> tblu_entityId;
+	std::map<uint64_t, uint64_t> tblu_entityId_map;
 	std::vector<uint32_t> temp_entityTypeResourceIndex;
 	std::vector<uint32_t> tblu_entityTypeResourceIndex;
 	std::vector<int32_t> temp_externalSceneTypeIndicesInResourceHeader;
@@ -69,7 +83,12 @@ public:
 	JsonString* temp_json_input = nullptr;
 	JsonString* tblu_json_input = nullptr;
 	rapidjson::Document temp_json_document;
+	rapidjson::Document temp_json_document_original;
 	rapidjson::Document tblu_json_document;
+	rapidjson::Document tblu_json_document_original;
+	rapidjson::Document qn_json_document;
+	rapidjson::Document qn_json_document_original;
+	json qn_patch_json;
 	std::vector<std::string> temp_depends_file_name;
 	std::vector<std::string> temp_depends_hash_string;
 	std::vector<uint64_t> temp_depends_hash_value;

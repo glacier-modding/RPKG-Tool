@@ -1367,9 +1367,9 @@ namespace rpkg
 						}
 						else if (hashType == "TEMP")
 						{
-							string[] buttons = { "Extract " + hashName, "Edit " + hashName + " in Brick/Entity Editor (Recursive)", "Edit " + hashName + " in Brick/Entity Editor (Non-Recursive)", "Extract PRIM Models linked to " + hashName + " To GLB/TGA File(s)", "Extract PRIMs linked to " + hashName + " To GLB File(s)", "Cancel" };
+							string[] buttons = { "Extract " + hashName, "Extract to QN (QuickEntity) JSON", "Edit " + hashName + " in Brick/Entity Editor (Recursive)", "Edit " + hashName + " in Brick/Entity Editor (Non-Recursive)", "Extract PRIM Models linked to " + hashName + " To GLB/TGA File(s)", "Extract PRIMs linked to " + hashName + " To GLB File(s)", "Cancel" };
 
-							buttonCount = 6;
+							buttonCount = 7;
 
 							rightClickMenu = new RightClickMenu(buttons);
 						}
@@ -1571,6 +1571,146 @@ namespace rpkg
 								}
 
 								return;
+							}
+							else if (hashType == "TEMP")
+							{
+								string runtimeDirectory = rpkgFilePath.Substring(0, rpkgFilePath.LastIndexOf("\\"));
+
+								if (!runtimeDirectory.EndsWith("runtime", StringComparison.OrdinalIgnoreCase))
+								{
+									MessageBoxShow("The current RPKG does not exist in the Hitman runtime directory, can not perform QN (QuickEntity) JSON extraction.");
+
+									return;
+								}
+
+								ImportRPKGFileFolder(runtimeDirectory);
+
+								command = "-extract_entity_to_qn";
+
+								filter = hashValue;
+
+								progress.message.Content = "Extracting " + hashName + " entity (TEMP/TBLU) to QN (QuickEntity) JSON...";
+
+								var fileDialog = new Ookii.Dialogs.Wpf.VistaSaveFileDialog();
+
+								fileDialog.Title = "Select file to save extracted QN (QuickEntity) JSON to:";
+
+								fileDialog.Filter = "JSON file|*.json";
+
+								string initialFolder = "";
+
+								if (File.Exists(userSettings.InputFolder))
+								{
+									initialFolder = userSettings.InputFolder;
+								}
+								else
+								{
+									initialFolder = System.IO.Directory.GetCurrentDirectory();
+								}
+
+								fileDialog.InitialDirectory = initialFolder;
+
+								fileDialog.FileName = hashName.Split('.')[0] + ".entity.json";
+
+								var fileDialogResult = fileDialog.ShowDialog();
+
+								if (fileDialogResult == true)
+								{
+									output_path = fileDialog.FileName;
+								}
+								else
+								{
+									return;
+								}
+							}
+							else if (hashType == "WWEM")
+							{
+								command = "-extract_wwem_to_ogg_from";
+
+								filter = hashValue;
+
+								progress.message.Content = "Extracting " + hashName + " To OGG To IOI Path...";
+							}
+							else if (hashType == "WWES")
+							{
+								command = "-extract_wwes_to_ogg_from";
+
+								filter = hashValue;
+
+								progress.message.Content = "Extracting " + hashName + " To OGG To IOI Path...";
+							}
+							else if (hashType == "WWEV")
+							{
+								command = "-extract_wwev_to_ogg_from";
+
+								filter = hashValue;
+
+								progress.message.Content = "Extracting " + hashName + " To OGG To IOI Path...";
+							}
+							else if (hashType == "DLGE")
+							{
+								command = "-extract_dlge_to_json_from";
+
+								filter = hashValue;
+
+								progress.message.Content = "Extracting " + hashName + " To JSON...";
+							}
+							else if (hashType == "LOCR")
+							{
+								command = "-extract_locr_to_json_from";
+
+								filter = hashValue;
+
+								progress.message.Content = "Extracting " + hashName + " To JSON...";
+							}
+							else if (hashType == "RTLV")
+							{
+								command = "-extract_rtlv_to_json_from";
+
+								filter = hashValue;
+
+								progress.message.Content = "Extracting " + hashName + " To JSON...";
+							}
+							else if (hashType == "GFXI")
+							{
+								command = "-extract_ores_from";
+
+								filter = hashValue;
+
+								progress.message.Content = "Extracting " + hashName + " To Image To IOI Path...";
+							}
+							else if (hashType == "JSON")
+							{
+								command = "-extract_ores_from";
+
+								filter = hashValue;
+
+								progress.message.Content = "Extracting " + hashName + " To JSON To IOI Path...";
+							}
+
+							if (hashType != "TEMP")
+							{
+								string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
+
+								if (outputFolder == "")
+								{
+									return;
+								}
+
+								output_path = outputFolder;
+							}
+						}
+						else if (rightClickMenu.buttonPressed == "button2" && buttonCount >= 4)
+						{
+							if (hashType == "PRIM")
+							{
+								command = "-extract_prim_to_glb_from";
+
+								progress.operation = (int)Progress.Operation.GENERAL;
+
+								filter = hashValue;
+
+								progress.message.Content = "Extracting " + hashName + " To GLB File...";
 							}
 							else if (hashType == "TEMP")
 							{
@@ -1790,70 +1930,6 @@ namespace rpkg
 
 								return;
 							}
-							else if (hashType == "WWEM")
-							{
-								command = "-extract_wwem_to_ogg_from";
-
-								filter = hashValue;
-
-								progress.message.Content = "Extracting " + hashName + " To OGG To IOI Path...";
-							}
-							else if (hashType == "WWES")
-							{
-								command = "-extract_wwes_to_ogg_from";
-
-								filter = hashValue;
-
-								progress.message.Content = "Extracting " + hashName + " To OGG To IOI Path...";
-							}
-							else if (hashType == "WWEV")
-							{
-								command = "-extract_wwev_to_ogg_from";
-
-								filter = hashValue;
-
-								progress.message.Content = "Extracting " + hashName + " To OGG To IOI Path...";
-							}
-							else if (hashType == "DLGE")
-							{
-								command = "-extract_dlge_to_json_from";
-
-								filter = hashValue;
-
-								progress.message.Content = "Extracting " + hashName + " To JSON...";
-							}
-							else if (hashType == "LOCR")
-							{
-								command = "-extract_locr_to_json_from";
-
-								filter = hashValue;
-
-								progress.message.Content = "Extracting " + hashName + " To JSON...";
-							}
-							else if (hashType == "RTLV")
-							{
-								command = "-extract_rtlv_to_json_from";
-
-								filter = hashValue;
-
-								progress.message.Content = "Extracting " + hashName + " To JSON...";
-							}
-							else if (hashType == "GFXI")
-							{
-								command = "-extract_ores_from";
-
-								filter = hashValue;
-
-								progress.message.Content = "Extracting " + hashName + " To Image To IOI Path...";
-							}
-							else if (hashType == "JSON")
-							{
-								command = "-extract_ores_from";
-
-								filter = hashValue;
-
-								progress.message.Content = "Extracting " + hashName + " To JSON To IOI Path...";
-							}
 
 							string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
 
@@ -1864,19 +1940,9 @@ namespace rpkg
 
 							output_path = outputFolder;
 						}
-						else if (rightClickMenu.buttonPressed == "button2" && buttonCount >= 4)
+						else if (rightClickMenu.buttonPressed == "button3" && buttonCount == 7)
 						{
-							if (hashType == "PRIM")
-							{
-								command = "-extract_prim_to_glb_from";
-
-								progress.operation = (int)Progress.Operation.GENERAL;
-
-								filter = hashValue;
-
-								progress.message.Content = "Extracting " + hashName + " To GLB File...";
-							}
-							else if (hashType == "TEMP")
+							if (hashType == "TEMP")
 							{
 								string rpkgFileBackup = rpkgFilePath;
 
@@ -2104,7 +2170,7 @@ namespace rpkg
 
 							output_path = outputFolder;
 						}
-						else if (rightClickMenu.buttonPressed == "button3" && buttonCount == 6)
+						else if (rightClickMenu.buttonPressed == "button4" && buttonCount == 7)
 						{
 							if (hashType == "TEMP")
 							{
@@ -2182,7 +2248,7 @@ namespace rpkg
 
 							output_path = outputFolder;
 						}
-						else if (rightClickMenu.buttonPressed == "button4" && buttonCount == 6)
+						else if (rightClickMenu.buttonPressed == "button5" && buttonCount == 7)
 						{
 							if (hashType == "TEMP")
 							{
@@ -2192,15 +2258,6 @@ namespace rpkg
 
 								progress.message.Content = "Extracting PRIMs linked to " + hashName + " To GLB File(s)...";
 							}
-
-							string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
-
-							if (outputFolder == "")
-							{
-								return;
-							}
-
-							output_path = outputFolder;
 						}
 						else
 						{
@@ -6870,6 +6927,263 @@ namespace rpkg
 			{
 				return;
 			}
+		}
+
+        private void MapEditorExport_Click(object sender, RoutedEventArgs e)
+        {
+			bool isTEMPNode = false;
+
+			System.Windows.Forms.TreeNode treeNode = null;
+
+			if (LeftTabControl.SelectedIndex == 0)
+			{
+				if (MainTreeView.SelectedNode != null)
+				{
+					treeNode = MainTreeView.SelectedNode;
+
+					//MessageBoxShow(treeNode.Text);
+				}
+			}
+			else if (LeftTabControl.SelectedIndex == 1)
+			{
+				if (HashMapTreeView.SelectedNode != null)
+				{
+					treeNode = HashMapTreeView.SelectedNode;
+
+					//MessageBoxShow(treeNode.Text);
+				}
+			}
+			else if (LeftTabControl.SelectedIndex == 2)
+			{
+				if (LeftTabControl2.SelectedIndex == 0)
+                {
+					if (SearchRPKGsTreeView.SelectedNode != null)
+					{
+						treeNode = SearchRPKGsTreeView.SelectedNode;
+
+						//MessageBoxShow(treeNode.Text);
+					}
+				}
+				else if (LeftTabControl2.SelectedIndex == 1)
+                {
+					if (SearchHashListTreeView.SelectedNode != null)
+					{
+						treeNode = SearchHashListTreeView.SelectedNode;
+
+						//MessageBoxShow(treeNode.Text);
+					}
+				}
+			}
+
+			if (treeNode != null)
+			{
+				if (treeNode.Text.Length >= 21)
+				{
+					if (treeNode.Text.Substring(16, 5).ToUpper() == ".TEMP")
+					{
+						isTEMPNode = true;
+
+						//MessageBoxShow(treeNode.Text);
+
+						rpkgFilePath = GetRootTreeNode(treeNode).Text;
+
+						string runtimeDirectory = rpkgFilePath.Substring(0, rpkgFilePath.LastIndexOf("\\"));
+
+						if (!runtimeDirectory.EndsWith("runtime", StringComparison.OrdinalIgnoreCase))
+						{
+							MessageBoxShow("The RPKG this TEMP file is in does not exist in the Hitman runtime directory, can not perform map extraction.");
+
+							return;
+						}
+
+						ImportRPKGFileFolder(runtimeDirectory);
+
+						string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract Map To:");
+
+						if (temp_outputFolder == "")
+						{
+							return;
+						}
+
+						MapFilter mapFilter = new MapFilter();
+
+						mapFilter.ShowDialog();
+
+						string mapFilters = "";
+
+						mapFilters += mapFilter.FilterBoxes.IsOn ? "boxes=true" : "boxes=false";
+						mapFilters += mapFilter.FilterSpheres.IsOn ? ",spheres=true" : ",spheres=false";
+						mapFilters += mapFilter.FilterVisible.IsOn ? ",visible=true" : ",visible=false";
+
+						//MessageBoxShow(mapFilters);
+
+						string command = "-export_map";
+						string input_path = runtimeDirectory;
+						string filter = treeNode.Text.Substring(0, 16);
+						string search_type = "";
+						string output_path = temp_outputFolder;
+
+						MapExportProgress progress = new MapExportProgress();
+
+						int return_value = reset_task_status();
+
+						execute_task rpkgExecute = task_execute;
+
+						IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, mapFilters, search_type, output_path, null, null);
+
+						progress.ShowDialog();
+
+						if (progress.task_status == (int)Progress.RPKGStatus.MAP_ERROR)
+						{
+							MessageBoxShow(progress.task_status_string);
+						}
+					}
+				}
+			}
+
+			if (!isTEMPNode)
+			{
+				MessageBoxShow("To extract a map (entity):\n- Import all the RPKGs from the Hitman Runtime folder\n- Locate and select in the treeview the map's (entity's) main TEMP file/resource\n- Click this button again.");
+			}
+		}
+
+		private void MapEditorImport_Click(object sender, RoutedEventArgs e)
+		{
+			string runtimeDirectory = FindRuntimeDirectoryFromNodes();
+
+			if (runtimeDirectory == "")
+			{
+				MessageBoxShow("To import a map (entity):\n- Import all the RPKGs from the Hitman Runtime folder\n- Click this button again.");
+
+				return;
+			}
+
+			ImportRPKGFileFolder(runtimeDirectory);
+
+			string temp_inputFolder = SelectFolder("input", "Select Input Folder To Import Map From:");
+
+			if (temp_inputFolder == "")
+			{
+				return;
+			}
+
+			MapImportSelector mapImportSelector = new MapImportSelector();
+
+			mapImportSelector.ShowDialog();
+
+			string qn_format = mapImportSelector.qn_format;
+
+			string temp_outputFolder = SelectFolder("output", "Select Output Folder To Export QN JSONs To:");
+
+			if (temp_outputFolder == "")
+			{
+				return;
+			}
+
+			string command = "-import_map";
+			string input_path = runtimeDirectory;
+			string search_type = "";
+			string map_path = temp_inputFolder;
+			string output_path = temp_outputFolder;
+
+			MapImportProgress progress = new MapImportProgress();
+
+			int return_value = reset_task_status();
+
+			execute_task rpkgExecute = task_execute;
+
+			IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, map_path, qn_format, search_type, output_path, null, null);
+
+			progress.ShowDialog();
+
+			if (progress.task_status == (int)Progress.RPKGStatus.MAP_ERROR)
+            {
+				MessageBoxShow(progress.task_status_string);
+            }
+		}
+
+        private void MainMapExport_Click(object sender, RoutedEventArgs e)
+        {
+			var menuItem = sender as MenuItem;
+
+			string tempHash = menuItem.Tag.ToString();
+
+			string runtimeDirectory = FindRuntimeDirectoryFromNodes();
+
+			if (runtimeDirectory == "")
+			{
+				MessageBoxShow("To extract a main map (entity):\n- Import all the RPKGs from the Hitman Runtime folder\n- Click this button again.");
+
+				return;
+			}
+
+			ImportRPKGFileFolder(runtimeDirectory);
+
+			string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract Map To:");
+
+			if (temp_outputFolder == "")
+			{
+				return;
+			}
+
+			MapFilter mapFilter = new MapFilter();
+
+			mapFilter.ShowDialog();
+
+			string mapFilters = "";
+
+			mapFilters += mapFilter.FilterBoxes.IsOn ? "boxes=true" : "boxes=false";
+			mapFilters += mapFilter.FilterSpheres.IsOn ? ",spheres=true" : ",spheres=false";
+			mapFilters += mapFilter.FilterVisible.IsOn ? ",visible=true" : ",visible=false";
+
+			//MessageBoxShow(mapFilters);
+
+			string command = "-export_map";
+			string input_path = runtimeDirectory;
+			string filter = tempHash;
+			string search_type = "";
+			string output_path = temp_outputFolder;
+
+			MapExportProgress progress = new MapExportProgress();
+
+			int return_value = reset_task_status();
+
+			execute_task rpkgExecute = task_execute;
+
+			IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, mapFilters, search_type, output_path, null, null);
+
+			progress.ShowDialog();
+
+			if (progress.task_status == (int)Progress.RPKGStatus.MAP_ERROR)
+			{
+				MessageBoxShow(progress.task_status_string);
+			}
+		}
+
+		private string FindRuntimeDirectoryFromNodes()
+		{
+			if (MainTreeView.Nodes.Count > 0)
+			{
+				foreach (System.Windows.Forms.TreeNode node in MainTreeView.Nodes)
+				{
+					if (node.Text.Length > 0)
+					{
+						int pos = node.Text.LastIndexOf("\\");
+
+						if (pos > 0)
+						{
+							string runtimeDirectory = node.Text.Substring(0, pos);
+
+							if (runtimeDirectory.EndsWith("runtime", StringComparison.OrdinalIgnoreCase))
+							{
+								return runtimeDirectory;
+							}
+						}
+					}
+				}
+			}
+
+			return "";
 		}
 	}
 }

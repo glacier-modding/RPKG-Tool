@@ -21,9 +21,10 @@ struct rpkg_extraction_vars
 class rpkg_function
 {
 public:
+	static void extract_entity_to_qn(std::string& input_path, std::string& filter, std::string& output_path);
 	static void extract_prim_textured_from(std::string& input_path, std::string& filter, std::string& output_path, bool rotate);
 	static void latest_hash(std::string& input_path, std::string& filter, std::string& output_path);
-	static uint32_t get_latest_hash(uint64_t hash_value, bool log_output);
+	static uint32_t get_latest_hash(uint64_t hash_value);
 	static void json_to_hash_meta(std::string& input_path, std::string& filter, std::string& output_path);
 	static void hash_meta_to_json(std::string& input_path, std::string& filter, std::string& output_path);
 	static void edit_hash_depends(std::string& input_path, std::string& filter, std::string& search, std::string& search_type, std::string& output_path);

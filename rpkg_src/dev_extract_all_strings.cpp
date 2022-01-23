@@ -25,11 +25,12 @@ void dev_function::dev_extract_all_strings(std::string& input_path, std::string&
 
 	rpkg_function::import_rpkg_files_in_folder(input_path);
 
-    LOG("Loading Hash List...");
-
-    generic_function::load_hash_list(false);
-
-    LOG("Loading Hash List: Done");
+    if (!hash_list_loaded)
+    {
+        LOG("Loading Hash List...");
+        generic_function::load_hash_list(false);
+        LOG("Loading Hash List: Done");
+    }
 
 	std::cout << "Extracting all known hashes from loaded RPKGs vs the Hash List..." << std::endl;
 

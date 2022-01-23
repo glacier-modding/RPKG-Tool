@@ -43,7 +43,7 @@ void rpkg_function::extract_gfxf_from(std::string& input_path, std::string& filt
 
         timing_string = ss.str();
 
-        LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+        //LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
 
         file::create_directories(file::output_path_append("GFXF", output_path));
 

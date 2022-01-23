@@ -292,15 +292,29 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-export_map")
     {
-        map::export_map(input_path, filter, output_path, false);
+        map::export_map(input_path, filter, search, output_path, false);
     }
     else if (command == "-export_map_textured")
     {
-        map::export_map(input_path, filter, output_path, true);
+        map::export_map(input_path, filter, search, output_path, true);
     }
     else if (command == "-import_map")
     {
-        map::import_map(input_path, filter, output_path);
+        map::import_map(input_path, filter, search, output_path);
+    }
+    else if (command == "-extract_entity_to_qn")
+    {
+        rpkg_function::extract_entity_to_qn(input_path, filter, output_path);
+    }
+    else if (command == "-dev_extract_all_hashes_in_game")
+    {
+        rpkg_extraction_vars rpkg_vars;
+
+        rpkg_vars.input_path = input_path;
+        rpkg_vars.filter = filter;
+        rpkg_vars.output_path = output_path;
+
+        dev_function::dev_extract_all_hashes_in_game(rpkg_vars);
     }
 }
 
@@ -344,6 +358,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-dev_extract_wwise_ids",
                                                     "-dev_resource_tool",
                                                     "-dev_hash_list_percent_found",
+                                                    "-dev_extract_all_hashes_in_game",
                                                     "-encrypt_packagedefinition_thumbs",
                                                     "-extract_from_rpkg",
                                                     "-extract_from_rpkgs",
@@ -359,6 +374,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-extract_prim_to_obj_from",
                                                     "-extract_prim_textured_from",
                                                     "-extract_temp_from",
+                                                    "-extract_entity_to_qn",
                                                     "-extract_all_text_from",
                                                     "-extract_text_from",
                                                     "-extract_wwem_to_ogg_from",
@@ -426,6 +442,18 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
         else if (util::to_lower_case(commands.at(i).at(0)) == "-filter")
         {
             filter = commands.at(i).at(1);
+        }
+        else if (util::to_lower_case(commands.at(i).at(0)) == "-map_path")
+        {
+            filter = commands.at(i).at(1);
+        }
+        else if (util::to_lower_case(commands.at(i).at(0)) == "-map_filters")
+        {
+            search = commands.at(i).at(1);
+        }
+        else if (util::to_lower_case(commands.at(i).at(0)) == "-qn_format")
+        {
+            search = commands.at(i).at(1);
         }
         else if (util::to_lower_case(commands.at(i).at(0)) == "-output_path")
         {

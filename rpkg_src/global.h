@@ -59,7 +59,18 @@ enum RPKGStatus
     PRIM_REBUILD_META_FILE_MISSING,
     PRIM_REBUILD_SUCCESSFUL,
     PRIM_MODEL_REBUILD_SUCCESSFUL,
-    PRIM_MODEL_EXTRACT_SUCCESSFUL
+    PRIM_MODEL_EXTRACT_SUCCESSFUL,
+    MAP_RECURSIVE_TEMP_LOADING_EXECUTING,
+    MAP_GET_MAP_NODES_EXECUTING,
+    MAP_EXTRACT_MAP_NODES_PRIMS_EXECUTING,
+    MAP_GENERATE_GODOT_PROJECT_EXECUTING,
+    MAP_EXPORT_SUCCESSFUL,
+    MAP_GODOT_MAP_NODE_IMPORTING,
+    MAP_NODE_TEMP_LOADING,
+    MAP_NODE_CHANGES_CHECK,
+    MAP_WRITING_CHANGES_TO_QN,
+    MAP_IMPORT_SUCCESSFUL,
+    MAP_ERROR
 };
 
 enum FileType3D
@@ -228,6 +239,7 @@ extern std::string timing_string;
 extern std::string task_status_string;
 extern int task_single_status;
 extern int task_multiple_status;
+extern int task_map_status;
 extern int gui_control;
 extern std::string localization_string;
 extern std::string hashes_with_no_reverse_depends;
@@ -301,4 +313,13 @@ extern GetJsonFromMemory resource_tool_GetJsonFromMemory;
 extern std::string exe_path;
 extern std::vector<float> prim_float_values;
 extern bool prim_float_values_initialized;
-void initialize_prim_float_values();
+extern void initialize_prim_float_values();
+extern bool log_output;
+extern int map_percent_progress_recursive_temp;
+extern int map_percent_progress_map_nodes;
+extern int map_percent_progress_map_nodes_prim;
+extern int map_percent_progress_godot_files;
+extern int map_percent_progress_godot_map_nodes;
+extern int map_percent_progress_map_node_temp_loading;
+extern int map_percent_progress_map_node_changes_check;
+extern int map_percent_progress_map_writing_changes_to_qn;

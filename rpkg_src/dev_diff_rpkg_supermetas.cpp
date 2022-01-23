@@ -14,11 +14,12 @@
 
 void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string& filter, std::string& output_path)
 {
-    LOG("Loading Hash List...");
-
-    generic_function::load_hash_list(true);
-
-    LOG("Loading Hash List: Done");
+    if (!hash_list_loaded)
+    {
+        LOG("Loading Hash List...");
+        generic_function::load_hash_list(true);
+        LOG("Loading Hash List: Done");
+    }
 
     input_path = file::parse_input_folder_path(input_path);
 

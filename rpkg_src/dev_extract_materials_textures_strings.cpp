@@ -14,11 +14,12 @@
 
 void dev_function::dev_extract_materials_textures_strings(std::string& input_path, std::string& filter, std::string& output_path)
 {
-    LOG("Loading Hash List...");
-
-    generic_function::load_hash_list(true);
-
-    LOG("Loading Hash List: Done");
+    if (!hash_list_loaded)
+    {
+        LOG("Loading Hash List...");
+        generic_function::load_hash_list(true);
+        LOG("Loading Hash List: Done");
+    }
 
     std::vector<std::string> mati_hash_files;
     std::vector<std::string> mati_hash_strings;

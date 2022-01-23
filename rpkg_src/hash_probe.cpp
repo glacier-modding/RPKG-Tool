@@ -24,7 +24,7 @@ void rpkg_function::hash_probe(std::string& input_path, std::string& filter, std
 
         ss << "Scanning folder: Done";
 
-        LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+        //LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
 
         std::vector<std::string> filters = util::parse_input_filter(filter);
 

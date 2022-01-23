@@ -21,6 +21,7 @@
     <ClCompile Include="..\rpkg_src\decrypt_packagedefinition_thumbs.cpp" />
     <ClCompile Include="..\rpkg_src\dev_compute_ioi_hash.cpp" />
     <ClCompile Include="..\rpkg_src\dev_diff_rpkg_supermetas.cpp" />
+    <ClCompile Include="..\rpkg_src\dev_extract_all_hashes_in_game.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_all_strings.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_materials_textures_strings.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_ores_strings.cpp" />
@@ -43,6 +44,7 @@
     <ClCompile Include="..\rpkg_src\extract_all_text_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_direct_hash_depends_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_dlge_to_json_from.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_entity_to_qn.cpp" />
     <ClCompile Include="..\rpkg_src\extract_from_rpkg.cpp" />
     <ClCompile Include="..\rpkg_src\extract_from_rpkgs.cpp" />
     <ClCompile Include="..\rpkg_src\extract_from_rpkg_with_map.cpp" />

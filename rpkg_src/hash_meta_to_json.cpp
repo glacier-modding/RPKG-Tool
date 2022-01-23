@@ -23,11 +23,12 @@ void rpkg_function::hash_meta_to_json(std::string& input_path, std::string& filt
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
-    LOG("Loading Hash List...");
-
-    generic_function::load_hash_list(false);
-
-    LOG("Loading Hash List: Done");
+    if (!hash_list_loaded)
+    {
+        LOG("Loading Hash List...");
+        generic_function::load_hash_list(false);
+        LOG("Loading Hash List: Done");
+    }
 
     if (file::path_exists(input_path))
     {

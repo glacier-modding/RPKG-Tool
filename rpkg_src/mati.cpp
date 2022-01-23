@@ -292,26 +292,25 @@ void mati::map_textures()
     std::memcpy(&header_offset, &mati_data.data()[position], sizeof(bytes4));
     position = header_offset;
 
-    std::cout << "MATI header_offset: " << util::uint32_t_to_hex_string(header_offset) << std::endl;
-
     std::memcpy(&type_offset, &mati_data.data()[position], sizeof(bytes4));
     position += 4;
 
-    std::cout << "MATI type_offset: " << util::uint32_t_to_hex_string(type_offset) << std::endl;
-
     type = std::string(&mati_data.data()[type_offset]);
-
-    std::cout << "MATI type: " << type << std::endl;
 
     std::memcpy(&texture_count, &mati_data.data()[position], sizeof(bytes4));
     position += 0x18;
 
-    std::cout << "MATI texture_count: " << texture_count << std::endl;
-
     std::memcpy(&instance_offset, &mati_data.data()[position], sizeof(bytes4));
     position = instance_offset;
 
-    std::cout << "MATI instance_offset: " << util::uint32_t_to_hex_string(instance_offset) << std::endl;
+    if (log_output)
+    {
+        std::cout << "MATI header_offset: " << util::uint32_t_to_hex_string(header_offset) << std::endl;
+        std::cout << "MATI type_offset: " << util::uint32_t_to_hex_string(type_offset) << std::endl;
+        std::cout << "MATI type: " << type << std::endl;
+        std::cout << "MATI texture_count: " << texture_count << std::endl;
+        std::cout << "MATI instance_offset: " << util::uint32_t_to_hex_string(instance_offset) << std::endl;
+    }
 
     read_properties(position, -1);
 
@@ -327,7 +326,8 @@ void mati::map_textures()
                 {
                     if (mati_properties.at(p).parent == mati_properties.at(r).parent && mati_properties.at(r).name == "TXID")
                     {
-                        std::cout << "Diffuse texture found at index: " << mati_properties.at(r).value_int << std::endl;
+                        if (log_output)
+                            std::cout << "Diffuse texture found at index: " << mati_properties.at(r).value_int << std::endl;
 
                         if (mati_properties.at(r).value_int < temp_hash_reference_count)
                         {
@@ -348,7 +348,8 @@ void mati::map_textures()
                 {
                     if (mati_properties.at(p).parent == mati_properties.at(r).parent && mati_properties.at(r).name == "TXID")
                     {
-                        std::cout << "Normal texture found at index: " << mati_properties.at(r).value_int << std::endl;
+                        if (log_output)
+                            std::cout << "Normal texture found at index: " << mati_properties.at(r).value_int << std::endl;
 
                         if (mati_properties.at(r).value_int < temp_hash_reference_count)
                         {
@@ -366,7 +367,7 @@ void mati::map_textures()
     {
         for (uint32_t d = 0; d < temp_hash_reference_count; d++)
         {
-            uint32_t temp_rpkg_index = rpkg_function::get_latest_hash(rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).hash_reference_data.hash_reference.at(d), false);
+            uint32_t temp_rpkg_index = rpkg_function::get_latest_hash(rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).hash_reference_data.hash_reference.at(d));
 
             if (temp_rpkg_index != UINT32_MAX)
             {
@@ -439,83 +440,93 @@ void mati::read_properties(uint32_t position, uint32_t parent)
     temp_mati_property.name[0] = mati_data.data()[position];
     position++;
 
-    std::map<std::string, std::string>::iterator it = mati_property_name_map.find(temp_mati_property.name);
-
-    if (it != mati_property_name_map.end())
-    {
-        std::cout << "MATI temp_mati_property.name: " << temp_mati_property.name << " (" << it->second << ")" << std::endl;
-    }
-    else
-    {
-        std::cout << "MATI temp_mati_property.name: " << temp_mati_property.name << std::endl;
-    }
-
     std::memcpy(&temp_mati_property.data, &mati_data.data()[position], sizeof(bytes4));
     position += 0x4;
-
-    std::cout << "MATI temp_mati_property.data: " << temp_mati_property.data << std::endl;
 
     std::memcpy(&temp_mati_property.size, &mati_data.data()[position], sizeof(bytes4));
     position += 0x4;
 
-    std::cout << "MATI temp_mati_property.size: " << temp_mati_property.size << std::endl;
-
     std::memcpy(&temp_mati_property.type, &mati_data.data()[position], sizeof(bytes4));
     position += 0x4;
 
-    std::cout << "MATI temp_mati_property.type: " << temp_mati_property.type << std::endl;
+    if (log_output)
+    {
+        std::map<std::string, std::string>::iterator it = mati_property_name_map.find(temp_mati_property.name);
+
+        if (it != mati_property_name_map.end())
+        {
+            std::cout << "MATI temp_mati_property.name: " << temp_mati_property.name << " (" << it->second << ")" << std::endl;
+        }
+        else
+        {
+            std::cout << "MATI temp_mati_property.name: " << temp_mati_property.name << std::endl;
+        }
+
+        std::cout << "MATI temp_mati_property.data: " << temp_mati_property.data << std::endl;
+        std::cout << "MATI temp_mati_property.size: " << temp_mati_property.size << std::endl;
+        std::cout << "MATI temp_mati_property.type: " << temp_mati_property.type << std::endl;
+    }
 
     if (temp_mati_property.type == 0)
     {
-        std::cout << "MATI temp_property_type: FLOAT" << std::endl;
+        if (log_output)
+            std::cout << "MATI temp_property_type: FLOAT" << std::endl;
 
         if (temp_mati_property.size == 1)
         {
             std::memcpy(&temp_mati_property.value_float, &temp_mati_property.data, sizeof(bytes4));
 
-            std::cout << "MATI temp_mati_property.value: " << temp_mati_property.value_float << std::endl;
+            if (log_output)
+                std::cout << "MATI temp_mati_property.value: " << temp_mati_property.value_float << std::endl;
         }
         else
         {
             std::memcpy(&temp_mati_property.value_float, &mati_data.data()[temp_mati_property.data], sizeof(bytes4));
 
-            std::cout << "MATI temp_mati_property.value: " << temp_mati_property.value_float << std::endl;
+            if (log_output)
+                std::cout << "MATI temp_mati_property.value: " << temp_mati_property.value_float << std::endl;
         }
 
         mati_properties.push_back(temp_mati_property);
     }
     else if (temp_mati_property.type == 1)
     {
-        std::cout << "MATI temp_property_type: STRING" << std::endl;
+        if (log_output)
+            std::cout << "MATI temp_property_type: STRING" << std::endl;
 
         temp_mati_property.value_string = std::string(&mati_data.data()[temp_mati_property.data]);
 
-        std::cout << "MATI temp_mati_property.value: " << temp_mati_property.value_string << std::endl;
+        if (log_output)
+            std::cout << "MATI temp_mati_property.value: " << temp_mati_property.value_string << std::endl;
 
         mati_properties.push_back(temp_mati_property);
     }
     else if (temp_mati_property.type == 2)
     {
-        std::cout << "MATI temp_property_type: INT" << std::endl;
+        if (log_output)
+            std::cout << "MATI temp_property_type: INT" << std::endl;
 
         if (temp_mati_property.size == 1)
         {
             temp_mati_property.value_int = temp_mati_property.data;
 
-            std::cout << "MATI temp_mati_property.value: " << temp_mati_property.value_int << std::endl;
+            if (log_output)
+                std::cout << "MATI temp_mati_property.value: " << temp_mati_property.value_int << std::endl;
         }
         else
         {
             std::memcpy(&temp_mati_property.value_int, &mati_data.data()[temp_mati_property.data], sizeof(bytes4));
 
-            std::cout << "MATI temp_mati_property.value: " << temp_mati_property.value_int << std::endl;
+            if (log_output)
+                std::cout << "MATI temp_mati_property.value: " << temp_mati_property.value_int << std::endl;
         }
 
         mati_properties.push_back(temp_mati_property);
     }
     else if (temp_mati_property.type == 3)
     {
-        std::cout << "MATI temp_property_type: PROPERTY" << std::endl;
+        if (log_output)
+            std::cout << "MATI temp_property_type: PROPERTY" << std::endl;
 
         position = temp_mati_property.data;
 

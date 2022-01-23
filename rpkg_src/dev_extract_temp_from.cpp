@@ -53,13 +53,13 @@ void rpkg_function::dev_extract_temp_from(std::string& input_path, std::string& 
 
         timing_string = ss.str();
 
-        LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
+        //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
 
-        LOG("Loading Hash List...");
+        //LOG("Loading Hash List...");
 
         //generic_function::load_hash_list(true);
 
-        LOG("Loading Hash List: Done");
+        //LOG("Loading Hash List: Done");
 
         uint64_t temp_hash_value = std::strtoull(filter.c_str(), nullptr, 16);
 

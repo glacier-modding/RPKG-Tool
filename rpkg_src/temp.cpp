@@ -13,18 +13,21 @@
 #include "thirdparty/rapidjson/writer.h"
 #include "thirdparty/rapidjson/stringbuffer.h"
 #include "thirdparty/rapidjson/pointer.h"
+#include "thirdparty/directxmath/DirectXMath.h"
 #include <iostream>
 #include <map>
 #include <fstream>
 #include <sstream>
 #include <set>
+#include <algorithm>
+#include <iomanip>
 
 #pragma comment(lib, "../rpkg_src/thirdparty/zhmtools/ResourceLib_HM2.lib")
 #pragma comment(lib, "../rpkg_src/thirdparty/zhmtools/ResourceLib_HM3.lib")
 
 temp::temp()
 {
-    
+       
 }
 
 temp::temp(uint64_t rpkgs_index, uint64_t hash_index)
@@ -137,6 +140,8 @@ void temp::load_data()
                 if (it2 != tblu_json_subEntities[i].MemberEnd())
                 {
                     tblu_entityId.at(i) = it2->value.GetUint64();
+
+                    tblu_entityId_map[tblu_entityId.at(i)] = i;
                 }
 
                 rapidjson::Value::ConstMemberIterator it3 = tblu_json_subEntities[i].FindMember("entityTypeResourceIndex");
@@ -454,6 +459,28 @@ void temp::load_hash_depends()
                 prim_depends_rpkg_index_index.push_back(temp_value);
                 prim_depends_hash_index_index.push_back(temp_value);
             }
+
+            std::string hash_value_string = util::uint64_t_to_hex_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(i));
+
+            std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(i));
+
+            if (it2 != hash_list_hash_map.end())
+            {
+                if (hash_value_string == generic_function::compute_ioi_hash_string(hash_list_hash_strings.at(it2->second)))
+                {
+                    temp_meta_strings.push_back(hash_list_hash_strings.at(it2->second));
+                }
+                else
+                {
+                    temp_meta_strings.push_back(util::uint64_t_to_hex_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(i)));
+                }
+            }
+            else
+            {
+                temp_meta_strings.push_back(util::uint64_t_to_hex_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(i)));
+            }
+
+            temp_meta_flags.push_back(util::uint8_t_to_hex_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference_type.at(i)));
         }
     }
 
@@ -619,6 +646,41 @@ void temp::load_hash_depends()
         }
 
         //LOG("  - PRIM File Name In RPKG Used: " + prim_depends_in_rpkgs.at(k).at(prim_depends_rpkg_index_index.at(k)));
+    }
+
+    if (tblu_return_value == TEMP_TBLU_FOUND)
+    {
+        uint32_t tblu_hash_reference_count = rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+
+        //LOG(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_file_name + " has " + util::uint32_t_to_string(temp_hash_reference_count) + " dependencies in " + rpkgs.at(temp_rpkg_index).rpkg_file_path);
+
+        if (tblu_hash_reference_count > 0)
+        {
+            for (uint64_t k = 0; k < tblu_hash_reference_count; k++)
+            {
+                std::string hash_value_string = util::uint64_t_to_hex_string(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_reference_data.hash_reference.at(k));
+
+                std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_reference_data.hash_reference.at(k));
+
+                if (it2 != hash_list_hash_map.end())
+                {
+                    if (hash_value_string == generic_function::compute_ioi_hash_string(hash_list_hash_strings.at(it2->second)))
+                    {
+                        tblu_meta_strings.push_back(hash_list_hash_strings.at(it2->second));
+                    }
+                    else
+                    {
+                        tblu_meta_strings.push_back(util::uint64_t_to_hex_string(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_reference_data.hash_reference.at(k)));
+                    }
+                }
+                else
+                {
+                    tblu_meta_strings.push_back(util::uint64_t_to_hex_string(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_reference_data.hash_reference.at(k)));
+                }
+
+                tblu_meta_flags.push_back(util::uint8_t_to_hex_string(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_reference_data.hash_reference_type.at(k)));
+            }
+        }
     }
 }
 
@@ -2614,4 +2676,1167 @@ void temp::get_entry_name_string(int entry_index)
     {
         response_string.append(tblu_entityName.at(entry_index));
     }
+}
+
+bool temp::rt_json_to_qn_json()
+{
+    if (tblu_entityId.size() != tblu_entityId_map.size())
+    {
+        LOG("Error: The TBLU contains duplicate entityIds.");
+
+        return false;
+    }
+
+    rapidjson::Pointer("/tempHash").Set(qn_json_document, rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_string.c_str());
+    rapidjson::Pointer("/tbluHash").Set(qn_json_document, rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_string.c_str());
+
+    if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(temp_json_document, rapidjson::Pointer("/rootEntityIndex")))
+    {
+        rapidjson::Pointer("/rootEntity").Set(qn_json_document, util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(temp_json_value->GetInt())).c_str());
+    }
+
+    rapidjson::Pointer("/entities").Set(qn_json_document, rapidjson::Value().SetObject());
+
+    rapidjson::Value& tblu_json_subEntities = tblu_json_document["subEntities"];
+
+    for (uint32_t s = 0; s < temp_subentity_count; s++)
+    {
+        rapidjson::Document subEntity_json(&qn_json_document.GetAllocator());
+
+        std::string json_pointer = "/subEntities/" + util::uint32_t_to_string(s) + "/logicalParent";
+
+        if (rapidjson::Value* tblu_json_logicalParent = rapidjson::GetValueByPointer(tblu_json_document, rapidjson::Pointer(json_pointer.c_str())))
+        {
+            convert_to_qn_reference(subEntity_json, tblu_json_logicalParent->GetObject(), "/parent");
+        }
+
+        rapidjson::Pointer("/name").Set(subEntity_json, tblu_entityName.at(s).c_str());
+
+        json_pointer = "/subEntities/" + util::uint32_t_to_string(s) + "/entityTypeResourceIndex";
+
+        if (rapidjson::Value* temp_json_entityTypeResourceIndex = rapidjson::GetValueByPointer(temp_json_document, rapidjson::Pointer(json_pointer.c_str())))
+        {
+            rapidjson::Pointer("/template").Set(subEntity_json, temp_meta_strings.at(temp_json_entityTypeResourceIndex->GetInt()).c_str());
+
+            if (temp_meta_flags.at(temp_json_entityTypeResourceIndex->GetInt()) != "1F")
+            {
+                rapidjson::Pointer("/templateFlag").Set(subEntity_json, temp_meta_flags.at(temp_json_entityTypeResourceIndex->GetInt()).c_str());
+            }
+        }
+
+        json_pointer = "/subEntities/" + util::uint32_t_to_string(s) + "/entityTypeResourceIndex";
+
+        if (rapidjson::Value* tblu_json_entityTypeResourceIndex = rapidjson::GetValueByPointer(tblu_json_document, rapidjson::Pointer(json_pointer.c_str())))
+        {
+            rapidjson::Pointer("/blueprint").Set(subEntity_json, tblu_meta_strings.at(tblu_json_entityTypeResourceIndex->GetInt()).c_str());
+        }
+
+        rapidjson::Pointer("/properties").Set(subEntity_json, rapidjson::Value().SetObject());
+
+        rapidjson::Pointer("/postInitProperties").Set(subEntity_json, rapidjson::Value().SetObject());
+
+        json_pointer = "/subEntities/" + util::uint32_t_to_string(s) + "/editorOnly";
+
+        if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(tblu_json_document, rapidjson::Pointer(json_pointer.c_str())))
+        {
+            rapidjson::Pointer("/editorOnly").Set(subEntity_json, temp_json_value->GetBool());
+        }
+
+        json_pointer = "/subEntities/" + util::uint32_t_to_string(s) + "/propertyValues";
+
+        if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(temp_json_document, rapidjson::Pointer(json_pointer.c_str())))
+        {
+            rapidjson::Pointer("/propertyValues").Set(subEntity_json, temp_json_value->GetArray());
+        }
+
+        json_pointer = "/subEntities/" + util::uint32_t_to_string(s) + "/postInitPropertyValues";
+
+        if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(temp_json_document, rapidjson::Pointer(json_pointer.c_str())))
+        {
+            rapidjson::Pointer("/postInitPropertyValues").Set(subEntity_json, temp_json_value->GetArray());
+        }
+
+        json_pointer = "/subEntities/" + util::uint32_t_to_string(s) + "/platformSpecificPropertyValues";
+
+        if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(temp_json_document, rapidjson::Pointer(json_pointer.c_str())))
+        {
+            rapidjson::Pointer("/platformSpecificPropertyValues").Set(subEntity_json, temp_json_value->GetArray());
+        }
+
+        json_pointer = "/subEntities/" + util::uint32_t_to_string(s) + "/propertyAliases";
+
+        if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(tblu_json_document, rapidjson::Pointer(json_pointer.c_str())))
+        {
+            if (temp_json_value->GetArray().Size() > 0)
+            {
+                for (uint32_t a = 0; a < temp_json_value->GetArray().Size(); a++)
+                {
+                    json_pointer = "/subEntities/" + util::uint32_t_to_string(s) + "/propertyAliases/" + util::uint32_t_to_string(a);
+
+                    if (rapidjson::Value* tblu_json_subEntity2 = rapidjson::GetValueByPointer(tblu_json_document, rapidjson::Pointer(json_pointer.c_str())))
+                    {
+                        rapidjson::Document json_object(&subEntity_json.GetAllocator());
+
+                        rapidjson::Pointer("/exposeProperty").Set(json_object, tblu_json_subEntity2->GetObject()["sAliasName"].GetString());
+                        rapidjson::Pointer("/onEntity").Set(json_object, util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(tblu_json_subEntity2->GetObject()["entityID"].GetInt())).c_str());
+                        rapidjson::Pointer("/asProperty").Set(json_object, tblu_json_subEntity2->GetObject()["sPropertyName"].GetString());
+
+                        //std::cout << "propertyAliases sAliasName: " << tblu_json_subEntity2->GetObject()["sAliasName"].GetString() << std::endl;
+                        //std::cout << "propertyAliases entityID: " << tblu_json_subEntity2->GetObject()["entityID"].GetInt() << std::endl;
+                        //std::cout << "propertyAliases sPropertyName: " << tblu_json_subEntity2->GetObject()["sPropertyName"].GetString() << std::endl;
+
+                        rapidjson::Pointer(json_pointer.c_str()).Set(tblu_json_document, json_object);
+                    }
+                }
+
+                json_pointer = "/subEntities/" + util::uint32_t_to_string(s) + "/propertyAliases";
+
+                if (rapidjson::Value* tblu_json_subEntity2 = rapidjson::GetValueByPointer(tblu_json_document, rapidjson::Pointer(json_pointer.c_str())))
+                {
+                    rapidjson::Pointer("/propertyAliases").Set(subEntity_json, tblu_json_subEntity2->GetArray());
+                }
+            }
+        }
+
+        json_pointer = "/subEntities/" + util::uint32_t_to_string(s) + "/exposedEntities";
+
+        if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(tblu_json_document, rapidjson::Pointer(json_pointer.c_str())))
+        {
+            if (temp_json_value->GetArray().Size() > 0)
+            {
+                for (uint32_t a = 0; a < temp_json_value->GetArray().Size(); a++)
+                {
+                    json_pointer = "/subEntities/" + util::uint32_t_to_string(s) + "/exposedEntities/" + util::uint32_t_to_string(a);
+
+                    if (rapidjson::Value* tblu_json_subEntity2 = rapidjson::GetValueByPointer(tblu_json_document, rapidjson::Pointer(json_pointer.c_str())))
+                    {
+                        rapidjson::Document json_object(&subEntity_json.GetAllocator());
+
+                        rapidjson::Pointer("/name").Set(json_object, tblu_json_subEntity2->GetObject()["sName"].GetString());
+                        rapidjson::Pointer("/isArray").Set(json_object, tblu_json_subEntity2->GetObject()["bIsArray"].GetBool());
+
+                        json_pointer = "/subEntities/" + util::uint32_t_to_string(s) + "/exposedEntities/" + util::uint32_t_to_string(a) + "/aTargets";
+
+                        if (rapidjson::Value* tblu_json_subEntity3 = rapidjson::GetValueByPointer(tblu_json_document, rapidjson::Pointer(json_pointer.c_str())))
+                        {
+                            if (tblu_json_subEntity3->GetArray().Size() > 0)
+                            {
+                                for (uint32_t t = 0; t < tblu_json_subEntity3->GetArray().Size(); t++)
+                                {
+                                    json_pointer = "/subEntities/" + util::uint32_t_to_string(s) + "/exposedEntities/" + util::uint32_t_to_string(a) + "/aTargets/" + util::uint32_t_to_string(t);
+
+                                    if (rapidjson::Value* tblu_json_aTargets = rapidjson::GetValueByPointer(tblu_json_document, rapidjson::Pointer(json_pointer.c_str())))
+                                    {
+                                        convert_to_qn_reference(json_object, tblu_json_aTargets->GetObject(), "/targets/" + util::uint32_t_to_string(t));
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                rapidjson::Pointer("/targets").Set(json_object, rapidjson::Value().SetArray());
+                            }
+                        }
+
+                        //std::cout << "exposedEntities name: " << tblu_json_subEntity2->GetObject()["sName"].GetString() << std::endl;
+                        //std::cout << "exposedEntities isArray: " << tblu_json_subEntity2->GetObject()["bIsArray"].GetBool() << std::endl;
+
+                        json_pointer = "/subEntities/" + util::uint32_t_to_string(s) + "/exposedEntities/" + util::uint32_t_to_string(a);
+
+                        rapidjson::Pointer(json_pointer.c_str()).Set(tblu_json_document, json_object);
+                    }
+                }
+
+                json_pointer = "/subEntities/" + util::uint32_t_to_string(s) + "/exposedEntities";
+
+                if (rapidjson::Value* tblu_json_subEntity2 = rapidjson::GetValueByPointer(tblu_json_document, rapidjson::Pointer(json_pointer.c_str())))
+                {
+                    rapidjson::Pointer("/exposedEntities").Set(subEntity_json, tblu_json_subEntity2->GetArray());
+                }
+            }
+        }
+
+        json_pointer = "/subEntities/" + util::uint32_t_to_string(s) + "/exposedInterfaces";
+
+        if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(tblu_json_document, rapidjson::Pointer(json_pointer.c_str())))
+        {
+            if (temp_json_value->GetArray().Size() > 0)
+            {
+                for (uint32_t a = 0; a < temp_json_value->GetArray().Size(); a++)
+                {
+                    json_pointer = "/subEntities/" + util::uint32_t_to_string(s) + "/exposedInterfaces/" + util::uint32_t_to_string(a);
+
+                    if (rapidjson::Value* tblu_json_subEntity2 = rapidjson::GetValueByPointer(tblu_json_document, rapidjson::Pointer(json_pointer.c_str())))
+                    {
+                        rapidjson::Document json_object(&subEntity_json.GetAllocator());
+
+                        //std::cout << "exposedInterfaces 0: " << tblu_json_subEntity2->GetArray()[0].GetString() << std::endl;
+                        //std::cout << "exposedInterfaces 1: " << tblu_json_subEntity2->GetArray()[1].GetInt() << std::endl;
+
+                        json_pointer = "/subEntities/" + util::uint32_t_to_string(s) + "/exposedInterfaces/" + util::uint32_t_to_string(a) + "/1";
+
+                        rapidjson::Pointer(json_pointer.c_str()).Set(tblu_json_document, util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(tblu_json_subEntity2->GetArray()[1].GetInt())).c_str());
+                    }
+                }
+
+                json_pointer = "/subEntities/" + util::uint32_t_to_string(s) + "/exposedInterfaces";
+
+                if (rapidjson::Value* tblu_json_subEntity2 = rapidjson::GetValueByPointer(tblu_json_document, rapidjson::Pointer(json_pointer.c_str())))
+                {
+                    rapidjson::Pointer("/exposedInterfaces").Set(subEntity_json, tblu_json_subEntity2->GetArray());
+                }
+            }
+        }
+
+        rapidjson::Value::MemberIterator it = tblu_json_subEntities[s].FindMember("entitySubsets");
+
+        if (it != tblu_json_subEntities[s].MemberEnd())
+        {
+            for (uint64_t e = 0; e < it->value.Size(); e++)
+            {
+                for (uint64_t a = 0; a < it->value[e][1]["entities"].Size(); a++)
+                {
+                    //std::cout << it->value[e][1]["entities"][a].GetInt() << std::endl;
+
+                    std::string entityId_string = util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(it->value[e][1]["entities"][a].GetInt()));
+
+                    it->value[e][1]["entities"][a].SetString(entityId_string.c_str(), entityId_string.length(), qn_json_document.GetAllocator());
+                }
+            }
+
+            if (it->value.Size() > 0)
+            {
+                rapidjson::Pointer("/entitySubsets").Set(subEntity_json, it->value);
+            }
+        }
+
+        json_pointer = "/propertyValues";
+
+        if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(subEntity_json, rapidjson::Pointer(json_pointer.c_str())))
+        {
+            if (temp_json_value->GetArray().Size() > 0)
+            {
+                for (uint32_t a = 0; a < temp_json_value->GetArray().Size(); a++)
+                {
+                    convert_to_qn_property(subEntity_json, temp_json_value->GetArray()[a]);
+
+                    std::string nPropertyID = "";
+
+                    if (temp_json_value->GetArray()[a]["nPropertyID"].IsString())
+                    {
+                        nPropertyID = temp_json_value->GetArray()[a]["nPropertyID"].GetString();
+                    }
+                    else if (temp_json_value->GetArray()[a]["nPropertyID"].IsUint())
+                    {
+                        nPropertyID = util::uint32_t_to_string(temp_json_value->GetArray()[a]["nPropertyID"].GetUint());
+                    }
+
+                    std::string string_replace = "/";
+                    std::string string_replace_with = "~1";
+
+                    util::replace_all_string_in_string(nPropertyID, string_replace, string_replace_with);
+
+                    json_pointer = "/properties/" + nPropertyID + "/type";
+
+                    rapidjson::Pointer(json_pointer.c_str()).Set(subEntity_json, temp_json_value->GetArray()[a]["value"]["$type"]);
+
+                    json_pointer = "/properties/" + nPropertyID + "/value";
+
+                    rapidjson::Pointer(json_pointer.c_str()).Set(subEntity_json, temp_json_value->GetArray()[a]["value"]["$val"]);
+                }
+            }
+        }
+
+        rapidjson::Pointer("/propertyValues").Erase(subEntity_json);
+
+        json_pointer = "/postInitPropertyValues";
+
+        if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(subEntity_json, rapidjson::Pointer(json_pointer.c_str())))
+        {
+            if (temp_json_value->GetArray().Size() > 0)
+            {
+                for (uint32_t a = 0; a < temp_json_value->GetArray().Size(); a++)
+                {
+                    convert_to_qn_property(subEntity_json, temp_json_value->GetArray()[a]);
+
+                    std::string nPropertyID = "";
+
+                    if (temp_json_value->GetArray()[a]["nPropertyID"].IsString())
+                    {
+                        nPropertyID = temp_json_value->GetArray()[a]["nPropertyID"].GetString();
+                    }
+                    else if (temp_json_value->GetArray()[a]["nPropertyID"].IsUint())
+                    {
+                        nPropertyID = util::uint32_t_to_string(temp_json_value->GetArray()[a]["nPropertyID"].GetUint());
+                    }
+
+                    json_pointer = "/postInitProperties/" + nPropertyID + "/type";
+
+                    rapidjson::Pointer(json_pointer.c_str()).Set(subEntity_json, temp_json_value->GetArray()[a]["value"]["$type"]);
+
+                    json_pointer = "/postInitProperties/" + nPropertyID + "/value";
+
+                    rapidjson::Pointer(json_pointer.c_str()).Set(subEntity_json, temp_json_value->GetArray()[a]["value"]["$val"]);
+                }
+            }
+        }
+
+        rapidjson::Pointer("/postInitPropertyValues").Erase(subEntity_json);
+
+        json_pointer = "/entities/" + util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(s));
+
+        rapidjson::Pointer(json_pointer.c_str()).Set(qn_json_document, subEntity_json);
+    }
+
+    std::string json_pointer = "/pinConnections";
+
+    if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(tblu_json_document, rapidjson::Pointer(json_pointer.c_str())))
+    {
+        if (temp_json_value->GetArray().Size() > 0)
+        {
+            for (uint32_t a = 0; a < temp_json_value->GetArray().Size(); a++)
+            {
+                //std::cout << "fromID: " << temp_json_value->GetArray()[a]["fromID"].GetInt() << std::endl;
+                //std::cout << "toID: " << temp_json_value->GetArray()[a]["toID"].GetInt() << std::endl;
+                //std::cout << "fromPinName: " << temp_json_value->GetArray()[a]["fromPinName"].GetString() << std::endl;
+                //std::cout << "toPinName: " << temp_json_value->GetArray()[a]["toPinName"].GetString() << std::endl;
+                //std::cout << "constantPinValue: " << temp_json_value->GetArray()[a].HasMember("constantPinValue") << std::endl;
+                //std::cout << "constantPinValue $type: " << temp_json_value->GetArray()[a]["constantPinValue"]["$type"].GetString() << std::endl;
+                //std::cout << "constantPinValue $val: " << temp_json_value->GetArray()[a]["constantPinValue"]["$val"].GetString() << std::endl;
+
+                rapidjson::Document json_object(&qn_json_document.GetAllocator());
+
+                json_pointer = "/entities/" + util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(temp_json_value->GetArray()[a]["fromID"].GetInt()));
+
+                rapidjson::Pointer("/onEvent").Set(json_object, temp_json_value->GetArray()[a]["fromPinName"].GetString());
+                rapidjson::Pointer("/shouldTrigger").Set(json_object, temp_json_value->GetArray()[a]["toPinName"].GetString());
+                rapidjson::Pointer("/onEntity").Set(json_object, util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(temp_json_value->GetArray()[a]["toID"].GetInt())).c_str());
+
+                if (temp_json_value->GetArray()[a].HasMember("constantPinValue"))
+                {
+                    if (std::strcmp(temp_json_value->GetArray()[a]["constantPinValue"]["$type"].GetString(), "void") != 0)
+                    {
+                        rapidjson::Pointer("/value/type").Set(json_object, temp_json_value->GetArray()[a]["constantPinValue"]["$type"].GetString());
+                        rapidjson::Pointer("/value/value").Set(json_object, temp_json_value->GetArray()[a]["constantPinValue"]["$val"]);
+                    }
+                }
+
+                json_pointer = "/entities/" + util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(temp_json_value->GetArray()[a]["fromID"].GetInt())) + "/events";
+
+                if (!rapidjson::GetValueByPointer(qn_json_document, rapidjson::Pointer(json_pointer.c_str())))
+                {
+                    rapidjson::Pointer(json_pointer.c_str()).Set(qn_json_document, rapidjson::Value().SetArray());
+                }
+
+                json_pointer = "/entities/" + util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(temp_json_value->GetArray()[a]["fromID"].GetInt())) + "/events/-";
+
+                //std::cout << "json_pointer: " << json_pointer << std::endl;
+
+                rapidjson::Pointer(json_pointer.c_str()).Set(qn_json_document, json_object);
+
+                //property["value"]["$val"].Swap(json_object);
+            }
+        }
+    }
+
+    json_pointer = "/inputPinForwardings";
+
+    if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(tblu_json_document, rapidjson::Pointer(json_pointer.c_str())))
+    {
+        if (temp_json_value->GetArray().Size() > 0)
+        {
+            for (uint32_t a = 0; a < temp_json_value->GetArray().Size(); a++)
+            {
+                //std::cout << "fromID: " << temp_json_value->GetArray()[a]["fromID"].GetInt() << std::endl;
+                //std::cout << "toID: " << temp_json_value->GetArray()[a]["toID"].GetInt() << std::endl;
+                //std::cout << "fromPinName: " << temp_json_value->GetArray()[a]["fromPinName"].GetString() << std::endl;
+                //std::cout << "toPinName: " << temp_json_value->GetArray()[a]["toPinName"].GetString() << std::endl;
+                //std::cout << "constantPinValue: " << temp_json_value->GetArray()[a].HasMember("constantPinValue") << std::endl;
+                //std::cout << "constantPinValue $type: " << temp_json_value->GetArray()[a]["constantPinValue"]["$type"].GetString() << std::endl;
+                //std::cout << "constantPinValue $val: " << temp_json_value->GetArray()[a]["constantPinValue"]["$val"].GetString() << std::endl;
+
+                rapidjson::Document json_object(&qn_json_document.GetAllocator());
+
+                json_pointer = "/entities/" + util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(temp_json_value->GetArray()[a]["fromID"].GetInt()));
+
+                rapidjson::Pointer("/whenTriggered").Set(json_object, temp_json_value->GetArray()[a]["fromPinName"].GetString());
+                rapidjson::Pointer("/alsoTrigger").Set(json_object, temp_json_value->GetArray()[a]["toPinName"].GetString());
+                rapidjson::Pointer("/onEntity").Set(json_object, util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(temp_json_value->GetArray()[a]["toID"].GetInt())).c_str());
+
+                if (temp_json_value->GetArray()[a].HasMember("constantPinValue"))
+                {
+                    if (std::strcmp(temp_json_value->GetArray()[a]["constantPinValue"]["$type"].GetString(), "void") != 0)
+                    {
+                        rapidjson::Pointer("/value/type").Set(json_object, temp_json_value->GetArray()[a]["constantPinValue"]["$type"].GetString());
+                        rapidjson::Pointer("/value/value").Set(json_object, temp_json_value->GetArray()[a]["constantPinValue"]["$val"]);
+                    }
+                }
+
+                json_pointer = "/entities/" + util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(temp_json_value->GetArray()[a]["fromID"].GetInt())) + "/inputCopying";
+
+                if (!rapidjson::GetValueByPointer(qn_json_document, rapidjson::Pointer(json_pointer.c_str())))
+                {
+                    rapidjson::Pointer(json_pointer.c_str()).Set(qn_json_document, rapidjson::Value().SetArray());
+                }
+
+                json_pointer = "/entities/" + util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(temp_json_value->GetArray()[a]["fromID"].GetInt())) + "/inputCopying/-";
+
+                //std::cout << "json_pointer: " << json_pointer << std::endl;
+
+                rapidjson::Pointer(json_pointer.c_str()).Set(qn_json_document, json_object);
+
+                //property["value"]["$val"].Swap(json_object);
+            }
+        }
+    }
+
+    json_pointer = "/outputPinForwardings";
+
+    if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(tblu_json_document, rapidjson::Pointer(json_pointer.c_str())))
+    {
+        if (temp_json_value->GetArray().Size() > 0)
+        {
+            for (uint32_t a = 0; a < temp_json_value->GetArray().Size(); a++)
+            {
+                //std::cout << "fromID: " << temp_json_value->GetArray()[a]["fromID"].GetInt() << std::endl;
+                //std::cout << "toID: " << temp_json_value->GetArray()[a]["toID"].GetInt() << std::endl;
+                //std::cout << "fromPinName: " << temp_json_value->GetArray()[a]["fromPinName"].GetString() << std::endl;
+                //std::cout << "toPinName: " << temp_json_value->GetArray()[a]["toPinName"].GetString() << std::endl;
+                //std::cout << "constantPinValue: " << temp_json_value->GetArray()[a].HasMember("constantPinValue") << std::endl;
+                //std::cout << "constantPinValue $type: " << temp_json_value->GetArray()[a]["constantPinValue"]["$type"].GetString() << std::endl;
+                //std::cout << "constantPinValue $val: " << temp_json_value->GetArray()[a]["constantPinValue"]["$val"].GetString() << std::endl;
+
+                rapidjson::Document json_object(&qn_json_document.GetAllocator());
+
+                json_pointer = "/entities/" + util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(temp_json_value->GetArray()[a]["fromID"].GetInt()));
+
+                rapidjson::Pointer("/onEvent").Set(json_object, temp_json_value->GetArray()[a]["fromPinName"].GetString());
+                rapidjson::Pointer("/propagateEvent").Set(json_object, temp_json_value->GetArray()[a]["toPinName"].GetString());
+                rapidjson::Pointer("/onEntity").Set(json_object, util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(temp_json_value->GetArray()[a]["toID"].GetInt())).c_str());
+
+                if (temp_json_value->GetArray()[a].HasMember("constantPinValue"))
+                {
+                    if (std::strcmp(temp_json_value->GetArray()[a]["constantPinValue"]["$type"].GetString(), "void") != 0)
+                    {
+                        rapidjson::Pointer("/value/type").Set(json_object, temp_json_value->GetArray()[a]["constantPinValue"]["$type"].GetString());
+                        rapidjson::Pointer("/value/value").Set(json_object, temp_json_value->GetArray()[a]["constantPinValue"]["$val"]);
+                    }
+                }
+
+                json_pointer = "/entities/" + util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(temp_json_value->GetArray()[a]["fromID"].GetInt())) + "/outputCopying";
+
+                if (!rapidjson::GetValueByPointer(qn_json_document, rapidjson::Pointer(json_pointer.c_str())))
+                {
+                    rapidjson::Pointer(json_pointer.c_str()).Set(qn_json_document, rapidjson::Value().SetArray());
+                }
+
+                json_pointer = "/entities/" + util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(temp_json_value->GetArray()[a]["fromID"].GetInt())) + "/outputCopying/-";
+
+                //std::cout << "json_pointer: " << json_pointer << std::endl;
+
+                rapidjson::Pointer(json_pointer.c_str()).Set(qn_json_document, json_object);
+
+                //property["value"]["$val"].Swap(json_object);
+            }
+        }
+    }
+
+    json_pointer = "/propertyOverrides";
+
+    if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(temp_json_document, rapidjson::Pointer(json_pointer.c_str())))
+    {
+        if (temp_json_value->GetArray().Size() > 0)
+        {
+            for (uint32_t a = 0; a < temp_json_value->GetArray().Size(); a++)
+            {
+                rapidjson::Document property_overrides_json_object(&qn_json_document.GetAllocator());
+
+                convert_to_qn_reference(property_overrides_json_object, temp_json_value->GetArray()[a].GetObject()["propertyOwner"].GetObject(), "/entities");
+
+                convert_to_qn_property(property_overrides_json_object, temp_json_value->GetArray()[a].GetObject()["propertyValue"]);
+
+                std::string nPropertyID = "";
+
+                if (temp_json_value->GetArray()[a].GetObject()["propertyValue"]["nPropertyID"].IsString())
+                {
+                    nPropertyID = temp_json_value->GetArray()[a].GetObject()["propertyValue"]["nPropertyID"].GetString();
+                }
+                else if (temp_json_value->GetArray()[a].GetObject()["propertyValue"]["nPropertyID"].IsUint())
+                {
+                    nPropertyID = util::uint32_t_to_string(temp_json_value->GetArray()[a].GetObject()["propertyValue"]["nPropertyID"].GetUint());
+                }
+
+                json_pointer = "/properties";
+
+                if (!rapidjson::GetValueByPointer(property_overrides_json_object, rapidjson::Pointer(json_pointer.c_str())))
+                {
+                    rapidjson::Pointer(json_pointer.c_str()).Set(property_overrides_json_object, rapidjson::Value().SetObject());
+                }
+
+                json_pointer = "/properties/" + nPropertyID + "/type";
+
+                rapidjson::Pointer(json_pointer.c_str()).Set(property_overrides_json_object, temp_json_value->GetArray()[a].GetObject()["propertyValue"]["value"]["$type"]);
+
+                json_pointer = "/properties/" + nPropertyID + "/value";
+
+                rapidjson::Pointer(json_pointer.c_str()).Set(property_overrides_json_object, temp_json_value->GetArray()[a].GetObject()["propertyValue"]["value"]["$val"]);
+
+                json_pointer = "/propertyOverrides/" + util::uint32_t_to_string(a);
+
+                rapidjson::Pointer(json_pointer.c_str()).Set(qn_json_document, property_overrides_json_object);
+            }
+        }
+    }
+
+    if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(temp_json_document, rapidjson::Pointer("/propertyOverrides")))
+    {
+        //rapidjson::Pointer("/propertyOverrides").Set(qn_json_document, temp_json_value->GetArray());
+    }
+
+    if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(tblu_json_document, rapidjson::Pointer("/overrideDeletes")))
+    {
+        rapidjson::Pointer("/overrideDeletes").Set(qn_json_document, temp_json_value->GetArray());
+    }
+
+    if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(tblu_json_document, rapidjson::Pointer("/pinConnectionOverrides")))
+    {
+        rapidjson::Pointer("/pinConnectionOverrides").Set(qn_json_document, temp_json_value->GetArray());
+    }
+
+    if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(tblu_json_document, rapidjson::Pointer("/pinConnectionOverrideDeletes")))
+    {
+        rapidjson::Pointer("/pinConnectionOverrideDeletes").Set(qn_json_document, temp_json_value->GetArray());
+    }
+
+    rapidjson::Document entities_json_object(&qn_json_document.GetAllocator());
+    rapidjson::Pointer("").Set(entities_json_object, rapidjson::Value().SetArray());
+
+    rapidjson::Document properties_json_object(&qn_json_document.GetAllocator());
+    rapidjson::Pointer("").Set(properties_json_object, rapidjson::Value().SetArray());
+
+    if (rapidjson::Value* entities_json_value = rapidjson::GetValueByPointer(entities_json_object, rapidjson::Pointer("")))
+    {
+        if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(qn_json_document, rapidjson::Pointer("/propertyOverrides")))
+        {
+            if (temp_json_value->GetArray().Size() > 0)
+            {
+                for (uint32_t a = 0; a < temp_json_value->GetArray().Size(); a++)
+                {
+                    bool in_entities = false;
+
+                    for (uint32_t e = 0; e < entities_json_value->GetArray().Size(); e++)
+                    {
+                        if (temp_json_value->GetArray()[a].GetObject()["entities"] == entities_json_value->GetArray()[e]["entities"])
+                        {
+                            in_entities = true;
+
+                            json_pointer = "/" + util::uint32_t_to_string(e) + "/properties";
+
+                            if (rapidjson::Value* properties_json_value = rapidjson::GetValueByPointer(entities_json_object, rapidjson::Pointer(json_pointer.c_str())))
+                            {
+                                std::string property_name = "";
+
+                                for (rapidjson::Value::ConstMemberIterator iter = temp_json_value->GetArray()[a].GetObject()["properties"].MemberBegin(); iter != temp_json_value->GetArray()[a].GetObject()["properties"].MemberEnd(); ++iter)
+                                {
+                                    property_name = std::string(iter->name.GetString());
+                                }
+
+                                rapidjson::Value key(property_name.c_str(), entities_json_object.GetAllocator());
+
+                                properties_json_value->AddMember(key, temp_json_value->GetArray()[a].GetObject()["properties"].GetObject()[key], entities_json_object.GetAllocator());
+                            }
+                        }
+                    }
+
+                    if (!in_entities)
+                    {
+                        //std::cout << temp_json_value->GetArray()[a].GetObject()["entities"]["ref"].GetString() << std::endl;
+
+                        uint32_t array_index = entities_json_value->GetArray().Size();
+
+                        json_pointer = "/" + util::uint32_t_to_string(array_index) + "/entities";
+                        rapidjson::Pointer(json_pointer.c_str()).Set(entities_json_object, temp_json_value->GetArray()[a].GetObject()["entities"]);
+
+                        json_pointer = "/" + util::uint32_t_to_string(array_index) + "/properties";
+                        rapidjson::Pointer(json_pointer.c_str()).Set(entities_json_object, temp_json_value->GetArray()[a].GetObject()["properties"]);
+                    }
+                }
+            }
+        }
+
+        if (rapidjson::Value* properties_json_value = rapidjson::GetValueByPointer(properties_json_object, rapidjson::Pointer("")))
+        {
+            for (uint32_t e = 0; e < entities_json_value->GetArray().Size(); e++)
+            {
+                bool in_properties = false;
+
+                for (uint32_t p = 0; p < properties_json_value->GetArray().Size(); p++)
+                {
+                    if (entities_json_value->GetArray()[e].GetObject()["properties"] == properties_json_value->GetArray()[p]["properties"])
+                    {
+                        in_properties = true;
+
+                        json_pointer = "/" + util::uint32_t_to_string(p) + "/entities";
+
+                        if (rapidjson::Value* properties_json = rapidjson::GetValueByPointer(properties_json_object, rapidjson::Pointer(json_pointer.c_str())))
+                        {
+                            properties_json->PushBack(entities_json_value->GetArray()[e].GetObject()["entities"], properties_json_object.GetAllocator());
+                        }
+                    }
+                }
+
+                if (!in_properties)
+                {
+                    uint32_t array_index = properties_json_value->GetArray().Size();
+
+                    json_pointer = "/" + util::uint32_t_to_string(array_index) + "/entities/0";
+                    rapidjson::Pointer(json_pointer.c_str()).Set(properties_json_object, entities_json_value->GetArray()[e].GetObject()["entities"]);
+
+                    json_pointer = "/" + util::uint32_t_to_string(array_index) + "/properties";
+                    rapidjson::Pointer(json_pointer.c_str()).Set(properties_json_object, entities_json_value->GetArray()[e].GetObject()["properties"]);
+                }
+            }
+        }
+    }
+
+    rapidjson::Pointer("/propertyOverrides").Set(qn_json_document, properties_json_object.GetArray());
+
+    if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(qn_json_document, rapidjson::Pointer("/overrideDeletes")))
+    {
+        if (temp_json_value->GetArray().Size() > 0)
+        {
+            for (uint32_t a = 0; a < temp_json_value->GetArray().Size(); a++)
+            {
+                json_pointer = "/overrideDeletes/" + util::uint32_t_to_string(a);
+
+                convert_to_qn_reference(qn_json_document, temp_json_value->GetArray()[a].GetObject(), json_pointer);
+            }
+        }
+    }
+
+    if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(qn_json_document, rapidjson::Pointer("/pinConnectionOverrides")))
+    {
+        if (temp_json_value->GetArray().Size() > 0)
+        {
+            for (uint32_t a = 0; a < temp_json_value->GetArray().Size(); a++)
+            {
+                rapidjson::Document json_object1(&qn_json_document.GetAllocator());
+
+                convert_to_qn_reference(json_object1, temp_json_value->GetArray()[a].GetObject()["fromEntity"], "");
+
+                temp_json_value->GetArray()[a].GetObject()["fromEntity"].Swap(json_object1);
+
+                rapidjson::Document json_object2(&qn_json_document.GetAllocator());
+
+                convert_to_qn_reference(json_object2, temp_json_value->GetArray()[a].GetObject()["toEntity"], "");
+
+                temp_json_value->GetArray()[a].GetObject()["toEntity"].Swap(json_object2);
+            }
+        }
+    }
+
+    if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(qn_json_document, rapidjson::Pointer("/pinConnectionOverrideDeletes")))
+    {
+        if (temp_json_value->GetArray().Size() > 0)
+        {
+            for (uint32_t a = 0; a < temp_json_value->GetArray().Size(); a++)
+            {
+                rapidjson::Document json_object1(&qn_json_document.GetAllocator());
+
+                convert_to_qn_reference(json_object1, temp_json_value->GetArray()[a].GetObject()["fromEntity"], "");
+
+                temp_json_value->GetArray()[a].GetObject()["fromEntity"].Swap(json_object1);
+
+                rapidjson::Document json_object2(&qn_json_document.GetAllocator());
+
+                convert_to_qn_reference(json_object2, temp_json_value->GetArray()[a].GetObject()["toEntity"], "");
+
+                temp_json_value->GetArray()[a].GetObject()["toEntity"].Swap(json_object2);
+            }
+        }
+    }
+
+    json_pointer = "/externalScenes";
+
+    rapidjson::Pointer(json_pointer.c_str()).Set(qn_json_document, rapidjson::Value().SetArray());
+
+    for (uint32_t s = 0; s < temp_externalSceneTypeIndicesInResourceHeader.size(); s++)
+    {
+        json_pointer = "/externalScenes/" + util::uint32_t_to_string(s);
+
+        rapidjson::Pointer(json_pointer.c_str()).Set(qn_json_document, temp_meta_strings.at(temp_externalSceneTypeIndicesInResourceHeader.at(s)).c_str());
+    }
+
+    if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(temp_json_document, rapidjson::Pointer("/subType")))
+    {
+        rapidjson::Pointer("/subType").Set(qn_json_document, temp_json_value->GetInt());
+    }
+
+    rapidjson::Pointer("/quickEntityVersion").Set(qn_json_document, 2.1);
+}
+
+void temp::convert_to_qn_reference(rapidjson::Document& json_document, rapidjson::Value& reference, std::string pointer_string)
+{
+    uint64_t entityID = reference["entityID"].GetUint64();
+    int32_t externalSceneIndex = reference["externalSceneIndex"].GetInt();
+    int32_t entityIndex = reference["entityIndex"].GetInt();
+    std::string exposedEntity = reference["exposedEntity"].GetString();
+
+    //std::cout << "entityID: " << entityID << std::endl;
+    //std::cout << "externalSceneIndex: " << externalSceneIndex << std::endl;
+    //std::cout << "entityIndex: " << entityIndex << std::endl;
+    //std::cout << "exposedEntity: " << exposedEntity << std::endl;
+
+    if (externalSceneIndex != -1 || exposedEntity.length() > 0)
+    {
+        rapidjson::Document json_object(&json_document.GetAllocator());
+
+        if (entityIndex == -1)
+        {
+            rapidjson::Pointer("/ref").Set(json_object, rapidjson::kNullType);
+        }
+        else if (entityIndex == -2)
+        {
+            rapidjson::Pointer("/ref").Set(json_object, util::uint64_t_to_hex_string_for_qn(entityID).c_str()); 
+        }
+        else
+        {
+            rapidjson::Pointer("/ref").Set(json_object, util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(entityIndex)).c_str());
+        }
+
+        if (externalSceneIndex == -1)
+        {
+            rapidjson::Pointer("/externalScene").Set(json_object, rapidjson::kNullType);
+        }
+        else
+        {
+            rapidjson::Pointer("/externalScene").Set(json_object, temp_meta_strings.at(temp_externalSceneTypeIndicesInResourceHeader.at(externalSceneIndex)).c_str());
+        }
+
+        if (exposedEntity != "")
+        {
+            rapidjson::Pointer("/exposedEntity").Set(json_object, exposedEntity.c_str());
+        }
+
+        rapidjson::Pointer(pointer_string.c_str()).Set(json_document, json_object);
+    }
+    else
+    {
+        if (entityIndex == -1)
+        {
+            rapidjson::Pointer(pointer_string.c_str()).Set(json_document, rapidjson::kNullType);
+
+        }
+        else
+        {
+            rapidjson::Pointer(pointer_string.c_str()).Set(json_document, util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(entityIndex)).c_str());
+        }
+    }
+}
+
+void temp::convert_to_qn_property(rapidjson::Document& json_document, rapidjson::Value& property)
+{
+    if (property["nPropertyID"].IsString())
+    {
+        //std::cout << property["nPropertyID"].GetString() << std::endl;
+        //std::cout << property["value"]["$type"].GetString() << std::endl;
+
+        std::string nPropertyID = property["nPropertyID"].GetString();
+        std::string type = property["value"]["$type"].GetString();
+
+        if (type.length() > 8)
+        {
+            if (type.substr(0, 7) == "TArray<")
+            {
+                if (property["value"]["$val"].GetArray().Size() > 0)
+                {
+                    for (uint32_t a = 0; a < property["value"]["$val"].GetArray().Size(); a++)
+                    {
+                        rapidjson::Document json_object(&json_document.GetAllocator());
+
+                        rapidjson::Pointer("/nPropertyID").Set(json_object, "");
+                        rapidjson::Pointer("/value").Set(json_object, rapidjson::Value().SetObject());
+                        rapidjson::Pointer("/value/$type").Set(json_object, type.substr(7, (type.length() - 8)).c_str());
+                        rapidjson::Pointer("/value/$val").Set(json_object, property["value"]["$val"].GetArray()[a]);
+
+                        convert_to_qn_property(json_document, json_object);
+
+                        property["value"]["$val"][a].Swap(json_object["value"]["$val"]);
+                    }
+                }
+            }
+        }
+
+        if (type == "SEntityTemplateReference")
+        {
+            rapidjson::Document json_object(&json_document.GetAllocator());
+
+            convert_to_qn_reference(json_object, property["value"]["$val"], "/$val");
+
+            property["value"]["$val"].Swap(json_object["$val"]);
+        }
+        else if (type == "ZRuntimeResourceID")
+        {
+            rapidjson::Document json_object(&json_document.GetAllocator());
+
+            if (property["value"]["$val"]["m_IDLow"].GetUint() == 4294967295 && property["value"]["$val"]["m_IDHigh"].GetUint() == 4294967295)
+            {
+                rapidjson::Pointer("").Set(json_object, rapidjson::kNullType);
+            }
+            else
+            {
+                if (temp_meta_flags.at(property["value"]["$val"]["m_IDLow"].GetUint()) != "1F")
+                {
+                    rapidjson::Pointer("/resource").Set(json_object, temp_meta_strings.at(property["value"]["$val"]["m_IDLow"].GetUint()).c_str());
+                    rapidjson::Pointer("/flag").Set(json_object, temp_meta_flags.at(property["value"]["$val"]["m_IDLow"].GetUint()).c_str());
+                }
+                else
+                {
+                    rapidjson::Pointer("").Set(json_object, temp_meta_strings.at(property["value"]["$val"]["m_IDLow"].GetUint()).c_str());
+                }
+            }
+
+            property["value"]["$val"].Swap(json_object);
+        }
+        else if (type == "SMatrix43")
+        {
+            matrix43 matrix;
+
+            matrix.x_axis.x = property["value"]["$val"]["XAxis"]["x"].GetFloat();
+            matrix.y_axis.x = property["value"]["$val"]["YAxis"]["x"].GetFloat();
+            matrix.z_axis.x = property["value"]["$val"]["ZAxis"]["x"].GetFloat();
+            matrix.x_axis.y = property["value"]["$val"]["XAxis"]["y"].GetFloat();
+            matrix.y_axis.y = property["value"]["$val"]["YAxis"]["y"].GetFloat();
+            matrix.z_axis.y = property["value"]["$val"]["ZAxis"]["y"].GetFloat();
+            matrix.x_axis.z = property["value"]["$val"]["XAxis"]["z"].GetFloat();
+            matrix.y_axis.z = property["value"]["$val"]["YAxis"]["z"].GetFloat();
+            matrix.z_axis.z = property["value"]["$val"]["ZAxis"]["z"].GetFloat();
+            matrix.transform.x = property["value"]["$val"]["Trans"]["x"].GetFloat();
+            matrix.transform.y = property["value"]["$val"]["Trans"]["y"].GetFloat();
+            matrix.transform.z = property["value"]["$val"]["Trans"]["z"].GetFloat();
+
+            vector3 euler_angles;
+
+            float radians_to_degrees = 180.0f / DirectX::XM_PI;
+
+            euler_angles.y = std::asin(std::clamp(matrix.x_axis.z, -1.0f, 1.0f));
+
+            if (std::abs(matrix.x_axis.z) < 0.9999999)
+            {
+                euler_angles.x = std::atan2(-matrix.y_axis.z, matrix.z_axis.z);
+                euler_angles.z = std::atan2(-matrix.x_axis.y, matrix.x_axis.x);
+            }
+            else
+            {
+                euler_angles.x = std::atan2(matrix.z_axis.y, matrix.y_axis.y);
+                euler_angles.z = 0;
+            }
+
+            if (euler_angles.x == 0.0f && std::signbit(euler_angles.x))
+                euler_angles.x = 0.0f;
+            if (euler_angles.y == 0.0f && std::signbit(euler_angles.y))
+                euler_angles.y = 0.0f;
+            if (euler_angles.z == 0.0f && std::signbit(euler_angles.z))
+                euler_angles.z = 0.0f;
+
+            //std::cout << "euler_angles.x: " << euler_angles.x * radians_to_degrees << std::endl;
+            //std::cout << "euler_angles.y: " << euler_angles.y * radians_to_degrees << std::endl;
+            //std::cout << "euler_angles.z: " << euler_angles.z * radians_to_degrees << std::endl;
+
+            rapidjson::Document json_object(&json_document.GetAllocator());
+
+            rapidjson::Pointer("/rotation/x").Set(json_object, (euler_angles.x * radians_to_degrees));
+            rapidjson::Pointer("/rotation/y").Set(json_object, (euler_angles.y * radians_to_degrees));
+            rapidjson::Pointer("/rotation/z").Set(json_object, (euler_angles.z * radians_to_degrees));
+
+            rapidjson::Pointer("/position/x").Set(json_object, matrix.transform.x);
+            rapidjson::Pointer("/position/y").Set(json_object, matrix.transform.y);
+            rapidjson::Pointer("/position/z").Set(json_object, matrix.transform.z);
+
+            property["value"]["$val"].Swap(json_object);
+        }
+        else if (type == "ZGuid")
+        {
+            rapidjson::Document json_object(&json_document.GetAllocator());
+
+            std::stringstream ss;
+
+            ss << std::hex << std::setw(8) << std::setfill('0') << property["value"]["$val"]["_a"].GetUint() << "-";
+            ss << std::hex << std::setw(4) << std::setfill('0') << property["value"]["$val"]["_b"].GetUint() << "-";
+            ss << std::hex << std::setw(4) << std::setfill('0') << property["value"]["$val"]["_c"].GetUint() << "-";
+            ss << std::hex << std::setw(2) << std::setfill('0') << property["value"]["$val"]["_d"].GetUint();
+            ss << std::hex << std::setw(2) << std::setfill('0') << property["value"]["$val"]["_e"].GetUint() << "-";
+            ss << std::hex << std::setw(2) << std::setfill('0') << property["value"]["$val"]["_f"].GetUint();
+            ss << std::hex << std::setw(2) << std::setfill('0') << property["value"]["$val"]["_g"].GetUint();
+            ss << std::hex << std::setw(2) << std::setfill('0') << property["value"]["$val"]["_h"].GetUint();
+            ss << std::hex << std::setw(2) << std::setfill('0') << property["value"]["$val"]["_i"].GetUint();
+            ss << std::hex << std::setw(2) << std::setfill('0') << property["value"]["$val"]["_j"].GetUint();
+            ss << std::hex << std::setw(2) << std::setfill('0') << property["value"]["$val"]["_k"].GetUint();
+
+            rapidjson::Pointer("").Set(json_object, ss.str().c_str());
+
+            property["value"]["$val"].Swap(json_object);
+        }
+        else if (type == "SColorRGB")
+        {
+            rapidjson::Document json_object(&json_document.GetAllocator());
+
+            std::stringstream ss;
+
+            ss << "#" << std::hex << std::setw(2) << std::setfill('0') << (uint32_t)std::round(property["value"]["$val"]["r"].GetFloat() * 255.0f);
+            ss << std::hex << std::setw(2) << std::setfill('0') << (uint32_t)std::round(property["value"]["$val"]["g"].GetFloat() * 255.0f);
+            ss << std::hex << std::setw(2) << std::setfill('0') << (uint32_t)std::round(property["value"]["$val"]["b"].GetFloat() * 255.0f);
+
+            rapidjson::Pointer("").Set(json_object, ss.str().c_str());
+
+            property["value"]["$val"].Swap(json_object);
+        }
+        else if (type == "SColorRGBA")
+        {
+            rapidjson::Document json_object(&json_document.GetAllocator());
+
+            std::stringstream ss;
+
+            ss << "#" << std::hex << std::setw(2) << std::setfill('0') << (uint32_t)std::round(property["value"]["$val"]["r"].GetFloat() * 255.0f);
+            ss << std::hex << std::setw(2) << std::setfill('0') << (uint32_t)std::round(property["value"]["$val"]["g"].GetFloat() * 255.0f);
+            ss << std::hex << std::setw(2) << std::setfill('0') << (uint32_t)std::round(property["value"]["$val"]["b"].GetFloat() * 255.0f);
+            ss << std::hex << std::setw(2) << std::setfill('0') << (uint32_t)std::round(property["value"]["$val"]["a"].GetFloat() * 255.0f);
+
+            rapidjson::Pointer("").Set(json_object, ss.str().c_str());
+
+            property["value"]["$val"].Swap(json_object);
+        }
+    }
+    else if (property["nPropertyID"].IsUint())
+    {
+        //std::cout << property["nPropertyID"].GetUint() << std::endl;
+
+        std::string type = property["value"]["$type"].GetString();
+
+        if (type.length() > 8)
+        {
+            if (type.substr(0, 7) == "TArray<")
+            {
+                if (property["value"]["$val"].GetArray().Size() > 0)
+                {
+                    for (uint32_t a = 0; a < property["value"]["$val"].GetArray().Size(); a++)
+                    {
+                        rapidjson::Document json_object(&json_document.GetAllocator());
+
+                        rapidjson::Pointer("/nPropertyID").Set(json_object, "");
+                        rapidjson::Pointer("/value").Set(json_object, rapidjson::Value().SetObject());
+                        rapidjson::Pointer("/value/$type").Set(json_object, type.substr(7, (type.length() - 8)).c_str());
+                        rapidjson::Pointer("/value/$val").Set(json_object, property["value"]["$val"].GetArray()[a]);
+
+                        convert_to_qn_property(json_document, json_object);
+
+                        property["value"]["$val"][a].Swap(json_object["value"]["$val"]);
+                    }
+                }
+            }
+        }
+
+        if (type == "SEntityTemplateReference")
+        {
+            rapidjson::Document json_object(&json_document.GetAllocator());
+
+            convert_to_qn_reference(json_object, property["value"]["$val"], "/$val");
+
+            property["value"]["$val"].Swap(json_object["$val"]);
+        }
+        else if (type == "ZRuntimeResourceID")
+        {
+            rapidjson::Document json_object(&json_document.GetAllocator());
+
+            if (property["value"]["$val"]["m_IDLow"].GetUint() == 4294967295 && property["value"]["$val"]["m_IDHigh"].GetUint() == 4294967295)
+            {
+                rapidjson::Pointer("").Set(json_object, rapidjson::kNullType);
+            }
+            else
+            {
+                if (temp_meta_flags.at(property["value"]["$val"]["m_IDLow"].GetUint()) != "1F")
+                {
+                    rapidjson::Pointer("/resource").Set(json_object, temp_meta_strings.at(property["value"]["$val"]["m_IDLow"].GetUint()).c_str());
+                    rapidjson::Pointer("/flag").Set(json_object, temp_meta_flags.at(property["value"]["$val"]["m_IDLow"].GetUint()).c_str());
+                }
+                else
+                {
+                    rapidjson::Pointer("").Set(json_object, temp_meta_strings.at(property["value"]["$val"]["m_IDLow"].GetUint()).c_str());
+                }
+            }
+
+            property["value"]["$val"].Swap(json_object);
+        }
+        else if (type == "SMatrix43")
+        {
+            matrix43 matrix;
+
+            matrix.x_axis.x = property["value"]["$val"]["XAxis"]["x"].GetFloat();
+            matrix.y_axis.x = property["value"]["$val"]["YAxis"]["x"].GetFloat();
+            matrix.z_axis.x = property["value"]["$val"]["ZAxis"]["x"].GetFloat();
+            matrix.x_axis.y = property["value"]["$val"]["XAxis"]["y"].GetFloat();
+            matrix.y_axis.y = property["value"]["$val"]["YAxis"]["y"].GetFloat();
+            matrix.z_axis.y = property["value"]["$val"]["ZAxis"]["y"].GetFloat();
+            matrix.x_axis.z = property["value"]["$val"]["XAxis"]["z"].GetFloat();
+            matrix.y_axis.z = property["value"]["$val"]["YAxis"]["z"].GetFloat();
+            matrix.z_axis.z = property["value"]["$val"]["ZAxis"]["z"].GetFloat();
+            matrix.transform.x = property["value"]["$val"]["Trans"]["x"].GetFloat();
+            matrix.transform.y = property["value"]["$val"]["Trans"]["y"].GetFloat();
+            matrix.transform.z = property["value"]["$val"]["Trans"]["z"].GetFloat();
+
+            vector3 euler_angles;
+
+            float radians_to_degrees = 180.0f / DirectX::XM_PI;
+
+            euler_angles.y = std::asin(std::clamp(matrix.x_axis.z, -1.0f, 1.0f));
+
+            if (std::abs(matrix.x_axis.z) < 0.9999999)
+            {
+                euler_angles.x = std::atan2(-matrix.y_axis.z, matrix.z_axis.z);
+                euler_angles.z = std::atan2(-matrix.x_axis.y, matrix.x_axis.x);
+            }
+            else
+            {
+                euler_angles.x = std::atan2(matrix.z_axis.y, matrix.y_axis.y);
+                euler_angles.z = 0;
+            }
+
+            if (euler_angles.x == 0.0f && std::signbit(euler_angles.x))
+                euler_angles.x = 0.0f;
+            if (euler_angles.y == 0.0f && std::signbit(euler_angles.y))
+                euler_angles.y = 0.0f;
+            if (euler_angles.z == 0.0f && std::signbit(euler_angles.z))
+                euler_angles.z = 0.0f;
+
+            //std::cout << "euler_angles.x: " << euler_angles.x * radians_to_degrees << std::endl;
+            //std::cout << "euler_angles.y: " << euler_angles.y * radians_to_degrees << std::endl;
+            //std::cout << "euler_angles.z: " << euler_angles.z * radians_to_degrees << std::endl;
+
+            rapidjson::Document json_object(&json_document.GetAllocator());
+
+            rapidjson::Pointer("/rotation/x").Set(json_object, (euler_angles.x * radians_to_degrees));
+            rapidjson::Pointer("/rotation/y").Set(json_object, (euler_angles.y * radians_to_degrees));
+            rapidjson::Pointer("/rotation/z").Set(json_object, (euler_angles.z * radians_to_degrees));
+
+            rapidjson::Pointer("/position/x").Set(json_object, matrix.transform.x);
+            rapidjson::Pointer("/position/y").Set(json_object, matrix.transform.y);
+            rapidjson::Pointer("/position/z").Set(json_object, matrix.transform.z);
+
+            property["value"]["$val"].Swap(json_object);
+        }
+        else if (type == "ZGuid")
+        {
+            rapidjson::Document json_object(&json_document.GetAllocator());
+
+            std::stringstream ss;
+
+            ss << std::hex << std::setw(8) << std::setfill('0') << property["value"]["$val"]["_a"].GetUint() << "-";
+            ss << std::hex << std::setw(4) << std::setfill('0') << property["value"]["$val"]["_b"].GetUint() << "-";
+            ss << std::hex << std::setw(4) << std::setfill('0') << property["value"]["$val"]["_c"].GetUint() << "-";
+            ss << std::hex << std::setw(2) << std::setfill('0') << property["value"]["$val"]["_d"].GetUint();
+            ss << std::hex << std::setw(2) << std::setfill('0') << property["value"]["$val"]["_e"].GetUint() << "-";
+            ss << std::hex << std::setw(2) << std::setfill('0') << property["value"]["$val"]["_f"].GetUint();
+            ss << std::hex << std::setw(2) << std::setfill('0') << property["value"]["$val"]["_g"].GetUint();
+            ss << std::hex << std::setw(2) << std::setfill('0') << property["value"]["$val"]["_h"].GetUint();
+            ss << std::hex << std::setw(2) << std::setfill('0') << property["value"]["$val"]["_i"].GetUint();
+            ss << std::hex << std::setw(2) << std::setfill('0') << property["value"]["$val"]["_j"].GetUint();
+            ss << std::hex << std::setw(2) << std::setfill('0') << property["value"]["$val"]["_k"].GetUint();
+
+            rapidjson::Pointer("").Set(json_object, ss.str().c_str());
+
+            property["value"]["$val"].Swap(json_object);
+        }
+        else if (type == "SColorRGB")
+        {
+            rapidjson::Document json_object(&json_document.GetAllocator());
+
+            std::stringstream ss;
+
+            ss << "#" << std::hex << std::setw(2) << std::setfill('0') << (uint32_t)std::round(property["value"]["$val"]["r"].GetFloat() * 255.0f);
+            ss << std::hex << std::setw(2) << std::setfill('0') << (uint32_t)std::round(property["value"]["$val"]["g"].GetFloat() * 255.0f);
+            ss << std::hex << std::setw(2) << std::setfill('0') << (uint32_t)std::round(property["value"]["$val"]["b"].GetFloat() * 255.0f);
+
+            rapidjson::Pointer("").Set(json_object, ss.str().c_str());
+
+            property["value"]["$val"].Swap(json_object);
+        }
+        else if (type == "SColorRGBA")
+        {
+            rapidjson::Document json_object(&json_document.GetAllocator());
+
+            std::stringstream ss;
+
+            ss << "#" << std::hex << std::setw(2) << std::setfill('0') << (uint32_t)std::round(property["value"]["$val"]["r"].GetFloat() * 255.0f);
+            ss << std::hex << std::setw(2) << std::setfill('0') << (uint32_t)std::round(property["value"]["$val"]["g"].GetFloat() * 255.0f);
+            ss << std::hex << std::setw(2) << std::setfill('0') << (uint32_t)std::round(property["value"]["$val"]["b"].GetFloat() * 255.0f);
+            ss << std::hex << std::setw(2) << std::setfill('0') << (uint32_t)std::round(property["value"]["$val"]["a"].GetFloat() * 255.0f);
+
+            rapidjson::Pointer("").Set(json_object, ss.str().c_str());
+
+            property["value"]["$val"].Swap(json_object);
+        }
+    }
+}
+
+void temp::write_qn_json_to_file(std::string output_path)
+{
+    std::ofstream file_qn = std::ofstream(output_path, std::ofstream::binary);
+
+    rapidjson::StringBuffer buffer_qn;
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer_qn(buffer_qn);
+    qn_json_document.Accept(writer_qn);
+
+    //std::cout << buffer.GetString() << std::endl;
+
+    file_qn.write(buffer_qn.GetString(), buffer_qn.GetSize());
+
+    file_qn.close();
+}
+
+void temp::generate_qn_patch_json()
+{
+    rapidjson::StringBuffer buffer_qn_original;
+    rapidjson::Writer<rapidjson::StringBuffer> writer_qn_original(buffer_qn_original);
+    qn_json_document_original.Accept(writer_qn_original);
+
+    rapidjson::StringBuffer buffer_qn;
+    rapidjson::Writer<rapidjson::StringBuffer> writer_qn(buffer_qn);
+    qn_json_document.Accept(writer_qn);
+
+    json qn_json_original;
+    json qn_json;
+
+    try
+    {
+        qn_json_original = json::parse(buffer_qn_original.GetString(), buffer_qn_original.GetString() + buffer_qn_original.GetSize());
+
+        qn_json = json::parse(buffer_qn.GetString(), buffer_qn.GetString() + buffer_qn.GetSize());
+
+        qn_patch_json["tempHash"] = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_string;
+        qn_patch_json["tbluHash"] = rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_string;
+        qn_patch_json["patch"] = json::diff(qn_json_original, qn_json);
+        qn_patch_json["patchVersion"] = 4;
+    }
+    catch (json::parse_error& e)
+    {
+        std::stringstream ss;
+        ss << "Error: " << temp_file_name << "\n"
+            << "Error message: " << e.what() << '\n'
+            << "Error exception id: " << e.id << '\n'
+            << "Error byte position of error: " << e.byte;
+        LOG_AND_EXIT(ss.str());
+    }
+}
+
+void temp::write_qn_patch_json_to_file(std::string output_path)
+{
+    std::ofstream file_qn_patch = std::ofstream(output_path, std::ofstream::binary);
+
+    if (!file_qn_patch.good())
+    {
+        LOG_AND_EXIT("Error: QN Patch JSON file " + output_path + " could not be created.");
+    }
+
+    file_qn_patch << std::setw(4) << qn_patch_json << std::endl;
+
+    file_qn_patch.close();
 }

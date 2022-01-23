@@ -85,127 +85,114 @@ borg::borg(uint64_t rpkgs_index, uint64_t hash_index)
     uint32_t bytes4 = 0;
     uint64_t bytes8 = 0;
 
-    LOG("BORG file: " + borg_file_name);
-
-    std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(borg_rpkg_index).hash.at(borg_hash_index).hash_value);
-
-    if (it2 != hash_list_hash_map.end())
-    {
-        LOG("  - IOI String: " + hash_list_hash_strings.at(it2->second));
-    }
-    else
-    {
-        LOG("  - IOI String: ");
-    }
-
     std::memcpy(&borg_primary_header_offset, &borg_data.data()[borg_position], sizeof(bytes4));
     borg_position += 0x4;
-
-    LOG("  - BORG primary header offset: " + util::uint32_t_to_hex_string(borg_primary_header_offset));
 
     borg_position = borg_primary_header_offset;
 
     std::memcpy(&bones_count, &borg_data.data()[borg_position], sizeof(bytes4));
     borg_position += 0x4;
 
-    LOG("  - BORG bones count: " + util::uint32_t_to_hex_string(bones_count));
-
     std::memcpy(&bones_count_animated, &borg_data.data()[borg_position], sizeof(bytes4));
     borg_position += 0x4;
-
-    LOG("  - BORG bones count animated: " + util::uint32_t_to_hex_string(bones_count_animated));
 
     std::memcpy(&bones_offset, &borg_data.data()[borg_position], sizeof(bytes4));
     borg_position += 0x4;
 
-    LOG("  - BORG bones offset: " + util::uint32_t_to_hex_string(bones_offset));
-
     std::memcpy(&poses_offset, &borg_data.data()[borg_position], sizeof(bytes4));
     borg_position += 0x4;
-
-    LOG("  - BORG poses offset: " + util::uint32_t_to_hex_string(poses_offset));
 
     std::memcpy(&poses_inverse_matrices, &borg_data.data()[borg_position], sizeof(bytes4));
     borg_position += 0x4;
 
-    LOG("  - BORG poses inverse matrices: " + util::uint32_t_to_hex_string(poses_inverse_matrices));
-
     std::memcpy(&bones_constraints, &borg_data.data()[borg_position], sizeof(bytes4));
     borg_position += 0x4;
-
-    LOG("  - BORG bones constraints: " + util::uint32_t_to_hex_string(bones_constraints));
 
     std::memcpy(&poses_header, &borg_data.data()[borg_position], sizeof(bytes4));
     borg_position += 0x4;
 
-    LOG("  - BORG poses header: " + util::uint32_t_to_hex_string(poses_header));
-
     std::memcpy(&bones_invert, &borg_data.data()[borg_position], sizeof(bytes4));
     borg_position += 0x4;
-
-    LOG("  - BORG bones invert: " + util::uint32_t_to_hex_string(bones_invert));
 
     std::memcpy(&bones_map, &borg_data.data()[borg_position], sizeof(bytes4));
     borg_position += 0x4;
 
-    LOG("  - BORG bones map: " + util::uint32_t_to_hex_string(bones_map));
-
     borg_position = bones_offset;
+
+    if (log_output)
+    {
+        LOG("BORG file: " + borg_file_name);
+
+        std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(borg_rpkg_index).hash.at(borg_hash_index).hash_value);
+
+        if (it2 != hash_list_hash_map.end())
+        {
+            LOG("  - IOI String: " + hash_list_hash_strings.at(it2->second));
+        }
+        else
+        {
+            LOG("  - IOI String: ");
+        }
+
+        LOG("  - BORG primary header offset: " + util::uint32_t_to_hex_string(borg_primary_header_offset));
+        LOG("  - BORG bones count: " + util::uint32_t_to_hex_string(bones_count));
+        LOG("  - BORG bones count animated: " + util::uint32_t_to_hex_string(bones_count_animated));
+        LOG("  - BORG bones offset: " + util::uint32_t_to_hex_string(bones_offset));
+        LOG("  - BORG poses offset: " + util::uint32_t_to_hex_string(poses_offset));
+        LOG("  - BORG poses inverse matrices: " + util::uint32_t_to_hex_string(poses_inverse_matrices));
+        LOG("  - BORG bones constraints: " + util::uint32_t_to_hex_string(bones_constraints));
+        LOG("  - BORG poses header: " + util::uint32_t_to_hex_string(poses_header));
+        LOG("  - BORG bones invert: " + util::uint32_t_to_hex_string(bones_invert));
+        LOG("  - BORG bones map: " + util::uint32_t_to_hex_string(bones_map));
+    }
 
     for (uint32_t b = 0; b < bones_count; b++)
     {
         bone_data temp_bone_data;
 
-        LOG("Bone " + std::to_string(b));
-
         std::memcpy(&temp_bone_data.position.x, &borg_data.data()[borg_position], sizeof(bytes4));
         borg_position += 0x4;
-
-        LOG("    - temp_bone_data.position.x: " + util::float_to_string(temp_bone_data.position.x));
 
         std::memcpy(&temp_bone_data.position.y, &borg_data.data()[borg_position], sizeof(bytes4));
         borg_position += 0x4;
 
-        LOG("    - temp_bone_data.position.y: " + util::float_to_string(temp_bone_data.position.y));
-
         std::memcpy(&temp_bone_data.position.z, &borg_data.data()[borg_position], sizeof(bytes4));
         borg_position += 0x4;
-
-        LOG("    - temp_bone_data.position.z: " + util::float_to_string(temp_bone_data.position.z));
 
         std::memcpy(&temp_bone_data.parent_id, &borg_data.data()[borg_position], sizeof(bytes4));
         borg_position += 0x4;
 
-        LOG("    - parent_id: " + util::uint32_t_to_hex_string(temp_bone_data.parent_id));
-
         std::memcpy(&temp_bone_data.size.x, &borg_data.data()[borg_position], sizeof(bytes4));
         borg_position += 0x4;
-
-        LOG("    - temp_bone_data.size.x: " + util::float_to_string(temp_bone_data.size.x));
 
         std::memcpy(&temp_bone_data.size.y, &borg_data.data()[borg_position], sizeof(bytes4));
         borg_position += 0x4;
 
-        LOG("    - temp_bone_data.size.y: " + util::float_to_string(temp_bone_data.size.y));
-
         std::memcpy(&temp_bone_data.size.z, &borg_data.data()[borg_position], sizeof(bytes4));
         borg_position += 0x4;
-
-        LOG("    - temp_bone_data.size.z: " + util::float_to_string(temp_bone_data.size.z));
 
         std::memcpy(&input, &borg_data.data()[borg_position], 0x22);
         borg_position += 0x22;
 
         temp_bone_data.name = std::string(input);
 
-        LOG("    - name: " + temp_bone_data.name);
-
-        LOG("    - name length: " + util::uint32_t_to_string(temp_bone_data.name.length()));
-
         std::memcpy(&temp_bone_data.part, &borg_data.data()[borg_position], sizeof(bytes2));
         borg_position += 0x2;
 
-        LOG("    - part: " + util::uint16_t_to_hex_string(temp_bone_data.part));
+        if (log_output)
+        {
+            LOG("Bone " + std::to_string(b));
+            LOG("    - temp_bone_data.position.x: " + util::float_to_string(temp_bone_data.position.x));
+            LOG("    - temp_bone_data.position.y: " + util::float_to_string(temp_bone_data.position.y));
+            LOG("    - temp_bone_data.position.z: " + util::float_to_string(temp_bone_data.position.z));
+            LOG("    - parent_id: " + util::uint32_t_to_hex_string(temp_bone_data.parent_id));
+            LOG("    - temp_bone_data.size.x: " + util::float_to_string(temp_bone_data.size.x));
+            LOG("    - temp_bone_data.size.y: " + util::float_to_string(temp_bone_data.size.y));
+            LOG("    - temp_bone_data.size.z: " + util::float_to_string(temp_bone_data.size.z));
+            LOG("    - name: " + temp_bone_data.name);
+            LOG("    - name length: " + util::uint32_t_to_string(temp_bone_data.name.length()));
+            LOG("    - part: " + util::uint16_t_to_hex_string(temp_bone_data.part));
+        }
 
         bones_data.push_back(temp_bone_data);
     }
@@ -214,8 +201,6 @@ borg::borg(uint64_t rpkgs_index, uint64_t hash_index)
 
     for (uint32_t b = 0; b < bones_count; b++)
     {
-        LOG("Bone " + std::to_string(b));
-
         float temp_float_a = 0;
         float temp_float_b = 0;
         float temp_float_c = 0;
@@ -239,32 +224,32 @@ borg::borg(uint64_t rpkgs_index, uint64_t hash_index)
         temp_bone_quaternion.m128_f32[2] = temp_float_c;
         temp_bone_quaternion.m128_f32[3] = temp_float_d;
 
-        LOG("    - temp_bone_quaternion.a: " + util::float_to_string(temp_bone_quaternion.m128_f32[0]));
-        LOG("    - temp_bone_quaternion.b: " + util::float_to_string(temp_bone_quaternion.m128_f32[1]));
-        LOG("    - temp_bone_quaternion.c: " + util::float_to_string(temp_bone_quaternion.m128_f32[2]));
-        LOG("    - temp_bone_quaternion.d: " + util::float_to_string(temp_bone_quaternion.m128_f32[3]));
-
         vector4 temp_vector4;
 
         std::memcpy(&temp_vector4.x, &borg_data.data()[borg_position], sizeof(bytes4));
         borg_position += 0x4;
 
-        LOG("    - bones_position.x: " + util::float_to_string(temp_vector4.x));
-
         std::memcpy(&temp_vector4.y, &borg_data.data()[borg_position], sizeof(bytes4));
         borg_position += 0x4;
-
-        LOG("    - bones_position.y: " + util::float_to_string(temp_vector4.y));
 
         std::memcpy(&temp_vector4.z, &borg_data.data()[borg_position], sizeof(bytes4));
         borg_position += 0x4;
 
-        LOG("    - bones_position.z: " + util::float_to_string(temp_vector4.z));
-
         std::memcpy(&temp_vector4.w, &borg_data.data()[borg_position], sizeof(bytes4));
         borg_position += 0x4;
 
-        LOG("    - bones_position.w: " + util::float_to_string(temp_vector4.w));
+        if (log_output)
+        {
+            LOG("Bone " + std::to_string(b));
+            LOG("    - temp_bone_quaternion.a: " + util::float_to_string(temp_bone_quaternion.m128_f32[0]));
+            LOG("    - temp_bone_quaternion.b: " + util::float_to_string(temp_bone_quaternion.m128_f32[1]));
+            LOG("    - temp_bone_quaternion.c: " + util::float_to_string(temp_bone_quaternion.m128_f32[2]));
+            LOG("    - temp_bone_quaternion.d: " + util::float_to_string(temp_bone_quaternion.m128_f32[3]));
+            LOG("    - bones_position.x: " + util::float_to_string(temp_vector4.x));
+            LOG("    - bones_position.y: " + util::float_to_string(temp_vector4.y));
+            LOG("    - bones_position.z: " + util::float_to_string(temp_vector4.z));
+            LOG("    - bones_position.w: " + util::float_to_string(temp_vector4.w));
+        }
 
         bones_position.push_back(temp_vector4);
 
@@ -284,8 +269,6 @@ borg::borg(uint64_t rpkgs_index, uint64_t hash_index)
 
     for (uint32_t b = 0; b < bones_count; b++)
     {
-        LOG("Bone " + std::to_string(b));
-
         DirectX::XMMATRIX inverse_bind_matrix = DirectX::XMMatrixIdentity();
 
         std::memcpy(&inverse_bind_matrix.r[0].m128_f32[0], &borg_data.data()[borg_position], sizeof(bytes4));
@@ -324,22 +307,26 @@ borg::borg(uint64_t rpkgs_index, uint64_t hash_index)
         std::memcpy(&inverse_bind_matrix.r[3].m128_f32[2], &borg_data.data()[borg_position], sizeof(bytes4));
         borg_position += 0x4;
 
-        LOG("    - inverse_bind_matrix.r[0].m128_f32[0]: " + util::float_to_string(inverse_bind_matrix.r[0].m128_f32[0]));
-        LOG("    - inverse_bind_matrix.r[0].m128_f32[1]: " + util::float_to_string(inverse_bind_matrix.r[0].m128_f32[1]));
-        LOG("    - inverse_bind_matrix.r[0].m128_f32[2]: " + util::float_to_string(inverse_bind_matrix.r[0].m128_f32[2]));
-        LOG("    - inverse_bind_matrix.r[0].m128_f32[3]: " + util::float_to_string(inverse_bind_matrix.r[0].m128_f32[3]));
-        LOG("    - inverse_bind_matrix.r[1].m128_f32[0]: " + util::float_to_string(inverse_bind_matrix.r[1].m128_f32[0]));
-        LOG("    - inverse_bind_matrix.r[1].m128_f32[1]: " + util::float_to_string(inverse_bind_matrix.r[1].m128_f32[1]));
-        LOG("    - inverse_bind_matrix.r[1].m128_f32[2]: " + util::float_to_string(inverse_bind_matrix.r[1].m128_f32[2]));
-        LOG("    - inverse_bind_matrix.r[1].m128_f32[3]: " + util::float_to_string(inverse_bind_matrix.r[1].m128_f32[3]));
-        LOG("    - inverse_bind_matrix.r[2].m128_f32[0]: " + util::float_to_string(inverse_bind_matrix.r[2].m128_f32[0]));
-        LOG("    - inverse_bind_matrix.r[2].m128_f32[1]: " + util::float_to_string(inverse_bind_matrix.r[2].m128_f32[1]));
-        LOG("    - inverse_bind_matrix.r[2].m128_f32[2]: " + util::float_to_string(inverse_bind_matrix.r[2].m128_f32[2]));
-        LOG("    - inverse_bind_matrix.r[2].m128_f32[3]: " + util::float_to_string(inverse_bind_matrix.r[2].m128_f32[3]));
-        LOG("    - inverse_bind_matrix.r[3].m128_f32[0]: " + util::float_to_string(inverse_bind_matrix.r[3].m128_f32[0]));
-        LOG("    - inverse_bind_matrix.r[3].m128_f32[1]: " + util::float_to_string(inverse_bind_matrix.r[3].m128_f32[1]));
-        LOG("    - inverse_bind_matrix.r[3].m128_f32[2]: " + util::float_to_string(inverse_bind_matrix.r[3].m128_f32[2]));
-        LOG("    - inverse_bind_matrix.r[3].m128_f32[3]: " + util::float_to_string(inverse_bind_matrix.r[3].m128_f32[3]));
+        if (log_output)
+        {
+            LOG("Bone " + std::to_string(b));
+            LOG("    - inverse_bind_matrix.r[0].m128_f32[0]: " + util::float_to_string(inverse_bind_matrix.r[0].m128_f32[0]));
+            LOG("    - inverse_bind_matrix.r[0].m128_f32[1]: " + util::float_to_string(inverse_bind_matrix.r[0].m128_f32[1]));
+            LOG("    - inverse_bind_matrix.r[0].m128_f32[2]: " + util::float_to_string(inverse_bind_matrix.r[0].m128_f32[2]));
+            LOG("    - inverse_bind_matrix.r[0].m128_f32[3]: " + util::float_to_string(inverse_bind_matrix.r[0].m128_f32[3]));
+            LOG("    - inverse_bind_matrix.r[1].m128_f32[0]: " + util::float_to_string(inverse_bind_matrix.r[1].m128_f32[0]));
+            LOG("    - inverse_bind_matrix.r[1].m128_f32[1]: " + util::float_to_string(inverse_bind_matrix.r[1].m128_f32[1]));
+            LOG("    - inverse_bind_matrix.r[1].m128_f32[2]: " + util::float_to_string(inverse_bind_matrix.r[1].m128_f32[2]));
+            LOG("    - inverse_bind_matrix.r[1].m128_f32[3]: " + util::float_to_string(inverse_bind_matrix.r[1].m128_f32[3]));
+            LOG("    - inverse_bind_matrix.r[2].m128_f32[0]: " + util::float_to_string(inverse_bind_matrix.r[2].m128_f32[0]));
+            LOG("    - inverse_bind_matrix.r[2].m128_f32[1]: " + util::float_to_string(inverse_bind_matrix.r[2].m128_f32[1]));
+            LOG("    - inverse_bind_matrix.r[2].m128_f32[2]: " + util::float_to_string(inverse_bind_matrix.r[2].m128_f32[2]));
+            LOG("    - inverse_bind_matrix.r[2].m128_f32[3]: " + util::float_to_string(inverse_bind_matrix.r[2].m128_f32[3]));
+            LOG("    - inverse_bind_matrix.r[3].m128_f32[0]: " + util::float_to_string(inverse_bind_matrix.r[3].m128_f32[0]));
+            LOG("    - inverse_bind_matrix.r[3].m128_f32[1]: " + util::float_to_string(inverse_bind_matrix.r[3].m128_f32[1]));
+            LOG("    - inverse_bind_matrix.r[3].m128_f32[2]: " + util::float_to_string(inverse_bind_matrix.r[3].m128_f32[2]));
+            LOG("    - inverse_bind_matrix.r[3].m128_f32[3]: " + util::float_to_string(inverse_bind_matrix.r[3].m128_f32[3]));
+        }
 
         bones_inverse_bind_matrices.push_back(inverse_bind_matrix.r[0].m128_f32[0]);
         bones_inverse_bind_matrices.push_back(inverse_bind_matrix.r[0].m128_f32[1]);
