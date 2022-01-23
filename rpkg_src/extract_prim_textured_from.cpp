@@ -60,13 +60,14 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
 
         //timing_string = "Calculating Entity World Coordinate Data And Extracting Associated PRIMs to glTFs...";
 
-        LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
+        //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
 
-        LOG("Loading Hash List...");
-
-        generic_function::load_hash_list(true);
-
-        LOG("Loading Hash List: Done");
+        if (!hash_list_loaded)
+        {
+            LOG("Loading Hash List...");
+            generic_function::load_hash_list(true);
+            LOG("Loading Hash List: Done");
+        }
 
         //std::vector<std::string>().swap(prim_asset_file_names);
 
@@ -76,7 +77,7 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
         {
             uint64_t temp_hash_value = std::strtoull(filters.at(f).c_str(), nullptr, 16);
 
-            uint32_t rpkg_index = rpkg_function::get_latest_hash(temp_hash_value, false);
+            uint32_t rpkg_index = rpkg_function::get_latest_hash(temp_hash_value);
 
             if (rpkg_index == UINT32_MAX)
             {
@@ -132,7 +133,7 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
 
                     for (uint32_t d = 0; d < temp_hash_reference_count; d++)
                     {
-                        uint32_t temp_rpkg_index = rpkg_function::get_latest_hash(rpkgs.at(temp_prim.prim_rpkg_index).hash.at(temp_prim.prim_hash_index).hash_reference_data.hash_reference.at(d), false);
+                        uint32_t temp_rpkg_index = rpkg_function::get_latest_hash(rpkgs.at(temp_prim.prim_rpkg_index).hash.at(temp_prim.prim_hash_index).hash_reference_data.hash_reference.at(d));
 
                         if (temp_rpkg_index == UINT32_MAX)
                         {
@@ -157,7 +158,7 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
 
                                 if (temp_mati.has_diffuse_texture)
                                 {
-                                    uint32_t temp_rpkg_index2 = rpkg_function::get_latest_hash(temp_mati.diffuse_texture_hash, false);
+                                    uint32_t temp_rpkg_index2 = rpkg_function::get_latest_hash(temp_mati.diffuse_texture_hash);
 
                                     if (temp_rpkg_index2 == UINT32_MAX)
                                     {
@@ -191,7 +192,7 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
                                 
                                 if (temp_mati.has_normal_texture)
                                 {
-                                    uint32_t temp_rpkg_index2 = rpkg_function::get_latest_hash(temp_mati.normal_texture_hash, false);
+                                    uint32_t temp_rpkg_index2 = rpkg_function::get_latest_hash(temp_mati.normal_texture_hash);
 
                                     if (temp_rpkg_index2 == UINT32_MAX)
                                     {

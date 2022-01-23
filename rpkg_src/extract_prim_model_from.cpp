@@ -59,13 +59,13 @@ void rpkg_function::extract_prim_model_from(std::string& input_path, std::string
 
         //timing_string = "Calculating Entity World Coordinate Data And Extracting Associated PRIMs to glTFs...";
 
-        LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
+        //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
 
-        LOG("Loading Hash List...");
+        //LOG("Loading Hash List...");
 
         //generic_function::load_hash_list(true);
 
-        LOG("Loading Hash List: Done");
+        //LOG("Loading Hash List: Done");
 
         //std::vector<std::string>().swap(prim_asset_file_names);
 

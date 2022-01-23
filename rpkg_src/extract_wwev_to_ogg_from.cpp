@@ -47,7 +47,7 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
         timing_string = ss.str();
 
-        LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+        //LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
 
         file::create_directories(file::output_path_append("WWEV", output_path));
 

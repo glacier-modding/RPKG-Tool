@@ -21,11 +21,12 @@
 
 void dev_function::dev_hash_list_percent_found(std::string& input_path, std::string& filter, std::string& output_path)
 {
-    LOG("Loading Hash List...");
-
-    generic_function::load_hash_list(false);
-
-    LOG("Loading Hash List: Done");
+    if (!hash_list_loaded)
+    {
+        LOG("Loading Hash List...");
+        generic_function::load_hash_list(false);
+        LOG("Loading Hash List: Done");
+    }
 
     uint64_t matched = 0;
 

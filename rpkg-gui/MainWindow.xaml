@@ -65,8 +65,119 @@
 						<MenuItem Click="Rebuild_Click" Header="Rebuild Localization (LOCR) From Folder"/>
 						<MenuItem Click="Rebuild_Click" Header="Rebuild Localization (RTLV) From Folder"/>
 						<MenuItem Click="Rebuild_Click" Header="Rebuild Sounds (WWEV) From Folder"/>
-					</MenuItem>
-					<MenuItem Header="Color Theme">
+                    </MenuItem>
+                    <MenuItem Header="Map Editing">
+                        <MenuItem Header="Export Main Hitman Map to Godot v4 project">
+                            <MenuItem Header="ICA Facility">
+                                <MenuItem Header="Intro" Click="MainMapExport_Click" Tag="00DF652A32235BCE"/>
+                                <MenuItem Header="Freeform Training" Click="MainMapExport_Click" Tag="005FCD7DB380B935"/>
+                                <MenuItem Header="The Final Test" Click="MainMapExport_Click" Tag="00A07698324C95E4"/>
+                            </MenuItem>
+
+                            <MenuItem Header="Paris">
+                                <MenuItem Header="The Showstopper" Click="MainMapExport_Click" Tag="0011E323C2A9568F"/>
+                                <MenuItem Header="Holiday Hoarders" Click="MainMapExport_Click" Tag="00B69DB24675E6EC"/>
+                            </MenuItem>
+
+                            <MenuItem Header="Sapienza">
+                                <MenuItem Header="World of Tomorrow" Click="MainMapExport_Click" Tag="003FCA2D355765F6"/>
+                                <MenuItem Header="The Icon" Click="MainMapExport_Click" Tag="004E41EA4574E6F1"/>
+                                <MenuItem Header="Landslide" Click="MainMapExport_Click" Tag="00E849806992CB33"/>
+                                <MenuItem Header="The Author" Click="MainMapExport_Click" Tag="00E35B73AB0A3FCD"/>
+                            </MenuItem>
+
+                            <MenuItem Header="Marrakesh">
+                                <MenuItem Header="A Gilded Cage" Click="MainMapExport_Click" Tag="00CCB0BC5BBCEB64"/>
+                                <MenuItem Header="A House Built on Sand" Click="MainMapExport_Click" Tag="00651D18449B04B0"/>
+                            </MenuItem>
+
+                            <MenuItem Header="Bangkok">
+                                <MenuItem Header="Club 27" Click="MainMapExport_Click" Tag="000CE1E7168604DA"/>
+                                <MenuItem Header="The Source" Click="MainMapExport_Click" Tag="0001589D95EDC6D8"/>
+                            </MenuItem>
+
+                            <MenuItem Header="Colorado">
+                                <MenuItem Header="Freedom Fighters" Click="MainMapExport_Click" Tag="00B8C8111EF26413"/>
+                            </MenuItem>
+
+                            <MenuItem Header="Hokkaido">
+                                <MenuItem Header="Situs Inversus" Click="MainMapExport_Click" Tag="008167E46937D17C"/>
+                                <MenuItem Header="Hokkaido Snow Festival" Click="MainMapExport_Click" Tag="00E139CEC06E5C62"/>
+                                <MenuItem Header="Patient Zero" Click="MainMapExport_Click" Tag="001722CB49DCFF66"/>
+                            </MenuItem>
+
+                            <MenuItem Header="Hawke's Bay">
+                                <MenuItem Header="Nightcall" Click="MainMapExport_Click" Tag="00BF2670C110F0D2"/>
+                                <MenuItem Header="The Mills Reverie" Click="MainMapExport_Click" Tag="004DEC0476CFF564"/>
+                            </MenuItem>
+
+                            <MenuItem Header="Miami">
+                                <MenuItem Header="The Finish Line" Click="MainMapExport_Click" Tag="00DCAD025C52A18F"/>
+                                <MenuItem Header="A Silver Tongue" Click="MainMapExport_Click" Tag="00AC85A2AA837088"/>
+                            </MenuItem>
+
+                            <MenuItem Header="Santa Fortuna">
+                                <MenuItem Header="Three-Headed Serpent" Click="MainMapExport_Click" Tag="005F175F74156567"/>
+                                <MenuItem Header="Embrace of the Serpent" Click="MainMapExport_Click" Tag="00493496F045C73D"/>
+                            </MenuItem>
+
+                            <MenuItem Header="Mumbai">
+                                <MenuItem Header="Chasing a Ghost" Click="MainMapExport_Click" Tag="000EDA83617783CF"/>
+                                <MenuItem Header="Illusions of Grandeur" Click="MainMapExport_Click" Tag="005D7F5C3AB501D0"/>
+                            </MenuItem>
+
+                            <MenuItem Header="Whittleton Creek">
+                                <MenuItem Header="Another Life" Click="MainMapExport_Click" Tag="00C18C63D3E2E1E1"/>
+                                <MenuItem Header="A Bitter Pill" Click="MainMapExport_Click" Tag="007775946A5BCE1C"/>
+                            </MenuItem>
+
+                            <MenuItem Header="Isle of Sgàil">
+                                <MenuItem Header="The Ark Society" Click="MainMapExport_Click" Tag="00B91E821FD1D373"/>
+                            </MenuItem>
+
+                            <MenuItem Header="New York">
+                                <MenuItem Header="Golden Handshake" Click="MainMapExport_Click" Tag="00675BB0B65964C3"/>
+                            </MenuItem>
+
+                            <MenuItem Header="Haven Island">
+                                <MenuItem Header="The Last Resort" Click="MainMapExport_Click" Tag="00AA2B56939C2D1A"/>
+                            </MenuItem>
+
+                            <MenuItem Header="Dubai">
+                                <MenuItem Header="On Top Of The World" Click="MainMapExport_Click" Tag="00D0CA04ADF58866"/>
+                            </MenuItem>
+
+                            <MenuItem Header="Dartmoor">
+                                <MenuItem Header="Death In The Family" Click="MainMapExport_Click" Tag="00D17645CAA28C8A"/>
+                                <MenuItem Header="The Dartmoor Garden Show" Click="MainMapExport_Click" Tag="007A8497E95A4415"/>
+                            </MenuItem>
+
+                            <MenuItem Header="Berlin">
+                                <MenuItem Header="Apex Predator" Click="MainMapExport_Click" Tag="00B839D4389104BF"/>
+                            </MenuItem>
+
+                            <MenuItem Header="Chongqing">
+                                <MenuItem Header="End Of An Era" Click="MainMapExport_Click" Tag="00E7CFC510AC524F"/>
+                            </MenuItem>
+
+                            <MenuItem Header="Mendoza">
+                                <MenuItem Header="The Farewell" Click="MainMapExport_Click" Tag="0091EB0CBCFC66E3"/>
+                            </MenuItem>
+
+                            <MenuItem Header="Carpathian Mountains">
+                                <MenuItem Header="Untouchable" Click="MainMapExport_Click" Tag="006BCFA7D4EB51E5"/>
+                            </MenuItem>
+
+                            <MenuItem Header="Sniper Assassin">
+                                <MenuItem Header="Himmelstein" Click="MainMapExport_Click" Tag="00D55EECEED49BB6"/>
+                                <MenuItem Header="Hantu Port" Click="MainMapExport_Click" Tag="00D0EA44F6999F2B"/>
+                                <MenuItem Header="Siberia" Click="MainMapExport_Click" Tag="00939786A2259BA0"/>
+                            </MenuItem>
+                        </MenuItem>
+                        <MenuItem  Click="MapEditorExport_Click" Header="Export Map By TEMP to Godot v4 project"/>
+                        <MenuItem Click="MapEditorImport_Click" Header="Import Map from Godot v4 project"/>
+                    </MenuItem>
+                    <MenuItem Header="Color Theme">
 						<MenuItem Click="ChangeColorTheme_Click" Header="Light/Blue"/>
 						<MenuItem Click="ChangeColorTheme_Click" Header="Light/Brown"/>
 						<MenuItem Click="ChangeColorTheme_Click" Header="Light/Green"/>
@@ -123,8 +234,10 @@
 								<ColumnDefinition Width="Auto"/>
 								<ColumnDefinition Width="Auto"/>
 							</Grid.ColumnDefinitions>
-							<Label Grid.Row="0" Grid.Column="0" Content="Search string:"/>
-							<TextBox Grid.Row="0" Grid.Column="1" x:Name="SearchRPKGsTextBox" TextChanged="SearchRPKGsTextBox_TextChanged" FontFamily="Consolas" TextWrapping="NoWrap"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Grid.Row="0" Grid.Column="0" Content="Search string:" VerticalContentAlignment="Center"/>
+                            </StackPanel>
+                            <TextBox Grid.Row="0" Grid.Column="1" x:Name="SearchRPKGsTextBox" TextChanged="SearchRPKGsTextBox_TextChanged" FontFamily="Consolas" TextWrapping="NoWrap"/>
 							<Label Grid.Row="0" Grid.Column="2" Content="Max results per RPKG:"/>
 							<ComboBox Grid.Row="0" Grid.Column="3" x:Name="SearchRPKGsComboBox" FontFamily="Consolas">
 								<ComboBoxItem Content="100" IsSelected="True"/>

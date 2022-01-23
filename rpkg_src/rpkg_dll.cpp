@@ -77,6 +77,7 @@ int reset_task_status()
 {
     task_single_status = READY;
     task_multiple_status = READY;
+    task_map_status = READY;
     gui_control = READY;
 
     return 0;
@@ -104,6 +105,58 @@ int reset_task_multiple_status()
     task_multiple_status = 0;
 
     return task_multiple_status;
+}
+
+int get_task_map_status()
+{
+    return task_map_status;
+}
+
+int reset_task_map_status()
+{
+    task_map_status = 0;
+
+    return task_map_status;
+}
+
+int get_map_percent_progress_recursive_temp()
+{
+    return map_percent_progress_recursive_temp;
+}
+
+int get_map_percent_progress_map_nodes()
+{
+    return map_percent_progress_map_nodes;
+}
+
+int get_map_percent_progress_map_nodes_prim()
+{
+    return map_percent_progress_map_nodes_prim;
+}
+
+int get_map_percent_progress_godot_files()
+{
+    return map_percent_progress_godot_files;
+}
+
+int get_map_percent_progress_godot_map_nodes()
+{
+    return map_percent_progress_godot_map_nodes;
+}
+
+int get_map_percent_progress_map_node_temp_loading()
+{
+    return map_percent_progress_map_node_temp_loading;
+}
+
+int get_map_percent_progress_map_node_changes_check()
+{
+    return map_percent_progress_map_node_changes_check;
+}
+
+int get_map_percent_progress_map_writing_changes_to_qn()
+{
+    return map_percent_progress_map_writing_changes_to_qn;
 }
 
 int set_gui_control(int gui_control_value)

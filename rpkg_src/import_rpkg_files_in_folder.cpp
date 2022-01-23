@@ -10,34 +10,34 @@ void rpkg_function::import_rpkg_files_in_folder(std::string& input_rpkg_folder_p
 {
     std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
 
-    double console_update_rate = 1.0 / 2.0;
-    int period_count = 1;
+    //double console_update_rate = 1.0 / 2.0;
+    //int period_count = 1;
 
     for (const auto& entry : std::filesystem::recursive_directory_iterator(input_rpkg_folder_path))
     {
-        std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
+        //std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
 
-        double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+        //double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
 
-        if (time_in_seconds_from_start_time > console_update_rate)
-        {
-            start_time = end_time;
+        //if (time_in_seconds_from_start_time > console_update_rate)
+        //{
+            //start_time = end_time;
 
-            if (period_count > 3)
-            {
-                period_count = 0;
-            }
+            //if (period_count > 3)
+            //{
+                //period_count = 0;
+            //}
 
-            std::stringstream ss;
+            //std::stringstream ss;
 
-            ss << "Scanning folder" << std::string(period_count, '.');
+            //ss << "Scanning folder" << std::string(period_count, '.');
 
-            timing_string = ss.str();
+            //timing_string = ss.str();
 
-            LOG_NO_ENDL("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+            //LOG_NO_ENDL("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
 
-            period_count++;
-        }
+            //period_count++;
+        //}
 
         if (std::filesystem::is_regular_file(entry.path().string()))
         {

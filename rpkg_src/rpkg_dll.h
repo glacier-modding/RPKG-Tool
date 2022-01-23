@@ -23,6 +23,26 @@ RPKG_EXPORT int get_task_multiple_status();
 
 RPKG_EXPORT int reset_task_multiple_status();
 
+RPKG_EXPORT int get_task_map_status();
+
+RPKG_EXPORT int reset_task_map_status();
+
+RPKG_EXPORT int get_map_percent_progress_recursive_temp();
+
+RPKG_EXPORT int get_map_percent_progress_map_nodes();
+
+RPKG_EXPORT int get_map_percent_progress_map_nodes_prim();
+
+RPKG_EXPORT int get_map_percent_progress_godot_files();
+
+RPKG_EXPORT int get_map_percent_progress_godot_map_nodes();
+
+RPKG_EXPORT int get_map_percent_progress_map_node_temp_loading();
+
+RPKG_EXPORT int get_map_percent_progress_map_node_changes_check();
+
+RPKG_EXPORT int get_map_percent_progress_map_writing_changes_to_qn();
+
 RPKG_EXPORT int set_gui_control(int gui_control_value);
 
 RPKG_EXPORT int get_gui_control();

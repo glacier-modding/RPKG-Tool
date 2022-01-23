@@ -19,11 +19,12 @@ void rpkg_function::latest_hash(std::string& input_path, std::string& filter, st
 
     if (file::path_exists(input_rpkg_folder_path))
     {
-        LOG("Loading Hash List...");
-
-        generic_function::load_hash_list(false);
-
-        LOG("Loading Hash List: Done");
+        if (!hash_list_loaded)
+        {
+            LOG("Loading Hash List...");
+            generic_function::load_hash_list(false);
+            LOG("Loading Hash List: Done");
+        }
 
         rpkg_function::import_rpkg_files_in_folder(input_rpkg_folder_path);
 
@@ -31,7 +32,7 @@ void rpkg_function::latest_hash(std::string& input_path, std::string& filter, st
 
         ss << "Scanning folder: Done";
 
-        LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+        //LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
 
         std::vector<std::string> filters = util::parse_input_filter(filter);
 
@@ -55,7 +56,7 @@ void rpkg_function::latest_hash(std::string& input_path, std::string& filter, st
                 LOG("Scanning RPKG files for: " + filters.at(z));
             }
 
-            uint32_t hash_in_rpkg_index = get_latest_hash(hash_value, true);
+            uint32_t hash_in_rpkg_index = get_latest_hash(hash_value);
 
             LOG("The latest hash file used is in RPKG file: " + rpkgs.at(hash_in_rpkg_index).rpkg_file_name);
 

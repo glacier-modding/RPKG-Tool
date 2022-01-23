@@ -13,7 +13,7 @@
 #include <fstream>
 #include <filesystem>
 
-uint32_t rpkg_function::get_latest_hash(uint64_t hash_value, bool log_output)
+uint32_t rpkg_function::get_latest_hash(uint64_t hash_value)
 {
     uint32_t hash_in_rpkgs_index_by_chunk_number = 0;
     uint32_t hash_in_rpkgs_index_by_patch_number = 0;

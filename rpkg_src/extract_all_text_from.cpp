@@ -43,11 +43,11 @@ void rpkg_function::extract_all_text_from(std::string& input_path, std::string& 
             rpkg_function::import_rpkg(input_path, true);
         }
 
-        LOG("Loading Hash List...");
+        //LOG("Loading Hash List...");
 
         //generic_function::load_hash_list(true);
 
-        LOG("Loading Hash List: Done");
+        //LOG("Loading Hash List: Done");
 
         HRESULT hresult = CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
 
@@ -62,7 +62,7 @@ void rpkg_function::extract_all_text_from(std::string& input_path, std::string& 
 
         timing_string = ss.str();
 
-        LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
+        //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
 
         file::create_directories(file::output_path_append("TEXT", output_path));
 

@@ -48,11 +48,11 @@ void rpkg_function::extract_all_prim_model_from(std::string& input_path, std::st
             rpkg_function::import_rpkg_files_in_folder(parent_path);
         }
 
-        LOG("Loading Hash List...");
+        //LOG("Loading Hash List...");
 
         //generic_function::load_hash_list(true);
 
-        LOG("Loading Hash List: Done");
+        //LOG("Loading Hash List: Done");
 
         std::stringstream ss;
 
@@ -60,7 +60,7 @@ void rpkg_function::extract_all_prim_model_from(std::string& input_path, std::st
 
         timing_string = ss.str();
 
-        LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
+        //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
 
         //file::create_directories(file::output_path_append("PRIM", output_path));
 

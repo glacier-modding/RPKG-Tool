@@ -113,6 +113,18 @@
     <Compile Include="Licenses.xaml.cs">
       <DependentUpon>Licenses.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MapFilter.xaml.cs">
+      <DependentUpon>MapFilter.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MapExportProgress.xaml.cs">
+      <DependentUpon>MapExportProgress.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MapImportProgress.xaml.cs">
+      <DependentUpon>MapImportProgress.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MapImportSelector.xaml.cs">
+      <DependentUpon>MapImportSelector.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Message.xaml.cs">
       <DependentUpon>Message.xaml</DependentUpon>
     </Compile>
@@ -159,6 +171,22 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="MapFilter.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MapExportProgress.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MapImportProgress.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MapImportSelector.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Message.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

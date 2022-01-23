@@ -747,7 +747,7 @@ bool text::save_text_to_jpg(std::string png_path)
 
     if (FAILED(hresult))
     {
-        LOG("Error: PNG file " + texture_file_path.generic_string() + " exporting failed.");
+        LOG("Error: JPG file " + texture_file_path.generic_string() + " exporting failed.");
 
         return false;
     }
@@ -985,7 +985,7 @@ bool text::save_texd_to_jpg(std::string png_path)
 
         if (FAILED(hresult))
         {
-            LOG("Error: PNG file " + texture_file_path.generic_string() + " exporting failed.");
+            LOG("Error: JPG file " + texture_file_path.generic_string() + " exporting failed.");
 
             return false;
         }
