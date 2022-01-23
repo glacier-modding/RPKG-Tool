@@ -69,7 +69,7 @@
                     <MenuItem Header="Map Editing">
                         <MenuItem Header="Export Main Hitman Map to Godot v4 project">
                             <MenuItem Header="ICA Facility">
-                                <MenuItem Header="Intro" Click="MainMapExport_Click" Tag="00DF652A32235BCE"/>
+                                <MenuItem Header="Intro" Click="MainMapExport_Click" Tag="00891597BD81CC36"/>
                                 <MenuItem Header="Freeform Training" Click="MainMapExport_Click" Tag="005FCD7DB380B935"/>
                                 <MenuItem Header="The Final Test" Click="MainMapExport_Click" Tag="00A07698324C95E4"/>
                             </MenuItem>
