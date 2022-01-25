@@ -905,10 +905,7 @@ namespace rpkg
 
 						RightClickMenu rightClickMenu = new RightClickMenu(buttons);
 
-						System.Windows.Point point = new System.Windows.Point(e.Location.X, e.Location.Y);
-
-						rightClickMenu.Left = PointToScreen(point).X;
-						rightClickMenu.Top = PointToScreen(point).Y;
+						SetRightClickMenuPosition(ref rightClickMenu, e.Location.X, e.Location.Y);
 
 						rightClickMenu.ShowDialog();
 
@@ -1046,10 +1043,7 @@ namespace rpkg
 
 							RightClickMenu rightClickMenu = new RightClickMenu(buttons);
 
-							System.Windows.Point point = new System.Windows.Point(e.Location.X, e.Location.Y);
-
-							rightClickMenu.Left = PointToScreen(point).X;
-							rightClickMenu.Top = PointToScreen(point).Y;
+							SetRightClickMenuPosition(ref rightClickMenu, e.Location.X, e.Location.Y);
 
 							rightClickMenu.ShowDialog();
 
@@ -1090,10 +1084,7 @@ namespace rpkg
 
 							RightClickMenu rightClickMenu = new RightClickMenu(buttons);
 
-							System.Windows.Point point = new System.Windows.Point(e.Location.X, e.Location.Y);
-
-							rightClickMenu.Left = PointToScreen(point).X;
-							rightClickMenu.Top = PointToScreen(point).Y;
+							SetRightClickMenuPosition(ref rightClickMenu, e.Location.X, e.Location.Y);
 
 							rightClickMenu.ShowDialog();
 
@@ -1134,10 +1125,7 @@ namespace rpkg
 
 							RightClickMenu rightClickMenu = new RightClickMenu(buttons);
 
-							System.Windows.Point point = new System.Windows.Point(e.Location.X, e.Location.Y);
-
-							rightClickMenu.Left = PointToScreen(point).X;
-							rightClickMenu.Top = PointToScreen(point).Y;
+							SetRightClickMenuPosition(ref rightClickMenu, e.Location.X, e.Location.Y);
 
 							rightClickMenu.ShowDialog();
 
@@ -1203,10 +1191,7 @@ namespace rpkg
 
 							RightClickMenu rightClickMenu = new RightClickMenu(buttons);
 
-							System.Windows.Point point = new System.Windows.Point(e.Location.X, e.Location.Y);
-
-							rightClickMenu.Left = PointToScreen(point).X;
-							rightClickMenu.Top = PointToScreen(point).Y;
+							SetRightClickMenuPosition(ref rightClickMenu, e.Location.X, e.Location.Y);
 
 							rightClickMenu.ShowDialog();
 
@@ -1288,10 +1273,7 @@ namespace rpkg
 
 							RightClickMenu rightClickMenu = new RightClickMenu(buttons);
 
-							System.Windows.Point point = new System.Windows.Point(e.Location.X, e.Location.Y);
-
-							rightClickMenu.Left = PointToScreen(point).X;
-							rightClickMenu.Top = PointToScreen(point).Y;
+							SetRightClickMenuPosition(ref rightClickMenu, e.Location.X, e.Location.Y);
 
 							rightClickMenu.ShowDialog();
 
@@ -1444,10 +1426,7 @@ namespace rpkg
 							rightClickMenu = new RightClickMenu(buttons);
 						}
 
-						System.Windows.Point point = new System.Windows.Point(e.Location.X, e.Location.Y);
-
-						rightClickMenu.Left = PointToScreen(point).X;
-						rightClickMenu.Top = PointToScreen(point).Y;
+						SetRightClickMenuPosition(ref rightClickMenu, e.Location.X, e.Location.Y);
 
 						rightClickMenu.ShowDialog();
 
@@ -2238,15 +2217,6 @@ namespace rpkg
 
 								return;
 							}
-
-							string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
-
-							if (outputFolder == "")
-							{
-								return;
-							}
-
-							output_path = outputFolder;
 						}
 						else if (rightClickMenu.buttonPressed == "button5" && buttonCount == 7)
 						{
@@ -2258,6 +2228,15 @@ namespace rpkg
 
 								progress.message.Content = "Extracting PRIMs linked to " + hashName + " To GLB File(s)...";
 							}
+
+							string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
+
+							if (outputFolder == "")
+							{
+								return;
+							}
+
+							output_path = outputFolder;
 						}
 						else
 						{
@@ -6475,8 +6454,7 @@ namespace rpkg
 
 			RightClickMenu rightClickMenu = new RightClickMenu(buttons);
 
-			rightClickMenu.Left = PointToScreen(Mouse.GetPosition(null)).X;
-			rightClickMenu.Top = PointToScreen(Mouse.GetPosition(null)).Y;
+			SetRightClickMenuPosition(ref rightClickMenu, Mouse.GetPosition(null).X, Mouse.GetPosition(null).Y);
 
 			rightClickMenu.ShowDialog();
 
@@ -7184,6 +7162,31 @@ namespace rpkg
 			}
 
 			return "";
+		}
+
+		private void SetRightClickMenuPosition(ref RightClickMenu rightClickMenu, double x, double y)
+        {
+			System.Windows.Point point = new System.Windows.Point(x, y);
+
+			rightClickMenu.Left = PointToScreen(point).X;
+			rightClickMenu.Top = PointToScreen(point).Y;
+
+			PresentationSource source = PresentationSource.FromVisual(this);
+
+			double dpiX = 1.0;
+			double dpiY = 1.0;
+
+			if (source != null)
+			{
+				dpiX = source.CompositionTarget.TransformToDevice.M11;
+				dpiY = source.CompositionTarget.TransformToDevice.M22;
+			}
+
+			if (dpiX != 1.0 || dpiY != 1.0)
+			{
+				rightClickMenu.Left /= dpiX;
+				rightClickMenu.Top /= dpiY;
+			}
 		}
 	}
 }
