@@ -185,6 +185,9 @@ void console::display_usage_info()
     LOG("    -generate_rpkg_from <path to folder to generate rpkg from>");
     LOG("        Generates a RPKG file from hash file(s) in a given folder and all subfolders.");
     LOG("        The folder name is used for the filename of the generated RPKG file.");
+    LOG("    -generate_rpkg_from_quickly <path to folder to generate rpkg from>");
+    LOG("        Generates a RPKG file from hash file(s) in a given folder and all subfolders, but q u i c k l y.");
+    LOG("        The folder name is used for the filename of the generated RPKG file.");
     LOG("    -hash_depends <path to folder containing RPKG files>");
     LOG("        Lists the forward and reverse depends of a given hash file/resource.");
     LOG("        Scans a directory, commonly Hitman's Runtime dir, and imports and");
@@ -273,6 +276,8 @@ void console::display_usage_info()
     LOG("        rpkg-cli.exe -filter ORES,REPO,JSON -extract_from_rpkg \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg\"");
     LOG("    Generates a RPKG file from hash file(s) in a given folder and all subfolders:");
     LOG("        rpkg-cli.exe -generate_rpkg_from chunk0patch1");
+    LOG("    Generates a RPKG file from hash file(s) in a given folder and all subfolders but q u i c k l y:");
+    LOG("        rpkg-cli.exe -generate_rpkg_from_quickly chunk0patch1");
     LOG("    Converts a Hash *.meta file into an easily editable JSON file (*.meta.JSON):");
     LOG("        rpkg-cli.exe -hash_meta_to_json \"C:\\00123456789ABCDE.meta\"");
     LOG("    Converts a Hash meta JSON file (*.meta.JSON) into a Hash *.meta file:");

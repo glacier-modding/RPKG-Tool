@@ -16,7 +16,7 @@
 #include <sstream>
 #include <map>
 
-void rpkg_function::generate_rpkg_from_quickly(std::string& input_path, std::string& filter, std::string& output_path)
+void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& filter, std::string& output_path)
 {
     task_single_status = TASK_EXECUTING;
 
@@ -299,7 +299,7 @@ void rpkg_function::generate_rpkg_from_quickly(std::string& input_path, std::str
 
                 uint64_t compressed_size_final;
 
-                compressed_size_final = LZ4_compress_HC(input_file_data.data(), output_file_data.data(), (int)input_file_size, compressed_size, LZ4HC_CLEVEL_MAX);
+                compressed_size_final = LZ4_compress_fast(input_file_data.data(), output_file_data.data(), (int)input_file_size, compressed_size, 15);
 
                 output_data_length.push_back(compressed_size_final);
 
