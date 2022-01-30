@@ -65,6 +65,7 @@
     <ClCompile Include="..\rpkg_src\extract_wwev_to_ogg_from.cpp" />
     <ClCompile Include="..\rpkg_src\file.cpp" />
     <ClCompile Include="..\rpkg_src\generate_rpkg_from.cpp" />
+    <ClCompile Include="..\rpkg_src\generate_rpkg_quickly_from.cpp" />
     <ClCompile Include="..\rpkg_src\get_latest_hash.cpp" />
     <ClCompile Include="..\rpkg_src\get_unique_name.cpp" />
     <ClCompile Include="..\rpkg_src\global.cpp" />

@@ -171,6 +171,9 @@
     <ClCompile Include="..\rpkg_src\generate_rpkg_from.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\rpkg_src\generate_rpkg_quickly_from.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\rpkg_src\global.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
