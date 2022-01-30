@@ -16,7 +16,7 @@
 #include <sstream>
 #include <map>
 
-void rpkg_function::generate_rpkg_from_quickly(std::string& input_path, std::string& filter, std::string& output_path)
+void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& filter, std::string& output_path)
 {
     task_single_status = TASK_EXECUTING;
 

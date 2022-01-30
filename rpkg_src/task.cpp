@@ -145,9 +145,9 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     {
         rpkg_function::generate_rpkg_from(input_path, filter, output_path);
     }
-    else if (command == "-generate_rpkg_from_quickly")
+    else if (command == "-generate_rpkg_quickly_from")
     {
-        rpkg_function::generate_rpkg_from_quickly(input_path, filter, output_path);
+        rpkg_function::generate_rpkg_quickly_from(input_path, filter, output_path);
     }
     else if (command == "-hash_depends")
     {
@@ -391,7 +391,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-export_map_textured",
                                                     "-import_map",
                                                     "-generate_rpkg_from",
-                                                    "-generate_rpkg_from_quickly",
+                                                    "-generate_rpkg_quickly_from",
                                                     "-hash_depends",
                                                     "-latest_hash",
                                                     "-hash_meta_to_json",
