@@ -58,7 +58,7 @@ void rpkg_function::latest_hash(std::string& input_path, std::string& filter, st
 
             uint32_t hash_in_rpkg_index = get_latest_hash(hash_value);
 
-            LOG("The latest hash file used is in RPKG file: " + rpkgs.at(hash_in_rpkg_index).rpkg_file_name);
+            LOG("The latest version of " + filters.at(z) + " is in: " + rpkgs.at(hash_in_rpkg_index).rpkg_file_name);
 
             if (z != filters.size() - 1)
             {
