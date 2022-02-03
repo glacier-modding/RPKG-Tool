@@ -9,7 +9,6 @@
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
 #include "thirdparty/rapidjson/document.h"
-#include "thirdparty/rapidjson/prettywriter.h"
 #include "thirdparty/rapidjson/writer.h"
 #include "thirdparty/rapidjson/stringbuffer.h"
 #include "thirdparty/rapidjson/pointer.h"
@@ -2571,7 +2570,7 @@ void temp::export_json_files(std::string& json_file_path)
     std::ofstream file_temp = std::ofstream(json_file_path + rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_file_name + ".JSON", std::ofstream::binary);
 
     rapidjson::StringBuffer buffer_temp;
-    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer_temp(buffer_temp);
+    rapidjson::Writer<rapidjson::StringBuffer> writer_temp(buffer_temp);
     temp_json_document.Accept(writer_temp);
 
     //std::cout << buffer.GetString() << std::endl;
@@ -2583,7 +2582,7 @@ void temp::export_json_files(std::string& json_file_path)
     std::ofstream file_tblu = std::ofstream(json_file_path + rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_file_name + ".JSON", std::ofstream::binary);
 
     rapidjson::StringBuffer buffer_tblu;
-    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer_tblu(buffer_tblu);
+    rapidjson::Writer<rapidjson::StringBuffer> writer_tblu(buffer_tblu);
     tblu_json_document.Accept(writer_tblu);
 
     //std::cout << buffer.GetString() << std::endl;
@@ -3782,7 +3781,7 @@ void temp::write_qn_json_to_file(std::string output_path)
     std::ofstream file_qn = std::ofstream(output_path, std::ofstream::binary);
 
     rapidjson::StringBuffer buffer_qn;
-    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer_qn(buffer_qn);
+    rapidjson::Writer<rapidjson::StringBuffer> writer_qn(buffer_qn);
     qn_json_document.Accept(writer_qn);
 
     //std::cout << buffer.GetString() << std::endl;
