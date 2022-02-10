@@ -176,6 +176,11 @@ void console::display_usage_info()
     LOG("        Extracts all hash linked files/resources of type TEXT/TEXD from");
     LOG("        all the RPKG files in a given directory and then decrypts");
     LOG("        them in memory and outputs / formats them as TGA files.");
+    LOG("    -extract_to_rt_json <path to RPKG file>");
+    LOG("        Extracts hash linked files/resources of types supported by ResourceTool");
+    LOG("        where the hash files are specified by -filter and the Hitman game version");
+    LOG("        is specified by -version and then converts them in memory and outputs / formats them");
+    LOG("        as RT JSON file(s).");
     LOG("    -filter <hash filter>");
     LOG("        Filters hash linked files/resources by string filter.");
     LOG("        String filter can be a full hash value, partial hash value,");
@@ -255,6 +260,8 @@ void console::display_usage_info()
     LOG("        Specifies RPKG file whose hash files/resources will to be searched through.");
     LOG("    -text_search <text string>");
     LOG("        Specifices the text string to find within hash files/resources.");
+    LOG("    -version <text string>");
+    LOG("        Specifices the ResourceTool Hitman game version. Options are: HM2016, HM2, or HM3.");
     LOG("  Examples:");
     LOG("    Computes the IOI style truncated md5 hash/runtimeid from a string:");
     LOG("        rpkg-cli.exe -compute_ioi_hash \"[assembly:/_PRO/Scenes/Missions/CoastalTown/Mission01.entity].pc_entitytemplate\"");

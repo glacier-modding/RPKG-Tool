@@ -320,6 +320,10 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
 
         dev_function::dev_extract_all_hashes_in_game(rpkg_vars);
     }
+    else if (command == "-extract_to_rt_json")
+    {
+        rpkg_function::extract_to_rt_json(input_path, filter, search, output_path);
+    }
 }
 
 void task::process_and_execute_files_draged_and_dropped(std::vector<std::string> &dragged_and_dropped_files)
@@ -381,6 +385,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-extract_entity_to_qn",
                                                     "-extract_all_text_from",
                                                     "-extract_text_from",
+                                                    "-extract_to_rt_json",
                                                     "-extract_wwem_to_ogg_from",
                                                     "-extract_wwes_to_ogg_from",
                                                     "-extract_wwev_to_ogg_from",
@@ -457,6 +462,10 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
             search = commands.at(i).at(1);
         }
         else if (util::to_lower_case(commands.at(i).at(0)) == "-qn_format")
+        {
+            search = commands.at(i).at(1);
+        }
+        else if (util::to_lower_case(commands.at(i).at(0)) == "-version")
         {
             search = commands.at(i).at(1);
         }

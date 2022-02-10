@@ -21,6 +21,7 @@ struct rpkg_extraction_vars
 class rpkg_function
 {
 public:
+	static void extract_to_rt_json(std::string& input_path, std::string& filter, std::string& version, std::string& output_path);
 	static void extract_entity_to_qn(std::string& input_path, std::string& filter, std::string& output_path);
 	static void extract_prim_textured_from(std::string& input_path, std::string& filter, std::string& output_path, bool rotate);
 	static void latest_hash(std::string& input_path, std::string& filter, std::string& output_path);

@@ -549,6 +549,9 @@
     <ClCompile Include="..\rpkg_src\dev_extract_all_hashes_in_game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\rpkg_src\extract_to_rt_json.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\Bit_stream.h">

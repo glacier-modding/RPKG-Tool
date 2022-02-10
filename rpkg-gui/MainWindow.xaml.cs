@@ -1417,6 +1417,22 @@ namespace rpkg
 								rightClickMenu = new RightClickMenu(buttons);
 							}
 						}
+						else if (hashType == "AIRG" || hashType == "CRMD" || hashType == "ATMD" || hashType == "CBLU" || hashType == "CPPT" || hashType == "DSWB" || hashType == "GFXF" || hashType == "GIDX" || hashType == "VIDB" || hashType == "WSGB")
+                        {
+							string[] buttons = { "Extract " + hashName, "Extract To Hitman 3 RT (ResourceTool) JSON", "Extract To Hitman 2 RT (ResourceTool) JSON", "Extract To Hitman 2016 RT (ResourceTool) JSON", "Cancel" };
+
+							buttonCount = 5;
+
+							rightClickMenu = new RightClickMenu(buttons);
+						}
+						else if (hashType == "ECPB")
+						{
+							string[] buttons = { "Extract " + hashName, "Extract To Hitman 3 RT (ResourceTool) JSON", "Extract To Hitman 2 RT (ResourceTool) JSON", "Cancel" };
+
+							buttonCount = 4;
+
+							rightClickMenu = new RightClickMenu(buttons);
+						}
 						else
 						{
 							string[] buttons = { "Extract " + hashName, "Cancel" };
@@ -1666,6 +1682,16 @@ namespace rpkg
 
 								progress.message.Content = "Extracting " + hashName + " To JSON To IOI Path...";
 							}
+							else if (hashType == "AIRG" || hashType == "CRMD" || hashType == "ATMD" || hashType == "CBLU" || hashType == "CPPT" || hashType == "DSWB" || hashType == "ECPB" || hashType == "GFXF" || hashType == "GIDX" || hashType == "VIDB" || hashType == "WSGB")
+							{
+								command = "-extract_to_rt_json";
+
+								filter = hashValue;
+
+								search = "HM3";
+
+								progress.message.Content = "Extracting " + hashName + " To HM3 RT (ResourceTool) JSON...";
+							}
 
 							if (hashType != "TEMP")
 							{
@@ -1909,6 +1935,16 @@ namespace rpkg
 
 								return;
 							}
+							else if (hashType == "AIRG" || hashType == "CRMD" || hashType == "ATMD" || hashType == "CBLU" || hashType == "CPPT" || hashType == "DSWB" || hashType == "ECPB" || hashType == "GFXF" || hashType == "GIDX" || hashType == "VIDB" || hashType == "WSGB")
+							{
+								command = "-extract_to_rt_json";
+
+								filter = hashValue;
+
+								search = "HM2";
+
+								progress.message.Content = "Extracting " + hashName + " To HM2 RT (ResourceTool) JSON...";
+							}
 
 							string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
 
@@ -1919,7 +1955,7 @@ namespace rpkg
 
 							output_path = outputFolder;
 						}
-						else if (rightClickMenu.buttonPressed == "button3" && buttonCount == 7)
+						else if (rightClickMenu.buttonPressed == "button3" && buttonCount >= 5)
 						{
 							if (hashType == "TEMP")
 							{
@@ -2138,6 +2174,16 @@ namespace rpkg
 								}
 
 								return;
+							}
+							else if (hashType == "AIRG" || hashType == "CRMD" || hashType == "ATMD" || hashType == "CBLU" || hashType == "CPPT" || hashType == "DSWB" || hashType == "GFXF" || hashType == "GIDX" || hashType == "VIDB" || hashType == "WSGB")
+							{
+								command = "-extract_to_rt_json";
+
+								filter = hashValue;
+
+								search = "HM2016";
+
+								progress.message.Content = "Extracting " + hashName + " To HM2016 RT (ResourceTool) JSON...";
 							}
 
 							string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
