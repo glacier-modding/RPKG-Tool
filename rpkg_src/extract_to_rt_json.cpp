@@ -49,9 +49,9 @@ void rpkg_function::extract_to_rt_json(std::string& input_path, std::string& fil
         LOG_AND_RETURN("Error: Version (HM2016, HM2, or HM3) must be passed via -version on the command line.");
     }
 
-    std::vector<std::string> hm2016_valid_resources = { "AIRG", "CRMD", "ATMD", "CBLU", "CPPT", "DSWB", "GFXF", "GIDX", "VIDB", "WSGB" };
-    std::vector<std::string> hm2_valid_resources = { "AIRG", "CRMD", "ATMD", "CBLU", "CPPT", "DSWB", "ECPB", "GFXF", "GIDX", "VIDB", "WSGB" };
-    std::vector<std::string> hm3_valid_resources = { "AIRG", "CRMD", "ATMD", "CBLU", "CPPT", "DSWB", "ECPB", "GFXF", "GIDX", "VIDB", "WSGB" };
+    std::vector<std::string> hm2016_valid_resources = { "TEMP", "AIRG", "TBLU", "CRMD", "ATMD", "CBLU", "CPPT", "DSWB", "GFXF", "GIDX", "VIDB", "WSGB" };
+    std::vector<std::string> hm2_valid_resources = { "TEMP", "AIRG", "TBLU", "CRMD", "ATMD", "CBLU", "CPPT", "DSWB", "ECPB", "GFXF", "GIDX", "VIDB", "WSGB" };
+    std::vector<std::string> hm3_valid_resources = { "TEMP", "AIRG", "TBLU", "CRMD", "ATMD", "CBLU", "CPPT", "DSWB", "ECPB", "GFXF", "GIDX", "VIDB", "WSGB" };
 
     if (file::path_exists(input_path))
     {
