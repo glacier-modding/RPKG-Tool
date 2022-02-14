@@ -191,6 +191,10 @@ void rpkg_function::hash_meta_to_json(std::string& input_path, std::string& filt
 
         std::ofstream file_temp = std::ofstream(input_path + ".JSON", std::ofstream::binary);
 
+        LOG("Success: " + input_path + " has been converted.");
+
+        response_string = "Success: " + input_path + " has been converted.";
+
         file_temp.write(strbuf.GetString(), strbuf.GetSize());
 
         file_temp.close();

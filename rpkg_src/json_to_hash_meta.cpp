@@ -370,6 +370,10 @@ void rpkg_function::json_to_hash_meta(std::string& input_path, std::string& filt
 
         std::ofstream meta_file = std::ofstream(input_path.substr(0, input_path.length() - 5), std::ofstream::binary);
 
+        LOG("Success: " + input_path + " has been converted.");
+
+        response_string = "Success: " + input_path + " has been converted.";
+
         meta_file.write(meta_data.data(), meta_data.size());
 
         meta_file.close();
