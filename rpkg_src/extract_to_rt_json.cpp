@@ -171,7 +171,7 @@ void rpkg_function::extract_to_rt_json(std::string& input_path, std::string& fil
 
                         JsonString* temp_json_input = nullptr;
 
-                        temp_json_input = resource_tool_converter->FromMemoryToJsonString((const void*)temp_data.data(), (size_t)temp_data.size(), true);
+                        temp_json_input = resource_tool_converter->FromMemoryToJsonString((const void*)temp_data.data(), (size_t)temp_data.size());
 
                         rapidjson::StringStream ss(temp_json_input->JsonData);
 

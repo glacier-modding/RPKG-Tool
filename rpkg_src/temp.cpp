@@ -222,7 +222,7 @@ void temp::load_temp_data()
         resource_tool_converter = HM3_GetConverterForResource("TEMP");
     }
 
-    temp_json_input = resource_tool_converter->FromMemoryToJsonString((const void*)temp_data.data(), (size_t)temp_data.size(), true);
+    temp_json_input = resource_tool_converter->FromMemoryToJsonString((const void*)temp_data.data(), (size_t)temp_data.size());
 
     //resource_tool_ConvertMemoryResourceToJson(&type[0], (void*)temp_data.data(), (uint64_t)temp_data.size());
 
@@ -302,7 +302,7 @@ void temp::load_tblu_data()
         resource_tool_converter = HM3_GetConverterForResource("TBLU");
     }
 
-    tblu_json_input = resource_tool_converter->FromMemoryToJsonString((const void*)tblu_data.data(), (size_t)tblu_data.size(), true);
+    tblu_json_input = resource_tool_converter->FromMemoryToJsonString((const void*)tblu_data.data(), (size_t)tblu_data.size());
 
     //resource_tool_ConvertMemoryResourceToJson(&type[0], (void*)tblu_data.data(), (uint64_t)tblu_data.size());
 
@@ -2616,7 +2616,7 @@ int temp::generate_temp_file_from_data(std::string temp_path)
         resource_tool_generator = HM3_GetGeneratorForResource("TEMP");
     }
 
-    resource_tool_generator->FromJsonStringToResourceFile(buffer.GetString(), buffer.GetSize(), &temp_path[0], true, true);
+    resource_tool_generator->FromJsonStringToResourceFile(buffer.GetString(), buffer.GetSize(), &temp_path[0], true);
 
     //resource_tool_ConvertMemoryJsonToResource(&type[0], buffer.GetString(), buffer.GetSize(), &temp_path[0]);
 
