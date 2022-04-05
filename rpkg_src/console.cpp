@@ -40,7 +40,7 @@ int console::update_console(std::string& message, uint64_t indexMax, uint64_t in
 
 void console::display_usage_info()
 {
-    LOG("rpkg-cli v2.20.0 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files.");
+    LOG("rpkg-cli v2.21.0 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files.");
     LOG("--------------------------------------------------------------------------------");
     LOG("Note: All the information used to build this program was gleaned");
     LOG("      in a completely 'clean room' environment.");
