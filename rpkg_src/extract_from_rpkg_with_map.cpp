@@ -55,12 +55,12 @@ void rpkg_function::extract_from_rpkg_with_map(rpkg_extraction_vars& rpkg_vars)
                     hash_size = rpkgs.at(i).hash.at(it->second).hash_size_final;
                 }
 
-                if (rpkg_vars.ores_mode)
-                {
-                    std::ofstream ores_meta_hash_file = std::ofstream(rpkg_vars.ores_path + "_" + hash_file_name, std::ofstream::binary);
+                //if (rpkg_vars.ores_mode)
+                //{
+                //    std::ofstream ores_meta_hash_file = std::ofstream(rpkg_vars.ores_path + "_" + hash_file_name, std::ofstream::binary);
 
-                    ores_meta_hash_file.close();
-                }
+                //    ores_meta_hash_file.close();
+                //}
 
                 std::vector<char> input_data(hash_size, 0);
 
