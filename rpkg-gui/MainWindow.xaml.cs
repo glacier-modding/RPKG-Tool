@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6789,7 +6789,7 @@ namespace rpkg
 
 			SetDiscordStatus("Hash Calculator", "");
 
-			hashCalculator.ShowDialog();
+			hashCalculator.Show();
 
 			if (LeftTabControl.SelectedIndex == 0)
 			{
