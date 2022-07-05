@@ -230,16 +230,89 @@
 							</Grid.RowDefinitions>
 							<Grid.ColumnDefinitions>
 								<ColumnDefinition Width="Auto"/>
-								<ColumnDefinition Width="*"/>
-								<ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
 								<ColumnDefinition Width="Auto"/>
 							</Grid.ColumnDefinitions>
                             <StackPanel Orientation="Horizontal">
                                 <Label Grid.Row="0" Grid.Column="0" Content="Search string:" VerticalContentAlignment="Center"/>
                             </StackPanel>
                             <TextBox Grid.Row="0" Grid.Column="1" x:Name="SearchRPKGsTextBox" TextChanged="SearchRPKGsTextBox_TextChanged" FontFamily="Consolas" TextWrapping="NoWrap"/>
-							<Label Grid.Row="0" Grid.Column="2" Content="Max results per RPKG:"/>
-							<ComboBox Grid.Row="0" Grid.Column="3" x:Name="SearchRPKGsComboBox" FontFamily="Consolas">
+							<Label Grid.Row="0" Grid.Column="2" Content="Resource Type:"/>
+                            <ComboBox Grid.Row="0" Grid.Column="3" x:Name="SearchRPKGsType" SelectionChanged="SearchRPKGsType_SelectionChanged" FontFamily="Consolas">
+                                <ComboBoxItem Content="All" IsSelected="True"/>
+                                <ComboBoxItem Content="AIBB"/>
+                                <ComboBoxItem Content="AIBX"/>
+                                <ComboBoxItem Content="AIBZ"/>
+                                <ComboBoxItem Content="AIRG"/>
+                                <ComboBoxItem Content="ALOC"/>
+                                <ComboBoxItem Content="ASEB"/>
+                                <ComboBoxItem Content="ASET"/>
+                                <ComboBoxItem Content="ASVA"/>
+                                <ComboBoxItem Content="ATMD"/>
+                                <ComboBoxItem Content="BLOB"/>
+                                <ComboBoxItem Content="BMSK"/>
+                                <ComboBoxItem Content="BORG"/>
+                                <ComboBoxItem Content="CBLU"/>
+                                <ComboBoxItem Content="CLNG"/>
+                                <ComboBoxItem Content="CPPT"/>
+                                <ComboBoxItem Content="CRMD"/>
+                                <ComboBoxItem Content="DITL"/>
+                                <ComboBoxItem Content="DLGE"/>
+                                <ComboBoxItem Content="ECPB"/>
+                                <ComboBoxItem Content="ECPT"/>
+                                <ComboBoxItem Content="ENUM"/>
+                                <ComboBoxItem Content="ERES"/>
+                                <ComboBoxItem Content="FXAC"/>
+                                <ComboBoxItem Content="FXAS"/>
+                                <ComboBoxItem Content="GFXF"/>
+                                <ComboBoxItem Content="GFXI"/>
+                                <ComboBoxItem Content="GFXV"/>
+                                <ComboBoxItem Content="GIDX"/>
+                                <ComboBoxItem Content="HIKC"/>
+                                <ComboBoxItem Content="IMAP"/>
+                                <ComboBoxItem Content="JSON"/>
+                                <ComboBoxItem Content="LINE"/>
+                                <ComboBoxItem Content="LOCR"/>
+                                <ComboBoxItem Content="MATB"/>
+                                <ComboBoxItem Content="MATE"/>
+                                <ComboBoxItem Content="MATI"/>
+                                <ComboBoxItem Content="MATT"/>
+                                <ComboBoxItem Content="MJBA"/>
+                                <ComboBoxItem Content="MRTN"/>
+                                <ComboBoxItem Content="MRTR"/>
+                                <ComboBoxItem Content="NAVP"/>
+                                <ComboBoxItem Content="ORES"/>
+                                <ComboBoxItem Content="PREL"/>
+                                <ComboBoxItem Content="PRIM"/>
+                                <ComboBoxItem Content="REPO"/>
+                                <ComboBoxItem Content="RTLV"/>
+                                <ComboBoxItem Content="SCDA"/>
+                                <ComboBoxItem Content="SDEF"/>
+                                <ComboBoxItem Content="SLMX"/>
+                                <ComboBoxItem Content="TBLU"/>
+                                <ComboBoxItem Content="TELI"/>
+                                <ComboBoxItem Content="TEMP"/>
+                                <ComboBoxItem Content="TEXD"/>
+                                <ComboBoxItem Content="TEXT"/>
+                                <ComboBoxItem Content="UICB"/>
+                                <ComboBoxItem Content="UICT"/>
+                                <ComboBoxItem Content="VIDB"/>
+                                <ComboBoxItem Content="VTXD"/>
+                                <ComboBoxItem Content="WBNK"/>
+                                <ComboBoxItem Content="WSGB"/>
+                                <ComboBoxItem Content="WSGT"/>
+                                <ComboBoxItem Content="WSWB"/>
+                                <ComboBoxItem Content="WSWT"/>
+                                <ComboBoxItem Content="WWEM"/>
+                                <ComboBoxItem Content="WWES"/>
+                                <ComboBoxItem Content="WWEV"/>
+                                <ComboBoxItem Content="YSHP"/>
+                            </ComboBox>
+                            <Label Grid.Row="0" Grid.Column="4" Content="Results per RPKG:"/>
+                            <ComboBox Grid.Row="0" Grid.Column="5" x:Name="SearchRPKGsComboBox" SelectionChanged="SearchRPKGsComboBox_SelectionChanged" FontFamily="Consolas">
 								<ComboBoxItem Content="100" IsSelected="True"/>
 								<ComboBoxItem Content="200"/>
 								<ComboBoxItem Content="500"/>
@@ -252,7 +325,7 @@
 								<ComboBoxItem Content="100000"/>
 							</ComboBox>
 							<!--TreeView Grid.Row="1" Grid.ColumnSpan="4" x:Name="SearchRPKGsTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/-->
-							<WindowsFormsHost Grid.Row="1" Grid.ColumnSpan="4" x:Name="SearchRPKGsTreeViewWindowsFormsHost">
+							<WindowsFormsHost Grid.Row="1" Grid.ColumnSpan="6" x:Name="SearchRPKGsTreeViewWindowsFormsHost">
 								<wf:TreeView x:Name="SearchRPKGsTreeView" Font="Consolas,10"/>
 							</WindowsFormsHost>
 						</Grid>

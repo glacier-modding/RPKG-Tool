@@ -2526,8 +2526,8 @@ namespace rpkg
 			}
 		}
 
-		private void SearchRPKGsTextBox_TextChanged(object sender, TextChangedEventArgs e)
-		{
+		private void SearchTextChanged()
+        {
 			if (searchRPKGsInputTimer == null)
 			{
 				searchRPKGsInputTimer = new System.Windows.Threading.DispatcherTimer();
@@ -2538,8 +2538,23 @@ namespace rpkg
 			}
 
 			searchRPKGsInputTimer.Stop();
-			searchRPKGsInputTimer.Tag = (sender as TextBox).Text;
+			//searchRPKGsInputTimer.Tag = (sender as TextBox).Text;
 			searchRPKGsInputTimer.Start();
+		}
+
+		private void SearchRPKGsTextBox_TextChanged(object sender, TextChangedEventArgs e)
+		{
+			SearchTextChanged();
+		}
+
+		private void SearchRPKGsType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			SearchTextChanged();
+		}
+
+		private void SearchRPKGsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			SearchTextChanged();
 		}
 
 		private void SearchRPKGsTextBox_TimerTimeout(object sender, EventArgs e)
@@ -2582,116 +2597,128 @@ namespace rpkg
 
 					int resourceTypeItemIndex = 0;
 
+					string resourceTypeFilter = "";
+					bool resourceTypeFilterEnabled = false;
+
+					if (SearchRPKGsType.Text != "All")
+                    {
+						resourceTypeFilter = SearchRPKGsType.Text;
+						resourceTypeFilterEnabled = true;
+					}
+
 					foreach (System.Windows.Forms.TreeNode resourceItems in mainTreeNode.Nodes)
 					{
-						if (rpkgResultsCount <= maxSearchResults)
+						string resourceType = resourceItems.Text.ToString();
+
+						if (resourceTypeFilter == resourceType || !resourceTypeFilterEnabled)
 						{
-							string resourceType = resourceItems.Text.ToString();
-
-							bool resourceTypeItemAdded = false;
-
-							//MessageBoxShow(resourceType);
-
-							int return_value = search_imported_hashes(SearchRPKGsTextBox.Text, rpkgPath, resourceType, maxSearchResults);
-
-							//MessageBoxShow(Marshal.PtrToStringAnsi(get_search_imported_hashes()));
-
-							string searchResultsString = Marshal.PtrToStringAnsi(get_search_imported_hashes());
-
-							bool found = false;
-
-							System.Windows.Forms.TreeNode item;
-
-							if (!rpkgItemAdded)
+							if (rpkgResultsCount <= maxSearchResults)
 							{
-								item = new System.Windows.Forms.TreeNode();
-							}
-							else
-							{
-								item = (SearchRPKGsTreeView.Nodes[rpkgItemIndex] as System.Windows.Forms.TreeNode);
-							}
+								bool resourceTypeItemAdded = false;
 
-							item.Text = rpkgPath;
+								//MessageBoxShow(resourceType);
 
-							//item.IsExpanded = true;
+								int return_value = search_imported_hashes(SearchRPKGsTextBox.Text, rpkgPath, resourceType, maxSearchResults);
 
-							string rpkgFile = rpkgPath.Substring(rpkgPath.LastIndexOf("\\") + 1);
+								//MessageBoxShow(Marshal.PtrToStringAnsi(get_search_imported_hashes()));
 
-							string[] searchResults = searchResultsString.TrimEnd(',').Split(',');
+								string searchResultsString = Marshal.PtrToStringAnsi(get_search_imported_hashes());
 
-							if (searchResults.Length > 0)
-							{
-								if (searchResults[0] != "")
+								bool found = false;
+
+								System.Windows.Forms.TreeNode item;
+
+								if (!rpkgItemAdded)
 								{
-									int nodeCount = 0;
+									item = new System.Windows.Forms.TreeNode();
+								}
+								else
+								{
+									item = (SearchRPKGsTreeView.Nodes[rpkgItemIndex] as System.Windows.Forms.TreeNode);
+								}
 
-									System.Windows.Forms.TreeNode[] nodes = new System.Windows.Forms.TreeNode[searchResults.Length];
+								item.Text = rpkgPath;
 
-									System.Windows.Forms.TreeNode item2;
+								//item.IsExpanded = true;
 
-									if (!resourceTypeItemAdded)
+								string rpkgFile = rpkgPath.Substring(rpkgPath.LastIndexOf("\\") + 1);
+
+								string[] searchResults = searchResultsString.TrimEnd(',').Split(',');
+
+								if (searchResults.Length > 0)
+								{
+									if (searchResults[0] != "")
 									{
-										item2 = new System.Windows.Forms.TreeNode();
+										int nodeCount = 0;
 
-										item2.Text = resourceType;
+										System.Windows.Forms.TreeNode[] nodes = new System.Windows.Forms.TreeNode[searchResults.Length];
 
-										item2.Expand();
-									}
-									else
-									{
-										item2 = (item.Nodes[resourceTypeItemIndex] as System.Windows.Forms.TreeNode);
-									}
+										System.Windows.Forms.TreeNode item2;
 
-									foreach (string searchResult in searchResults)
-									{
-										found = true;
+										if (!resourceTypeItemAdded)
+										{
+											item2 = new System.Windows.Forms.TreeNode();
 
-										rpkgResultsCount++;
+											item2.Text = resourceType;
 
-										//MessageBoxShow(searchResult);
+											item2.Expand();
+										}
+										else
+										{
+											item2 = (item.Nodes[resourceTypeItemIndex] as System.Windows.Forms.TreeNode);
+										}
 
-										//var item3 = new System.Windows.Forms.TreeNode();
+										foreach (string searchResult in searchResults)
+										{
+											found = true;
 
-										string[] temp_test = searchResult.Split('.');
+											rpkgResultsCount++;
 
-										string ioiString = Marshal.PtrToStringAnsi(get_hash_list_string(temp_test[0]));
+											//MessageBoxShow(searchResult);
 
-										//item3.Header = searchResult + " (" + rpkgFile + ") " + ioiString;
+											//var item3 = new System.Windows.Forms.TreeNode();
 
-										//item2.Nodes.Add(searchResult + " (" + rpkgFile + ") " + ioiString);
+											string[] temp_test = searchResult.Split('.');
 
-										nodes[nodeCount] = new System.Windows.Forms.TreeNode();
+											string ioiString = Marshal.PtrToStringAnsi(get_hash_list_string(temp_test[0]));
 
-										nodes[nodeCount].Text = searchResult + " (" + rpkgFile + ") " + ioiString;
+											//item3.Header = searchResult + " (" + rpkgFile + ") " + ioiString;
 
-										//item3.Expanded += Item_Expanded;
+											//item2.Nodes.Add(searchResult + " (" + rpkgFile + ") " + ioiString);
 
-										//item2.Items.Add(item3);
+											nodes[nodeCount] = new System.Windows.Forms.TreeNode();
 
-										nodeCount++;
-									}
+											nodes[nodeCount].Text = searchResult + " (" + rpkgFile + ") " + ioiString;
 
-									item2.Nodes.AddRange(nodes);
+											//item3.Expanded += Item_Expanded;
 
-									if (!resourceTypeItemAdded)
-									{
-										item.Nodes.Add(item2);
+											//item2.Items.Add(item3);
 
-										resourceTypeItemAdded = true;
-									}
+											nodeCount++;
+										}
 
-									if (!rpkgItemAdded && found)
-									{
-										SearchRPKGsTreeView.Nodes.Add(item);
+										item2.Nodes.AddRange(nodes);
 
-										rpkgItemAdded = true;
+										if (!resourceTypeItemAdded)
+										{
+											item.Nodes.Add(item2);
+
+											resourceTypeItemAdded = true;
+										}
+
+										if (!rpkgItemAdded && found)
+										{
+											SearchRPKGsTreeView.Nodes.Add(item);
+
+											rpkgItemAdded = true;
+										}
 									}
 								}
-							}
 
-							if (resourceTypeItemAdded)
-							{
-								resourceTypeItemIndex++;
+								if (resourceTypeItemAdded)
+								{
+									resourceTypeItemIndex++;
+								}
 							}
 						}
 					}
@@ -7234,5 +7261,5 @@ namespace rpkg
 				rightClickMenu.Top /= dpiY;
 			}
 		}
-	}
+    }
 }
