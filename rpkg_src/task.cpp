@@ -103,10 +103,6 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     {
         rpkg_function::extract_prim_textured_from(input_path, filter, output_path, true);
     }
-    else if (command == "-extract_temp_from")
-    {
-        rpkg_function::extract_temp_from(input_path, filter, output_path);
-    }
     else if (command == "-extract_all_text_from")
     {
         rpkg_function::extract_all_text_from(input_path, filter, output_path);
