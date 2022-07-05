@@ -7,11 +7,8 @@
 #include "rpkg.h"
 #include "hash.h"
 #include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
 #include "thirdparty/json/json.hpp"
-#include <iostream>
 #include <set>
-#include <map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -106,7 +103,7 @@ void rpkg_function::extract_rtlv_to_json_from(std::string &input_path, std::stri
 
                             bool found = false;
 
-                            uint64_t input_filter_index = 0;
+                            // uint64_t input_filter_index = 0;
 
                             for (uint64_t z = 0; z < filters.size(); z++)
                             {
@@ -116,7 +113,7 @@ void rpkg_function::extract_rtlv_to_json_from(std::string &input_path, std::stri
                                 {
                                     found = true;
 
-                                    input_filter_index = z;
+                                    // input_filter_index = z;
 
                                     break;
                                 }

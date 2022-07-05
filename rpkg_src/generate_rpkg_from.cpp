@@ -10,7 +10,6 @@
 #include "thirdparty/lz4/lz4hc.h"
 #include <chrono>
 #include <filesystem>
-#include <iostream>
 #include <fstream>
 #include <vector>
 #include <sstream>
@@ -29,10 +28,10 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& fil
         std::string rpkg_file_name;
         std::string rpkg_meta_file_name;
 
-        uint64_t position = 0;
-        uint8_t bytes1 = 0;
-        uint32_t bytes4 = 0;
-        uint64_t bytes8 = 0;
+        // uint64_t position = 0;
+        // uint8_t bytes1 = 0;
+        // uint32_t bytes4 = 0;
+        // uint64_t bytes8 = 0;
 
         std::string base_folder_name = "";
 
@@ -305,15 +304,15 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& fil
 
                 if (meta_data.is_xored)
                 {
-                    crypto::xor_data(output_file_data.data(), (uint32_t)compressed_size_final);
+                    crypto::xor_data(output_file_data.data(), static_cast<uint32_t>(compressed_size_final));
 
                     temp_hash_data.is_xored = 1;
-                    temp_hash_data.hash_size = (uint32_t)compressed_size_final | (uint32_t)0x80000000;
+                    temp_hash_data.hash_size = static_cast<uint32_t>(compressed_size_final) | 0x80000000;
                 }
                 else
                 {
                     temp_hash_data.is_xored = 0;
-                    temp_hash_data.hash_size = (uint32_t)compressed_size_final;
+                    temp_hash_data.hash_size = static_cast<uint32_t>(compressed_size_final);
                 }
 
                 if (use_hash_file_meta_data)
@@ -447,7 +446,7 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& fil
         uint32_t table_offset = hash_count * 0x14;
         uint32_t table_size = 0x0;
         uint64_t hash_offset = 0x0;
-        uint64_t total_hash_size = 0x0;
+        // uint64_t total_hash_size = 0x0;
 
         table_size = 0x0;
 
@@ -699,7 +698,7 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& fil
             LOG("Successfully generated RPKGv2 file: " << rpkg_file_name);
         }
 
-        percent_progress = (uint32_t)100;
+        percent_progress = static_cast<uint32_t>(100);
 
         task_single_status = TASK_SUCCESSFUL;
     }

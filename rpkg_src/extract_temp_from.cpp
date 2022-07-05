@@ -1,4 +1,5 @@
 #include "rpkg_function.h"
+/*
 #include "file.h"
 #include "global.h"
 #include "crypto.h"
@@ -13,6 +14,7 @@
 #include <sstream>
 #include <fstream>
 #include <regex>
+*/
 #include <filesystem>
 
 void rpkg_function::extract_temp_from(std::string& input_path, std::string& filter, std::string& output_path)

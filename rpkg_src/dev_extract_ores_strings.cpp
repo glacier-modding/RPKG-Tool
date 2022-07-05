@@ -1,12 +1,7 @@
 #include "dev_function.h"
-#include "file.h"
 #include "global.h"
 #include "crypto.h"
-#include "console.h"
-#include "util.h"
-#include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
 #include <map>
 #include <chrono>
@@ -100,8 +95,8 @@ void dev_function::dev_extract_ores_strings(std::string& input_path, std::string
                         std::memcpy(&ores_hash_resource_file_count, (&ores_data->data()[0] + position), sizeof(bytes4));
                         position += 0x4;
 
-                        std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-                        int stringstream_length = 80;
+                        // std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
+                        // int stringstream_length = 80;
 
                         for (uint64_t k = 0; k < ores_hash_resource_file_count; k++)
                         {

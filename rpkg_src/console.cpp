@@ -1,6 +1,5 @@
 #include "console.h"
 #include "global.h"
-#include <iostream>
 #include <iomanip>
 #include <sstream>
 

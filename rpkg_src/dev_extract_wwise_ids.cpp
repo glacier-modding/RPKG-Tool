@@ -3,16 +3,9 @@
 #include "file.h"
 #include "global.h"
 #include "crypto.h"
-#include "console.h"
 #include "util.h"
 #include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
-#include "thirdparty/ww2ogg/packed_codebooks_aoTuV_603.h"
-#include "thirdparty/ww2ogg/wwriff.h"
-#include "thirdparty/revorb/revorb.h"
 #include <iostream>
-#include <map>
-#include <chrono>
 #include <sstream>
 #include <fstream>
 #include <regex>
@@ -24,8 +17,8 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& f
 
     rpkg_function::import_rpkg_files_in_folder(input_path);
 
-    uint64_t wwev_count_current = 0;
-    uint64_t wwev_hash_size_current = 0;
+    // uint64_t wwev_count_current = 0;
+    // uint64_t wwev_hash_size_current = 0;
 
     for (uint64_t i = 0; i < rpkgs.size(); i++)
     {

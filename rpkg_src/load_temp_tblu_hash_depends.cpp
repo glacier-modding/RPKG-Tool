@@ -1,4 +1,5 @@
 #include "rpkg_function.h"
+/*
 #include "file.h"
 #include "global.h"
 #include "crypto.h"
@@ -7,6 +8,7 @@
 #include "generic_function.h"
 #include <iostream>
 #include <map>
+*/
 
 int rpkg_function::load_temp_tblu_hash_depends(uint64_t rpkg_index, uint64_t hash_index)
 {

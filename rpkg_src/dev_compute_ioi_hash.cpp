@@ -1,14 +1,9 @@
 #include "rpkg_function.h"
 #include "dev_function.h"
 #include "global.h"
-#include "file.h"
-#include "crypto.h"
-#include <fstream>
-#include <iostream>
 #include <filesystem>
 #include <regex>
 #include <sstream>
-#include <algorithm>
 #include "thirdparty/md5/md5.h"
 
 extern "C" void MD5Init(struct MD5Context* ctx);

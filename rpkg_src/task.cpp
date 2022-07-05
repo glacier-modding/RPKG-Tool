@@ -8,8 +8,6 @@
 #include "map.h"
 #include <string>
 #include <vector>
-#include <iostream>
-#include <sstream>
 
 void task::execute(std::string &command, std::string &input_path, std::string &filter, std::string &search, std::string &search_type, std::string &output_path)
 {

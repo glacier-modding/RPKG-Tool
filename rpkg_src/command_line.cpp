@@ -5,7 +5,6 @@
 #include <iostream>
 #include <regex>
 #include <vector>
-#include <sstream>
 
 bool command_line::all_args_are_paths(int argc, char* argv[])
 {

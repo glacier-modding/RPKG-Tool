@@ -1,7 +1,6 @@
 #include "generic_function.h"
 #include "global.h"
 #include <string>
-#include <iostream>
 #include <iomanip>
 #include <sstream>
 #include "thirdparty/md5/md5.h"

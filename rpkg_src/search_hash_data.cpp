@@ -1,6 +1,5 @@
 #include "rpkg_function.h"
 #include "global.h"
-#include <iostream>
 #include <iomanip>
 #include <regex>
 

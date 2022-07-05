@@ -3,20 +3,14 @@
 #include "generic_function.h"
 #include "file.h"
 #include "util.h"
-#include "crypto.h"
 #include "temp.h"
 #include <fstream>
 #include <iostream>
 #include <filesystem>
 #include <regex>
-#include <sstream>
-#include <algorithm>
 #include <Windows.h>
 #include "thirdparty/rapidjson/document.h"
 #include "thirdparty/rapidjson/writer.h"
-#include "thirdparty/rapidjson/prettywriter.h"
-#include "thirdparty/rapidjson/pointer.h"
-#include "thirdparty/rapidjson/stringbuffer.h"
 
 void rpkg_function::json_to_hash_meta(std::string& input_path, std::string& filter, std::string& output_path)
 {

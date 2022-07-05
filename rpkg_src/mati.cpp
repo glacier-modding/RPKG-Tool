@@ -1,13 +1,10 @@
 #include "mati.h"
 #include "rpkg_function.h"
-#include "file.h"
 #include "global.h"
 #include "crypto.h"
 #include "console.h"
 #include "util.h"
-#include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
 #include <map>
 #include <fstream>
@@ -61,7 +58,7 @@ mati::mati(uint64_t rpkgs_index, uint64_t hash_index)
         crypto::xor_data(mati_input_data.data(), (uint32_t)mati_hash_size);
     }
 
-    uint32_t mati_decompressed_size = rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).hash_size_final;
+    const uint32_t mati_decompressed_size = rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).hash_size_final;
 
     mati_output_data = std::vector<char>(mati_decompressed_size, 0);
 

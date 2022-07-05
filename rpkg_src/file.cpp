@@ -4,8 +4,6 @@
 #include <string>
 #include <fstream>
 #include <filesystem>
-#include <iostream>
-#include <sstream>
 
 bool file::write_to_file(std::string file_path, std::string& data)
 {
@@ -41,7 +39,7 @@ void file::create_directories(std::string path)
 
 std::string file::output_path_append(std::string file_name, std::string output_path)
 {
-    std::string path = "";
+    std::string path;
     std::string base_file_name = file_name;
 
     if (output_path == "")
@@ -88,7 +86,7 @@ std::string file::parse_input_folder_path(std::string input)
 
 std::string file::get_base_file_name(std::string input)
 {
-    std::string input_file_name = "";
+    std::string input_file_name;
 
     size_t pos = input.find_last_of("\\/");
 
@@ -120,11 +118,9 @@ std::string file::get_root_file_name(std::string input)
 
 void file::parse_input_file_name(std::string input, std::string ends_with)
 {
-    std::string input_file_name = "";
+    std::string input_file_name = file::get_base_file_name(input);
 
-    input_file_name = file::get_base_file_name(input);
-
-    int ends_with_length = (int)ends_with.length();
+    int ends_with_length = static_cast<int>(ends_with.length());
 
     if (util::to_upper_case(input_file_name.substr((input_file_name.length() - ends_with_length), ends_with_length)) != util::to_upper_case(ends_with))
     {
