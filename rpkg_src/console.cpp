@@ -16,15 +16,15 @@ int console::update_console(std::string& message, uint64_t indexMax, uint64_t in
     std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
     double timeInSecondsFromstart_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
 
-    double percent = ((double)index / (double)indexMax) * 100.0;
+    double percent = (static_cast<double>(index) / static_cast<double>(indexMax)) * 100.0;
     std::stringstream ss;
-    ss << message << std::fixed << std::setprecision(1) << percent << "% Done" << " in " << timeInSecondsFromstart_time << "s, estimated completion in " << (timeInSecondsFromstart_time / (double)index) * (indexMax - index) << "s";
+    ss << message << std::fixed << std::setprecision(1) << percent << "% Done" << " in " << timeInSecondsFromstart_time << "s, estimated completion in " << (timeInSecondsFromstart_time / static_cast<double>(index)) * (indexMax - index) << "s";
 
-    percent_progress = (uint32_t)percent;
+    percent_progress = static_cast<uint32_t>(percent);
 
     if (ss.str().length() > stringstream_length)
     {
-        stringstream_length = (int)ss.str().length();
+        stringstream_length = static_cast<int>(ss.str().length());
     }
 
     timing_string = ss.str();

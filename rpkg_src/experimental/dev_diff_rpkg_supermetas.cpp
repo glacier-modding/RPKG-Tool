@@ -1,9 +1,9 @@
 #include "dev_function.h"
-#include "rpkg_function.h"
-#include "generic_function.h"
-#include "global.h"
-#include "file.h"
-#include "hash.h"
+#include "../rpkg_function.h"
+#include "../generic_function.h"
+#include "../global.h"
+#include "../file.h"
+#include "../hash.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -74,11 +74,9 @@ void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string
 
             if (file::is_supermeta_file(supermeta_file_name))
             {
-                std::map<std::string, uint64_t>::iterator it = supermeta_file_name_map.find(supermeta_file_name);
-
                 //std::cout << supermeta_file_name << std::endl;
 
-                if (it == supermeta_file_name_map.end())
+                if (auto it = supermeta_file_name_map.find(supermeta_file_name); it == supermeta_file_name_map.end())
                 {
                     std::vector<std::string> temp_supermeta_file_paths;
 
@@ -96,24 +94,24 @@ void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string
         }
     }
 
-    for (uint64_t i = 0; i < supermeta_file_paths.size(); i++)
+    for (auto& supermeta_file_path : supermeta_file_paths)
     {
-        if (supermeta_file_paths.at(i).size() > 1)
+        if (supermeta_file_path.size() > 1)
         {
-            for (uint64_t j = 0; j < supermeta_file_paths.at(i).size(); j++)
+            for (uint64_t j = 0; j < supermeta_file_path.size(); j++)
             {
-                std::cout << supermeta_file_paths.at(i).at(j) << std::endl;
+                std::cout << supermeta_file_path.at(j) << std::endl;
 
-                std::cout << "Importing RPKG SUPERMETA:\n  - " << supermeta_file_paths.at(i).at(j) << std::endl;
+                std::cout << "Importing RPKG SUPERMETA:\n  - " << supermeta_file_path.at(j) << std::endl;
 
-                rpkg_function::import_rpkg(supermeta_file_paths.at(i).at(j), true);
+                rpkg_function::import_rpkg(supermeta_file_path.at(j), true);
             }
 
-            for (uint64_t x = 0; x < rpkgs.size(); x++)
+            for (auto& rpkg : rpkgs)
             {
                 std::cout << "RPKG File Details: " << std::endl;
-                std::cout << "  - File Path: " << rpkgs.at(x).rpkg_file_path << std::endl;
-                std::cout << "  - Hash Count: " << rpkgs.at(x).hash.size() << std::endl;
+                std::cout << "  - File Path: " << rpkg.rpkg_file_path << std::endl;
+                std::cout << "  - Hash Count: " << rpkg.hash.size() << std::endl;
             }
 
             for (uint64_t x = 0; x < rpkgs.size(); x++)
@@ -129,13 +127,13 @@ void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string
 
                     for (uint64_t a = 0; a < rpkgs.at(x).hash.size(); a++)
                     {
-                        std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(y).hash_map.find(rpkgs.at(x).hash.at(a).hash_value);
+                        auto it = rpkgs.at(y).hash_map.find(rpkgs.at(x).hash.at(a).hash_value);
 
                         if (it == rpkgs.at(y).hash_map.end())
                         {
                             std::string ioi_string = "";
 
-                            std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(x).hash.at(a).hash_value);
+                            auto it2 = hash_list_hash_map.find(rpkgs.at(x).hash.at(a).hash_value);
 
                             if (it2 != hash_list_hash_map.end())
                             {
@@ -151,13 +149,13 @@ void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string
 
                     for (uint64_t a = 0; a < rpkgs.at(y).hash.size(); a++)
                     {
-                        std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(x).hash_map.find(rpkgs.at(y).hash.at(a).hash_value);
+                        auto it = rpkgs.at(x).hash_map.find(rpkgs.at(y).hash.at(a).hash_value);
 
                         if (it == rpkgs.at(x).hash_map.end())
                         {
                             std::string ioi_string = "";
 
-                            std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(y).hash.at(a).hash_value);
+                            auto it2 = hash_list_hash_map.find(rpkgs.at(y).hash.at(a).hash_value);
 
                             if (it2 != hash_list_hash_map.end())
                             {
@@ -299,7 +297,7 @@ void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string
         }
         else
         {
-            std::cout << "Not enough supermetas found for " << supermeta_file_paths.at(i).at(0) << " to perform a diff operation." << std::endl;
+            std::cout << "Not enough supermetas found for " << supermeta_file_path.at(0) << " to perform a diff operation." << std::endl;
         }
     }
 }

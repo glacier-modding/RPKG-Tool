@@ -1,15 +1,15 @@
-#include "rpkg_function.h"
+#include "../rpkg_function.h"
 #include "dev_function.h"
-#include "global.h"
-#include "file.h"
-#include "temp.h"
+#include "../global.h"
+#include "../file.h"
+#include "../temp.h"
 #include <iostream>
 #include <filesystem>
 #include <sstream>
 #include <Windows.h>
-#include "thirdparty/rapidjson/document.h"
-#include "thirdparty/rapidjson/writer.h"
-#include "thirdparty/rapidjson/pointer.h"
+#include "../thirdparty/rapidjson/document.h"
+#include "../thirdparty/rapidjson/writer.h"
+#include "../thirdparty/rapidjson/pointer.h"
 
 static void json_node_scan(const rapidjson::Value& doc, const rapidjson::Value& node, std::string json_pointer, std::string json_type)
 {

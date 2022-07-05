@@ -1,10 +1,10 @@
-#include "rpkg_function.h"
+#include "../rpkg_function.h"
 #include "dev_function.h"
-#include "global.h"
-#include "file.h"
-#include "util.h"
-#include "crypto.h"
-#include "temp.h"
+#include "../global.h"
+#include "../file.h"
+#include "../util.h"
+#include "../crypto.h"
+#include "../temp.h"
 #include <fstream>
 #include <iostream>
 #include <filesystem>
@@ -12,10 +12,10 @@
 #include <sstream>
 #include <algorithm>
 #include <Windows.h>
-#include "thirdparty/rapidjson/document.h"
-#include "thirdparty/rapidjson/writer.h"
-#include "thirdparty/rapidjson/pointer.h"
-#include "thirdparty/rapidjson/stringbuffer.h"
+#include "../thirdparty/rapidjson/document.h"
+#include "../thirdparty/rapidjson/writer.h"
+#include "../thirdparty/rapidjson/pointer.h"
+#include "../thirdparty/rapidjson/stringbuffer.h"
 
 void extract_glb_and_return_coords(uint32_t temps_index, uint32_t entry_index, std::string parent_string, std::vector<uint64_t>& entityId_temp_index, std::vector<uint64_t>& entityId_m_eidParent_entityID, std::vector<uint64_t>& entityId_m_eidParent_entityIndex, std::multimap<std::string, uint64_t>& entityId_m_eidParent_entityIndex_map, std::vector<bool>& entityId_entity_logicalParent_top_level, std::vector<bool>& entityId_has_m_mTransform_and_m_eidParent, std::map<std::string, uint64_t>& entityId_temp_index_entityIndex_map, std::vector<std::string>& entityId_m_mTransform)
 {

@@ -2,11 +2,12 @@
 #include "file.h"
 #include "global.h"
 #include <string>
+// ReSharper disable once CppUnusedIncludeDirective
 #include <iostream>
 #include <regex>
 #include <vector>
 
-bool command_line::all_args_are_paths(int argc, char* argv[])
+bool command_line::all_args_are_paths(const int argc, char* argv[])
 {
     for (int i = 1; i < argc; i++)
     {
@@ -19,7 +20,7 @@ bool command_line::all_args_are_paths(int argc, char* argv[])
     return true;
 }
 
-std::vector<std::vector<std::string>> command_line::parse(int argc, char* argv[])
+std::vector<std::vector<std::string>> command_line::parse(const int argc, char* argv[])
 {
     std::vector<std::vector<std::string>> command_line_args;
 
@@ -57,7 +58,7 @@ std::vector<std::vector<std::string>> command_line::parse(int argc, char* argv[]
     return command_line_args;
 }
 
-std::vector<std::vector<std::string>> command_line::parse(std::vector<std::string> args)
+std::vector<std::vector<std::string>> command_line::parse(const std::vector<std::string> args)
 {
     std::vector<std::vector<std::string>> command_line_args;
 
@@ -95,7 +96,7 @@ std::vector<std::vector<std::string>> command_line::parse(std::vector<std::strin
     return command_line_args;
 }
 
-std::vector<std::string> command_line::get_dragged_and_dropped_files(int argc, char* argv[])
+std::vector<std::string> command_line::get_dragged_and_dropped_files(const int argc, char* argv[])
 {
     std::vector<std::string> dragged_and_dropped_files;
 

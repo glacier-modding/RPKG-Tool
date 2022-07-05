@@ -22,11 +22,11 @@ public:
 	void load_hash_depends();
 	void load_temp_data();
 	void load_tblu_data();
-	void get_prim_from_temp(uint32_t entry_index);
+	void get_prim_from_temp(uint32_t entry_index) const;
 	void temp_version_check();
 	void set_temp_version(uint32_t temp_version);
-	void get_top_level_logical_parents();
-	void get_entries_with_logical_parent(uint32_t logical_parent);
+	void get_top_level_logical_parents() const;
+	void get_entries_with_logical_parent(uint32_t logical_parent) const;
 	void get_entries_hash_references(uint32_t entry_index);
 	void get_entries_hash_reference_data(uint32_t entry_index);
 	void get_temp_entries_data(std::string value_type, std::string type_string);

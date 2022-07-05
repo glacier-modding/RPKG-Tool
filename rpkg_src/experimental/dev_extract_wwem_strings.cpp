@@ -1,9 +1,9 @@
 #include "dev_function.h"
-#include "file.h"
-#include "global.h"
-#include "crypto.h"
-#include "util.h"
-#include "thirdparty/lz4/lz4.h"
+#include "../file.h"
+#include "../global.h"
+#include "../crypto.h"
+#include "../util.h"
+#include "../thirdparty/lz4/lz4.h"
 #include <iostream>
 #include <map>
 #include <chrono>
@@ -423,8 +423,6 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
 
     std::map<std::string, uint32_t> wwem_name_map;
 
-    uint64_t wwem_map_index = 0;
-
     for (uint64_t i = 0; i < rpkgs.size(); i++)
     {
         for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++)
@@ -502,15 +500,11 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
                     }
 
                     uint32_t wwem_file_name_length = 0;
-                    uint32_t wwem_file_count = 0;
-                    uint32_t wwem_file_count_test = 0;
 
                     uint32_t position = 0;
 
                     char input[1024];
-                    uint8_t bytes1 = 0;
                     uint32_t bytes4 = 0;
-                    uint64_t bytes8 = 0;
 
                     bool adtllabl_not_found = true;
 
@@ -538,8 +532,6 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
                     }
 
                     std::string wem_file_name = "";
-                    std::string wwem_meta_data_file_name = "";
-                    std::string ogg_file = "";
                     std::string output_meta_file_path = "";
                     std::string wwem_string = "";
                     std::string directory = "";
@@ -608,10 +600,6 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
 
                             wem_file_name = wem_base_name + ".wav].pc_wem";
 
-                            wwem_meta_data_file_name = wem_base_name + "_" + hash_file_name;
-
-                            ogg_file = wem_base_name + ".ogg";
-
                             output_meta_file_path = wem_base_name;
 
                             if (output_meta_file_path.substr(output_meta_file_path.length() - 1, 1) == "\\")
@@ -645,10 +633,6 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
 
                             wem_file_name = wem_base_name + ".wav].pc_wem";
 
-                            wwem_meta_data_file_name = wem_base_name + "_" + hash_file_name;
-
-                            ogg_file = wem_base_name + ".ogg";
-
                             output_meta_file_path = directory;
                         }
                         else
@@ -679,10 +663,6 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
 
                                 wem_file_name = wem_base_name + ".wav].pc_wem";
 
-                                wwem_meta_data_file_name = wem_base_name + "_" + hash_file_name;
-
-                                ogg_file = wem_base_name + ".ogg";
-
                                 output_meta_file_path = wem_base_name;
 
                                 if (output_meta_file_path.substr(output_meta_file_path.length() - 1, 1) == "\\")
@@ -708,10 +688,6 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
                                 //rpkg_function::get_unique_wwem_name(wwem_name_map, wem_base_name, rpkgs.at(i).rpkg_file_name);
 
                                 wem_file_name = wem_base_name + ".wav].pc_wem";
-
-                                wwem_meta_data_file_name = wem_base_name + "_" + hash_file_name;
-
-                                ogg_file = wem_base_name + ".ogg";
 
                                 output_meta_file_path = directory;
                             }
@@ -795,8 +771,6 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
                                                     }
 
                                                     uint32_t wwev_file_name_length = 0;
-                                                    uint32_t wwev_file_count = 0;
-                                                    uint32_t wwev_file_count_test = 0;
 
                                                     uint32_t position = 0;
 
@@ -853,10 +827,6 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
                             //rpkg_function::get_unique_wwem_name(wwem_name_map, wem_base_name, rpkgs.at(i).rpkg_file_name);
 
                             wem_file_name = wem_base_name + ".wav].pc_wem";
-
-                            wwem_meta_data_file_name = wem_base_name + "_" + hash_file_name;
-
-                            ogg_file = wem_base_name + ".ogg";
 
                             output_meta_file_path = directory;
                         }

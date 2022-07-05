@@ -1,7 +1,7 @@
 #include "dev_function.h"
-#include "global.h"
-#include "crypto.h"
-#include "thirdparty/lz4/lz4.h"
+#include "../global.h"
+#include "../crypto.h"
+#include "../thirdparty/lz4/lz4.h"
 #include <iostream>
 #include <map>
 #include <chrono>
