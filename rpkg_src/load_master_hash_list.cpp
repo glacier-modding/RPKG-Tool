@@ -3,7 +3,6 @@
 #include "file.h"
 #include "util.h"
 #include <fstream>
-#include <iostream>
 
 void generic_function::load_hash_list(bool exit_if_no_hash_list, std::string path)
 {
@@ -25,10 +24,8 @@ void generic_function::load_hash_list(bool exit_if_no_hash_list, std::string pat
             {
                 LOG_AND_EXIT("\nError: hash_list.txt not found. Download the lastest hash_list.txt from hitmandb.notex.app/latest-hashes.7z\n");
             }
-            else
-            {
-                LOG_AND_RETURN("\nError: hash_list.txt not found. Download the lastest hash_list.txt from hitmandb.notex.app/latest-hashes.7z\n");
-            }
+
+            LOG_AND_RETURN("\nError: hash_list.txt not found. Download the lastest hash_list.txt from hitmandb.notex.app/latest-hashes.7z\n");
         }
 
         hash_list_file.seekg(0, hash_list_file.end);

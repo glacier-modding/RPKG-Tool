@@ -2,20 +2,14 @@
 #include "dev_function.h"
 #include "global.h"
 #include "file.h"
-#include "util.h"
-#include "crypto.h"
 #include "temp.h"
-#include <fstream>
 #include <iostream>
 #include <filesystem>
-#include <regex>
 #include <sstream>
-#include <algorithm>
 #include <Windows.h>
 #include "thirdparty/rapidjson/document.h"
 #include "thirdparty/rapidjson/writer.h"
 #include "thirdparty/rapidjson/pointer.h"
-#include "thirdparty/rapidjson/stringbuffer.h"
 
 static void json_node_scan(const rapidjson::Value& doc, const rapidjson::Value& node, std::string json_pointer, std::string json_type)
 {

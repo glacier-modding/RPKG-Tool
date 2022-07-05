@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdint.h>
-#include <string>
 
 #define RPKG_EXPORT extern "C" __declspec(dllexport)
 

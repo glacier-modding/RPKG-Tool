@@ -6,8 +6,6 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include <iostream>
-#include <sstream>
 
 void generic_function::decrypt_packagedefinition_thumbs(std::string &input_path, std::string &output_path)
 {

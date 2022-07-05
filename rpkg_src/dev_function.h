@@ -1,9 +1,6 @@
 #pragma once
-#include "rpkg.h"
-#include "hash.h"
 #include "rpkg_function.h"
 #include <string>
-#include <vector>
 #include <set>
 #include <stdint.h>
 

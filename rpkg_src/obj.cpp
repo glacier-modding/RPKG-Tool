@@ -1,7 +1,5 @@
 #include "obj.h"
-#include "file.h"
 #include "util.h"
-#include <iostream>
 #include <fstream>
 #include <filesystem>
 

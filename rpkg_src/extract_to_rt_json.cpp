@@ -2,16 +2,11 @@
 #include "file.h"
 #include "global.h"
 #include "crypto.h"
-#include "console.h"
 #include "util.h"
-#include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
 #include "thirdparty/rapidjson/document.h"
-#include "thirdparty/rapidjson/writer.h"
 #include "thirdparty/rapidjson/prettywriter.h"
 #include "thirdparty/rapidjson/stringbuffer.h"
-#include <iostream>
 #include <map>
 #include <chrono>
 #include <sstream>
@@ -40,11 +35,7 @@ void rpkg_function::extract_to_rt_json(std::string& input_path, std::string& fil
 
     version = util::to_upper_case(version);
 
-    if (version == "")
-    {
-        LOG_AND_RETURN("Error: Version (HM2016, HM2, or HM3) must be passed via -version on the command line.");
-    }
-    else if (version != "HM2016" && version != "HM2" && version != "HM3")
+    if (version == "" || (version != "HM2016" && version != "HM2" && version != "HM3"))
     {
         LOG_AND_RETURN("Error: Version (HM2016, HM2, or HM3) must be passed via -version on the command line.");
     }

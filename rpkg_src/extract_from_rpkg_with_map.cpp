@@ -1,16 +1,10 @@
 #include "rpkg_function.h"
 #include "global.h"
-#include "util.h"
-#include "console.h"
 #include "file.h"
 #include "crypto.h"
 #include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
-#include <iostream>
 #include <fstream>
-#include <iomanip>
 #include <regex>
-#include <sstream>
 
 void rpkg_function::extract_from_rpkg_with_map(rpkg_extraction_vars& rpkg_vars)
 {

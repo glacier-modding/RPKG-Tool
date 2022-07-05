@@ -1,12 +1,9 @@
 #include "rpkg_function.h"
 #include "file.h"
 #include "global.h"
-#include "crypto.h"
 #include "console.h"
 #include "util.h"
-#include "prim.h"
 #include <iostream>
-#include <map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -171,7 +168,7 @@ void rpkg_function::rebuild_prim_model_in(std::string& input_path, std::string& 
                 return;
             }
 
-            if (((i * (uint64_t)100000) / (uint64_t)rebuilt_folders.size()) % (uint64_t)10 == 0 && i > 0)
+            if (((i * (uint64_t)100000) / rebuilt_folders.size()) % (uint64_t)10 == 0 && i > 0)
             {
                 stringstream_length = console::update_console(message, rebuilt_folders.size(), i, start_time, stringstream_length);
             }

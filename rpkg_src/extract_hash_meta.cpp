@@ -1,8 +1,6 @@
 #include "rpkg_function.h"
 #include "global.h"
-#include <iostream>
 #include <fstream>
-#include <sstream>
 
 void rpkg_function::extract_hash_meta(uint64_t i, uint64_t j, std::string& final_path)
 {

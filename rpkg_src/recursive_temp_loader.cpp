@@ -1,12 +1,8 @@
 #include "temp.h"
 #include "rpkg_function.h"
-#include "file.h"
 #include "global.h"
-#include "crypto.h"
-#include "console.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "util.h"
-#include "generic_function.h"
-#include <iostream>
 #include <map>
 
 void rpkg_function::recursive_temp_loader(uint32_t rpkgs_index, uint32_t hash_index, uint32_t temp_version, std::map<uint32_t, uint32_t>& parents_map, std::vector<uint32_t> temps_indexes, uint32_t level, uint32_t level_max, uint32_t temps_max)

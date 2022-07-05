@@ -1,14 +1,10 @@
 #include "rpkg_function.h"
-#include "util.h"
-#include "global.h"
 #include "file.h"
 #include <filesystem>
-#include <iostream>
-#include <sstream>
 
 void rpkg_function::import_rpkg_files_in_folder(std::string& input_rpkg_folder_path)
 {
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
+    // std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
 
     //double console_update_rate = 1.0 / 2.0;
     //int period_count = 1;
@@ -43,7 +39,7 @@ void rpkg_function::import_rpkg_files_in_folder(std::string& input_rpkg_folder_p
         {
             std::size_t pos = entry.path().string().find_last_of("\\/");
 
-            std::string rpkg_file_name = "";
+            std::string rpkg_file_name;
             std::string hash = "";
             std::string hash_resource_type = "";
 
