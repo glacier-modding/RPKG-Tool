@@ -3,17 +3,17 @@
 void crypto::xor_data(char *input_data, const uint32_t input_data_length)
 {
     const unsigned char xor_array[] = {0xDC, 0x45, 0xA6, 0x9C, 0xD3, 0x72, 0x4C, 0xAB};
+    constexpr int xor_length = sizeof xor_array;
 
     for (uint64_t i = 0; i < input_data_length; i++)
     {
-        constexpr int xor_length = sizeof xor_array;
         input_data[i] ^= xor_array[i % xor_length];
     }
 }
 
 constexpr uint32_t localization_keys[4] = {0x53527737, 0x7506499E, 0xBD39AEE3, 0xA59E7268};
 constexpr uint32_t thumbs_keys[4] = {0x30F95282, 0x1F48C419, 0x295F8548, 0x2A78366D};
-constexpr unsigned int num_rounds = 32;
+constexpr uint32_t num_rounds = 32;
 constexpr uint32_t thumbs_delta = 0x61C88647;
 constexpr uint32_t localization_delta = 0x9E3779B9;
 constexpr uint32_t decrypt_sum = 0xC6EF3720;

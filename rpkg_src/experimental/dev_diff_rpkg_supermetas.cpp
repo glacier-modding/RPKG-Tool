@@ -74,9 +74,11 @@ void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string
 
             if (file::is_supermeta_file(supermeta_file_name))
             {
+                std::map<std::string, uint64_t>::iterator it = supermeta_file_name_map.find(supermeta_file_name);
+
                 //std::cout << supermeta_file_name << std::endl;
 
-                if (auto it = supermeta_file_name_map.find(supermeta_file_name); it == supermeta_file_name_map.end())
+                if (it == supermeta_file_name_map.end())
                 {
                     std::vector<std::string> temp_supermeta_file_paths;
 
@@ -127,13 +129,13 @@ void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string
 
                     for (uint64_t a = 0; a < rpkgs.at(x).hash.size(); a++)
                     {
-                        auto it = rpkgs.at(y).hash_map.find(rpkgs.at(x).hash.at(a).hash_value);
+                        std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(y).hash_map.find(rpkgs.at(x).hash.at(a).hash_value);
 
                         if (it == rpkgs.at(y).hash_map.end())
                         {
                             std::string ioi_string = "";
 
-                            auto it2 = hash_list_hash_map.find(rpkgs.at(x).hash.at(a).hash_value);
+                            std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(x).hash.at(a).hash_value);
 
                             if (it2 != hash_list_hash_map.end())
                             {
@@ -149,13 +151,13 @@ void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string
 
                     for (uint64_t a = 0; a < rpkgs.at(y).hash.size(); a++)
                     {
-                        auto it = rpkgs.at(x).hash_map.find(rpkgs.at(y).hash.at(a).hash_value);
+                        std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(x).hash_map.find(rpkgs.at(y).hash.at(a).hash_value);
 
                         if (it == rpkgs.at(x).hash_map.end())
                         {
                             std::string ioi_string = "";
 
-                            auto it2 = hash_list_hash_map.find(rpkgs.at(y).hash.at(a).hash_value);
+                            std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(y).hash.at(a).hash_value);
 
                             if (it2 != hash_list_hash_map.end())
                             {
