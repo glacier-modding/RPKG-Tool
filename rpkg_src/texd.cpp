@@ -1,17 +1,9 @@
 #include "texd.h"
 #include "rpkg_function.h"
-#include "file.h"
 #include "global.h"
 #include "crypto.h"
-#include "console.h"
-#include "util.h"
-#include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
-#include <iostream>
-#include <map>
 #include <fstream>
-#include <set>
 
 texd::texd()
 {
