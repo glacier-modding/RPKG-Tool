@@ -1,41 +1,41 @@
-#include "generic_function.h"
+#include "rpkg_function.h"
 #include "global.h"
-#include <string>
-#include <iomanip>
+#include <filesystem>
+#include <regex>
 #include <sstream>
+
+#include "generic_function.h"
 #include "thirdparty/md5/md5.h"
 
-extern "C" void MD5Init(struct MD5Context* ctx);
-extern "C" void MD5Update(struct MD5Context* ctx, unsigned char* buf, unsigned len);
-extern "C" void MD5Final(unsigned char digest[16], struct MD5Context* ctx);
+extern "C" void MD5Init(MD5Context* ctx);
+extern "C" void MD5Update(MD5Context* ctx, unsigned char* buf, unsigned len);
+extern "C" void MD5Final(unsigned char digest[16], MD5Context* ctx);
 extern "C" void MD5Transform(uint32 buf[4], uint32 in[16]);
 
-void generic_function::compute_ioi_hash(std::string& input_to_ioi_hash)
+std::string generic_function::compute_ioi_hash(const std::string& input_to_ioi_hash)
 {
     unsigned char signature[16];
     struct MD5Context md5c;
 
     std::string lowercase;
 
-    for (int i = 0; i < input_to_ioi_hash.length(); i++)
+    for (const char i : input_to_ioi_hash)
     {
-        lowercase += std::tolower(input_to_ioi_hash[i]);
+        lowercase += std::tolower(i);
     }
 
     //LOG(main_data->console_prefix << "Input: " << main_data->input_to_ioi_hash << ", " << lowercase);
 
     MD5Init(&md5c);
-    MD5Update(&md5c, (unsigned char*)lowercase.c_str(), (unsigned int)lowercase.length());
+    MD5Update(&md5c, (unsigned char*)lowercase.c_str(), static_cast<unsigned>(lowercase.length()));
     MD5Final(signature, &md5c);
 
     std::stringstream ss;
 
-    for (uint64_t m = 0; m < 16; m++)
+    for (const unsigned char m : signature)
     {
-        ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)(unsigned char)signature[m];
+        ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(m);
     }
-
-    LOG("Normal MD5 Hash: " << ss.str());
 
     ss.str(std::string());
 
@@ -43,8 +43,8 @@ void generic_function::compute_ioi_hash(std::string& input_to_ioi_hash)
 
     for (uint64_t m = 1; m < 8; m++)
     {
-        ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)(unsigned char)signature[m];
+        ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(signature[m]);
     }
 
-    LOG("IOI Hash: " << ss.str());
+    return ss.str();
 }

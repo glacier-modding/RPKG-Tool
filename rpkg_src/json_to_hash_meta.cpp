@@ -332,7 +332,7 @@ void rpkg_function::json_to_hash_meta(std::string& input_path, std::string& filt
                 }
                 else if (hash_value_string.substr(0, 1) == "[")
                 {
-                    temp_string = generic_function::compute_ioi_hash_string(hash_value_string);
+                    temp_string = generic_function::compute_ioi_hash(hash_value_string);
                 }
                 else
                 {
