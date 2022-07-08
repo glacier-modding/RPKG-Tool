@@ -1,10 +1,10 @@
-#include "../rpkg_function.h"
-#include "../global.h"
+#include "rpkg_function.h"
+#include "global.h"
 #include "dev_function.h"
-#include "../console.h"
-#include "../file.h"
-#include "../crypto.h"
-#include "../thirdparty/lz4/lz4.h"
+#include "console.h"
+#include "file.h"
+#include "crypto.h"
+#include "thirdparty/lz4/lz4.h"
 #include <fstream>
 #include <regex>
 #include <sstream>

@@ -46,30 +46,34 @@ void generic_function::decrypt_packagedefinition_thumbs(std::string &input_path,
         input_data.push_back(0x0);
     }
 
+    uint32_t zero_pad_length = (uint32_t)(packagedefinitions_thumbs_file_size - input_data.size());
+
     for (uint64_t i = 0; i < input_data.size() / 8; i++)
     {
         uint32_t data[2];
-        std::memcpy(&data[0], &input_data[i * static_cast<uint64_t>(8)], sizeof(uint32_t));
-        std::memcpy(&data[1], &input_data[i * static_cast<uint64_t>(8) + static_cast<uint64_t>(4)], sizeof(uint32_t));
+        std::memcpy(&data[0], &input_data[(uint64_t)i * (uint64_t)8], sizeof(uint32_t));
+        std::memcpy(&data[1], &input_data[(uint64_t)i * (uint64_t)8 + (uint64_t)4], sizeof(uint32_t));
 
         crypto::xtea_decrypt_packagedefinition_thumbs(data);
 
-        std::memcpy(&input_data[i * static_cast<uint64_t>(8)], &data[0], sizeof(uint32_t));
-        std::memcpy(&input_data[i * static_cast<uint64_t>(8) + static_cast<uint64_t>(4)], &data[1], sizeof(uint32_t));
+        std::memcpy(&input_data[(uint64_t)i * (uint64_t)8], &data[0], sizeof(uint32_t));
+        std::memcpy(&input_data[(uint64_t)i * (uint64_t)8 + (uint64_t)4], &data[1], sizeof(uint32_t));
     }
 
     uint64_t last_zero_position = input_data.size();
 
     if (input_data.size() > 0)
     {
-        for (uint64_t i = input_data.size() - 1; i > 0; i--)
+        for (uint64_t i = (input_data.size() - 1); i > 0; i--)
         {
             if (input_data.at(i) != 0)
             {
                 break;
             }
-
-            last_zero_position--;
+            else
+            {
+                last_zero_position--;
+            }
         }
     }
 

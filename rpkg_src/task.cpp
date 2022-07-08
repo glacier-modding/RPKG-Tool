@@ -4,7 +4,7 @@
 #include "util.h"
 #include "generic_function.h"
 #include "rpkg_function.h"
-#include "experimental/dev_function.h"
+#include "dev_function.h"
 #include "map.h"
 #include <string>
 #include <vector>
@@ -13,7 +13,7 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
 {
     if (command == "-compute_ioi_hash")
     {
-        LOG("IOI Hash: " << generic_function::compute_ioi_hash(filter));
+        generic_function::compute_ioi_hash(filter);
     }
     if (command == "-compute_ioi_hash_from_file")
     {
@@ -320,24 +320,24 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
 }
 
-void task::process_and_execute_files_dragged_and_dropped(std::vector<std::string> &dragged_and_dropped_files)
+void task::process_and_execute_files_draged_and_dropped(std::vector<std::string> &dragged_and_dropped_files)
 {
-    for (auto& dragged_and_dropped_file : dragged_and_dropped_files)
+    for (int i = 0; i < dragged_and_dropped_files.size(); i++)
     {
-        if (file::is_rpkg_file(dragged_and_dropped_file))
+        if (file::is_rpkg_file(dragged_and_dropped_files.at(i)))
         {
             std::string command = "-extract_from_rpkg";
-            std::string empty;
+            std::string empty = "";
 
-            execute(command, dragged_and_dropped_file, empty, empty, empty, empty);
+            task::execute(command, dragged_and_dropped_files.at(i), empty, empty, empty, empty);
         }
     }
 }
 
 void task::process_and_execute_command_line_args(std::vector<std::vector<std::string>> &commands)
 {
-    std::string command;
-    std::string input_path;
+    std::string command = "";
+    std::string input_path = "";
     std::string filter = "";
     std::string search = "";
     std::string search_type = "";
@@ -414,48 +414,58 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
 
     int command_count = 0;
 
-    for (auto& i : commands)
+    for (int i = 0; i < commands.size(); i++)
     {
-        const std::string substring = util::to_lower_case(i.at(0));
-        
-        if (std::find(commands_with_paths.begin(), commands_with_paths.end(), i.at(0)) != commands_with_paths.end())
+        if (std::find(commands_with_paths.begin(), commands_with_paths.end(), commands.at(i).at(0)) != commands_with_paths.end())
         {
-            command = i.at(0);
-            input_path = i.at(1);
+            command = commands.at(i).at(0);
+            input_path = commands.at(i).at(1);
             command_count++;
         }
-        else if (std::find(commands_without_paths.begin(), commands_without_paths.end(), i.at(0)) != commands_without_paths.end())
+        else if (std::find(commands_without_paths.begin(), commands_without_paths.end(), commands.at(i).at(0)) != commands_without_paths.end())
         {
-            command = i.at(0);
-            filter = i.at(1);
+            command = commands.at(i).at(0);
+            filter = commands.at(i).at(1);
             command_count++;
         }
-        else if (substring == "-text_search")
+        else if (util::to_lower_case(commands.at(i).at(0)) == "-text_search")
         {
             search_type = "text";
-            search = i.at(1);
+            search = commands.at(i).at(1);
         }
-        else if (substring == "-hex_search")
+        else if (util::to_lower_case(commands.at(i).at(0)) == "-hex_search")
         {
             search_type = "hex";
-            search = i.at(1);
+            search = commands.at(i).at(1);
         }
-        else if (substring == "-regex_search")
+        else if (util::to_lower_case(commands.at(i).at(0)) == "-regex_search")
         {
             search_type = "regex";
-            search = i.at(1);
+            search = commands.at(i).at(1);
         }
-        else if (substring == "-filter" || substring == "-map_path")
+        else if (util::to_lower_case(commands.at(i).at(0)) == "-filter")
         {
-            filter = i.at(1);
+            filter = commands.at(i).at(1);
         }
-        else if (substring == "-map_filters" || substring == "-qn_format" || substring == "-version")
+        else if (util::to_lower_case(commands.at(i).at(0)) == "-map_path")
         {
-            search = i.at(1);
+            filter = commands.at(i).at(1);
         }
-        else if (substring == "-output_path")
+        else if (util::to_lower_case(commands.at(i).at(0)) == "-map_filters")
         {
-            output_path = i.at(1);
+            search = commands.at(i).at(1);
+        }
+        else if (util::to_lower_case(commands.at(i).at(0)) == "-qn_format")
+        {
+            search = commands.at(i).at(1);
+        }
+        else if (util::to_lower_case(commands.at(i).at(0)) == "-version")
+        {
+            search = commands.at(i).at(1);
+        }
+        else if (util::to_lower_case(commands.at(i).at(0)) == "-output_path")
+        {
+            output_path = commands.at(i).at(1);
         }
         else
         {
@@ -468,5 +478,5 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
         LOG_AND_EXIT("Error: Too many commands on the command line.");
     }
 
-    execute(command, input_path, filter, search, search_type, output_path);
+    task::execute(command, input_path, filter, search, search_type, output_path);
 }

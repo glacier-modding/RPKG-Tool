@@ -140,7 +140,7 @@ void rpkg_function::hash_meta_to_json(std::string& input_path, std::string& filt
 
                 if (it2 != hash_list_hash_map.end())
                 {
-                    if (hash_value_string == generic_function::compute_ioi_hash(hash_list_hash_strings.at(it2->second)))
+                    if (hash_value_string == generic_function::compute_ioi_hash_string(hash_list_hash_strings.at(it2->second)))
                     {
                         json_string += "{\"hash\":\"" + hash_list_hash_strings.at(it2->second) + "\",";
                     }

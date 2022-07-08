@@ -1,9 +1,9 @@
 #include "dev_function.h"
-#include "../global.h"
-#include "../util.h"
-#include "../crypto.h"
-#include "../generic_function.h"
-#include "../thirdparty/lz4/lz4.h"
+#include "global.h"
+#include "util.h"
+#include "crypto.h"
+#include "generic_function.h"
+#include "thirdparty/lz4/lz4.h"
 #include <fstream>
 #include <iostream>
 #include <filesystem>
@@ -495,7 +495,7 @@ void dev_function::dev_extract_materials_textures_strings(std::string& input_pat
         {
             std::string test_string = "[assembly:" + substrings.at(j) + mati_hash_strings.at(i) + "].pc_mi";
 
-            std::string ioi_hash = generic_function::compute_ioi_hash(test_string);
+            std::string ioi_hash = dev_function::dev_compute_ioi_hash(test_string);
 
             //std::cout << test_string << "," << ioi_hash << std::endl;
 
@@ -547,6 +547,8 @@ void dev_function::dev_extract_materials_textures_strings(std::string& input_pat
 
                         if ((k + 1) < hash_reference_count)
                         {
+                            bool already_found = false;
+
                             for (uint64_t x = 0; x < rpkgs.size(); x++)
                             {
                                 if (!found_at_all)
@@ -610,6 +612,8 @@ void dev_function::dev_extract_materials_textures_strings(std::string& input_pat
                                                                         std::cout << "NOT FOUND INSIDE2" << std::endl;
                                                                     }
                                                                 }
+
+                                                                already_found = true;
 
                                                                 found_at_all = true;
                                                             }
@@ -879,13 +883,13 @@ void dev_function::dev_extract_materials_textures_strings(std::string& input_pat
                     test_string.append(param2.at(y));
                     test_string.append(param3.at(z));
 
-                    std::string ioi_hash = generic_function::compute_ioi_hash(test_string);
+                    std::string ioi_hash = dev_function::dev_compute_ioi_hash(test_string);
 
                     //std::cout << "Testing: " << test_string << std::endl;
 
                     for (uint64_t i = 0; i < rpkgs.size(); i++)
                     {
-                        auto it = rpkgs.at(i).hash_map.find(strtoull(ioi_hash.c_str(), nullptr, 16));
+                        std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(strtoull(ioi_hash.c_str(), nullptr, 16));
 
                         if (it != rpkgs.at(i).hash_map.end())
                         {

@@ -1,6 +1,6 @@
 #include "dev_function.h"
-#include "../global.h"
-#include "../file.h"
+#include "global.h"
+#include "file.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>

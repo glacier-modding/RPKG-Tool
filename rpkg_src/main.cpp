@@ -1,13 +1,16 @@
 #include "command_line.h"
 #include "console.h"
 #include "global.h"
+#include "file.h"
+#include "rpkg.h"
 #include "task.h"
+#include "generic_function.h"
 #include <string>
 #include <vector>
 #include <iostream>
-#include <Windows.h>
+#include <windows.h>
 
-int main(const int argc, char* argv[])
+int main(int argc, char* argv[])
 {
 	// Gets the folder of the executable (OSX/Linux not tested)
 	#if defined(PLATFORM_POSIX) || defined(__linux__)
@@ -44,7 +47,7 @@ int main(const int argc, char* argv[])
                 {
                     std::exit(0);
                 }
-                if (input == "h" || input == "help")
+                else if (input == "h" || input == "help")
                 {
                     console::display_usage_info();
                 }
@@ -96,7 +99,7 @@ int main(const int argc, char* argv[])
                     args.push_back(input.substr(pos1));
                 }
 
-                if (args.empty())
+                if (args.size() > 0)
                 {
                     std::cout << "Running command: " << input << std::endl << std::endl;
 
@@ -127,7 +130,7 @@ int main(const int argc, char* argv[])
         {
             std::vector<std::string> dragged_and_dropped_files = command_line::get_dragged_and_dropped_files(argc, argv);
 
-            task::process_and_execute_files_dragged_and_dropped(dragged_and_dropped_files);
+            task::process_and_execute_files_draged_and_dropped(dragged_and_dropped_files);
         }
         else
         {
