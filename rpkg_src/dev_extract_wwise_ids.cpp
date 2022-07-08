@@ -1,17 +1,22 @@
 #include "dev_function.h"
-#include "../file.h"
-#include "../global.h"
-#include "../crypto.h"
-#include "../thirdparty/lz4/lz4.h"
+#include "rpkg_function.h"
+#include "file.h"
+#include "global.h"
+#include "crypto.h"
+#include "util.h"
+#include "thirdparty/lz4/lz4.h"
 #include <iostream>
-#include <chrono>
 #include <sstream>
 #include <fstream>
 #include <regex>
 #include <filesystem>
 
-void dev_function::dev_extract_wwev_strings(std::string& input_path, std::string& filter, std::string& output_path)
+void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& filter, std::string& output_path)
 {
+    input_path = file::parse_input_folder_path(input_path);
+
+    rpkg_function::import_rpkg_files_in_folder(input_path);
+
     // uint64_t wwev_count_current = 0;
     // uint64_t wwev_hash_size_current = 0;
 
@@ -99,16 +104,7 @@ void dev_function::dev_extract_wwev_strings(std::string& input_path, std::string
 
                     std::memcpy(&hash, &rpkgs.at(i).hash.at(hash_index).hash_value, 0x8);
 
-                    for (uint64_t k = 0; k < sizeof(uint64_t); k++)
-                    {
-                        wwev_meta_data.push_back(hash[k]);
-                    }
-
                     std::memcpy(&input, &wwev_data->data()[position], (wwev_file_name_length + (uint64_t)0xC));
-                    for (uint64_t k = 0; k < (wwev_file_name_length + (uint64_t)0xC); k++)
-                    {
-                        wwev_meta_data.push_back(input[k]);
-                    }
 
                     position += 0x4;
 
@@ -138,6 +134,112 @@ void dev_function::dev_extract_wwev_strings(std::string& input_path, std::string
                     std::string final_path = current_path + "\\" + rpkgs.at(i).hash.at(hash_index).hash_file_name;
 
                     std::cout << hash_file_name << "," << "[assembly:/sound/wwise/exportedwwisedata/events/unknown/" << wwev_file_name.data() << ".wwiseevent].pc_wwisebank" << std::endl;
+
+                    if (wwev_file_count > 0)
+                    {
+                        for (uint64_t k = 0; k < wwev_file_count; k++)
+                        {
+                            std::memcpy(&bytes4, &wwev_data->data()[position], 0x4);
+
+                            std::cout << "WWEV file " << std::to_string(k) << ": " << std::endl;
+                            std::cout << "  - Wwise ID: " << util::uint32_t_to_hex_string(bytes4) << std::endl;
+
+                            position += 0x4;
+
+                            uint32_t wem_size;
+
+                            std::memcpy(&wem_size, &wwev_data->data()[position], sizeof(bytes4));
+                            position += 0x4;
+
+                            std::cout << "  - Length: " << util::uint32_t_to_hex_string(wem_size) << std::endl;
+
+                            std::vector<char> wwev_file_data(wem_size, 0);
+
+                            std::memcpy(wwev_file_data.data(), &wwev_data->data()[position], wem_size);
+                            position += wem_size;
+
+                            std::string wem_file = wem_path + "\\" + std::to_string(k) + ".wem";
+                        }
+                    }
+                    else
+                    {
+                        std::memcpy(&bytes4, &wwev_data->data()[position], 0x4);
+
+                        if (bytes4 == 0)
+                        {
+
+                        }
+                        else
+                        {
+                            std::memcpy(&bytes4, &wwev_data->data()[position], 0x4);
+
+                            uint32_t length = bytes4;
+
+                            position += 0x4;
+
+                            for (uint64_t k = 0; k < length; k++)
+                            {
+                                position += 0x4;
+
+                                std::memcpy(&bytes4, &wwev_data->data()[position], 0x4);
+
+                                std::cout << "WWEV Link Type(0) " << std::to_string(k) << ": " << std::endl;
+                                std::cout << "  - Wwise ID: " << util::uint32_t_to_hex_string(bytes4) << std::endl;
+
+                                position += 0x4;
+
+                                uint32_t wem_size;
+
+                                std::memcpy(&wem_size, &wwev_data->data()[position], sizeof(bytes4));
+
+                                position += 0x4;
+
+                                std::cout << "  - Length: " << util::uint32_t_to_hex_string(wem_size) << std::endl;
+
+                                position += wem_size;
+                            }
+                        }
+                    }
+
+                    if ((position + 0x4) <= decompressed_size)
+                    {
+                        std::memcpy(&bytes4, &wwev_data->data()[position], 0x4);
+
+                        if (bytes4 == 0)
+                        {
+
+                        }
+                        else
+                        {
+                            std::memcpy(&bytes4, &wwev_data->data()[position], 0x4);
+
+                            uint32_t length = bytes4;
+
+                            position += 0x4;
+
+                            for (uint64_t k = 0; k < length; k++)
+                            {
+                                position += 0x4;
+
+                                std::memcpy(&bytes4, &wwev_data->data()[position], 0x4);
+
+                                std::cout << "WWEV Link Type(1) " << std::to_string(k) << ": " << std::endl;
+                                std::cout << "  - Wwise ID: " << util::uint32_t_to_hex_string(bytes4) << std::endl;
+
+                                position += 0x4;
+
+                                uint32_t wem_size;
+
+                                std::memcpy(&wem_size, &wwev_data->data()[position], sizeof(bytes4));
+
+                                position += 0x4;
+
+                                std::cout << "  - Length: " << util::uint32_t_to_hex_string(wem_size) << std::endl;
+
+                                position += wem_size;
+                            }
+                        }
+                    }
                 }
             }
         }

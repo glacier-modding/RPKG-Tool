@@ -1,7 +1,8 @@
-#include "generic_function.h"
+#include "rpkg_function.h"
+#include "dev_function.h"
 #include "global.h"
-#include <string>
-#include <iomanip>
+#include <filesystem>
+#include <regex>
 #include <sstream>
 #include "thirdparty/md5/md5.h"
 
@@ -10,7 +11,7 @@ extern "C" void MD5Update(struct MD5Context* ctx, unsigned char* buf, unsigned l
 extern "C" void MD5Final(unsigned char digest[16], struct MD5Context* ctx);
 extern "C" void MD5Transform(uint32 buf[4], uint32 in[16]);
 
-void generic_function::compute_ioi_hash(std::string& input_to_ioi_hash)
+std::string dev_function::dev_compute_ioi_hash(std::string input_to_ioi_hash)
 {
     unsigned char signature[16];
     struct MD5Context md5c;
@@ -19,7 +20,7 @@ void generic_function::compute_ioi_hash(std::string& input_to_ioi_hash)
 
     for (int i = 0; i < input_to_ioi_hash.length(); i++)
     {
-        lowercase += std::tolower(input_to_ioi_hash[i]);
+        lowercase.push_back(std::tolower(input_to_ioi_hash[i]));
     }
 
     //LOG(main_data->console_prefix << "Input: " << main_data->input_to_ioi_hash << ", " << lowercase);
@@ -35,7 +36,7 @@ void generic_function::compute_ioi_hash(std::string& input_to_ioi_hash)
         ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)(unsigned char)signature[m];
     }
 
-    LOG("Normal MD5 Hash: " << ss.str());
+    //LOG("Normal MD5 Hash: " << ss.str());
 
     ss.str(std::string());
 
@@ -46,5 +47,5 @@ void generic_function::compute_ioi_hash(std::string& input_to_ioi_hash)
         ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)(unsigned char)signature[m];
     }
 
-    LOG("IOI Hash: " << ss.str());
+    return ss.str();
 }

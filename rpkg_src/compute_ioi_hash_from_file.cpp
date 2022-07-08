@@ -7,9 +7,9 @@
 #include <fstream>
 #include "thirdparty/md5/md5.h"
 
-extern "C" void MD5Init(MD5Context* ctx);
-extern "C" void MD5Update(MD5Context* ctx, unsigned char* buf, unsigned len);
-extern "C" void MD5Final(unsigned char digest[16], MD5Context* ctx);
+extern "C" void MD5Init(struct MD5Context* ctx);
+extern "C" void MD5Update(struct MD5Context* ctx, unsigned char* buf, unsigned len);
+extern "C" void MD5Final(unsigned char digest[16], struct MD5Context* ctx);
 extern "C" void MD5Transform(uint32 buf[4], uint32 in[16]);
 
 void generic_function::compute_ioi_hash_from_file(std::string& input_path)
@@ -36,7 +36,13 @@ void generic_function::compute_ioi_hash_from_file(std::string& input_path)
 
             //std::cout << "String: " << ioi_string << std::endl;
 
-            if (auto it = ioi_string_map.find(substring); it == ioi_string_map.end())
+            std::map<std::string, uint64_t>::iterator it = ioi_string_map.find(substring);
+
+            if (it != ioi_string_map.end())
+            {
+
+            }
+            else
             {
                 ioi_strings.push_back(ioi_string);
                 ioi_string_map[ioi_string] = ioi_strings.size() - 1;
@@ -44,29 +50,29 @@ void generic_function::compute_ioi_hash_from_file(std::string& input_path)
         }
     }
 
-    for (auto& ioi_string : ioi_strings)
+    for (int j = 0; j < ioi_strings.size(); j++)
     {
         unsigned char signature[16];
         struct MD5Context md5c;
 
         std::string lowercase;
 
-        for (char i : ioi_string)
+        for (int i = 0; i < ioi_strings.at(j).length(); i++)
         {
-            lowercase += std::tolower(i);
+            lowercase += std::tolower(ioi_strings.at(j)[i]);
         }
 
         //LOG(main_data->console_prefix << "Input: " << main_data->input_to_ioi_hash << ", " << lowercase);
 
         MD5Init(&md5c);
-        MD5Update(&md5c, (unsigned char*)lowercase.c_str(), static_cast<unsigned>(lowercase.length()));
+        MD5Update(&md5c, (unsigned char*)lowercase.c_str(), (unsigned int)lowercase.length());
         MD5Final(signature, &md5c);
 
         std::stringstream ss;
 
-        for (unsigned char m : signature)
+        for (uint64_t m = 0; m < 16; m++)
         {
-            ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(m);
+            ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)(unsigned char)signature[m];
         }
 
         ss.str(std::string());
@@ -75,9 +81,9 @@ void generic_function::compute_ioi_hash_from_file(std::string& input_path)
 
         for (uint64_t m = 1; m < 8; m++)
         {
-            ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(signature[m]);
+            ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)(unsigned char)signature[m];
         }
 
-        std::cout << ss.str() << "," << ioi_string << std::endl;
+        std::cout << ss.str() << "," << ioi_strings.at(j) << std::endl;
     }
 }

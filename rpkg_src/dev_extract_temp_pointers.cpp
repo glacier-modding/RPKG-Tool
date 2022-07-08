@@ -1,8 +1,8 @@
 #include "dev_function.h"
-#include "../rpkg_function.h"
-#include "../file.h"
-#include "../global.h"
-#include "../temp.h"
+#include "rpkg_function.h"
+#include "file.h"
+#include "global.h"
+#include "temp.h"
 #include <map>
 #include <sstream>
 #include <regex>

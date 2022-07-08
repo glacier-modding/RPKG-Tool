@@ -25,7 +25,7 @@ temp::temp()
        
 }
 
-temp::temp(const uint64_t rpkgs_index, const uint64_t hash_index)
+temp::temp(uint64_t rpkgs_index, uint64_t hash_index)
 {
     initialize_enum_map_h2();
     initialize_enum_map_h3();
@@ -43,7 +43,7 @@ temp::temp(const uint64_t rpkgs_index, const uint64_t hash_index)
     load_hash_depends();
 }
 
-temp::temp(const uint64_t rpkgs_index, const uint64_t hash_index, const uint32_t temp_version)
+temp::temp(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
 {
     temp_file_version = temp_version;
 
@@ -269,13 +269,13 @@ void temp::load_tblu_data()
         crypto::xor_data(tblu_input_data.data(), (uint32_t)tblu_hash_size);
     }
 
-    const uint32_t tblu_decompressed_size = rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_size_final;
+    uint32_t tblu_decompressed_size = rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_size_final;
 
     tblu_output_data = std::vector<char>(tblu_decompressed_size, 0);
 
     if (rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).is_lz4ed)
     {
-        LZ4_decompress_safe(tblu_input_data.data(), tblu_output_data.data(), static_cast<int>(tblu_hash_size), tblu_decompressed_size);
+        LZ4_decompress_safe(tblu_input_data.data(), tblu_output_data.data(), (int)tblu_hash_size, tblu_decompressed_size);
 
         tblu_data = tblu_output_data;
     }
@@ -461,7 +461,7 @@ void temp::load_hash_depends()
 
             if (it2 != hash_list_hash_map.end())
             {
-                if (hash_value_string == generic_function::compute_ioi_hash(hash_list_hash_strings.at(it2->second)))
+                if (hash_value_string == generic_function::compute_ioi_hash_string(hash_list_hash_strings.at(it2->second)))
                 {
                     temp_meta_strings.push_back(hash_list_hash_strings.at(it2->second));
                 }
@@ -659,7 +659,7 @@ void temp::load_hash_depends()
 
                 if (it2 != hash_list_hash_map.end())
                 {
-                    if (hash_value_string == generic_function::compute_ioi_hash(hash_list_hash_strings.at(it2->second)))
+                    if (hash_value_string == generic_function::compute_ioi_hash_string(hash_list_hash_strings.at(it2->second)))
                     {
                         tblu_meta_strings.push_back(hash_list_hash_strings.at(it2->second));
                     }
@@ -679,7 +679,7 @@ void temp::load_hash_depends()
     }
 }
 
-void temp::get_prim_from_temp(uint32_t entry_index) const
+void temp::get_prim_from_temp(uint32_t entry_index)
 {
     response_string = "";
 
@@ -736,7 +736,7 @@ void temp::temp_version_check()
         crypto::xor_data(temp_input_data.data(), (uint32_t)temp_hash_size);
     }
 
-    const uint32_t temp_decompressed_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_size_final;
+    uint32_t temp_decompressed_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_size_final;
 
     temp_output_data = std::vector<char>(temp_decompressed_size, 0);
 
@@ -754,11 +754,13 @@ void temp::temp_version_check()
     std::vector<char>().swap(temp_output_data);
     std::vector<char>().swap(temp_input_data);
 
+    uint64_t temp_position = 0;
+
     uint32_t temp_sub_entity_table_offset = 0;
     uint32_t temp_after_sub_entity_table_offset = 0;
     uint32_t entity_count = 0;
 
-    uint64_t temp_position = 0x20;
+    temp_position = 0x20;
 
     std::memcpy(&temp_sub_entity_table_offset, &temp_data.data()[temp_position], 0x4);
 
@@ -772,7 +774,7 @@ void temp::temp_version_check()
 
     if (temp_sub_entity_table_offset == 0x60 && entity_count != 0xFFFFFFFF)
     {
-        const uint32_t temp_version_check = temp_after_sub_entity_table_offset - temp_sub_entity_table_offset;
+        uint32_t temp_version_check = temp_after_sub_entity_table_offset - temp_sub_entity_table_offset;
 
         if (temp_version_check == 0x58 * entity_count)
         {
@@ -795,7 +797,7 @@ void temp::temp_version_check()
     }
     else if (temp_sub_entity_table_offset == 0x58)
     {
-        const uint32_t temp_version_check = temp_after_sub_entity_table_offset - temp_sub_entity_table_offset;
+        uint32_t temp_version_check = temp_after_sub_entity_table_offset - temp_sub_entity_table_offset;
 
         if ((temp_version_check % 0x58 == 0) && (temp_version_check % 0x70 == 0))
         {
@@ -829,7 +831,7 @@ void temp::set_temp_version(uint32_t temp_version)
     temp_file_version = temp_version;
 }
 
-void temp::get_top_level_logical_parents() const
+void temp::get_top_level_logical_parents()
 {
     std::set<std::string> logical_parents_set;
 
@@ -848,7 +850,7 @@ void temp::get_top_level_logical_parents() const
     }
 }
 
-void temp::get_entries_with_logical_parent(const uint32_t logical_parent) const
+void temp::get_entries_with_logical_parent(uint32_t logical_parent)
 {
     for (uint32_t e = 0; e < temp_logicalParent.size(); e++)
     {
@@ -858,18 +860,18 @@ void temp::get_entries_with_logical_parent(const uint32_t logical_parent) const
 
             std::memcpy(&char4, &e, 0x4);
 
-            for (char& i : char4)
+            for (uint32_t i = 0; i < 0x4; i++)
             {
-                response_data.push_back(i);
+                response_data.push_back(char4[i]);
             }
 
             uint32_t entityName_string_length = tblu_entityName.at(e).length();
 
             std::memcpy(&char4, &entityName_string_length, 0x4);
 
-            for (char& i : char4)
+            for (uint32_t i = 0; i < 0x4; i++)
             {
-                response_data.push_back(i);
+                response_data.push_back(char4[i]);
             }
 
             for (uint32_t i = 0; i < entityName_string_length; i++)
