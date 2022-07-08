@@ -16,8 +16,3 @@ public:
     static bool is_rpkg_file(std::string input);
     static bool is_supermeta_file(std::string input);
 };
-
-#define ASSERT_EXISTS(file_path) \
-    if (!file::path_exists(file_path)) {\
-        LOG_AND_EXIT("Assertion failed: expected " + (file_path) + " to exist!");\
-    }

@@ -32,169 +32,77 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
         input_path = file::parse_input_folder_path(input_path);
     }
 
-    ASSERT_EXISTS(input_path)
-
-    if (!hash_list_loaded)
+    if (file::path_exists(input_path))
     {
-        LOG("Loading Hash List...");
-        generic_function::load_hash_list(true);
-        LOG("Loading Hash List: Done");
-    }
-
-    if (!input_path_is_rpkg_file)
-    {
-        import_rpkg_files_in_folder(input_path);
-    }
-
-    std::stringstream ss;
-
-    ss << "Scanning folder: Done";
-
-    timing_string = ss.str();
-
-    //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
-
-    file::create_directories(file::output_path_append("WWEM", output_path));
-
-    std::vector<std::string> filters = util::parse_input_filter(filter);
-
-    bool extract_single_hash = false;
-
-    if (filters.size() == 1)
-    {
-        std::string legal_chars = "0123456789ABCDEF";
-
-        bool is_a_hash = false;
-
-        if (filters.at(0).length() == 16)
+        if (!hash_list_loaded)
         {
-            is_a_hash = true;
-
-            for (int i = 0; i < 16; i++)
-            {
-                bool is_legal = false;
-
-                for (int j = 0; j < 16; j++)
-                {
-                    if (filters.at(0)[i] == legal_chars[j])
-                    {
-                        is_legal = true;
-                    }
-                }
-
-                if (!is_legal)
-                {
-                    is_a_hash = false;
-                }
-            }
+            LOG("Loading Hash List...");
+            generic_function::load_hash_list(true);
+            LOG("Loading Hash List: Done");
         }
 
-        if (is_a_hash)
+        if (!input_path_is_rpkg_file)
         {
-            extract_single_hash = true;
+            rpkg_function::import_rpkg_files_in_folder(input_path);
         }
-    }
 
-    uint64_t wwem_count = 0;
-    uint64_t wwem_hash_size_total = 0;
+        std::stringstream ss;
 
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-    double console_update_rate = 1.0 / 2.0;
-    int period_count = 1;
+        ss << "Scanning folder: Done";
 
-    for (uint64_t i = 0; i < rpkgs.size(); i++)
-    {
-        for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++)
+        timing_string = ss.str();
+
+        //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
+
+        file::create_directories(file::output_path_append("WWEM", output_path));
+
+        std::vector<std::string> filters = util::parse_input_filter(filter);
+
+        bool extract_single_hash = false;
+
+        if (filters.size() == 1)
         {
-            if (rpkgs.at(i).hash_resource_types.at(r) == "WWEM")
+            std::string legal_chars = "0123456789ABCDEF";
+
+            bool is_a_hash = false;
+
+            if (filters.at(0).length() == 16)
             {
-                for (uint64_t j = 0; j < rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).size(); j++)
+                is_a_hash = true;
+
+                for (int i = 0; i < 16; i++)
                 {
-                    uint64_t hash_index = rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).at(j);
+                    bool is_legal = false;
 
-                    if (gui_control == ABORT_CURRENT_TASK)
+                    for (int j = 0; j < 16; j++)
                     {
-                        return;
-                    }
-
-                    std::string hash_file_name = rpkgs.at(i).hash.at(hash_index).hash_file_name;
-
-                    std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-                    double time_in_seconds_from_start_time = 0.000000001 * std::chrono::duration_cast<
-                        std::chrono::nanoseconds>(end_time - start_time).count();
-
-                    if (time_in_seconds_from_start_time > console_update_rate)
-                    {
-                        start_time = end_time;
-
-                        if (period_count > 3)
+                        if (filters.at(0)[i] == legal_chars[j])
                         {
-                            period_count = 0;
+                            is_legal = true;
                         }
-
-                        std::stringstream ss;
-
-                        ss << "Scanning RPKGs for WWEM files" << std::string(period_count, '.');
-
-                        timing_string = ss.str();
-
-                        LOG_NO_ENDL("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-                        period_count++;
                     }
 
-                    wwem_hash_size_total += rpkgs.at(i).hash.at(hash_index).hash_size_final;
-
-                    wwem_count++;
+                    if (!is_legal)
+                    {
+                        is_a_hash = false;
+                    }
                 }
             }
-        }
-    }
 
-    ss.str(std::string());
-
-    ss << "Scanning RPKGs for WWEM files: Done";
-
-    LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-    start_time = std::chrono::high_resolution_clock::now();
-    int stringstream_length = 80;
-
-    uint64_t wwem_count_current = 0;
-    uint64_t wwem_hash_size_current = 0;
-
-    std::string message = "Extracting WWEM to IOI Paths: ";
-
-    if (filter != "")
-    {
-        LOG("Extracting WWEM to *.wem/*.ogg files with filter \"" << filter << "\"");
-    }
-
-    std::map<std::string, uint32_t> wwem_name_map;
-
-    std::vector<std::string> found_in;
-    std::vector<std::string> not_found_in;
-
-    // uint64_t wwem_map_index = 0;
-
-    for (uint64_t z = 0; z < filters.size(); z++)
-    {
-        found_in.push_back("");
-
-        not_found_in.push_back("");
-    }
-
-    for (uint64_t i = 0; i < rpkgs.size(); i++)
-    {
-        std::vector<bool> extracted;
-
-        for (uint64_t z = 0; z < filters.size(); z++)
-        {
-            extracted.push_back(false);
+            if (is_a_hash)
+            {
+                extract_single_hash = true;
+            }
         }
 
-        if (rpkgs.at(i).rpkg_file_path == input_path || !input_path_is_rpkg_file)
+        uint64_t wwem_count = 0;
+        uint64_t wwem_hash_size_total = 0;
+
+        std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
+        double console_update_rate = 1.0 / 2.0;
+        int period_count = 1;
+
+        for (uint64_t i = 0; i < rpkgs.size(); i++)
         {
             for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++)
             {
@@ -209,292 +117,375 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
                             return;
                         }
 
-                        if (((wwem_count_current * static_cast<uint64_t>(100000)) / wwem_count) % static_cast<uint64_t>(10) == 0 &&
-                            wwem_count_current > 0)
+                        std::string hash_file_name = rpkgs.at(i).hash.at(hash_index).hash_file_name;
+
+                        std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
+
+                        double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+
+                        if (time_in_seconds_from_start_time > console_update_rate)
                         {
-                            stringstream_length = console::update_console(
-                                message, wwem_hash_size_total, wwem_hash_size_current, start_time, stringstream_length);
-                        }
+                            start_time = end_time;
 
-                        wwem_hash_size_current += rpkgs.at(i).hash.at(hash_index).hash_size_final;
-
-                        wwem_count_current++;
-
-                        if (!extract_single_hash || (extract_single_hash && filter == rpkgs.at(i).hash.at(hash_index).
-                            hash_string))
-                        {
-                            std::string hash_file_name = rpkgs.at(i).hash.at(hash_index).hash_file_name;
-
-                            std::string hash_list_string = "";
-                            std::string wwem_ioi_path = "";
-                            std::string wwem_ioi_directory = "";
-                            // std::string wwem_base_name = "";
-
-                            bool full_wwem_ioi_path_unknown = false;
-                            bool wwem_ioi_path_found = false;
-
-                            std::map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(
-                                rpkgs.at(i).hash.at(hash_index).hash_value);
-
-                            if (it != hash_list_hash_map.end())
+                            if (period_count > 3)
                             {
-                                hash_list_string = hash_list_hash_strings.at(it->second);
-                                wwem_ioi_path = file::output_path_append(
-                                    "WWEM\\" + rpkgs.at(i).rpkg_file_name + "\\assembly", output_path);
-
-                                if (hash_list_string.find("/unknown/") != std::string::npos)
-                                {
-                                    full_wwem_ioi_path_unknown = true;
-                                }
-
-                                size_t pos1 = hash_list_string.find("[assembly:");
-                                size_t pos2 = hash_list_string.find(".wav]");
-                                size_t pos3 = hash_list_string.find(".pc_wem");
-
-                                if (pos1 != std::string::npos && pos2 != std::string::npos && pos3 != std::string::npos
-                                    && (pos2 - pos1) > 12)
-                                {
-                                    wwem_ioi_path.append(hash_list_string.substr((pos1 + 10), pos2 - (pos1 + 10)));
-
-                                    std::replace(wwem_ioi_path.begin(), wwem_ioi_path.end(), '/', '\\');
-
-                                    size_t pos4 = wwem_ioi_path.find_last_of("\\");
-
-                                    // wwem_base_name = wwem_ioi_path.substr(pos4 + 1);
-
-                                    wwem_ioi_directory = wwem_ioi_path.substr(0, pos4);
-
-                                    if (full_wwem_ioi_path_unknown)
-                                    {
-                                        wwem_ioi_path += "." + rpkgs.at(i).hash.at(hash_index).hash_string;
-                                        //wwem_ioi_path.push_back('\\');
-                                        //wwem_ioi_path.append(wwem_base_name);
-                                        //wwem_ioi_directory.push_back('\\');
-                                        //wwem_ioi_directory.append(wwem_base_name);
-                                    }
-
-                                    //rpkg_function::get_unique_name(wwem_name_map, wwem_ioi_path);
-
-                                    wwem_ioi_path_found = true;
-                                }
+                                period_count = 0;
                             }
 
-                            if (wwem_ioi_path_found)
-                            {
-                                uint64_t hash_size;
+                            std::stringstream ss;
 
-                                if (rpkgs.at(i).hash.at(hash_index).is_lz4ed == 1)
+                            ss << "Scanning RPKGs for WWEM files" << std::string(period_count, '.');
+
+                            timing_string = ss.str();
+
+                            LOG_NO_ENDL("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+
+                            period_count++;
+                        }
+
+                        wwem_hash_size_total += rpkgs.at(i).hash.at(hash_index).hash_size_final;
+
+                        wwem_count++;
+                    }
+                }
+            }
+        }
+
+        ss.str(std::string());
+
+        ss << "Scanning RPKGs for WWEM files: Done";
+
+        LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+
+        start_time = std::chrono::high_resolution_clock::now();
+        int stringstream_length = 80;
+
+        uint64_t wwem_count_current = 0;
+        uint64_t wwem_hash_size_current = 0;
+
+        std::string message = "Extracting WWEM to IOI Paths: ";
+
+        if (filter != "")
+        {
+            LOG("Extracting WWEM to *.wem/*.ogg files with filter \"" << filter << "\"");
+        }
+
+        std::map<std::string, uint32_t> wwem_name_map;
+
+        std::vector<std::string> found_in;
+        std::vector<std::string> not_found_in;
+
+        // uint64_t wwem_map_index = 0;
+
+        for (uint64_t z = 0; z < filters.size(); z++)
+        {
+            found_in.push_back("");
+
+            not_found_in.push_back("");
+        }
+
+        for (uint64_t i = 0; i < rpkgs.size(); i++)
+        {
+            std::vector<bool> extracted;
+
+            for (uint64_t z = 0; z < filters.size(); z++)
+            {
+                extracted.push_back(false);
+            }
+
+            if (rpkgs.at(i).rpkg_file_path == input_path || !input_path_is_rpkg_file)
+            {
+                for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++)
+                {
+                    if (rpkgs.at(i).hash_resource_types.at(r) == "WWEM")
+                    {
+                        for (uint64_t j = 0; j < rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).size(); j++)
+                        {
+                            uint64_t hash_index = rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).at(j);
+
+                            if (gui_control == ABORT_CURRENT_TASK)
+                            {
+                                return;
+                            }
+
+                            if (((wwem_count_current * (uint64_t)100000) / (uint64_t)wwem_count) % (uint64_t)10 == 0 && wwem_count_current > 0)
+                            {
+                                stringstream_length = console::update_console(message, wwem_hash_size_total, wwem_hash_size_current, start_time, stringstream_length);
+                            }
+
+                            wwem_hash_size_current += rpkgs.at(i).hash.at(hash_index).hash_size_final;
+
+                            wwem_count_current++;
+
+                            if (!extract_single_hash || (extract_single_hash && filter == rpkgs.at(i).hash.at(hash_index).hash_string))
+                            {
+                                std::string hash_file_name = rpkgs.at(i).hash.at(hash_index).hash_file_name;
+
+                                std::string hash_list_string = "";
+                                std::string wwem_ioi_path = "";
+                                std::string wwem_ioi_directory = "";
+                                // std::string wwem_base_name = "";
+
+                                bool full_wwem_ioi_path_unknown = false;
+                                bool wwem_ioi_path_found = false;
+
+                                std::map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(rpkgs.at(i).hash.at(hash_index).hash_value);
+
+                                if (it != hash_list_hash_map.end())
                                 {
-                                    hash_size = rpkgs.at(i).hash.at(hash_index).hash_size;
+                                    hash_list_string = hash_list_hash_strings.at(it->second);
+                                    wwem_ioi_path = file::output_path_append("WWEM\\" + rpkgs.at(i).rpkg_file_name + "\\assembly", output_path);
+
+                                    if (hash_list_string.find("/unknown/") != std::string::npos)
+                                    {
+                                        full_wwem_ioi_path_unknown = true;
+                                    }
+
+                                    size_t pos1 = hash_list_string.find("[assembly:");
+                                    size_t pos2 = hash_list_string.find(".wav]");
+                                    size_t pos3 = hash_list_string.find(".pc_wem");
+
+                                    if (pos1 != std::string::npos && pos2 != std::string::npos && pos3 != std::string::npos && (pos2 - pos1) > 12)
+                                    {
+                                        wwem_ioi_path.append(hash_list_string.substr((pos1 + 10), pos2 - (pos1 + 10)));
+
+                                        std::replace(wwem_ioi_path.begin(), wwem_ioi_path.end(), '/', '\\');
+
+                                        size_t pos4 = wwem_ioi_path.find_last_of("\\");
+
+                                        // wwem_base_name = wwem_ioi_path.substr(pos4 + 1);
+
+                                        wwem_ioi_directory = wwem_ioi_path.substr(0, pos4);
+
+                                        if (full_wwem_ioi_path_unknown)
+                                        {
+                                            wwem_ioi_path += "." + rpkgs.at(i).hash.at(hash_index).hash_string;
+                                            //wwem_ioi_path.push_back('\\');
+                                            //wwem_ioi_path.append(wwem_base_name);
+                                            //wwem_ioi_directory.push_back('\\');
+                                            //wwem_ioi_directory.append(wwem_base_name);
+                                        }
+
+                                        //rpkg_function::get_unique_name(wwem_name_map, wwem_ioi_path);
+
+                                        wwem_ioi_path_found = true;
+                                    }
+                                }
+
+                                if (wwem_ioi_path_found)
+                                {
+                                    uint64_t hash_size;
+
+                                    if (rpkgs.at(i).hash.at(hash_index).is_lz4ed == 1)
+                                    {
+                                        hash_size = rpkgs.at(i).hash.at(hash_index).hash_size;
+
+                                        if (rpkgs.at(i).hash.at(hash_index).is_xored == 1)
+                                        {
+                                            hash_size &= 0x3FFFFFFF;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        hash_size = rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                                    }
+
+                                    std::vector<char> input_data(hash_size, 0);
+
+                                    std::ifstream file = std::ifstream(rpkgs.at(i).rpkg_file_path, std::ifstream::binary);
+
+                                    if (!file.good())
+                                    {
+                                        LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(i).rpkg_file_path + " could not be read.");
+                                    }
+
+                                    file.seekg(rpkgs.at(i).hash.at(hash_index).hash_offset, file.beg);
+                                    file.read(input_data.data(), hash_size);
+                                    file.close();
 
                                     if (rpkgs.at(i).hash.at(hash_index).is_xored == 1)
                                     {
-                                        hash_size &= 0x3FFFFFFF;
-                                    }
-                                }
-                                else
-                                {
-                                    hash_size = rpkgs.at(i).hash.at(hash_index).hash_size_final;
-                                }
-
-                                std::vector<char> input_data(hash_size, 0);
-
-                                std::ifstream file = std::ifstream(rpkgs.at(i).rpkg_file_path, std::ifstream::binary);
-
-                                if (!file.good())
-                                {
-                                    LOG_AND_EXIT(
-                                        "Error: RPKG file " + rpkgs.at(i).rpkg_file_path + " could not be read.");
-                                }
-
-                                file.seekg(rpkgs.at(i).hash.at(hash_index).hash_offset, file.beg);
-                                file.read(input_data.data(), hash_size);
-                                file.close();
-
-                                if (rpkgs.at(i).hash.at(hash_index).is_xored == 1)
-                                {
-                                    crypto::xor_data(input_data.data(), (uint32_t)hash_size);
-                                }
-
-                                uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).hash_size_final;
-
-                                std::vector<char> output_data(decompressed_size, 0);
-
-                                std::vector<char>* wwem_data;
-
-                                if (rpkgs.at(i).hash.at(hash_index).is_lz4ed)
-                                {
-                                    LZ4_decompress_safe(input_data.data(), output_data.data(), (int)hash_size,
-                                                        decompressed_size);
-
-                                    wwem_data = &output_data;
-                                }
-                                else
-                                {
-                                    wwem_data = &input_data;
-                                }
-
-                                std::string wem_file_name = wwem_ioi_path + ".wem";
-                                //std::string wwem_meta_data_file_name = wwem_ioi_path + "_" + hash_file_name;
-                                std::string ogg_file = wwem_ioi_path + ".ogg";
-
-                                bool found = false;
-
-                                uint64_t input_filter_index = 0;
-
-                                for (uint64_t z = 0; z < filters.size(); z++)
-                                {
-                                    std::size_t found_position_hash = hash_file_name.find(filters.at(z));
-
-                                    std::size_t found_position_wwem = util::to_upper_case(hash_list_string).find(
-                                        filters.at(z));
-
-                                    if ((found_position_hash != std::string::npos && filters.at(z) != "") || (
-                                        found_position_wwem != std::string::npos && filters.at(z) != ""))
-                                    {
-                                        found = true;
-
-                                        input_filter_index = z;
-
-                                        break;
-                                    }
-                                }
-
-                                if (found || filter == "")
-                                {
-                                    file::create_directories(wwem_ioi_directory);
-
-                                    if (filters.size() > 0)
-                                    {
-                                        extracted.at(input_filter_index) = true;
+                                        crypto::xor_data(input_data.data(), (uint32_t)hash_size);
                                     }
 
-                                    std::ofstream wem_file = std::ofstream(wem_file_name, std::ofstream::binary);
+                                    uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).hash_size_final;
 
-                                    if (!wem_file.good())
+                                    std::vector<char> output_data(decompressed_size, 0);
+
+                                    std::vector<char>* wwem_data;
+
+                                    if (rpkgs.at(i).hash.at(hash_index).is_lz4ed)
                                     {
-                                        LOG_AND_EXIT("Error: wem file " + wem_file_name + " could not be created.");
+                                        LZ4_decompress_safe(input_data.data(), output_data.data(), (int)hash_size, decompressed_size);
+
+                                        wwem_data = &output_data;
+                                    }
+                                    else
+                                    {
+                                        wwem_data = &input_data;
                                     }
 
-                                    wem_file.write(wwem_data->data(), decompressed_size);
+                                    std::string wem_file_name = wwem_ioi_path + ".wem";
+                                    //std::string wwem_meta_data_file_name = wwem_ioi_path + "_" + hash_file_name;
+                                    std::string ogg_file = wwem_ioi_path + ".ogg";
 
-                                    wem_file.close();
+                                    bool found = false;
 
-                                    //std::ofstream wwem_meta_data_file = std::ofstream(wwem_meta_data_file_name, std::ofstream::binary);
+                                    uint64_t input_filter_index = 0;
 
-                                    //if (!wwem_meta_data_file.good())
-                                    //{
-                                    //LOG_AND_EXIT("Error: meta file " + wwem_meta_data_file_name + " could not be created.");
-                                    //}
-
-                                    //wwem_meta_data_file.close();
-
-                                    if (!file::path_exists("packed_codebooks_aoTuV_603.bin"))
+                                    for (uint64_t z = 0; z < filters.size(); z++)
                                     {
-                                        LOG("Error: Missing packed_codebooks_aoTuV_603.bin file.");
-                                        LOG("       Attempting to create the packed_codebooks_aoTuV_603.bin file.");
+                                        std::size_t found_position_hash = hash_file_name.find(filters.at(z));
 
-                                        std::ofstream output_file = std::ofstream(
-                                            "packed_codebooks_aoTuV_603.bin", std::ofstream::binary);
+                                        std::size_t found_position_wwem = util::to_upper_case(hash_list_string).find(filters.at(z));
+
+                                        if ((found_position_hash != std::string::npos && filters.at(z) != "") || (found_position_wwem != std::string::npos && filters.at(z) != ""))
+                                        {
+                                            found = true;
+
+                                            input_filter_index = z;
+
+                                            break;
+                                        }
+                                    }
+
+                                    if (found || filter == "")
+                                    {
+                                        file::create_directories(wwem_ioi_directory);
+
+                                        if (filters.size() > 0)
+                                        {
+                                            extracted.at(input_filter_index) = true;
+                                        }
+
+                                        std::ofstream wem_file = std::ofstream(wem_file_name, std::ofstream::binary);
+
+                                        if (!wem_file.good())
+                                        {
+                                            LOG_AND_EXIT("Error: wem file " + wem_file_name + " could not be created.");
+                                        }
+
+                                        wem_file.write(wwem_data->data(), decompressed_size);
+
+                                        wem_file.close();
+
+                                        //std::ofstream wwem_meta_data_file = std::ofstream(wwem_meta_data_file_name, std::ofstream::binary);
+
+                                        //if (!wwem_meta_data_file.good())
+                                        //{
+                                            //LOG_AND_EXIT("Error: meta file " + wwem_meta_data_file_name + " could not be created.");
+                                        //}
+
+                                        //wwem_meta_data_file.close();
+
+                                        if (!file::path_exists("packed_codebooks_aoTuV_603.bin"))
+                                        {
+                                            LOG("Error: Missing packed_codebooks_aoTuV_603.bin file.");
+                                            LOG("       Attempting to create the packed_codebooks_aoTuV_603.bin file.");
+
+                                            std::ofstream output_file = std::ofstream("packed_codebooks_aoTuV_603.bin", std::ofstream::binary);
+
+                                            if (!output_file.good())
+                                            {
+                                                LOG_AND_EXIT("Error: packed_codebooks_aoTuV_603.bin file packed_codebooks_aoTuV_603.bin could not be created.");
+                                            }
+
+                                            output_file.write((const char*)codebook, sizeof(codebook));
+                                        }
+
+                                        std::ofstream output_file = std::ofstream(ogg_file, std::ofstream::binary);
 
                                         if (!output_file.good())
                                         {
-                                            LOG_AND_EXIT(
-                                                "Error: packed_codebooks_aoTuV_603.bin file packed_codebooks_aoTuV_603.bin could not be created.");
+                                            LOG_AND_EXIT("Error: ogg file " + ogg_file + " could not be created.");
                                         }
 
-                                        output_file.write(reinterpret_cast<const char*>(codebook), sizeof(codebook));
+                                        try
+                                        {
+                                            Wwise_RIFF_Vorbis ww(wem_file_name, "packed_codebooks_aoTuV_603.bin", false, false, kNoForcePacketFormat);
+
+                                            ww.generate_ogg(output_file);
+                                        }
+                                        catch (const Parse_error& pe)
+                                        {
+                                            LOG("WWEV resource found: " << hash_file_name << " in RPKG file: " << rpkgs.at(i).rpkg_file_name);
+                                            LOG("Error parsing ogg file " << wem_file_name << " could not be created.");
+                                            LOG("Error: " << pe);
+                                        }
+
+                                        output_file.close();
+
+                                        revorb(ogg_file);
+
+                                        std::remove(wem_file_name.c_str());
+
+                                        //std::string metas_directory = wwem_ioi_directory + "\\metas";
+
+                                        //file::create_directories(metas_directory);
+
+                                        //std::string final_path = metas_directory + "\\" + rpkgs.at(i).hash.at(hash_index).hash_file_name;
+
+                                        //rpkg_function::extract_hash_meta(i, hash_index, final_path);
                                     }
-
-                                    std::ofstream output_file = std::ofstream(ogg_file, std::ofstream::binary);
-
-                                    if (!output_file.good())
-                                    {
-                                        LOG_AND_EXIT("Error: ogg file " + ogg_file + " could not be created.");
-                                    }
-
-                                    try
-                                    {
-                                        Wwise_RIFF_Vorbis ww(wem_file_name, "packed_codebooks_aoTuV_603.bin", false,
-                                                             false, kNoForcePacketFormat);
-
-                                        ww.generate_ogg(output_file);
-                                    }
-                                    catch (const Parse_error& pe)
-                                    {
-                                        LOG("WWEV resource found: " << hash_file_name <<" in RPKG file: " << rpkgs.at(i).rpkg_file_name);
-                                        LOG("Error parsing ogg file " << wem_file_name << " could not be created.");
-                                        LOG("Error: " << pe);
-                                    }
-
-                                    output_file.close();
-
-                                    revorb(ogg_file);
-
-                                    std::remove(wem_file_name.c_str());
-
-                                    //std::string metas_directory = wwem_ioi_directory + "\\metas";
-
-                                    //file::create_directories(metas_directory);
-
-                                    //std::string final_path = metas_directory + "\\" + rpkgs.at(i).hash.at(hash_index).hash_file_name;
-
-                                    //rpkg_function::extract_hash_meta(i, hash_index, final_path);
                                 }
                             }
                         }
                     }
                 }
             }
+
+            for (uint64_t z = 0; z < filters.size(); z++)
+            {
+                if (extracted.at(z))
+                {
+                    if (found_in.at(z) == "")
+                    {
+                        found_in.at(z).append(rpkgs.at(i).rpkg_file_name);
+                    }
+                    else
+                    {
+                        found_in.at(z).append(", " + rpkgs.at(i).rpkg_file_name);
+                    }
+                }
+                else
+                {
+                    if (not_found_in.at(z) == "")
+                    {
+                        not_found_in.at(z).append(rpkgs.at(i).rpkg_file_name);
+                    }
+                    else
+                    {
+                        not_found_in.at(z).append(", " + rpkgs.at(i).rpkg_file_name);
+                    }
+                }
+            }
         }
 
-        for (uint64_t z = 0; z < filters.size(); z++)
+        std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
+
+        ss.str(std::string());
+
+        ss << message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
+
+        LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+
+        percent_progress = (uint32_t)100;
+
+        if (filter != "")
         {
-            if (extracted.at(z))
+            for (uint64_t z = 0; z < filters.size(); z++)
             {
-                if (found_in.at(z) == "")
-                {
-                    found_in.at(z).append(rpkgs.at(i).rpkg_file_name);
-                }
-                else
-                {
-                    found_in.at(z).append(", " + rpkgs.at(i).rpkg_file_name);
-                }
-            }
-            else
-            {
-                if (not_found_in.at(z) == "")
-                {
-                    not_found_in.at(z).append(rpkgs.at(i).rpkg_file_name);
-                }
-                else
-                {
-                    not_found_in.at(z).append(", " + rpkgs.at(i).rpkg_file_name);
-                }
+                LOG(std::endl << "\"" << filters.at(z) << "\" was found in and extracted from: " << found_in.at(z));
+
+                LOG(std::endl << "\"" << filters.at(z) << "\" was not found in RPKG file(s): " << not_found_in.at(z));
             }
         }
+
+        task_single_status = TASK_SUCCESSFUL;
+        task_multiple_status = TASK_SUCCESSFUL;
     }
-
-    std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-    ss.str(std::string());
-
-    ss << message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
-
-    LOG("\r" << ss.str() << std::string(80 - ss.str().length(), ' '));
-
-    percent_progress = static_cast<uint32_t>(100);
-
-    if (filter != "")
+    else
     {
-        for (uint64_t z = 0; z < filters.size(); z++)
-        {
-            LOG(std::endl << "\"" << filters.at(z) << "\" was found in and extracted from: " << found_in.at(z));
-
-            LOG(std::endl << "\"" << filters.at(z) << "\" was not found in RPKG file(s): " << not_found_in.at(z));
-        }
+        LOG_AND_EXIT("Error: The folder " + input_path + " to with the input RPKGs does not exist.");
     }
-
-    task_single_status = TASK_SUCCESSFUL;
-    task_multiple_status = TASK_SUCCESSFUL;
 }
