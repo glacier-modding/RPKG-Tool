@@ -9,13 +9,10 @@ void rpkg_function::search_hash_data(std::string& search_type, std::string& sear
     {
         uint64_t position = 0;
 
-        bool done_searching = false;
-
-        while (!done_searching)
+        while (true)
         {
             if ((position + search.length()) > search_data.size())
             {
-                done_searching = true;
                 break;
             }
 
@@ -35,13 +32,11 @@ void rpkg_function::search_hash_data(std::string& search_type, std::string& sear
                         {
                             if (position_start == 0)
                             {
-                                done_searching_start = true;
                                 break;
                             }
 
                             if (search_data.data()[position_start] < 0x20 || search_data.data()[position_start] > 0x7E)
                             {
-                                done_searching_start = true;
                                 break;
                             }
 
@@ -66,8 +61,6 @@ void rpkg_function::search_hash_data(std::string& search_type, std::string& sear
     {
         uint64_t position = 0;
 
-        bool done_searching = false;
-
         std::vector<char> hex_search;
 
         if (search.length() % 2 != 0)
@@ -80,11 +73,10 @@ void rpkg_function::search_hash_data(std::string& search_type, std::string& sear
             hex_search.push_back((char)strtoul(search.substr(i * 2, 2).c_str(), nullptr, 16));
         }
 
-        while (!done_searching)
+        while (true)
         {
             if ((position + hex_search.size()) > search_data.size())
             {
-                done_searching = true;
                 break;
             }
 
@@ -118,9 +110,9 @@ void rpkg_function::search_hash_data(std::string& search_type, std::string& sear
     else if (search_type == "regex")
     {
         std::smatch m;
-        std::regex re(search);
+        const std::regex re(search);
         std::string data_string;
-        data_string.reserve((uint64_t)search_data.size() * (uint64_t)6);
+        data_string.reserve(search_data.size() * (uint64_t)6);
 
         for (uint64_t k = 0; k < search_data.size(); k++)
         {
@@ -131,7 +123,7 @@ void rpkg_function::search_hash_data(std::string& search_type, std::string& sear
             else
             {
                 char value[5];
-                sprintf_s(value, "\\x%02X", (int)(unsigned char)search_data.data()[k]);
+                sprintf_s(value, "\\x%02X", (unsigned char)search_data.data()[k]);
                 data_string += value;
             }
         }
