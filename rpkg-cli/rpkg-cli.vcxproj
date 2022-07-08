@@ -58,6 +58,7 @@
     <ClCompile Include="..\rpkg_src\extract_prim_textured_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_rpkg_meta.cpp" />
     <ClCompile Include="..\rpkg_src\extract_rtlv_to_json_from.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_temp_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_text_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_to_rt_json.cpp" />
     <ClCompile Include="..\rpkg_src\extract_wwem_to_ogg_from.cpp" />

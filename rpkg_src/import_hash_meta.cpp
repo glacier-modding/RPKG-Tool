@@ -1,9 +1,13 @@
 #include "rpkg_function.h"
+#include "rpkg.h"
+#include "file.h"
 #include "util.h"
 #include "hash.h"
 #include "global.h"
+#include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream>
 
 void rpkg_function::import_hash_meta(hash& meta_data, std::string& hash_meta_file_path)
 {

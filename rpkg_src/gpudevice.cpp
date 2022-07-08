@@ -1,5 +1,5 @@
 #include "gpudevice.h"
-#include "global.h"
+#include <iostream>
 
 gpudevice::gpudevice()
 {

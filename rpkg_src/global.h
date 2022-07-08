@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include <stdint.h>
-#include <iostream>
 
 #ifdef RPKG_CLI
 #define LOG(x) std::cout << x << std::endl

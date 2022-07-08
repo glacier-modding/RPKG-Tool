@@ -4,6 +4,7 @@
 #include "util.h"
 #include "hash.h"
 #include "console.h"
+#include <iostream>
 #include <fstream>
 #include <sstream>
 
@@ -414,7 +415,7 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path, bool with_timing)
 
             for (uint64_t j = 0; j < temp_hash_reference_count; j++)
             {
-                if (input_file_data[position + j * (uint64_t)0x8 + (uint64_t)0x7] == 0x0)
+                if (input_file_data[position + (uint64_t)j * (uint64_t)0x8 + (uint64_t)0x7] == 0x0)
                 {
                     zero_count++;
                 }

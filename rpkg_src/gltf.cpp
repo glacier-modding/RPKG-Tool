@@ -5,6 +5,7 @@
 #include <GLTFSDK/IStreamWriter.h>
 #include <GLTFSDK/GLBResourceWriter.h>
 #include <GLTFSDK/Serialize.h>
+#include <iostream>
 #include <sstream>
 #include <fstream>
 #include <filesystem>

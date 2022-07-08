@@ -3,8 +3,10 @@
 #include "global.h"
 #include "file.h"
 #include "util.h"
+#include "crypto.h"
 #include "temp.h"
 #include "prim.h"
+#include "gltf.h"
 #include "map.h"
 #include "generic_function.h"
 #include <fstream>
@@ -12,9 +14,16 @@
 #include <filesystem>
 #include <regex>
 #include <sstream>
+#include <algorithm>
 #include "thirdparty/rapidjson/document.h"
+#include "thirdparty/rapidjson/prettywriter.h"
+#include "thirdparty/rapidjson/writer.h"
 #include "thirdparty/rapidjson/pointer.h"
+#include "thirdparty/rapidjson/stringbuffer.h"
 #include "thirdparty/directxmath/DirectXMath.h"
+#include "thirdparty/directxmath/DirectXCollision.h"
+#include "thirdparty/directxmath/DirectXColors.h"
+#include "thirdparty/directxmath/DirectXPackedVector.h"
 
 map::map()
 {
@@ -1184,7 +1193,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
             return;
         }
 
-        if (((m * (uint64_t)10000) / temp_map.map_nodes.size()) % (uint64_t)10 == 0 && m > 0)
+        if (((m * (uint64_t)10000) / (uint64_t)temp_map.map_nodes.size()) % (uint64_t)10 == 0 && m > 0)
         {
             temp_map.stringstream_length = console::update_console(temp_map.message, temp_map.map_nodes.size(), m, temp_map.start_time, temp_map.stringstream_length);
         }

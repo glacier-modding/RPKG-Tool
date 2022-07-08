@@ -5,8 +5,11 @@
 #include "util.h"
 #include "rpkg.h"
 #include "hash.h"
+#include <iostream>
 #include <map>
 #include <chrono>
+#include <sstream>
+#include <fstream>
 #include <filesystem>
 #include <set>
 

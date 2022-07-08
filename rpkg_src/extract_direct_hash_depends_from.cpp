@@ -1,11 +1,15 @@
 #include "rpkg_function.h"
 #include "file.h"
 #include "global.h"
+#include "console.h"
 #include "util.h"
 #include "rpkg.h"
 #include "hash.h"
+#include <iostream>
 #include <map>
 #include <chrono>
+#include <sstream>
+#include <fstream>
 #include <filesystem>
 
 void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, std::string& filter, std::string& output_path, bool extract_prim_models)
@@ -19,9 +23,9 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
 
     std::vector<std::string> filters = util::parse_input_filter(filter);
 
-    // std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-    // double console_update_rate = 1.0 / 2.0;
-    // int period_count = 1;
+    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
+    double console_update_rate = 1.0 / 2.0;
+    int period_count = 1;
 
     for (uint64_t z = 0; z < filters.size(); z++)
     {

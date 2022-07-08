@@ -5,7 +5,10 @@
 #include "file.h"
 #include "crypto.h"
 #include "thirdparty/lz4/lz4.h"
+#include "thirdparty/lz4/lz4hc.h"
+#include <iostream>
 #include <fstream>
+#include <iomanip>
 #include <regex>
 #include <sstream>
 

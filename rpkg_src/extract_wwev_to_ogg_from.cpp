@@ -4,10 +4,14 @@
 #include "crypto.h"
 #include "console.h"
 #include "util.h"
+#include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
+#include "thirdparty/lz4/lz4hc.h"
 #include "thirdparty/ww2ogg/packed_codebooks_aoTuV_603.h"
 #include "thirdparty/ww2ogg/wwriff.h"
 #include "thirdparty/revorb/revorb.h"
+#include <iostream>
+#include <map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -199,7 +203,7 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
                             std::string hash_file_name = rpkgs.at(i).hash.at(hash_index).hash_file_name;
 
-                            if (((wwev_count_current * (uint64_t)100000) / wwev_count) % static_cast<uint64_t>(10) == 0 && wwev_count_current > 0)
+                            if (((wwev_count_current * (uint64_t)100000) / (uint64_t)wwev_count) % (uint64_t)10 == 0 && wwev_count_current > 0)
                             {
                                 stringstream_length = console::update_console(message, wwev_hash_size_total, wwev_hash_size_current, start_time, stringstream_length);
                             }
@@ -270,9 +274,9 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
                                 uint32_t position = 0;
 
                                 char input[1024];
-                                // uint8_t bytes1 = 0;
+                                uint8_t bytes1 = 0;
                                 uint32_t bytes4 = 0;
-                                // uint64_t bytes8 = 0;
+                                uint64_t bytes8 = 0;
 
                                 std::memcpy(&wwev_file_name_length, &wwev_data->data()[position], sizeof(bytes4));
 
@@ -608,7 +612,7 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
         LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
 
-        percent_progress = static_cast<uint32_t>(100);
+        percent_progress = (uint32_t)100;
 
         if (filter != "")
         {

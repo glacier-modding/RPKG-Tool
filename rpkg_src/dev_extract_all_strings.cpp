@@ -2,10 +2,20 @@
 #include "dev_function.h"
 #include "file.h"
 #include "global.h"
+#include "crypto.h"
+#include "console.h"
 #include "util.h"
 #include "generic_function.h"
+#include "thirdparty/lz4/lz4.h"
+#include "thirdparty/lz4/lz4hc.h"
+#include "thirdparty/ww2ogg/packed_codebooks_aoTuV_603.h"
+#include "thirdparty/ww2ogg/wwriff.h"
+#include "thirdparty/revorb/revorb.h"
 #include <iostream>
 #include <map>
+#include <chrono>
+#include <sstream>
+#include <fstream>
 #include <regex>
 #include <filesystem>
 

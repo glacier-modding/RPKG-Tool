@@ -1,8 +1,13 @@
 #include "rpkg_function.h"
 #include "file.h"
 #include "global.h"
+#include "crypto.h"
 #include "console.h"
 #include "util.h"
+#include "thirdparty/lz4/lz4.h"
+#include "thirdparty/lz4/lz4hc.h"
+#include <iostream>
+#include <map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -105,7 +110,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                 return;
             }
 
-            if (((i * (uint64_t)100000) / gfxf_folders.size()) % (uint64_t)10 == 0 && i > 0)
+            if (((i * (uint64_t)100000) / (uint64_t)gfxf_folders.size()) % (uint64_t)10 == 0 && i > 0)
             {
                 stringstream_length = console::update_console(message, gfxf_folders.size(), i, start_time, stringstream_length);
             }
@@ -409,7 +414,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path, std::string& filter
                     {
                         position = gfx_file_size + 0x44;
 
-                        while ((position & 0xF) != 0x4 && (position & 0xF) != 0xC)
+                        while (((position & 0xF) != 0x4) && ((position & 0xF) != 0xC))
                         {
                             gfxf_file_data.push_back(0x0);
                             position++;

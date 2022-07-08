@@ -4,10 +4,12 @@
 #include "thirdparty/lz4/lz4hc.h"
 #include "thirdparty/directxtex/DirectXTex.h"
 #include <string>
+#include <algorithm>
 #include <sstream>
 #include <iomanip>
 #include <regex>
 #include <Windows.h>
+#include <iostream>
 
 bool util::floats_equal(float value1, float value2)
 {

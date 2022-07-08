@@ -1,6 +1,9 @@
 #include "dev_function.h"
 #include "global.h"
 #include "file.h"
+#include "util.h"
+#include "hash.h"
+#include "console.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>

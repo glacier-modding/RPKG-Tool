@@ -3,8 +3,11 @@
 #include "util.h"
 #include "global.h"
 #include "crypto.h"
+#include "console.h"
 #include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
+#include "thirdparty/lz4/lz4hc.h"
+#include <iostream>
 #include <chrono>
 #include <filesystem>
 #include <sstream>
@@ -92,7 +95,7 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
 
         timing_string = "Extracting ORES to IOI Paths...";
 
-        // std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
+        std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
         double console_update_rate = 1.0 / 2.0;
         int period_count = 1;
 
@@ -182,7 +185,7 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
                 position += 0x4;
 
                 std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-                // int stringstream_length = 80;
+                int stringstream_length = 80;
 
                 for (uint64_t k = 0; k < ores_hash_resource_file_count; k++)
                 {
@@ -252,7 +255,7 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
 
                                 std::string ores_ioi_path = "";
                                 std::string ores_ioi_directory = "";
-                                // std::string ores_base_name = "";
+                                std::string ores_base_name = "";
 
                                 ores_ioi_path = file::output_path_append("ORES\\" + rpkgs.at(rpkg_index2).rpkg_file_name, output_path);
 
@@ -262,7 +265,7 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
 
                                 size_t pos3 = ores_ioi_path.find_last_of("\\");
 
-                                // ores_base_name = ores_ioi_path.substr(pos3 + 1);
+                                ores_base_name = ores_ioi_path.substr(pos3 + 1);
 
                                 ores_ioi_directory = ores_ioi_path.substr(0, pos3);
 

@@ -1,16 +1,23 @@
 #include "rpkg_function.h"
 #include "file.h"
 #include "global.h"
+#include "crypto.h"
 #include "console.h"
 #include "util.h"
 #include "prim.h"
+#include "thirdparty/lz4/lz4.h"
+#include "thirdparty/lz4/lz4hc.h"
 #include "thirdparty/json/json.hpp"
 #include "thirdparty/mikktspace/mikktspace.h"
 #include "thirdparty/directxmath/DirectXMath.h"
+#include "thirdparty/directxmath/DirectXCollision.h"
+#include "thirdparty/directxmath/DirectXColors.h"
+#include "thirdparty/directxmath/DirectXPackedVector.h"
 #include <GLTFSDK/GLTF.h>
 #include <GLTFSDK/GLTFResourceReader.h>
 #include <GLTFSDK/GLBResourceReader.h>
 #include <GLTFSDK/Deserialize.h>
+#include <iostream>
 #include <map>
 #include <chrono>
 #include <sstream>
@@ -252,7 +259,7 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
                 return;
             }
 
-            if (((i * (uint64_t)100000) / prim_folders.size()) % (uint64_t)10 == 0 && i > 0)
+            if (((i * (uint64_t)100000) / (uint64_t)prim_folders.size()) % (uint64_t)10 == 0 && i > 0)
             {
                 stringstream_length = console::update_console(message, prim_folders.size(), i, start_time, stringstream_length);
             }

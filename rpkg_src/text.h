@@ -1,9 +1,11 @@
 #pragma once
+#include "hash.h"
 #include "texd.h"
 #include "thirdparty/directxtex/DirectXTex.h"
 #include "thirdparty/directxtex/DDS.h"
 #include <string>
 #include <vector>
+#include <map>
 #include <stdint.h>
 
 class text
