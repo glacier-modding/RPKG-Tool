@@ -8,7 +8,7 @@
         xmlns:local="clr-namespace:rpkg"
         mc:Ignorable="d"
         Loaded="Window_Loaded" Activated="MetroWindow_Activated" Name="EditorWindow"
-        Title="Entity/Brick (TEMP/TBLU) Editor" Height="800" Width="1280" WindowStartupLocation="CenterScreen" FontFamily="Consolas">
+        Title="Entity/Brick (TEMP) Editor" Height="800" Width="1280" WindowStartupLocation="CenterScreen" FontFamily="Consolas">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -21,9 +21,9 @@
         </Grid.ColumnDefinitions>
         <DockPanel Grid.Row="0" Grid.ColumnSpan="3">
             <Menu DockPanel.Dock="Top">
-                <MenuItem Click="GenerateTEMPFile_Click" Header="Generate TEMP File"/>
-                <MenuItem Click="GenerateRPKGFile_Click" Header="Generate RPKG With TEMP File"/>
-                <MenuItem Click="GenerateTEMPJSONFiles_Click" Header="Generate TEMP JSON Files"/>
+                <MenuItem Click="GenerateTEMPFile_Click" Header="Save Binary TEMP File"/>
+                <MenuItem Click="GenerateRPKGFile_Click" Header="Pack To RPKG File"/>
+                <MenuItem Click="GenerateTEMPJSONFiles_Click" Header="Save RT JSON Files"/>
                 <MenuItem Click="Exit_Click" Header="Exit"/>
             </Menu>
         </DockPanel>
@@ -54,10 +54,10 @@
                         <TextBox Grid.Row="0" Grid.Column="1" x:Name="FilterTextBox" TextChanged="SearchTEMPsTextBox_TextChanged" FontFamily="Consolas" TextWrapping="NoWrap"/>
                         <ComboBox Grid.Row="0" Grid.Column="2"  >
                             <ComboBoxItem>
-                                <Button  x:Name="ExpandAllNodes" Click="ExpandAllNodes_Click" Content="Expand All Nodes"/>
+                                <Button  x:Name="ExpandAllNodes" Click="ExpandAllNodes_Click" Content="Fully Expand Tree"/>
                                 </ComboBoxItem>
                             <ComboBoxItem>
-                                <Button  x:Name="CollapseAllNodes" Click="CollapseAllNodes_Click" Content="Collapse All Nodes"/>
+                                <Button  x:Name="CollapseAllNodes" Click="CollapseAllNodes_Click" Content="Collapse Tree"/>
                             </ComboBoxItem>
                             <ComboBoxItem>
                                 <Button  x:Name="PreviousNode" Click="PreviousNode_Click" Content="Previous Node"/>
