@@ -7,7 +7,9 @@
 #include "rpkg.h"
 #include "hash.h"
 #include "thirdparty/lz4/lz4.h"
+#include "thirdparty/lz4/lz4hc.h"
 #include "thirdparty/json/json.hpp"
+#include <iostream>
 #include <map>
 #include <chrono>
 #include <sstream>
@@ -103,7 +105,7 @@ void rpkg_function::extract_dlge_to_json_from(std::string &input_path, std::stri
 
                             bool found = false;
 
-                            // uint64_t input_filter_index = 0;
+                            uint64_t input_filter_index = 0;
 
                             for (uint64_t z = 0; z < filters.size(); z++)
                             {
@@ -113,7 +115,7 @@ void rpkg_function::extract_dlge_to_json_from(std::string &input_path, std::stri
                                 {
                                     found = true;
 
-                                    // input_filter_index = z;
+                                    input_filter_index = z;
 
                                     break;
                                 }
@@ -190,7 +192,7 @@ void rpkg_function::extract_dlge_to_json_from(std::string &input_path, std::stri
                                     dlge_data = &input_data;
                                 }
 
-                                // uint32_t dlge_data_size = 0;
+                                uint32_t dlge_data_size = 0;
                                 uint32_t number_of_dlge_categories = 0;
                                 std::vector<uint32_t> dlge_categories;
                                 std::vector<uint32_t> dlge_identifiers;
@@ -221,7 +223,7 @@ void rpkg_function::extract_dlge_to_json_from(std::string &input_path, std::stri
                                 uint32_t position = 0;
 
                                 uint8_t bytes1 = 0;
-                                // uint16_t bytes2 = 0;
+                                uint16_t bytes2 = 0;
                                 uint32_t bytes4 = 0;
                                 uint64_t bytes8 = 0;
 

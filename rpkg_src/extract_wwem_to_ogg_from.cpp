@@ -6,9 +6,11 @@
 #include "util.h"
 #include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
+#include "thirdparty/lz4/lz4hc.h"
 #include "thirdparty/ww2ogg/packed_codebooks_aoTuV_603.h"
 #include "thirdparty/ww2ogg/wwriff.h"
 #include "thirdparty/revorb/revorb.h"
+#include <iostream>
 #include <map>
 #include <chrono>
 #include <sstream>
@@ -175,7 +177,7 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
         std::vector<std::string> found_in;
         std::vector<std::string> not_found_in;
 
-        // uint64_t wwem_map_index = 0;
+        uint64_t wwem_map_index = 0;
 
         for (uint64_t z = 0; z < filters.size(); z++)
         {
@@ -224,7 +226,7 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
                                 std::string hash_list_string = "";
                                 std::string wwem_ioi_path = "";
                                 std::string wwem_ioi_directory = "";
-                                // std::string wwem_base_name = "";
+                                std::string wwem_base_name = "";
 
                                 bool full_wwem_ioi_path_unknown = false;
                                 bool wwem_ioi_path_found = false;
@@ -253,7 +255,7 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
 
                                         size_t pos4 = wwem_ioi_path.find_last_of("\\");
 
-                                        // wwem_base_name = wwem_ioi_path.substr(pos4 + 1);
+                                        wwem_base_name = wwem_ioi_path.substr(pos4 + 1);
 
                                         wwem_ioi_directory = wwem_ioi_path.substr(0, pos4);
 

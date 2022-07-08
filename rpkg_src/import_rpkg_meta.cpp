@@ -2,7 +2,9 @@
 #include "rpkg.h"
 #include "file.h"
 #include "global.h"
+#include <iostream>
 #include <fstream>
+#include <sstream>
 
 bool rpkg_function::import_rpkg_meta(rpkg& rpkg_meta_data, std::string& rpkg_meta_file_path, std::string& input_rpkg_folder_path)
 {
@@ -12,6 +14,8 @@ bool rpkg_function::import_rpkg_meta(rpkg& rpkg_meta_data, std::string& rpkg_met
     uint32_t bytes4 = 0;
     uint64_t bytes8 = 0;
     char input[1024];
+
+    uint64_t rpkg_meta_file_size = 0;
 
     rpkg_meta_data.rpkg_file_version = 1;
 
@@ -27,7 +31,7 @@ bool rpkg_function::import_rpkg_meta(rpkg& rpkg_meta_data, std::string& rpkg_met
         }
 
         rpkg_meta_file.seekg(0, rpkg_meta_file.end);
-        uint64_t rpkg_meta_file_size = rpkg_meta_file.tellg();
+        rpkg_meta_file_size = rpkg_meta_file.tellg();
         rpkg_meta_file.seekg(0, rpkg_meta_file.beg);
 
         rpkg_meta_file.read(input, 4);
@@ -178,15 +182,17 @@ bool rpkg_function::import_rpkg_meta(rpkg& rpkg_meta_data, std::string& rpkg_met
 
         return true;
     }
+    else
+    {
+        rpkg_meta_data.is_patch_file = true;
+        rpkg_meta_data.patch_entry_count = 0x0;
 
-    rpkg_meta_data.is_patch_file = true;
-    rpkg_meta_data.patch_entry_count = 0x0;
+        LOG("RPKG meta file matching the name of the folder was not found");
+        LOG("   in it's root:" << input_rpkg_folder_path);
+        LOG("Defaulting to RPKGv1 patch file creation settings:");
+        LOG("  - Patch entry (deletion list) count is set to 0");
+        LOG("  - No patch entries (deletion entries) will be appended");
 
-    LOG("RPKG meta file matching the name of the folder was not found");
-    LOG("   in it's root:" << input_rpkg_folder_path);
-    LOG("Defaulting to RPKGv1 patch file creation settings:");
-    LOG("  - Patch entry (deletion list) count is set to 0");
-    LOG("  - No patch entries (deletion entries) will be appended");
-
-    return false;
+        return false;
+    }
 }

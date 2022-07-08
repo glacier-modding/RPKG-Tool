@@ -7,8 +7,11 @@
 #include "rpkg.h"
 #include "hash.h"
 #include "thirdparty/lz4/lz4.h"
+#include "thirdparty/lz4/lz4hc.h"
 #include "thirdparty/json/json.hpp"
+#include <iostream>
 #include <set>
+#include <map>
 #include <chrono>
 #include <sstream>
 #include <fstream>

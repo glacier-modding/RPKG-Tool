@@ -1,4 +1,5 @@
 #pragma once
+#include "hash.h"
 #include <string>
 #include <vector>
 #include <map>

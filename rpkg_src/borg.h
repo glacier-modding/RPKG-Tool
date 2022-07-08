@@ -1,8 +1,13 @@
 #pragma once
+#include "hash.h"
 #include "global.h"
 #include "thirdparty/directxmath/DirectXMath.h"
+#include "thirdparty/directxmath/DirectXCollision.h"
+#include "thirdparty/directxmath/DirectXColors.h"
+#include "thirdparty/directxmath/DirectXPackedVector.h"
 #include <string>
 #include <vector>
+#include <map>
 #include <stdint.h>
 
 class borg

@@ -2,8 +2,14 @@
 #include "file.h"
 #include "global.h"
 #include "crypto.h"
+#include "console.h"
 #include "util.h"
+#include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
+#include "thirdparty/lz4/lz4hc.h"
+#include "thirdparty/ww2ogg/packed_codebooks_aoTuV_603.h"
+#include "thirdparty/ww2ogg/wwriff.h"
+#include "thirdparty/revorb/revorb.h"
 #include <iostream>
 #include <map>
 #include <chrono>
@@ -30,9 +36,9 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
     std::vector<std::string> wwem_ioi_paths;
     std::vector<std::string> wwem_ioi_short_paths;
 
-    // std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-    // double console_update_rate = 1.0 / 2.0;
-    // int period_count = 1;
+    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
+    double console_update_rate = 1.0 / 2.0;
+    int period_count = 1;
 
     for (uint64_t i = 0; i < rpkgs.size(); i++)
     {

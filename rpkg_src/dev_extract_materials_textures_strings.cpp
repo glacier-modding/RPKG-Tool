@@ -1,9 +1,11 @@
 #include "dev_function.h"
 #include "global.h"
+#include "file.h"
 #include "util.h"
 #include "crypto.h"
 #include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
+#include "thirdparty/lz4/lz4hc.h"
 #include <fstream>
 #include <iostream>
 #include <filesystem>

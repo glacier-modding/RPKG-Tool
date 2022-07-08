@@ -7,8 +7,10 @@
 #include "crypto.h"
 #include "global.h"
 #include "thirdparty/lz4/lz4.h"
+#include "thirdparty/lz4/lz4hc.h"
 #include <chrono>
 #include <filesystem>
+#include <iostream>
 #include <fstream>
 #include <vector>
 #include <sstream>
@@ -227,7 +229,7 @@ void rpkg_function::generate_rpkg_quickly_from(std::string& input_path, std::str
                 return;
             }
 
-            if ((i * (uint64_t)100000) / files_index.size() % (uint64_t)100 == 0 && i > 0)
+            if (((i * (uint64_t)100000) / (uint64_t)files_index.size()) % (uint64_t)100 == 0 && i > 0)
             {
                 stringstream_length = console::update_console(message, files_index.size(), i, start_time, stringstream_length);
             }

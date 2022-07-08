@@ -6,8 +6,10 @@
 #include "console.h"
 #include "util.h"
 #include "borg.h"
+#include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
+#include <iostream>
 #include <map>
 #include <fstream>
 #include <set>
@@ -179,7 +181,6 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
 
         //LOG("      - PRIM object (" + std::to_string(o) + ") header sub type value: " + util::uint8_t_to_hex_string(object_sub_type_value));
 
-        /*
         if (object_sub_type_value == 0x0)
         {
             //LOG("      - PRIM object (" + std::to_string(o) + ") header sub type: Standard");
@@ -208,7 +209,6 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
         {
             //LOG("      - PRIM object (" + std::to_string(o) + ") header sub type: SpeedTree");
         }
-        */
 
         prim_position = prim_object_offsets.at(o);
 

@@ -1,4 +1,5 @@
 #pragma once
+#include "hash.h"
 #include "global.h"
 #include <string>
 #include <vector>

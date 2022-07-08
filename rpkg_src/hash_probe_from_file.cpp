@@ -1,10 +1,13 @@
 #include "rpkg_function.h"
 #include "file.h"
 #include "global.h"
+#include "console.h"
+#include "util.h"
 #include "rpkg.h"
 #include "hash.h"
 #include <iostream>
 #include <map>
+#include <chrono>
 #include <sstream>
 #include <fstream>
 #include <filesystem>
@@ -22,7 +25,6 @@ void rpkg_function::hash_probe_from_file(std::string& input_path, std::string& f
 
     if (file::path_exists(input_rpkg_folder_path))
     {
-        // TODO: This should not be hardcoded. Move to some kind of userland module? -RD
         std::string H1 = "Z:\\HITMAN1\\";
         std::string H2 = "Z:\\HITMAN2\\Runtime\\";
         std::string H3 = "C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\";
