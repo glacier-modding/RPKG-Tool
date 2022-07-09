@@ -3,9 +3,51 @@
 #include "global.h"
 #include <string>
 #include <fstream>
-#include <filesystem>
 #include <iostream>
 #include <sstream>
+
+uint64_t file::get_hash_value_from_path(std::filesystem::path path, std::string extension)
+{
+    std::string file_name = path.filename().string();
+
+    uint64_t hash_value = 0;
+
+    if (file_name.length() <= extension.length())
+    {
+        return hash_value;
+    }
+
+    if (util::to_upper_case(file_name.substr((file_name.length() - extension.length()), extension.length())) != util::to_upper_case(extension))
+    {
+        return hash_value;
+    }
+
+    std::string hash_string = util::to_upper_case(file_name.substr(0, (file_name.length() - extension.length())));
+
+    if (!util::is_valid_hash(hash_string))
+    {
+        return hash_value;
+    }
+
+    return std::strtoull(hash_string.c_str(), nullptr, 16);
+}
+
+std::vector<std::filesystem::path> file::get_recursive_file_list(std::string path)
+{
+    std::vector<std::filesystem::path> files;
+
+    path = file::parse_input_folder_path(path);
+
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(path, std::filesystem::directory_options::skip_permission_denied))
+    {
+        if (std::filesystem::is_regular_file(entry.path().string()))
+        {
+            files.push_back(entry.path());
+        }
+    }
+
+    return files;
+}
 
 bool file::write_to_file(std::string file_path, std::string& data)
 {

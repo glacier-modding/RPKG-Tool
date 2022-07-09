@@ -5,6 +5,10 @@
 class util
 {
 public:
+    static bool is_valid_hash(std::string hash);
+    static std::string hash_type(uint64_t hash_value);
+    static uint64_t ioi_string_to_hash(std::string ioi_string);
+    static std::string hash_to_ioi_string(uint64_t hash_value);
     static bool floats_equal(float value1, float value2);
     static std::string find_string_between_strings(std::string_view& input_string, std::string string_before, std::string string_after);
     static void split_string_view(std::string_view& temp_string_view, std::string split_string, std::vector<uint64_t>& split_positions);

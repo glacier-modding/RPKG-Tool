@@ -1064,7 +1064,7 @@ namespace rpkg
 
 								progress.message.Content = "Extracting All " + header + " To GLB...";
 
-								string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + header + " To:");
+								string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + header + " To:", "");
 
 								if (temp_outputFolder == "")
 								{
@@ -1105,7 +1105,7 @@ namespace rpkg
 
 								progress.message.Content = "Extracting All " + header + " To TGA...";
 
-								string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + header + " To:");
+								string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + header + " To:", "");
 
 								if (temp_outputFolder == "")
 								{
@@ -1433,6 +1433,14 @@ namespace rpkg
 
 							rightClickMenu = new RightClickMenu(buttons);
 						}
+						else if (hashType == "MATI")
+						{
+							string[] buttons = { "Extract " + hashName, "Extract " + hashName + " To MATI JSON", "Cancel" };
+
+							buttonCount = 3;
+
+							rightClickMenu = new RightClickMenu(buttons);
+						}
 						else
 						{
 							string[] buttons = { "Extract " + hashName, "Cancel" };
@@ -1456,7 +1464,7 @@ namespace rpkg
 
 							progress.message.Content = "Extracting " + hashName + "...";
 
-							string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
+							string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:", "");
 
 							if (outputFolder == "")
 							{
@@ -1505,7 +1513,7 @@ namespace rpkg
 
 								progress.message.Content = "Extracting " + hashName + " To GLB/TGA File(s)...";
 
-								string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
+								string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:", "");
 
 								if (temp_outputFolder == "")
 								{
@@ -1541,7 +1549,7 @@ namespace rpkg
 
 								progress.message.Content = "Extracting " + hashName + " To TGA File(s)...";
 
-								string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
+								string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:", "");
 
 								if (temp_outputFolder == "")
 								{
@@ -1692,10 +1700,18 @@ namespace rpkg
 
 								progress.message.Content = "Extracting " + hashName + " To HM3 RT (ResourceTool) JSON...";
 							}
+							else if (hashType == "MATI")
+							{
+								command = "-extract_mati_to_json";
+
+								filter = hashValue;
+
+								progress.message.Content = "Extracting " + hashName + " MATI to MATI JSON...";
+							}
 
 							if (hashType != "TEMP")
 							{
-								string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
+								string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:", "");
 
 								if (outputFolder == "")
 								{
@@ -1946,7 +1962,7 @@ namespace rpkg
 								progress.message.Content = "Extracting " + hashName + " To HM2 RT (ResourceTool) JSON...";
 							}
 
-							string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
+							string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:", "");
 
 							if (outputFolder == "")
 							{
@@ -2186,7 +2202,7 @@ namespace rpkg
 								progress.message.Content = "Extracting " + hashName + " To HM2016 RT (ResourceTool) JSON...";
 							}
 
-							string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
+							string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:", "");
 
 							if (outputFolder == "")
 							{
@@ -2233,7 +2249,7 @@ namespace rpkg
 
 								progress.message.Content = "Extracting PRIM Models linked to " + hashName + " To GLB/TGA File(s)...";
 
-								string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
+								string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:", ""); ;
 
 								if (temp_outputFolder == "")
 								{
@@ -2275,7 +2291,7 @@ namespace rpkg
 								progress.message.Content = "Extracting PRIMs linked to " + hashName + " To GLB File(s)...";
 							}
 
-							string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:");
+							string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:", "");
 
 							if (outputFolder == "")
 							{
@@ -3465,7 +3481,7 @@ namespace rpkg
 				return;
 			}
 
-			string outputFolder = SelectFolder("output", "Select Output Folder To Extract RPKG To:");
+			string outputFolder = SelectFolder("output", "Select Output Folder To Extract RPKG To:", "");
 
 			if (outputFolder == "")
 			{
@@ -3552,7 +3568,7 @@ namespace rpkg
 				massExtractName = "PRIM";
 			}
 
-			string inputFolder = SelectFolder("input", "Select Input Folder (Runtime folder or other folder with multiple RPKGs) To Extract " + massExtractName + " From:");
+			string inputFolder = SelectFolder("input", "Select Input Folder (Runtime folder or other folder with multiple RPKGs) To Extract " + massExtractName + " From:", "");
 
 			if (inputFolder == "")
 			{
@@ -3587,7 +3603,7 @@ namespace rpkg
 
 			ImportRPKGFileFolder(inputFolder);
 
-			string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + massExtractName + " To:");
+			string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + massExtractName + " To:", "");
 
 			if (outputFolder == "")
 			{
@@ -3761,7 +3777,7 @@ namespace rpkg
 				rebuildType = "WWEV";
 			}
 
-			string inputFolder = SelectFolder("input", "Select Folder To Rebuild " + rebuildType + " From:");
+			string inputFolder = SelectFolder("input", "Select Folder To Rebuild " + rebuildType + " From:", "");
 
 			if (inputFolder != "")
 			{
@@ -4024,7 +4040,7 @@ namespace rpkg
 
 		private void OpenRPKGFolder_Click(object sender, RoutedEventArgs e)
 		{
-			string inputFolder = SelectFolder("input", "Select Folder Containing RPKG Files To Import From:");
+			string inputFolder = SelectFolder("input", "Select Folder Containing RPKG Files To Import From:", "");
 
 			if (inputFolder != "")
 			{
@@ -4060,11 +4076,11 @@ namespace rpkg
 
 		private void GenerateRPKGFromFolder_Click(object sender, RoutedEventArgs e)
 		{
-			string inputFolder = SelectFolder("input", "Select Folder To Generate RPKG From:");
+			string inputFolder = SelectFolder("input", "Select Folder To Generate RPKG From:", "");
 
 			if (inputFolder != "")
 			{
-				string outputFolder = SelectFolder("output", "Select Output Folder To Save Generated RPKG To:");
+				string outputFolder = SelectFolder("output", "Select Output Folder To Save Generated RPKG To:", "");
 
 				string command = "-generate_rpkg_from";
 				string input_path = inputFolder;
@@ -4087,7 +4103,7 @@ namespace rpkg
 			}
 		}
 
-		private string SelectFolder(string type, string description)
+		private string SelectFolder(string type, string description, string initialFolder)
 		{
 			var folderDialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
 
@@ -4097,30 +4113,32 @@ namespace rpkg
 
 			if (type == "input")
 			{
-				string initialFolder = "";
-
-				if (File.Exists(userSettings.InputFolder))
-				{
-					initialFolder = userSettings.InputFolder;
-				}
-				else
-				{
-					initialFolder = System.IO.Directory.GetCurrentDirectory();
+				if (!File.Exists(initialFolder))
+                {
+					if (File.Exists(userSettings.InputFolder))
+					{
+						initialFolder = userSettings.InputFolder;
+					}
+					else
+					{
+						initialFolder = System.IO.Directory.GetCurrentDirectory();
+					}
 				}
 
 				folderDialog.SelectedPath = initialFolder;
 			}
 			else if (type == "output")
 			{
-				string initialFolder = "";
-
-				if (File.Exists(userSettings.OutputFolder))
+				if (!File.Exists(initialFolder))
 				{
-					initialFolder = userSettings.OutputFolder;
-				}
-				else
-				{
-					initialFolder = System.IO.Directory.GetCurrentDirectory();
+					if (File.Exists(userSettings.OutputFolder))
+					{
+						initialFolder = userSettings.OutputFolder;
+					}
+					else
+					{
+						initialFolder = System.IO.Directory.GetCurrentDirectory();
+					}
 				}
 
 				folderDialog.SelectedPath = initialFolder;
@@ -4146,6 +4164,70 @@ namespace rpkg
 				File.WriteAllText("rpkg.json", jsonString);
 
 				return folderDialog.SelectedPath;
+			}
+
+			return "";
+		}
+
+		private string SelectFile(string type, string description, string filter, string initialFileName)
+		{
+			if (type == "input")
+			{
+				var fileDialog = new Ookii.Dialogs.Wpf.VistaOpenFileDialog();
+
+				fileDialog.Title = description;
+
+				fileDialog.Filter = filter;
+
+				string initialFolder = "";
+
+				if (File.Exists(userSettings.InputFolder))
+				{
+					initialFolder = userSettings.InputFolder;
+				}
+				else
+				{
+					initialFolder = System.IO.Directory.GetCurrentDirectory();
+				}
+
+				fileDialog.InitialDirectory = initialFolder;
+
+				var fileDialogResult = fileDialog.ShowDialog();
+
+				if (fileDialogResult == true)
+				{
+					return fileDialog.FileName;
+				}
+			}
+			else if (type == "output")
+			{
+				var fileDialog = new Ookii.Dialogs.Wpf.VistaSaveFileDialog();
+
+				fileDialog.Title = description;
+
+				fileDialog.Filter = filter;
+
+				string initialFolder = "";
+
+				if (File.Exists(userSettings.InputFolder))
+				{
+					initialFolder = userSettings.InputFolder;
+				}
+				else
+				{
+					initialFolder = System.IO.Directory.GetCurrentDirectory();
+				}
+
+				fileDialog.InitialDirectory = initialFolder;
+
+				fileDialog.FileName = initialFileName;
+
+				var fileDialogResult = fileDialog.ShowDialog();
+
+				if (fileDialogResult == true)
+				{
+					return fileDialog.FileName;
+				}
 			}
 
 			return "";
@@ -6643,7 +6725,7 @@ namespace rpkg
 
 					progress.message.Content = "Extracting " + nodeData[0] + " To GLB/TGA File(s)...";
 
-					string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + nodeData[0] + " To:");
+					string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + nodeData[0] + " To:", "");
 
 					if (temp_outputFolder == "")
 					{
@@ -6677,7 +6759,7 @@ namespace rpkg
 
 					progress.message.Content = "Extracting " + nodeData[0] + " To GLB/TGA File(s)...";
 
-					string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + nodeData[0] + " To:");
+					string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + nodeData[0] + " To:", "");
 
 					if (temp_outputFolder == "")
 					{
@@ -6711,7 +6793,7 @@ namespace rpkg
 
 					progress.message.Content = "Extracting " + nodeData[0] + " To GLB/TGA File(s)...";
 
-					string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + nodeData[0] + " To:");
+					string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + nodeData[0] + " To:", "");
 
 					if (temp_outputFolder == "")
 					{
@@ -6745,7 +6827,7 @@ namespace rpkg
 
 					progress.message.Content = "Extracting " + nodeData[0] + " To GLB/TGA File(s)...";
 
-					string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + nodeData[0] + " To:");
+					string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + nodeData[0] + " To:", "");
 
 					if (temp_outputFolder == "")
 					{
@@ -6779,7 +6861,7 @@ namespace rpkg
 
 					progress.message.Content = "Extracting " + nodeData[0] + " To GLB/TGA File(s)...";
 
-					string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + nodeData[0] + " To:");
+					string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + nodeData[0] + " To:", "");
 
 					if (temp_outputFolder == "")
 					{
@@ -7049,7 +7131,7 @@ namespace rpkg
 
 						ImportRPKGFileFolder(runtimeDirectory);
 
-						string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract Map To:");
+						string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract Map To:", "");
 
 						if (temp_outputFolder == "")
 						{
@@ -7111,7 +7193,7 @@ namespace rpkg
 
 			ImportRPKGFileFolder(runtimeDirectory);
 
-			string temp_inputFolder = SelectFolder("input", "Select Input Folder To Import Map From:");
+			string temp_inputFolder = SelectFolder("input", "Select Input Folder To Import Map From:", "");
 
 			if (temp_inputFolder == "")
 			{
@@ -7124,7 +7206,7 @@ namespace rpkg
 
 			string qn_format = mapImportSelector.qn_format;
 
-			string temp_outputFolder = SelectFolder("output", "Select Output Folder To Export QN JSONs To:");
+			string temp_outputFolder = SelectFolder("output", "Select Output Folder To Export QN JSONs To:", "");
 
 			if (temp_outputFolder == "")
 			{
@@ -7170,7 +7252,7 @@ namespace rpkg
 
 			ImportRPKGFileFolder(runtimeDirectory);
 
-			string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract Map To:");
+			string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract Map To:", "");
 
 			if (temp_outputFolder == "")
 			{
@@ -7261,5 +7343,147 @@ namespace rpkg
 				rightClickMenu.Top /= dpiY;
 			}
 		}
-    }
+
+		private void MaterialUtilities_Click(object sender, RoutedEventArgs e)
+		{
+			string materialUtilitiesButton = (sender as MenuItem).Tag.ToString();
+
+			string inputPath = "";
+			string outputPath = "";
+
+			if (materialUtilitiesButton == "MATI" || materialUtilitiesButton == "JSON")
+			{
+				if (materialUtilitiesButton == "MATI")
+				{
+					inputPath = SelectFile("input", "Select MATI File To Convert To MATI JSON:", "MATI file|*.MATI", "");
+
+					if (inputPath != "")
+					{
+						//DirectoryInfo directoryInfo = new DirectoryInfo(inputPath).Parent;
+
+						outputPath = SelectFolder("output", "Select MATI JSON File Output Folder:", "");
+					}
+				}
+				else if (materialUtilitiesButton == "JSON")
+				{
+					inputPath = SelectFile("input", "Select MATI JSON To Convert To MATI File:", "JSON file|*.JSON", "");
+
+					if (inputPath != "")
+					{
+						//DirectoryInfo directoryInfo = new DirectoryInfo(inputPath).Parent;
+
+						outputPath = SelectFolder("output", "Select MATI File Output Folder:", "");
+					}
+				}
+			}
+			else if (materialUtilitiesButton == "MATIS" || materialUtilitiesButton == "JSONS")
+			{
+				if (materialUtilitiesButton == "MATIS")
+				{
+					inputPath = SelectFolder("input", "Select MATI Files Input Folder (Recursive):", "");
+
+					if (inputPath != "")
+					{
+						MessageQuestion messageBox = new MessageQuestion();
+						messageBox.message.Content = "Output MATI JSON Files To A Single Directory Or Into The Same Directory They Reside?";
+						messageBox.OKButton.Content = "Single Directory";
+						messageBox.CancelButton.Content = "Where They Reside";
+						messageBox.ShowDialog();
+
+						if (messageBox.buttonPressed == "OKButton")
+						{
+							//DirectoryInfo directoryInfo = new DirectoryInfo(inputPath).Parent;
+
+							outputPath = SelectFolder("output", "Select MATI JSON Files Output Folder:", "");
+						}
+						else if (messageBox.buttonPressed == "CancelButton")
+						{
+							outputPath = "";
+						}
+					}
+				}
+				else if (materialUtilitiesButton == "JSONS")
+				{
+					inputPath = SelectFolder("input", "Select MATI JSON Files Input Folder (Recursive):", "");
+
+					if (inputPath != "")
+					{
+
+						MessageQuestion messageBox = new MessageQuestion();
+						messageBox.message.Content = "Output MATI Files To A Single Directory Or Into The Same Directory They Reside?";
+						messageBox.OKButton.Content = "Single Directory";
+						messageBox.CancelButton.Content = "Where They Reside";
+						messageBox.ShowDialog();
+
+						if (messageBox.buttonPressed == "OKButton")
+						{
+							//DirectoryInfo directoryInfo = new DirectoryInfo(inputPath).Parent;
+
+							outputPath = SelectFolder("output", "Select MATI Files Output Folder:", "");
+						}
+						else if (messageBox.buttonPressed == "CancelButton")
+						{
+							outputPath = "";
+						}
+					}
+				}
+			}
+
+			if (inputPath != "")
+			{
+				string command = "";
+				string input_path = inputPath;
+				string filter = "";
+				string search = "";
+				string search_type = "";
+				string output_path = outputPath;
+
+				Progress progress = new Progress();
+
+				progress.operation = (int)Progress.Operation.MASS_EXTRACT;
+
+				progress.ProgressBar.IsIndeterminate = true;
+
+				if (materialUtilitiesButton == "MATI")
+				{
+					command = "-mati_to_json";
+
+					progress.message.Content = "Converting MATI File To MATI JSON...";
+				}
+				else if (materialUtilitiesButton == "JSON")
+				{
+					command = "-json_to_mati";
+
+					progress.message.Content = "Converting MATI JSON To MATI File...";
+				}
+				else if (materialUtilitiesButton == "MATIS")
+				{
+					command = "-mati_to_json";
+
+					progress.message.Content = "Converting MATI Files To MATI JSONs...";
+				}
+				else if (materialUtilitiesButton == "JSONS")
+				{
+					command = "-json_to_mati";
+
+					progress.message.Content = "Converting MATI JSONs To MATI Files...";
+				}
+
+				int return_value = reset_task_status();
+
+				execute_task rpkgExecute = task_execute;
+
+				IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
+
+				progress.ShowDialog();
+
+				if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
+				{
+					//MessageBoxShow(progress.task_status_string);
+
+					return;
+				}
+			}
+		}
+	}
 }

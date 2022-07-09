@@ -9,7 +9,6 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include <sstream>
 
 void task::execute(std::string &command, std::string &input_path, std::string &filter, std::string &search, std::string &search_type, std::string &output_path)
 {
@@ -104,10 +103,6 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     else if (command == "-extract_prim_textured_from")
     {
         rpkg_function::extract_prim_textured_from(input_path, filter, output_path, true);
-    }
-    else if (command == "-extract_temp_from")
-    {
-        rpkg_function::extract_temp_from(input_path, filter, output_path);
     }
     else if (command == "-extract_all_text_from")
     {
@@ -324,6 +319,18 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     {
         rpkg_function::extract_to_rt_json(input_path, filter, search, output_path);
     }
+    else if (command == "-extract_mati_to_json")
+    {
+        rpkg_function::extract_mati_to_json(input_path, filter, output_path);
+    }
+    else if (command == "-json_to_mati")
+    {
+        rpkg_function::json_to_mati(input_path, filter, output_path);
+    }
+    else if (command == "-mati_to_json")
+    {
+        rpkg_function::mati_to_json(input_path, filter, output_path);
+    }
 }
 
 void task::process_and_execute_files_draged_and_dropped(std::vector<std::string> &dragged_and_dropped_files)
@@ -381,7 +388,6 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-extract_prim_to_glb_from",
                                                     "-extract_prim_to_obj_from",
                                                     "-extract_prim_textured_from",
-                                                    "-extract_temp_from",
                                                     "-extract_entity_to_qn",
                                                     "-extract_all_text_from",
                                                     "-extract_text_from",
@@ -392,6 +398,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-extract_dlge_to_json_from",
                                                     "-extract_locr_to_json_from",
                                                     "-extract_rtlv_to_json_from",
+                                                    "-extract_mati_to_json",
                                                     "-export_map",
                                                     "-export_map_textured",
                                                     "-import_map",
@@ -401,6 +408,8 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-latest_hash",
                                                     "-hash_meta_to_json",
                                                     "-json_to_hash_meta",
+                                                    "-json_to_mati",
+                                                    "-mati_to_json",
                                                     "-extract_all_hash_depends_from",
                                                     "-extract_non_base_hash_depends_from",
                                                     "-extract_all_hash_depends_prim_models_from",
@@ -433,6 +442,11 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
             command = commands.at(i).at(0);
             filter = commands.at(i).at(1);
             command_count++;
+        }
+        else if (util::to_lower_case(commands.at(i).at(0)) == "-search")
+        {
+            search_type = "text";
+            search = commands.at(i).at(1);
         }
         else if (util::to_lower_case(commands.at(i).at(0)) == "-text_search")
         {

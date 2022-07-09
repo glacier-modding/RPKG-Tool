@@ -60,34 +60,7 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
 
         if (filters.size() == 1)
         {
-            std::string legal_chars = "0123456789ABCDEF";
-
-            bool is_a_hash = false;
-
-            if (filters.at(0).length() == 16)
-            {
-                is_a_hash = true;
-
-                for (int i = 0; i < 16; i++)
-                {
-                    bool is_legal = false;
-
-                    for (int j = 0; j < 16; j++)
-                    {
-                        if (filters.at(0)[i] == legal_chars[j])
-                        {
-                            is_legal = true;
-                        }
-                    }
-
-                    if (!is_legal)
-                    {
-                        is_a_hash = false;
-                    }
-                }
-            }
-
-            if (is_a_hash)
+            if (util::is_valid_hash(filters.at(0)))
             {
                 extract_single_hash = true;
             }

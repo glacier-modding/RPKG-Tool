@@ -21,6 +21,11 @@ struct rpkg_extraction_vars
 class rpkg_function
 {
 public:
+	static void mati_to_json(std::string& input_path, std::string& filter, std::string& output_path);
+	static void extract_hash_meta_json(uint64_t i, uint64_t j, std::string& final_path);
+	static void json_to_mati(std::string& input_path, std::string& filter, std::string& output_path);
+	static void extract_mati_to_json(std::string& input_path, std::string& filter, std::string& output_path);
+	static void search_entities(std::string& input_path, std::string& filter, std::string& search, std::string& search_type, std::string& output_path);
 	static void extract_to_rt_json(std::string& input_path, std::string& filter, std::string& version, std::string& output_path);
 	static void extract_entity_to_qn(std::string& input_path, std::string& filter, std::string& output_path);
 	static void extract_prim_textured_from(std::string& input_path, std::string& filter, std::string& output_path, bool rotate);

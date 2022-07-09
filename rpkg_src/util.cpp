@@ -1,15 +1,74 @@
 #include "util.h"
 #include "global.h"
+#include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
 #include "thirdparty/directxtex/DirectXTex.h"
 #include <string>
-#include <algorithm>
 #include <sstream>
 #include <iomanip>
 #include <regex>
 #include <Windows.h>
-#include <iostream>
+
+bool util::is_valid_hash(std::string hash)
+{
+    std::string valid_chars = "0123456789ABCDEF";
+
+    hash = util::to_upper_case(hash);
+
+    if (hash.length() != 16)
+    {
+        return false;
+    }
+
+    for (int i = 0; i < 16; i++)
+    {
+        if (valid_chars.find(hash[i]) == std::string::npos)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+std::string util::hash_type(uint64_t hash_value)
+{
+    if (hash_list_loaded)
+    {
+        std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(hash_value);
+
+        if (it2 != hash_list_hash_map.end())
+        {
+            return hash_list_hash_file_names.at(it2->second).substr(17);
+        }
+    }
+
+    return "";
+}
+
+uint64_t util::ioi_string_to_hash(std::string ioi_string)
+{
+    return std::strtoull(generic_function::compute_ioi_hash_string(ioi_string).c_str(), nullptr, 16);
+}
+
+std::string util::hash_to_ioi_string(uint64_t hash_value)
+{
+    if (hash_list_loaded)
+    {
+        std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(hash_value);
+
+        if (it2 != hash_list_hash_map.end())
+        {
+            if (hash_list_hash_strings.at(it2->second) != "")
+            {
+                return hash_list_hash_strings.at(it2->second);
+            }
+        }
+    }
+
+    return util::uint64_t_to_hex_string(hash_value);
+}
 
 bool util::floats_equal(float value1, float value2)
 {

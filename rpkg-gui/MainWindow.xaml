@@ -66,6 +66,12 @@
 						<MenuItem Click="Rebuild_Click" Header="Rebuild Video Subtitles (RTLV) From Folder"/>
 						<MenuItem Click="Rebuild_Click" Header="Rebuild Sound Events (WWEV) From Folder"/>
                     </MenuItem>
+                    <MenuItem Header="Material Utilities">
+                        <MenuItem Click="MaterialUtilities_Click" Header="Convert Single MATI (+.MATI.meta) File To MATI JSON File" Tag="MATI"/>
+                        <MenuItem Click="MaterialUtilities_Click" Header="Convert Single MATI JSON File To MATI (+.MATI.meta) File" Tag="JSON"/>
+                        <MenuItem Click="MaterialUtilities_Click" Header="Mass Convert MATI (+.MATI.meta) Files To MATI JSON Files" Tag="MATIS"/>
+                        <MenuItem Click="MaterialUtilities_Click" Header="Mass Convert MATI JSON Files To MATI (+.MATI.meta) Files" Tag="JSONS"/>
+                    </MenuItem>
                     <MenuItem Header="Map Editing">
                         <MenuItem Header="Export Main Hitman Map to Godot v4 project">
                             <MenuItem Header="ICA Facility">
@@ -177,30 +183,30 @@
                         <MenuItem  Click="MapEditorExport_Click" Header="Export Map By TEMP to Godot v4 project"/>
                         <MenuItem Click="MapEditorImport_Click" Header="Import Map from Godot v4 project"/>
                     </MenuItem>
-                    <MenuItem Header="Color Theme">
-						<MenuItem Click="ChangeColorTheme_Click" Header="Light/Blue"/>
-						<MenuItem Click="ChangeColorTheme_Click" Header="Light/Brown"/>
-						<MenuItem Click="ChangeColorTheme_Click" Header="Light/Green"/>
-						<MenuItem Click="ChangeColorTheme_Click" Header="Light/Orange"/>
-						<MenuItem Click="ChangeColorTheme_Click" Header="Light/Purple"/>
-						<MenuItem Click="ChangeColorTheme_Click" Header="Light/Red"/>
-						<MenuItem Click="ChangeColorTheme_Click" Header="Light/Yellow"/>
-						<!--MenuItem Click="ChangeColorTheme_Click" Header="Light/White"/-->
-						<MenuItem Click="ChangeColorTheme_Click" Header="Dark/Blue"/>
-						<MenuItem Click="ChangeColorTheme_Click" Header="Dark/Brown"/>
-						<MenuItem Click="ChangeColorTheme_Click" Header="Dark/Green"/>
-						<MenuItem Click="ChangeColorTheme_Click" Header="Dark/Orange"/>
-						<MenuItem Click="ChangeColorTheme_Click" Header="Dark/Purple"/>
-						<MenuItem Click="ChangeColorTheme_Click" Header="Dark/Red"/>
-						<MenuItem Click="ChangeColorTheme_Click" Header="Dark/Yellow"/>
-						<MenuItem Click="ChangeColorTheme_Click" Header="Dark/White"/>
-					</MenuItem>
 					<MenuItem Header="Utilities">
 						<MenuItem Click="ConvertHashMetaFileToJSON_Click" Header="Convert Hash Meta File To JSON"/>
 						<MenuItem Click="ConvertJSONToHashMetaFile_Click" Header="Convert JSON To Hash Meta File"/>
                         <MenuItem Click="HashCalculator_Click"  Header="Hash Calculator"/>
                     </MenuItem>
-					<MenuItem Click="About_Click" Header="About"/>
+                    <MenuItem Header="Color Theme">
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Light/Blue"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Light/Brown"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Light/Green"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Light/Orange"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Light/Purple"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Light/Red"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Light/Yellow"/>
+                        <!--MenuItem Click="ChangeColorTheme_Click" Header="Light/White"/-->
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Blue"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Brown"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Green"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Orange"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Purple"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Red"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Dark/Yellow"/>
+                        <MenuItem Click="ChangeColorTheme_Click" Header="Dark/White"/>
+                    </MenuItem>
+                    <MenuItem Click="About_Click" Header="About"/>
 				</Menu>
 			</DockPanel>
 			<Image Grid.Row="0" Grid.Column="2" Source="Discord.png" Cursor="Hand" MouseDown="DiscordInvite_MouseDown"/>

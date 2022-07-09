@@ -1,9 +1,13 @@
 #pragma once
 #include <string>
+#include <vector>
+#include <filesystem>
 
 class file
 {
 public:
+    static uint64_t get_hash_value_from_path(std::filesystem::path path, std::string extension);
+    static std::vector<std::filesystem::path> get_recursive_file_list(std::string path);
     static bool write_to_file(std::string file_name, std::string& data);
     static bool path_exists(const std::string& s);
     static void create_directories(std::string s);
