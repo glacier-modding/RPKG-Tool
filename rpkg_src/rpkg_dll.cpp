@@ -495,6 +495,8 @@ uint32_t get_hash_in_rpkg_size(char* rpkg_file, char* hash_string)
             }
         }
     }
+
+    return 0;
 }
 
 char* get_hash_in_rpkg_data(char* rpkg_file, char* hash_string)
@@ -987,6 +989,29 @@ uint32_t generate_localization_string(char* rpkg_file, char* hash_string, char* 
 char* get_localization_string()
 {
     return &localization_string[0];
+}
+
+char* get_localization_line_string()
+{
+    return &localization_line_string[0];
+}
+
+uint32_t generate_localization_line_string(char* rpkg_file, char* hash_string, char* resource_type)
+{
+    gui_control = READY;
+    task_single_status = READY;
+    task_multiple_status = READY;
+
+    std::string input_path = std::string(rpkg_file);
+    std::string filter = std::string(hash_string);
+    std::string output_path = "";
+    std::string resource = std::string(resource_type);
+
+    localization_line_string = "";
+
+    rpkg_function::get_line_string(input_path, filter, output_path);
+
+    return (uint32_t)localization_line_string.length();
 }
 
 uint32_t generate_json_string(char* rpkg_file, char* hash_string)
@@ -2647,6 +2672,330 @@ int generate_json_files_from_data(char* temp_path)
 
             temps.at(i).export_json_files(temp_path_string);
         }
+    }
+
+    return 0;
+}
+
+int deep_search_localization(char* input_path, char* search_value, int search_dlge, int search_locr, int search_rtlv, int max_results)
+{
+    gui_control = READY;
+    task_single_status = READY;
+    task_multiple_status = READY;
+
+    std::string input_path_string = std::string(input_path);
+    std::string filter = "";
+    std::string output_path = "";
+    std::string search = std::string(search_value);
+    std::string search_type = "";
+
+    localization_search_results = "";
+
+    bool search_dlge_bool = false;
+    bool search_locr_bool = false;
+    bool search_rtlv_bool = false;
+
+    if (search_dlge != 0)
+        search_dlge_bool = true;
+    if (search_locr != 0)
+        search_locr_bool = true;
+    if (search_rtlv != 0)
+        search_rtlv_bool = true;
+
+    rpkg_function::search_localization(input_path_string, filter, search, search_type, output_path, search_dlge_bool, search_locr_bool, search_rtlv_bool, max_results);
+
+    return 0;
+}
+
+uint32_t get_localization_search_results_size()
+{
+    return (uint32_t)localization_search_results.length();
+}
+
+char* get_localization_search_results()
+{
+    return &localization_search_results[0];
+}
+
+int deep_search_entities(char* input_path, char* search_value, bool search_entity_ids, bool search_entity_names, bool search_property_names, bool search_property_values, int max_results)
+{
+    gui_control = READY;
+    task_single_status = READY;
+    task_multiple_status = READY;
+
+    std::string input_path_string = std::string(input_path);
+    std::string filter = "";
+    std::string output_path = "";
+    std::string search = std::string(search_value);
+    std::string search_type = "";
+
+    entities_search_results = "";
+
+    bool search_entity_ids_bool = false;
+    bool search_entity_names_bool = false;
+    bool search_property_names_bool = false;
+    bool search_property_values_bool = false;
+
+    if (search_entity_ids != 0)
+        search_entity_ids_bool = true;
+    if (search_entity_names != 0)
+        search_entity_names_bool = true;
+    if (search_property_names != 0)
+        search_property_names_bool = true;
+    if (search_property_values != 0)
+        search_property_values_bool = true;
+
+    rpkg_function::search_entities(input_path_string, filter, search, search_type, output_path, search_entity_ids_bool, search_entity_names_bool, search_property_names_bool, search_property_values_bool, max_results);
+
+    return 0;
+}
+
+uint32_t get_entities_search_results_size()
+{
+    return (uint32_t)entities_search_results.length();
+}
+
+char* get_entities_search_results()
+{
+    return &entities_search_results[0];
+}
+
+uint32_t is_repo_loaded()
+{
+    uint64_t repo_hash_value = 0x00204D1AFD76AB13;
+
+    uint32_t rpkg_index = rpkg_function::get_latest_hash(repo_hash_value);
+
+    if (rpkg_index != UINT32_MAX)
+    {
+        std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(repo_hash_value);
+
+        if (it != rpkgs.at(rpkg_index).hash_map.end())
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+uint32_t is_ores_loaded()
+{
+    uint64_t repo_hash_value = 0x00858D45F5F9E3CA;
+
+    uint32_t rpkg_index = rpkg_function::get_latest_hash(repo_hash_value);
+
+    if (rpkg_index != UINT32_MAX)
+    {
+        std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(repo_hash_value);
+
+        if (it != rpkgs.at(rpkg_index).hash_map.end())
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+int load_repo()
+{
+    uint64_t repo_hash_value = 0x00204D1AFD76AB13;
+
+    uint32_t repo_rpkg_index = rpkg_function::get_latest_hash(repo_hash_value);
+
+    if (repo_rpkg_index != UINT32_MAX)
+    {
+        std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(repo_rpkg_index).hash_map.find(repo_hash_value);
+
+        if (it != rpkgs.at(repo_rpkg_index).hash_map.end())
+        {
+            uint64_t ores_hash_value = 0x00858D45F5F9E3CA;
+
+            uint32_t ores_rpkg_index = rpkg_function::get_latest_hash(ores_hash_value);
+
+            if (ores_rpkg_index != UINT32_MAX)
+            {
+                std::map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(ores_rpkg_index).hash_map.find(ores_hash_value);
+
+                if (it2 != rpkgs.at(ores_rpkg_index).hash_map.end())
+                {
+                    std::vector<repo>().swap(repos);
+
+                    repos.emplace_back(repo_rpkg_index, it->second);
+
+                    repos[0].load_ores(ores_rpkg_index, it2->second);
+
+                    repos[0].load_repo();
+
+                    return 1;
+                }
+            }
+        }
+    }
+
+    return 0;
+}
+
+int load_repo_from_file(char* repo_path)
+{
+    std::vector<repo>().swap(repos);
+
+    repos.emplace_back(repo_path);
+
+    uint64_t ores_hash_value = 0x00858D45F5F9E3CA;
+
+    uint32_t ores_rpkg_index = rpkg_function::get_latest_hash(ores_hash_value);
+
+    if (ores_rpkg_index != UINT32_MAX)
+    {
+        std::map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(ores_rpkg_index).hash_map.find(ores_hash_value);
+
+        if (it2 != rpkgs.at(ores_rpkg_index).hash_map.end())
+        {
+            repos[0].load_ores(ores_rpkg_index, it2->second);
+        }
+    }
+
+    repos[0].load_repo();
+
+    return 0;
+}
+
+int reset_repos()
+{
+    std::vector<repo>().swap(repos);
+
+    return 0;
+}
+
+uint32_t get_repo_response_data_size()
+{
+    return (uint32_t)repo_response_data.length();
+}
+
+char* get_repo_response_data()
+{
+    return &repo_response_data[0];
+}
+
+int get_repo_child_entries(char* id)
+{
+    repos[0].get_child_entries(id);
+
+    return 0;
+}
+
+int get_repo_category(int category)
+{
+    repos[0].get_category(category);
+
+    return 0;
+}
+
+int get_repo_json(char* id)
+{
+    repos[0].get_json(id);
+
+    return 0;
+}
+
+char* get_repo_image_hash(char* id)
+{
+    repos[0].get_image_hash(id);
+
+    return &repo_response_data[0];
+}
+
+char* get_latest_hash_rpkg_path(char* hash)
+{
+    latest_hash_rpkg_path = "";
+
+    uint64_t hash_value = std::strtoull(hash, nullptr, 16);
+
+    uint32_t rpkg_index = rpkg_function::get_latest_hash(hash_value);
+
+    if (rpkg_index != UINT32_MAX)
+    {
+        std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(hash_value);
+
+        if (it != rpkgs.at(rpkg_index).hash_map.end())
+        {
+            latest_hash_rpkg_path = rpkgs.at(rpkg_index).rpkg_file_path;
+        }
+    }
+
+    return &latest_hash_rpkg_path[0];
+}
+
+int is_valid_json(char* json)
+{
+    return repos[0].valid_json(json);
+}
+
+char* check_json(char* json)
+{
+    repos[0].check_json(json);
+
+    return &check_json_response[0];
+}
+
+int create_patch(char* patch_path)
+{
+    if (repos.size() > 0)
+    {
+        repos[0].create_patch(patch_path);
+    }
+
+    return 0;
+}
+
+int import_patch(char* patch_path)
+{
+    if (repos.size() > 0)
+    {
+        repos[0].import_patch(patch_path);
+    }
+
+    return 0;
+}
+
+int save_json(char* id, char* json)
+{
+    if (repos.size() > 0)
+    {
+        repos[0].save_json(id, json);
+    }
+
+    return 0;
+}
+
+int duplicate_repo_entry(char* id)
+{
+    repos[0].duplicate_entry(id);
+
+    return 0;
+}
+
+int erase_repo_entry(char* id)
+{
+    repos[0].erase_entry(id);
+
+    return 0;
+}
+
+int get_repo_entry(char* id)
+{
+    repos[0].get_entry(id);
+
+    return 0;
+}
+
+int update_json_at_pointer(char* id, char* json_pointer, char* value)
+{
+    if (repos.size() > 0)
+    {
+        repos[0].update_json_at_pointer(id, json_pointer, value);
     }
 
     return 0;

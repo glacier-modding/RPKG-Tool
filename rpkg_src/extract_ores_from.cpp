@@ -1,6 +1,7 @@
 #include "rpkg_function.h"
 #include "file.h"
 #include "util.h"
+#include "ores.h"
 #include "global.h"
 #include "crypto.h"
 #include "console.h"
@@ -88,79 +89,9 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
 
                 std::string hash_file_name = rpkgs.at(rpkg_index).hash.at(hash_index).hash_file_name;
 
-                uint64_t hash_size;
+                ores temp_ores(rpkg_index, hash_index);
 
-                if (rpkgs.at(rpkg_index).hash.at(hash_index).is_lz4ed == 1)
-                {
-                    hash_size = rpkgs.at(rpkg_index).hash.at(hash_index).hash_size;
-
-                    if (rpkgs.at(rpkg_index).hash.at(hash_index).is_xored == 1)
-                    {
-                        hash_size &= 0x3FFFFFFF;
-                    }
-                }
-                else
-                {
-                    hash_size = rpkgs.at(rpkg_index).hash.at(hash_index).hash_size_final;
-                }
-
-                std::vector<char> input_data(hash_size, 0);
-
-                std::ifstream file = std::ifstream(rpkgs.at(rpkg_index).rpkg_file_path, std::ifstream::binary);
-
-                if (!file.good())
-                {
-                    LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(rpkg_index).rpkg_file_path + " could not be read.");
-                }
-
-                file.seekg(rpkgs.at(rpkg_index).hash.at(hash_index).hash_offset, file.beg);
-                file.read(input_data.data(), hash_size);
-                file.close();
-
-                if (rpkgs.at(rpkg_index).hash.at(hash_index).is_xored == 1)
-                {
-                    crypto::xor_data(input_data.data(), (uint32_t)hash_size);
-                }
-
-                uint32_t decompressed_size = rpkgs.at(rpkg_index).hash.at(hash_index).hash_size_final;
-
-                std::vector<char> output_data(decompressed_size, 0);
-
-                std::vector<char>* ores_data;
-
-                if (rpkgs.at(rpkg_index).hash.at(hash_index).is_lz4ed)
-                {
-                    LZ4_decompress_safe(input_data.data(), output_data.data(), (int)hash_size, decompressed_size);
-
-                    ores_data = &output_data;
-                }
-                else
-                {
-                    ores_data = &input_data;
-                }
-
-                std::vector<uint64_t> ores_hash_resource;
-                std::vector<std::string> ores_hash_resource_file_path;
-                std::vector<std::vector<std::string>> ores_hash_resource_file_path_elements;
-
-                uint32_t ores_hash_resource_file_count = 0;
-
-                uint32_t position = 0x10;
-
-                uint8_t bytes1 = 0;
-                uint32_t bytes4 = 0;
-                uint64_t bytes8 = 0;
-
-                std::memcpy(&bytes4, (&ores_data->data()[0] + position), sizeof(bytes4));
-                position = bytes4 + 0xC;
-
-                std::memcpy(&ores_hash_resource_file_count, (&ores_data->data()[0] + position), sizeof(bytes4));
-                position += 0x4;
-
-                std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-                int stringstream_length = 80;
-
-                for (uint64_t k = 0; k < ores_hash_resource_file_count; k++)
+                for (auto& ores_entry : temp_ores.ores_entries)
                 {
                     if (gui_control == ABORT_CURRENT_TASK)
                     {
@@ -191,28 +122,7 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
                         period_count++;
                     }
 
-                    uint32_t string_offset = 0;
-                    uint8_t string_length = 0;
-                    uint64_t hash_lsb = 0;
-                    uint64_t hash_msb = 0;
-                    uint64_t hash = 0;
-
-                    std::memcpy(&string_length, (&ores_data->data()[0] + position), sizeof(bytes1));
-                    position += 0x8;
-
-                    std::memcpy(&string_offset, (&ores_data->data()[0] + position), sizeof(bytes4));
-                    string_offset += 0x10;
-                    position += 0x8;
-
-                    std::memcpy(&hash_lsb, (&ores_data->data()[0] + position), sizeof(bytes4));
-                    position += 0x4;
-
-                    std::memcpy(&hash_msb, (&ores_data->data()[0] + position), sizeof(bytes4));
-                    position += 0x4;
-
-                    hash = (hash_lsb << 32) | hash_msb;
-
-                    std::string hash_string = util::uint64_t_to_hex_string(hash);
+                    std::string hash_string = util::uint64_t_to_hex_string(ores_entry.second);
 
                     if (!extract_single_hash || (extract_single_hash && filter == hash_string))
                     {
@@ -220,7 +130,7 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
                         {
                             uint64_t rpkg_index2 = i;
 
-                            std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(hash);
+                            std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(ores_entry.second);
 
                             if (it != rpkgs.at(i).hash_map.end())
                             {
@@ -232,7 +142,7 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
 
                                 ores_ioi_path = file::output_path_append("ORES\\" + rpkgs.at(rpkg_index2).rpkg_file_name, output_path);
 
-                                ores_ioi_path += "/" + std::string(&ores_data->data()[0] + string_offset);
+                                ores_ioi_path += "/" + ores_entry.first;
 
                                 std::replace(ores_ioi_path.begin(), ores_ioi_path.end(), '/', '\\');
 

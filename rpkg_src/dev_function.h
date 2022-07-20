@@ -10,6 +10,7 @@
 class dev_function
 {
 public:
+	static void dev_dlge_names(std::string& input_path, std::string& filter, std::string& output_path);
 	static void dev_extract_all_hashes_in_game(rpkg_extraction_vars& rpkg_vars);
 	static void dev_hash_list_percent_found(std::string& input_path, std::string& filter, std::string& output_path);
 	static void dev_map_editor(std::string& input_path, std::string& filter, std::string& output_path);

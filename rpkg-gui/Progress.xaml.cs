@@ -338,7 +338,8 @@ namespace rpkg
             PRIM,
             PRIM_REBUILD,
             PRIM_MODEL_REBUILD,
-            PRIM_MODEL_EXTRACT
+            PRIM_MODEL_EXTRACT,
+            DEEP_SEARCH
         };
 
         public enum RPKGStatus

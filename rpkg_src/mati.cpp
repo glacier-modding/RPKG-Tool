@@ -590,7 +590,7 @@ void mati::generate_json(std::string output_path)
     }
     else
     {
-        json["ERES"] = util::hash_to_ioi_string(rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).hash_reference_data.hash_reference.at(eres_index));
+        json["ERES"] = util::hash_to_ioi_string(rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).hash_reference_data.hash_reference.at(eres_index), true);
     }
 
     for (uint32_t i = 0; i < rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).hash_reference_data.hash_reference.size(); i++)
@@ -607,7 +607,7 @@ void mati::generate_json(std::string output_path)
     }
     else
     {
-        json["MATE"] = util::hash_to_ioi_string(rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).hash_reference_data.hash_reference.at(mate_index));
+        json["MATE"] = util::hash_to_ioi_string(rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).hash_reference_data.hash_reference.at(mate_index), true);
     }
 
     json["UnknownFlags"]["Unk1"] = unknown_flag_1;
@@ -735,11 +735,11 @@ nlohmann::ordered_json mati::read_properties_json(nlohmann::ordered_json temp_js
             }
             else if (from_mati_file)
             {
-                temp_json[temp_mati_property.name] = util::hash_to_ioi_string(meta_data.hash_reference_data.hash_reference.at(temp_mati_property.int_value));
+                temp_json[temp_mati_property.name] = util::hash_to_ioi_string(meta_data.hash_reference_data.hash_reference.at(temp_mati_property.int_value), true);
             }
             else
             {
-                temp_json[temp_mati_property.name] = util::hash_to_ioi_string(rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).hash_reference_data.hash_reference.at(temp_mati_property.int_value));
+                temp_json[temp_mati_property.name] = util::hash_to_ioi_string(rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).hash_reference_data.hash_reference.at(temp_mati_property.int_value), true);
             }
         }
         else
@@ -943,7 +943,7 @@ mati::mati(std::string mati_path, std::string mati_meta_path, uint64_t hash_valu
     }
     else
     {
-        json["ERES"] = util::hash_to_ioi_string(meta_data.hash_reference_data.hash_reference.at(eres_index));
+        json["ERES"] = util::hash_to_ioi_string(meta_data.hash_reference_data.hash_reference.at(eres_index), true);
     }
 
     for (uint32_t i = 0; i < meta_data.hash_reference_data.hash_reference.size(); i++)
@@ -960,7 +960,7 @@ mati::mati(std::string mati_path, std::string mati_meta_path, uint64_t hash_valu
     }
     else
     {
-        json["MATE"] = util::hash_to_ioi_string(meta_data.hash_reference_data.hash_reference.at(mate_index));
+        json["MATE"] = util::hash_to_ioi_string(meta_data.hash_reference_data.hash_reference.at(mate_index), true);
     }
 
     json["UnknownFlags"]["Unk1"] = unknown_flag_1;

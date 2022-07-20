@@ -10,6 +10,33 @@
 #include <regex>
 #include <Windows.h>
 
+std::string util::generate_guid()
+{
+    GUID guid;
+
+    CoCreateGuid(&guid);
+
+    std::string guidString = "";
+
+    guidString += uint32_t_to_hex_string(guid.Data1);
+    guidString += '-';
+    guidString += uint16_t_to_hex_string(guid.Data2);
+    guidString += '-';
+    guidString += uint16_t_to_hex_string(guid.Data3);
+    guidString += '-';
+    guidString += uint8_t_to_hex_string(guid.Data4[0]);
+    guidString += uint8_t_to_hex_string(guid.Data4[1]);
+    guidString += '-';
+    guidString += uint8_t_to_hex_string(guid.Data4[2]);
+    guidString += uint8_t_to_hex_string(guid.Data4[3]);
+    guidString += uint8_t_to_hex_string(guid.Data4[4]);
+    guidString += uint8_t_to_hex_string(guid.Data4[5]);
+    guidString += uint8_t_to_hex_string(guid.Data4[6]);
+    guidString += uint8_t_to_hex_string(guid.Data4[7]);
+
+    return util::to_lower_case(guidString);
+}
+
 bool util::is_valid_hash(std::string hash)
 {
     std::string valid_chars = "0123456789ABCDEF";
@@ -52,7 +79,35 @@ uint64_t util::ioi_string_to_hash(std::string ioi_string)
     return std::strtoull(generic_function::compute_ioi_hash_string(ioi_string).c_str(), nullptr, 16);
 }
 
-std::string util::hash_to_ioi_string(uint64_t hash_value)
+std::string util::hash_to_ioi_string(uint64_t hash_value, bool return_hash_if_not_found)
+{
+    if (hash_list_loaded)
+    {
+        std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(hash_value);
+
+        if (it2 != hash_list_hash_map.end())
+        {
+            if (hash_list_hash_strings.at(it2->second) != "")
+            {
+                if (hash_value == std::strtoull(generic_function::compute_ioi_hash_string(hash_list_hash_strings.at(it2->second)).c_str(), nullptr, 16))
+                {
+                    return hash_list_hash_strings.at(it2->second);
+                }       
+            }
+        }
+    }
+
+    if (return_hash_if_not_found)
+    {
+        return util::uint64_t_to_hex_string(hash_value);
+    }
+    else
+    {
+        return "";
+    }
+}
+
+std::string util::hash_to_hash_list_string(uint64_t hash_value)
 {
     if (hash_list_loaded)
     {
@@ -134,6 +189,29 @@ void util::split_string_view(std::string_view& temp_string_view, std::string spl
     while (!done)
     {
         size_t pos1 = temp_string_view.substr(position).find(split_string);
+
+        if (pos1 != std::string::npos)
+        {
+            split_positions.push_back(position + pos1);
+        }
+        else
+        {
+            done = true;
+        }
+
+        position += pos1 + 1;
+    }
+}
+
+void util::split_string(std::string& temp_string, std::string split_string, std::vector<uint64_t>& split_positions)
+{
+    bool done = false;
+
+    uint64_t position = 0;
+
+    while (!done)
+    {
+        size_t pos1 = temp_string.substr(position).find(split_string);
 
         if (pos1 != std::string::npos)
         {

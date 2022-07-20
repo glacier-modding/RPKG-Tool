@@ -31,6 +31,9 @@ using System.Drawing;
 using System.Runtime.CompilerServices;
 using DiscordRPC;
 using Button = System.Windows.Controls.Button;
+using ICSharpCode.AvalonEdit.Highlighting;
+using ICSharpCode.AvalonEdit.Highlighting.Xshd;
+using System.Xml;
 
 namespace rpkg
 {
@@ -87,13 +90,17 @@ namespace rpkg
 						{
 							SetDiscordStatus("Resource View", "");
 						}
-						else if (LeftTabControl.SelectedIndex == 1)
-						{
-							SetDiscordStatus("Dependency View", "");
-						}
 						else if (LeftTabControl.SelectedIndex == 2)
 						{
+							SetDiscordStatus("REPO View", "");
+						}
+						else if (LeftTabControl.SelectedIndex == 4)
+						{
 							SetDiscordStatus("Search View", "");
+						}
+						else if (LeftTabControl.SelectedIndex == 6)
+						{
+							SetDiscordStatus("Deep Search View", "");
 						}
 					}
 				}
@@ -266,36 +273,79 @@ namespace rpkg
 			item.Text = "";
 			MainTreeView.Nodes.Add(item);
 			item = new System.Windows.Forms.TreeNode();
-			item.Text = "Alternatively you can select from the:";
+			item.Text = "Alternatively you can select from the menus above for additional functions.";
 			MainTreeView.Nodes.Add(item);
 			item = new System.Windows.Forms.TreeNode();
-			item.Text = "Extract";
-			MainTreeView.Nodes.Add(item);
+			item.Text = "NOTE: Subsequent searches are faster than the first search, as the first search";
+			item.Name = "deepsearch";
+			DeepSearchEntitiesTreeView.Nodes.Add(item);
 			item = new System.Windows.Forms.TreeNode();
-			item.Text = "Generate";
-			MainTreeView.Nodes.Add(item);
+			item.Text = "      loads/keeps RPKG's entities into JSONs in memory while searching them.";
+			item.Name = "deepsearch";
+			DeepSearchEntitiesTreeView.Nodes.Add(item);
 			item = new System.Windows.Forms.TreeNode();
-			item.Text = "Mass Extract";
-			MainTreeView.Nodes.Add(item);
+			item.Text = "NOTE: Make sure you load all RPKGs in your Hitman Runtime folder to ensure";
+			item.Name = "deepsearch";
+			REPOTreeView.Nodes.Add(item);
 			item = new System.Windows.Forms.TreeNode();
-			item.Text = "Rebuild";
-			MainTreeView.Nodes.Add(item);
-			item = new System.Windows.Forms.TreeNode();
-			item.Text = "Color Theme";
-			MainTreeView.Nodes.Add(item);
-			item = new System.Windows.Forms.TreeNode();
-			item.Text = "menus above for additional functions.";
-			MainTreeView.Nodes.Add(item);
+			item.Text = "      you are searching/accessing the latest REPO and ORES from the game!";
+			item.Name = "deepsearch";
+			REPOTreeView.Nodes.Add(item);
+
+			MainTreeView.Name = "MainTreeView";
+			SearchRPKGsTreeView.Name = "SearchRPKGsTreeView";
+			SearchHashListTreeView.Name = "SearchHashListTreeView";
+			DeepSearchEntitiesTreeView.Name = "DeepSearchEntitiesTreeView";
+			DeepSearchLocalizationTreeView.Name = "DeepSearchLocalizationTreeView";
+			REPOTreeView.Name = "REPOTreeView";
 
 			MainTreeView.NodeMouseClick += MainTreeView_NodeMouseClick;
-			HashMapTreeView.NodeMouseClick += MainTreeView_NodeMouseClick;
 			SearchRPKGsTreeView.NodeMouseClick += MainTreeView_NodeMouseClick;
+			DeepSearchEntitiesTreeView.NodeMouseClick += MainTreeView_NodeMouseClick;
+			DeepSearchLocalizationTreeView.NodeMouseClick += MainTreeView_NodeMouseClick;
+			REPOTreeView.NodeMouseClick += REPOTreeView_NodeMouseClick;
 			MainTreeView.AfterSelect += MainTreeView_AfterSelect;
-			HashMapTreeView.AfterSelect += MainTreeView_AfterSelect;
 			SearchRPKGsTreeView.AfterSelect += MainTreeView_AfterSelect;
+			DeepSearchEntitiesTreeView.AfterSelect += MainTreeView_AfterSelect;
+			DeepSearchLocalizationTreeView.AfterSelect += MainTreeView_AfterSelect;
+			REPOTreeView.AfterSelect += REPOTreeView_AfterSelect;
 			SearchHashListTreeView.AfterSelect += SearchHashListTreeView_AfterSelect;
 			LeftTabControl.SelectionChanged += LeftTabControl_SelectionChanged;
 			RightTabControl.SelectionChanged += RightTabControl_SelectionChanged;
+
+			enumDictionary = new Dictionary<string, string[]>();
+			enumDictionary.Add("BurstPattern", new string[] { "eEBP_None", "eEBP_Circular3Rings", "eEBP_Box" });
+			enumDictionary.Add("SilenceRating", new string[] { "eSR_NotSilenced", "eSR_Silenced", "eSR_SuperSilenced", "eSR_CompletelySilenced" });
+			enumDictionary.Add("AudioFireType", new string[] { "eWBC_AudioFireType_Single", "eWBC_AudioFireType_Full_Automatic" });
+			enumDictionary.Add("AudioHeadType", new string[] { "eWBC_AudioHeadTailType_Silenced", "eWBC_AudioHeadTailType_Normal", "eWBC_AudioHeadTailType_SilencedSweetener", "eWBC_AudioHeadTailType_NormalSweetener" });
+			enumDictionary.Add("AudioTailType", new string[] { "eWBC_AudioHeadTailType_Silenced", "eWBC_AudioHeadTailType_Normal", "eWBC_AudioHeadTailType_DryFire", "eWBC_AudioHeadTailType_SilencedSweetener", "eWBC_AudioHeadTailType_NormalSweetener" });
+			enumDictionary.Add("AudioWeaponClass", new string[] { "eWBC_AudioClass_Pistol", "eWBC_AudioClass_SniperRifle", "eWBC_AudioClass_AssaultRifle", "eWBC_AudioClass_Shotgun", "eWBC_AudioClass_SMG" });
+			enumDictionary.Add("AudioWeaponFamily", new string[] { "eWBC_AudioFamily_Heavy", "eWBC_AudioFamily_Standard", "eWBC_AudioFamily_Light", "eWBC_AudioFamily_NPC", "eWBC_AudioFamily_Exotics" });
+			enumDictionary.Add("CheatGroup", new string[] { "eCGNone", "eCGDevices", "eCGPistols", "eCGSniper", "eCGAssaultRifles", "eCGExotics", "eCGSMGs", "eCGShotguns" });
+			enumDictionary.Add("CarryAnimSetType", new string[] { "EAST_SUITCASE", "EAST_CARRY_WEAPON_ITEM", "EAST_SMALLOBJ", "EAST_CARRY_PROXY_MINE", "EAST_CARRY_1HANDEDWEAPON", "EAST_UNDEFINED", "EAST_CARRY_2HANDEDWEAPON", "EAST_CARRY_LEAD_PIPES", "EAST_PLATE", "EAST_GLASS", "EAST_BOX", "EAST_FLASHLIGHT", "EAST_CARRY_BRICK_MINE", "EAST_TRAY", "EAST_CARRY_UMBRELLA", "EAST_DEFAULT", "EAST_CARRY_TUBE", "EAST_WHISKYGLASS", "EAST_PHONE" });
+			enumDictionary.Add("HolsterAbility", new string[] { "eHolsterQuestStorage", "eHolsteringAllowed", "eUndecided", "eHolsterTemporarilyOnly", "eCanNotBeHolstered", "eHolsterSecondaryOnly" });
+			enumDictionary.Add("InventoryCategoryIcon", new string[] { "QuestItem", "melee", "key", "explosives", "questitem", "tool", "pistol", "INVALID_CATEGORY_ICON", "sniperrifle", "assaultrifle", "remote", "shotgun", "suitcase", "smg", "distraction", "poison", "Container", "Tool" });
+			enumDictionary.Add("InventoryCategoryName", new string[] { "QuestItem", "melee", "key", "explosive", "", "tool", "pistol", "sniperrifle", "assaultrifle", "remote", "shotgun", "suitcase", "smg", "distraction", "poison", "USBStick", "Suitcase" });
+			enumDictionary.Add("ItemHandsIdle", new string[] { "IH_ONEHANDED", "IH_TWOHANDED", "IH_NONE" });
+			enumDictionary.Add("ItemHandsUse", new string[] { "IH_ONEHANDED", "IH_TWOHANDED", "IH_NONE" });
+			enumDictionary.Add("ItemType", new string[] { "eOther_GenericPickup", "eCC_Brick", "eOther_Keycard_A", "eCC_RemoteExplosive", "eUnknownItemType", "eGun_HardBaller_01", "eItemAmmo", "eSniper_SakoTRG", "eRifle_HK416", "eDetonator", "eShotgun_M500New", "eSuitcase", "eCC_FireExtinguisher_01", "eCC_BaseballBat", "eSniper_SakoTRGSilenced", "eSMG_HK_UMP", "eShotgun_M500", "eCC_Knife", "eCC_Bottle", "eCC_Katana", "eCC_Screwdriver", "eCC_FiberWire", "eSyringe_Emetic", "eGun_Taurus24_7", "eCC_Cleaver", "eSyringe_Lethal", "eGun_44AutoMag", "eCC_Axe", "eShotgun_Spas12", "eCC_Radio", "cCC_Book_A", "eCC_C4Brick", "eCC_Hammer", "eCC_Wrench", "eCC_PoliceBaton", "eCC_MetalPipe", "eCC_PetrolCan", "eSMG_HK_UMPSilenced", "eCC_Bong", "eSyringe_Sedative", "eOther_Camera" });
+			enumDictionary.Add("MainAnimSetType", new string[] { "EAST_UNDEFINED", "EAST_SUITCASE", "EAST_CARRY_LEAD_PIPES", "EAST_SMG", "EAST_ASSULT", "EAST_SHOTGUN", "EAST_PISTOL", "EAST_SMALLOBJ", "EAST_DEFAULT", "EAST_CARRY_1HANDEDWEAPON", "EAST_CARRY_UMBRELLA", "EAST_CARRY_BRICK_MINE" });
+			enumDictionary.Add("OnlineTraits", new string[] { "NONE", "melee_nonlethal", "throw_nonlethal_deprecated", "Setpiece", "activator", "container", "explosive", "explosive_device", "Trap", "poison", "body", "pistol", "suspended", "sniperrifle", "assaultrifle", "detonator_explosive_device", "shotgun", "case", "distraction", "smg", "electricity", "tool", "melee_lethal", "throw_lethal_deprecated", "fiberwire", "syringe_poison", "consumable_poison", "melee", "questitem", "accident_explosion", "onlevel" });
+			enumDictionary.Add("PlaceableType", new string[] { "PLACEABLE_NOT", "PLACEABLE_SLEEP_PHYSICS", "PLACEABLE_ATTACH", "PLACEABLE_FULL_PHYSICS", "PLACEABLE_NO_PHYSICS" });
+			enumDictionary.Add("PoisonType", new string[] { "POISONTYPE_NONE", "POISONTYPE_SEDATIVE", "POISONTYPE_EMETIC", "POISONTYPE_LETHAL" });
+			enumDictionary.Add("ActionRewardType", new string[] { "AR_QuestItem", "AR_None", "AR_Key", "AR_Keycard" });
+			enumDictionary.Add("EquipAbility", new string[] { "EA_CANNOT_BE_EQUIPPED", "EA_EQUIP_IN_HANDS" });
+			enumDictionary.Add("ItemHandsCoverAnimLayer", new string[] { "IH_NONE", "IH_ONEHANDED", "IH_TWOHANDED" });
+			enumDictionary.Add("ItemHUDType", new string[] { "EIHT_None", "EIHT_GhostItem" });
+			enumDictionary.Add("ItemSize", new string[] { "ITEMSIZE_SMALL", "ITEMSIZE_LARGE", "ITEMSIZE_MEDIUM" });
+			enumDictionary.Add("MeleeDamageBehavior", new string[] { "EIMDB_Undefined", "EIMDB_Sticking", "EIMDB_Slashing" });
+			enumDictionary.Add("Rarity", new string[] { "ITEMRARITY_COMMON", "ITEMRARITY_UNCOMMON", "ITEMRARITY_RARE" });
+			enumDictionary.Add("ThrownCollisionLoudness", new string[] { "eLoudness_Default", "eLoudness_Normal", "eLoudness_Low", "eLoudness_Loud" });
+			enumDictionary.Add("ThrowType", new string[] { "THROW_NONE", "THROW_PACIFY_LIGHT", "THROW_PACIFY_HEAVY", "THROW_KNOCKDOWN_LIGHT", "THROW_NORMAL", "THROW_DEADLY_LIGHT", "THROW_DEADLY_HEAVY", "THROW_COIN" });
+			enumDictionary.Add("GripAnimType", new string[] { "IGT_Suitcase", "IGT_Melee_1H_Rock", "IGT_Gadget_Coin", "IGT_Gadget_C4", "IGT_Melee_1H_Crowbar", "IGT_Gadget_Mine", "IGT_Firearm_Pistol", "IGT_Firearm_SniperRifle", "IGT_Firearm_AssaultRifle_Bullpup", "IGT_Gadget_Detonator", "IGT_Gadget_Remote", "IGT_Melee_1H_FireExtinguisher", "IGT_Firearm_Shotgun", "IGT_Melee_2H_Stick", "IGT_Firearm_SMG", "IGT_Prop_1H", "IGT_Firearm_AssaultRifle_Carbine", "IGT_Prop_1H_Duck", "IGT_Melee_1H_Screwdriver", "IGT_None", "IGT_Melee_1H_Baton", "IGT_Melee_1H_Knife", "IGT_Melee_2H_Sword", "IGT_Gadget_Fiberwire", "IGT_Gadget_Vial", "IGT_Melee_1H_Syringe", "IGT_Firearm_Pistol_Stealth", "IGT_Melee_1H_Stick", "IGT_Melee_1H_Cleaver", "IGT_Prop_1h_Phone", "IGT_Firearm_Dartgun", "IGT_Melee_2H_Axe", "IGT_Firearm_SMG02", "IGT_Melee_1H_Sword", "IGT_Melee_1H_Hammer" });
+			enumDictionary.Add("AmmoType", new string[] { "eAmmoGun", "eAmmoShotgun", "eAmmoSMG", "eAmmoSniper", "eAmmoRifle", "eAmmoDartTranquilizer", "eAmmoLightPistol", "eAmmoShotgunBeanbag", "eAmmoHarmless" });
+
+			LoadResources();
 		}
 
 		private void MainTreeView_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
@@ -313,13 +363,38 @@ namespace rpkg
 
 					string itemHeader = item.Text;
 
+					string itemName = item.Name;
+
 					currentNodeText = item.Text;
 
 					//MessageBoxShow(itemHeader);
 
 					rpkgFilePath = GetRootTreeNode(e.Node).Text;
 
-					if (itemHeader.Length == 4)
+					if (itemName == "deepsearch")
+					{
+						DetailsTextBox.Text = itemHeader;
+
+						DetailsTextBox.Visibility = Visibility.Visible;
+						MainScrollViewer.Visibility = Visibility.Collapsed;
+						MainStackPanel.Visibility = Visibility.Collapsed;
+						EditPatchDeletionListButton.Visibility = Visibility.Collapsed;
+						SaveChangesToPatchDeletionListButton.Visibility = Visibility.Collapsed;
+						DiscardChangesToPatchDeletionListButton.Visibility = Visibility.Collapsed;
+						EditHashDependsButton.Visibility = Visibility.Collapsed;
+						SaveChangesToHashDependsButton.Visibility = Visibility.Collapsed;
+						DiscardChangesToHashDependsButton.Visibility = Visibility.Collapsed;
+						ExtractHashDependsButton.Visibility = Visibility.Collapsed;
+
+						if (ThirdTabRight.Visibility == Visibility.Visible)
+						{
+							ThirdTabRight.Visibility = Visibility.Collapsed;
+							ThirdTabRightSeparator.Visibility = Visibility.Collapsed;
+						}
+
+						return;
+					}
+					else if (itemHeader.Length == 4)
 					{
 						string resourceType = itemHeader;
 
@@ -329,13 +404,17 @@ namespace rpkg
 						{
 							SetDiscordStatus("Resource View", rpkgFile);
 						}
-						else if (LeftTabControl.SelectedIndex == 1)
-						{
-							SetDiscordStatus("Dependency View", rpkgFile);
-						}
 						else if (LeftTabControl.SelectedIndex == 2)
 						{
+							SetDiscordStatus("REPO View", rpkgFile);
+						}
+						else if (LeftTabControl.SelectedIndex == 4)
+						{
 							SetDiscordStatus("Search View", rpkgFile);
+						}
+						else if (LeftTabControl.SelectedIndex == 6)
+						{
+							SetDiscordStatus("Deep Search View", rpkgFile);
 						}
 
 						UInt32 hashBasedOnResourceTypeCount = get_hash_based_on_resource_type_count(rpkgFilePath, resourceType);
@@ -350,21 +429,25 @@ namespace rpkg
 						if (ThirdTabRight.Visibility == Visibility.Visible)
 						{
 							ThirdTabRight.Visibility = Visibility.Collapsed;
+							ThirdTabRightSeparator.Visibility = Visibility.Collapsed;
 						}
 
 						if (FourthTabRight.Visibility == Visibility.Visible)
 						{
 							FourthTabRight.Visibility = Visibility.Collapsed;
+							FourthTabRightSeparator.Visibility = Visibility.Collapsed;
 						}
 
 						if (FifthTabRight.Visibility == Visibility.Visible)
 						{
 							FifthTabRight.Visibility = Visibility.Collapsed;
+							FifthTabRightSeparator.Visibility = Visibility.Collapsed;
 						}
 
 						if (SixthTabRight.Visibility == Visibility.Visible)
 						{
 							SixthTabRight.Visibility = Visibility.Collapsed;
+							SixthTabRightSeparator.Visibility = Visibility.Collapsed;
 						}
 
 						DetailsTextBox.Visibility = Visibility.Visible;
@@ -386,13 +469,17 @@ namespace rpkg
 						{
 							SetDiscordStatus("Resource View", rpkgFile);
 						}
-						else if (LeftTabControl.SelectedIndex == 1)
-						{
-							SetDiscordStatus("Dependency View", rpkgFile);
-						}
 						else if (LeftTabControl.SelectedIndex == 2)
 						{
+							SetDiscordStatus("REPO View", rpkgFile);
+						}
+						else if (LeftTabControl.SelectedIndex == 4)
+						{
 							SetDiscordStatus("Search View", rpkgFile);
+						}
+						else if (LeftTabControl.SelectedIndex == 6)
+						{
+							SetDiscordStatus("Deep Search View", rpkgFile);
 						}
 
 						UInt32 allHashesInRPKGCount = get_all_hashes_in_rpkg_count(itemHeader);
@@ -438,21 +525,25 @@ namespace rpkg
 						if (ThirdTabRight.Visibility == Visibility.Visible)
 						{
 							ThirdTabRight.Visibility = Visibility.Collapsed;
+							ThirdTabRightSeparator.Visibility = Visibility.Collapsed;
 						}
 
 						if (FourthTabRight.Visibility == Visibility.Visible)
 						{
 							FourthTabRight.Visibility = Visibility.Collapsed;
+							FourthTabRightSeparator.Visibility = Visibility.Collapsed;
 						}
 
 						if (FifthTabRight.Visibility == Visibility.Visible)
 						{
 							FifthTabRight.Visibility = Visibility.Collapsed;
+							FifthTabRightSeparator.Visibility = Visibility.Collapsed;
 						}
 
 						if (SixthTabRight.Visibility == Visibility.Visible)
 						{
 							SixthTabRight.Visibility = Visibility.Collapsed;
+							SixthTabRightSeparator.Visibility = Visibility.Collapsed;
 						}
 					}
 					else
@@ -471,13 +562,17 @@ namespace rpkg
 						{
 							SetDiscordStatus("Resource View", hashFile);
 						}
-						else if (LeftTabControl.SelectedIndex == 1)
-						{
-							SetDiscordStatus("Dependency View", hashFile);
-						}
 						else if (LeftTabControl.SelectedIndex == 2)
 						{
+							SetDiscordStatus("REPO View", hashFile);
+						}
+						else if (LeftTabControl.SelectedIndex == 4)
+						{
 							SetDiscordStatus("Search View", hashFile);
+						}
+						else if (LeftTabControl.SelectedIndex == 6)
+						{
+							SetDiscordStatus("Deep Search View", hashFile);
 						}
 
 						currentHashFileName = hashFile;
@@ -507,22 +602,22 @@ namespace rpkg
 						//HexViewerTextBox.Text += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgFilePath, hash));
 						//HexViewerTextBoxTextString += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgFilePath, hash));
 
-						if (RightTabControl.SelectedIndex == 1)
+						if (RightTabControl.SelectedIndex == 2)
 						{
 							LoadHexEditor();
 						}
 
-						if (RightTabControl.SelectedIndex == 3 && resourceType == "TEXT")
+						if (RightTabControl.SelectedIndex == 6 && resourceType == "TEXT")
 						{
 							LoadImageViewer_TEXT(hashFile, hash);
 						}
 
-						if (RightTabControl.SelectedIndex == 3 && resourceType == "GFXI")
+						if (RightTabControl.SelectedIndex == 6 && resourceType == "GFXI")
 						{
 							LoadImageViewer_GFXI(hash);
 						}
 
-						if (RightTabControl.SelectedIndex == 5 && resourceType == "PRIM")
+						if (RightTabControl.SelectedIndex == 10 && resourceType == "PRIM")
 						{
 							LoadModelViewer(hash);
 						}
@@ -549,6 +644,7 @@ namespace rpkg
 								if (ThirdTabRight.Visibility == Visibility.Collapsed)
 								{
 									ThirdTabRight.Visibility = Visibility.Visible;
+									ThirdTabRightSeparator.Visibility = Visibility.Visible;
 								}
 							}
 							else
@@ -556,6 +652,7 @@ namespace rpkg
 								if (ThirdTabRight.Visibility == Visibility.Visible)
 								{
 									ThirdTabRight.Visibility = Visibility.Collapsed;
+									ThirdTabRightSeparator.Visibility = Visibility.Collapsed;
 								}
 							}
 						}
@@ -577,6 +674,7 @@ namespace rpkg
 								if (ThirdTabRight.Visibility == Visibility.Collapsed)
 								{
 									ThirdTabRight.Visibility = Visibility.Visible;
+									ThirdTabRightSeparator.Visibility = Visibility.Visible;
 								}
 							}
 							else
@@ -584,7 +682,33 @@ namespace rpkg
 								if (ThirdTabRight.Visibility == Visibility.Visible)
 								{
 									ThirdTabRight.Visibility = Visibility.Collapsed;
+									ThirdTabRightSeparator.Visibility = Visibility.Collapsed;
 								}
+							}
+						}
+						else if (resourceType == "LINE")
+						{
+							string runtimeDirectory = rpkgFilePath.Substring(0, rpkgFilePath.LastIndexOf("\\"));
+
+							if (!runtimeDirLoaded)
+							{
+								if (runtimeDirectory.EndsWith("runtime", StringComparison.OrdinalIgnoreCase))
+								{
+									ImportRPKGFileFolder(runtimeDirectory);
+								}
+
+								runtimeDirLoaded = true;
+							}
+
+							UInt32 localization_data_size = generate_localization_line_string(runtimeDirectory, hash, resourceType);
+
+							byte[] localization_data = new byte[localization_data_size];
+
+							Marshal.Copy(get_localization_line_string(), localization_data, 0, (int)localization_data_size);
+
+							if (localization_data_size > 0)
+							{
+								DetailsTextBox.Text += Encoding.UTF8.GetString(localization_data);
 							}
 						}
 						else
@@ -592,21 +716,25 @@ namespace rpkg
 							if (ThirdTabRight.Visibility == Visibility.Visible)
 							{
 								ThirdTabRight.Visibility = Visibility.Collapsed;
+								ThirdTabRightSeparator.Visibility = Visibility.Collapsed;
 							}
 
 							if (FourthTabRight.Visibility == Visibility.Visible)
 							{
 								FourthTabRight.Visibility = Visibility.Collapsed;
+								FourthTabRightSeparator.Visibility = Visibility.Collapsed;
 							}
 
 							if (FifthTabRight.Visibility == Visibility.Visible)
 							{
 								FifthTabRight.Visibility = Visibility.Collapsed;
+								FifthTabRightSeparator.Visibility = Visibility.Collapsed;
 							}
 
 							if (SixthTabRight.Visibility == Visibility.Visible)
 							{
 								SixthTabRight.Visibility = Visibility.Collapsed;
+								SixthTabRightSeparator.Visibility = Visibility.Collapsed;
 							}
 						}
 
@@ -617,6 +745,7 @@ namespace rpkg
 							if (SixthTabRight.Visibility == Visibility.Collapsed)
 							{
 								SixthTabRight.Visibility = Visibility.Visible;
+								SixthTabRightSeparator.Visibility = Visibility.Visible;
 							}
 						}
 
@@ -625,6 +754,7 @@ namespace rpkg
 							if (FourthTabRight.Visibility == Visibility.Collapsed)
 							{
 								FourthTabRight.Visibility = Visibility.Visible;
+								FourthTabRightSeparator.Visibility = Visibility.Visible;
 							}
 						}
 
@@ -633,6 +763,7 @@ namespace rpkg
 							if (FourthTabRight.Visibility == Visibility.Collapsed)
 							{
 								FourthTabRight.Visibility = Visibility.Visible;
+								FourthTabRightSeparator.Visibility = Visibility.Visible;
 							}
 						}
 
@@ -671,6 +802,7 @@ namespace rpkg
 							if (FifthTabRight.Visibility == Visibility.Collapsed)
 							{
 								FifthTabRight.Visibility = Visibility.Visible;
+								FifthTabRightSeparator.Visibility = Visibility.Visible;
 							}
 
 							return_value = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hash, 0, 0);
@@ -750,6 +882,7 @@ namespace rpkg
 								if (FifthTabRight.Visibility == Visibility.Collapsed)
 								{
 									FifthTabRight.Visibility = Visibility.Visible;
+									FifthTabRightSeparator.Visibility = Visibility.Visible;
 								}
 
 								return_value = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hash, 1, 0);
@@ -803,6 +936,7 @@ namespace rpkg
 									if (FifthTabRight.Visibility == Visibility.Visible)
 									{
 										FifthTabRight.Visibility = Visibility.Collapsed;
+										FifthTabRightSeparator.Visibility = Visibility.Collapsed;
 									}
 
 									FirstTabRight.IsSelected = true;
@@ -813,6 +947,7 @@ namespace rpkg
 								if (FifthTabRight.Visibility == Visibility.Visible)
 								{
 									FifthTabRight.Visibility = Visibility.Collapsed;
+									FifthTabRightSeparator.Visibility = Visibility.Collapsed;
 								}
 
 								FirstTabRight.IsSelected = true;
@@ -882,6 +1017,8 @@ namespace rpkg
 
 				string header = e.Node.Text;
 
+				string headerName = e.Node.Name;
+
 				if (oneOrMoreRPKGsHaveBeenImported)
 				{
 					if (header.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
@@ -905,7 +1042,7 @@ namespace rpkg
 
 						RightClickMenu rightClickMenu = new RightClickMenu(buttons);
 
-						SetRightClickMenuPosition(ref rightClickMenu, e.Location.X, e.Location.Y);
+						SetRightClickMenuPosition((sender as System.Windows.Forms.TreeView).Name, ref rightClickMenu, e.Location.X, e.Location.Y);
 
 						rightClickMenu.ShowDialog();
 
@@ -952,6 +1089,10 @@ namespace rpkg
 							{
 								MainTreeView.Nodes.RemoveAt(treeview_item_index);
 
+								resetDeepSearchComboBoxes();
+
+								//LoadREPO();
+
 								//ImportRPKGFile(rpkgFilePath);
 
 								//foreach (System.Windows.Forms.TreeNode item in MainTreeView.Nodes)
@@ -965,39 +1106,6 @@ namespace rpkg
 							else
 							{
 								MessageBoxShow("Error: Cound not find the treeview item for unloading for RPKG: " + rpkgFilePath);
-							}
-
-							treeview_item_found = false;
-
-							count = 0;
-
-							treeview_item_index = 0;
-
-							foreach (System.Windows.Forms.TreeNode item in HashMapTreeView.Nodes)
-							{
-								if (item.Text.ToString() == rpkgFilePath)
-								{
-									treeview_item_index = count;
-
-									treeview_item_found = true;
-								}
-
-								count++;
-							}
-
-							if (treeview_item_found)
-							{
-								HashMapTreeView.Nodes.RemoveAt(treeview_item_index);
-
-								//ImportRPKGFile(rpkgFilePath);
-
-								//foreach (System.Windows.Forms.TreeNode item in MainTreeView.Nodes)
-								//{
-								//if (item.Text.ToString() == rpkgFilePath)
-								//{
-								//MainTreeView.SelectedNode = item;
-								//}
-								//}
 							}
 
 							return;
@@ -1022,6 +1130,29 @@ namespace rpkg
 							return;
 						}
 					}
+					else if (headerName == "deepsearch")
+					{
+						DetailsTextBox.Text = header;
+
+						DetailsTextBox.Visibility = Visibility.Visible;
+						MainScrollViewer.Visibility = Visibility.Collapsed;
+						MainStackPanel.Visibility = Visibility.Collapsed;
+						EditPatchDeletionListButton.Visibility = Visibility.Collapsed;
+						SaveChangesToPatchDeletionListButton.Visibility = Visibility.Collapsed;
+						DiscardChangesToPatchDeletionListButton.Visibility = Visibility.Collapsed;
+						EditHashDependsButton.Visibility = Visibility.Collapsed;
+						SaveChangesToHashDependsButton.Visibility = Visibility.Collapsed;
+						DiscardChangesToHashDependsButton.Visibility = Visibility.Collapsed;
+						ExtractHashDependsButton.Visibility = Visibility.Collapsed;
+
+						if (ThirdTabRight.Visibility == Visibility.Visible)
+						{
+							ThirdTabRight.Visibility = Visibility.Collapsed;
+							ThirdTabRightSeparator.Visibility = Visibility.Collapsed;
+						}
+
+						return;
+					}
 					else if (header.Length == 4)
 					{
 						rpkgFilePath = GetRootTreeNode(e.Node).Text;
@@ -1043,7 +1174,7 @@ namespace rpkg
 
 							RightClickMenu rightClickMenu = new RightClickMenu(buttons);
 
-							SetRightClickMenuPosition(ref rightClickMenu, e.Location.X, e.Location.Y);
+							SetRightClickMenuPosition((sender as System.Windows.Forms.TreeView).Name, ref rightClickMenu, e.Location.X, e.Location.Y);
 
 							rightClickMenu.ShowDialog();
 
@@ -1084,7 +1215,7 @@ namespace rpkg
 
 							RightClickMenu rightClickMenu = new RightClickMenu(buttons);
 
-							SetRightClickMenuPosition(ref rightClickMenu, e.Location.X, e.Location.Y);
+							SetRightClickMenuPosition((sender as System.Windows.Forms.TreeView).Name, ref rightClickMenu, e.Location.X, e.Location.Y);
 
 							rightClickMenu.ShowDialog();
 
@@ -1125,7 +1256,7 @@ namespace rpkg
 
 							RightClickMenu rightClickMenu = new RightClickMenu(buttons);
 
-							SetRightClickMenuPosition(ref rightClickMenu, e.Location.X, e.Location.Y);
+							SetRightClickMenuPosition((sender as System.Windows.Forms.TreeView).Name, ref rightClickMenu, e.Location.X, e.Location.Y);
 
 							rightClickMenu.ShowDialog();
 
@@ -1191,7 +1322,7 @@ namespace rpkg
 
 							RightClickMenu rightClickMenu = new RightClickMenu(buttons);
 
-							SetRightClickMenuPosition(ref rightClickMenu, e.Location.X, e.Location.Y);
+							SetRightClickMenuPosition((sender as System.Windows.Forms.TreeView).Name, ref rightClickMenu, e.Location.X, e.Location.Y);
 
 							rightClickMenu.ShowDialog();
 
@@ -1273,7 +1404,7 @@ namespace rpkg
 
 							RightClickMenu rightClickMenu = new RightClickMenu(buttons);
 
-							SetRightClickMenuPosition(ref rightClickMenu, e.Location.X, e.Location.Y);
+							SetRightClickMenuPosition((sender as System.Windows.Forms.TreeView).Name, ref rightClickMenu, e.Location.X, e.Location.Y);
 
 							rightClickMenu.ShowDialog();
 
@@ -1418,7 +1549,7 @@ namespace rpkg
 							}
 						}
 						else if (hashType == "AIRG" || hashType == "CRMD" || hashType == "ATMD" || hashType == "CBLU" || hashType == "CPPT" || hashType == "DSWB" || hashType == "GFXF" || hashType == "GIDX" || hashType == "VIDB" || hashType == "WSGB")
-                        {
+						{
 							string[] buttons = { "Extract " + hashName, "Extract To Hitman 3 RT (ResourceTool) JSON", "Extract To Hitman 2 RT (ResourceTool) JSON", "Extract To Hitman 2016 RT (ResourceTool) JSON", "Cancel" };
 
 							buttonCount = 5;
@@ -1441,6 +1572,14 @@ namespace rpkg
 
 							rightClickMenu = new RightClickMenu(buttons);
 						}
+						else if (hashType == "SDEF")
+						{
+							string[] buttons = { "Extract " + hashName, "Extract " + hashName + " To SDEF JSON", "Cancel" };
+
+							buttonCount = 3;
+
+							rightClickMenu = new RightClickMenu(buttons);
+						}
 						else
 						{
 							string[] buttons = { "Extract " + hashName, "Cancel" };
@@ -1450,7 +1589,7 @@ namespace rpkg
 							rightClickMenu = new RightClickMenu(buttons);
 						}
 
-						SetRightClickMenuPosition(ref rightClickMenu, e.Location.X, e.Location.Y);
+						SetRightClickMenuPosition((sender as System.Windows.Forms.TreeView).Name, ref rightClickMenu, e.Location.X, e.Location.Y);
 
 						rightClickMenu.ShowDialog();
 
@@ -1708,6 +1847,14 @@ namespace rpkg
 
 								progress.message.Content = "Extracting " + hashName + " MATI to MATI JSON...";
 							}
+							else if (hashType == "SDEF")
+							{
+								command = "-extract_sdef_to_json";
+
+								filter = hashValue;
+
+								progress.message.Content = "Extracting " + hashName + " SDEF to SDEF JSON...";
+							}
 
 							if (hashType != "TEMP")
 							{
@@ -1935,13 +2082,17 @@ namespace rpkg
 									{
 										SetDiscordStatus("Resource View", "");
 									}
-									else if (LeftTabControl.SelectedIndex == 1)
-									{
-										SetDiscordStatus("Dependency View", "");
-									}
 									else if (LeftTabControl.SelectedIndex == 2)
 									{
+										SetDiscordStatus("REPO View", "");
+									}
+									else if (LeftTabControl.SelectedIndex == 4)
+									{
 										SetDiscordStatus("Search View", "");
+									}
+									else if (LeftTabControl.SelectedIndex == 6)
+									{
+										SetDiscordStatus("Deep Search View", "");
 									}
 
 									//GC.Collect();
@@ -2175,13 +2326,17 @@ namespace rpkg
 									{
 										SetDiscordStatus("Resource View", "");
 									}
-									else if (LeftTabControl.SelectedIndex == 1)
-									{
-										SetDiscordStatus("Dependency View", "");
-									}
 									else if (LeftTabControl.SelectedIndex == 2)
 									{
+										SetDiscordStatus("REPO View", "");
+									}
+									else if (LeftTabControl.SelectedIndex == 4)
+									{
 										SetDiscordStatus("Search View", "");
+									}
+									else if (LeftTabControl.SelectedIndex == 6)
+									{
+										SetDiscordStatus("Deep Search View", "");
 									}
 
 									//GC.Collect();
@@ -2324,81 +2479,6 @@ namespace rpkg
 			}
 		}
 
-		private void HashMapTreeView_AfterExpand(object sender, System.Windows.Forms.TreeViewEventArgs e)
-		{
-			var item = (e.Node as System.Windows.Forms.TreeNode);
-
-			if (item.Nodes.Count == 1 && item.Nodes[0].Text == "")
-			{
-				item.Nodes.Clear();
-
-				System.Windows.Forms.TreeNode parentPrevious = item.Parent;
-
-				System.Windows.Forms.TreeNode parentCurrent = parentPrevious;
-
-				while (parentCurrent != null)
-				{
-					parentPrevious = parentCurrent;
-
-					parentCurrent = parentPrevious.Parent;
-				}
-
-				//System.Windows.MessageBox.Show(parentPrevious.Header.ToString());
-
-				string rpkgFilePathLocal = parentPrevious.Text.ToString();
-
-				string[] header = (item.Text as string).Replace("(", "").Replace(")", "").Split(' ');
-
-				string hash = header[0];
-				string rpkgFile = header[1];
-
-				//System.Windows.MessageBox.Show(hash + "," + rpkgFilePath);
-
-				int return_value = reset_task_status();
-
-				execute_get_direct_hash_depends rpkgExecute = get_direct_hash_depends;
-
-				IAsyncResult ar = rpkgExecute.BeginInvoke(rpkgFilePathLocal, hash, null, null);
-
-				Progress progress = new Progress();
-
-				progress.operation = (int)Progress.Operation.GENERAL;
-
-				progress.ShowDialog();
-
-				string hashDependsString = Marshal.PtrToStringAnsi(get_direct_hash_depends_string());
-
-				//System.Windows.MessageBox.Show(hashDependsString);
-
-				string[] hashDepends = hashDependsString.TrimEnd(',').Split(',');
-
-				if (hashDependsString != "")
-				{
-					foreach (string hashDepend in hashDepends)
-					{
-						string[] hashData = hashDepend.Split('|');
-
-						string hash2 = hashData[0];
-						string rpkgFile2 = hashData[1];
-
-						var item2 = new System.Windows.Forms.TreeNode();
-
-						string[] temp_test = hash2.Split('.');
-
-						string ioiString = Marshal.PtrToStringAnsi(get_hash_list_string(temp_test[0]));
-
-						item2.Text = hash2 + " (" + rpkgFile + ") " + ioiString;
-
-						item2.Nodes.Add("");
-
-						item.Nodes.Add(item2);
-					}
-				}
-			}
-
-			//GC.Collect();
-		}
-
 		private void SearchHashListTreeView_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
 		{
 			if (oneOrMoreRPKGsHaveBeenImported)
@@ -2457,7 +2537,7 @@ namespace rpkg
 
 							//HexViewerTextBox.Text += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgHashFilePath, hash));
 
-							if (RightTabControl.SelectedIndex == 1)
+							if (RightTabControl.SelectedIndex == 2)
 							{
 								LoadHexEditor();
 							}
@@ -2484,6 +2564,7 @@ namespace rpkg
 									if (ThirdTabRight.Visibility == Visibility.Collapsed)
 									{
 										ThirdTabRight.Visibility = Visibility.Visible;
+										ThirdTabRightSeparator.Visibility = Visibility.Visible;
 									}
 								}
 								else
@@ -2491,6 +2572,7 @@ namespace rpkg
 									if (ThirdTabRight.Visibility == Visibility.Visible)
 									{
 										ThirdTabRight.Visibility = Visibility.Collapsed;
+										ThirdTabRightSeparator.Visibility = Visibility.Collapsed;
 									}
 								}
 							}
@@ -2499,21 +2581,25 @@ namespace rpkg
 								if (ThirdTabRight.Visibility == Visibility.Visible)
 								{
 									ThirdTabRight.Visibility = Visibility.Collapsed;
+									ThirdTabRightSeparator.Visibility = Visibility.Collapsed;
 								}
 
 								if (FourthTabRight.Visibility == Visibility.Visible)
 								{
 									FourthTabRight.Visibility = Visibility.Collapsed;
+									FourthTabRightSeparator.Visibility = Visibility.Collapsed;
 								}
 
 								if (FifthTabRight.Visibility == Visibility.Visible)
 								{
 									FifthTabRight.Visibility = Visibility.Collapsed;
+									FifthTabRightSeparator.Visibility = Visibility.Collapsed;
 								}
 
 								if (SixthTabRight.Visibility == Visibility.Visible)
 								{
 									SixthTabRight.Visibility = Visibility.Collapsed;
+									SixthTabRightSeparator.Visibility = Visibility.Collapsed;
 								}
 							}
 
@@ -2543,7 +2629,7 @@ namespace rpkg
 		}
 
 		private void SearchTextChanged()
-        {
+		{
 			if (searchRPKGsInputTimer == null)
 			{
 				searchRPKGsInputTimer = new System.Windows.Threading.DispatcherTimer();
@@ -2617,7 +2703,7 @@ namespace rpkg
 					bool resourceTypeFilterEnabled = false;
 
 					if (SearchRPKGsType.Text != "All")
-                    {
+					{
 						resourceTypeFilter = SearchRPKGsType.Text;
 						resourceTypeFilterEnabled = true;
 					}
@@ -2837,16 +2923,66 @@ namespace rpkg
 			if (tab.SelectedIndex == 0)
 			{
 				SetDiscordStatus("Resource View", "");
-			}
-			else if (tab.SelectedIndex == 1)
-			{
-				LoadHashDependsMap();
 
-				SetDiscordStatus("Dependency View", "");
+				if (RightTabControl.Visibility == Visibility.Collapsed)
+				{
+					RightTabControl.Visibility = Visibility.Visible;
+				}
+
+				if (REPOGrid.Visibility == Visibility.Visible)
+				{
+					REPOGrid.Visibility = Visibility.Collapsed;
+				}
 			}
 			else if (tab.SelectedIndex == 2)
 			{
+				SetDiscordStatus("REPO View", "");
+
+				if (RightTabControl.Visibility == Visibility.Visible)
+                {
+					RightTabControl.Visibility = Visibility.Collapsed;
+				}
+
+				if (REPOGrid.Visibility == Visibility.Collapsed)
+				{
+					REPOGrid.Visibility = Visibility.Visible;
+				}
+
+				//if (REPOTreeView.Nodes.Count > 0)
+				//{
+					//if (REPOTreeView.Nodes[0].Text.StartsWith("NOTE:"))
+					//{
+						//LoadREPO();
+					//}
+				//}
+			}
+			else if (tab.SelectedIndex == 4)
+			{
 				SetDiscordStatus("Search View", "");
+
+				if (RightTabControl.Visibility == Visibility.Collapsed)
+				{
+					RightTabControl.Visibility = Visibility.Visible;
+				}
+
+				if (REPOGrid.Visibility == Visibility.Visible)
+				{
+					REPOGrid.Visibility = Visibility.Collapsed;
+				}
+			}
+			else if (tab.SelectedIndex == 6)
+			{
+				SetDiscordStatus("Deep Search View", "");
+
+				if (RightTabControl.Visibility == Visibility.Collapsed)
+				{
+					RightTabControl.Visibility = Visibility.Visible;
+				}
+
+				if (REPOGrid.Visibility == Visibility.Visible)
+				{
+					REPOGrid.Visibility = Visibility.Collapsed;
+				}
 			}
 		}
 
@@ -2856,12 +2992,12 @@ namespace rpkg
 
 			//MessageBoxShow(tab.SelectedIndex.ToString());
 
-			if (tab.SelectedIndex == 1)
+			if (tab.SelectedIndex == 2)
 			{
 				LoadHexEditor();
 			}
 
-			if (tab.SelectedIndex == 3)
+			if (tab.SelectedIndex == 6)
 			{
 				string[] hashDetails = currentHash.Split('.');
 				string hash = hashDetails[0];
@@ -2876,7 +3012,7 @@ namespace rpkg
 				}
 			}
 
-			if (tab.SelectedIndex == 5)
+			if (tab.SelectedIndex == 10)
 			{
 				string[] hashDetails = currentHash.Split('.');
 				string hash = hashDetails[0];
@@ -2943,6 +3079,7 @@ namespace rpkg
 					if (FourthTabRight.Visibility == Visibility.Collapsed)
 					{
 						FourthTabRight.Visibility = Visibility.Visible;
+						FourthTabRightSeparator.Visibility = Visibility.Visible;
 					}
 
 					File.Delete(png_file_name);
@@ -2952,6 +3089,7 @@ namespace rpkg
 					if (FourthTabRight.Visibility == Visibility.Visible)
 					{
 						FourthTabRight.Visibility = Visibility.Collapsed;
+						FourthTabRightSeparator.Visibility = Visibility.Collapsed;
 						RightTabControl.SelectedIndex = 0;
 					}
 				}
@@ -2991,6 +3129,7 @@ namespace rpkg
 					if (FourthTabRight.Visibility == Visibility.Collapsed)
 					{
 						FourthTabRight.Visibility = Visibility.Visible;
+						FourthTabRightSeparator.Visibility = Visibility.Visible;
 					}
 				}
 				else
@@ -2998,6 +3137,7 @@ namespace rpkg
 					if (FourthTabRight.Visibility == Visibility.Visible)
 					{
 						FourthTabRight.Visibility = Visibility.Collapsed;
+						FourthTabRightSeparator.Visibility = Visibility.Collapsed;
 						RightTabControl.SelectedIndex = 0;
 					}
 				}
@@ -3055,6 +3195,7 @@ namespace rpkg
 				if (SixthTabRight.Visibility == Visibility.Collapsed)
 				{
 					SixthTabRight.Visibility = Visibility.Visible;
+					SixthTabRightSeparator.Visibility = Visibility.Visible;
 				}
 
 				ModelImporter import = new ModelImporter();
@@ -3078,6 +3219,7 @@ namespace rpkg
 				if (SixthTabRight.Visibility == Visibility.Visible)
 				{
 					SixthTabRight.Visibility = Visibility.Collapsed;
+					SixthTabRightSeparator.Visibility = Visibility.Collapsed;
 					RightTabControl.SelectedIndex = 0;
 				}
 			}
@@ -3243,6 +3385,10 @@ namespace rpkg
 
 			MainTreeView.Nodes.Add(item);
 
+			resetDeepSearchComboBoxes();
+
+			//LoadREPO();
+
 			List<string> resourceTypes = new List<string>();
 
 			UInt32 resourceTypeCount = get_resource_types_count(rpkgFilePath);
@@ -3273,13 +3419,17 @@ namespace rpkg
 				{
 					SetDiscordStatus("Resource View", "");
 				}
-				else if (LeftTabControl.SelectedIndex == 1)
-				{
-					SetDiscordStatus("Dependency View", "");
-				}
 				else if (LeftTabControl.SelectedIndex == 2)
 				{
+					SetDiscordStatus("REPO View", "");
+				}
+				else if (LeftTabControl.SelectedIndex == 4)
+				{
 					SetDiscordStatus("Search View", "");
+				}
+				else if (LeftTabControl.SelectedIndex == 6)
+				{
+					SetDiscordStatus("Deep Search View", "");
 				}
 			}
 
@@ -3288,128 +3438,141 @@ namespace rpkg
 
 		private void ImportRPKGFileFolder(string folderPath)
 		{
-			List<string> rpkgFiles = new List<string>();
-
-			foreach (var filePath in Directory.GetFiles(folderPath))
+			if (!runtimeDirLoaded)
 			{
-				if (filePath.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
+				List<string> rpkgFiles = new List<string>();
+
+				foreach (var filePath in Directory.GetFiles(folderPath))
 				{
-					rpkgFiles.Add(filePath);
-				}
-			}
-
-			rpkgFiles.Sort(new NaturalStringComparer());
-
-			string rpkgListString = "";
-
-			List<string> rpkgList = new List<string>();
-
-			foreach (string filePath in rpkgFiles)
-			{
-				bool found = false;
-
-				foreach (System.Windows.Forms.TreeNode treeViewNode in MainTreeView.Nodes)
-				{
-					if (filePath == (treeViewNode.Text as string))
+					if (filePath.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
 					{
-						found = true;
+						rpkgFiles.Add(filePath);
 					}
 				}
 
-				if (!found)
+				rpkgFiles.Sort(new NaturalStringComparer());
+
+				string rpkgListString = "";
+
+				List<string> rpkgList = new List<string>();
+
+				foreach (string filePath in rpkgFiles)
 				{
-					rpkgListString += filePath + ",";
+					bool found = false;
 
-					rpkgList.Add(filePath);
-				}
-			}
-
-			int return_value = reset_task_status();
-
-			execute_import_rpkgs temp_rpkgExecute = import_rpkgs;
-
-			IAsyncResult temp_ar = temp_rpkgExecute.BeginInvoke(folderPath, rpkgListString, null, null);
-
-			Progress progress = new Progress();
-
-			progress.message.Content = "Importing RPKG file(s) from " + folderPath + "...";
-
-			progress.operation = (int)Progress.Operation.MASS_EXTRACT;
-
-			progress.ShowDialog();
-
-			if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
-			{
-				//MessageBoxShow(progress.task_status_string);
-
-				return;
-			}
-
-			foreach (string filePath in rpkgList)
-			{
-				int rpkg_valid = is_rpkg_valid(filePath);
-
-				if (rpkg_valid == 1)
-				{
-					if (MainTreeView.Nodes.Count > 0)
+					foreach (System.Windows.Forms.TreeNode treeViewNode in MainTreeView.Nodes)
 					{
-						if ((MainTreeView.Nodes[0] as System.Windows.Forms.TreeNode).Text.ToString() == "Click")
+						if (filePath == (treeViewNode.Text as string))
 						{
-							MainTreeView.Nodes.Clear();
+							found = true;
 						}
 					}
 
-					MainTreeView.AfterExpand += MainTreeView_AfterExpand;
-
-					var item = new System.Windows.Forms.TreeNode();
-
-					item.Text = filePath;
-
-					MainTreeView.Nodes.Add(item);
-
-					List<string> resourceTypes = new List<string>();
-
-					UInt32 resourceTypeCount = get_resource_types_count(filePath);
-
-					for (UInt32 i = 0; i < resourceTypeCount; i++)
+					if (!found)
 					{
-						resourceTypes.Add(Marshal.PtrToStringAnsi(get_resource_types_at(filePath, i)));
-					}
+						rpkgListString += filePath + ",";
 
-					resourceTypes.Sort();
-
-					foreach (string resourceType in resourceTypes)
-					{
-						var item2 = new System.Windows.Forms.TreeNode();
-
-						item2.Text = resourceType;
-
-						item2.Nodes.Add("");
-
-						//item2.Collapsed += Item2_Collapsed;
-
-						item.Nodes.Add(item2);
+						rpkgList.Add(filePath);
 					}
 				}
-			}
 
-			if (oneOrMoreRPKGsHaveBeenImported)
-			{
-				if (LeftTabControl.SelectedIndex == 0)
-				{
-					SetDiscordStatus("Resource View", "");
-				}
-				else if (LeftTabControl.SelectedIndex == 1)
-				{
-					SetDiscordStatus("Dependency View", "");
-				}
-				else if (LeftTabControl.SelectedIndex == 2)
-				{
-					SetDiscordStatus("Search View", "");
-				}
-			}
+				int return_value = reset_task_status();
 
-			oneOrMoreRPKGsHaveBeenImported = true;
+				execute_import_rpkgs temp_rpkgExecute = import_rpkgs;
+
+				IAsyncResult temp_ar = temp_rpkgExecute.BeginInvoke(folderPath, rpkgListString, null, null);
+
+				Progress progress = new Progress();
+
+				progress.message.Content = "Importing RPKG file(s) from " + folderPath + "...";
+
+				progress.operation = (int)Progress.Operation.MASS_EXTRACT;
+
+				progress.ShowDialog();
+
+				if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
+				{
+					//MessageBoxShow(progress.task_status_string);
+
+					return;
+				}
+
+				foreach (string filePath in rpkgList)
+				{
+					int rpkg_valid = is_rpkg_valid(filePath);
+
+					if (rpkg_valid == 1)
+					{
+						if (MainTreeView.Nodes.Count > 0)
+						{
+							if ((MainTreeView.Nodes[0] as System.Windows.Forms.TreeNode).Text.ToString() == "Click")
+							{
+								MainTreeView.Nodes.Clear();
+							}
+						}
+
+						MainTreeView.AfterExpand += MainTreeView_AfterExpand;
+
+						var item = new System.Windows.Forms.TreeNode();
+
+						item.Text = filePath;
+
+						MainTreeView.Nodes.Add(item);
+
+						List<string> resourceTypes = new List<string>();
+
+						UInt32 resourceTypeCount = get_resource_types_count(filePath);
+
+						for (UInt32 i = 0; i < resourceTypeCount; i++)
+						{
+							resourceTypes.Add(Marshal.PtrToStringAnsi(get_resource_types_at(filePath, i)));
+						}
+
+						resourceTypes.Sort();
+
+						foreach (string resourceType in resourceTypes)
+						{
+							var item2 = new System.Windows.Forms.TreeNode();
+
+							item2.Text = resourceType;
+
+							item2.Nodes.Add("");
+
+							//item2.Collapsed += Item2_Collapsed;
+
+							item.Nodes.Add(item2);
+						}
+					}
+				}
+
+				resetDeepSearchComboBoxes();
+
+				//LoadREPO();
+
+				if (oneOrMoreRPKGsHaveBeenImported)
+				{
+					if (LeftTabControl.SelectedIndex == 0)
+					{
+						SetDiscordStatus("Resource View", "");
+					}
+					else if (LeftTabControl.SelectedIndex == 2)
+					{
+						SetDiscordStatus("REPO View", "");
+					}
+					else if (LeftTabControl.SelectedIndex == 4)
+					{
+						SetDiscordStatus("Search View", "");
+					}
+					else if (LeftTabControl.SelectedIndex == 6)
+					{
+						SetDiscordStatus("Deep Search View", "");
+					}
+				}
+
+				oneOrMoreRPKGsHaveBeenImported = true;
+
+				runtimeDirLoaded = true;
+			}
 		}
 
 		private void OpenRPKGFile_Click(object sender, RoutedEventArgs e)
@@ -4114,7 +4277,7 @@ namespace rpkg
 			if (type == "input")
 			{
 				if (!File.Exists(initialFolder))
-                {
+				{
 					if (File.Exists(userSettings.InputFolder))
 					{
 						initialFolder = userSettings.InputFolder;
@@ -4253,71 +4416,6 @@ namespace rpkg
 			File.WriteAllText("rpkg.json", jsonString);
 		}
 
-		private void LoadHashDependsMap()
-		{
-			if (oneOrMoreRPKGsHaveBeenImported)
-			{
-				foreach (System.Windows.Forms.TreeNode rpkgItem in MainTreeView.Nodes)
-				{
-					string rpkgPath = rpkgItem.Text.ToString();
-
-					bool alreadyLoaded = false;
-
-					HashMapTreeView.AfterExpand += HashMapTreeView_AfterExpand;
-
-					foreach (System.Windows.Forms.TreeNode treeViewNode in HashMapTreeView.Nodes)
-					{
-						if (rpkgPath == (treeViewNode.Text as string))
-						{
-							alreadyLoaded = true;
-						}
-					}
-
-					if (!alreadyLoaded)
-					{
-						var item = new System.Windows.Forms.TreeNode();
-
-						item.Text = rpkgPath;
-
-						int return_value = reset_task_status();
-
-						execute_get_hashes_with_no_reverse_depends rpkg = get_hashes_with_no_reverse_depends;
-
-						IAsyncResult ar = rpkg.BeginInvoke(rpkgPath, null, null);
-
-						Progress progress = new Progress();
-
-						progress.operation = (int)Progress.Operation.MASS_EXTRACT;
-
-						progress.ShowDialog();
-
-						string hashesWithNoReveserseDepends = Marshal.PtrToStringAnsi(get_hashes_with_no_reverse_depends_string());
-
-						string[] hashes = hashesWithNoReveserseDepends.TrimEnd(',').Split(',');
-
-						string rpkgFile = rpkgPath.Substring(rpkgPath.LastIndexOf("\\") + 1);
-
-						foreach (string hash in hashes)
-						{
-							var item2 = new System.Windows.Forms.TreeNode();
-
-							string[] temp_test = hash.Split('.');
-
-							string ioiString = Marshal.PtrToStringAnsi(get_hash_list_string(temp_test[0]));
-
-							item2.Text = hash + " (" + rpkgFile + ") " + ioiString;
-
-							item2.Nodes.Add("");
-
-							item.Nodes.Add(item2);
-						}
-
-						HashMapTreeView.Nodes.Add(item);
-					}
-				}
-			}
-		}
-
 		private void MessageBoxShow(string messageBoxString)
 		{
 			Message messageBox = new Message();
@@ -4366,23 +4464,37 @@ namespace rpkg
 			{
 				MainTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
 				MainTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
-				HashMapTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
-				HashMapTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
 				SearchRPKGsTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
 				SearchRPKGsTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
+				DeepSearchEntitiesTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+				DeepSearchEntitiesTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
+				DeepSearchLocalizationTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+				DeepSearchLocalizationTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
+				REPOTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+				REPOTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
 				SearchHashListTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
 				SearchHashListTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
+				xshdJSONDark = XmlReader.Create(new MemoryStream(Properties.Resources.JSON_Dark));
+				REPOJSONTextEditor.SyntaxHighlighting = HighlightingLoader.Load(xshdJSONDark, HighlightingManager.Instance);
+				REPOJSONTextEditor.Foreground = System.Windows.Media.Brushes.White;
 			}
 			else if (brightness == "Light")
 			{
 				MainTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
 				MainTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
-				HashMapTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
-				HashMapTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
 				SearchRPKGsTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
 				SearchRPKGsTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+				DeepSearchEntitiesTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
+				DeepSearchEntitiesTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+				DeepSearchLocalizationTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
+				DeepSearchLocalizationTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+				REPOTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
+				REPOTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
 				SearchHashListTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
 				SearchHashListTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+				xshdJSONLight = XmlReader.Create(new MemoryStream(Properties.Resources.JSON_Light));
+				REPOJSONTextEditor.SyntaxHighlighting = HighlightingLoader.Load(xshdJSONLight, HighlightingManager.Instance);
+				REPOJSONTextEditor.Foreground = System.Windows.Media.Brushes.Black;
 			}
 		}
 
@@ -4409,6 +4521,7 @@ namespace rpkg
 		private string currentHashFileName = "";
 		public string hashDependsRPKGFilePath = "";
 		private string currentNodeText = "";
+		private System.Windows.Threading.DispatcherTimer searchREPOInputTimer;
 		private System.Windows.Threading.DispatcherTimer searchRPKGsInputTimer;
 		private System.Windows.Threading.DispatcherTimer searchHashListInputTimer;
 		private System.Windows.Threading.DispatcherTimer OGGPlayerTimer;
@@ -4428,8 +4541,20 @@ namespace rpkg
 		public int hashDependsPage;
 		public bool discordOn = false;
 		public DiscordRPC.Timestamps timestamp;
+		public bool runtimeDirLoaded = false;
+		BackgroundWorker deepSearchEntitiesWorker;
+		BackgroundWorker deepSearchLocalizationWorker;
+		XmlReader xshdJSONDark;
+		XmlReader xshdJSONLight;
+		public TreeViewBackup repoTreeViewBackup;
+		public string repoJSONTextEditorID;
+		public int repoJSONTextEditorParentNodeIndex;
+		public int repoJSONTextEditorNodeIndex;
+		Dictionary<string, string[]> enumDictionary;
+		JsonDocument visualEditorJSON;
+		bool loadingVisualEditor = false;
 
-		private enum OggPlayerState
+private enum OggPlayerState
 		{
 			NULL,
 			READY,
@@ -4437,6 +4562,103 @@ namespace rpkg
 			PAUSED,
 			RESET
 		}
+
+		public enum Operation
+		{
+			IMPORT,
+			GENERAL,
+			MASS_EXTRACT,
+			DOWNLOAD,
+			TEMP_TBLU,
+			PRIM,
+			PRIM_REBUILD,
+			PRIM_MODEL_REBUILD,
+			PRIM_MODEL_EXTRACT,
+			DEEP_SEARCH
+		};
+
+		public enum RPKGStatus
+		{
+			READY,
+			TASK_EXECUTING,
+			TASK_SUCCESSFUL,
+			TASK_EXITED,
+			TASK_RETURNED,
+			RPKG_IMPORTING,
+			RPKG_IMPORTED,
+			RPKG_ALREADY_IMPORTED,
+			SCANNING_DIRECTORY,
+			SCANNING_DIRECTORY_DONE,
+			ABORT_CURRENT_TASK,
+			TEMP_TBLU_FOUND,
+			TEMP_TBLU_NOT_FOUND_IN_DEPENDS,
+			TEMP_TBLU_NOT_FOUND_IN_RPKG,
+			TEMP_TBLU_TOO_MANY,
+			TEMP_HEADER_NOT_FOUND,
+			TEMP_TBLU_ENTRY_COUNT_MISMATCH,
+			PRIM_UV_CHANNEL_COUNT_GREATER_THAN_1,
+			PRIM_OBJECT_IS_NOT_A_MESH_TYPE,
+			TEMP_VERSION_UNKNOWN,
+			TBLU_VERSION_UNKNOWN,
+			PRIM_REBUILD_GLB_MESH_NAME_MALFORMED,
+			PRIM_REBUILD_ONLY_ONE_MESH_ALLOWED,
+			PRIM_REBUILD_VERTEX_NOT_MULTIPLE_OF_3,
+			PRIM_REBUILD_MISSING_POSITION_DATA,
+			PRIM_REBUILD_MISMATCHED_BONES,
+			PRIM_REBUILD_WEIGHTED_DATA_DOES_NOT_CONFORM,
+			PRIM_REBUILD_WEIGHTED_DATA_MISSING,
+			PRIM_REBUILD_NORMALS_DO_NOT_MATCH_VERTICES,
+			PRIM_REBUILD_MISSING_NORMAL_DATA,
+			PRIM_REBUILD_UVS_DO_NOT_MATCH_VERTICES,
+			PRIM_REBUILD_MISSING_UV_DATA,
+			PRIM_REBUILD_COLORS_DO_NOT_MATCH_VERTICES,
+			PRIM_REBUILD_COLORS_WRONG_FORMAT,
+			PRIM_REBUILD_TOO_MANY_PRIMARY_OBJECT_HEADERS,
+			PRIM_REBUILD_META_FILE_MISSING,
+			PRIM_REBUILD_SUCCESSFUL,
+			PRIM_MODEL_REBUILD_SUCCESSFUL,
+			PRIM_MODEL_EXTRACT_SUCCESSFUL,
+			MAP_RECURSIVE_TEMP_LOADING_EXECUTING,
+			MAP_GET_MAP_NODES_EXECUTING,
+			MAP_EXTRACT_MAP_NODES_PRIMS_EXECUTING,
+			MAP_GENERATE_GODOT_PROJECT_EXECUTING,
+			MAP_EXPORT_SUCCESSFUL,
+			MAP_GODOT_MAP_NODE_IMPORTING,
+			MAP_NODE_TEMP_LOADING,
+			MAP_NODE_CHANGES_CHECK,
+			MAP_WRITING_CHANGES_TO_QN,
+			MAP_IMPORT_SUCCESSFUL,
+			MAP_ERROR
+		};
+
+		public enum REPOCategory
+		{
+			NPCS,
+			OUTFITS,
+			RUNTIME_QUESTITEMS,
+			RUNTIME_MELEES,
+			RUNTIME_KEYS,
+			RUNTIME_EXPLOSIVES,
+			RUNTIME_TOOLS,
+			RUNTIME_PISTOLS,
+			RUNTIME_INVALID_CATEGORY_ICONS,
+			RUNTIME_SNIPERRIFLES,
+			RUNTIME_ASSAULTRIFLES,
+			RUNTIME_REMOTES,
+			RUNTIME_SHOTGUNS,
+			RUNTIME_SUITCASES,
+			RUNTIME_SMGS,
+			RUNTIME_DISTRACTIONS,
+			RUNTIME_POISONS,
+			RUNTIME_CONTAINERS,
+			AREADISCOVEREDS,
+			LOCATIONS,
+			MODIFIERS,
+			MAGAZINE_CONFIGS,
+			AMMO_CONFIGS,
+			DIFFICULTY_PARAMETERS,
+			BEHAVIOURS
+		};
 
 		private int oggPlayerState = (int)OggPlayerState.NULL;
 		private bool oggPlayerRunning = false;
@@ -4453,6 +4675,8 @@ namespace rpkg
 		public delegate int execute_get_hashes_with_no_reverse_depends(string rpkg_file);
 		public delegate int execute_get_direct_hash_depends(string rpkg_file, string hash_string);
 		public delegate int execute_task(string csharp_command, string csharp_input_path, string csharp_filter, string search, string search_type, string csharp_output_path);
+		public delegate int execute_deep_search_localization(string input_path, string search_value, int search_dlge, int search_locr, int search_rtlv, int max_results);
+		public delegate int execute_deep_search_entities(string input_path, string search_value, int search_entity_ids, int search_entity_names, int search_property_names, int search_property_values, int max_results);
 
 		[DllImport("rpkg.dll", EntryPoint = "task_execute", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int task_execute(string csharp_command, string csharp_input_path, string csharp_filter, string search, string search_type, string csharp_output_path);
@@ -4508,8 +4732,14 @@ namespace rpkg
 		[DllImport("rpkg.dll", EntryPoint = "generate_localization_string", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UInt32 generate_localization_string(string rpkg_file_name, string hash_string, string resource_type);
 
+		[DllImport("rpkg.dll", EntryPoint = "generate_localization_line_string", CallingConvention = CallingConvention.Cdecl)]
+		public static extern UInt32 generate_localization_line_string(string rpkg_file_name, string hash_string, string resource_type);
+
 		[DllImport("rpkg.dll", EntryPoint = "get_localization_string", CallingConvention = CallingConvention.Cdecl)]
 		public static extern IntPtr get_localization_string();
+
+		[DllImport("rpkg.dll", EntryPoint = "get_localization_line_string", CallingConvention = CallingConvention.Cdecl)]
+		public static extern IntPtr get_localization_line_string();
 
 		[DllImport("rpkg.dll", EntryPoint = "generate_json_string", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UInt32 generate_json_string(string rpkg_file_name, string hash_string);
@@ -4616,6 +4846,153 @@ namespace rpkg
 		[DllImport("rpkg.dll", EntryPoint = "get_response_string", CallingConvention = CallingConvention.Cdecl)]
 		public static extern IntPtr get_response_string();
 
+		[DllImport("rpkg.dll", EntryPoint = "get_task_single_status", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int get_task_single_status();
+
+		[DllImport("rpkg.dll", EntryPoint = "get_task_multiple_status", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int get_task_multiple_status();
+
+		[DllImport("rpkg.dll", EntryPoint = "reset_task_multiple_status", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int reset_task_multiple_status();
+
+		[DllImport("rpkg.dll", EntryPoint = "set_gui_control", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int set_gui_control(int gui_control_value);
+
+		[DllImport("rpkg.dll", EntryPoint = "get_gui_control", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int get_gui_control();
+
+		[DllImport("rpkg.dll", EntryPoint = "get_timing_string", CallingConvention = CallingConvention.Cdecl)]
+		public static extern IntPtr get_timing_string();
+
+		[DllImport("rpkg.dll", EntryPoint = "get_task_status_string", CallingConvention = CallingConvention.Cdecl)]
+		public static extern IntPtr get_task_status_string();
+
+		[DllImport("rpkg.dll", EntryPoint = "deep_search_localization", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int deep_search_localization(string input_path, string search_value, int search_dlge, int search_locr, int search_rtlv, int max_results);
+
+		[DllImport("rpkg.dll", EntryPoint = "get_localization_search_results_size", CallingConvention = CallingConvention.Cdecl)]
+		public static extern UInt32 get_localization_search_results_size();
+
+		[DllImport("rpkg.dll", EntryPoint = "get_localization_search_results", CallingConvention = CallingConvention.Cdecl)]
+		public static extern IntPtr get_localization_search_results();
+
+		[DllImport("rpkg.dll", EntryPoint = "deep_search_entities", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int deep_search_entities(string input_path, string search_value, int search_entity_ids, int search_entity_names, int search_property_names, int search_property_values, int max_results);
+
+		[DllImport("rpkg.dll", EntryPoint = "get_entities_search_results_size", CallingConvention = CallingConvention.Cdecl)]
+		public static extern UInt32 get_entities_search_results_size();
+
+		[DllImport("rpkg.dll", EntryPoint = "get_entities_search_results", CallingConvention = CallingConvention.Cdecl)]
+		public static extern IntPtr get_entities_search_results();
+
+		[DllImport("rpkg.dll", EntryPoint = "is_repo_loaded", CallingConvention = CallingConvention.Cdecl)]
+		public static extern UInt32 is_repo_loaded();
+
+		[DllImport("rpkg.dll", EntryPoint = "is_ores_loaded", CallingConvention = CallingConvention.Cdecl)]
+		public static extern UInt32 is_ores_loaded();
+
+		[DllImport("rpkg.dll", EntryPoint = "load_repo", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int load_repo();
+
+		[DllImport("rpkg.dll", EntryPoint = "reset_repos", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int reset_repos();
+
+		[DllImport("rpkg.dll", EntryPoint = "get_repo_response_data_size", CallingConvention = CallingConvention.Cdecl)]
+		public static extern UInt32 get_repo_response_data_size();
+
+		[DllImport("rpkg.dll", EntryPoint = "get_repo_response_data", CallingConvention = CallingConvention.Cdecl)]
+		public static extern IntPtr get_repo_response_data();
+
+		[DllImport("rpkg.dll", EntryPoint = "get_repo_child_entries", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int get_repo_child_entries(string id);
+
+		[DllImport("rpkg.dll", EntryPoint = "get_repo_category", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int get_repo_category(int category);
+
+		[DllImport("rpkg.dll", EntryPoint = "get_repo_json", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int get_repo_json(string id);
+
+		[DllImport("rpkg.dll", EntryPoint = "get_repo_image_hash", CallingConvention = CallingConvention.Cdecl)]
+		public static extern IntPtr get_repo_image_hash(string id);
+
+		[DllImport("rpkg.dll", EntryPoint = "get_latest_hash_rpkg_path", CallingConvention = CallingConvention.Cdecl)]
+		public static extern IntPtr get_latest_hash_rpkg_path(string hash);
+
+		[DllImport("rpkg.dll", EntryPoint = "is_valid_json", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int is_valid_json(string json);
+
+		[DllImport("rpkg.dll", EntryPoint = "check_json", CallingConvention = CallingConvention.Cdecl)]
+		public static extern IntPtr check_json(string json);
+
+		[DllImport("rpkg.dll", EntryPoint = "load_repo_from_file", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int load_repo_from_file(string repo_path);
+
+		[DllImport("rpkg.dll", EntryPoint = "create_patch", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int create_patch(string patch_path);
+
+		[DllImport("rpkg.dll", EntryPoint = "import_patch", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int import_patch(string patch_path);
+
+		[DllImport("rpkg.dll", EntryPoint = "save_json", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int save_json(string id, string json);
+
+		[DllImport("rpkg.dll", EntryPoint = "duplicate_repo_entry", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int duplicate_repo_entry(string id);
+
+		[DllImport("rpkg.dll", EntryPoint = "erase_repo_entry", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int erase_repo_entry(string id);
+
+		[DllImport("rpkg.dll", EntryPoint = "get_repo_entry", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int get_repo_entry(string id);
+
+		[DllImport("rpkg.dll", EntryPoint = "update_json_at_pointer", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int update_json_at_pointer(string id, string json_pointer, string value);
+
+		private void LoadResources()
+		{
+			MemoryStream memoryStream1 = new MemoryStream(Properties.Resources.i1, 0, Properties.Resources.i1.Length, true, true);
+			MemoryStream memoryStream2 = new MemoryStream(Properties.Resources.i2, 0, Properties.Resources.i2.Length, true, true);
+			MemoryStream memoryStream3 = new MemoryStream(Properties.Resources.i3, 0, Properties.Resources.i3.Length, true, true);
+
+			for (int i = 0; i < memoryStream1.Length; i++)
+            {
+                memoryStream1.GetBuffer()[i] = (byte)(memoryStream1.GetBuffer()[i] ^ 0x47);
+			}
+
+			for (int i = 0; i < memoryStream2.Length; i++)
+			{
+				memoryStream2.GetBuffer()[i] = (byte)(memoryStream2.GetBuffer()[i] ^ 0x47);
+			}
+
+			for (int i = 0; i < memoryStream3.Length; i++)
+			{
+				memoryStream3.GetBuffer()[i] = (byte)(memoryStream3.GetBuffer()[i] ^ 0x47);
+			}
+
+			BitmapImage bitmapImage1 = new BitmapImage();
+			bitmapImage1.BeginInit();
+			bitmapImage1.StreamSource = memoryStream1;
+			bitmapImage1.EndInit();
+			BitmapImage bitmapImage2 = new BitmapImage();
+			bitmapImage2.BeginInit();
+			bitmapImage2.StreamSource = memoryStream2;
+			bitmapImage2.EndInit();
+			BitmapImage bitmapImage3 = new BitmapImage();
+			bitmapImage3.BeginInit();
+			bitmapImage3.StreamSource = memoryStream3;
+			bitmapImage3.EndInit();
+
+			image1.Source = bitmapImage1;
+			image2.Source = bitmapImage2;
+			image3.Source = bitmapImage3;
+			image4.Source = bitmapImage1;
+			image5.Source = bitmapImage2;
+			image6.Source = bitmapImage3;
+			image7.Source = bitmapImage1;
+			image8.Source = bitmapImage2;
+			image9.Source = bitmapImage3;
+			image10.Source = bitmapImage1;
+		}
 
 		[SuppressUnmanagedCodeSecurity]
 		internal static class SafeNativeMethods
@@ -4747,6 +5124,7 @@ namespace rpkg
 						if (FifthTabRight.Visibility == Visibility.Visible)
 						{
 							FifthTabRight.Visibility = Visibility.Collapsed;
+							FifthTabRightSeparator.Visibility = Visibility.Collapsed;
 						}
 
 						FirstTabRight.IsSelected = true;
@@ -4991,6 +5369,7 @@ namespace rpkg
 					if (FifthTabRight.Visibility == Visibility.Visible)
 					{
 						FifthTabRight.Visibility = Visibility.Collapsed;
+						FifthTabRightSeparator.Visibility = Visibility.Collapsed;
 					}
 
 					FirstTabRight.IsSelected = true;
@@ -5462,40 +5841,6 @@ namespace rpkg
 					{
 						MessageBoxShow("Error: Cound not find the treeview item for unloading for RPKG: " + rpkgFilePath);
 					}
-
-					treeview_item_found = false;
-
-					count = 0;
-
-					treeview_item_index = 0;
-
-					foreach (System.Windows.Forms.TreeNode item in HashMapTreeView.Nodes)
-					{
-						if (item.Text.ToString() == rpkgFilePath)
-						{
-							treeview_item_index = count;
-
-							treeview_item_found = true;
-						}
-
-						count++;
-					}
-
-					if (treeview_item_found)
-					{
-						HashMapTreeView.Nodes.RemoveAt(treeview_item_index);
-
-						//ImportRPKGFile(rpkgFilePath);
-
-						//foreach (System.Windows.Forms.TreeNode item in MainTreeView.Nodes)
-						//{
-						//if (item.Text.ToString() == rpkgFilePath)
-						//{
-						//MainTreeView.SelectedNode = item;
-						//}
-						//}
-					}
-
 				}
 				else if (return_value == 1)
 				{
@@ -6526,40 +6871,6 @@ namespace rpkg
 					{
 						MessageBoxShow("Error: Cound not find the treeview item for unloading for RPKG: " + hashDependsRPKGFilePath);
 					}
-
-					treeview_item_found = false;
-
-					count = 0;
-
-					treeview_item_index = 0;
-
-					foreach (System.Windows.Forms.TreeNode item in HashMapTreeView.Nodes)
-					{
-						if (item.Text.ToString() == rpkgFilePath)
-						{
-							treeview_item_index = count;
-
-							treeview_item_found = true;
-						}
-
-						count++;
-					}
-
-					if (treeview_item_found)
-					{
-						HashMapTreeView.Nodes.RemoveAt(treeview_item_index);
-
-						//ImportRPKGFile(rpkgFilePath);
-
-						//foreach (System.Windows.Forms.TreeNode item in MainTreeView.Nodes)
-						//{
-						//if (item.Text.ToString() == rpkgFilePath)
-						//{
-						//MainTreeView.SelectedNode = item;
-						//}
-						//}
-					}
-
 				}
 				else if (return_value == 1)
 				{
@@ -6609,7 +6920,7 @@ namespace rpkg
 
 			RightClickMenu rightClickMenu = new RightClickMenu(buttons);
 
-			SetRightClickMenuPosition(ref rightClickMenu, Mouse.GetPosition(null).X, Mouse.GetPosition(null).Y);
+			SetRightClickMenuPosition("", ref rightClickMenu, Mouse.GetPosition(null).X, Mouse.GetPosition(null).Y);
 
 			rightClickMenu.ShowDialog();
 
@@ -6904,13 +7215,17 @@ namespace rpkg
 			{
 				SetDiscordStatus("Resource View", "");
 			}
-			else if (LeftTabControl.SelectedIndex == 1)
-			{
-				SetDiscordStatus("Dependency View", "");
-			}
 			else if (LeftTabControl.SelectedIndex == 2)
 			{
+				SetDiscordStatus("REPO View", "");
+			}
+			else if (LeftTabControl.SelectedIndex == 4)
+			{
 				SetDiscordStatus("Search View", "");
+			}
+			else if (LeftTabControl.SelectedIndex == 6)
+			{
+				SetDiscordStatus("Deep Search View", "");
 			}
 		}
 
@@ -7062,8 +7377,8 @@ namespace rpkg
 			}
 		}
 
-        private void MapEditorExport_Click(object sender, RoutedEventArgs e)
-        {
+		private void MapEditorExport_Click(object sender, RoutedEventArgs e)
+		{
 			bool isTEMPNode = false;
 
 			System.Windows.Forms.TreeNode treeNode = null;
@@ -7077,19 +7392,10 @@ namespace rpkg
 					//MessageBoxShow(treeNode.Text);
 				}
 			}
-			else if (LeftTabControl.SelectedIndex == 1)
-			{
-				if (HashMapTreeView.SelectedNode != null)
-				{
-					treeNode = HashMapTreeView.SelectedNode;
-
-					//MessageBoxShow(treeNode.Text);
-				}
-			}
 			else if (LeftTabControl.SelectedIndex == 2)
 			{
 				if (LeftTabControl2.SelectedIndex == 0)
-                {
+				{
 					if (SearchRPKGsTreeView.SelectedNode != null)
 					{
 						treeNode = SearchRPKGsTreeView.SelectedNode;
@@ -7097,8 +7403,8 @@ namespace rpkg
 						//MessageBoxShow(treeNode.Text);
 					}
 				}
-				else if (LeftTabControl2.SelectedIndex == 1)
-                {
+				else if (LeftTabControl2.SelectedIndex == 2)
+				{
 					if (SearchHashListTreeView.SelectedNode != null)
 					{
 						treeNode = SearchHashListTreeView.SelectedNode;
@@ -7230,13 +7536,13 @@ namespace rpkg
 			progress.ShowDialog();
 
 			if (progress.task_status == (int)Progress.RPKGStatus.MAP_ERROR)
-            {
+			{
 				MessageBoxShow(progress.task_status_string);
-            }
+			}
 		}
 
-        private void MainMapExport_Click(object sender, RoutedEventArgs e)
-        {
+		private void MainMapExport_Click(object sender, RoutedEventArgs e)
+		{
 			var menuItem = sender as MenuItem;
 
 			string tempHash = menuItem.Tag.ToString();
@@ -7319,8 +7625,39 @@ namespace rpkg
 			return "";
 		}
 
-		private void SetRightClickMenuPosition(ref RightClickMenu rightClickMenu, double x, double y)
-        {
+		private void SetRightClickMenuPosition(string treeViewName, ref RightClickMenu rightClickMenu, double x, double y)
+		{
+			if (treeViewName == "MainTreeView")
+			{
+				x += 8.0;
+				y += 107.0;
+			}
+			else if (treeViewName == "SearchRPKGsTreeView")
+			{
+				x += 8.0;
+				y += 216.0;
+			}
+			else if (treeViewName == "SearchHashListTreeView")
+			{
+				x += 8.0;
+				y += 178.0;
+			}
+			else if (treeViewName == "DeepSearchEntitiesTreeView")
+			{
+				x += 8.0;
+				y += 309.0;
+			}
+			else if (treeViewName == "DeepSearchLocalizationTreeView")
+			{
+				x += 8.0;
+				y += 336.0;
+			}
+			else if (treeViewName == "REPOTreeView")
+			{
+				x += 8.0;
+				y += 212.0;
+			}
+
 			System.Windows.Point point = new System.Windows.Point(x, y);
 
 			rightClickMenu.Left = PointToScreen(point).X;
@@ -7482,6 +7819,1962 @@ namespace rpkg
 					//MessageBoxShow(progress.task_status_string);
 
 					return;
+				}
+			}
+		}
+
+		private void DeepSearchEntitiesButton_Click(object sender, RoutedEventArgs e)
+		{
+			/*if (MainTreeView.Nodes.Count > 0)
+			{
+				rpkgFilePath = MainTreeView.Nodes[0].Text;
+
+				string runtimeDirectory = rpkgFilePath.Substring(0, rpkgFilePath.LastIndexOf("\\"));
+
+				if (!runtimeDirLoaded)
+				{
+					if (runtimeDirectory.EndsWith("runtime", StringComparison.OrdinalIgnoreCase))
+					{
+						ImportRPKGFileFolder(runtimeDirectory);
+					}
+
+					runtimeDirLoaded = true;
+				}
+			}
+			else
+			{
+				MessageBoxShow("Load All Runtime RPKG files first!");
+
+				return;
+			}*/
+
+			if (DeepSearchEntitiesButton.Content.ToString() == "Stop Search")
+			{
+				int gui_control_value = (int)RPKGStatus.ABORT_CURRENT_TASK;
+
+				int return_value = set_gui_control(gui_control_value);
+
+				DeepSearchEntitiesButton.Content = "Start Search";
+			}
+			else
+			{
+				if (DeepSearchEntitiesTextBox.Text.Length > 0)
+				{
+					DeepSearchEntitiesTreeView.Nodes.Clear();
+
+					string input_path = "";
+
+					if (DeepSearchEntitiesRPKGsComboBox.Text == "All Loaded RPKGs")
+					{
+						if (MainTreeView.Nodes.Count > 0)
+						{
+							//rpkgFilePath = MainTreeView.Nodes[0].Text;
+
+							//input_path = rpkgFilePath.Substring(0, rpkgFilePath.LastIndexOf("\\"));
+
+							input_path = "";
+						}
+					}
+					else if (DeepSearchEntitiesRPKGsComboBox.SelectedIndex > 0)
+					{
+						input_path = DeepSearchEntitiesRPKGsComboBox.Text;
+					}
+					else
+					{
+						MessageBoxShow("Load RPKG files first!");
+
+						return;
+					}
+
+					int return_value = reset_task_status();
+
+					execute_deep_search_entities rpkgExecute = deep_search_entities;
+
+					int search_entity_ids = 0;
+					int search_entity_names = 0;
+					int search_property_names = 0;
+					int search_property_values = 0;
+
+					/*if (DeepSearchEntitiesEntityIDsCheckBox.IsChecked ?? false)
+					{
+						search_entity_ids = 1;
+					}
+
+					if (DeepSearchEntitiesEntityNamesCheckBox.IsChecked ?? false)
+					{
+						search_entity_names = 1;
+					}
+
+					if (DeepSearchEntitiesPropertyNamesCheckBox.IsChecked ?? false)
+					{
+						search_property_names = 1;
+					}
+
+					if (DeepSearchEntitiesPropertyValuesCheckBox.IsChecked ?? false)
+					{
+						search_property_values = 1;
+					}*/
+
+					int maxSearchResults = 0;
+
+					int.TryParse(DeepSearchEntitiesComboBox.Text, out maxSearchResults);
+
+					if (maxSearchResults == 0)
+					{
+						maxSearchResults = 100;
+					}
+
+					IAsyncResult ar = rpkgExecute.BeginInvoke(input_path, DeepSearchEntitiesTextBox.Text, search_entity_ids, search_entity_names, search_property_names, search_property_values, maxSearchResults, null, null);
+
+					deepSearchEntitiesWorker = new BackgroundWorker();
+					deepSearchEntitiesWorker.WorkerReportsProgress = true;
+					deepSearchEntitiesWorker.DoWork += deepSearchEntitiesWorker_DoWork;
+					deepSearchEntitiesWorker.ProgressChanged += deepSearchEntitiesWorker_ProgressChanged;
+					deepSearchEntitiesWorker.RunWorkerCompleted += deepSearchEntitiesWorker_RunWorkerCompleted;
+
+					deepSearchEntitiesWorker.RunWorkerAsync();
+
+					DeepSearchEntitiesButton.Content = "Stop Search";
+				}
+			}
+		}
+
+		private void DeepSearchLocalizationButton_Click(object sender, RoutedEventArgs e)
+		{
+			if (DeepSearchLocalizationButton.Content.ToString() == "Stop Search")
+			{
+				int gui_control_value = (int)RPKGStatus.ABORT_CURRENT_TASK;
+
+				int return_value = set_gui_control(gui_control_value);
+
+				DeepSearchLocalizationButton.Content = "Start Search";
+			}
+			else
+			{
+				if (DeepSearchLocalizationTextBox.Text.Length > 0)
+				{
+					DeepSearchLocalizationTreeView.Nodes.Clear();
+
+					string input_path = "";
+
+					if (DeepSearchLocalizationRPKGsComboBox.Text == "All Loaded RPKGs")
+					{
+						if (MainTreeView.Nodes.Count > 0)
+						{
+							//rpkgFilePath = MainTreeView.Nodes[0].Text;
+
+							//input_path = rpkgFilePath.Substring(0, rpkgFilePath.LastIndexOf("\\"));
+
+							input_path = "";
+						}
+					}
+					else if (DeepSearchLocalizationRPKGsComboBox.SelectedIndex > 0)
+					{
+						input_path = DeepSearchLocalizationRPKGsComboBox.Text;
+					}
+					else
+					{
+						MessageBoxShow("Load RPKG files first!");
+
+						return;
+					}
+
+					int return_value = reset_task_status();
+
+					execute_deep_search_localization rpkgExecute = deep_search_localization;
+
+					int search_dlge = 0;
+					int search_locr = 0;
+					int search_rtlv = 0;
+
+					if (DeepSearchLocalizationDLGECheckBox.IsChecked ?? false)
+					{
+						search_dlge = 1;
+					}
+
+					if (DeepSearchLocalizationLOCRCheckBox.IsChecked ?? false)
+					{
+						search_locr = 1;
+					}
+
+					if (DeepSearchLocalizationRTLVCheckBox.IsChecked ?? false)
+					{
+						search_rtlv = 1;
+					}
+
+					int maxSearchResults = 0;
+
+					int.TryParse(DeepSearchLocalizationComboBox.Text, out maxSearchResults);
+
+					if (maxSearchResults == 0)
+					{
+						maxSearchResults = 100;
+					}
+
+					IAsyncResult ar = rpkgExecute.BeginInvoke(input_path, DeepSearchLocalizationTextBox.Text, search_dlge, search_locr, search_rtlv, maxSearchResults, null, null);
+
+					deepSearchLocalizationWorker = new BackgroundWorker();
+					deepSearchLocalizationWorker.WorkerReportsProgress = true;
+					deepSearchLocalizationWorker.DoWork += deepSearchLocalizationWorker_DoWork;
+					deepSearchLocalizationWorker.ProgressChanged += deepSearchLocalizationWorker_ProgressChanged;
+					deepSearchLocalizationWorker.RunWorkerCompleted += deepSearchLocalizationWorker_RunWorkerCompleted;
+
+					deepSearchLocalizationWorker.RunWorkerAsync();
+
+					DeepSearchLocalizationButton.Content = "Stop Search";
+				}
+			}
+		}
+
+		void deepSearchLocalizationWorker_DoWork(object sender, DoWorkEventArgs e)
+		{
+			int percent = 0;
+			int task_single_status = 0;
+			int task_multiple_status = 0;
+			bool task_done = false;
+			int task_status = 0;
+
+			while (!task_done)
+			{
+				percent = get_current_percent();
+
+				task_single_status = get_task_single_status();
+
+				task_multiple_status = get_task_multiple_status();
+
+				(sender as BackgroundWorker).ReportProgress((int)percent);
+
+				if (task_single_status == (int)RPKGStatus.TASK_EXITED)
+				{
+					task_status = task_single_status;
+
+					task_done = true;
+				}
+
+				if (task_multiple_status == (int)RPKGStatus.TASK_SUCCESSFUL)
+				{
+					task_status = task_multiple_status;
+
+					task_done = true;
+				}
+
+				Thread.Sleep(100);
+			}
+		}
+
+		void deepSearchLocalizationWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+		{
+			DeepSearchLocalizationProgressBar.Value = e.ProgressPercentage;
+		}
+
+		void deepSearchLocalizationWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+		{
+			DeepSearchLocalizationButton.Content = "Start Search";
+
+			UInt32 localization_data_size = get_localization_search_results_size();
+
+			byte[] localization_data = new byte[localization_data_size];
+
+			Marshal.Copy(get_localization_search_results(), localization_data, 0, (int)localization_data_size);
+
+			if (localization_data_size > 0)
+			{
+				//DeepSearchLocalizationTreeView.Nodes.Add(Encoding.UTF8.GetString(localization_data));
+
+				string[] records = Encoding.UTF8.GetString(localization_data).Split(new[] { "||||||" }, StringSplitOptions.None);
+
+				foreach (string r in records)
+				{
+					if (r.Length > 0)
+					{
+						string[] data = r.Split(new[] { "||||" }, StringSplitOptions.None);
+
+						if (data.Length == 3)
+						{
+							System.Windows.Forms.TreeNode node1 = findTreeNode(ref DeepSearchLocalizationTreeView, data[0]);
+
+							if (node1 == null)
+							{
+								DeepSearchLocalizationTreeView.Nodes.Add(data[0]);
+							}
+
+							node1 = findTreeNode(ref DeepSearchLocalizationTreeView, data[0]);
+
+							if (node1 != null)
+							{
+								System.Windows.Forms.TreeNode node2 = findTreeNode(ref node1, data[1]);
+
+								if (node2 != null)
+								{
+									System.Windows.Forms.TreeNode node3 = node2.Nodes.Add(data[2]);
+
+									node3.Name = "deepsearch";
+								}
+								else
+								{
+									node2 = node1.Nodes.Add(data[1]);
+
+									System.Windows.Forms.TreeNode node3 = node2.Nodes.Add(data[2]);
+
+									node3.Name = "deepsearch";
+								}
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				DeepSearchLocalizationTreeView.Nodes.Add("Search returned 0 results.");
+			}
+		}
+
+		void deepSearchEntitiesWorker_DoWork(object sender, DoWorkEventArgs e)
+		{
+			int percent = 0;
+			int task_single_status = 0;
+			int task_multiple_status = 0;
+			bool task_done = false;
+			int task_status = 0;
+
+			while (!task_done)
+			{
+				percent = get_current_percent();
+
+				task_single_status = get_task_single_status();
+
+				task_multiple_status = get_task_multiple_status();
+
+				(sender as BackgroundWorker).ReportProgress((int)percent);
+
+				if (task_single_status == (int)RPKGStatus.TASK_EXITED)
+				{
+					task_status = task_single_status;
+
+					task_done = true;
+				}
+
+				if (task_multiple_status == (int)RPKGStatus.TASK_SUCCESSFUL)
+				{
+					task_status = task_multiple_status;
+
+					task_done = true;
+				}
+
+				Thread.Sleep(100);
+			}
+		}
+
+		void deepSearchEntitiesWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+		{
+			DeepSearchEntitiesProgressBar.Value = e.ProgressPercentage;
+		}
+
+		void deepSearchEntitiesWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+		{
+			DeepSearchEntitiesButton.Content = "Start Search";
+
+			UInt32 entities_data_size = get_entities_search_results_size();
+
+			byte[] entities_data = new byte[entities_data_size];
+
+			Marshal.Copy(get_entities_search_results(), entities_data, 0, (int)entities_data_size);
+
+			if (entities_data_size > 0)
+			{
+				//DeepSearchLocalizationTreeView.Nodes.Add(Encoding.UTF8.GetString(localization_data));
+
+				string[] records = Encoding.UTF8.GetString(entities_data).Split(new[] { "||||||" }, StringSplitOptions.None);
+
+				foreach (string r in records)
+				{
+					if (r.Length > 0)
+					{
+						string[] data = r.Split(new[] { "||||" }, StringSplitOptions.None);
+
+						if (data.Length == 3)
+						{
+							System.Windows.Forms.TreeNode node1 = findTreeNode(ref DeepSearchEntitiesTreeView, data[0]);
+
+							if (node1 == null)
+							{
+								DeepSearchEntitiesTreeView.Nodes.Add(data[0]);
+							}
+
+							node1 = findTreeNode(ref DeepSearchEntitiesTreeView, data[0]);
+
+							if (node1 != null)
+							{
+								System.Windows.Forms.TreeNode node2 = findTreeNode(ref node1, data[1]);
+
+								if (node2 != null)
+								{
+									System.Windows.Forms.TreeNode node3 = node2.Nodes.Add(data[2]);
+
+									node3.Name = "deepsearch";
+								}
+								else
+								{
+									node2 = node1.Nodes.Add(data[1]);
+
+									System.Windows.Forms.TreeNode node3 = node2.Nodes.Add(data[2]);
+
+									node3.Name = "deepsearch";
+								}
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				DeepSearchEntitiesTreeView.Nodes.Add("Search returned 0 results.");
+			}
+		}
+
+		System.Windows.Forms.TreeNode findTreeNode(ref System.Windows.Forms.TreeView treeView, string nodeText)
+		{
+			foreach (System.Windows.Forms.TreeNode node in treeView.Nodes)
+			{
+				if (node.Text == nodeText)
+				{
+					return node;
+				}
+			}
+
+			return null;
+		}
+
+		System.Windows.Forms.TreeNode findTreeNode(ref System.Windows.Forms.TreeNode mainNode, string nodeText)
+		{
+			foreach (System.Windows.Forms.TreeNode node in mainNode.Nodes)
+			{
+				if (node.Text == nodeText)
+				{
+					return node;
+				}
+			}
+
+			return null;
+		}
+
+		void resetDeepSearchComboBoxes()
+		{
+			List<string> items = new List<string>();
+
+			items.Add("All Loaded RPKGs");
+
+			foreach (System.Windows.Forms.TreeNode node in MainTreeView.Nodes)
+			{
+				items.Add(node.Text.ToString());
+			}
+
+			DeepSearchEntitiesRPKGsComboBox.ItemsSource = items;
+			DeepSearchEntitiesRPKGsComboBox.SelectedIndex = 0;
+
+			DeepSearchLocalizationRPKGsComboBox.ItemsSource = items;
+			DeepSearchLocalizationRPKGsComboBox.SelectedIndex = 0;
+		}
+
+		private void DeepSearchEntitiesExpandAllButton_Click(object sender, RoutedEventArgs e)
+		{
+			DeepSearchEntitiesTreeView.ExpandAll();
+		}
+
+		private void DeepSearchEntitiesCollapseAllButton_Click(object sender, RoutedEventArgs e)
+		{
+			DeepSearchEntitiesTreeView.CollapseAll();
+		}
+
+		private void DeepSearchLocalizationExpandAllButton_Click(object sender, RoutedEventArgs e)
+		{
+			DeepSearchLocalizationTreeView.ExpandAll();
+		}
+
+		private void DeepSearchLocalizationCollapseAllButton_Click(object sender, RoutedEventArgs e)
+		{
+			DeepSearchLocalizationTreeView.CollapseAll();
+		}
+
+		private void SearchRPKGsExpandAllButton_Click(object sender, RoutedEventArgs e)
+		{
+			SearchRPKGsTreeView.ExpandAll();
+		}
+
+		private void SearchRPKGsCollapseAllButton_Click(object sender, RoutedEventArgs e)
+		{
+			SearchRPKGsTreeView.CollapseAll();
+		}
+
+		private void DialogueUtilities_Click(object sender, RoutedEventArgs e)
+		{
+			string dialogueUtilitiesButton = (sender as MenuItem).Tag.ToString();
+
+			string inputPath = "";
+			string outputPath = "";
+
+			if (dialogueUtilitiesButton == "SDEF" || dialogueUtilitiesButton == "JSON")
+			{
+				if (dialogueUtilitiesButton == "SDEF")
+				{
+					inputPath = SelectFile("input", "Select SDEF File To Convert To SDEF JSON:", "SDEF file|*.SDEF", "");
+
+					if (inputPath != "")
+					{
+						//DirectoryInfo directoryInfo = new DirectoryInfo(inputPath).Parent;
+
+						outputPath = SelectFolder("output", "Select SDEF JSON File Output Folder:", "");
+					}
+				}
+				else if (dialogueUtilitiesButton == "JSON")
+				{
+					inputPath = SelectFile("input", "Select SDEF JSON To Convert To SDEF File:", "JSON file|*.JSON", "");
+
+					if (inputPath != "")
+					{
+						//DirectoryInfo directoryInfo = new DirectoryInfo(inputPath).Parent;
+
+						outputPath = SelectFolder("output", "Select SDEF File Output Folder:", "");
+					}
+				}
+			}
+			else if (dialogueUtilitiesButton == "SDEFS" || dialogueUtilitiesButton == "JSONS")
+			{
+				if (dialogueUtilitiesButton == "SDEFS")
+				{
+					inputPath = SelectFolder("input", "Select SDEF Files Input Folder (Recursive):", "");
+
+					if (inputPath != "")
+					{
+						MessageQuestion messageBox = new MessageQuestion();
+						messageBox.message.Content = "Output SDEF JSON Files To A Single Directory Or Into The Same Directory They Reside?";
+						messageBox.OKButton.Content = "Single Directory";
+						messageBox.CancelButton.Content = "Where They Reside";
+						messageBox.ShowDialog();
+
+						if (messageBox.buttonPressed == "OKButton")
+						{
+							//DirectoryInfo directoryInfo = new DirectoryInfo(inputPath).Parent;
+
+							outputPath = SelectFolder("output", "Select SDEF JSON Files Output Folder:", "");
+						}
+						else if (messageBox.buttonPressed == "CancelButton")
+						{
+							outputPath = "";
+						}
+					}
+				}
+				else if (dialogueUtilitiesButton == "JSONS")
+				{
+					inputPath = SelectFolder("input", "Select SDEF JSON Files Input Folder (Recursive):", "");
+
+					if (inputPath != "")
+					{
+
+						MessageQuestion messageBox = new MessageQuestion();
+						messageBox.message.Content = "Output SDEF Files To A Single Directory Or Into The Same Directory They Reside?";
+						messageBox.OKButton.Content = "Single Directory";
+						messageBox.CancelButton.Content = "Where They Reside";
+						messageBox.ShowDialog();
+
+						if (messageBox.buttonPressed == "OKButton")
+						{
+							//DirectoryInfo directoryInfo = new DirectoryInfo(inputPath).Parent;
+
+							outputPath = SelectFolder("output", "Select SDEF Files Output Folder:", "");
+						}
+						else if (messageBox.buttonPressed == "CancelButton")
+						{
+							outputPath = "";
+						}
+					}
+				}
+			}
+
+			if (inputPath != "")
+			{
+				string command = "";
+				string input_path = inputPath;
+				string filter = "";
+				string search = "";
+				string search_type = "";
+				string output_path = outputPath;
+
+				Progress progress = new Progress();
+
+				progress.operation = (int)Progress.Operation.MASS_EXTRACT;
+
+				progress.ProgressBar.IsIndeterminate = true;
+
+				if (dialogueUtilitiesButton == "SDEF")
+				{
+					command = "-sdef_to_json";
+
+					progress.message.Content = "Converting SDEF File To SDEF JSON...";
+				}
+				else if (dialogueUtilitiesButton == "JSON")
+				{
+					command = "-json_to_sdef";
+
+					progress.message.Content = "Converting SDEF JSON To SDEF File...";
+				}
+				else if (dialogueUtilitiesButton == "SDEFS")
+				{
+					command = "-sdef_to_json";
+
+					progress.message.Content = "Converting SDEF Files To SDEF JSONs...";
+				}
+				else if (dialogueUtilitiesButton == "JSONS")
+				{
+					command = "-json_to_sdef";
+
+					progress.message.Content = "Converting SDEF JSONs To SDEF Files...";
+				}
+
+				int return_value = reset_task_status();
+
+				execute_task rpkgExecute = task_execute;
+
+				IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
+
+				progress.ShowDialog();
+
+				if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
+				{
+					//MessageBoxShow(progress.task_status_string);
+
+					return;
+				}
+			}
+		}
+
+		void LoadREPO()
+		{
+			REPOTreeView.Nodes.Clear();
+
+			LoadREPOCategory("NPCs", (int)REPOCategory.NPCS);
+			LoadREPOCategory("Outfits", (int)REPOCategory.OUTFITS);
+			LoadREPOCategory("Pistols", (int)REPOCategory.RUNTIME_PISTOLS);
+			LoadREPOCategory("SMGs", (int)REPOCategory.RUNTIME_SMGS);
+			LoadREPOCategory("Shotguns", (int)REPOCategory.RUNTIME_SHOTGUNS);
+			LoadREPOCategory("Assault Rifles", (int)REPOCategory.RUNTIME_ASSAULTRIFLES);
+			LoadREPOCategory("Sniper Rifles", (int)REPOCategory.RUNTIME_SNIPERRIFLES);
+			LoadREPOCategory("Explosives", (int)REPOCategory.RUNTIME_EXPLOSIVES);
+			LoadREPOCategory("Melees", (int)REPOCategory.RUNTIME_MELEES);
+			LoadREPOCategory("Poisons", (int)REPOCategory.RUNTIME_POISONS);
+			LoadREPOCategory("Distractions", (int)REPOCategory.RUNTIME_DISTRACTIONS);
+			LoadREPOCategory("Remotes", (int)REPOCategory.RUNTIME_REMOTES);
+			LoadREPOCategory("Keys", (int)REPOCategory.RUNTIME_KEYS);
+			LoadREPOCategory("Tools", (int)REPOCategory.RUNTIME_TOOLS);
+			LoadREPOCategory("Suitcases", (int)REPOCategory.RUNTIME_SUITCASES);
+			LoadREPOCategory("Containers", (int)REPOCategory.RUNTIME_CONTAINERS);
+			LoadREPOCategory("QuestItems", (int)REPOCategory.RUNTIME_QUESTITEMS);
+			LoadREPOCategory("Misc", (int)REPOCategory.RUNTIME_INVALID_CATEGORY_ICONS);
+			LoadREPOCategory("Ammo Configs", (int)REPOCategory.AMMO_CONFIGS);
+			LoadREPOCategory("Magazine Configs", (int)REPOCategory.MAGAZINE_CONFIGS);
+			LoadREPOCategory("Area Discovereds", (int)REPOCategory.AREADISCOVEREDS);
+			LoadREPOCategory("Locations", (int)REPOCategory.LOCATIONS);
+			LoadREPOCategory("Modifiers", (int)REPOCategory.MODIFIERS);
+			LoadREPOCategory("Difficulty Parameters", (int)REPOCategory.DIFFICULTY_PARAMETERS);
+			LoadREPOCategory("Behaviours", (int)REPOCategory.BEHAVIOURS);
+
+			repoTreeViewBackup = new TreeViewBackup(REPOTreeView.Nodes);
+		}
+
+		private void DeepSearchREPOButton_Click(object sender, RoutedEventArgs e)
+		{
+
+		}
+
+		void LoadREPOCategory(string nodeName, int category)
+		{
+			int response = get_repo_category(category);
+
+			System.Windows.Forms.TreeNode node = REPOTreeView.Nodes.Add(nodeName);
+
+			UInt32 repo_data_size = get_repo_response_data_size();
+
+			byte[] repo_data = new byte[repo_data_size];
+
+			Marshal.Copy(get_repo_response_data(), repo_data, 0, (int)repo_data_size);
+
+			if (repo_data_size > 0)
+			{
+				string[] entries = Encoding.UTF8.GetString(repo_data).Split(new[] { "||||||" }, StringSplitOptions.None);
+
+				foreach (string entry in entries)
+				{
+					if (entry.Length > 0)
+					{
+						string[] data = entry.Split(new[] { "||||" }, StringSplitOptions.None);
+
+						if (data.Length == 3)
+						{
+							System.Windows.Forms.TreeNode node1 = node.Nodes.Add(data[0] + " (" + data[2] + ")");
+							node1.Name = data[2];
+							node1.Tag = data[1];
+
+							//LoadREPOTreeView(ref node1, data[2]);
+						}
+					}
+				}
+			}
+		}
+
+		void LoadREPOTreeView(ref System.Windows.Forms.TreeNode node, string id)
+		{
+			int response = get_repo_child_entries(id);
+
+			UInt32 repo_data_size = get_repo_response_data_size();
+
+			byte[] repo_data = new byte[repo_data_size];
+
+			Marshal.Copy(get_repo_response_data(), repo_data, 0, (int)repo_data_size);
+
+			if (repo_data_size > 0)
+			{
+				string[] entries = Encoding.UTF8.GetString(repo_data).Split(new[] { "||||||" }, StringSplitOptions.None);
+
+				foreach (string entry in entries)
+				{
+					if (entry.Length > 0)
+					{
+						string[] data = entry.Split(new[] { "||||" }, StringSplitOptions.None);
+
+						if (data.Length == 3)
+						{
+							if (data[2] != id)
+							{
+								System.Windows.Forms.TreeNode node1 = findTreeNode(ref node, data[0]);
+
+								if (node1 == null)
+								{
+									node.Nodes.Add(data[0]);
+								}
+
+								node1 = findTreeNode(ref node, data[0]);
+
+								if (node1 != null)
+								{
+									string name = data[1] + " (" + data[2] + ")";
+
+									System.Windows.Forms.TreeNode node2 = findTreeNode(ref node1, name);
+
+									if (node2 == null)
+									{
+										node2 = node1.Nodes.Add(name);
+
+										node2.Name = data[2];
+
+										//MessageBoxShow(name);
+
+										LoadREPOTreeView(ref node2, data[2]);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		private void REPOTreeView_NodeMouseClick(object sender, System.Windows.Forms.TreeNodeMouseClickEventArgs e)
+		{
+			if (e.Button == System.Windows.Forms.MouseButtons.Right)
+			{
+				bool runtimeCategoryClicked = false;
+				bool nonRuntimeCategoryClicked = false;
+
+				if (e.Node.Text == "NPCs")
+					nonRuntimeCategoryClicked = true;
+				else if (e.Node.Text == "Outfits")
+					nonRuntimeCategoryClicked = true;
+				else if (e.Node.Text == "Pistols")
+					runtimeCategoryClicked = true;
+				else if (e.Node.Text == "SMGs")
+					runtimeCategoryClicked = true;
+				else if (e.Node.Text == "Shotguns")
+					runtimeCategoryClicked = true;
+				else if (e.Node.Text == "Assault Rifles")
+					runtimeCategoryClicked = true;
+				else if (e.Node.Text == "Sniper Rifles")
+					runtimeCategoryClicked = true;
+				else if (e.Node.Text == "Explosives")
+					runtimeCategoryClicked = true;
+				else if (e.Node.Text == "Melees")
+					runtimeCategoryClicked = true;
+				else if (e.Node.Text == "Poisons")
+					runtimeCategoryClicked = true;
+				else if (e.Node.Text == "Distractions")
+					runtimeCategoryClicked = true;
+				else if (e.Node.Text == "Remotes")
+					runtimeCategoryClicked = true;
+				else if (e.Node.Text == "Keys")
+					runtimeCategoryClicked = true;
+				else if (e.Node.Text == "Tools")
+					runtimeCategoryClicked = true;
+				else if (e.Node.Text == "Suitcases")
+					runtimeCategoryClicked = true;
+				else if (e.Node.Text == "Containers")
+					runtimeCategoryClicked = true;
+				else if (e.Node.Text == "QuestItems")
+					runtimeCategoryClicked = true;
+				else if (e.Node.Text == "Misc")
+					runtimeCategoryClicked = true;
+				else if (e.Node.Text == "Area Discovereds")
+					nonRuntimeCategoryClicked = true;
+				else if (e.Node.Text == "Locations")
+					nonRuntimeCategoryClicked = true;
+				else if (e.Node.Text == "Modifiers")
+					nonRuntimeCategoryClicked = true;
+				else if (e.Node.Text == "Difficulty Parameters")
+					nonRuntimeCategoryClicked = true;
+				else if (e.Node.Text == "Behaviours")
+					nonRuntimeCategoryClicked = true;
+				else if (e.Node.Text == "Magazine Configs")
+					nonRuntimeCategoryClicked = true;
+				else if (e.Node.Text == "Ammo Configs")
+					nonRuntimeCategoryClicked = true;
+
+				if (!runtimeCategoryClicked && !nonRuntimeCategoryClicked)
+				{
+					string[] buttons = { "Duplicate Entry", "Erase Entry", "Cancel" };
+
+					string rpkg_file_path = "";
+					string hash = "";
+
+					if ((e.Node.Tag as string) != null)
+					{
+						hash = (e.Node.Tag as string);
+
+						if (hash != " ")
+						{
+							rpkg_file_path = Marshal.PtrToStringAnsi(get_latest_hash_rpkg_path(hash));
+
+							if (rpkg_file_path == "")
+                            {
+								MessageBoxShow("Hash file/resource " + hash + " was not found in the currently loaded RPKGs.");
+
+								return;
+                            }
+							else
+                            {
+								buttons = new string[] { "Extract Entity (" + hash + ") To QN (QuickEntity) JSON", "Duplicate Entry", "Erase Entry", "Cancel" };
+							}
+						}
+					}
+
+					RightClickMenu rightClickMenu = new RightClickMenu(buttons);
+
+					SetRightClickMenuPosition((sender as System.Windows.Forms.TreeView).Name, ref rightClickMenu, e.Location.X, e.Location.Y);
+
+					rightClickMenu.ShowDialog();
+
+					if (rightClickMenu.buttonPressed == "button0" && buttons.Length == 4)
+                    {
+						string runtimeDirectory = rpkg_file_path.Substring(0, rpkg_file_path.LastIndexOf("\\"));
+
+						if (!runtimeDirectory.EndsWith("runtime", StringComparison.OrdinalIgnoreCase))
+						{
+							MessageBoxShow("The current RPKG does not exist in the Hitman runtime directory, can not perform QN (QuickEntity) JSON extraction.");
+
+							return;
+						}
+
+						ImportRPKGFileFolder(runtimeDirectory);
+
+						string command = "-extract_entity_to_qn";
+						string filter = hash;
+						string output_path = "";
+
+						Progress progress = new Progress();
+
+						progress.operation = (int)Progress.Operation.MASS_EXTRACT;
+
+						progress.message.Content = "Extracting " + hash + " entity (TEMP/TBLU) to QN (QuickEntity) JSON...";
+
+						var fileDialog = new Ookii.Dialogs.Wpf.VistaSaveFileDialog();
+
+						fileDialog.Title = "Select file to save extracted QN (QuickEntity) JSON to:";
+
+						fileDialog.Filter = "JSON file|*.json";
+
+						string initialFolder = "";
+
+						if (File.Exists(userSettings.InputFolder))
+						{
+							initialFolder = userSettings.InputFolder;
+						}
+						else
+						{
+							initialFolder = System.IO.Directory.GetCurrentDirectory();
+						}
+
+						fileDialog.InitialDirectory = initialFolder;
+
+						fileDialog.FileName = hash + ".entity.json";
+
+						var fileDialogResult = fileDialog.ShowDialog();
+
+						if (fileDialogResult == true)
+						{
+							output_path = fileDialog.FileName;
+						}
+						else
+						{
+							return;
+						}
+
+						//MessageBoxShow(hash + ", " + rpkg_file_path + ", " + output_path);
+
+						int return_value = reset_task_status();
+
+						execute_task rpkgExecute = task_execute;
+
+						IAsyncResult ar = rpkgExecute.BeginInvoke(command, rpkg_file_path, filter, "", "", output_path, null, null);
+
+						progress.ShowDialog();
+
+						if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
+						{
+							//MessageBoxShow(progress.task_status_string);
+
+							return;
+						}
+					}
+					else if ((rightClickMenu.buttonPressed == "button1" && buttons.Length == 4) || (rightClickMenu.buttonPressed == "button0" && buttons.Length == 3))
+					{
+						//MessageBoxShow(e.Node.Name);
+
+						int response = duplicate_repo_entry(e.Node.Name);
+
+						UInt32 repo_data_size = get_repo_response_data_size();
+
+						byte[] repo_data = new byte[repo_data_size];
+
+						Marshal.Copy(get_repo_response_data(), repo_data, 0, (int)repo_data_size);
+
+						if (repo_data_size > 0)
+						{
+							string[] entries = Encoding.UTF8.GetString(repo_data).Split(new[] { "||||||" }, StringSplitOptions.None);
+
+							foreach (string entry in entries)
+							{
+								if (entry.Length > 0)
+								{
+									string[] data = entry.Split(new[] { "||||" }, StringSplitOptions.None);
+
+									if (data.Length == 3)
+									{
+										System.Windows.Forms.TreeNode node1 = e.Node.Parent.Nodes.Insert(e.Node.Index + 1, data[0] + " (" + data[2] + ")");
+										node1.Name = data[2];
+										node1.Tag = data[1];
+
+										REPOTreeView.SelectedNode = node1;
+
+										//LoadREPOTreeView(ref node1, data[2]);
+									}
+								}
+							}
+						}
+					}
+					else if ((rightClickMenu.buttonPressed == "button2" && buttons.Length == 4) || (rightClickMenu.buttonPressed == "button1" && buttons.Length == 3))
+					{
+						//MessageBoxShow(e.Node.Name);
+
+						int response = erase_repo_entry(e.Node.Name);
+
+						e.Node.Remove();
+					}
+
+					return;
+				}
+			}
+		}
+
+		private void REPOTreeView_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
+		{
+			if (REPOTreeView.Nodes.Count > 0)
+			{
+				System.Windows.Forms.TreeNode node = (e.Node as System.Windows.Forms.TreeNode);
+
+				if (node == null)
+				{
+					return;
+				}
+
+				if (REPOJSONTextEditor.Visibility == Visibility.Collapsed)
+                {
+					REPOVisualEditorTabControl.Visibility = Visibility.Collapsed;
+					REPOJSONTextEditor.Visibility = Visibility.Visible;
+				}
+
+				if (node.Name != "")
+				{
+					LoadREPOJSON(ref node);
+				}
+				else
+                {
+					REPOJSONTextEditor.Text = "";
+					repoJSONTextEditorID = "";
+                }
+			}
+		}
+
+		void LoadREPOJSON(ref System.Windows.Forms.TreeNode node)
+        {
+			bool imageFound = false;
+
+			REPOImageViewer.Source = null;
+
+			if ((node.Tag as string) != null)
+			{
+				string rpkg_file_path = Marshal.PtrToStringAnsi(get_latest_hash_rpkg_path((node.Tag as string)));
+
+				if ((node.Tag as string) == " ")
+				{
+					REPOHashTextBox.Text = "";
+				}
+				else
+				{
+					REPOHashTextBox.Text = node.Tag + " in RPKG file " + rpkg_file_path + ":\n";
+
+					REPOHashTextBox.Text += Marshal.PtrToStringAnsi(get_hash_details(rpkg_file_path, (node.Tag as string)));
+				}
+
+				int response = get_repo_json(node.Name);
+
+				UInt32 repo_data_size = get_repo_response_data_size();
+
+				byte[] repo_data = new byte[repo_data_size];
+
+				Marshal.Copy(get_repo_response_data(), repo_data, 0, (int)repo_data_size);
+
+				if (repo_data_size > 0)
+				{
+					REPOJSONTextEditor.Text = Encoding.UTF8.GetString(repo_data);
+					repoJSONTextEditorID = node.Name;
+					repoJSONTextEditorParentNodeIndex = node.Parent.Index;
+					repoJSONTextEditorNodeIndex = node.Index;
+
+					string imageHash = Marshal.PtrToStringAnsi(get_repo_image_hash(node.Name));
+
+					if (imageHash != "")
+					{
+						try
+						{
+							BitmapImage bitmapImage = new BitmapImage();
+
+							bitmapImage.BeginInit();
+
+							rpkg_file_path = Marshal.PtrToStringAnsi(get_latest_hash_rpkg_path(imageHash));
+
+							//MessageBoxShow(imageHash + ", " + rpkg_file_path);
+
+							if (rpkg_file_path != "")
+							{
+								UInt32 hash_size = get_hash_in_rpkg_size(rpkg_file_path, imageHash);
+
+								if (hash_size > 0)
+								{
+									byte[] hash_data = new byte[hash_size];
+
+									Marshal.Copy(get_hash_in_rpkg_data(rpkg_file_path, imageHash), hash_data, 0, (int)hash_size);
+
+									MemoryStream memoryStream = new MemoryStream(hash_data);
+
+									bitmapImage.StreamSource = memoryStream;
+
+									bitmapImage.EndInit();
+
+									REPOImageViewer.Source = bitmapImage;
+
+									int return_value_clear = clear_hash_data_vector();
+
+									imageFound = true;
+								}
+							}
+						}
+						catch
+						{
+							REPOImageViewerLabel.Visibility = Visibility.Visible;
+
+							return;
+						}
+					}
+				}
+			}
+
+			if (!imageFound)
+			{
+				REPOImageViewerLabel.Visibility = Visibility.Visible;
+			}
+			else
+			{
+				REPOImageViewerLabel.Visibility = Visibility.Collapsed;
+			}
+		}
+
+        private void LoadREPOFromRPKGsButton_Click(object sender, RoutedEventArgs e)
+        {
+			REPOJSONTextEditor.Text = "";
+			repoJSONTextEditorID = "";
+
+			REPOJSONTextEditor.Visibility = Visibility.Visible;
+			REPOVisualEditorTabControl.Visibility = Visibility.Collapsed;
+
+			//int response = reset_repos();
+
+			UInt32 isREPOLoaded = is_repo_loaded();
+
+			UInt32 isORESLoaded = is_ores_loaded();
+
+			if (isREPOLoaded == 0)
+			{
+				MessageBoxShow("No REPO hash file/resource found, ideally load all RPKGs from your Hitman Runtime folder and search again.");
+
+				return;
+			}
+
+			if (isORESLoaded == 0)
+			{
+				MessageBoxShow("No ORES hash file/resource found, ideally load all RPKGs from your Hitman Runtime folder and search again.");
+
+				return;
+			}
+
+			int response = load_repo();
+
+			UInt32 repo_data_size = get_repo_response_data_size();
+
+			byte[] repo_data = new byte[repo_data_size];
+
+			Marshal.Copy(get_repo_response_data(), repo_data, 0, (int)repo_data_size);
+
+			if (repo_data_size > 0)
+			{
+				MessageBoxShow(Encoding.UTF8.GetString(repo_data));
+			}
+            else
+            {
+				LoadREPO();
+			}
+		}
+
+        private void LoadREPOFromFileButton_Click(object sender, RoutedEventArgs e)
+		{
+			REPOJSONTextEditor.Text = "";
+			repoJSONTextEditorID = "";
+
+			REPOJSONTextEditor.Visibility = Visibility.Visible;
+			REPOVisualEditorTabControl.Visibility = Visibility.Collapsed;
+
+			string repoPath = SelectFile("input", "Select REPO File To Input", "All files|*.*", "");
+
+			if (repoPath != "")
+			{
+				//int response = reset_repos();
+
+				int response = load_repo_from_file(repoPath);
+
+				UInt32 repo_data_size = get_repo_response_data_size();
+
+				byte[] repo_data = new byte[repo_data_size];
+
+				Marshal.Copy(get_repo_response_data(), repo_data, 0, (int)repo_data_size);
+
+				if (repo_data_size > 0)
+				{
+					MessageBoxShow(Encoding.UTF8.GetString(repo_data));
+				}
+				else
+				{
+					LoadREPO();
+				}
+			}
+		}
+
+        private void REPOImportSMFREPOJSONButton_Click(object sender, RoutedEventArgs e)
+		{
+			REPOJSONTextEditor.Text = "";
+			repoJSONTextEditorID = "";
+
+			REPOJSONTextEditor.Visibility = Visibility.Visible;
+			REPOVisualEditorTabControl.Visibility = Visibility.Collapsed;
+
+			if (REPOTreeView.Nodes.Count > 2)
+			{
+				string repoPath = SelectFile("input", "Select SMF REPO JSON File To Input", "SMF REPO JSON files|*.repository.json|All files|*.*", "");
+
+				if (repoPath != "")
+				{
+					int response = import_patch(repoPath);
+
+					UInt32 repo_data_size = get_repo_response_data_size();
+
+					byte[] repo_data = new byte[repo_data_size];
+
+					Marshal.Copy(get_repo_response_data(), repo_data, 0, (int)repo_data_size);
+
+					if (repo_data_size > 0)
+					{
+						MessageBoxShow(Encoding.UTF8.GetString(repo_data));
+					}
+					else
+					{
+						LoadREPO();
+					}
+				}
+			}
+			else
+			{
+				MessageBoxShow("Load the REPO either from the currently loaded RPKGs or from a REPO file first.");
+			}
+		}
+
+        private void REPOSaveChangesToSMFREPOJSONButton_Click(object sender, RoutedEventArgs e)
+        {
+			if (REPOTreeView.Nodes.Count > 2)
+			{
+				string repoPath = SelectFile("output", "Select SMF REPO JSON File To Output To", "SMF REPO JSON files|*.repository.json|All files|*.*", "");
+
+				if (repoPath != "")
+				{
+					if (!repoPath.ToLower().EndsWith(".repository.json"))
+                    {
+						repoPath += ".repository.json";
+					}
+
+					int response = create_patch(repoPath);
+
+					UInt32 repo_data_size = get_repo_response_data_size();
+
+					byte[] repo_data = new byte[repo_data_size];
+
+					Marshal.Copy(get_repo_response_data(), repo_data, 0, (int)repo_data_size);
+
+					if (repo_data_size > 0)
+					{
+						MessageBoxShow(Encoding.UTF8.GetString(repo_data));
+					}
+				}
+			}
+			else
+			{
+				MessageBoxShow("Load the REPO either from the currently loaded RPKGs or from a REPO file first.");
+			}
+		}
+
+		private void REPOJSONTextEditor_TextChanged(object sender, EventArgs e)
+		{
+			//int isValidJSON = is_valid_json(REPOJSONTextEditor.Text);
+
+			if (REPOJSONTextEditor.Text == "")
+            {
+				REPOJSONStatus.Visibility = Visibility.Collapsed;
+			}
+			else
+			{
+				string response = Marshal.PtrToStringAnsi(check_json(REPOJSONTextEditor.Text));
+
+				//if (isValidJSON == 1)
+				if (response == "")
+				{
+					//MessageBoxShow("Valid!");
+
+					REPOJSONStatus.Visibility = Visibility.Visible;
+					REPOJSONStatus.Foreground = System.Windows.Media.Brushes.PaleGreen;
+					REPOJSONStatus.Content = "JSON: Valid";
+				}
+				else
+				{
+					//MessageBoxShow("Not Valid!");
+
+					REPOJSONStatus.Visibility = Visibility.Visible;
+					REPOJSONStatus.Foreground = System.Windows.Media.Brushes.OrangeRed;
+					REPOJSONStatus.Content = "JSON: " + response;
+				}
+			}
+		}
+
+        private void REPOJSONTextEditor_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+			//MessageBoxShow(REPOJSONTextEditorName.Text);
+
+			if (repoJSONTextEditorID != "")
+			{
+				int response = save_json(repoJSONTextEditorID, REPOJSONTextEditor.Text);
+
+				repoJSONTextEditorID = Marshal.PtrToStringAnsi(get_repo_response_data());
+
+				if (repoJSONTextEditorID.StartsWith("Err"))
+                {
+					MessageBoxShow(repoJSONTextEditorID);
+
+					REPOJSONTextEditor.Text = "";
+					repoJSONTextEditorID = "";
+				}
+				else
+                {
+					UpdateNode();
+				}
+			}
+		}
+
+		void UpdateNode()
+        {
+			int response = get_repo_entry(repoJSONTextEditorID);
+
+			UInt32 repo_data_size = get_repo_response_data_size();
+
+			byte[] repo_data = new byte[repo_data_size];
+
+			Marshal.Copy(get_repo_response_data(), repo_data, 0, (int)repo_data_size);
+
+			if (repo_data_size > 0)
+			{
+				string[] entries = Encoding.UTF8.GetString(repo_data).Split(new[] { "||||||" }, StringSplitOptions.None);
+
+				foreach (string entry in entries)
+				{
+					if (entry.Length > 0)
+					{
+						string[] data = entry.Split(new[] { "||||" }, StringSplitOptions.None);
+
+						if (data.Length == 3)
+						{
+							System.Windows.Forms.TreeNode node = REPOTreeView.Nodes[repoJSONTextEditorParentNodeIndex].Nodes[repoJSONTextEditorNodeIndex];
+
+							node.Text = data[0] + " (" + data[2] + ")";
+							node.Name = data[2];
+							node.Tag = data[1];
+						}
+					}
+				}
+			}
+		}
+
+		private void SearchREPOTextBox_TextChanged(object sender, TextChangedEventArgs e)
+		{
+			if (searchREPOInputTimer == null)
+			{
+				searchREPOInputTimer = new System.Windows.Threading.DispatcherTimer();
+
+				searchREPOInputTimer.Interval = TimeSpan.FromMilliseconds(600);
+
+				searchREPOInputTimer.Tick += SearchREPOTextBox_TimerTimeout;
+			}
+
+			searchREPOInputTimer.Stop();
+			//searchREPOInputTimer.Tag = (sender as TextBox).Text;
+			searchREPOInputTimer.Start();
+		}
+
+		private void SearchREPOTextBox_TimerTimeout(object sender, EventArgs e)
+		{
+			var timer = (sender as System.Windows.Threading.DispatcherTimer);
+
+			if (timer == null)
+			{
+				return;
+			}
+
+			timer.Stop();
+
+			REPOTreeView.BeginUpdate();
+
+			repoTreeViewBackup.Restore();
+
+			if (SearchREPOTextBox.Text.Length > 0)
+			{
+				string filter = SearchREPOTextBox.Text.ToLower();
+				int childrenVisibleCount = 0;
+
+				foreach (System.Windows.Forms.TreeNode node in REPOTreeView.Nodes)
+				{
+					FilterNodes(node, ref filter, childrenVisibleCount);
+				}
+			}
+
+			REPOTreeView.EndUpdate();
+		}
+
+		private int FilterNodes(System.Windows.Forms.TreeNode parentNode, ref string filter, int childrenVisibleCount)
+		{
+			int currentChildrenVisibleCount = 0;
+
+			if (parentNode != null)
+			{
+				if (parentNode.Nodes.Count > 0)
+				{
+					foreach (System.Windows.Forms.TreeNode node in parentNode.Nodes)
+					{
+						currentChildrenVisibleCount += FilterNodes(node, ref filter, 0);
+					}
+				}
+
+				if (!parentNode.Text.ToLower().Contains(filter) && currentChildrenVisibleCount == 0)
+				{
+					parentNode.Nodes.Clear();
+				}
+				else
+				{
+					if (parentNode.Nodes.Count > 0)
+					{
+						List<int> nodesToRemove = new List<int>();
+
+						for (int i = 0; i < parentNode.Nodes.Count; i++)
+						{
+							if (!parentNode.Nodes[i].Text.ToLower().Contains(filter) && parentNode.Nodes[i].Nodes.Count < 1)
+							{
+								nodesToRemove.Add(i);
+							}
+						}
+
+						for (int i = 0; i < nodesToRemove.Count; i++)
+						{
+							int toRemove = nodesToRemove.Count - i - 1;
+
+							parentNode.Nodes[nodesToRemove[toRemove]].Remove();
+						}
+					}
+
+					childrenVisibleCount++;
+				}
+			}
+
+			return childrenVisibleCount;
+		}
+
+		public class TreeViewBackup : List<TreeViewBackup>
+		{
+			public System.Windows.Forms.TreeNode Parent { get; }
+			public System.Windows.Forms.TreeNodeCollection Children { get; }
+
+			public TreeViewBackup(System.Windows.Forms.TreeNodeCollection children, System.Windows.Forms.TreeNode parent = null)
+			{
+				Parent = parent;
+				Children = children;
+				AddRange(Children.Cast<System.Windows.Forms.TreeNode>().Select(child => new TreeViewBackup(child.Nodes, child)));
+			}
+
+			public void Restore()
+			{
+				Children.Clear();
+				this.ForEach(clone => clone.Restore());
+				Children.AddRange(this.Select(n => n.Parent).ToArray());
+			}
+		}
+
+		private void REPOJSONEditorButton_Click(object sender, RoutedEventArgs e)
+		{
+			REPOJSONTextEditor.Visibility = Visibility.Visible;
+			REPOVisualEditorTabControl.Visibility = Visibility.Collapsed;
+		}
+
+		private void REPOJSONVisualEditorButton_Click(object sender, RoutedEventArgs e)
+		{
+			REPOJSONTextEditor.Visibility = Visibility.Collapsed;
+			REPOVisualEditorTabControl.Visibility = Visibility.Visible;
+
+			LoadREPOVisualEditor();
+		}
+
+		Grid CreateInput(string labelText, int labelFontSize, FontWeight labelFontWeight, string textBoxName, string textBoxText, Thickness textBoxMargin, TextChangedEventHandler textChangedEventHandler)
+		{
+			Grid grid = new Grid();
+			RowDefinition rowDefinition = new RowDefinition();
+			ColumnDefinition columnDefinition = new ColumnDefinition();
+			rowDefinition.Height = GridLength.Auto;
+			grid.RowDefinitions.Add(rowDefinition);
+			columnDefinition.Width = GridLength.Auto;
+			grid.ColumnDefinitions.Add(columnDefinition);
+			columnDefinition = new ColumnDefinition();
+			columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+			grid.ColumnDefinitions.Add(columnDefinition);
+			
+			return grid;
+		}
+
+		TextBox CreateTextBox(string name, string text, Thickness margin, KeyboardFocusChangedEventHandler keyboardFocusChangedEventHandler)
+		{
+			TextBox textBox = new TextBox();
+			textBox.Name = name;
+			textBox.Text = text;
+			textBox.Margin = margin;
+
+			if (keyboardFocusChangedEventHandler != null)
+			{
+				textBox.LostKeyboardFocus += keyboardFocusChangedEventHandler;
+			}
+
+			return textBox;
+		}
+
+		TextBlock CreateTextBlock(string text, int fontsize, FontWeight fontWeight)
+		{
+			TextBlock label1 = new TextBlock();
+			label1.Text = text;
+			label1.FontSize = fontsize;
+			label1.FontWeight = fontWeight;
+			return label1;
+		}
+
+		void LoadREPOVisualEditor()
+        {
+			loadingVisualEditor = true;
+
+			REPOVisualEditorTabControl.Items.Clear();
+
+			TabItem tabItemRoot = new TabItem();
+			tabItemRoot.Header = "Root";
+			ScrollViewer scrollViewerRoot = new ScrollViewer();
+			scrollViewerRoot.Name = tabItemRoot.Header + "ScrollViewer";
+			scrollViewerRoot.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+			StackPanel stackPanelRoot = new StackPanel();
+			stackPanelRoot.Name = tabItemRoot.Header + "StackPanel";
+			scrollViewerRoot.Content = stackPanelRoot;
+			tabItemRoot.Content = scrollViewerRoot;
+
+			REPOVisualEditorTabControl.Items.Add(tabItemRoot);
+
+			Grid gridRoot = new Grid();
+			ColumnDefinition columnDefinition = new ColumnDefinition();
+			columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+			gridRoot.ColumnDefinitions.Add(columnDefinition);
+			columnDefinition = new ColumnDefinition();
+			columnDefinition.Width = new GridLength(10);
+			gridRoot.ColumnDefinitions.Add(columnDefinition);
+			columnDefinition = new ColumnDefinition();
+			columnDefinition.Width = new GridLength(10);
+			gridRoot.ColumnDefinitions.Add(columnDefinition);
+			columnDefinition = new ColumnDefinition();
+			columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+			gridRoot.ColumnDefinitions.Add(columnDefinition);
+			bool top = true;
+			int index = 0;
+
+			visualEditorJSON = JsonDocument.Parse(REPOJSONTextEditor.Text);
+
+			foreach (JsonProperty jsonProperty in visualEditorJSON.RootElement.EnumerateObject())
+			{
+				string jsonPointer = "";
+
+				if (jsonProperty.Value.ValueKind == JsonValueKind.Object)
+                {
+					TabItem tabItem = new TabItem();
+					tabItem.Header = jsonProperty.Name;
+					ScrollViewer scrollViewer = new ScrollViewer();
+					scrollViewer.Name = tabItem.Header + "ScrollViewer";
+					StackPanel stackPanel = new StackPanel();
+					stackPanel.Name = tabItem.Header + "StackPanel";
+					scrollViewer.Content = stackPanel;
+					tabItem.Content = scrollViewer;
+					REPOVisualEditorTabControl.Items.Add(tabItem);
+					Grid gridObject = new Grid();
+					ColumnDefinition columnDefinitionObject = new ColumnDefinition();
+					columnDefinitionObject.Width = new GridLength(1, GridUnitType.Star);
+					gridObject.ColumnDefinitions.Add(columnDefinitionObject);
+					columnDefinitionObject = new ColumnDefinition();
+					columnDefinitionObject.Width = new GridLength(10);
+					gridObject.ColumnDefinitions.Add(columnDefinitionObject);
+					columnDefinitionObject = new ColumnDefinition();
+					columnDefinitionObject.Width = new GridLength(10);
+					gridObject.ColumnDefinitions.Add(columnDefinitionObject);
+					columnDefinitionObject = new ColumnDefinition();
+					columnDefinitionObject.Width = new GridLength(1, GridUnitType.Star);
+					gridObject.ColumnDefinitions.Add(columnDefinitionObject);
+					bool objectTop = true;
+					int objectIndex = 0;
+
+					jsonPointer = "/" + jsonProperty.Name.Replace("~", "~0").Replace("/", "~1");
+
+					foreach (JsonProperty jsonProperty2 in jsonProperty.Value.EnumerateObject())
+					{
+						if (jsonProperty2.Value.ValueKind == JsonValueKind.Array)
+						{
+							int arrayIndex = 0;
+
+							jsonPointer = "/" + jsonProperty2.Name.Replace("~", "~0").Replace("/", "~1");
+
+							foreach (JsonElement jsonElement in jsonProperty2.Value.EnumerateArray())
+							{
+								string arrayJsonPointer = jsonPointer + "/" + arrayIndex.ToString();
+
+								AddRowToVisualEditor(jsonProperty2.Name + " (" + arrayIndex.ToString() + ")", jsonElement, ref arrayJsonPointer, ref gridObject, ref objectIndex, ref objectTop);
+
+								arrayIndex++;
+							}
+						}
+						else
+						{
+							string valueJsonPointer = jsonPointer + "/" + jsonProperty2.Name.Replace("~", "~0").Replace("/", "~1");
+
+							AddRowToVisualEditor(jsonProperty2.Name, jsonProperty2.Value, ref valueJsonPointer, ref gridObject, ref objectIndex, ref objectTop);
+						}
+					}
+
+					stackPanel.Children.Add(gridObject);
+				}
+				else if (jsonProperty.Value.ValueKind == JsonValueKind.Array)
+				{
+					int arrayIndex = 0;
+
+					jsonPointer = "/" + jsonProperty.Name.Replace("~", "~0").Replace("/", "~1");
+
+					foreach (JsonElement jsonElement in jsonProperty.Value.EnumerateArray())
+					{
+						string arrayJsonPointer = jsonPointer + "/" + arrayIndex.ToString();
+
+						AddRowToVisualEditor(jsonProperty.Name + " (" + arrayIndex.ToString() + ")", jsonElement, ref arrayJsonPointer, ref gridRoot, ref index, ref top);
+
+						arrayIndex++;
+					}
+				}
+				else
+                {
+					jsonPointer = "/" + jsonProperty.Name.Replace("~", "~0").Replace("/", "~1");
+
+					AddRowToVisualEditor(jsonProperty.Name, jsonProperty.Value, ref jsonPointer, ref gridRoot, ref index, ref top);
+				}
+			}
+
+			stackPanelRoot.Children.Add(gridRoot);
+
+			REPOVisualEditorTabControl.SelectedIndex = 0;
+
+			loadingVisualEditor = false;
+		}
+
+		void AddRowToVisualEditor(string name, JsonElement element, ref string jsonPointer, ref Grid grid, ref int index, ref bool top)
+        {
+			RowDefinition rowDefinition = new RowDefinition();
+			rowDefinition.Height = GridLength.Auto;
+			grid.RowDefinitions.Add(rowDefinition);
+			TextBlock textBlock = CreateTextBlock(name + ":", 14, FontWeights.Regular);
+			textBlock.TextAlignment = TextAlignment.Right;
+			textBlock.FontWeight = FontWeights.Bold;
+			textBlock.HorizontalAlignment = HorizontalAlignment.Stretch;
+			textBlock.VerticalAlignment = VerticalAlignment.Center;
+			System.Windows.Media.BrushConverter brushConverter = new BrushConverter();
+			textBlock.Background = (System.Windows.Media.Brush)brushConverter.ConvertFromString("#2e2e2e");
+			Border border = new Border();
+			border.BorderBrush = System.Windows.Media.Brushes.White;
+
+			if (top)
+				border.BorderThickness = new Thickness(1, 1, 0, 1);
+			else
+				border.BorderThickness = new Thickness(1, 0, 0, 1);
+
+			border.Margin = new Thickness(50, 0, 0, 0);
+			border.Child = textBlock;
+			grid.Children.Add(border);
+			Grid.SetRow(border, index);
+			Grid.SetColumn(border, 0);
+			border = new Border();
+			border.BorderBrush = System.Windows.Media.Brushes.White;
+
+			if (top)
+				border.BorderThickness = new Thickness(0, 1, 0, 1);
+			else
+				border.BorderThickness = new Thickness(0, 0, 0, 1);
+
+			grid.Children.Add(border);
+			Grid.SetRow(border, index);
+			Grid.SetColumn(border, 1);
+			border = new Border();
+			border.BorderBrush = System.Windows.Media.Brushes.White;
+			border.Background = (System.Windows.Media.Brush)brushConverter.ConvertFromString("#434343");
+
+			if (top)
+				border.BorderThickness = new Thickness(1, 1, 0, 1);
+			else
+				border.BorderThickness = new Thickness(1, 0, 0, 1);
+
+			grid.Children.Add(border);
+			Grid.SetRow(border, index);
+			Grid.SetColumn(border, 2);
+
+			if (enumDictionary.ContainsKey(name))
+			{
+				ComboBox comboBox = new ComboBox();
+				comboBox.ItemsSource = enumDictionary[name];
+				comboBox.Background = (System.Windows.Media.Brush)brushConverter.ConvertFromString("#434343");
+				comboBox.BorderThickness = new Thickness(0);
+				comboBox.Tag = jsonPointer;
+				comboBox.SelectionChanged += ComboBox_SelectionChanged;
+
+				if (!enumDictionary[name].Contains<string>(element.ToString()))
+				{
+					comboBox.Items.Add(element.ToString());
+				}
+
+				comboBox.SelectedValue = element.ToString();
+				border = new Border();
+				border.BorderBrush = System.Windows.Media.Brushes.White;
+				border.Background = (System.Windows.Media.Brush)brushConverter.ConvertFromString("#434343");
+
+				if (top)
+					border.BorderThickness = new Thickness(0, 1, 1, 1);
+				else
+					border.BorderThickness = new Thickness(0, 0, 1, 1);
+
+				border.Margin = new Thickness(0, 0, 50, 0);
+				border.Child = comboBox;
+				grid.Children.Add(border);
+				Grid.SetRow(border, index);
+				Grid.SetColumn(border, 3);
+			}
+			else if (element.ValueKind == JsonValueKind.True || element.ValueKind == JsonValueKind.False)
+			{
+				CheckBox checkBox = new CheckBox();
+				checkBox.Content = name;
+				checkBox.Background = (System.Windows.Media.Brush)brushConverter.ConvertFromString("#434343");
+				checkBox.BorderThickness = new Thickness(0);
+				checkBox.Tag = jsonPointer;
+				checkBox.Checked += CheckBox_Changed;
+				checkBox.Unchecked += CheckBox_Changed;
+
+				if (element.ValueKind == JsonValueKind.True)
+					checkBox.IsChecked = true;
+				else
+					checkBox.IsChecked = false;
+
+				border = new Border();
+				border.Height = 28;
+				border.BorderBrush = System.Windows.Media.Brushes.White;
+				border.Background = (System.Windows.Media.Brush)brushConverter.ConvertFromString("#434343");
+
+				if (top)
+					border.BorderThickness = new Thickness(0, 1, 1, 1);
+				else
+					border.BorderThickness = new Thickness(0, 0, 1, 1);
+
+				border.Margin = new Thickness(0, 0, 50, 0);
+				border.Child = checkBox;
+				grid.Children.Add(border);
+				Grid.SetRow(border, index);
+				Grid.SetColumn(border, 3);
+			}
+			else
+			{
+				TextBox textBox = CreateTextBox("testing", element.ToString(), new Thickness(0), TextBox_LostKeyboardFocus);
+				textBox.TextAlignment = TextAlignment.Left;
+				textBox.FontWeight = FontWeights.Regular;
+				textBox.HorizontalAlignment = HorizontalAlignment.Stretch;
+				textBox.Background = (System.Windows.Media.Brush)brushConverter.ConvertFromString("#434343");
+				textBox.BorderThickness = new Thickness(0);
+				textBox.Tag = jsonPointer;
+				border = new Border();
+				border.BorderBrush = System.Windows.Media.Brushes.White;
+				border.Background = (System.Windows.Media.Brush)brushConverter.ConvertFromString("#434343");
+
+				if (top)
+					border.BorderThickness = new Thickness(0, 1, 1, 1);
+				else
+					border.BorderThickness = new Thickness(0, 0, 1, 1);
+
+				border.Margin = new Thickness(0, 0, 50, 0);
+				border.Child = textBox;
+				grid.Children.Add(border);
+				Grid.SetRow(border, index);
+				Grid.SetColumn(border, 3);
+			}
+
+			if (top)
+				top = false;
+			index++;
+		}
+
+		private static DependencyObject FindDescendant(DependencyObject parent, string name)
+		{
+			FrameworkElement element = parent as FrameworkElement;
+
+			if (element != null)
+			{
+				if (element.Name == name)
+				{
+					return parent;
+				}
+			}
+
+			int num_children = VisualTreeHelper.GetChildrenCount(parent);
+
+			for (int i = 0; i < num_children; i++)
+			{
+				DependencyObject child = VisualTreeHelper.GetChild(parent, i);
+				DependencyObject descendant = FindDescendant(child, name);
+
+				if (descendant != null)
+				{
+					return descendant;
+				}
+			}
+
+			return null;
+		}
+
+        private void TextBox_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+		{
+			if (loadingVisualEditor)
+				return;
+
+			TextBox textBox = sender as TextBox;
+
+			string pointer = (textBox.Tag as string);
+
+			if (pointer != null)
+			{
+				//MessageBoxShow(repoJSONTextEditorID + ", " + pointer + ", " + textBox.Text);
+
+				update_json_at_pointer(repoJSONTextEditorID, pointer, textBox.Text);
+
+				repoJSONTextEditorID = Marshal.PtrToStringAnsi(get_repo_response_data());
+
+				if (repoJSONTextEditorID.StartsWith("Err"))
+				{
+					MessageBoxShow(repoJSONTextEditorID);
+
+					REPOJSONTextEditor.Text = "";
+					repoJSONTextEditorID = "";
+				}
+				else
+				{
+					System.Windows.Forms.TreeNode node = REPOTreeView.Nodes[repoJSONTextEditorParentNodeIndex].Nodes[repoJSONTextEditorNodeIndex];
+
+					LoadREPOJSON(ref node);
+
+					UpdateNode();
+				}
+			}
+		}
+
+		string GetJSONValueByPointer(string pointer)
+		{
+			foreach (JsonProperty jsonProperty in visualEditorJSON.RootElement.EnumerateObject())
+			{
+				string jsonPointer = "";
+
+				if (jsonProperty.Value.ValueKind == JsonValueKind.Object)
+				{
+					jsonPointer = "/" + jsonProperty.Name.Replace("~", "~0").Replace("/", "~1");
+
+					foreach (JsonProperty jsonProperty2 in jsonProperty.Value.EnumerateObject())
+					{
+						if (jsonProperty2.Value.ValueKind == JsonValueKind.Array)
+						{
+							int arrayIndex = 0;
+
+							jsonPointer = "/" + jsonProperty2.Name.Replace("~", "~0").Replace("/", "~1");
+
+							foreach (JsonElement jsonElement in jsonProperty2.Value.EnumerateArray())
+							{
+								string arrayJsonPointer = jsonPointer + "/" + arrayIndex.ToString();
+
+								if (pointer == arrayJsonPointer)
+								{
+									return jsonElement.ToString();
+								}
+
+								arrayIndex++;
+							}
+						}
+						else
+						{
+							string valueJsonPointer = jsonPointer + "/" + jsonProperty2.Name.Replace("~", "~0").Replace("/", "~1");
+
+							if (pointer == valueJsonPointer)
+							{
+								return jsonProperty2.Value.ToString();
+							}
+
+						}
+					}
+				}
+				else if (jsonProperty.Value.ValueKind == JsonValueKind.Array)
+				{
+					int arrayIndex = 0;
+
+					jsonPointer = "/" + jsonProperty.Name.Replace("~", "~0").Replace("/", "~1");
+
+					foreach (JsonElement jsonElement in jsonProperty.Value.EnumerateArray())
+					{
+						string arrayJsonPointer = jsonPointer + "/" + arrayIndex.ToString();
+
+						if (pointer == arrayJsonPointer)
+						{
+							return jsonElement.ToString();
+						}
+
+						arrayIndex++;
+					}
+				}
+				else
+				{
+					jsonPointer = "/" + jsonProperty.Name.Replace("~", "~0").Replace("/", "~1");
+
+					if (pointer == jsonPointer)
+					{
+						return jsonProperty.Value.ToString();
+					}
+				}
+			}
+
+			return "";
+		}
+
+        private void CheckBox_Changed(object sender, RoutedEventArgs e)
+		{
+			if (loadingVisualEditor)
+				return;
+
+			CheckBox checkBox = sender as CheckBox;
+
+			string pointer = (checkBox.Tag as string);
+
+			if (pointer != null)
+			{
+				if (checkBox.IsChecked ?? false)
+				{
+					update_json_at_pointer(repoJSONTextEditorID, pointer, "true");
+				}
+				else
+                {
+					update_json_at_pointer(repoJSONTextEditorID, pointer, "false");
+				}
+
+				System.Windows.Forms.TreeNode node = REPOTreeView.Nodes[repoJSONTextEditorParentNodeIndex].Nodes[repoJSONTextEditorNodeIndex];
+
+				LoadREPOJSON(ref node);
+
+				UpdateNode();
+			}
+		}
+
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+			if (loadingVisualEditor)
+				return;
+
+			ComboBox comboBox = sender as ComboBox;
+
+			string comboBoxText = comboBox.SelectedItem.ToString();
+
+			string pointer = (comboBox.Tag as string);
+
+			if (pointer != null)
+			{
+				if (comboBoxText != GetJSONValueByPointer(pointer))
+				{
+					//MessageBoxShow(repoJSONTextEditorID + ", " + pointer + ", " + comboBoxText);
+
+					update_json_at_pointer(repoJSONTextEditorID, pointer, comboBoxText);
+
+					System.Windows.Forms.TreeNode node = REPOTreeView.Nodes[repoJSONTextEditorParentNodeIndex].Nodes[repoJSONTextEditorNodeIndex];
+
+					LoadREPOJSON(ref node);
+
+					UpdateNode();
 				}
 			}
 		}

@@ -79,7 +79,11 @@ RPKG_EXPORT char* get_hash_in_rpkg_data_in_hex_view(char* rpkg_file, char* hash_
 
 RPKG_EXPORT uint32_t generate_localization_string(char* rpkg_file, char* hash_string, char* resource_type);
 
+RPKG_EXPORT uint32_t generate_localization_line_string(char* rpkg_file, char* hash_string, char* resource_type);
+
 RPKG_EXPORT char* get_localization_string();
+
+RPKG_EXPORT char* get_localization_line_string();
 
 RPKG_EXPORT uint32_t generate_json_string(char* rpkg_file, char* hash_string);
 
@@ -194,3 +198,57 @@ RPKG_EXPORT int get_tblu_subentity_count(uint32_t temps_index);
 RPKG_EXPORT char* get_entry_name(uint32_t temp_index, int entry_index);
 
 RPKG_EXPORT int generate_json_files_from_data(char* temp_path);
+
+RPKG_EXPORT int deep_search_localization(char* input_path, char* search_value, int search_dlge, int search_locr, int search_rtlv, int max_results);
+
+RPKG_EXPORT uint32_t get_localization_search_results_size();
+
+RPKG_EXPORT char* get_localization_search_results();
+
+RPKG_EXPORT int deep_search_entities(char* input_path, char* search_value, bool search_entity_ids, bool search_entity_names, bool search_property_names, bool search_property_values, int max_results);
+
+RPKG_EXPORT uint32_t get_entities_search_results_size();
+
+RPKG_EXPORT char* get_entities_search_results();
+
+RPKG_EXPORT uint32_t is_repo_loaded();
+
+RPKG_EXPORT uint32_t is_ores_loaded();
+
+RPKG_EXPORT int load_repo();
+
+RPKG_EXPORT int load_repo_from_file(char* repo_path);
+
+RPKG_EXPORT int reset_repos();
+
+RPKG_EXPORT uint32_t get_repo_response_data_size();
+
+RPKG_EXPORT char* get_repo_response_data();
+
+RPKG_EXPORT int get_repo_child_entries(char* id);
+
+RPKG_EXPORT int get_repo_category(int category);
+
+RPKG_EXPORT int get_repo_json(char* id);
+
+RPKG_EXPORT char* get_repo_image_hash(char* id);
+
+RPKG_EXPORT char* get_latest_hash_rpkg_path(char* hash);
+
+RPKG_EXPORT int is_valid_json(char* json);
+
+RPKG_EXPORT char* check_json(char* json);
+
+RPKG_EXPORT int create_patch(char* patch_path);
+
+RPKG_EXPORT int import_patch(char* patch_path);
+
+RPKG_EXPORT int save_json(char* id, char* json);
+
+RPKG_EXPORT int duplicate_repo_entry(char* id);
+
+RPKG_EXPORT int erase_repo_entry(char* id);
+
+RPKG_EXPORT int get_repo_entry(char* id);
+
+RPKG_EXPORT int update_json_at_pointer(char* id, char* json_pointer, char* value);

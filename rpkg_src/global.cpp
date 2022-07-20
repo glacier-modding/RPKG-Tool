@@ -10,6 +10,13 @@ int task_single_status = READY;
 int task_multiple_status = READY;
 int task_map_status = READY;
 int gui_control = READY;
+std::vector<repo> repos;
+std::string check_json_response = "";
+std::string latest_hash_rpkg_path = "";
+std::string repo_response_data = "";
+std::string entities_search_results = "";
+std::string localization_search_results = "";
+std::string localization_line_string = "";
 std::string localization_string = "";
 std::string hashes_with_no_reverse_depends = "";
 std::string hash_direct_depends = "";
@@ -84,6 +91,8 @@ int map_percent_progress_godot_map_nodes = 0;
 int map_percent_progress_map_node_temp_loading = 0;
 int map_percent_progress_map_node_changes_check = 0;
 int map_percent_progress_map_writing_changes_to_qn = 0;
+std::map<uint64_t, entity> deep_search_entities_map;
+nlohmann::ordered_json localization_json;
 
 void initialize_prim_float_values()
 {

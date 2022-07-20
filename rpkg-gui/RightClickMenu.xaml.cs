@@ -32,26 +32,26 @@ namespace rpkg
                 newButton.Content = buttons[i];
                 newButton.Name = "button" + i.ToString();
                 newButton.Click += this.Button_Click;
-                newButton.Height = 40;
-                newButton.Padding = new Thickness(16, 0, 16, 0);
+                newButton.Height = 34;
+                newButton.Padding = new Thickness(8, 0, 8, 0);
 
                 if (buttons.Length == 1)
                 {
-                    newButton.Margin = new Thickness(16, 16, 16, 16);
+                    newButton.Margin = new Thickness(8, 8, 8, 8);
                 }
                 else if (i == 0)
                 {
-                    newButton.Margin = new Thickness(16, 16, 16, 8);
+                    newButton.Margin = new Thickness(8, 8, 8, 4);
                 }
                 else if (i == (buttons.Length - 1))
                 {
-                    newButton.Margin = new Thickness(16, 8, 16, 16);
+                    newButton.Margin = new Thickness(8, 4, 8, 8);
                 }
                 else
                 {
-                    newButton.Margin = new Thickness(16, 8, 16, 8);
+                    newButton.Margin = new Thickness(8, 4, 8, 4);
                 }
-                
+
                 this.MainStackPanel.Children.Add(newButton);
             }
         }

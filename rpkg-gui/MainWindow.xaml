@@ -4,13 +4,14 @@
         xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:hx="http://helix-toolkit.org/wpf"
+	    xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
         xmlns:local="clr-namespace:rpkg"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
-        Title="RPKG v2.22.0" Height="800" Width="1280" WindowStartupLocation="CenterScreen">
+        Title="RPKG v2.22.0" Height="800" Width="1280" WindowStartupLocation="CenterScreen" Name="RPKGMainWindow">
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"/>
@@ -34,43 +35,49 @@
 			</Grid.ColumnDefinitions>
 			<DockPanel Grid.Row="0" Grid.Column="0">
 				<Menu DockPanel.Dock="Top">
-					<MenuItem Header="Import">
-						<MenuItem Click="OpenRPKGFile_Click" Header="Import RPKG File"/>
-						<MenuItem Click="OpenRPKGFolder_Click" Header="Import RPKGs Folder"/>
-					</MenuItem>
-					<MenuItem Header="Extract">
-						<MenuItem Click="Extract_Click" Header="Extract from RPKG File"/>
-					</MenuItem>
-					<MenuItem Header="Generate">
-						<MenuItem Click="GenerateRPKGFromFolder_Click" Header="Generate RPKG From Folder"/>
-					</MenuItem>
-					<MenuItem Header="Mass Extract">
-						<MenuItem Click="MassExtract_Click" Header="Extract Mesh Primitives (PRIM) To GLB From RPKGs In Folder"/>
-						<MenuItem Click="MassExtract_Click" Header="Extract Textures (TEXT/TEXD) To TGA From RPKGs In Folder"/>
-						<MenuItem Click="MassExtract_Click" Header="Extract Images/JSONs (ORES) To IOI Paths From RPKGs In Folder"/>
-						<MenuItem Click="MassExtract_Click" Header="Extract Sounds (WWEM) To OGG To IOI Paths From RPKGs In Folder"/>
-						<MenuItem Click="MassExtract_Click" Header="Extract Speech (WWES) To OGG To IOI Paths From RPKGs In Folder"/>
-						<MenuItem Click="MassExtract_Click" Header="Extract Sound Events (WWEV) To OGG To IOI Paths From RPKGs In Folder"/>
-						<MenuItem Click="MassExtract_Click" Header="Extract Dialogue Subtitles (DLGE) To JSON From RPKGs In Folder"/>
-						<MenuItem Click="MassExtract_Click" Header="Extract Localised Strings (LOCR) To JSON From RPKGs In Folder"/>
-						<MenuItem Click="MassExtract_Click" Header="Extract Video Subtitles (RTLV) To JSON From RPKGs In Folder"/>
-						<MenuItem Click="MassExtract_Click" Header="Extract Scaleform GFX/DDS/TGA (GFXF) From RPKGs In Folder"/>
-					</MenuItem>
-					<MenuItem Header="Rebuild">
-						<MenuItem Click="Rebuild_Click" Header="Rebuild Primitive Models (PRIM/TEXT/TEXD) From Folder"/>
-						<MenuItem Click="Rebuild_Click" Header="Rebuild Mesh Primitives (PRIM) From Folder"/>
-						<MenuItem Click="Rebuild_Click" Header="Rebuild Textures (TEXT/TEXD) From Folder"/>
-						<MenuItem Click="Rebuild_Click" Header="Rebuild Scaleform GFX/DDS/TGA (GFXF) From Folder"/>
-						<MenuItem Click="Rebuild_Click" Header="Rebuild Dialogue Subtitles (DLGE) From Folder"/>
-						<MenuItem Click="Rebuild_Click" Header="Rebuild Localised Strings (LOCR) From Folder"/>
-						<MenuItem Click="Rebuild_Click" Header="Rebuild Video Subtitles (RTLV) From Folder"/>
-						<MenuItem Click="Rebuild_Click" Header="Rebuild Sound Events (WWEV) From Folder"/>
+                    <MenuItem Header="Import">
+                        <MenuItem Click="OpenRPKGFile_Click" Header="Import RPKG File"/>
+                        <MenuItem Click="OpenRPKGFolder_Click" Header="Import RPKGs Folder"/>
+                    </MenuItem>
+                    <MenuItem Header="Extract">
+                        <MenuItem Click="Extract_Click" Header="Extract from RPKG File"/>
+                    </MenuItem>
+                    <MenuItem Header="Generate">
+                        <MenuItem Click="GenerateRPKGFromFolder_Click" Header="Generate RPKG From Folder"/>
+                    </MenuItem>
+                    <MenuItem Header="Mass Extract">
+                        <MenuItem Click="MassExtract_Click" Header="Extract Mesh Primitives (PRIM) To GLB From RPKGs In Folder"/>
+                        <MenuItem Click="MassExtract_Click" Header="Extract Textures (TEXT/TEXD) To TGA From RPKGs In Folder"/>
+                        <MenuItem Click="MassExtract_Click" Header="Extract Images/JSONs (ORES) To IOI Paths From RPKGs In Folder"/>
+                        <MenuItem Click="MassExtract_Click" Header="Extract Sounds (WWEM) To OGG To IOI Paths From RPKGs In Folder"/>
+                        <MenuItem Click="MassExtract_Click" Header="Extract Speech (WWES) To OGG To IOI Paths From RPKGs In Folder"/>
+                        <MenuItem Click="MassExtract_Click" Header="Extract Sound Events (WWEV) To OGG To IOI Paths From RPKGs In Folder"/>
+                        <MenuItem Click="MassExtract_Click" Header="Extract Dialogue Subtitles (DLGE) To JSON From RPKGs In Folder"/>
+                        <MenuItem Click="MassExtract_Click" Header="Extract Localised Strings (LOCR) To JSON From RPKGs In Folder"/>
+                        <MenuItem Click="MassExtract_Click" Header="Extract Video Subtitles (RTLV) To JSON From RPKGs In Folder"/>
+                        <MenuItem Click="MassExtract_Click" Header="Extract Scaleform GFX/DDS/TGA (GFXF) From RPKGs In Folder"/>
+                    </MenuItem>
+                    <MenuItem Header="Rebuild">
+                        <MenuItem Click="Rebuild_Click" Header="Rebuild Primitive Models (PRIM/TEXT/TEXD) From Folder"/>
+                        <MenuItem Click="Rebuild_Click" Header="Rebuild Mesh Primitives (PRIM) From Folder"/>
+                        <MenuItem Click="Rebuild_Click" Header="Rebuild Textures (TEXT/TEXD) From Folder"/>
+                        <MenuItem Click="Rebuild_Click" Header="Rebuild Scaleform GFX/DDS/TGA (GFXF) From Folder"/>
+                        <MenuItem Click="Rebuild_Click" Header="Rebuild Dialogue Subtitles (DLGE) From Folder"/>
+                        <MenuItem Click="Rebuild_Click" Header="Rebuild Localised Strings (LOCR) From Folder"/>
+                        <MenuItem Click="Rebuild_Click" Header="Rebuild Video Subtitles (RTLV) From Folder"/>
+                        <MenuItem Click="Rebuild_Click" Header="Rebuild Sound Events (WWEV) From Folder"/>
                     </MenuItem>
                     <MenuItem Header="Material Utilities">
                         <MenuItem Click="MaterialUtilities_Click" Header="Convert Single MATI (+.MATI.meta) File To MATI JSON File" Tag="MATI"/>
                         <MenuItem Click="MaterialUtilities_Click" Header="Convert Single MATI JSON File To MATI (+.MATI.meta) File" Tag="JSON"/>
                         <MenuItem Click="MaterialUtilities_Click" Header="Mass Convert MATI (+.MATI.meta) Files To MATI JSON Files" Tag="MATIS"/>
                         <MenuItem Click="MaterialUtilities_Click" Header="Mass Convert MATI JSON Files To MATI (+.MATI.meta) Files" Tag="JSONS"/>
+                    </MenuItem>
+                    <MenuItem Header="Dialogue Utilities">
+                        <MenuItem Click="DialogueUtilities_Click" Header="Convert Single SDEF (+.SDEF.meta) File To SDEF JSON File" Tag="SDEF"/>
+                        <MenuItem Click="DialogueUtilities_Click" Header="Convert Single SDEF JSON File To SDEF (+.SDEF.meta) File" Tag="JSON"/>
+                        <MenuItem Click="DialogueUtilities_Click" Header="Mass Convert SDEF (+.SDEF.meta) Files To SDEF JSON Files" Tag="SDEFS"/>
+                        <MenuItem Click="DialogueUtilities_Click" Header="Mass Convert SDEF JSON Files To SDEF (+.SDEF.meta) Files" Tag="JSONS"/>
                     </MenuItem>
                     <MenuItem Header="Map Editing">
                         <MenuItem Header="Export Main Hitman Map to Godot v4 project">
@@ -183,9 +190,9 @@
                         <MenuItem  Click="MapEditorExport_Click" Header="Export Map By TEMP to Godot v4 project"/>
                         <MenuItem Click="MapEditorImport_Click" Header="Import Map from Godot v4 project"/>
                     </MenuItem>
-					<MenuItem Header="Utilities">
-						<MenuItem Click="ConvertHashMetaFileToJSON_Click" Header="Convert Hash Meta File To JSON"/>
-						<MenuItem Click="ConvertJSONToHashMetaFile_Click" Header="Convert JSON To Hash Meta File"/>
+                    <MenuItem Header="Utilities">
+                        <MenuItem Click="ConvertHashMetaFileToJSON_Click" Header="Convert Hash Meta File To JSON"/>
+                        <MenuItem Click="ConvertJSONToHashMetaFile_Click" Header="Convert JSON To Hash Meta File"/>
                         <MenuItem Click="HashCalculator_Click"  Header="Hash Calculator"/>
                     </MenuItem>
                     <MenuItem Header="Color Theme">
@@ -207,46 +214,86 @@
                         <MenuItem Click="ChangeColorTheme_Click" Header="Dark/White"/>
                     </MenuItem>
                     <MenuItem Click="About_Click" Header="About"/>
-				</Menu>
-			</DockPanel>
-			<Image Grid.Row="0" Grid.Column="2" Source="Discord.png" Cursor="Hand" MouseDown="DiscordInvite_MouseDown"/>
-			<Label Grid.Row="0" Grid.Column="3" Content="Presence " FontSize="14"/>
-			<mah:ToggleSwitch Grid.Row="0" Grid.Column="4" Toggled="DiscordRichPresence_Toggled" Width="90"/>
-		</Grid>
-		<TabControl x:Name="LeftTabControl" Grid.Row="1" Grid.Column="0">
-			<TabItem x:Name="FirstTabLeft" Header="Resource View">
-				<!--TreeView x:Name="MainTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/-->
-				<WindowsFormsHost x:Name="MainTreeViewWindowsFormsHost">
-					<wf:TreeView x:Name="MainTreeView" Font="Consolas,10"/>
-				</WindowsFormsHost>
-			</TabItem>
-			<TabItem x:Name="SecondTabLeft" Header="Dependency View">
-				<!--TreeView x:Name="SearchRPKGsTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/-->
-				<WindowsFormsHost x:Name="HashMapTreeViewWindowsFormsHost">
-					<wf:TreeView x:Name="HashMapTreeView" Font="Consolas,10"/>
-				</WindowsFormsHost>
-			</TabItem>
-			<TabItem x:Name="ThirdTabLeft" Header="Search">
-				<TabControl x:Name="LeftTabControl2" Grid.Row="1" Grid.Column="0">
-					<TabItem x:Name="ThirdTabLeft2" Header="Search RPKGs">
-						<Grid>
-							<Grid.RowDefinitions>
-								<RowDefinition Height="Auto"/>
-								<RowDefinition Height="*"/>
-							</Grid.RowDefinitions>
-							<Grid.ColumnDefinitions>
-								<ColumnDefinition Width="Auto"/>
+                </Menu>
+            </DockPanel>
+            <Image Grid.Row="0" Grid.Column="2" Source="Discord.png" Cursor="Hand" MouseDown="DiscordInvite_MouseDown"/>
+            <Label Grid.Row="0" Grid.Column="3" Content="Presence " FontSize="14"/>
+            <mah:ToggleSwitch Grid.Row="0" Grid.Column="4" Toggled="DiscordRichPresence_Toggled" Width="90"/>
+        </Grid>
+        <TabControl x:Name="LeftTabControl" Grid.Row="1" Grid.Column="0">
+            <TabItem x:Name="FirstTabLeft" Header="Resource View">
+                <!--TreeView x:Name="MainTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/-->
+                <WindowsFormsHost x:Name="MainTreeViewWindowsFormsHost">
+                    <wf:TreeView x:Name="MainTreeView" Font="Consolas,10"/>
+                </WindowsFormsHost>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="24" VerticalAlignment="Bottom"/>
+                </TabItem.Header>
+                <Image Name="image1"/>
+            </TabItem>
+            <TabItem x:Name="REPOTab" Header="REPO">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <UniformGrid Rows="2" Columns="2" VerticalAlignment="Center">
+                            <Button Name="LoadREPOFromRPKGsButton" Content="Load REPO From Loaded RPKGs" Click="LoadREPOFromRPKGsButton_Click" Margin="5"/>
+                            <Button Name="LoadREPOFromFileButton" Content="Load REPO From File" Click="LoadREPOFromFileButton_Click" Margin="5"/>
+                            <Button Name="REPOImportSMFREPOJSONButton" Content="Import SMF REPO JSON" Click="REPOImportSMFREPOJSONButton_Click"  Margin="5"/>
+                            <Button Name="REPOSaveChangesToSMFREPOJSONButton" Content="Save Changes To SMF REPO JSON" Click="REPOSaveChangesToSMFREPOJSONButton_Click" Margin="5"/>
+                        </UniformGrid>
+                    </Grid>
+                    <Label Grid.Row="1" Grid.Column="0" Content="Filter by:" VerticalContentAlignment="Center" FontSize="14"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" x:Name="SearchREPOTextBox" FontFamily="Consolas" TextWrapping="NoWrap" TextChanged="SearchREPOTextBox_TextChanged"/>
+                    <!--TreeView Grid.Row="1" Grid.ColumnSpan="4" x:Name="SearchRPKGsTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/-->
+                    <WindowsFormsHost Grid.Row="2" Grid.ColumnSpan="2" x:Name="REPOTreeViewWindowsFormsHost">
+                        <wf:TreeView x:Name="REPOTreeView" Font="Consolas,10" Sorted="True"/>
+                    </WindowsFormsHost>
+                </Grid>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="24" VerticalAlignment="Bottom"/>
+                </TabItem.Header>
+                <Image Name="image2"/>
+            </TabItem>
+            <TabItem x:Name="ThirdTabLeft" Header="Search">
+                <TabControl x:Name="LeftTabControl2" Grid.Row="1" Grid.Column="0">
+                    <TabItem x:Name="SecondTabLeft2" Header="Search RPKGs">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
-								<ColumnDefinition Width="Auto"/>
-							</Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
                             <StackPanel Orientation="Horizontal">
-                                <Label Grid.Row="0" Grid.Column="0" Content="Search string:" VerticalContentAlignment="Center"/>
+                                <Label Grid.Row="0" Grid.Column="0" Content="Search string:" VerticalContentAlignment="Center" FontSize="14"/>
                             </StackPanel>
                             <TextBox Grid.Row="0" Grid.Column="1" x:Name="SearchRPKGsTextBox" TextChanged="SearchRPKGsTextBox_TextChanged" FontFamily="Consolas" TextWrapping="NoWrap"/>
-							<Label Grid.Row="0" Grid.Column="2" Content="Resource Type:"/>
+                            <Label Grid.Row="0" Grid.Column="2" Content="Resource Type:" FontSize="14"/>
                             <ComboBox Grid.Row="0" Grid.Column="3" x:Name="SearchRPKGsType" SelectionChanged="SearchRPKGsType_SelectionChanged" FontFamily="Consolas">
                                 <ComboBoxItem Content="All" IsSelected="True"/>
                                 <ComboBoxItem Content="AIBB"/>
@@ -317,138 +364,389 @@
                                 <ComboBoxItem Content="WWEV"/>
                                 <ComboBoxItem Content="YSHP"/>
                             </ComboBox>
-                            <Label Grid.Row="0" Grid.Column="4" Content="Results per RPKG:"/>
+                            <Label Grid.Row="0" Grid.Column="4" Content="Results per RPKG:" FontSize="14"/>
                             <ComboBox Grid.Row="0" Grid.Column="5" x:Name="SearchRPKGsComboBox" SelectionChanged="SearchRPKGsComboBox_SelectionChanged" FontFamily="Consolas">
-								<ComboBoxItem Content="100" IsSelected="True"/>
-								<ComboBoxItem Content="200"/>
-								<ComboBoxItem Content="500"/>
-								<ComboBoxItem Content="1000"/>
-								<ComboBoxItem Content="2000"/>
-								<ComboBoxItem Content="5000"/>
-								<ComboBoxItem Content="10000"/>
-								<ComboBoxItem Content="20000"/>
-								<ComboBoxItem Content="50000"/>
-								<ComboBoxItem Content="100000"/>
-							</ComboBox>
-							<!--TreeView Grid.Row="1" Grid.ColumnSpan="4" x:Name="SearchRPKGsTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/-->
-							<WindowsFormsHost Grid.Row="1" Grid.ColumnSpan="6" x:Name="SearchRPKGsTreeViewWindowsFormsHost">
-								<wf:TreeView x:Name="SearchRPKGsTreeView" Font="Consolas,10"/>
-							</WindowsFormsHost>
-						</Grid>
-					</TabItem>
-					<TabItem x:Name="ThirdTabLeft3" Header="Search Hash List">
-						<Grid>
-							<Grid.RowDefinitions>
-								<RowDefinition Height="Auto"/>
-								<RowDefinition Height="*"/>
-							</Grid.RowDefinitions>
-							<Grid.ColumnDefinitions>
-								<ColumnDefinition Width="Auto"/>
-								<ColumnDefinition Width="*"/>
-								<ColumnDefinition Width="Auto"/>
-								<ColumnDefinition Width="Auto"/>
-							</Grid.ColumnDefinitions>
-							<Label Grid.Row="0" Grid.Column="0" Content="Search string:"/>
-							<TextBox Grid.Row="0" Grid.Column="1" x:Name="SearchHashListTextBox" TextChanged="SearchHashListTextBox_TextChanged" FontFamily="Consolas" TextWrapping="NoWrap"/>
-							<Label Grid.Row="0" Grid.Column="2" Content="Max results:"/>
-							<ComboBox Grid.Row="0" Grid.Column="3" x:Name="SearchHashListComboBox" FontFamily="Consolas">
-								<ComboBoxItem Content="100" IsSelected="True"/>
-								<ComboBoxItem Content="200"/>
-								<ComboBoxItem Content="500"/>
-								<ComboBoxItem Content="1000"/>
-								<ComboBoxItem Content="2000"/>
-								<ComboBoxItem Content="5000"/>
-								<ComboBoxItem Content="10000"/>
-								<ComboBoxItem Content="20000"/>
-								<ComboBoxItem Content="50000"/>
-								<ComboBoxItem Content="100000"/>
-							</ComboBox>
-							<!--TreeView Grid.Row="1" Grid.ColumnSpan="4" x:Name="SearchHashListTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/-->
-							<WindowsFormsHost Grid.Row="1" Grid.ColumnSpan="4" x:Name="SearchHashListTreeViewWindowsFormsHost">
-								<wf:TreeView x:Name="SearchHashListTreeView" Font="Consolas,10"/>
-							</WindowsFormsHost>
-						</Grid>
-					</TabItem>
-				</TabControl>
-			</TabItem>
-		</TabControl>
-		<GridSplitter HorizontalAlignment="Right" VerticalAlignment="Stretch" Grid.Row="1"  Grid.Column="1" ResizeBehavior="PreviousAndNext" Width="5"/>
-		<TabControl x:Name="RightTabControl" Grid.Row="1" Grid.Column="2">
-			<TabItem x:Name="FirstTabRight" Header="Details">
-				<Grid>
-					<Grid.RowDefinitions>
-						<RowDefinition Height="Auto" />
-						<RowDefinition Height="*"/>
-					</Grid.RowDefinitions>
-					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="Auto"/>
-						<ColumnDefinition Width="Auto"/>
-						<ColumnDefinition Width="*"/>
-					</Grid.ColumnDefinitions>
-					<Button Grid.Row="0" Grid.Column="0" Click="EditPatchDeletionListButton_Click" x:Name="EditPatchDeletionListButton" Content="Edit Patch Deletion List" Visibility="Collapsed"/>
-					<Button Grid.Row="0" Grid.Column="0" Click="SaveChangesToPatchDeletionListButton_Click" x:Name="SaveChangesToPatchDeletionListButton" Content="Save Changes To Patch Deletion List" Visibility="Collapsed"/>
-					<Button Grid.Row="0" Grid.Column="1" Click="DiscardChangesToPatchDeletionListButton_Click" x:Name="DiscardChangesToPatchDeletionListButton" Content="Discard Changes To Patch Deletion List" Visibility="Collapsed"/>
-					<Button Grid.Row="0" Grid.Column="0" Click="EditHashDependsButton_Click" x:Name="EditHashDependsButton" Content="Edit Hash Depends" Visibility="Collapsed"/>
-					<Button Grid.Row="0" Grid.Column="0" Click="SaveChangesToHashDependsButton_Click" x:Name="SaveChangesToHashDependsButton" Content="Save Changes To Hash Depends" Visibility="Collapsed"/>
-					<Button Grid.Row="0" Grid.Column="1" Click="DiscardChangesToHashDependsButton_Click" x:Name="DiscardChangesToHashDependsButton" Content="Discard Changes To Hash Depends" Visibility="Collapsed"/>
-					<Button Grid.Row="0" Grid.Column="1" Click="ExtractHashDependsButton_Click" x:Name="ExtractHashDependsButton" Content="Extract Hash Depends" Visibility="Collapsed"/>
-					<TextBox Grid.Row="1" Grid.ColumnSpan="3" x:Name="DetailsTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap" TextChanged="DetailsTextBox_TextChanged" IsReadOnly="True"/>
-					<ScrollViewer Grid.Row="1" Grid.ColumnSpan="3" x:Name="MainScrollViewer" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
-						<StackPanel x:Name="MainStackPanel" Visibility="Collapsed">
+                                <ComboBoxItem Content="100" IsSelected="True"/>
+                                <ComboBoxItem Content="200"/>
+                                <ComboBoxItem Content="500"/>
+                                <ComboBoxItem Content="1000"/>
+                                <ComboBoxItem Content="2000"/>
+                                <ComboBoxItem Content="5000"/>
+                                <ComboBoxItem Content="10000"/>
+                                <ComboBoxItem Content="20000"/>
+                                <ComboBoxItem Content="50000"/>
+                                <ComboBoxItem Content="100000"/>
+                            </ComboBox>
+                            <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6" VerticalAlignment="Center">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <UniformGrid Rows="1" Columns="2" VerticalAlignment="Center">
+                                    <Button Name="SearchRPKGsExpandAllButton" Content="Expand All" Click="SearchRPKGsExpandAllButton_Click" Margin="5"/>
+                                    <Button Name="SearchRPKGsCollapseAllButton" Content="Collapse All" Click="SearchRPKGsCollapseAllButton_Click" Margin="5"/>
+                                </UniformGrid>
+                            </Grid>
+                            <!--TreeView Grid.Row="1" Grid.ColumnSpan="4" x:Name="SearchRPKGsTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/-->
+                            <WindowsFormsHost Grid.Row="2" Grid.ColumnSpan="6" x:Name="SearchRPKGsTreeViewWindowsFormsHost">
+                                <wf:TreeView x:Name="SearchRPKGsTreeView" Font="Consolas,10"/>
+                            </WindowsFormsHost>
+                        </Grid>
+                    </TabItem>
+                    <TabItem>
+                        <TabItem.Header>
+                            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="24" VerticalAlignment="Bottom"/>
+                        </TabItem.Header>
+                        <Image Name="image4"/>
+                    </TabItem>
+                    <TabItem x:Name="SecondTabLeft3" Header="Search Hash List">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Row="0" Grid.Column="0" Content="Search string:" FontSize="14"/>
+                            <TextBox Grid.Row="0" Grid.Column="1" x:Name="SearchHashListTextBox" TextChanged="SearchHashListTextBox_TextChanged" FontFamily="Consolas" TextWrapping="NoWrap"/>
+                            <Label Grid.Row="0" Grid.Column="2" Content="Max results:" FontSize="14"/>
+                            <ComboBox Grid.Row="0" Grid.Column="3" x:Name="SearchHashListComboBox" FontFamily="Consolas">
+                                <ComboBoxItem Content="100" IsSelected="True"/>
+                                <ComboBoxItem Content="200"/>
+                                <ComboBoxItem Content="500"/>
+                                <ComboBoxItem Content="1000"/>
+                                <ComboBoxItem Content="2000"/>
+                                <ComboBoxItem Content="5000"/>
+                                <ComboBoxItem Content="10000"/>
+                                <ComboBoxItem Content="20000"/>
+                                <ComboBoxItem Content="50000"/>
+                                <ComboBoxItem Content="100000"/>
+                            </ComboBox>
+                            <!--TreeView Grid.Row="1" Grid.ColumnSpan="4" x:Name="SearchHashListTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/-->
+                            <WindowsFormsHost Grid.Row="2" Grid.ColumnSpan="4" x:Name="SearchHashListTreeViewWindowsFormsHost">
+                                <wf:TreeView x:Name="SearchHashListTreeView" Font="Consolas,10"/>
+                            </WindowsFormsHost>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="24" VerticalAlignment="Bottom"/>
+                </TabItem.Header>
+                <Image Name="image3"/>
+            </TabItem>
+            <TabItem x:Name="SecondTabLeft" Header="Deep Search">
+                <TabControl x:Name="LeftTabControl3" Grid.Row="1" Grid.Column="0">
+                    <TabItem x:Name="DeepSearchEntitiesTab" Header="Entities">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Grid.Row="0" Grid.Column="0" Content="Search value:" VerticalContentAlignment="Center" FontSize="14"/>
+                            </StackPanel>
+                            <TextBox Grid.Row="0" Grid.Column="1" x:Name="DeepSearchEntitiesTextBox" FontFamily="Consolas" TextWrapping="NoWrap"/>
+                            <Label Grid.Row="0" Grid.Column="2" Content="Max results:" FontSize="14"/>
+                            <ComboBox Grid.Row="0" Grid.Column="3" x:Name="DeepSearchEntitiesComboBox" FontFamily="Consolas">
+                                <ComboBoxItem Content="100" IsSelected="True"/>
+                                <ComboBoxItem Content="200"/>
+                                <ComboBoxItem Content="500"/>
+                                <ComboBoxItem Content="1000"/>
+                                <ComboBoxItem Content="2000"/>
+                                <ComboBoxItem Content="5000"/>
+                                <ComboBoxItem Content="10000"/>
+                                <ComboBoxItem Content="20000"/>
+                                <ComboBoxItem Content="50000"/>
+                                <ComboBoxItem Content="100000"/>
+                            </ComboBox>
+                            <Grid Grid.Row="1" Grid.ColumnSpan="4">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Row="0" Grid.Column="0" Content="Search within RPKGS:" VerticalContentAlignment="Center" FontSize="14"/>
+                                <ComboBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" x:Name="DeepSearchEntitiesRPKGsComboBox" FontFamily="Consolas" Margin="15" VerticalAlignment="Center"/>
+                                <Label Grid.Row="1" Grid.Column="0" Content="Search progress:" VerticalContentAlignment="Center" FontSize="14"/>
+                                <ProgressBar Grid.Row="1" Grid.Column="1" Value="0" Name="DeepSearchEntitiesProgressBar" Margin="10"/>
+                                <Button Grid.Row="1" Grid.Column="2" Name="DeepSearchEntitiesButton" Content="Start Search" Margin="5" Click="DeepSearchEntitiesButton_Click"/>
+                                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" VerticalAlignment="Center">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <UniformGrid Rows="1" Columns="2" VerticalAlignment="Center">
+                                        <Button Name="DeepSearchEntitiesExpandAllButton" Content="Expand All" Click="DeepSearchEntitiesExpandAllButton_Click" Margin="5"/>
+                                        <Button Name="DeepSearchEntitiesCollapseAllButton" Content="Collapse All" Click="DeepSearchEntitiesCollapseAllButton_Click" Margin="5"/>
+                                    </UniformGrid>
+                                </Grid>
+                            </Grid>
+                            <!--TreeView Grid.Row="1" Grid.ColumnSpan="4" x:Name="SearchRPKGsTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/-->
+                            <WindowsFormsHost Grid.Row="2" Grid.ColumnSpan="4" x:Name="DeepSearchEntitiesTreeViewWindowsFormsHost">
+                                <wf:TreeView x:Name="DeepSearchEntitiesTreeView" Font="Consolas,10"/>
+                            </WindowsFormsHost>
+                        </Grid>
+                    </TabItem>
+                    <TabItem>
+                        <TabItem.Header>
+                            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="24" VerticalAlignment="Bottom"/>
+                        </TabItem.Header>
+                        <Image Name="image5"/>
+                    </TabItem>
+                    <TabItem x:Name="DeepSearchLocalizationTab" Header="Localization">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Grid.Row="0" Grid.Column="0" Content="Search value:" VerticalContentAlignment="Center" FontSize="14"/>
+                            </StackPanel>
+                            <TextBox Grid.Row="0" Grid.Column="1" x:Name="DeepSearchLocalizationTextBox" FontFamily="Consolas" TextWrapping="NoWrap"/>
+                            <Label Grid.Row="0" Grid.Column="2" Content="Max results:" FontSize="14"/>
+                            <ComboBox Grid.Row="0" Grid.Column="3" x:Name="DeepSearchLocalizationComboBox" FontFamily="Consolas">
+                                <ComboBoxItem Content="100" IsSelected="True"/>
+                                <ComboBoxItem Content="200"/>
+                                <ComboBoxItem Content="500"/>
+                                <ComboBoxItem Content="1000"/>
+                                <ComboBoxItem Content="2000"/>
+                                <ComboBoxItem Content="5000"/>
+                                <ComboBoxItem Content="10000"/>
+                                <ComboBoxItem Content="20000"/>
+                                <ComboBoxItem Content="50000"/>
+                                <ComboBoxItem Content="100000"/>
+                            </ComboBox>
+                            <Grid Grid.Row="1" Grid.ColumnSpan="4">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Row="0" Grid.Column="0" Content="Search within RPKGS:" VerticalContentAlignment="Center" FontSize="14"/>
+                                <ComboBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" x:Name="DeepSearchLocalizationRPKGsComboBox" FontFamily="Consolas" Margin="15" VerticalAlignment="Center"/>
+                                <Label Grid.Row="1" Grid.Column="0" Content="Search through:" FontSize="14" VerticalAlignment="Center"/>
+                                <Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Center">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <UniformGrid Rows="1" Columns="3" VerticalAlignment="Center">
+                                        <CheckBox Name="DeepSearchLocalizationDLGECheckBox" Content="DLGE" HorizontalAlignment="Center" IsChecked="True"/>
+                                        <CheckBox Name="DeepSearchLocalizationLOCRCheckBox" Content="LOCR" HorizontalAlignment="Center" IsChecked="True"/>
+                                        <CheckBox Name="DeepSearchLocalizationRTLVCheckBox" Content="RTLV" HorizontalAlignment="Center" IsChecked="True"/>
+                                    </UniformGrid>
+                                </Grid>
+                                <Label Grid.Row="2" Grid.Column="0" Content="Search progress:" VerticalContentAlignment="Center" FontSize="14"/>
+                                <ProgressBar Grid.Row="2" Grid.Column="1" Value="0" Name="DeepSearchLocalizationProgressBar" Margin="10"/>
+                                <Button Grid.Row="2" Grid.Column="2" Name="DeepSearchLocalizationButton" Content="Start Search" Margin="5" Click="DeepSearchLocalizationButton_Click"/>
+                                <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" VerticalAlignment="Center">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <UniformGrid Rows="1" Columns="2" VerticalAlignment="Center">
+                                        <Button Name="DeepSearchLocalizationExpandAllButton" Content="Expand All" Click="DeepSearchLocalizationExpandAllButton_Click" Margin="5"/>
+                                        <Button Name="DeepSearchLocalizationCollapseAllButton" Content="Collapse All" Click="DeepSearchLocalizationCollapseAllButton_Click" Margin="5"/>
+                                    </UniformGrid>
+                                </Grid>
+                            </Grid>
+                            <!--TreeView Grid.Row="1" Grid.ColumnSpan="4" x:Name="SearchRPKGsTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/-->
+                            <WindowsFormsHost Grid.Row="2" Grid.ColumnSpan="4" x:Name="DeepSearchLocalizationTreeViewWindowsFormsHost">
+                                <wf:TreeView x:Name="DeepSearchLocalizationTreeView" Font="Consolas,10"/>
+                            </WindowsFormsHost>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+            </TabItem>
+        </TabControl>
+        <GridSplitter HorizontalAlignment="Right" VerticalAlignment="Stretch" Grid.Row="1"  Grid.Column="1" ResizeBehavior="PreviousAndNext" Width="5"/>
+        <TabControl x:Name="RightTabControl" Grid.Row="1" Grid.Column="2">
+            <TabItem x:Name="FirstTabRight" Header="Details">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Row="0" Grid.Column="0" Click="EditPatchDeletionListButton_Click" x:Name="EditPatchDeletionListButton" Content="Edit Patch Deletion List" Visibility="Collapsed"/>
+                    <Button Grid.Row="0" Grid.Column="0" Click="SaveChangesToPatchDeletionListButton_Click" x:Name="SaveChangesToPatchDeletionListButton" Content="Save Changes To Patch Deletion List" Visibility="Collapsed"/>
+                    <Button Grid.Row="0" Grid.Column="1" Click="DiscardChangesToPatchDeletionListButton_Click" x:Name="DiscardChangesToPatchDeletionListButton" Content="Discard Changes To Patch Deletion List" Visibility="Collapsed"/>
+                    <Button Grid.Row="0" Grid.Column="0" Click="EditHashDependsButton_Click" x:Name="EditHashDependsButton" Content="Edit Hash Depends" Visibility="Collapsed"/>
+                    <Button Grid.Row="0" Grid.Column="0" Click="SaveChangesToHashDependsButton_Click" x:Name="SaveChangesToHashDependsButton" Content="Save Changes To Hash Depends" Visibility="Collapsed"/>
+                    <Button Grid.Row="0" Grid.Column="1" Click="DiscardChangesToHashDependsButton_Click" x:Name="DiscardChangesToHashDependsButton" Content="Discard Changes To Hash Depends" Visibility="Collapsed"/>
+                    <Button Grid.Row="0" Grid.Column="1" Click="ExtractHashDependsButton_Click" x:Name="ExtractHashDependsButton" Content="Extract Hash Depends" Visibility="Collapsed"/>
+                    <TextBox Grid.Row="1" Grid.ColumnSpan="3" x:Name="DetailsTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap" TextChanged="DetailsTextBox_TextChanged" IsReadOnly="True"/>
+                    <ScrollViewer Grid.Row="1" Grid.ColumnSpan="3" x:Name="MainScrollViewer" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+                        <StackPanel x:Name="MainStackPanel" Visibility="Collapsed">
 
-						</StackPanel>
-					</ScrollViewer>
-				</Grid>
-			</TabItem>
-			<TabItem x:Name="SecondTabRight" Header="Hex Viewer">
-				<TextBox x:Name="HexViewerTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap" IsReadOnly="True"/>
-			</TabItem>
-			<TabItem x:Name="ThirdTabRight" Header="JSON Viewer" Visibility="Collapsed">
-				<TextBox x:Name="LocalizationTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="Wrap" IsReadOnly="True"/>
-			</TabItem>
-			<TabItem x:Name="FourthTabRight" Header="Image Viewer" Visibility="Collapsed">
-				<Image x:Name="ImageViewer"/>
-			</TabItem>
-			<TabItem x:Name="FifthTabRight" Header="Audio Player" Visibility="Collapsed">
-				<Grid>
-					<Grid.Resources>
-						<Style TargetType="{x:Type iconPacks:PackIconMaterialDesign}">
-							<Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.Accent}"/>
-							<Setter Property="Background" Value="{DynamicResource MahApps.Brushes.ThemeBackground}"/>
-						</Style>
-					</Grid.Resources>
-					<Grid.RowDefinitions>
-						<RowDefinition Height="Auto"/>
-						<RowDefinition Height="Auto"/>
-						<RowDefinition Height="Auto"/>
-						<RowDefinition Height="*"/>
-					</Grid.RowDefinitions>
-					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="Auto"/>
-						<ColumnDefinition Width="*"/>
-						<ColumnDefinition Width="Auto"/>
-					</Grid.ColumnDefinitions>
-					<Label x:Name="OGGPlayerLabelHashFileName" Grid.Row="0" Grid.ColumnSpan="3" Content="" HorizontalContentAlignment="Center" FontFamily="Consolas"/>
-					<Label x:Name="OGGPlayerLabelIOIString" Grid.Row="1" Grid.ColumnSpan="3" Content="" HorizontalContentAlignment="Center" FontFamily="Consolas"/>
-					<iconPacks:PackIconMaterialDesign Margin="5" Grid.Row="2" Grid.Column="0" x:Name="OGGPlayerPlay" MouseDown="PackIconMaterialDesign_MouseDown" Kind="PlayCircleOutline" Width="40" Height="40" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-					<Slider Margin="5" Grid.Row="2" Grid.Column="1" x:Name="OGGPlayer" IsMoveToPointEnabled="True" Thumb.DragStarted="OGGPlayer_DragStarted" Thumb.DragCompleted="OGGPlayer_DragCompleted"/>
-					<Label x:Name="OGGPlayerLabel" Grid.Row="3" Grid.ColumnSpan="3" Content="0 / 0" HorizontalContentAlignment="Center" FontFamily="Consolas"/>
-					<ComboBox Margin="5" Grid.Row="2" Grid.Column="2" x:Name="OGGPlayerComboBox" FontFamily="Consolas" SelectionChanged="OGGPlayerComboBox_SelectionChanged">
-					</ComboBox>
-				</Grid>
-			</TabItem>
-			<TabItem x:Name="SixthTabRight" Header="3D Viewer" Visibility="Collapsed">
-				<Grid>
-					<hx:HelixViewport3D x:Name="helixViewport">
-						<hx:HelixViewport3D.Camera>
-							<OrthographicCamera NearPlaneDistance="-1.7976931348623157E+8" FarPlaneDistance="1.7976931348623157E+8" />
-						</hx:HelixViewport3D.Camera>
-						<hx:SunLight/>
-						<hx:DefaultLights></hx:DefaultLights>
-						<ModelVisual3D x:Name="model"></ModelVisual3D>
-					</hx:HelixViewport3D>
-				</Grid>
-			</TabItem>
-		</TabControl>
-	</Grid>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+            <TabItem Name="SecondTabRightSeparator">
+                <TabItem.Header>
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="24" VerticalAlignment="Bottom"/>
+                </TabItem.Header>
+                <Image Name="image6"/>
+            </TabItem>
+            <TabItem x:Name="SecondTabRight" Header="Hex Viewer">
+                <TextBox x:Name="HexViewerTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap" IsReadOnly="True"/>
+            </TabItem>
+            <TabItem Name="ThirdTabRightSeparator" Visibility="Collapsed">
+                <TabItem.Header>
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="24" VerticalAlignment="Bottom"/>
+                </TabItem.Header>
+                <Image Name="image7"/>
+            </TabItem>
+            <TabItem x:Name="ThirdTabRight" Header="JSON Viewer" Visibility="Collapsed">
+                <TextBox x:Name="LocalizationTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="Wrap" IsReadOnly="True"/>
+            </TabItem>
+            <TabItem Name="FourthTabRightSeparator" Visibility="Collapsed">
+                <TabItem.Header>
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="24" VerticalAlignment="Bottom"/>
+                </TabItem.Header>
+                <Image Name="image8"/>
+            </TabItem>
+            <TabItem x:Name="FourthTabRight" Header="Image Viewer" Visibility="Collapsed">
+                <Image x:Name="ImageViewer"/>
+            </TabItem>
+            <TabItem Name="FifthTabRightSeparator" Visibility="Collapsed">
+                <TabItem.Header>
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="24" VerticalAlignment="Bottom"/>
+                </TabItem.Header>
+                <Image Name="image9"/>
+            </TabItem>
+            <TabItem x:Name="FifthTabRight" Header="Audio Player" Visibility="Collapsed">
+                <Grid>
+                    <Grid.Resources>
+                        <Style TargetType="{x:Type iconPacks:PackIconMaterialDesign}">
+                            <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.Accent}"/>
+                            <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.ThemeBackground}"/>
+                        </Style>
+                    </Grid.Resources>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Label x:Name="OGGPlayerLabelHashFileName" Grid.Row="0" Grid.ColumnSpan="3" Content="" HorizontalContentAlignment="Center" FontFamily="Consolas"/>
+                    <Label x:Name="OGGPlayerLabelIOIString" Grid.Row="1" Grid.ColumnSpan="3" Content="" HorizontalContentAlignment="Center" FontFamily="Consolas"/>
+                    <iconPacks:PackIconMaterialDesign Margin="5" Grid.Row="2" Grid.Column="0" x:Name="OGGPlayerPlay" MouseDown="PackIconMaterialDesign_MouseDown" Kind="PlayCircleOutline" Width="40" Height="40" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <Slider Margin="5" Grid.Row="2" Grid.Column="1" x:Name="OGGPlayer" IsMoveToPointEnabled="True" Thumb.DragStarted="OGGPlayer_DragStarted" Thumb.DragCompleted="OGGPlayer_DragCompleted"/>
+                    <Label x:Name="OGGPlayerLabel" Grid.Row="3" Grid.ColumnSpan="3" Content="0 / 0" HorizontalContentAlignment="Center" FontFamily="Consolas"/>
+                    <ComboBox Margin="5" Grid.Row="2" Grid.Column="2" x:Name="OGGPlayerComboBox" FontFamily="Consolas" SelectionChanged="OGGPlayerComboBox_SelectionChanged">
+                    </ComboBox>
+                </Grid>
+            </TabItem>
+            <TabItem Name="SixthTabRightSeparator" Visibility="Collapsed">
+                <TabItem.Header>
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="24" VerticalAlignment="Bottom"/>
+                </TabItem.Header>
+                <Image Name="image10"/>
+            </TabItem>
+            <TabItem x:Name="SixthTabRight" Header="3D Viewer" Visibility="Collapsed">
+                <Grid>
+                    <hx:HelixViewport3D x:Name="helixViewport">
+                        <hx:HelixViewport3D.Camera>
+                            <OrthographicCamera NearPlaneDistance="-1.7976931348623157E+8" FarPlaneDistance="1.7976931348623157E+8" />
+                        </hx:HelixViewport3D.Camera>
+                        <hx:SunLight/>
+                        <hx:DefaultLights></hx:DefaultLights>
+                        <ModelVisual3D x:Name="model"></ModelVisual3D>
+                    </hx:HelixViewport3D>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <Grid x:Name="REPOGrid" Grid.Row="1" Grid.Column="2" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="200"/>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="200"/>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Image Grid.Row="0" Grid.Column="0" x:Name="REPOImageViewer"/>
+            <Label Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="24" Name="REPOImageViewerLabel" Foreground="White" Content="Image Not Found" Visibility="Collapsed"/>
+            <GridSplitter HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" ResizeBehavior="PreviousAndNext" Height="5"/>
+            <TextBox Grid.Row="2" Grid.Column="0" x:Name="REPOHashTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap" IsReadOnly="True"/>
+            <GridSplitter HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="3" Grid.Column="0" ResizeBehavior="PreviousAndNext" Height="5"/>
+            <!-- TextBox Grid.Row="4" Grid.Column="0" x:Name="REPOJSONTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap" IsReadOnly="False" TextChanged="REPOJSONTextBox_TextChanged"/-->
+            <Grid Grid.Row="4" Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Row="0" Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Row="0" Grid.Column="0" Name="REPOJSONEditorButton" Content="JSON Editor" Click="REPOJSONEditorButton_Click" Margin="5"/>
+                    <Button Grid.Row="0" Grid.Column="1" Name="REPOJSONVisualEditorButton" Content="Visual Editor" Click="REPOJSONVisualEditorButton_Click" Margin="5"/>
+                </Grid>
+                <avalonEdit:TextEditor Grid.Row="1" Grid.Column="0" x:Name="REPOJSONTextEditor" ShowLineNumbers="True" FontFamily="Consolas" FontSize="14" Foreground="white" TextChanged="REPOJSONTextEditor_TextChanged" LostKeyboardFocus="REPOJSONTextEditor_LostKeyboardFocus" Margin="5"/>
+                <TabControl Grid.Row="1" Grid.Column="0" x:Name="REPOVisualEditorTabControl" mah:HeaderedControlHelper.HeaderFontSize="19" Visibility="Collapsed"/>
+                <Label Grid.Row="2" Grid.Column="0" Name="REPOJSONStatus" Content="" FontFamily="Consolas" FontWeight="Bold" FontSize="18" Foreground="PaleGreen" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Grid>
+        </Grid>
+    </Grid>
 </mah:MetroWindow>

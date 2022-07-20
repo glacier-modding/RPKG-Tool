@@ -38,6 +38,7 @@ uint32_t rpkg_function::get_latest_hash(uint64_t hash_value)
             std::string_view hash_in_rpkgs_string_view(hash_in_rpkgs_upper_case.c_str(), hash_in_rpkgs_upper_case.length());
 
             size_t pos_chunk = hash_in_rpkgs_string_view.find("CHUNK");
+            size_t pos_dlc = hash_in_rpkgs_string_view.find("DLC");
             size_t pos_patch = hash_in_rpkgs_string_view.find("PATCH");
             size_t pos_ext = hash_in_rpkgs_string_view.find(".RPKG");
 
@@ -54,7 +55,25 @@ uint32_t rpkg_function::get_latest_hash(uint64_t hash_value)
             else if (pos_chunk != std::string::npos)
             {
                 //std::cout << std::string(hash_in_rpkgs_string_view.substr(pos_chunk + 5, pos_ext)) << std::endl;
-                chunk_numbers.push_back(std::strtol(std::string(hash_in_rpkgs_string_view.substr(pos_chunk + 5, pos_patch)).c_str(), nullptr, 10));
+                chunk_numbers.push_back(std::strtol(std::string(hash_in_rpkgs_string_view.substr(pos_chunk + 5)).c_str(), nullptr, 10));
+                patch_numbers.push_back(0);
+
+                //std::cout << "Chunk number: " << chunk_numbers.back() << std::endl;
+            }
+            else if (pos_dlc != std::string::npos && pos_patch != std::string::npos)
+            {
+                //std::cout << std::string(hash_in_rpkgs_string_view.substr(pos_chunk + 5, pos_patch)) << std::endl;
+                //std::cout << std::string(hash_in_rpkgs_string_view.substr(pos_patch + 5, pos_ext)) << std::endl;
+                chunk_numbers.push_back(std::strtol(std::string(hash_in_rpkgs_string_view.substr(pos_dlc + 3, pos_patch)).c_str(), nullptr, 10));
+                patch_numbers.push_back(std::strtol(std::string(hash_in_rpkgs_string_view.substr(pos_patch + 5, pos_ext)).c_str(), nullptr, 10));
+
+                //std::cout << "Chunk number: " << chunk_numbers.back() << std::endl;
+                //std::cout << "Patch number: " << patch_numbers.back() << std::endl;
+            }
+            else if (pos_dlc != std::string::npos)
+            {
+                //std::cout << std::string(hash_in_rpkgs_string_view.substr(pos_chunk + 5, pos_ext)) << std::endl;
+                chunk_numbers.push_back(std::strtol(std::string(hash_in_rpkgs_string_view.substr(pos_dlc + 3)).c_str(), nullptr, 10));
                 patch_numbers.push_back(0);
 
                 //std::cout << "Chunk number: " << chunk_numbers.back() << std::endl;
@@ -95,6 +114,7 @@ uint32_t rpkg_function::get_latest_hash(uint64_t hash_value)
                 std::string_view hash_in_rpkgs_string_view(hash_in_rpkgs_upper_case.c_str(), hash_in_rpkgs_upper_case.length());
 
                 size_t pos_chunk = hash_in_rpkgs_string_view.find("CHUNK");
+                size_t pos_dlc = hash_in_rpkgs_string_view.find("DLC");
                 size_t pos_patch = hash_in_rpkgs_string_view.find("PATCH");
                 size_t pos_ext = hash_in_rpkgs_string_view.find(".RPKG");
 
@@ -111,7 +131,25 @@ uint32_t rpkg_function::get_latest_hash(uint64_t hash_value)
                 else if (pos_chunk != std::string::npos)
                 {
                     //std::cout << std::string(hash_in_rpkgs_string_view.substr(pos_chunk + 5, pos_ext)) << std::endl;
-                    chunk_numbers.push_back(std::strtol(std::string(hash_in_rpkgs_string_view.substr(pos_chunk + 5, pos_patch)).c_str(), nullptr, 10));
+                    chunk_numbers.push_back(std::strtol(std::string(hash_in_rpkgs_string_view.substr(pos_chunk + 5)).c_str(), nullptr, 10));
+                    patch_numbers.push_back(0);
+
+                    //std::cout << "Chunk number: " << chunk_numbers.back() << std::endl;
+                }
+                else if (pos_dlc != std::string::npos && pos_patch != std::string::npos)
+                {
+                    //std::cout << std::string(hash_in_rpkgs_string_view.substr(pos_chunk + 5, pos_patch)) << std::endl;
+                    //std::cout << std::string(hash_in_rpkgs_string_view.substr(pos_patch + 5, pos_ext)) << std::endl;
+                    chunk_numbers.push_back(std::strtol(std::string(hash_in_rpkgs_string_view.substr(pos_dlc + 3, pos_patch)).c_str(), nullptr, 10));
+                    patch_numbers.push_back(std::strtol(std::string(hash_in_rpkgs_string_view.substr(pos_patch + 5, pos_ext)).c_str(), nullptr, 10));
+
+                    //std::cout << "Chunk number: " << chunk_numbers.back() << std::endl;
+                    //std::cout << "Patch number: " << patch_numbers.back() << std::endl;
+                }
+                else if (pos_dlc != std::string::npos)
+                {
+                    //std::cout << std::string(hash_in_rpkgs_string_view.substr(pos_chunk + 5, pos_ext)) << std::endl;
+                    chunk_numbers.push_back(std::strtol(std::string(hash_in_rpkgs_string_view.substr(pos_dlc + 3)).c_str(), nullptr, 10));
                     patch_numbers.push_back(0);
 
                     //std::cout << "Chunk number: " << chunk_numbers.back() << std::endl;

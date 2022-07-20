@@ -331,6 +331,38 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     {
         rpkg_function::mati_to_json(input_path, filter, output_path);
     }
+    else if (command == "-search_entities")
+    {
+        rpkg_function::search_entities(input_path, filter, search, search_type, output_path, true, true, true, true, 1000);
+    }
+    else if (command == "-search_localization")
+    {
+        rpkg_function::search_localization(input_path, filter, search, search_type, output_path, true, true, true, 1000);
+    }
+    else if (command == "-get_line_string")
+    {
+        rpkg_function::get_line_string(input_path, filter, output_path);
+    }
+    else if (command == "-extract_sdef_to_json")
+    {
+        rpkg_function::extract_sdef_to_json(input_path, filter, output_path);
+    }
+    else if (command == "-json_to_sdef")
+    {
+        rpkg_function::json_to_sdef(input_path, filter, output_path);
+    }
+    else if (command == "-sdef_to_json")
+    {
+        rpkg_function::sdef_to_json(input_path, filter, output_path);
+    }
+    else if (command == "-dev_dlge_names")
+    {
+        dev_function::dev_dlge_names(input_path, filter, output_path);
+    }
+    else if (command == "-search_repo")
+    {
+        rpkg_function::search_repo(input_path, filter, search, search_type, output_path, 1000);
+    }
 }
 
 void task::process_and_execute_files_draged_and_dropped(std::vector<std::string> &dragged_and_dropped_files)
@@ -360,6 +392,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-decrypt_packagedefinition_thumbs",
                                                     "-dev_extract_temp_from",
                                                     "-dev_diff_rpkg_supermetas",
+                                                    "-dev_dlge_names",
                                                     "-dev_extract_rpkg_supermetas",
                                                     "-dev_extract_all_strings",
                                                     "-dev_extract_all_entity_ids",
@@ -399,17 +432,21 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-extract_locr_to_json_from",
                                                     "-extract_rtlv_to_json_from",
                                                     "-extract_mati_to_json",
+                                                    "-extract_sdef_to_json",
                                                     "-export_map",
                                                     "-export_map_textured",
                                                     "-import_map",
                                                     "-generate_rpkg_from",
                                                     "-generate_rpkg_quickly_from",
+                                                    "-get_line_string",
                                                     "-hash_depends",
                                                     "-latest_hash",
                                                     "-hash_meta_to_json",
                                                     "-json_to_hash_meta",
                                                     "-json_to_mati",
                                                     "-mati_to_json",
+                                                    "-json_to_sdef",
+                                                    "-sdef_to_json",
                                                     "-extract_all_hash_depends_from",
                                                     "-extract_non_base_hash_depends_from",
                                                     "-extract_all_hash_depends_prim_models_from",
@@ -425,6 +462,9 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-rebuild_dlge_from_json_from",
                                                     "-rebuild_locr_from_json_from",
                                                     "-rebuild_rtlv_from_json_from",
+                                                    "-search_entities",
+                                                    "-search_localization",
+                                                    "-search_repo",
                                                     "-search_rpkg"};
 
     int command_count = 0;

@@ -1,9 +1,12 @@
 #pragma once
 #include "rpkg.h"
 #include "temp.h"
+#include "entity.h"
+#include "repo.h"
 #include <string>
 #include <vector>
 #include <stdint.h>
+#include "thirdparty/json/json.hpp"
 
 #ifdef RPKG_CLI
 #define LOG(x) std::cout << x << std::endl
@@ -241,6 +244,13 @@ extern int task_single_status;
 extern int task_multiple_status;
 extern int task_map_status;
 extern int gui_control;
+extern std::vector<repo> repos;
+extern std::string check_json_response;
+extern std::string latest_hash_rpkg_path;
+extern std::string repo_response_data;
+extern std::string entities_search_results;
+extern std::string localization_search_results;
+extern std::string localization_line_string;
 extern std::string localization_string;
 extern std::string hashes_with_no_reverse_depends;
 extern std::string hash_direct_depends;
@@ -323,3 +333,5 @@ extern int map_percent_progress_godot_map_nodes;
 extern int map_percent_progress_map_node_temp_loading;
 extern int map_percent_progress_map_node_changes_check;
 extern int map_percent_progress_map_writing_changes_to_qn;
+extern std::map<uint64_t, entity> deep_search_entities_map;
+extern nlohmann::ordered_json localization_json;

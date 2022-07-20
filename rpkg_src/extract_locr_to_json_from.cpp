@@ -78,7 +78,8 @@ void rpkg_function::extract_locr_to_json_from(std::string &input_path, std::stri
 
         timing_string = "Extracting LOCR as JSON...";
 
-        LOG("Extracting LOCR as JSON...");
+        if (log_output)
+            LOG("Extracting LOCR as JSON...");
 
         std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
         int stringstream_length = 80;
@@ -126,7 +127,7 @@ void rpkg_function::extract_locr_to_json_from(std::string &input_path, std::stri
                             {
                                 std::string message = "Extracting LOCR as JSON: ";
 
-                                if (((locr_current_count * (uint64_t)100000) / (uint64_t)locr_count) % (uint64_t)100 == 0 && locr_current_count > 0)
+                                if (((locr_current_count * (uint64_t)100000) / (uint64_t)locr_count) % (uint64_t)100 == 0 && locr_current_count > 0 && !output_to_string)
                                 {
                                     stringstream_length = console::update_console(message, locr_count, locr_current_count, start_time, stringstream_length);
                                 }
@@ -228,7 +229,8 @@ void rpkg_function::extract_locr_to_json_from(std::string &input_path, std::stri
                                 }
 
 #ifdef _DEBUG
-                                LOG((isLOCRv2 ? "LOCRv2 identified" : "LOCRv1 identified"));
+                                if (log_output)
+                                    LOG((isLOCRv2 ? "LOCRv2 identified" : "LOCRv1 identified"));
 #endif
 
                                 if (number_of_languages == 10 && !isLOCRv2)
@@ -421,6 +423,8 @@ void rpkg_function::extract_locr_to_json_from(std::string &input_path, std::stri
                                     ss << std::setw(4) << json_object << std::endl;
 
                                     localization_string = ss.str();
+
+                                    localization_json = json_object;
                                 }
                                 else
                                 {
@@ -461,12 +465,16 @@ void rpkg_function::extract_locr_to_json_from(std::string &input_path, std::stri
 
         ss << "Extracting LOCR as JSON: Done";
 
-        LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+        if (log_output)
+            LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
 
-        percent_progress = (uint32_t)100;
+        if (!output_to_string)
+        {
+            percent_progress = (uint32_t)100;
 
-        task_single_status = TASK_SUCCESSFUL;
-        task_multiple_status = TASK_SUCCESSFUL;
+            task_single_status = TASK_SUCCESSFUL;
+            task_multiple_status = TASK_SUCCESSFUL;
+        }
     }
     else
     {

@@ -37,6 +37,9 @@
     <Filter Include="Source Files\mikktspace">
       <UniqueIdentifier>{c1a0a4e3-1108-4746-b179-3b2746cdb764}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\yyjson">
+      <UniqueIdentifier>{2b26317a-bbed-4cc9-b0bf-fa7ca18cb718}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\rpkg_src\command_line.cpp">
@@ -561,6 +564,45 @@
     <ClCompile Include="..\rpkg_src\mati_to_json.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\rpkg_src\search_entities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\yyjson\yyjson.c">
+      <Filter>Source Files\yyjson</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\search_localization.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\get_line_string.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\sdef_to_json.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\json_to_sdef.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\extract_sdef_to_json.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\sdef.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\dev_dlge_names.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\search_repo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\repo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\ores.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\rpkg_src\thirdparty\ww2ogg\Bit_stream.h">
@@ -708,6 +750,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\rpkg_src\map.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\sdef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\repo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\ores.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

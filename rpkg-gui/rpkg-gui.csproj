@@ -131,6 +131,11 @@
     <Compile Include="MessageQuestion.xaml.cs">
       <DependentUpon>MessageQuestion.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="RightClickMenu.xaml.cs">
       <DependentUpon>RightClickMenu.xaml</DependentUpon>
     </Compile>
@@ -211,11 +216,6 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
@@ -229,6 +229,11 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <None Include="Resources\i1" />
+    <None Include="Resources\i2" />
+    <None Include="Resources\i3" />
+    <Resource Include="Resources\JSON-Dark.xshd" />
+    <Resource Include="Resources\JSON-Light.xshd" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -255,6 +260,9 @@
     <Resource Include="Discord.png" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AvalonEdit">
+      <Version>6.1.3.50</Version>
+    </PackageReference>
     <PackageReference Include="Costura.Fody">
       <Version>4.1.0</Version>
     </PackageReference>

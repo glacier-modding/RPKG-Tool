@@ -77,7 +77,8 @@ void rpkg_function::extract_dlge_to_json_from(std::string &input_path, std::stri
 
         timing_string = "Extracting DLGE as JSON...";
 
-        LOG("Extracting DLGE as JSON...");
+        if (log_output)
+            LOG("Extracting DLGE as JSON...");
 
         std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
         int stringstream_length = 80;
@@ -125,7 +126,7 @@ void rpkg_function::extract_dlge_to_json_from(std::string &input_path, std::stri
                             {
                                 std::string message = "Extracting DLGE as JSON: ";
 
-                                if (((dlge_current_count * (uint64_t)100000) / (uint64_t)dlge_count) % (uint64_t)100 == 0 && dlge_current_count > 0)
+                                if (((dlge_current_count * (uint64_t)100000) / (uint64_t)dlge_count) % (uint64_t)100 == 0 && dlge_current_count > 0 && !output_to_string)
                                 {
                                     stringstream_length = console::update_console(message, dlge_count, dlge_current_count, start_time, stringstream_length);
                                 }
@@ -538,6 +539,8 @@ void rpkg_function::extract_dlge_to_json_from(std::string &input_path, std::stri
                                         ss << std::setw(4) << json_object << std::endl;
 
                                         localization_string = ss.str();
+
+                                        localization_json = json_object;
                                     }
                                     else
                                     {
@@ -663,13 +666,17 @@ void rpkg_function::extract_dlge_to_json_from(std::string &input_path, std::stri
         ss.str(std::string());
 
         ss << "Extracting DLGE as JSON: Done";
+        
+        if (log_output)
+            LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
 
-        LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+        if (!output_to_string)
+        {
+            percent_progress = (uint32_t)100;
 
-        percent_progress = (uint32_t)100;
-
-        task_single_status = TASK_SUCCESSFUL;
-        task_multiple_status = TASK_SUCCESSFUL;
+            task_single_status = TASK_SUCCESSFUL;
+            task_multiple_status = TASK_SUCCESSFUL;
+        }
     }
     else
     {

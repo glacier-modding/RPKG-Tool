@@ -37,6 +37,9 @@
     <Filter Include="Source Files\mikktspace">
       <UniqueIdentifier>{e0fb69e9-6319-44c4-adb3-0c8d2146880f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\yyjson">
+      <UniqueIdentifier>{d1dfa612-cfc0-4e2d-a367-e4be0139c68e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\rpkg_src\thirdparty\ogg\src\bitwise.c">
@@ -561,6 +564,45 @@
     <ClCompile Include="..\rpkg_src\mati_to_json.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\rpkg_src\search_entities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\thirdparty\yyjson\yyjson.c">
+      <Filter>Source Files\yyjson</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\search_localization.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\get_line_string.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\sdef_to_json.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\json_to_sdef.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\extract_sdef_to_json.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\sdef.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\dev_dlge_names.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\repo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\search_repo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rpkg_src\ores.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\rpkg_src\command_line.h">
@@ -696,6 +738,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\rpkg_src\map.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\sdef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\repo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\ores.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
