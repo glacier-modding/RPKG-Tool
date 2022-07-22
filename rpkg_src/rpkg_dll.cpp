@@ -1332,6 +1332,13 @@ int search_imported_hashes(char* search_str, char* rpkg_file, char* resource_typ
                                 search_count++;
                             }
                         }
+                        else if (util::to_lower_case(rpkgs.at(i).hashes_based_on_resource_types.at(j).at(k)).find(search_string) != std::string::npos)
+                        {
+                            search_imported_hashes_string.append(rpkgs.at(i).hashes_based_on_resource_types.at(j).at(k));
+                            search_imported_hashes_string.push_back(',');
+
+                            search_count++;
+                        }
 
                         if (search_count >= max_results)
                         {
