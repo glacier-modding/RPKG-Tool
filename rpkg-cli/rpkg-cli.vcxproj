@@ -54,6 +54,7 @@
     <ClCompile Include="..\rpkg_src\extract_hash_meta.cpp" />
     <ClCompile Include="..\rpkg_src\extract_locr_to_json_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_mati_to_json.cpp" />
+    <ClCompile Include="..\rpkg_src\extract_mrtr_to_json.cpp" />
     <ClCompile Include="..\rpkg_src\extract_ores_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_prel_from.cpp" />
     <ClCompile Include="..\rpkg_src\extract_prim_from.cpp" />
@@ -88,6 +89,7 @@
     <ClCompile Include="..\rpkg_src\import_rpkg_meta.cpp" />
     <ClCompile Include="..\rpkg_src\json_to_hash_meta.cpp" />
     <ClCompile Include="..\rpkg_src\json_to_mati.cpp" />
+    <ClCompile Include="..\rpkg_src\json_to_mrtr.cpp" />
     <ClCompile Include="..\rpkg_src\json_to_sdef.cpp" />
     <ClCompile Include="..\rpkg_src\latest_hash.cpp" />
     <ClCompile Include="..\rpkg_src\load_master_hash_list.cpp" />
@@ -96,6 +98,8 @@
     <ClCompile Include="..\rpkg_src\map.cpp" />
     <ClCompile Include="..\rpkg_src\mati.cpp" />
     <ClCompile Include="..\rpkg_src\mati_to_json.cpp" />
+    <ClCompile Include="..\rpkg_src\mrtr.cpp" />
+    <ClCompile Include="..\rpkg_src\mrtr_to_json.cpp" />
     <ClCompile Include="..\rpkg_src\obj.cpp" />
     <ClCompile Include="..\rpkg_src\ores.cpp" />
     <ClCompile Include="..\rpkg_src\prim.cpp" />
@@ -216,6 +220,7 @@
     <ClInclude Include="..\rpkg_src\hash.h" />
     <ClInclude Include="..\rpkg_src\map.h" />
     <ClInclude Include="..\rpkg_src\mati.h" />
+    <ClInclude Include="..\rpkg_src\mrtr.h" />
     <ClInclude Include="..\rpkg_src\obj.h" />
     <ClInclude Include="..\rpkg_src\ores.h" />
     <ClInclude Include="..\rpkg_src\prim.h" />

@@ -288,7 +288,7 @@ namespace rpkg
 			item.Name = "deepsearch";
 			REPOTreeView.Nodes.Add(item);
 			item = new System.Windows.Forms.TreeNode();
-			item.Text = "      you are searching/accessing the latest REPO and ORES from the game!";
+			item.Text = "you are searching/accessing the latest REPO and ORES from the game!";
 			item.Name = "deepsearch";
 			REPOTreeView.Nodes.Add(item);
 
@@ -602,6 +602,10 @@ namespace rpkg
 						//HexViewerTextBox.Text += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgFilePath, hash));
 						//HexViewerTextBoxTextString += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgFilePath, hash));
 
+						string currentRPKGFilePath = rpkgFilePath;
+
+						currentHash = header[0];
+
 						if (RightTabControl.SelectedIndex == 2)
 						{
 							LoadHexEditor();
@@ -621,10 +625,6 @@ namespace rpkg
 						{
 							LoadModelViewer(hash);
 						}
-
-						string currentRPKGFilePath = rpkgFilePath;
-
-						currentHash = header[0];
 
 						if (resourceType == "JSON")
 						{
@@ -1580,6 +1580,14 @@ namespace rpkg
 
 							rightClickMenu = new RightClickMenu(buttons);
 						}
+						else if (hashType == "MRTR")
+						{
+							string[] buttons = { "Extract " + hashName, "Extract " + hashName + " To MRTR JSON", "Cancel" };
+
+							buttonCount = 3;
+
+							rightClickMenu = new RightClickMenu(buttons);
+						}
 						else if (hashType == "GFXF")
 						{
 							string[] buttons = { "Extract " + hashName, "Extract To Hitman 3 RT (ResourceTool) JSON", "Extract To Hitman 2 RT (ResourceTool) JSON", "Extract To Hitman 2016 RT (ResourceTool) JSON", "Extract GFXF Files From " + hashName, "Cancel" };
@@ -1862,6 +1870,14 @@ namespace rpkg
 								filter = hashValue;
 
 								progress.message.Content = "Extracting " + hashName + " SDEF to SDEF JSON...";
+							}
+							else if (hashType == "MRTR")
+							{
+								command = "-extract_mrtr_to_json";
+
+								filter = hashValue;
+
+								progress.message.Content = "Extracting " + hashName + " MRTR to MRTR JSON...";
 							}
 
 							if (hashType != "TEMP")
@@ -2565,14 +2581,14 @@ namespace rpkg
 
 							//HexViewerTextBox.Text += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgHashFilePath, hash));
 
+							string currentRPKGFilePath = rpkgHashFilePath;
+
+							currentHash = header[0];
+
 							if (RightTabControl.SelectedIndex == 2)
 							{
 								LoadHexEditor();
 							}
-
-							string currentRPKGFilePath = rpkgHashFilePath;
-
-							currentHash = header[0];
 
 							if (resourceType == "LOCR" || resourceType == "DLGE" || resourceType == "RTLV")
 							{
@@ -7709,7 +7725,7 @@ private enum OggPlayerState
 			}
 		}
 
-		private void MaterialUtilities_Click(object sender, RoutedEventArgs e)
+		private void MaterialMATIUtilities_Click(object sender, RoutedEventArgs e)
 		{
 			string materialUtilitiesButton = (sender as MenuItem).Tag.ToString();
 
@@ -8334,7 +8350,7 @@ private enum OggPlayerState
 			SearchRPKGsTreeView.CollapseAll();
 		}
 
-		private void DialogueUtilities_Click(object sender, RoutedEventArgs e)
+		private void DialogueSDEFUtilities_Click(object sender, RoutedEventArgs e)
 		{
 			string dialogueUtilitiesButton = (sender as MenuItem).Tag.ToString();
 
@@ -8457,6 +8473,148 @@ private enum OggPlayerState
 					command = "-json_to_sdef";
 
 					progress.message.Content = "Converting SDEF JSONs To SDEF Files...";
+				}
+
+				int return_value = reset_task_status();
+
+				execute_task rpkgExecute = task_execute;
+
+				IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
+
+				progress.ShowDialog();
+
+				if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
+				{
+					//MessageBoxShow(progress.task_status_string);
+
+					return;
+				}
+			}
+		}
+
+		private void AnimationMRTRUtilities_Click(object sender, RoutedEventArgs e)
+		{
+			string dialogueUtilitiesButton = (sender as MenuItem).Tag.ToString();
+
+			string inputPath = "";
+			string outputPath = "";
+
+			if (dialogueUtilitiesButton == "MRTR" || dialogueUtilitiesButton == "JSON")
+			{
+				if (dialogueUtilitiesButton == "MRTR")
+				{
+					inputPath = SelectFile("input", "Select MRTR File To Convert To MRTR JSON:", "MRTR file|*.MRTR", "");
+
+					if (inputPath != "")
+					{
+						//DirectoryInfo directoryInfo = new DirectoryInfo(inputPath).Parent;
+
+						outputPath = SelectFolder("output", "Select MRTR JSON File Output Folder:", "");
+					}
+				}
+				else if (dialogueUtilitiesButton == "JSON")
+				{
+					inputPath = SelectFile("input", "Select MRTR JSON To Convert To MRTR File:", "JSON file|*.JSON", "");
+
+					if (inputPath != "")
+					{
+						//DirectoryInfo directoryInfo = new DirectoryInfo(inputPath).Parent;
+
+						outputPath = SelectFolder("output", "Select SDEF File Output Folder:", "");
+					}
+				}
+			}
+			else if (dialogueUtilitiesButton == "MRTRS" || dialogueUtilitiesButton == "JSONS")
+			{
+				if (dialogueUtilitiesButton == "MRTRS")
+				{
+					inputPath = SelectFolder("input", "Select MRTR Files Input Folder (Recursive):", "");
+
+					if (inputPath != "")
+					{
+						MessageQuestion messageBox = new MessageQuestion();
+						messageBox.message.Content = "Output MRTR JSON Files To A Single Directory Or Into The Same Directory They Reside?";
+						messageBox.OKButton.Content = "Single Directory";
+						messageBox.CancelButton.Content = "Where They Reside";
+						messageBox.ShowDialog();
+
+						if (messageBox.buttonPressed == "OKButton")
+						{
+							//DirectoryInfo directoryInfo = new DirectoryInfo(inputPath).Parent;
+
+							outputPath = SelectFolder("output", "Select MRTR JSON Files Output Folder:", "");
+						}
+						else if (messageBox.buttonPressed == "CancelButton")
+						{
+							outputPath = "";
+						}
+					}
+				}
+				else if (dialogueUtilitiesButton == "JSONS")
+				{
+					inputPath = SelectFolder("input", "Select MRTR JSON Files Input Folder (Recursive):", "");
+
+					if (inputPath != "")
+					{
+
+						MessageQuestion messageBox = new MessageQuestion();
+						messageBox.message.Content = "Output MRTR Files To A Single Directory Or Into The Same Directory They Reside?";
+						messageBox.OKButton.Content = "Single Directory";
+						messageBox.CancelButton.Content = "Where They Reside";
+						messageBox.ShowDialog();
+
+						if (messageBox.buttonPressed == "OKButton")
+						{
+							//DirectoryInfo directoryInfo = new DirectoryInfo(inputPath).Parent;
+
+							outputPath = SelectFolder("output", "Select MRTR Files Output Folder:", "");
+						}
+						else if (messageBox.buttonPressed == "CancelButton")
+						{
+							outputPath = "";
+						}
+					}
+				}
+			}
+
+			if (inputPath != "")
+			{
+				string command = "";
+				string input_path = inputPath;
+				string filter = "";
+				string search = "";
+				string search_type = "";
+				string output_path = outputPath;
+
+				Progress progress = new Progress();
+
+				progress.operation = (int)Progress.Operation.MASS_EXTRACT;
+
+				progress.ProgressBar.IsIndeterminate = true;
+
+				if (dialogueUtilitiesButton == "MRTR")
+				{
+					command = "-mrtr_to_json";
+
+					progress.message.Content = "Converting MRTR File To MRTR JSON...";
+				}
+				else if (dialogueUtilitiesButton == "JSON")
+				{
+					command = "-json_to_mrtr";
+
+					progress.message.Content = "Converting MRTR JSON To MRTR File...";
+				}
+				else if (dialogueUtilitiesButton == "MRTRS")
+				{
+					command = "-mrtr_to_json";
+
+					progress.message.Content = "Converting MRTR Files To MRTR JSONs...";
+				}
+				else if (dialogueUtilitiesButton == "JSONS")
+				{
+					command = "-json_to_mrtr";
+
+					progress.message.Content = "Converting MRTR JSONs To MRTR Files...";
 				}
 
 				int return_value = reset_task_status();

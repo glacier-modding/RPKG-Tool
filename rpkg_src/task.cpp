@@ -363,6 +363,18 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     {
         rpkg_function::search_repo(input_path, filter, search, search_type, output_path, 1000);
     }
+    else if (command == "-extract_mrtr_to_json")
+    {
+        rpkg_function::extract_mrtr_to_json(input_path, filter, output_path);
+    }
+    else if (command == "-json_to_mrtr")
+    {
+        rpkg_function::json_to_mrtr(input_path, filter, output_path);
+    }
+    else if (command == "-mrtr_to_json")
+    {
+        rpkg_function::mrtr_to_json(input_path, filter, output_path);
+    }
 }
 
 void task::process_and_execute_files_draged_and_dropped(std::vector<std::string> &dragged_and_dropped_files)
@@ -433,6 +445,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-extract_rtlv_to_json_from",
                                                     "-extract_mati_to_json",
                                                     "-extract_sdef_to_json",
+                                                    "-extract_mrtr_to_json",
                                                     "-export_map",
                                                     "-export_map_textured",
                                                     "-import_map",
@@ -447,6 +460,8 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-mati_to_json",
                                                     "-json_to_sdef",
                                                     "-sdef_to_json",
+                                                    "-json_to_mrtr",
+                                                    "-mrtr_to_json",
                                                     "-extract_all_hash_depends_from",
                                                     "-extract_non_base_hash_depends_from",
                                                     "-extract_all_hash_depends_prim_models_from",

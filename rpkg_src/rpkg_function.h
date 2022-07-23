@@ -21,6 +21,9 @@ struct rpkg_extraction_vars
 class rpkg_function
 {
 public:
+	static void mrtr_to_json(std::string& input_path, std::string& filter, std::string& output_path);
+	static void json_to_mrtr(std::string& input_path, std::string& filter, std::string& output_path);
+	static void extract_mrtr_to_json(std::string& input_path, std::string& filter, std::string& output_path);
 	static void search_repo(std::string& input_path, std::string& filter, std::string& search, std::string& search_type, std::string& output_path, int max_results);
 	static void sdef_to_json(std::string& input_path, std::string& filter, std::string& output_path);
 	static void json_to_sdef(std::string& input_path, std::string& filter, std::string& output_path);

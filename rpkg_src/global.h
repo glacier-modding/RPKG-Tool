@@ -234,6 +234,29 @@ struct jpg_textures
     std::vector<char> texture_emissive_jpg;
 };
 
+struct doublevector3
+{
+    double x = 0;
+    double y = 0;
+    double z = 0;
+};
+
+struct doublevector4
+{
+    double x = 0;
+    double y = 0;
+    double z = 0;
+    double w = 0;
+};
+
+struct doublematrix43
+{
+    doublevector3 x_axis;
+    doublevector3 y_axis;
+    doublevector3 z_axis;
+    doublevector3 transform;
+};
+
 extern std::vector<rpkg> rpkgs;
 extern int percent_progress;
 extern std::string response_string;

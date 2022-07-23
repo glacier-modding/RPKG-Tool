@@ -67,17 +67,25 @@
                         <MenuItem Click="Rebuild_Click" Header="Rebuild Video Subtitles (RTLV) From Folder"/>
                         <MenuItem Click="Rebuild_Click" Header="Rebuild Sound Events (WWEV) From Folder"/>
                     </MenuItem>
-                    <MenuItem Header="Material Utilities">
-                        <MenuItem Click="MaterialUtilities_Click" Header="Convert Single MATI (+.MATI.meta) File To MATI JSON File" Tag="MATI"/>
-                        <MenuItem Click="MaterialUtilities_Click" Header="Convert Single MATI JSON File To MATI (+.MATI.meta) File" Tag="JSON"/>
-                        <MenuItem Click="MaterialUtilities_Click" Header="Mass Convert MATI (+.MATI.meta) Files To MATI JSON Files" Tag="MATIS"/>
-                        <MenuItem Click="MaterialUtilities_Click" Header="Mass Convert MATI JSON Files To MATI (+.MATI.meta) Files" Tag="JSONS"/>
-                    </MenuItem>
-                    <MenuItem Header="Dialogue Utilities">
-                        <MenuItem Click="DialogueUtilities_Click" Header="Convert Single SDEF (+.SDEF.meta) File To SDEF JSON File" Tag="SDEF"/>
-                        <MenuItem Click="DialogueUtilities_Click" Header="Convert Single SDEF JSON File To SDEF (+.SDEF.meta) File" Tag="JSON"/>
-                        <MenuItem Click="DialogueUtilities_Click" Header="Mass Convert SDEF (+.SDEF.meta) Files To SDEF JSON Files" Tag="SDEFS"/>
-                        <MenuItem Click="DialogueUtilities_Click" Header="Mass Convert SDEF JSON Files To SDEF (+.SDEF.meta) Files" Tag="JSONS"/>
+                    <MenuItem Header="Resource Utilities">
+                        <MenuItem Header="Material (MATI)">
+                            <MenuItem Click="MaterialMATIUtilities_Click" Header="Convert Single MATI (+.MATI.meta) File To MATI JSON File" Tag="MATI"/>
+                            <MenuItem Click="MaterialMATIUtilities_Click" Header="Convert Single MATI JSON File To MATI (+.MATI.meta) File" Tag="JSON"/>
+                            <MenuItem Click="MaterialMATIUtilities_Click" Header="Mass Convert MATI (+.MATI.meta) Files To MATI JSON Files" Tag="MATIS"/>
+                            <MenuItem Click="MaterialMATIUtilities_Click" Header="Mass Convert MATI JSON Files To MATI (+.MATI.meta) Files" Tag="JSONS"/>
+                        </MenuItem>
+                        <MenuItem Header="Dialogue (SDEF)">
+                            <MenuItem Click="DialogueSDEFUtilities_Click" Header="Convert Single SDEF (+.SDEF.meta) File To SDEF JSON File" Tag="SDEF"/>
+                            <MenuItem Click="DialogueSDEFUtilities_Click" Header="Convert Single SDEF JSON File To SDEF (+.SDEF.meta) File" Tag="JSON"/>
+                            <MenuItem Click="DialogueSDEFUtilities_Click" Header="Mass Convert SDEF (+.SDEF.meta) Files To SDEF JSON Files" Tag="SDEFS"/>
+                            <MenuItem Click="DialogueSDEFUtilities_Click" Header="Mass Convert SDEF JSON Files To SDEF (+.SDEF.meta) Files" Tag="JSONS"/>
+                        </MenuItem>
+                        <MenuItem Header="Animation (MRTR)">
+                            <MenuItem Click="AnimationMRTRUtilities_Click" Header="Convert Single MRTR File To MRTR JSON File" Tag="MRTR"/>
+                            <MenuItem Click="AnimationMRTRUtilities_Click" Header="Convert Single MRTR JSON File To MRTR File" Tag="JSON"/>
+                            <MenuItem Click="AnimationMRTRUtilities_Click" Header="Mass Convert MRTR Files To MRTR JSON Files" Tag="MRTRS"/>
+                            <MenuItem Click="AnimationMRTRUtilities_Click" Header="Mass Convert MRTR JSON Files To MRTR Files" Tag="JSONS"/>
+                        </MenuItem>
                     </MenuItem>
                     <MenuItem Header="Map Editing">
                         <MenuItem Header="Export Main Hitman Map to Godot v4 project">
