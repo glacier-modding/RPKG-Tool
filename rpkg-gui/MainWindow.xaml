@@ -641,7 +641,11 @@
                 <Image Name="image6"/>
             </TabItem>
             <TabItem x:Name="SecondTabRight" Header="Hex Viewer">
-                <avalonEdit:TextEditor x:Name="HexViewerTextBox" FontFamily="Consolas" FontSize="14" Foreground="white" IsReadOnly="True" PreviewMouseWheel="HexViewerTextBox_PreviewMouseWheel"/>
+                <avalonEdit:TextEditor x:Name="HexViewerTextBox" FontFamily="Consolas" FontSize="14" Foreground="white" IsReadOnly="True" PreviewMouseWheel="HexViewerTextBox_PreviewMouseWheel">
+                    <avalonEdit:TextEditor.Options>
+                        <avalonEdit:TextEditorOptions ShowBoxForControlCharacters="False"/>
+                    </avalonEdit:TextEditor.Options>
+                </avalonEdit:TextEditor>
                 <!--TextBox x:Name="HexViewerTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap" IsReadOnly="True"/-->
             </TabItem>
             <TabItem Name="ThirdTabRightSeparator" Visibility="Collapsed">
