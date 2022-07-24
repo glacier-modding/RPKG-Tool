@@ -3088,7 +3088,7 @@ namespace rpkg
 
 			string hash = hashDetails[0];
 
-			HexViewerTextBox.Text += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgFilePath, hash));
+			HexViewerTextBox.AppendText(Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgFilePath, hash)));
 		}
 
 		private void LoadImageViewer_TEXT(string hashFile, string hash)
@@ -4521,6 +4521,7 @@ namespace rpkg
 				xshdJSONDark = XmlReader.Create(new MemoryStream(Properties.Resources.JSON_Dark));
 				REPOJSONTextEditor.SyntaxHighlighting = HighlightingLoader.Load(xshdJSONDark, HighlightingManager.Instance);
 				REPOJSONTextEditor.Foreground = System.Windows.Media.Brushes.White;
+				HexViewerTextBox.Foreground = System.Windows.Media.Brushes.White;
 			}
 			else if (brightness == "Light")
 			{
@@ -4539,6 +4540,7 @@ namespace rpkg
 				xshdJSONLight = XmlReader.Create(new MemoryStream(Properties.Resources.JSON_Light));
 				REPOJSONTextEditor.SyntaxHighlighting = HighlightingLoader.Load(xshdJSONLight, HighlightingManager.Instance);
 				REPOJSONTextEditor.Foreground = System.Windows.Media.Brushes.Black;
+				HexViewerTextBox.Foreground = System.Windows.Media.Brushes.Black;
 			}
 		}
 
@@ -9964,5 +9966,146 @@ private enum OggPlayerState
 				}
 			}
 		}
-	}
+
+        private void HexViewerTextBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+			bool controlKey = Keyboard.Modifiers == ModifierKeys.Control;
+
+			if (controlKey)
+			{
+				if (e.Delta > 0)
+				{
+					if (HexViewerTextBox.FontSize < 64)
+					{
+						HexViewerTextBox.FontSize = Math.Min(64, HexViewerTextBox.FontSize + 1);
+					}
+				}
+				else
+				{
+					if (HexViewerTextBox.FontSize > 4)
+					{
+						HexViewerTextBox.FontSize = Math.Max(4, HexViewerTextBox.FontSize - 1);
+					}
+				}
+			}
+		}
+
+        private void DetailsTextBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+		{
+			bool controlKey = Keyboard.Modifiers == ModifierKeys.Control;
+
+			if (controlKey)
+			{
+				if (e.Delta > 0)
+				{
+					if (DetailsTextBox.FontSize < 64)
+					{
+						DetailsTextBox.FontSize = Math.Min(64, DetailsTextBox.FontSize + 1);
+					}
+				}
+				else
+				{
+					if (DetailsTextBox.FontSize > 4)
+					{
+						DetailsTextBox.FontSize = Math.Max(4, DetailsTextBox.FontSize - 1);
+					}
+				}
+			}
+		}
+
+        private void LocalizationTextBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+		{
+			bool controlKey = Keyboard.Modifiers == ModifierKeys.Control;
+
+			if (controlKey)
+			{
+				if (e.Delta > 0)
+				{
+					if (LocalizationTextBox.FontSize < 64)
+					{
+						LocalizationTextBox.FontSize = Math.Min(64, LocalizationTextBox.FontSize + 1);
+					}
+				}
+				else
+				{
+					if (LocalizationTextBox.FontSize > 4)
+					{
+						LocalizationTextBox.FontSize = Math.Max(4, LocalizationTextBox.FontSize - 1);
+					}
+				}
+			}
+		}
+
+        private void REPOHashTextBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+		{
+			bool controlKey = Keyboard.Modifiers == ModifierKeys.Control;
+
+			if (controlKey)
+			{
+				if (e.Delta > 0)
+				{
+					if (REPOHashTextBox.FontSize < 64)
+					{
+						REPOHashTextBox.FontSize = Math.Min(64, REPOHashTextBox.FontSize + 1);
+					}
+				}
+				else
+				{
+					if (REPOHashTextBox.FontSize > 4)
+					{
+						REPOHashTextBox.FontSize = Math.Max(4, REPOHashTextBox.FontSize - 1);
+					}
+				}
+			}
+		}
+
+        private void REPOJSONTextEditor_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+
+			bool controlKey = Keyboard.Modifiers == ModifierKeys.Control;
+
+			if (controlKey)
+			{
+				if (e.Delta > 0)
+				{
+					if (REPOJSONTextEditor.FontSize < 64)
+					{
+						REPOJSONTextEditor.FontSize = Math.Min(64, REPOJSONTextEditor.FontSize + 1);
+					}
+				}
+				else
+				{
+					if (REPOJSONTextEditor.FontSize > 4)
+					{
+						REPOJSONTextEditor.FontSize = Math.Max(4, REPOJSONTextEditor.FontSize - 1);
+					}
+				}
+			}
+		}
+
+		private void HandleTreeViewMouseWheel(object sender, System.Windows.Forms.MouseEventArgs e)
+		{
+			System.Windows.Forms.TreeView treeView = (sender as System.Windows.Forms.TreeView);
+
+			bool controlKey = Keyboard.Modifiers == ModifierKeys.Control;
+
+			if (controlKey)
+			{
+				if (e.Delta > 0)
+				{
+					if (treeView.Font.Size < 64)
+					{
+						treeView.Font = new System.Drawing.Font("Consolas", Math.Min(64, treeView.Font.Size + 1));
+					}
+				}
+				else
+				{
+					if (treeView.Font.Size > 4)
+					{
+						treeView.Font = new System.Drawing.Font("Consolas", Math.Max(4, treeView.Font.Size - 1));
+					}
+				}
+			}
+		}
+    }
 }

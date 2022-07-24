@@ -232,7 +232,7 @@
             <TabItem x:Name="FirstTabLeft" Header="Resource View">
                 <!--TreeView x:Name="MainTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/-->
                 <WindowsFormsHost x:Name="MainTreeViewWindowsFormsHost">
-                    <wf:TreeView x:Name="MainTreeView" Font="Consolas,10"/>
+                    <wf:TreeView x:Name="MainTreeView" Font="Consolas,10" MouseWheel="HandleTreeViewMouseWheel"/>
                 </WindowsFormsHost>
             </TabItem>
             <TabItem>
@@ -270,7 +270,7 @@
                     <TextBox Grid.Row="1" Grid.Column="1" x:Name="SearchREPOTextBox" FontFamily="Consolas" TextWrapping="NoWrap" TextChanged="SearchREPOTextBox_TextChanged"/>
                     <!--TreeView Grid.Row="1" Grid.ColumnSpan="4" x:Name="SearchRPKGsTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/-->
                     <WindowsFormsHost Grid.Row="2" Grid.ColumnSpan="2" x:Name="REPOTreeViewWindowsFormsHost">
-                        <wf:TreeView x:Name="REPOTreeView" Font="Consolas,10" Sorted="True"/>
+                        <wf:TreeView x:Name="REPOTreeView" Font="Consolas,10" Sorted="True" MouseWheel="HandleTreeViewMouseWheel"/>
                     </WindowsFormsHost>
                 </Grid>
             </TabItem>
@@ -399,7 +399,7 @@
                             </Grid>
                             <!--TreeView Grid.Row="1" Grid.ColumnSpan="4" x:Name="SearchRPKGsTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/-->
                             <WindowsFormsHost Grid.Row="2" Grid.ColumnSpan="6" x:Name="SearchRPKGsTreeViewWindowsFormsHost">
-                                <wf:TreeView x:Name="SearchRPKGsTreeView" Font="Consolas,10"/>
+                                <wf:TreeView x:Name="SearchRPKGsTreeView" Font="Consolas,10" MouseWheel="HandleTreeViewMouseWheel"/>
                             </WindowsFormsHost>
                         </Grid>
                     </TabItem>
@@ -438,7 +438,7 @@
                             </ComboBox>
                             <!--TreeView Grid.Row="1" Grid.ColumnSpan="4" x:Name="SearchHashListTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/-->
                             <WindowsFormsHost Grid.Row="2" Grid.ColumnSpan="4" x:Name="SearchHashListTreeViewWindowsFormsHost">
-                                <wf:TreeView x:Name="SearchHashListTreeView" Font="Consolas,10"/>
+                                <wf:TreeView x:Name="SearchHashListTreeView" Font="Consolas,10" MouseWheel="HandleTreeViewMouseWheel"/>
                             </WindowsFormsHost>
                         </Grid>
                     </TabItem>
@@ -513,7 +513,7 @@
                             </Grid>
                             <!--TreeView Grid.Row="1" Grid.ColumnSpan="4" x:Name="SearchRPKGsTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/-->
                             <WindowsFormsHost Grid.Row="2" Grid.ColumnSpan="4" x:Name="DeepSearchEntitiesTreeViewWindowsFormsHost">
-                                <wf:TreeView x:Name="DeepSearchEntitiesTreeView" Font="Consolas,10"/>
+                                <wf:TreeView x:Name="DeepSearchEntitiesTreeView" Font="Consolas,10" MouseWheel="HandleTreeViewMouseWheel"/>
                             </WindowsFormsHost>
                         </Grid>
                     </TabItem>
@@ -599,7 +599,7 @@
                             </Grid>
                             <!--TreeView Grid.Row="1" Grid.ColumnSpan="4" x:Name="SearchRPKGsTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/-->
                             <WindowsFormsHost Grid.Row="2" Grid.ColumnSpan="4" x:Name="DeepSearchLocalizationTreeViewWindowsFormsHost">
-                                <wf:TreeView x:Name="DeepSearchLocalizationTreeView" Font="Consolas,10"/>
+                                <wf:TreeView x:Name="DeepSearchLocalizationTreeView" Font="Consolas,10" MouseWheel="HandleTreeViewMouseWheel"/>
                             </WindowsFormsHost>
                         </Grid>
                     </TabItem>
@@ -626,7 +626,7 @@
                     <Button Grid.Row="0" Grid.Column="0" Click="SaveChangesToHashDependsButton_Click" x:Name="SaveChangesToHashDependsButton" Content="Save Changes To Hash Depends" Visibility="Collapsed"/>
                     <Button Grid.Row="0" Grid.Column="1" Click="DiscardChangesToHashDependsButton_Click" x:Name="DiscardChangesToHashDependsButton" Content="Discard Changes To Hash Depends" Visibility="Collapsed"/>
                     <Button Grid.Row="0" Grid.Column="1" Click="ExtractHashDependsButton_Click" x:Name="ExtractHashDependsButton" Content="Extract Hash Depends" Visibility="Collapsed"/>
-                    <TextBox Grid.Row="1" Grid.ColumnSpan="3" x:Name="DetailsTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap" TextChanged="DetailsTextBox_TextChanged" IsReadOnly="True"/>
+                    <TextBox Grid.Row="1" Grid.ColumnSpan="3" x:Name="DetailsTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap" TextChanged="DetailsTextBox_TextChanged" IsReadOnly="True" PreviewMouseWheel="DetailsTextBox_PreviewMouseWheel"/>
                     <ScrollViewer Grid.Row="1" Grid.ColumnSpan="3" x:Name="MainScrollViewer" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
                         <StackPanel x:Name="MainStackPanel" Visibility="Collapsed">
 
@@ -641,7 +641,8 @@
                 <Image Name="image6"/>
             </TabItem>
             <TabItem x:Name="SecondTabRight" Header="Hex Viewer">
-                <TextBox x:Name="HexViewerTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap" IsReadOnly="True"/>
+                <avalonEdit:TextEditor x:Name="HexViewerTextBox" FontFamily="Consolas" FontSize="14" Foreground="white" IsReadOnly="True" PreviewMouseWheel="HexViewerTextBox_PreviewMouseWheel"/>
+                <!--TextBox x:Name="HexViewerTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap" IsReadOnly="True"/-->
             </TabItem>
             <TabItem Name="ThirdTabRightSeparator" Visibility="Collapsed">
                 <TabItem.Header>
@@ -650,7 +651,7 @@
                 <Image Name="image7"/>
             </TabItem>
             <TabItem x:Name="ThirdTabRight" Header="JSON Viewer" Visibility="Collapsed">
-                <TextBox x:Name="LocalizationTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="Wrap" IsReadOnly="True"/>
+                <TextBox x:Name="LocalizationTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="Wrap" IsReadOnly="True" PreviewMouseWheel="LocalizationTextBox_PreviewMouseWheel"/>
             </TabItem>
             <TabItem Name="FourthTabRightSeparator" Visibility="Collapsed">
                 <TabItem.Header>
@@ -728,7 +729,7 @@
             <Image Grid.Row="0" Grid.Column="0" x:Name="REPOImageViewer"/>
             <Label Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="24" Name="REPOImageViewerLabel" Foreground="White" Content="Image Not Found" Visibility="Collapsed"/>
             <GridSplitter HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" ResizeBehavior="PreviousAndNext" Height="5"/>
-            <TextBox Grid.Row="2" Grid.Column="0" x:Name="REPOHashTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap" IsReadOnly="True"/>
+            <TextBox Grid.Row="2" Grid.Column="0" x:Name="REPOHashTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap" IsReadOnly="True" PreviewMouseWheel="REPOHashTextBox_PreviewMouseWheel"/>
             <GridSplitter HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="3" Grid.Column="0" ResizeBehavior="PreviousAndNext" Height="5"/>
             <!-- TextBox Grid.Row="4" Grid.Column="0" x:Name="REPOJSONTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap" IsReadOnly="False" TextChanged="REPOJSONTextBox_TextChanged"/-->
             <Grid Grid.Row="4" Grid.Column="0">
@@ -751,7 +752,7 @@
                     <Button Grid.Row="0" Grid.Column="0" Name="REPOJSONEditorButton" Content="JSON Editor" Click="REPOJSONEditorButton_Click" Margin="5"/>
                     <Button Grid.Row="0" Grid.Column="1" Name="REPOJSONVisualEditorButton" Content="Visual Editor" Click="REPOJSONVisualEditorButton_Click" Margin="5"/>
                 </Grid>
-                <avalonEdit:TextEditor Grid.Row="1" Grid.Column="0" x:Name="REPOJSONTextEditor" ShowLineNumbers="True" FontFamily="Consolas" FontSize="14" Foreground="white" TextChanged="REPOJSONTextEditor_TextChanged" LostKeyboardFocus="REPOJSONTextEditor_LostKeyboardFocus" Margin="5"/>
+                <avalonEdit:TextEditor Grid.Row="1" Grid.Column="0" x:Name="REPOJSONTextEditor" ShowLineNumbers="True" FontFamily="Consolas" FontSize="14" Foreground="white" TextChanged="REPOJSONTextEditor_TextChanged" LostKeyboardFocus="REPOJSONTextEditor_LostKeyboardFocus" Margin="5" PreviewMouseWheel="REPOJSONTextEditor_PreviewMouseWheel"/>
                 <TabControl Grid.Row="1" Grid.Column="0" x:Name="REPOVisualEditorTabControl" mah:HeaderedControlHelper.HeaderFontSize="19" Visibility="Collapsed"/>
                 <Label Grid.Row="2" Grid.Column="0" Name="REPOJSONStatus" Content="" FontFamily="Consolas" FontWeight="Bold" FontSize="18" Foreground="PaleGreen" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Grid>
