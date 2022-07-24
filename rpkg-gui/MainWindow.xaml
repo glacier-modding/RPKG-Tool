@@ -31,7 +31,7 @@
 				<ColumnDefinition Width="*"/>
 				<ColumnDefinition Width="Auto"/>
 				<ColumnDefinition Width="Auto"/>
-				<ColumnDefinition Width="Auto"/>
+				<ColumnDefinition Width="90"/>
 			</Grid.ColumnDefinitions>
 			<DockPanel Grid.Row="0" Grid.Column="0">
 				<Menu DockPanel.Dock="Top">
