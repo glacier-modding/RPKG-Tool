@@ -9,6 +9,8 @@ on:
   pull_request:
     types: [ opened, synchronize, reopened ]
 
+  workflow_dispatch:
+
 jobs:
   build_windows:
     name: Build (Windows)
