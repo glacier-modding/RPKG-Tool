@@ -11,7 +11,7 @@
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -19,7 +19,7 @@
 #include <filesystem>
 #include <set>
 
-void rpkg_function::extract_prim_from(std::string& input_path, std::string& filter, std::string& output_path, int type, bool rotate)
+void rpkg_function::extract_prim_from(std::string& input_path, std::string filter, std::string& output_path, int type, bool rotate)
 {
     task_single_status = TASK_EXECUTING;
     //task_multiple_status = TASK_EXECUTING;
@@ -74,7 +74,7 @@ void rpkg_function::extract_prim_from(std::string& input_path, std::string& filt
 
                 if (rpkgs.at(i).rpkg_file_path == input_path)
                 {
-                    std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+                    std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
                     if (it != rpkgs.at(rpkg_index).hash_map.end())
                     {
@@ -93,11 +93,11 @@ void rpkg_function::extract_prim_from(std::string& input_path, std::string& filt
 
                                 if (output_path == "")
                                 {
-                                    asset_file_name = std::filesystem::current_path().generic_string() + "/" + rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name + ".glb";
+                                    asset_file_name = std::filesystem::current_path().generic_string() + "/" + util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".glb";
                                 }
                                 else
                                 {
-                                    asset_file_name = file::output_path_append(rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name + ".glb", output_path);
+                                    asset_file_name = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".glb", output_path);
                                 }
 
                                 file::create_directories(output_path);
@@ -110,7 +110,7 @@ void rpkg_function::extract_prim_from(std::string& input_path, std::string& filt
 
                                 temp_prim.extract_meta(meta_path);
 
-                                std::string hash_meta_file_name = file::output_path_append(rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name, meta_path);
+                                std::string hash_meta_file_name = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type, meta_path);
 
                                 rpkg_function::extract_hash_meta(rpkg_index, it->second, hash_meta_file_name);
 
@@ -118,7 +118,7 @@ void rpkg_function::extract_prim_from(std::string& input_path, std::string& filt
                             }
                             else if (type == GLTF_SINGLE)
                             {
-                                std::string asset_file_name = file::output_path_append(rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name + ".gltf", output_path);
+                                std::string asset_file_name = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".gltf", output_path);
 
                                 prim_asset_file_names.push_back(asset_file_name);
 
@@ -128,7 +128,7 @@ void rpkg_function::extract_prim_from(std::string& input_path, std::string& filt
                             }
                             else if (type == OBJ_SINGLE)
                             {
-                                std::string asset_file_name = file::output_path_append(rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name + ".obj", output_path);
+                                std::string asset_file_name = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".obj", output_path);
 
                                 prim_asset_file_names.push_back(asset_file_name);
 

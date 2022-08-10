@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <stdint.h>
 #include "hash.h"
 #include "thirdparty/json/json.hpp"
@@ -97,7 +97,7 @@ public:
 	std::vector<uint32_t> mate_depends_rpkg_index_index;
 	std::vector<std::vector<uint32_t>> mate_depends_hash_index;
 	std::vector<uint32_t> mate_depends_hash_index_index;
-	std::map<std::string, std::string> mati_property_name_map = { {"AREF", "Alpha Reference"},
+	std::unordered_map<std::string, std::string> mati_property_name_map = { {"AREF", "Alpha Reference"},
 																	{"ATST", "Alpha Test Enabled"},
 																	{"BENA", "Blend Enabled"},
 																	{"BIND", "Binder"},
@@ -129,7 +129,7 @@ public:
 																	{"VALU", "Value"},
 																	{"ZBIA", "Z Bias"},
 																	{"ZOFF", "Z Offset"} };
-	std::map<std::string, MATI_PROPERTY_TYPE> mati_property_type_map = { {"AREF", MATI_PROPERTY_TYPE::INT},
+	std::unordered_map<std::string, MATI_PROPERTY_TYPE> mati_property_type_map = { {"AREF", MATI_PROPERTY_TYPE::INT},
 																	{"ATST", MATI_PROPERTY_TYPE::INT},
 																	{"BENA", MATI_PROPERTY_TYPE::INT},
 																	{"BIND", MATI_PROPERTY_TYPE::PROPERTY},

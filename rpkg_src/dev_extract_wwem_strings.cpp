@@ -11,7 +11,7 @@
 #include "thirdparty/ww2ogg/wwriff.h"
 #include "thirdparty/revorb/revorb.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -20,18 +20,18 @@
 
 void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string& filter, std::string& output_path)
 {    
-    std::map<std::string, uint64_t> fxas_to_wwem_ioi_path_map;
+    std::unordered_map<std::string, uint64_t> fxas_to_wwem_ioi_path_map;
     std::vector<std::string> fxas_wwem_ioi_path;
     std::vector<std::string> fxas_file_name;
-    std::map<uint64_t, uint64_t> fxas_hash;
+    std::unordered_map<uint64_t, uint64_t> fxas_hash;
 
     uint64_t total_wwem_fxas_linked = 0;
     uint64_t total_wwem_fxas_not_linked = 0;
 
     uint64_t wwem_count = 0;
 
-    std::map<uint64_t, uint64_t> dlge_wwem_map;
-    std::map<uint64_t, uint64_t> dlge_fxas_map;
+    std::unordered_map<uint64_t, uint64_t> dlge_wwem_map;
+    std::unordered_map<uint64_t, uint64_t> dlge_fxas_map;
     std::vector<uint64_t> wwem_hashes;
     std::vector<std::string> wwem_ioi_paths;
     std::vector<std::string> wwem_ioi_short_paths;
@@ -67,7 +67,7 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
                             {
                                 if (!already_found)
                                 {
-                                    std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(x).hash_map.find(rpkgs.at(i).hash.at(hash_index).hash_reference_data.hash_reference.at(k));
+                                    std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(x).hash_map.find(rpkgs.at(i).hash.at(hash_index).hash_reference_data.hash_reference.at(k));
 
                                     if (it != rpkgs.at(x).hash_map.end())
                                     {
@@ -75,7 +75,7 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
 
                                         if (hash_resource_type == "WWEM")
                                         {
-                                            std::map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(x).hash_map.find(rpkgs.at(i).hash.at(hash_index).hash_reference_data.hash_reference.at(k + 1));
+                                            std::unordered_map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(x).hash_map.find(rpkgs.at(i).hash.at(hash_index).hash_reference_data.hash_reference.at(k + 1));
 
                                             if (it3 != rpkgs.at(x).hash_map.end())
                                             {
@@ -83,22 +83,22 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
 
                                                 if (hash_resource_type == "FXAS")
                                                 {
-                                                    std::string hash_file_name = rpkgs.at(x).hash.at(it3->second).hash_file_name;
+                                                    std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(x).hash.at(it3->second).hash_value) + "." + rpkgs.at(x).hash.at(it3->second).hash_resource_type;
 
                                                     uint64_t hash_size;
 
-                                                    if (rpkgs.at(x).hash.at(it3->second).is_lz4ed == 1)
+                                                    if (rpkgs.at(x).hash.at(it3->second).data.lz4ed)
                                                     {
-                                                        hash_size = rpkgs.at(x).hash.at(it3->second).hash_size;
+                                                        hash_size = rpkgs.at(x).hash.at(it3->second).data.header.data_size;
 
-                                                        if (rpkgs.at(x).hash.at(it3->second).is_xored == 1)
+                                                        if (rpkgs.at(x).hash.at(it3->second).data.xored)
                                                         {
                                                             hash_size &= 0x3FFFFFFF;
                                                         }
                                                     }
                                                     else
                                                     {
-                                                        hash_size = rpkgs.at(x).hash.at(it3->second).hash_size_final;
+                                                        hash_size = rpkgs.at(x).hash.at(it3->second).data.resource.size_final;
                                                     }
 
                                                     std::vector<char> input_data(hash_size, 0);
@@ -110,22 +110,22 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
                                                         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(x).rpkg_file_path + " could not be read.");
                                                     }
 
-                                                    file.seekg(rpkgs.at(x).hash.at(it3->second).hash_offset, file.beg);
+                                                    file.seekg(rpkgs.at(x).hash.at(it3->second).data.header.data_offset, file.beg);
                                                     file.read(input_data.data(), hash_size);
                                                     file.close();
 
-                                                    if (rpkgs.at(x).hash.at(it3->second).is_xored == 1)
+                                                    if (rpkgs.at(x).hash.at(it3->second).data.xored)
                                                     {
                                                         crypto::xor_data(input_data.data(), (uint32_t)hash_size);
                                                     }
 
-                                                    uint32_t decompressed_size = rpkgs.at(x).hash.at(it3->second).hash_size_final;
+                                                    uint32_t decompressed_size = rpkgs.at(x).hash.at(it3->second).data.resource.size_final;
 
                                                     std::vector<char> output_data(decompressed_size, 0);
 
                                                     std::vector<char>* fxas_data;
 
-                                                    if (rpkgs.at(x).hash.at(it3->second).is_lz4ed)
+                                                    if (rpkgs.at(x).hash.at(it3->second).data.lz4ed)
                                                     {
                                                         LZ4_decompress_safe(input_data.data(), output_data.data(), (int)hash_size, decompressed_size);
 
@@ -270,26 +270,26 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
 
                     for (uint32_t k = 0; k < hash_reference_count; k++)
                     {
-                        std::map<uint64_t, uint64_t>::iterator it = fxas_hash.find(rpkgs.at(i).hash.at(hash_index).hash_reference_data.hash_reference.at(k));
+                        std::unordered_map<uint64_t, uint64_t>::iterator it = fxas_hash.find(rpkgs.at(i).hash.at(hash_index).hash_reference_data.hash_reference.at(k));
 
                         if (it == fxas_hash.end())
                         {
-                            std::string hash_file_name = rpkgs.at(i).hash.at(it->second).hash_file_name;
+                            std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(it->second).hash_value) + "." + rpkgs.at(i).hash.at(it->second).hash_resource_type;
 
                             uint64_t hash_size;
 
-                            if (rpkgs.at(i).hash.at(it->second).is_lz4ed == 1)
+                            if (rpkgs.at(i).hash.at(it->second).data.lz4ed)
                             {
-                                hash_size = rpkgs.at(i).hash.at(it->second).hash_size;
+                                hash_size = rpkgs.at(i).hash.at(it->second).data.header.data_size;
 
-                                if (rpkgs.at(i).hash.at(it->second).is_xored == 1)
+                                if (rpkgs.at(i).hash.at(it->second).data.xored)
                                 {
                                     hash_size &= 0x3FFFFFFF;
                                 }
                             }
                             else
                             {
-                                hash_size = rpkgs.at(i).hash.at(it->second).hash_size_final;
+                                hash_size = rpkgs.at(i).hash.at(it->second).data.resource.size_final;
                             }
 
                             std::vector<char> input_data(hash_size, 0);
@@ -301,22 +301,22 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
                                 LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(i).rpkg_file_path + " could not be read.");
                             }
 
-                            file.seekg(rpkgs.at(i).hash.at(it->second).hash_offset, file.beg);
+                            file.seekg(rpkgs.at(i).hash.at(it->second).data.header.data_offset, file.beg);
                             file.read(input_data.data(), hash_size);
                             file.close();
 
-                            if (rpkgs.at(i).hash.at(it->second).is_xored == 1)
+                            if (rpkgs.at(i).hash.at(it->second).data.xored)
                             {
                                 crypto::xor_data(input_data.data(), (uint32_t)hash_size);
                             }
 
-                            uint32_t decompressed_size = rpkgs.at(i).hash.at(it->second).hash_size_final;
+                            uint32_t decompressed_size = rpkgs.at(i).hash.at(it->second).data.resource.size_final;
 
                             std::vector<char> output_data(decompressed_size, 0);
 
                             std::vector<char>* fxas_data;
 
-                            if (rpkgs.at(i).hash.at(it->second).is_lz4ed)
+                            if (rpkgs.at(i).hash.at(it->second).data.lz4ed)
                             {
                                 LZ4_decompress_safe(input_data.data(), output_data.data(), (int)hash_size, decompressed_size);
 
@@ -427,7 +427,7 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
         }
     }
 
-    std::map<std::string, uint32_t> wwem_name_map;
+    std::unordered_map<std::string, uint32_t> wwem_name_map;
 
     uint64_t wwem_map_index = 0;
 
@@ -441,7 +441,7 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
                 {
                     uint64_t hash_index = rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).at(j);
 
-                    std::string hash_file_name = rpkgs.at(i).hash.at(hash_index).hash_file_name;
+                    std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
 
                     bool is_unknown = true;
 
@@ -458,18 +458,18 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
 
                     uint64_t hash_size;
 
-                    if (rpkgs.at(i).hash.at(hash_index).is_lz4ed == 1)
+                    if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
                     {
-                        hash_size = rpkgs.at(i).hash.at(hash_index).hash_size;
+                        hash_size = rpkgs.at(i).hash.at(hash_index).data.header.data_size;
 
-                        if (rpkgs.at(i).hash.at(hash_index).is_xored == 1)
+                        if (rpkgs.at(i).hash.at(hash_index).data.xored)
                         {
                             hash_size &= 0x3FFFFFFF;
                         }
                     }
                     else
                     {
-                        hash_size = rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                        hash_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
                     }
 
                     std::vector<char> input_data(hash_size, 0);
@@ -481,22 +481,22 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
                         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(i).rpkg_file_path + " could not be read.");
                     }
 
-                    file.seekg(rpkgs.at(i).hash.at(hash_index).hash_offset, file.beg);
+                    file.seekg(rpkgs.at(i).hash.at(hash_index).data.header.data_offset, file.beg);
                     file.read(input_data.data(), hash_size);
                     file.close();
 
-                    if (rpkgs.at(i).hash.at(hash_index).is_xored == 1)
+                    if (rpkgs.at(i).hash.at(hash_index).data.xored)
                     {
                         crypto::xor_data(input_data.data(), (uint32_t)hash_size);
                     }
 
-                    uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                    uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
 
                     std::vector<char> output_data(decompressed_size, 0);
 
                     std::vector<char>* wwem_data;
 
-                    if (rpkgs.at(i).hash.at(hash_index).is_lz4ed)
+                    if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
                     {
                         LZ4_decompress_safe(input_data.data(), output_data.data(), (int)hash_size, decompressed_size);
 
@@ -659,7 +659,7 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
                         }
                         else
                         {
-                            std::map<std::string, uint64_t>::iterator it = fxas_to_wwem_ioi_path_map.find(lowercase);
+                            std::unordered_map<std::string, uint64_t>::iterator it = fxas_to_wwem_ioi_path_map.find(lowercase);
 
                             if (it != fxas_to_wwem_ioi_path_map.end())
                             {
@@ -751,18 +751,18 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
                                                 {
                                                     uint64_t hash_size;
 
-                                                    if (rpkgs.at(a).hash.at(hash_index2).is_lz4ed == 1)
+                                                    if (rpkgs.at(a).hash.at(hash_index2).data.lz4ed)
                                                     {
-                                                        hash_size = rpkgs.at(a).hash.at(hash_index2).hash_size;
+                                                        hash_size = rpkgs.at(a).hash.at(hash_index2).data.header.data_size;
 
-                                                        if (rpkgs.at(a).hash.at(hash_index2).is_xored == 1)
+                                                        if (rpkgs.at(a).hash.at(hash_index2).data.xored)
                                                         {
                                                             hash_size &= 0x3FFFFFFF;
                                                         }
                                                     }
                                                     else
                                                     {
-                                                        hash_size = rpkgs.at(a).hash.at(hash_index2).hash_size_final;
+                                                        hash_size = rpkgs.at(a).hash.at(hash_index2).data.resource.size_final;
                                                     }
 
                                                     std::vector<char> input_data2(hash_size, 0);
@@ -774,22 +774,22 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
                                                         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(a).rpkg_file_path + " could not be read.");
                                                     }
 
-                                                    file2.seekg(rpkgs.at(a).hash.at(hash_index2).hash_offset, file2.beg);
+                                                    file2.seekg(rpkgs.at(a).hash.at(hash_index2).data.header.data_offset, file2.beg);
                                                     file2.read(input_data2.data(), hash_size);
                                                     file2.close();
 
-                                                    if (rpkgs.at(a).hash.at(hash_index2).is_xored == 1)
+                                                    if (rpkgs.at(a).hash.at(hash_index2).data.xored)
                                                     {
                                                         crypto::xor_data(input_data2.data(), (uint32_t)hash_size);
                                                     }
 
-                                                    uint32_t decompressed_size = rpkgs.at(a).hash.at(hash_index2).hash_size_final;
+                                                    uint32_t decompressed_size = rpkgs.at(a).hash.at(hash_index2).data.resource.size_final;
 
                                                     std::vector<char> output_data2(decompressed_size, 0);
 
                                                     std::vector<char>* wwev_data;
 
-                                                    if (rpkgs.at(a).hash.at(hash_index2).is_lz4ed)
+                                                    if (rpkgs.at(a).hash.at(hash_index2).data.lz4ed)
                                                     {
                                                         LZ4_decompress_safe(input_data2.data(), output_data2.data(), (int)hash_size, decompressed_size);
 

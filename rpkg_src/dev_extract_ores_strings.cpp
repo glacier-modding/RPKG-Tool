@@ -8,7 +8,7 @@
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -27,24 +27,24 @@ void dev_function::dev_extract_ores_strings(std::string& input_path, std::string
                 {
                     uint64_t hash_index = rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).at(j);
 
-                    std::string hash_file_name = rpkgs.at(i).hash.at(hash_index).hash_file_name;
+                    std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
 
                     if (hash_file_name == "00858D45F5F9E3CA.ORES")
                     {
                         uint64_t hash_size;
 
-                        if (rpkgs.at(i).hash.at(hash_index).is_lz4ed == 1)
+                        if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
                         {
-                            hash_size = rpkgs.at(i).hash.at(hash_index).hash_size;
+                            hash_size = rpkgs.at(i).hash.at(hash_index).data.header.data_size;
 
-                            if (rpkgs.at(i).hash.at(hash_index).is_xored == 1)
+                            if (rpkgs.at(i).hash.at(hash_index).data.xored)
                             {
                                 hash_size &= 0x3FFFFFFF;
                             }
                         }
                         else
                         {
-                            hash_size = rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                            hash_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
                         }
 
                         std::vector<char> input_data(hash_size, 0);
@@ -56,22 +56,22 @@ void dev_function::dev_extract_ores_strings(std::string& input_path, std::string
                             LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(i).rpkg_file_path + " could not be read.");
                         }
 
-                        file.seekg(rpkgs.at(i).hash.at(hash_index).hash_offset, file.beg);
+                        file.seekg(rpkgs.at(i).hash.at(hash_index).data.header.data_offset, file.beg);
                         file.read(input_data.data(), hash_size);
                         file.close();
 
-                        if (rpkgs.at(i).hash.at(hash_index).is_xored == 1)
+                        if (rpkgs.at(i).hash.at(hash_index).data.xored)
                         {
                             crypto::xor_data(input_data.data(), (uint32_t)hash_size);
                         }
 
-                        uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                        uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
 
                         std::vector<char> output_data(decompressed_size, 0);
 
                         std::vector<char>* ores_data;
 
-                        if (rpkgs.at(i).hash.at(hash_index).is_lz4ed)
+                        if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
                         {
                             LZ4_decompress_safe(input_data.data(), output_data.data(), (int)hash_size, decompressed_size);
 
@@ -135,13 +135,13 @@ void dev_function::dev_extract_ores_strings(std::string& input_path, std::string
                             {
                                 if (!found)
                                 {
-                                    std::map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(i).hash_map.find(hash);
+                                    std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(i).hash_map.find(hash);
 
                                     if (it2 != rpkgs.at(i).hash_map.end())
                                     {
                                         found = true;
 
-                                        std::cout << rpkgs.at(i).hash.at(it2->second).hash_file_name << "," << std::string(&ores_data->data()[0] + string_offset) << std::endl;
+                                        std::cout << util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(it2->second).hash_value) + "." + rpkgs.at(i).hash.at(it2->second).hash_resource_type << "," << std::string(&ores_data->data()[0] + string_offset) << std::endl;
                                     }
                                 }
                             }

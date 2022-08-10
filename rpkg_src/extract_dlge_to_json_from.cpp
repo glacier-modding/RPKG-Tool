@@ -10,7 +10,7 @@
 #include "thirdparty/lz4/lz4hc.h"
 #include "thirdparty/json/json.hpp"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -102,7 +102,7 @@ void rpkg_function::extract_dlge_to_json_from(std::string &input_path, std::stri
                                 return;
                             }
 
-                            std::string hash_file_name = rpkgs.at(i).hash.at(hash_index).hash_file_name;
+                            std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
 
                             bool found = false;
 
@@ -144,18 +144,18 @@ void rpkg_function::extract_dlge_to_json_from(std::string &input_path, std::stri
 
                                 uint64_t hash_size;
 
-                                if (rpkgs.at(i).hash.at(hash_index).is_lz4ed == 1)
+                                if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
                                 {
-                                    hash_size = rpkgs.at(i).hash.at(hash_index).hash_size;
+                                    hash_size = rpkgs.at(i).hash.at(hash_index).data.header.data_size;
 
-                                    if (rpkgs.at(i).hash.at(hash_index).is_xored == 1)
+                                    if (rpkgs.at(i).hash.at(hash_index).data.xored)
                                     {
                                         hash_size &= 0x3FFFFFFF;
                                     }
                                 }
                                 else
                                 {
-                                    hash_size = rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                                    hash_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
                                 }
 
                                 std::vector<char> input_data(hash_size, 0);
@@ -167,22 +167,22 @@ void rpkg_function::extract_dlge_to_json_from(std::string &input_path, std::stri
                                     LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(i).rpkg_file_path + " could not be read.");
                                 }
 
-                                file.seekg(rpkgs.at(i).hash.at(hash_index).hash_offset, file.beg);
+                                file.seekg(rpkgs.at(i).hash.at(hash_index).data.header.data_offset, file.beg);
                                 file.read(input_data.data(), hash_size);
                                 file.close();
 
-                                if (rpkgs.at(i).hash.at(hash_index).is_xored == 1)
+                                if (rpkgs.at(i).hash.at(hash_index).data.xored)
                                 {
                                     crypto::xor_data(input_data.data(), (uint32_t)hash_size);
                                 }
 
-                                uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                                uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
 
                                 std::vector<char> output_data(decompressed_size, 0);
 
                                 std::vector<char> *dlge_data;
 
-                                if (rpkgs.at(i).hash.at(hash_index).is_lz4ed)
+                                if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
                                 {
                                     LZ4_decompress_safe(input_data.data(), output_data.data(), (int)hash_size, decompressed_size);
 
@@ -584,7 +584,7 @@ void rpkg_function::extract_dlge_to_json_from(std::string &input_path, std::stri
 
                                         for (uint64_t a = 0; a < rpkgs.size(); a++)
                                         {
-                                            std::map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(a).hash_map.find(hash_value);
+                                            std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(a).hash_map.find(hash_value);
 
                                             hash_depends_variables temp_hash_depends_data;
 
@@ -606,15 +606,15 @@ void rpkg_function::extract_dlge_to_json_from(std::string &input_path, std::stri
 
                                                         for (uint64_t c = 0; c < rpkgs.size(); c++)
                                                         {
-                                                            std::map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(c).hash_map.find(rpkgs.at(a).hash.at(it2->second).hash_reference_data.hash_reference.at(b));
+                                                            std::unordered_map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(c).hash_map.find(rpkgs.at(a).hash.at(it2->second).hash_reference_data.hash_reference.at(b));
 
                                                             if (it3 != rpkgs.at(c).hash_map.end())
                                                             {
                                                                 if (!found)
                                                                 {
-                                                                    temp_hash_depends_data.hash_dependency_file_name.push_back(rpkgs.at(c).hash.at(it3->second).hash_file_name);
+                                                                    temp_hash_depends_data.hash_dependency_file_name.push_back(util::uint64_t_to_hex_string(rpkgs.at(c).hash.at(it3->second).hash_value) + "." + rpkgs.at(c).hash.at(it3->second).hash_resource_type);
 
-                                                                    std::string hash_link_file_name = current_path + "\\" + hash_file_name + "_" + rpkgs.at(c).hash.at(it3->second).hash_file_name;
+                                                                    std::string hash_link_file_name = current_path + "\\" + hash_file_name + "_" + util::uint64_t_to_hex_string(rpkgs.at(c).hash.at(it3->second).hash_value) + "." + rpkgs.at(c).hash.at(it3->second).hash_resource_type;
 
                                                                     if (rpkgs.at(c).hash.at(it3->second).hash_resource_type == "WWES")
                                                                     {
@@ -640,7 +640,7 @@ void rpkg_function::extract_dlge_to_json_from(std::string &input_path, std::stri
 
                                                         if (!found)
                                                         {
-                                                            temp_hash_depends_data.hash_dependency_file_name.push_back(rpkgs.at(a).hash.at(it2->second).hash_reference_data.hash_reference_string.at(b));
+                                                            temp_hash_depends_data.hash_dependency_file_name.push_back(util::uint64_t_to_hex_string(rpkgs.at(a).hash.at(it2->second).hash_reference_data.hash_reference.at(b)));
                                                         }
 
                                                         temp_hash_depends_data.hash_dependency_map[hash_value] = temp_hash_depends_data.hash_dependency_map.size();

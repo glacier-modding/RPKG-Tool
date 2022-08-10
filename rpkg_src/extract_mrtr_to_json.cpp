@@ -6,7 +6,7 @@
 #include "util.h"
 #include "mrtr.h"
 #include "thirdparty/lz4/lz4.h"
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -51,7 +51,7 @@ void rpkg_function::extract_mrtr_to_json(std::string& input_path, std::string& f
 
                 if (rpkgs.at(i).rpkg_file_path == input_path)
                 {
-                    std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(text_hash_value);
+                    std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(text_hash_value);
 
                     if (it != rpkgs.at(rpkg_index).hash_map.end())
                     {
@@ -60,7 +60,7 @@ void rpkg_function::extract_mrtr_to_json(std::string& input_path, std::string& f
                             return;
                         }
 
-                        timing_string = "Converting: " + rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name + " to MRTR JSON";
+                        timing_string = "Converting: " + util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + " to MRTR JSON";
 
                         mrtr temp_mrtr(rpkg_index, it->second);
 

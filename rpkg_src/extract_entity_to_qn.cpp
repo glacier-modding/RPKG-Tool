@@ -12,7 +12,7 @@
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -78,7 +78,7 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
 
             if (rpkg_index != UINT32_MAX)
             {
-                std::map<uint64_t, uint64_t>::iterator it6 = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+                std::unordered_map<uint64_t, uint64_t>::iterator it6 = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
                 if (it6 != rpkgs.at(rpkg_index).hash_map.end())
                 {

@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <set>
 #include <stdint.h>
 #include "thirdparty/yyjson/yyjson.h"
@@ -79,8 +79,8 @@ public:
 	uint32_t repo_hash_index = 0;
 	nlohmann::json repo_original;
 	nlohmann::json repo_modified;
-	std::map<std::string, uint32_t> repo_entries_original;
-	std::map<std::string, uint32_t> repo_entries_modified;
+	std::unordered_map<std::string, uint32_t> repo_entries_original;
+	std::unordered_map<std::string, uint32_t> repo_entries_modified;
 	std::set<std::string> repo_runtime_categories;
 	ores ores_object;
 };

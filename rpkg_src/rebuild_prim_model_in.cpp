@@ -6,7 +6,7 @@
 #include "util.h"
 #include "prim.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>

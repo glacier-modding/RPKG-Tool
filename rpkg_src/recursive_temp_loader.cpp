@@ -7,13 +7,13 @@
 #include "util.h"
 #include "generic_function.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 
-void rpkg_function::recursive_temp_loader(uint32_t rpkgs_index, uint32_t hash_index, uint32_t temp_version, std::map<uint32_t, uint32_t>& parents_map, std::vector<uint32_t> temps_indexes, uint32_t level, uint32_t level_max, uint32_t temps_max)
+void rpkg_function::recursive_temp_loader(uint32_t rpkgs_index, uint32_t hash_index, uint32_t temp_version, std::unordered_map<uint32_t, uint32_t>& parents_map, std::vector<uint32_t> temps_indexes, uint32_t level, uint32_t level_max, uint32_t temps_max)
 {
 	if ((level <= level_max || level_max == 0) && (temps.size() <= temps_max || temps_max == 0))
 	{
-		std::map<uint32_t, uint32_t>::iterator it = parents_map.find(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value);
+		std::unordered_map<uint32_t, uint32_t>::iterator it = parents_map.find(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value);
 
 		if (it == parents_map.end())
 		{
@@ -41,7 +41,7 @@ void rpkg_function::recursive_temp_loader(uint32_t rpkgs_index, uint32_t hash_in
 				//temps.at(temps.at(temps_index).parents.at(i)).children.push_back(temps_index);
 			//}
 
-			//LOG(std::string(level * 2, '-') + "TEMP File Name: " + rpkgs.at(rpkgs_index).hash.at(hash_index).hash_file_name);
+			//LOG(std::string(level * 2, '-') + "TEMP File Name: " + util::uint64_t_to_hex_string(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value) + "." + rpkgs.at(rpkgs_index).hash.at(hash_index).hash_resource_type);
 			//LOG(std::string(level * 2, ' ') + "  - temps.back().temp_depends_file_name.size(): " + util::uint64_t_to_string(temps.at(temps_index).temp_depends_file_name.size()));
 			//LOG(std::string(level * 2, ' ') + "  - temps.back().prim_depends_file_name.size(): " + util::uint64_t_to_string(temps.at(temps_index).prim_depends_file_name.size()));
 
@@ -62,9 +62,9 @@ void rpkg_function::recursive_temp_loader(uint32_t rpkgs_index, uint32_t hash_in
 		}
 		else
 		{
-			LOG("Recursive loop detected at level " + util::uint32_t_to_string(level) + " and the duplicate TEMP file is: " + rpkgs.at(rpkgs_index).hash.at(hash_index).hash_file_name);
+			LOG("Recursive loop detected at level " + util::uint32_t_to_string(level) + " and the duplicate TEMP file is: " + util::uint64_t_to_hex_string(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value) + "." + rpkgs.at(rpkgs_index).hash.at(hash_index).hash_resource_type);
 
-			std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value);
+			std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value);
 
 			if (it2 != hash_list_hash_map.end())
 			{

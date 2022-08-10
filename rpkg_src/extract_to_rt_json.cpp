@@ -12,7 +12,7 @@
 #include "thirdparty/rapidjson/prettywriter.h"
 #include "thirdparty/rapidjson/stringbuffer.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -69,7 +69,7 @@ void rpkg_function::extract_to_rt_json(std::string& input_path, std::string& fil
 
                 if (rpkgs.at(i).rpkg_file_path == input_path)
                 {
-                    std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(text_hash_value);
+                    std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(text_hash_value);
 
                     if (it != rpkgs.at(rpkg_index).hash_map.end())
                     {
@@ -102,18 +102,18 @@ void rpkg_function::extract_to_rt_json(std::string& input_path, std::string& fil
 
                         uint64_t temp_hash_size;
 
-                        if (rpkgs.at(rpkg_index).hash.at(it->second).is_lz4ed == 1)
+                        if (rpkgs.at(rpkg_index).hash.at(it->second).data.lz4ed)
                         {
-                            temp_hash_size = rpkgs.at(rpkg_index).hash.at(it->second).hash_size;
+                            temp_hash_size = rpkgs.at(rpkg_index).hash.at(it->second).data.header.data_size;
 
-                            if (rpkgs.at(rpkg_index).hash.at(it->second).is_xored == 1)
+                            if (rpkgs.at(rpkg_index).hash.at(it->second).data.xored)
                             {
                                 temp_hash_size &= 0x3FFFFFFF;
                             }
                         }
                         else
                         {
-                            temp_hash_size = rpkgs.at(rpkg_index).hash.at(it->second).hash_size_final;
+                            temp_hash_size = rpkgs.at(rpkg_index).hash.at(it->second).data.resource.size_final;
                         }
 
                         std::vector<char> temp_input_data = std::vector<char>(temp_hash_size, 0);
@@ -125,22 +125,22 @@ void rpkg_function::extract_to_rt_json(std::string& input_path, std::string& fil
                             LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(rpkg_index).rpkg_file_path + " could not be read.");
                         }
 
-                        file.seekg(rpkgs.at(rpkg_index).hash.at(it->second).hash_offset, file.beg);
+                        file.seekg(rpkgs.at(rpkg_index).hash.at(it->second).data.header.data_offset, file.beg);
                         file.read(temp_input_data.data(), temp_hash_size);
                         file.close();
 
-                        if (rpkgs.at(rpkg_index).hash.at(it->second).is_xored == 1)
+                        if (rpkgs.at(rpkg_index).hash.at(it->second).data.xored)
                         {
                             crypto::xor_data(temp_input_data.data(), (uint32_t)temp_hash_size);
                         }
 
-                        uint32_t temp_decompressed_size = rpkgs.at(rpkg_index).hash.at(it->second).hash_size_final;
+                        uint32_t temp_decompressed_size = rpkgs.at(rpkg_index).hash.at(it->second).data.resource.size_final;
 
                         std::vector<char> temp_output_data = std::vector<char>(temp_decompressed_size, 0);
 
                         std::vector<char> temp_data;
 
-                        if (rpkgs.at(rpkg_index).hash.at(it->second).is_lz4ed)
+                        if (rpkgs.at(rpkg_index).hash.at(it->second).data.lz4ed)
                         {
                             LZ4_decompress_safe(temp_input_data.data(), temp_output_data.data(), (int)temp_hash_size, temp_decompressed_size);
 
@@ -181,7 +181,7 @@ void rpkg_function::extract_to_rt_json(std::string& input_path, std::string& fil
 
                         resource_tool_converter->FreeJsonString(temp_json_input);
 
-                        std::ofstream file_temp = std::ofstream(file::output_path_append(rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name + ".JSON", output_path), std::ofstream::binary);
+                        std::ofstream file_temp = std::ofstream(file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".JSON", output_path), std::ofstream::binary);
 
                         rapidjson::StringBuffer buffer_temp;
                         rapidjson::PrettyWriter<rapidjson::StringBuffer> writer_temp(buffer_temp);

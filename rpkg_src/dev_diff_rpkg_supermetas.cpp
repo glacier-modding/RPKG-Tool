@@ -10,11 +10,11 @@
 #include <fstream>
 #include <sstream>
 #include <filesystem>
-#include <map>
+#include <unordered_map>
 
 void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string& filter, std::string& output_path)
 {
-    if (!hash_list_loaded)
+    /*if (!hash_list_loaded)
     {
         LOG("Loading Hash List...");
         generic_function::load_hash_list(true);
@@ -28,7 +28,7 @@ void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string
     double console_update_rate = 1.0 / 2.0;
     int period_count = 1;
 
-    std::map<std::string, uint64_t> supermeta_file_name_map;
+    std::unordered_map<std::string, uint64_t> supermeta_file_name_map;
     std::vector<std::vector<std::string>> supermeta_file_paths;
 
     for (const auto& entry : std::filesystem::recursive_directory_iterator(input_path))
@@ -76,7 +76,7 @@ void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string
 
             if (file::is_supermeta_file(supermeta_file_name))
             {
-                std::map<std::string, uint64_t>::iterator it = supermeta_file_name_map.find(supermeta_file_name);
+                std::unordered_map<std::string, uint64_t>::iterator it = supermeta_file_name_map.find(supermeta_file_name);
 
                 //std::cout << supermeta_file_name << std::endl;
 
@@ -131,13 +131,13 @@ void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string
 
                     for (uint64_t a = 0; a < rpkgs.at(x).hash.size(); a++)
                     {
-                        std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(y).hash_map.find(rpkgs.at(x).hash.at(a).hash_value);
+                        std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(y).hash_map.find(rpkgs.at(x).hash.at(a).hash_value);
 
                         if (it == rpkgs.at(y).hash_map.end())
                         {
                             std::string ioi_string = "";
 
-                            std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(x).hash.at(a).hash_value);
+                            std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(x).hash.at(a).hash_value);
 
                             if (it2 != hash_list_hash_map.end())
                             {
@@ -153,13 +153,13 @@ void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string
 
                     for (uint64_t a = 0; a < rpkgs.at(y).hash.size(); a++)
                     {
-                        std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(x).hash_map.find(rpkgs.at(y).hash.at(a).hash_value);
+                        std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(x).hash_map.find(rpkgs.at(y).hash.at(a).hash_value);
 
                         if (it == rpkgs.at(x).hash_map.end())
                         {
                             std::string ioi_string = "";
 
-                            std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(y).hash.at(a).hash_value);
+                            std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(y).hash.at(a).hash_value);
 
                             if (it2 != hash_list_hash_map.end())
                             {
@@ -175,13 +175,13 @@ void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string
 
                     for (uint64_t a = 0; a < rpkgs.at(x).hash.size(); a++)
                     {
-                        std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(y).hash_map.find(rpkgs.at(x).hash.at(a).hash_value);
+                        std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(y).hash_map.find(rpkgs.at(x).hash.at(a).hash_value);
 
                         if (it != rpkgs.at(y).hash_map.end())
                         {
                             std::string ioi_string = "";
 
-                            std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(x).hash.at(a).hash_value);
+                            std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(x).hash.at(a).hash_value);
 
                             if (it2 != hash_list_hash_map.end())
                             {
@@ -190,34 +190,34 @@ void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string
 
                             uint64_t hash_size1;
 
-                            if (rpkgs.at(x).hash.at(a).is_lz4ed == 1)
+                            if (rpkgs.at(x).hash.at(a).data.lz4ed)
                             {
-                                hash_size1 = rpkgs.at(x).hash.at(a).hash_size;
+                                hash_size1 = rpkgs.at(x).hash.at(a).data.header.data_size;
 
-                                if (rpkgs.at(x).hash.at(a).is_xored == 1)
+                                if (rpkgs.at(x).hash.at(a).data.xored)
                                 {
                                     hash_size1 &= 0x3FFFFFFF;
                                 }
                             }
                             else
                             {
-                                hash_size1 = rpkgs.at(x).hash.at(a).hash_size_final;
+                                hash_size1 = rpkgs.at(x).hash.at(a).data.resource.size_final;
                             }
 
                             uint64_t hash_size2;
 
-                            if (rpkgs.at(y).hash.at(it->second).is_lz4ed == 1)
+                            if (rpkgs.at(y).hash.at(it->second).data.lz4ed)
                             {
-                                hash_size2 = rpkgs.at(y).hash.at(it->second).hash_size;
+                                hash_size2 = rpkgs.at(y).hash.at(it->second).data.header.data_size;
 
-                                if (rpkgs.at(y).hash.at(it->second).is_xored == 1)
+                                if (rpkgs.at(y).hash.at(it->second).data.xored)
                                 {
                                     hash_size2 &= 0x3FFFFFFF;
                                 }
                             }
                             else
                             {
-                                hash_size2 = rpkgs.at(y).hash.at(it->second).hash_size_final;
+                                hash_size2 = rpkgs.at(y).hash.at(it->second).data.resource.size_final;
                             }
 
                             if (hash_size1 != hash_size2)
@@ -235,13 +235,13 @@ void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string
 
                     for (uint64_t a = 0; a < rpkgs.at(y).hash.size(); a++)
                     {
-                        std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(x).hash_map.find(rpkgs.at(y).hash.at(a).hash_value);
+                        std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(x).hash_map.find(rpkgs.at(y).hash.at(a).hash_value);
 
                         if (it != rpkgs.at(x).hash_map.end())
                         {
                             std::string ioi_string = "";
 
-                            std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(y).hash.at(a).hash_value);
+                            std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(y).hash.at(a).hash_value);
 
                             if (it2 != hash_list_hash_map.end())
                             {
@@ -250,34 +250,34 @@ void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string
 
                             uint64_t hash_size1;
 
-                            if (rpkgs.at(y).hash.at(a).is_lz4ed == 1)
+                            if (rpkgs.at(y).hash.at(a).data.lz4ed)
                             {
-                                hash_size1 = rpkgs.at(y).hash.at(a).hash_size;
+                                hash_size1 = rpkgs.at(y).hash.at(a).data.header.data_size;
 
-                                if (rpkgs.at(y).hash.at(a).is_xored == 1)
+                                if (rpkgs.at(y).hash.at(a).data.xored)
                                 {
                                     hash_size1 &= 0x3FFFFFFF;
                                 }
                             }
                             else
                             {
-                                hash_size1 = rpkgs.at(y).hash.at(a).hash_size_final;
+                                hash_size1 = rpkgs.at(y).hash.at(a).data.resource.size_final;
                             }
 
                             uint64_t hash_size2;
 
-                            if (rpkgs.at(x).hash.at(it->second).is_lz4ed == 1)
+                            if (rpkgs.at(x).hash.at(it->second).data.lz4ed)
                             {
-                                hash_size2 = rpkgs.at(x).hash.at(it->second).hash_size;
+                                hash_size2 = rpkgs.at(x).hash.at(it->second).data.header.data_size;
 
-                                if (rpkgs.at(x).hash.at(it->second).is_xored == 1)
+                                if (rpkgs.at(x).hash.at(it->second).data.xored)
                                 {
                                     hash_size2 &= 0x3FFFFFFF;
                                 }
                             }
                             else
                             {
-                                hash_size2 = rpkgs.at(x).hash.at(it->second).hash_size_final;
+                                hash_size2 = rpkgs.at(x).hash.at(it->second).data.resource.size_final;
                             }
 
                             if (hash_size1 != hash_size2)
@@ -304,4 +304,5 @@ void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string
             std::cout << "Not enough supermetas found for " << supermeta_file_paths.at(i).at(0) << " to perform a diff operation." << std::endl;
         }
     }
+    */
 }

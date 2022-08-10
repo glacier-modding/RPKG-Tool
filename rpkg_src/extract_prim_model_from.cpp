@@ -12,7 +12,7 @@
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -20,7 +20,7 @@
 #include <filesystem>
 #include <set>
 
-void rpkg_function::extract_prim_model_from(std::string& input_path, std::string& filter, std::string& output_path)
+void rpkg_function::extract_prim_model_from(std::string& input_path, std::string filter, std::string& output_path)
 {
     task_single_status = TASK_EXECUTING;
     //task_multiple_status = TASK_EXECUTING;
@@ -81,7 +81,7 @@ void rpkg_function::extract_prim_model_from(std::string& input_path, std::string
 
                 if (rpkgs.at(i).rpkg_file_path == input_path)
                 {
-                    std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+                    std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
                     if (it != rpkgs.at(rpkg_index).hash_map.end())
                     {
@@ -106,11 +106,11 @@ void rpkg_function::extract_prim_model_from(std::string& input_path, std::string
                                 util::replace_all_string_in_string(output_path, to_replace, replace_with);
                             }
 
-                            std::string prim_output_path = file::output_path_append(rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name + "\\PRIM\\" + rpkgs.at(rpkg_index).rpkg_file_name, output_path);
+                            std::string prim_output_path = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + "\\PRIM\\" + rpkgs.at(rpkg_index).rpkg_file_name, output_path);
 
-                            std::string text_output_path = file::output_path_append(rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name, output_path);
+                            std::string text_output_path = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type, output_path);
 
-                            asset_file_name = file::output_path_append(rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name + ".glb", prim_output_path);
+                            asset_file_name = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".glb", prim_output_path);
 
                             file::create_directories(prim_output_path);
 
@@ -124,7 +124,7 @@ void rpkg_function::extract_prim_model_from(std::string& input_path, std::string
 
                             temp_prim.extract_meta(meta_path);
 
-                            std::string hash_meta_file_name = file::output_path_append(rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name, meta_path);
+                            std::string hash_meta_file_name = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type, meta_path);
 
                             rpkg_function::extract_hash_meta(rpkg_index, it->second, hash_meta_file_name);
 

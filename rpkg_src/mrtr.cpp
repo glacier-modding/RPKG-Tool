@@ -8,7 +8,7 @@
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/directxmath/DirectXMath.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <fstream>
 #include <sstream>
 #include <set>
@@ -25,22 +25,22 @@ mrtr::mrtr(uint64_t rpkgs_index, uint64_t hash_index)
     mrtr_rpkg_index = rpkgs_index;
     mrtr_hash_index = hash_index;
 
-    mrtr_file_name = rpkgs.at(rpkgs_index).hash.at(hash_index).hash_file_name;
+    mrtr_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value) + "." + rpkgs.at(rpkgs_index).hash.at(hash_index).hash_resource_type;
 
     uint64_t mrtr_hash_size;
 
-    if (rpkgs.at(mrtr_rpkg_index).hash.at(mrtr_hash_index).is_lz4ed == 1)
+    if (rpkgs.at(mrtr_rpkg_index).hash.at(mrtr_hash_index).data.lz4ed)
     {
-        mrtr_hash_size = rpkgs.at(mrtr_rpkg_index).hash.at(mrtr_hash_index).hash_size;
+        mrtr_hash_size = rpkgs.at(mrtr_rpkg_index).hash.at(mrtr_hash_index).data.header.data_size;
 
-        if (rpkgs.at(mrtr_rpkg_index).hash.at(mrtr_hash_index).is_xored == 1)
+        if (rpkgs.at(mrtr_rpkg_index).hash.at(mrtr_hash_index).data.xored)
         {
             mrtr_hash_size &= 0x3FFFFFFF;
         }
     }
     else
     {
-        mrtr_hash_size = rpkgs.at(mrtr_rpkg_index).hash.at(mrtr_hash_index).hash_size_final;
+        mrtr_hash_size = rpkgs.at(mrtr_rpkg_index).hash.at(mrtr_hash_index).data.resource.size_final;
     }
 
     mrtr_input_data = std::vector<char>(mrtr_hash_size, 0);
@@ -52,20 +52,20 @@ mrtr::mrtr(uint64_t rpkgs_index, uint64_t hash_index)
         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(mrtr_rpkg_index).rpkg_file_path + " could not be read.");
     }
 
-    file.seekg(rpkgs.at(mrtr_rpkg_index).hash.at(mrtr_hash_index).hash_offset, file.beg);
+    file.seekg(rpkgs.at(mrtr_rpkg_index).hash.at(mrtr_hash_index).data.header.data_offset, file.beg);
     file.read(mrtr_input_data.data(), mrtr_hash_size);
     file.close();
 
-    if (rpkgs.at(mrtr_rpkg_index).hash.at(mrtr_hash_index).is_xored == 1)
+    if (rpkgs.at(mrtr_rpkg_index).hash.at(mrtr_hash_index).data.xored)
     {
         crypto::xor_data(mrtr_input_data.data(), (uint32_t)mrtr_hash_size);
     }
 
-    const uint32_t mrtr_decompressed_size = rpkgs.at(mrtr_rpkg_index).hash.at(mrtr_hash_index).hash_size_final;
+    const uint32_t mrtr_decompressed_size = rpkgs.at(mrtr_rpkg_index).hash.at(mrtr_hash_index).data.resource.size_final;
 
     mrtr_output_data = std::vector<char>(mrtr_decompressed_size, 0);
 
-    if (rpkgs.at(mrtr_rpkg_index).hash.at(mrtr_hash_index).is_lz4ed)
+    if (rpkgs.at(mrtr_rpkg_index).hash.at(mrtr_hash_index).data.lz4ed)
     {
         LZ4_decompress_safe(mrtr_input_data.data(), mrtr_output_data.data(), (int)mrtr_hash_size, mrtr_decompressed_size);
 
@@ -250,8 +250,8 @@ void mrtr::generate_json()
 void mrtr::write_json_to_file(std::string output_path)
 {
     file::create_directories(output_path);
-
-    std::ofstream json_file = std::ofstream(file::output_path_append(rpkgs.at(mrtr_rpkg_index).hash.at(mrtr_hash_index).hash_file_name + ".JSON", output_path), std::ofstream::binary);
+    
+    std::ofstream json_file = std::ofstream(file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(mrtr_rpkg_index).hash.at(mrtr_hash_index).hash_value) + "." + rpkgs.at(mrtr_rpkg_index).hash.at(mrtr_hash_index).hash_resource_type + ".JSON", output_path), std::ofstream::binary);
 
     json_file << std::setw(4) << json << std::endl;
 

@@ -3,6 +3,7 @@
 #include "temp.h"
 #include "entity.h"
 #include "repo.h"
+#include "util.h"
 #include <string>
 #include <vector>
 #include <stdint.h>
@@ -280,10 +281,10 @@ extern std::string hash_direct_depends;
 extern std::string hash_list_string;
 extern std::string patch_deletion_list_string;
 extern std::vector<std::string> hashes_depends_map_rpkg_file_paths;
-extern std::vector<std::map<uint64_t, uint64_t>> hashes_depends_map;
+extern std::vector<std::unordered_map<uint64_t, uint64_t>> hashes_depends_map;
 extern int hash_list_version;
 extern bool hash_list_loaded;
-extern std::map<uint64_t, uint64_t> hash_list_hash_map;
+extern std::unordered_map<uint64_t, uint64_t> hash_list_hash_map;
 extern std::vector<std::string> hash_list_hash_file_names;
 extern std::vector<std::string> hash_list_hash_value_strings;
 extern std::vector<std::string> hash_list_hash_strings;
@@ -294,11 +295,11 @@ extern int pcm_sample_size;
 extern int pcm_sample_rate;
 extern int pcm_channels;
 extern std::string extracted_wem_string;
-extern std::map<uint32_t, std::string>* property_map;
-extern std::map<std::string, uint32_t>* type_map_h2;
-extern std::map<std::string, uint32_t>* type_map_h3;
-extern std::map<std::string, std::map<int32_t, std::string>>* enum_map_h2;
-extern std::map<std::string, std::map<int32_t, std::string>>* enum_map_h3;
+extern std::unordered_map<uint32_t, std::string>* property_map;
+extern std::unordered_map<std::string, uint32_t>* type_map_h2;
+extern std::unordered_map<std::string, uint32_t>* type_map_h3;
+extern std::unordered_map<std::string, std::unordered_map<int32_t, std::string>>* enum_map_h2;
+extern std::unordered_map<std::string, std::unordered_map<int32_t, std::string>>* enum_map_h3;
 extern void initialize_enum_map_h2();
 extern void initialize_enum_map_h3();
 extern void initialize_type_map_h2();
@@ -308,10 +309,10 @@ extern bool enum_map_h3_initialized;
 extern bool type_map_h2_initialized;
 extern bool type_map_h3_initialized;
 extern std::vector<temp> temps;
-extern std::map<uint64_t, uint32_t> temps_map;
+extern std::unordered_map<uint64_t, uint32_t> temps_map;
 extern std::vector<matrix43> temp_world_coordinates;
 extern std::vector<std::string> temp_world_coordinates_property_names;
-extern std::map<uint32_t, uint32_t> temp_world_coordinates_map;
+extern std::unordered_map<uint32_t, uint32_t> temp_world_coordinates_map;
 extern std::vector<std::string> prim_asset_file_names;
 extern uint32_t prim_asset_file_count;
 extern std::string map_editor_output_path;
@@ -319,16 +320,16 @@ extern std::vector<std::string> map_editor_parents;
 extern std::vector<std::string> map_editor_property_names;
 extern std::vector<std::string> map_editor_matrixes;
 extern std::vector<std::vector<std::string>> map_editor_glb_file_names;
-extern std::map<std::string, uint32_t> map_editor_prim_file_names;
-extern std::map<std::string, uint32_t> map_editor_resource_map;
+extern std::unordered_map<std::string, uint32_t> map_editor_prim_file_names;
+extern std::unordered_map<std::string, uint32_t> map_editor_resource_map;
 extern std::string map_editor_godot_resources;
 extern std::string map_editor_godot_nodes;
 extern std::string map_editor_temp_matrix;
 extern std::vector<std::string> map_editor_godot_import_property_strings;
-extern std::map<std::string, uint32_t> map_editor_godot_import_property_strings_map;
+extern std::unordered_map<std::string, uint32_t> map_editor_godot_import_property_strings_map;
 extern std::vector<matrix43> map_editor_godot_import_matrixes;
 extern std::vector<uint64_t> entity_id_master_list;
-extern std::map<uint64_t, uint64_t> entity_id_master_list_map;
+extern std::unordered_map<uint64_t, uint64_t> entity_id_master_list_map;
 extern std::vector<uint32_t> entity_id_tblu_index;
 extern std::vector<uint32_t> entity_id_temps_index;
 extern std::vector<uint32_t> entity_id_logicalParent;
@@ -356,5 +357,6 @@ extern int map_percent_progress_godot_map_nodes;
 extern int map_percent_progress_map_node_temp_loading;
 extern int map_percent_progress_map_node_changes_check;
 extern int map_percent_progress_map_writing_changes_to_qn;
-extern std::map<uint64_t, entity> deep_search_entities_map;
+extern std::unordered_map<uint64_t, entity> deep_search_entities_map;
 extern nlohmann::ordered_json localization_json;
+extern std::string hashes_based_on_resource_type;

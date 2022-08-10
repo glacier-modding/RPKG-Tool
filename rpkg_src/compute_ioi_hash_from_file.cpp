@@ -21,7 +21,7 @@ void generic_function::compute_ioi_hash_from_file(std::string& input_path)
         std::cout << "Error: " + input_path + " could not be read." << std::endl;
     }
 
-    std::map<std::string, uint64_t> ioi_string_map;
+    std::unordered_map<std::string, uint64_t> ioi_string_map;
     std::vector<std::string> ioi_strings;
 
     std::string line = "";
@@ -36,7 +36,7 @@ void generic_function::compute_ioi_hash_from_file(std::string& input_path)
 
             //std::cout << "String: " << ioi_string << std::endl;
 
-            std::map<std::string, uint64_t>::iterator it = ioi_string_map.find(substring);
+            std::unordered_map<std::string, uint64_t>::iterator it = ioi_string_map.find(substring);
 
             if (it != ioi_string_map.end())
             {

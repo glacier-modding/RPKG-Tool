@@ -11,7 +11,7 @@
 #include "thirdparty/ww2ogg/wwriff.h"
 #include "thirdparty/revorb/revorb.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -92,7 +92,7 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
                             return;
                         }
 
-                        std::string hash_file_name = rpkgs.at(i).hash.at(hash_index).hash_file_name;
+                        std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
 
                         std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
 
@@ -118,7 +118,7 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
                             period_count++;
                         }
 
-                        wwem_hash_size_total += rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                        wwem_hash_size_total += rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
 
                         wwem_count++;
                     }
@@ -145,7 +145,7 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
             LOG("Extracting WWEM to *.wem/*.ogg files with filter \"" << filter << "\"");
         }
 
-        std::map<std::string, uint32_t> wwem_name_map;
+        std::unordered_map<std::string, uint32_t> wwem_name_map;
 
         std::vector<std::string> found_in;
         std::vector<std::string> not_found_in;
@@ -188,13 +188,13 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
                                 stringstream_length = console::update_console(message, wwem_hash_size_total, wwem_hash_size_current, start_time, stringstream_length);
                             }
 
-                            wwem_hash_size_current += rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                            wwem_hash_size_current += rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
 
                             wwem_count_current++;
 
-                            if (!extract_single_hash || (extract_single_hash && filter == rpkgs.at(i).hash.at(hash_index).hash_string))
+                            if (!extract_single_hash || (extract_single_hash && filter == util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value)))
                             {
-                                std::string hash_file_name = rpkgs.at(i).hash.at(hash_index).hash_file_name;
+                                std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
 
                                 std::string hash_list_string = "";
                                 std::string wwem_ioi_path = "";
@@ -204,7 +204,7 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
                                 bool full_wwem_ioi_path_unknown = false;
                                 bool wwem_ioi_path_found = false;
 
-                                std::map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(rpkgs.at(i).hash.at(hash_index).hash_value);
+                                std::unordered_map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(rpkgs.at(i).hash.at(hash_index).hash_value);
 
                                 if (it != hash_list_hash_map.end())
                                 {
@@ -234,7 +234,7 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
 
                                         if (full_wwem_ioi_path_unknown)
                                         {
-                                            wwem_ioi_path += "." + rpkgs.at(i).hash.at(hash_index).hash_string;
+                                            wwem_ioi_path += "." + util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value);
                                             //wwem_ioi_path.push_back('\\');
                                             //wwem_ioi_path.append(wwem_base_name);
                                             //wwem_ioi_directory.push_back('\\');
@@ -251,18 +251,18 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
                                 {
                                     uint64_t hash_size;
 
-                                    if (rpkgs.at(i).hash.at(hash_index).is_lz4ed == 1)
+                                    if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
                                     {
-                                        hash_size = rpkgs.at(i).hash.at(hash_index).hash_size;
+                                        hash_size = rpkgs.at(i).hash.at(hash_index).data.header.data_size;
 
-                                        if (rpkgs.at(i).hash.at(hash_index).is_xored == 1)
+                                        if (rpkgs.at(i).hash.at(hash_index).data.xored)
                                         {
                                             hash_size &= 0x3FFFFFFF;
                                         }
                                     }
                                     else
                                     {
-                                        hash_size = rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                                        hash_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
                                     }
 
                                     std::vector<char> input_data(hash_size, 0);
@@ -274,22 +274,22 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
                                         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(i).rpkg_file_path + " could not be read.");
                                     }
 
-                                    file.seekg(rpkgs.at(i).hash.at(hash_index).hash_offset, file.beg);
+                                    file.seekg(rpkgs.at(i).hash.at(hash_index).data.header.data_offset, file.beg);
                                     file.read(input_data.data(), hash_size);
                                     file.close();
 
-                                    if (rpkgs.at(i).hash.at(hash_index).is_xored == 1)
+                                    if (rpkgs.at(i).hash.at(hash_index).data.xored)
                                     {
                                         crypto::xor_data(input_data.data(), (uint32_t)hash_size);
                                     }
 
-                                    uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                                    uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
 
                                     std::vector<char> output_data(decompressed_size, 0);
 
                                     std::vector<char>* wwem_data;
 
-                                    if (rpkgs.at(i).hash.at(hash_index).is_lz4ed)
+                                    if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
                                     {
                                         LZ4_decompress_safe(input_data.data(), output_data.data(), (int)hash_size, decompressed_size);
 
@@ -398,7 +398,7 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
 
                                         //file::create_directories(metas_directory);
 
-                                        //std::string final_path = metas_directory + "\\" + rpkgs.at(i).hash.at(hash_index).hash_file_name;
+                                        //std::string final_path = metas_directory + "\\" + util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
 
                                         //rpkg_function::extract_hash_meta(i, hash_index, final_path);
                                     }

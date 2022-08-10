@@ -13,7 +13,7 @@
 #include "thirdparty/directxtex/DirectXTex.h"
 #include "thirdparty/directxtex/DDS.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -23,7 +23,7 @@
 #include <locale>
 #include <codecvt>
 
-void rpkg_function::extract_text_from(std::string& input_path, std::string& filter, std::string& output_path)
+void rpkg_function::extract_text_from(std::string& input_path, std::string filter, std::string& output_path)
 {
     task_single_status = TASK_EXECUTING;
     //task_multiple_status = TASK_EXECUTING;
@@ -76,7 +76,7 @@ void rpkg_function::extract_text_from(std::string& input_path, std::string& filt
 
                 if (rpkgs.at(i).rpkg_file_path == input_path)
                 {
-                    std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(text_hash_value);
+                    std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(text_hash_value);
 
                     if (it != rpkgs.at(rpkg_index).hash_map.end())
                     {
@@ -91,7 +91,7 @@ void rpkg_function::extract_text_from(std::string& input_path, std::string& filt
 
                         file::create_directories(text_output_dir);
 
-                        std::string tga_path = text_output_dir + "\\" + rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name + ".tga";
+                        std::string tga_path = text_output_dir + "\\" + util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".tga";
 
                         std::string meta_path = text_output_dir + "\\" + "metas";
 

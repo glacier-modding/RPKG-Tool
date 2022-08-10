@@ -3,7 +3,7 @@
 #include "global.h"
 #include <string>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <stdint.h>
 
 class prim
@@ -238,7 +238,7 @@ public:
 	std::vector<uint32_t> borg_depends_rpkg_index_index;
 	std::vector<std::vector<uint32_t>> borg_depends_hash_index;
 	std::vector<uint32_t> borg_depends_hash_index_index;
-    std::map<std::string, uint32_t> borg_bone_name_map;
+    std::unordered_map<std::string, uint32_t> borg_bone_name_map;
     uint32_t prim_primary_header_offset = 0;
     std::vector<uint32_t> prim_object_offsets;
     std::vector<bool> prim_object_is_weighted;

@@ -23,10 +23,10 @@ std::string hash_direct_depends = "";
 std::string hash_list_string = "";
 std::string patch_deletion_list_string = "";
 std::vector<std::string> hashes_depends_map_rpkg_file_paths;
-std::vector<std::map<uint64_t, uint64_t>> hashes_depends_map;
+std::vector<std::unordered_map<uint64_t, uint64_t>> hashes_depends_map;
 int hash_list_version = 0;
 bool hash_list_loaded = false;
-std::map<uint64_t, uint64_t> hash_list_hash_map;
+std::unordered_map<uint64_t, uint64_t> hash_list_hash_map;
 std::vector<std::string> hash_list_hash_file_names;
 std::vector<std::string> hash_list_hash_value_strings;
 std::vector<std::string> hash_list_hash_strings;
@@ -37,20 +37,20 @@ int pcm_sample_size = 0;
 int pcm_sample_rate = 0;
 int pcm_channels = 0;
 std::string extracted_wem_string = "";
-std::map<uint32_t, std::string>* property_map;
-std::map<std::string, uint32_t>* type_map_h2;
-std::map<std::string, uint32_t>* type_map_h3;
-std::map<std::string, std::map<int32_t, std::string>>* enum_map_h2;
-std::map<std::string, std::map<int32_t, std::string>>* enum_map_h3;
+std::unordered_map<uint32_t, std::string>* property_map;
+std::unordered_map<std::string, uint32_t>* type_map_h2;
+std::unordered_map<std::string, uint32_t>* type_map_h3;
+std::unordered_map<std::string, std::unordered_map<int32_t, std::string>>* enum_map_h2;
+std::unordered_map<std::string, std::unordered_map<int32_t, std::string>>* enum_map_h3;
 bool enum_map_h2_initialized = false;
 bool enum_map_h3_initialized = false;
 bool type_map_h2_initialized = false;
 bool type_map_h3_initialized = false;
 std::vector<temp> temps;
-std::map<uint64_t, uint32_t> temps_map;
+std::unordered_map<uint64_t, uint32_t> temps_map;
 std::vector<matrix43> temp_world_coordinates;
 std::vector<std::string> temp_world_coordinates_property_names;
-std::map<uint32_t, uint32_t> temp_world_coordinates_map;
+std::unordered_map<uint32_t, uint32_t> temp_world_coordinates_map;
 std::vector<std::string> prim_asset_file_names;
 uint32_t prim_asset_file_count = 0;
 std::string map_editor_output_path = "";
@@ -58,16 +58,16 @@ std::vector<std::string> map_editor_parents;
 std::vector<std::string> map_editor_property_names;
 std::vector<std::string> map_editor_matrixes;
 std::vector<std::vector<std::string>> map_editor_glb_file_names;
-std::map<std::string, uint32_t> map_editor_prim_file_names;
-std::map<std::string, uint32_t> map_editor_resource_map;
+std::unordered_map<std::string, uint32_t> map_editor_prim_file_names;
+std::unordered_map<std::string, uint32_t> map_editor_resource_map;
 std::string map_editor_godot_resources = "";
 std::string map_editor_godot_nodes = "";
 std::string map_editor_temp_matrix = "";
 std::vector<std::string> map_editor_godot_import_property_strings;
-std::map<std::string, uint32_t> map_editor_godot_import_property_strings_map;
+std::unordered_map<std::string, uint32_t> map_editor_godot_import_property_strings_map;
 std::vector<matrix43> map_editor_godot_import_matrixes;
 std::vector<uint64_t> entity_id_master_list;
-std::map<uint64_t, uint64_t> entity_id_master_list_map;
+std::unordered_map<uint64_t, uint64_t> entity_id_master_list_map;
 std::vector<uint32_t> entity_id_tblu_index;
 std::vector<uint32_t> entity_id_temps_index;
 std::vector<uint32_t> entity_id_logicalParent;
@@ -91,8 +91,9 @@ int map_percent_progress_godot_map_nodes = 0;
 int map_percent_progress_map_node_temp_loading = 0;
 int map_percent_progress_map_node_changes_check = 0;
 int map_percent_progress_map_writing_changes_to_qn = 0;
-std::map<uint64_t, entity> deep_search_entities_map;
+std::unordered_map<uint64_t, entity> deep_search_entities_map;
 nlohmann::ordered_json localization_json;
+std::string hashes_based_on_resource_type = "";
 
 void initialize_prim_float_values()
 {
@@ -113,7 +114,7 @@ void initialize_type_map_h2()
 	{
 		type_map_h2_initialized = true;
 
-		type_map_h2 = new std::map<std::string, uint32_t>();
+		type_map_h2 = new std::unordered_map<std::string, uint32_t>();
 
 		(*type_map_h2)["int8"] = TYPE_INT8;
 		(*type_map_h2)["uint8"] = TYPE_UINT8;
@@ -9880,7 +9881,7 @@ void initialize_type_map_h3()
 	{
 		type_map_h3_initialized = true;
 
-		type_map_h3 = new std::map<std::string, uint32_t>();
+		type_map_h3 = new std::unordered_map<std::string, uint32_t>();
 
 		(*type_map_h3)["int8"] = TYPE_INT8;
 		(*type_map_h3)["uint8"] = TYPE_UINT8;
@@ -20203,7 +20204,7 @@ void initialize_enum_map_h2()
 	{
 		enum_map_h2_initialized = true;
 
-		enum_map_h2 = new std::map<std::string, std::map<int32_t, std::string>>();
+		enum_map_h2 = new std::unordered_map<std::string, std::unordered_map<int32_t, std::string>>();
 
 		(*enum_map_h2)["AudioBusFlags"] = {
 			{ 1, "AudioBus_Master" },
@@ -29295,7 +29296,7 @@ void initialize_enum_map_h3()
 	{
 		enum_map_h3_initialized = true;
 
-		enum_map_h3 = new std::map<std::string, std::map<int32_t, std::string>>();
+		enum_map_h3 = new std::unordered_map<std::string, std::unordered_map<int32_t, std::string>>();
 
 		(*enum_map_h3)["AudioCurve"] = {
             { 0, "AudioCurve_Log3" },

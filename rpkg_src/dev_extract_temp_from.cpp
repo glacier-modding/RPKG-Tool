@@ -9,7 +9,7 @@
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -69,11 +69,11 @@ void rpkg_function::dev_extract_temp_from(std::string& input_path, std::string& 
 
             if (rpkgs.at(i).rpkg_file_path == "C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk0.rpkg")
             {
-                std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
                 if (it != rpkgs.at(rpkg_index).hash_map.end())
                 {
-                    std::map<uint32_t, uint32_t> parents_map;
+                    std::unordered_map<uint32_t, uint32_t> parents_map;
 
                     std::vector<uint32_t> temps_indexes;
 

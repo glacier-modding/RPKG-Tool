@@ -73,7 +73,7 @@ void rpkg_function::extract_from_rpkg(rpkg_extraction_vars& rpkg_vars)
                     stringstream_length = console::update_console(message, rpkgs.at(i).hash.size(), j, start_time, stringstream_length);
                 }
 
-                std::string hash_file_name = rpkgs.at(i).hash.at(j).hash_file_name;
+                std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(j).hash_value) + "." + rpkgs.at(i).hash.at(j).hash_resource_type;
 
                 bool found = false;
 
@@ -102,18 +102,18 @@ void rpkg_function::extract_from_rpkg(rpkg_extraction_vars& rpkg_vars)
 
                     uint64_t hash_size;
 
-                    if (rpkgs.at(i).hash.at(j).is_lz4ed == 1)
+                    if (rpkgs.at(i).hash.at(j).data.lz4ed)
                     {
-                        hash_size = rpkgs.at(i).hash.at(j).hash_size;
+                        hash_size = rpkgs.at(i).hash.at(j).data.header.data_size;
 
-                        if (rpkgs.at(i).hash.at(j).is_xored == 1)
+                        if (rpkgs.at(i).hash.at(j).data.xored)
                         {
                             hash_size &= 0x3FFFFFFF;
                         }
                     }
                     else
                     {
-                        hash_size = rpkgs.at(i).hash.at(j).hash_size_final;
+                        hash_size = rpkgs.at(i).hash.at(j).data.resource.size_final;
                     }
 
                     std::vector<char> input_data(hash_size, 0);
@@ -125,10 +125,10 @@ void rpkg_function::extract_from_rpkg(rpkg_extraction_vars& rpkg_vars)
                         LOG_AND_EXIT("Error: RPKG file " + rpkg_vars.input_path + " could not be read.");
                     }
 
-                    file.seekg(rpkgs.at(i).hash.at(j).hash_offset, file.beg);
+                    file.seekg(rpkgs.at(i).hash.at(j).data.header.data_offset, file.beg);
                     file.read(input_data.data(), hash_size);
 
-                    if (rpkgs.at(i).hash.at(j).is_xored == 1)
+                    if (rpkgs.at(i).hash.at(j).data.xored)
                     {
                         crypto::xor_data(input_data.data(), (uint32_t)hash_size);
                     }
@@ -143,10 +143,10 @@ void rpkg_function::extract_from_rpkg(rpkg_extraction_vars& rpkg_vars)
                     std::vector<char>* output_data;
                     uint64_t output_data_size;
 
-                    uint32_t decompressed_size = rpkgs.at(i).hash.at(j).hash_size_final;
+                    uint32_t decompressed_size = rpkgs.at(i).hash.at(j).data.resource.size_final;
                     std::vector<char> lz4_output_data(decompressed_size, 0);
 
-                    if (rpkgs.at(i).hash.at(j).is_lz4ed)
+                    if (rpkgs.at(i).hash.at(j).data.lz4ed)
                     {
                         LZ4_decompress_safe(input_data.data(), lz4_output_data.data(), (int)hash_size, decompressed_size);
 

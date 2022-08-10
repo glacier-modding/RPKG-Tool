@@ -10,7 +10,7 @@
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -73,7 +73,7 @@ void rpkg_function::extract_all_prim_of_temp_from(std::string& input_path, std::
 
                 if (rpkgs.at(i).rpkg_file_path == input_path)
                 {
-                    std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+                    std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
                     if (it != rpkgs.at(rpkg_index).hash_map.end())
                     {
@@ -82,7 +82,7 @@ void rpkg_function::extract_all_prim_of_temp_from(std::string& input_path, std::
                             return;
                         }
 
-                        std::string temp_hash_file_name = rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name;
+                        std::string temp_hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type;
 
                         if (rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type == "TEMP")
                         {

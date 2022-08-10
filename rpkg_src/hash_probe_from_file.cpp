@@ -6,7 +6,7 @@
 #include "rpkg.h"
 #include "hash.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -46,7 +46,7 @@ void rpkg_function::hash_probe_from_file(std::string& input_path, std::string& f
             std::cout << "Error: " + filter + " could not be read." << std::endl;
         }
 
-        std::map<std::string, uint64_t> ioi_string_map;
+        std::unordered_map<std::string, uint64_t> ioi_string_map;
         std::vector<std::string> ioi_strings;
 
         std::string line = "";
@@ -68,7 +68,7 @@ void rpkg_function::hash_probe_from_file(std::string& input_path, std::string& f
 
                 //std::cout << "String: " << ioi_string << std::endl;
 
-                std::map<std::string, uint64_t>::iterator it = ioi_string_map.find(substring);
+                std::unordered_map<std::string, uint64_t>::iterator it = ioi_string_map.find(substring);
 
                 if (it != ioi_string_map.end())
                 {
@@ -128,7 +128,7 @@ void rpkg_function::hash_probe_from_file(std::string& input_path, std::string& f
 
                 for (uint64_t i = 0; i < rpkgs.size(); i++)
                 {
-                    std::map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(i).hash_map.find(hash);
+                    std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(i).hash_map.find(hash);
 
                     if (it2 != rpkgs.at(i).hash_map.end())
                     {
@@ -136,7 +136,7 @@ void rpkg_function::hash_probe_from_file(std::string& input_path, std::string& f
 
                         found_count++;
 
-                        std::cout << rpkgs.at(i).hash.at(it2->second).hash_file_name << "," << ioi_strings.at(j) << "," << rpkgs.at(i).rpkg_file_path << std::endl;
+                        std::cout << util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(it2->second).hash_value) + "." + rpkgs.at(i).hash.at(it2->second).hash_resource_type << "," << ioi_strings.at(j) << "," << rpkgs.at(i).rpkg_file_path << std::endl;
                     }
                 }
 

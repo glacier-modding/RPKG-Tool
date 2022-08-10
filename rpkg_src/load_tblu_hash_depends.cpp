@@ -6,17 +6,17 @@
 #include "util.h"
 #include "generic_function.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 
 int rpkg_function::load_tblu_hash_depends(uint64_t rpkg_index, uint64_t hash_index)
 {
-    hash_depends_variables temporary_hash_depends_data;
+    /*hash_depends_variables temporary_hash_depends_data;
 
     temporary_hash_depends_data.rpkg_file_name = rpkgs.at(rpkg_index).rpkg_file_name;
 
     temporary_hash_depends_data.hash_value = rpkgs.at(rpkg_index).hash.at(hash_index).hash_value;
 
-    temporary_hash_depends_data.hash_string = rpkgs.at(rpkg_index).hash.at(hash_index).hash_string;
+    temporary_hash_depends_data.hash_string = util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(hash_index).hash_value);
 
     std::string hash_string = temporary_hash_depends_data.hash_string;
 
@@ -34,7 +34,7 @@ int rpkg_function::load_tblu_hash_depends(uint64_t rpkg_index, uint64_t hash_ind
 
             for (uint64_t z = 0; z < rpkgs.size(); z++)
             {
-                std::map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(z).hash_map.find(rpkgs.at(rpkg_index).hash.at(hash_index).hash_reference_data.hash_reference.at(y));
+                std::unordered_map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(z).hash_map.find(rpkgs.at(rpkg_index).hash.at(hash_index).hash_reference_data.hash_reference.at(y));
 
                 if (it3 != rpkgs.at(z).hash_map.end())
                 {
@@ -58,7 +58,7 @@ int rpkg_function::load_tblu_hash_depends(uint64_t rpkg_index, uint64_t hash_ind
 
             std::string ioi_string = "";
 
-            std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(std::strtoull(temporary_hash_depends_data.hash_dependency_file_name.back().c_str(), nullptr, 16));
+            std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(std::strtoull(temporary_hash_depends_data.hash_dependency_file_name.back().c_str(), nullptr, 16));
 
             if (it2 != hash_list_hash_map.end())
             {
@@ -152,5 +152,5 @@ int rpkg_function::load_tblu_hash_depends(uint64_t rpkg_index, uint64_t hash_ind
         }
     }
 
-    return TEMP_TBLU_FOUND;
+    return TEMP_TBLU_FOUND;*/
 }

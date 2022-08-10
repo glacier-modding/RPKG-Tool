@@ -7,7 +7,7 @@
 #include "rpkg.h"
 #include "hash.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -48,7 +48,7 @@ void rpkg_function::hash_depends(std::string& input_path, std::string& filter, s
 
             for (uint64_t i = 0; i < rpkgs.size(); i++)
             {
-                std::map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(i).hash_map.find(hash_value);
+                std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(i).hash_map.find(hash_value);
 
                 hash_depends_variables temp_hash_depends_data;
 
@@ -74,13 +74,13 @@ void rpkg_function::hash_depends(std::string& input_path, std::string& filter, s
 
                             for (uint64_t j = 0; j < rpkgs.size(); j++)
                             {
-                                std::map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(j).hash_map.find(rpkgs.at(i).hash.at(it2->second).hash_reference_data.hash_reference.at(k));
+                                std::unordered_map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(j).hash_map.find(rpkgs.at(i).hash.at(it2->second).hash_reference_data.hash_reference.at(k));
 
                                 if (it3 != rpkgs.at(j).hash_map.end())
                                 {
                                     if (!found)
                                     {
-                                        temp_hash_depends_data.hash_dependency_file_name.push_back(rpkgs.at(j).hash.at(it3->second).hash_file_name);
+                                        temp_hash_depends_data.hash_dependency_file_name.push_back(util::uint64_t_to_hex_string(rpkgs.at(j).hash.at(it3->second).hash_value) + "." + rpkgs.at(j).hash.at(it3->second).hash_resource_type);
                                     }
 
                                     found = true;
@@ -91,7 +91,7 @@ void rpkg_function::hash_depends(std::string& input_path, std::string& filter, s
 
                             if (!found)
                             {
-                                temp_hash_depends_data.hash_dependency_file_name.push_back(rpkgs.at(i).hash.at(it2->second).hash_reference_data.hash_reference_string.at(k));
+                                temp_hash_depends_data.hash_dependency_file_name.push_back(util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(it2->second).hash_reference_data.hash_reference.at(k)));
                             }
 
                             temp_hash_depends_data.hash_dependency_map[hash_value] = temp_hash_depends_data.hash_dependency_map.size();
@@ -132,7 +132,7 @@ void rpkg_function::hash_depends(std::string& input_path, std::string& filter, s
                         {
                             LOG("Hash file/resource: " << hash_depends_data.at(i).hash_dependency_file_name.at(j));
 
-                            std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(std::strtoull(hash_depends_data.at(i).hash_dependency_file_name.at(j).c_str(), nullptr, 16));
+                            std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(std::strtoull(hash_depends_data.at(i).hash_dependency_file_name.at(j).c_str(), nullptr, 16));
 
                             if (it2 != hash_list_hash_map.end())
                             {
@@ -189,7 +189,7 @@ void rpkg_function::hash_depends(std::string& input_path, std::string& filter, s
                         {
                             reverse_dependency_count++;
 
-                            std::string rd = rpkgs.at(i).hash.at(j).hash_file_name;
+                            std::string rd = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(j).hash_value) + "." + rpkgs.at(i).hash.at(j).hash_resource_type;
 
                             if (reverse_dependency.size() > 0)
                             {
@@ -241,7 +241,7 @@ void rpkg_function::hash_depends(std::string& input_path, std::string& filter, s
                 {
                     LOG("Hash file/resource: " << reverse_dependency.at(i));
 
-                    std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(std::strtoull(reverse_dependency.at(i).c_str(), nullptr, 16));
+                    std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(std::strtoull(reverse_dependency.at(i).c_str(), nullptr, 16));
 
                     if (it2 != hash_list_hash_map.end())
                     {

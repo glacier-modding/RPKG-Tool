@@ -13,14 +13,14 @@ void rpkg_function::extract_hash_meta(uint64_t i, uint64_t j, std::string& final
         meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).hash_value + k));
     }
 
-    for (int k = 0; k < sizeof(hash::hash_offset); k++)
+    for (int k = 0; k < sizeof(hash::data.header.data_offset); k++)
     {
-        meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).hash_offset + k));
+        meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).data.header.data_offset + k));
     }
 
-    for (int k = 0; k < sizeof(hash::hash_size); k++)
+    for (int k = 0; k < sizeof(hash::data.header.data_size); k++)
     {
-        meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).hash_size + k));
+        meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).data.header.data_size + k));
     }
 
     for (int k = 0; k < rpkgs.at(i).hash.at(j).hash_resource_type.length(); k++)
@@ -28,32 +28,32 @@ void rpkg_function::extract_hash_meta(uint64_t i, uint64_t j, std::string& final
         meta_data.push_back(*(rpkgs.at(i).hash.at(j).hash_resource_type.data() + k));
     }
 
-    for (int k = 0; k < sizeof(hash::hash_reference_table_size); k++)
+    for (int k = 0; k < sizeof(hash::data.resource.reference_table_size); k++)
     {
-        meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).hash_reference_table_size + k));
+        meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).data.resource.reference_table_size + k));
     }
 
-    for (int k = 0; k < sizeof(hash::hash_reference_table_dummy); k++)
+    for (int k = 0; k < sizeof(hash::data.resource.reference_table_dummy); k++)
     {
-        meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).hash_reference_table_dummy + k));
+        meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).data.resource.reference_table_dummy + k));
     }
 
-    for (int k = 0; k < sizeof(hash::hash_size_final); k++)
+    for (int k = 0; k < sizeof(hash::data.resource.size_final); k++)
     {
-        meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).hash_size_final + k));
+        meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).data.resource.size_final + k));
     }
 
-    for (int k = 0; k < sizeof(hash::hash_size_in_memory); k++)
+    for (int k = 0; k < sizeof(hash::data.resource.size_in_memory); k++)
     {
-        meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).hash_size_in_memory + k));
+        meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).data.resource.size_in_memory + k));
     }
 
-    for (int k = 0; k < sizeof(hash::hash_size_in_video_memory); k++)
+    for (int k = 0; k < sizeof(hash::data.resource.size_in_video_memory); k++)
     {
-        meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).hash_size_in_video_memory + k));
+        meta_data.push_back(*((char*)&rpkgs.at(i).hash.at(j).data.resource.size_in_video_memory + k));
     }
 
-    if (rpkgs.at(i).hash.at(j).hash_reference_table_size > 0)
+    if (rpkgs.at(i).hash.at(j).data.resource.reference_table_size > 0)
     {
         uint32_t hash_reference_table_size_count = 0;
         uint32_t temp_hash_reference_count = rpkgs.at(i).hash.at(j).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
@@ -82,9 +82,9 @@ void rpkg_function::extract_hash_meta(uint64_t i, uint64_t j, std::string& final
             hash_reference_table_size_count += sizeof(decltype(hash_reference_variables::hash_reference)::value_type);
         }
 
-        if (hash_reference_table_size_count != rpkgs.at(i).hash.at(j).hash_reference_table_size)
+        if (hash_reference_table_size_count != rpkgs.at(i).hash.at(j).data.resource.reference_table_size)
         {
-            LOG_AND_EXIT("Error: Hash meta data for " + rpkgs.at(i).hash.at(j).hash_string + " is corrupt.");
+            LOG_AND_EXIT("Error: Hash meta data for " + util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(j).hash_value) + " is corrupt.");
         }
     }
 

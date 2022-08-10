@@ -10,7 +10,7 @@
 #include "thirdparty/rapidjson/stringbuffer.h"
 #include "thirdparty/rapidjson/pointer.h"
 #include "thirdparty/directxmath/DirectXMath.h"
-#include <map>
+#include <unordered_map>
 #include <fstream>
 #include <sstream>
 #include <set>
@@ -49,7 +49,7 @@ entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
 
             for (uint64_t j = 0; j < rpkgs.size(); j++)
             {
-                std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(j).hash_map.find(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_reference_data.hash_reference.at(i));
+                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(j).hash_map.find(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_reference_data.hash_reference.at(i));
 
                 if (it != rpkgs.at(j).hash_map.end())
                 {
@@ -57,7 +57,7 @@ entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
                     {
                         if (!tblu_found)
                         {
-                            tblu_depends_file_name.push_back(rpkgs.at(j).hash.at(it->second).hash_file_name);
+                            tblu_depends_file_name.push_back(util::uint64_t_to_hex_string(rpkgs.at(j).hash.at(it->second).hash_value) + "." + rpkgs.at(j).hash.at(it->second).hash_resource_type);
 
                             tblu_return_value = TEMP_TBLU_FOUND;
 
@@ -65,7 +65,7 @@ entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
                         }
                         else
                         {
-                            if (rpkgs.at(j).hash.at(it->second).hash_file_name != tblu_depends_file_name.back())
+                            if (util::uint64_t_to_hex_string(rpkgs.at(j).hash.at(it->second).hash_value) + "." + rpkgs.at(j).hash.at(it->second).hash_resource_type != tblu_depends_file_name.back())
                             {
                                 tblu_return_value = TEMP_TBLU_TOO_MANY;
                             }
@@ -84,7 +84,7 @@ entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
 
         if (rpkg_index != UINT32_MAX)
         {
-            std::map<uint64_t, uint64_t>::iterator it6 = rpkgs.at(rpkg_index).hash_map.find(tblu_hash_value);
+            std::unordered_map<uint64_t, uint64_t>::iterator it6 = rpkgs.at(rpkg_index).hash_map.find(tblu_hash_value);
 
             if (it6 != rpkgs.at(rpkg_index).hash_map.end())
             {
@@ -93,18 +93,18 @@ entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
 
                 uint64_t temp_hash_size;
 
-                if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).is_lz4ed == 1)
+                if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.lz4ed)
                 {
-                    temp_hash_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_size;
+                    temp_hash_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.header.data_size;
 
-                    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).is_xored == 1)
+                    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.xored)
                     {
                         temp_hash_size &= 0x3FFFFFFF;
                     }
                 }
                 else
                 {
-                    temp_hash_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_size_final;
+                    temp_hash_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.resource.size_final;
                 }
 
                 std::vector<char> temp_data;
@@ -118,20 +118,20 @@ entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
                     LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(temp_rpkg_index).rpkg_file_path + " could not be read.");
                 }
 
-                file.seekg(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_offset, file.beg);
+                file.seekg(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.header.data_offset, file.beg);
                 file.read(temp_input_data.data(), temp_hash_size);
                 file.close();
 
-                if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).is_xored == 1)
+                if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.xored)
                 {
                     crypto::xor_data(temp_input_data.data(), (uint32_t)temp_hash_size);
                 }
 
-                uint32_t temp_decompressed_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_size_final;
+                uint32_t temp_decompressed_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.resource.size_final;
 
                 std::vector<char> temp_output_data = std::vector<char>(temp_decompressed_size, 0);
 
-                if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).is_lz4ed)
+                if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.lz4ed)
                 {
                     LZ4_decompress_safe(temp_input_data.data(), temp_output_data.data(), (int)temp_hash_size, temp_decompressed_size);
 
@@ -164,22 +164,22 @@ entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
 
                 std::vector<char>().swap(temp_data);
 
-                std::string tblu_hash_file_name = rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_file_name;
+                std::string tblu_hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_value) + "." + rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_resource_type;
 
                 uint64_t tblu_hash_size;
 
-                if (rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).is_lz4ed == 1)
+                if (rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).data.lz4ed)
                 {
-                    tblu_hash_size = rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_size;
+                    tblu_hash_size = rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).data.header.data_size;
 
-                    if (rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).is_xored == 1)
+                    if (rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).data.xored)
                     {
                         tblu_hash_size &= 0x3FFFFFFF;
                     }
                 }
                 else
                 {
-                    tblu_hash_size = rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_size_final;
+                    tblu_hash_size = rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).data.resource.size_final;
                 }
 
                 std::vector<char> tblu_data;
@@ -193,20 +193,20 @@ entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
                     LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(tblu_rpkg_index).rpkg_file_path + " could not be read.");
                 }
 
-                file2.seekg(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_offset, file2.beg);
+                file2.seekg(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).data.header.data_offset, file2.beg);
                 file2.read(tblu_input_data.data(), tblu_hash_size);
                 file2.close();
 
-                if (rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).is_xored == 1)
+                if (rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).data.xored)
                 {
                     crypto::xor_data(tblu_input_data.data(), (uint32_t)tblu_hash_size);
                 }
 
-                uint32_t tblu_decompressed_size = rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_size_final;
+                uint32_t tblu_decompressed_size = rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).data.resource.size_final;
 
                 std::vector<char> tblu_output_data = std::vector<char>(tblu_decompressed_size, 0);
 
-                if (rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).is_lz4ed)
+                if (rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).data.lz4ed)
                 {
                     LZ4_decompress_safe(tblu_input_data.data(), tblu_output_data.data(), (int)tblu_hash_size, tblu_decompressed_size);
 
@@ -272,7 +272,7 @@ uint32_t entity::search(std::string search_string, bool search_entity_ids, bool 
 
             if (entityIdString.find(search_string) != std::string::npos || entityNameString.find(search_string) != std::string::npos)
             {
-                entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path + "||||" + rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_file_name + " " + util::hash_to_ioi_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value, false) + "||||" + entityIdString + ": " + std::string(yyjson_get_str(tblu_entityName)) + "||||||";
+                entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path + "||||" + util::uint64_t_to_hex_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value) + "." + rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type + " " + util::hash_to_ioi_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value, false) + "||||" + entityIdString + ": " + std::string(yyjson_get_str(tblu_entityName)) + "||||||";
 
                 results_count++;
             }

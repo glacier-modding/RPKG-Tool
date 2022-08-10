@@ -63,8 +63,6 @@ RPKG_EXPORT char* get_hash_based_on_resource_type_at(char* rpkg_file, char* reso
 
 RPKG_EXPORT uint32_t get_all_hashes_in_rpkg_count(char* rpkg_file);
 
-RPKG_EXPORT char* get_all_hashes_in_rpkg_at(char* rpkg_file, uint32_t at_index);
-
 RPKG_EXPORT char* get_hash_details(char* rpkg_file, char* hash_string);
 
 RPKG_EXPORT uint32_t get_hash_in_rpkg_size(char* rpkg_file, char* hash_string);

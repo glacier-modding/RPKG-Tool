@@ -11,7 +11,7 @@
 #include "thirdparty/ww2ogg/wwriff.h"
 #include "thirdparty/revorb/revorb.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -37,24 +37,24 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& f
                 {
                     uint64_t hash_index = rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).at(j);
 
-                    std::string hash_file_name = rpkgs.at(i).hash.at(hash_index).hash_file_name;
+                    std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
 
                     std::string current_path = file::output_path_append("WWEV\\" + rpkgs.at(i).rpkg_file_name, output_path);
 
                     uint64_t hash_size;
 
-                    if (rpkgs.at(i).hash.at(hash_index).is_lz4ed == 1)
+                    if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
                     {
-                        hash_size = rpkgs.at(i).hash.at(hash_index).hash_size;
+                        hash_size = rpkgs.at(i).hash.at(hash_index).data.header.data_size;
 
-                        if (rpkgs.at(i).hash.at(hash_index).is_xored == 1)
+                        if (rpkgs.at(i).hash.at(hash_index).data.xored)
                         {
                             hash_size &= 0x3FFFFFFF;
                         }
                     }
                     else
                     {
-                        hash_size = rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                        hash_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
                     }
 
                     std::vector<char> input_data(hash_size, 0);
@@ -66,22 +66,22 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& f
                         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(i).rpkg_file_path + " could not be read.");
                     }
 
-                    file.seekg(rpkgs.at(i).hash.at(hash_index).hash_offset, file.beg);
+                    file.seekg(rpkgs.at(i).hash.at(hash_index).data.header.data_offset, file.beg);
                     file.read(input_data.data(), hash_size);
                     file.close();
 
-                    if (rpkgs.at(i).hash.at(hash_index).is_xored == 1)
+                    if (rpkgs.at(i).hash.at(hash_index).data.xored)
                     {
                         crypto::xor_data(input_data.data(), (uint32_t)hash_size);
                     }
 
-                    uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                    uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
 
                     std::vector<char> output_data(decompressed_size, 0);
 
                     std::vector<char>* wwev_data;
 
-                    if (rpkgs.at(i).hash.at(hash_index).is_lz4ed)
+                    if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
                     {
                         LZ4_decompress_safe(input_data.data(), output_data.data(), (int)hash_size, decompressed_size);
 
@@ -138,7 +138,7 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& f
 
                     std::string ogg_path = current_path + "\\ogg";
 
-                    std::string final_path = current_path + "\\" + rpkgs.at(i).hash.at(hash_index).hash_file_name;
+                    std::string final_path = current_path + "\\" + util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
 
                     std::cout << hash_file_name << "," << "[assembly:/sound/wwise/exportedwwisedata/events/unknown/" << wwev_file_name.data() << ".wwiseevent].pc_wwisebank" << std::endl;
 

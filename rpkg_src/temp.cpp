@@ -14,7 +14,7 @@
 #include "thirdparty/rapidjson/pointer.h"
 #include "thirdparty/directxmath/DirectXMath.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <fstream>
 #include <sstream>
 #include <set>
@@ -39,8 +39,8 @@ temp::temp(uint64_t rpkgs_index, uint64_t hash_index)
 
 	temp_rpkg_index = rpkgs_index;
 	temp_hash_index = hash_index;
-
-    temp_file_name = rpkgs.at(rpkgs_index).hash.at(hash_index).hash_file_name;
+    
+    temp_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value) + "." + rpkgs.at(rpkgs_index).hash.at(hash_index).hash_resource_type;
 
     tblu_return_value = TEMP_TBLU_NOT_FOUND_IN_DEPENDS;
 
@@ -60,7 +60,7 @@ temp::temp(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
     temp_rpkg_index = rpkgs_index;
     temp_hash_index = hash_index;
 
-    temp_file_name = rpkgs.at(rpkgs_index).hash.at(hash_index).hash_file_name;
+    temp_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value) + "." + rpkgs.at(rpkgs_index).hash.at(hash_index).hash_resource_type;;
 
     tblu_return_value = TEMP_TBLU_NOT_FOUND_IN_DEPENDS;
 
@@ -156,23 +156,23 @@ void temp::load_data()
 
 void temp::load_temp_data()
 {
-    //std::cout << rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_file_name << std::endl;
-    //std::cout << rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_file_name << std::endl;
+    //std::cout << util::uint64_t_to_hex_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value) + "." + rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type << std::endl;
+    //std::cout << util::uint64_t_to_hex_string(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_value) + "." + rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_resource_type << std::endl;
 
     uint64_t temp_hash_size;
 
-    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).is_lz4ed == 1)
+    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.lz4ed)
     {
-        temp_hash_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_size;
+        temp_hash_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.header.data_size;
 
-        if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).is_xored == 1)
+        if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.xored)
         {
             temp_hash_size &= 0x3FFFFFFF;
         }
     }
     else
     {
-        temp_hash_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_size_final;
+        temp_hash_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.resource.size_final;
     }
 
     temp_input_data = std::vector<char>(temp_hash_size, 0);
@@ -184,20 +184,20 @@ void temp::load_temp_data()
         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(temp_rpkg_index).rpkg_file_path + " could not be read.");
     }
 
-    file.seekg(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_offset, file.beg);
+    file.seekg(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.header.data_offset, file.beg);
     file.read(temp_input_data.data(), temp_hash_size);
     file.close();
 
-    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).is_xored == 1)
+    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.xored)
     {
         crypto::xor_data(temp_input_data.data(), (uint32_t)temp_hash_size);
     }
 
-    uint32_t temp_decompressed_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_size_final;
+    uint32_t temp_decompressed_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.resource.size_final;
 
     temp_output_data = std::vector<char>(temp_decompressed_size, 0);
 
-    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).is_lz4ed)
+    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.lz4ed)
     {
         LZ4_decompress_safe(temp_input_data.data(), temp_output_data.data(), (int)temp_hash_size, temp_decompressed_size);
 
@@ -237,22 +237,22 @@ void temp::load_temp_data()
 
 void temp::load_tblu_data()
 {
-    std::string tblu_hash_file_name = rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_file_name;
+    std::string tblu_hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_value) + "." + rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_resource_type;
 
     uint64_t tblu_hash_size;
 
-    if (rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).is_lz4ed == 1)
+    if (rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).data.lz4ed)
     {
-        tblu_hash_size = rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_size;
+        tblu_hash_size = rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).data.header.data_size;
 
-        if (rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).is_xored == 1)
+        if (rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).data.xored)
         {
             tblu_hash_size &= 0x3FFFFFFF;
         }
     }
     else
     {
-        tblu_hash_size = rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_size_final;
+        tblu_hash_size = rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).data.resource.size_final;
     }
 
     tblu_input_data = std::vector<char>(tblu_hash_size, 0);
@@ -264,20 +264,20 @@ void temp::load_tblu_data()
         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(tblu_rpkg_index).rpkg_file_path + " could not be read.");
     }
 
-    file2.seekg(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_offset, file2.beg);
+    file2.seekg(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).data.header.data_offset, file2.beg);
     file2.read(tblu_input_data.data(), tblu_hash_size);
     file2.close();
 
-    if (rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).is_xored == 1)
+    if (rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).data.xored)
     {
         crypto::xor_data(tblu_input_data.data(), (uint32_t)tblu_hash_size);
     }
 
-    uint32_t tblu_decompressed_size = rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_size_final;
+    uint32_t tblu_decompressed_size = rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).data.resource.size_final;
 
     tblu_output_data = std::vector<char>(tblu_decompressed_size, 0);
 
-    if (rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).is_lz4ed)
+    if (rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).data.lz4ed)
     {
         LZ4_decompress_safe(tblu_input_data.data(), tblu_output_data.data(), (int)tblu_hash_size, tblu_decompressed_size);
 
@@ -319,7 +319,7 @@ void temp::load_hash_depends()
 {
     uint32_t temp_hash_reference_count = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
-    //LOG(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_file_name + " has " + util::uint32_t_to_string(temp_hash_reference_count) + " dependencies in " + rpkgs.at(temp_rpkg_index).rpkg_file_path);
+    //LOG(util::uint64_t_to_hex_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value) + "." + rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type + " has " + util::uint32_t_to_string(temp_hash_reference_count) + " dependencies in " + rpkgs.at(temp_rpkg_index).rpkg_file_path);
 
     if (temp_hash_reference_count > 0)
     {
@@ -343,15 +343,15 @@ void temp::load_hash_depends()
 
             for (uint64_t j = 0; j < rpkgs.size(); j++)
             {
-                std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(j).hash_map.find(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(i));
+                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(j).hash_map.find(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(i));
 
                 if (it != rpkgs.at(j).hash_map.end())
                 {
                     if (rpkgs.at(j).hash.at(it->second).hash_resource_type == "TEMP")
                     {
                         if (!temp_found)
-                        {
-                            temp_depends_file_name.push_back(rpkgs.at(j).hash.at(it->second).hash_file_name);
+                        {   
+                            temp_depends_file_name.push_back(util::uint64_t_to_hex_string(rpkgs.at(j).hash.at(it->second).hash_value) + "." + rpkgs.at(j).hash.at(it->second).hash_resource_type);
 
                             temp_depends_index.push_back(i);
 
@@ -374,7 +374,7 @@ void temp::load_hash_depends()
                     {
                         if (!tblu_found)
                         {
-                            tblu_depends_file_name.push_back(rpkgs.at(j).hash.at(it->second).hash_file_name);
+                            tblu_depends_file_name.push_back(util::uint64_t_to_hex_string(rpkgs.at(j).hash.at(it->second).hash_value) + "." + rpkgs.at(j).hash.at(it->second).hash_resource_type);
 
                             tblu_depends_index.push_back(i);
 
@@ -385,7 +385,7 @@ void temp::load_hash_depends()
                         }
                         else
                         {
-                            if (rpkgs.at(j).hash.at(it->second).hash_file_name != tblu_depends_file_name.back())
+                            if (util::uint64_t_to_hex_string(rpkgs.at(j).hash.at(it->second).hash_value) + "." + rpkgs.at(j).hash.at(it->second).hash_resource_type != tblu_depends_file_name.back())
                             {
                                 tblu_return_value = TEMP_TBLU_TOO_MANY;
                             }
@@ -406,7 +406,7 @@ void temp::load_hash_depends()
                     {
                         if (!prim_found)
                         {
-                            prim_depends_file_name.push_back(rpkgs.at(j).hash.at(it->second).hash_file_name);
+                            prim_depends_file_name.push_back(util::uint64_t_to_hex_string(rpkgs.at(j).hash.at(it->second).hash_value) + "." + rpkgs.at(j).hash.at(it->second).hash_resource_type);
 
                             prim_depends_index.push_back(i);
 
@@ -461,7 +461,7 @@ void temp::load_hash_depends()
 
             std::string hash_value_string = util::uint64_t_to_hex_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(i));
 
-            std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(i));
+            std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(i));
 
             if (it2 != hash_list_hash_map.end())
             {
@@ -651,7 +651,7 @@ void temp::load_hash_depends()
     {
         uint32_t tblu_hash_reference_count = rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
-        //LOG(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_file_name + " has " + util::uint32_t_to_string(temp_hash_reference_count) + " dependencies in " + rpkgs.at(temp_rpkg_index).rpkg_file_path);
+        //LOG(util::uint64_t_to_hex_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value) + "." + rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type + " has " + util::uint32_t_to_string(temp_hash_reference_count) + " dependencies in " + rpkgs.at(temp_rpkg_index).rpkg_file_path);
 
         if (tblu_hash_reference_count > 0)
         {
@@ -659,7 +659,7 @@ void temp::load_hash_depends()
             {
                 std::string hash_value_string = util::uint64_t_to_hex_string(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_reference_data.hash_reference.at(k));
 
-                std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_reference_data.hash_reference.at(k));
+                std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_reference_data.hash_reference.at(k));
 
                 if (it2 != hash_list_hash_map.end())
                 {
@@ -687,7 +687,7 @@ void temp::get_prim_from_temp(uint32_t entry_index)
 {
     response_string = "";
 
-    std::map<uint64_t, uint32_t>::iterator it = temps_map.find(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(temp_entityTypeResourceIndex.at(entry_index)));
+    std::unordered_map<uint64_t, uint32_t>::iterator it = temps_map.find(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(temp_entityTypeResourceIndex.at(entry_index)));
 
     if (it != temps_map.end())
     {
@@ -708,18 +708,18 @@ void temp::temp_version_check()
 {
     uint64_t temp_hash_size;
 
-    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).is_lz4ed == 1)
+    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.lz4ed)
     {
-        temp_hash_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_size;
+        temp_hash_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.header.data_size;
 
-        if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).is_xored == 1)
+        if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.xored)
         {
             temp_hash_size &= 0x3FFFFFFF;
         }
     }
     else
     {
-        temp_hash_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_size_final;
+        temp_hash_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.resource.size_final;
     }
 
     temp_input_data = std::vector<char>(temp_hash_size, 0);
@@ -731,20 +731,20 @@ void temp::temp_version_check()
         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(temp_rpkg_index).rpkg_file_path + " could not be read.");
     }
 
-    file.seekg(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_offset, file.beg);
+    file.seekg(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.header.data_offset, file.beg);
     file.read(temp_input_data.data(), temp_hash_size);
     file.close();
 
-    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).is_xored == 1)
+    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.xored)
     {
         crypto::xor_data(temp_input_data.data(), (uint32_t)temp_hash_size);
     }
 
-    uint32_t temp_decompressed_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_size_final;
+    uint32_t temp_decompressed_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.resource.size_final;
 
     temp_output_data = std::vector<char>(temp_decompressed_size, 0);
 
-    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).is_lz4ed)
+    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.lz4ed)
     {
         LZ4_decompress_safe(temp_input_data.data(), temp_output_data.data(), (int)temp_hash_size, temp_decompressed_size);
 
@@ -894,7 +894,7 @@ void temp::get_entries_hash_references(uint32_t entry_index)
     {
         if (e == entry_index)
         {
-            std::map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(temp_entityTypeResourceIndex.at(e)));
+            std::unordered_map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(temp_entityTypeResourceIndex.at(e)));
 
             if (it != hash_list_hash_map.end())
             {
@@ -902,7 +902,7 @@ void temp::get_entries_hash_references(uint32_t entry_index)
             }
             else
             {
-                response_string.append(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference_string.at(temp_entityTypeResourceIndex.at(e)));
+                response_string.append(util::uint64_t_to_hex_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(temp_entityTypeResourceIndex.at(e))));
             }
 
             response_string.append(",");
@@ -915,7 +915,7 @@ void temp::get_entries_hash_references(uint32_t entry_index)
             }
             else
             {
-                response_string.append(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_reference_data.hash_reference_string.at(tblu_entityTypeResourceIndex.at(e)));
+                response_string.append(util::uint64_t_to_hex_string(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_reference_data.hash_reference.at(tblu_entityTypeResourceIndex.at(e))));
             }
 
         }
@@ -932,7 +932,7 @@ void temp::get_entries_hash_reference_data(uint32_t entry_index)
         {
             response_string.append("  - ");
 
-            std::map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(temp_entityTypeResourceIndex.at(e)));
+            std::unordered_map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(temp_entityTypeResourceIndex.at(e)));
 
             if (it != hash_list_hash_map.end())
             {
@@ -942,7 +942,7 @@ void temp::get_entries_hash_reference_data(uint32_t entry_index)
             }
             else
             {
-                response_string.append(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference_string.at(temp_entityTypeResourceIndex.at(e)));
+                response_string.append(util::uint64_t_to_hex_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(temp_entityTypeResourceIndex.at(e))));
             }
 
             response_string.append("\n  - ");
@@ -957,7 +957,7 @@ void temp::get_entries_hash_reference_data(uint32_t entry_index)
             }
             else
             {
-                response_string.append(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_reference_data.hash_reference_string.at(tblu_entityTypeResourceIndex.at(e)));
+                response_string.append(util::uint64_t_to_hex_string(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_reference_data.hash_reference.at(tblu_entityTypeResourceIndex.at(e))));
             }
 
         }
@@ -988,7 +988,7 @@ void temp::get_temp_entries_data(std::string value_type, std::string type_string
 
             //std::cout << it4->value.GetString() << std::endl;
 
-            std::map<std::string, uint32_t>::iterator it;
+            std::unordered_map<std::string, uint32_t>::iterator it;
 
             if (temp_file_version == 2)
             {
@@ -1328,7 +1328,7 @@ void temp::json_temp_node_scan(const rapidjson::Value& node, std::string& proper
     {
         //std::cout << json_type << "/" << last_name << std::endl;
 
-        std::map<std::string, uint32_t>::iterator it;
+        std::unordered_map<std::string, uint32_t>::iterator it;
 
         if (temp_file_version == 2)
         {
@@ -1717,7 +1717,7 @@ void temp::get_entries_data(uint32_t entry_index, std::string value_type)
 
                         //std::cout << it4->value.GetString() << std::endl;
 
-                        std::map<std::string, uint32_t>::iterator it;
+                        std::unordered_map<std::string, uint32_t>::iterator it;
 
                         if (temp_file_version == 2)
                         {
@@ -2068,7 +2068,7 @@ void temp::json_node_scan(const rapidjson::Value& node, std::string& propertyVal
     {
         //std::cout << json_type << "/" << last_name << std::endl;
 
-        std::map<std::string, uint32_t>::iterator it;
+        std::unordered_map<std::string, uint32_t>::iterator it;
 
         if (temp_file_version == 2)
         {
@@ -2382,7 +2382,7 @@ void temp::get_enum_values(std::string& property_type_string)
 {
     response_string = "";
 
-    std::map<std::string, std::map<int32_t, std::string>>::iterator it;
+    std::unordered_map<std::string, std::unordered_map<int32_t, std::string>>::iterator it;
 
     if (temp_file_version == 2)
     {
@@ -2390,7 +2390,7 @@ void temp::get_enum_values(std::string& property_type_string)
 
         if (it != enum_map_h2->end())
         {
-            for (std::map<int32_t, std::string>::iterator it2 = it->second.begin(); it2 != it->second.end(); it2++)
+            for (std::unordered_map<int32_t, std::string>::iterator it2 = it->second.begin(); it2 != it->second.end(); it2++)
             {
                 response_string.append(it2->second);
                 response_string.push_back(',');
@@ -2403,7 +2403,7 @@ void temp::get_enum_values(std::string& property_type_string)
 
         if (it != enum_map_h3->end())
         {
-            for (std::map<int32_t, std::string>::iterator it2 = it->second.begin(); it2 != it->second.end(); it2++)
+            for (std::unordered_map<int32_t, std::string>::iterator it2 = it->second.begin(); it2 != it->second.end(); it2++)
             {
                 response_string.append(it2->second);
                 response_string.push_back(',');
@@ -2567,7 +2567,7 @@ void temp::update_temp_file(uint32_t entry_index, char* update_data, uint32_t up
 
 void temp::export_json_files(std::string& json_file_path)
 {
-    std::ofstream file_temp = std::ofstream(json_file_path + rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_file_name + ".JSON", std::ofstream::binary);
+    std::ofstream file_temp = std::ofstream(json_file_path + util::uint64_t_to_hex_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value) + "." + rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type + ".JSON", std::ofstream::binary);
 
     rapidjson::StringBuffer buffer_temp;
     rapidjson::Writer<rapidjson::StringBuffer> writer_temp(buffer_temp);
@@ -2579,7 +2579,7 @@ void temp::export_json_files(std::string& json_file_path)
 
     file_temp.close();
 
-    std::ofstream file_tblu = std::ofstream(json_file_path + rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_file_name + ".JSON", std::ofstream::binary);
+    std::ofstream file_tblu = std::ofstream(json_file_path + util::uint64_t_to_hex_string(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_value) + "." + rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_resource_type + ".JSON", std::ofstream::binary);
 
     rapidjson::StringBuffer buffer_tblu;
     rapidjson::Writer<rapidjson::StringBuffer> writer_tblu(buffer_tblu);
@@ -2637,13 +2637,13 @@ void temp::get_all_bricks()
             {
                 uint64_t temp_hash_value = std::strtoull(temp_depends_file_name.at(i).c_str(), nullptr, 16);
 
-                std::map<uint64_t, uint32_t>::iterator it = temps_map.find(temp_hash_value);
+                std::unordered_map<uint64_t, uint32_t>::iterator it = temps_map.find(temp_hash_value);
 
                 if (it != temps_map.end())
                 {
                     if (temps.at(it->second).tblu_return_value == TEMP_TBLU_FOUND)
                     {
-                        std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(temp_depends_index.at(i)));
+                        std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(temp_depends_index.at(i)));
 
                         if (it2 != hash_list_hash_map.end())
                         {
@@ -2686,8 +2686,8 @@ bool temp::rt_json_to_qn_json()
         return false;
     }
 
-    rapidjson::Pointer("/tempHash").Set(qn_json_document, rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_string.c_str());
-    rapidjson::Pointer("/tbluHash").Set(qn_json_document, rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_string.c_str());
+    rapidjson::Pointer("/tempHash").Set(qn_json_document, util::uint64_t_to_hex_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value).c_str());
+    rapidjson::Pointer("/tbluHash").Set(qn_json_document, util::uint64_t_to_hex_string(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_value).c_str());
 
     if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(temp_json_document, rapidjson::Pointer("/rootEntityIndex")))
     {
@@ -3810,8 +3810,8 @@ void temp::generate_qn_patch_json()
 
         qn_json = json::parse(buffer_qn.GetString(), buffer_qn.GetString() + buffer_qn.GetSize());
 
-        qn_patch_json["tempHash"] = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_string;
-        qn_patch_json["tbluHash"] = rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_string;
+        qn_patch_json["tempHash"] = util::uint64_t_to_hex_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value);
+        qn_patch_json["tbluHash"] = util::uint64_t_to_hex_string(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_value);
         qn_patch_json["patch"] = json::diff(qn_json_original, qn_json);
         qn_patch_json["patchVersion"] = 4;
     }

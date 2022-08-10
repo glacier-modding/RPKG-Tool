@@ -8,7 +8,7 @@
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -70,22 +70,22 @@ void rpkg_function::extract_prel_refs(std::string& input_path, std::string& filt
                                 return;
                             }
                             
-                            std::string hash_file_name = rpkgs.at(i).hash.at(hash_index).hash_file_name;
+                            std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
 
                             uint64_t hash_size;
 
-                            if (rpkgs.at(i).hash.at(hash_index).is_lz4ed == 1)
+                            if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
                             {
-                                hash_size = rpkgs.at(i).hash.at(hash_index).hash_size;
+                                hash_size = rpkgs.at(i).hash.at(hash_index).data.header.data_size;
 
-                                if (rpkgs.at(i).hash.at(hash_index).is_xored == 1)
+                                if (rpkgs.at(i).hash.at(hash_index).data.xored)
                                 {
                                     hash_size &= 0x3FFFFFFF;
                                 }
                             }
                             else
                             {
-                                hash_size = rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                                hash_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
                             }
 
                             std::vector<char> input_data(hash_size, 0);
@@ -97,22 +97,22 @@ void rpkg_function::extract_prel_refs(std::string& input_path, std::string& filt
                                 LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(i).rpkg_file_path + " could not be read.");
                             }
 
-                            file.seekg(rpkgs.at(i).hash.at(hash_index).hash_offset, file.beg);
+                            file.seekg(rpkgs.at(i).hash.at(hash_index).data.header.data_offset, file.beg);
                             file.read(input_data.data(), hash_size);
                             file.close();
 
-                            if (rpkgs.at(i).hash.at(hash_index).is_xored == 1)
+                            if (rpkgs.at(i).hash.at(hash_index).data.xored)
                             {
                                 crypto::xor_data(input_data.data(), (uint32_t)hash_size);
                             }
 
-                            uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                            uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
 
                             std::vector<char> output_data(decompressed_size, 0);
 
                             std::vector<char>* prel_data;
 
-                            if (rpkgs.at(i).hash.at(hash_index).is_lz4ed)
+                            if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
                             {
                                 LZ4_decompress_safe(input_data.data(), output_data.data(), (int)hash_size, decompressed_size);
 
@@ -140,7 +140,7 @@ void rpkg_function::extract_prel_refs(std::string& input_path, std::string& filt
 
                             std::string ioi_string = "";
 
-                            std::map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(master_hash_value);
+                            std::unordered_map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(master_hash_value);
 
                             if (it != hash_list_hash_map.end())
                             {
@@ -162,7 +162,7 @@ void rpkg_function::extract_prel_refs(std::string& input_path, std::string& filt
 
                                 std::string ioi_string = "";
 
-                                std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(master_hash_depends.back());
+                                std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(master_hash_depends.back());
 
                                 if (it2 != hash_list_hash_map.end())
                                 {

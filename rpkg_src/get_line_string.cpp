@@ -10,7 +10,7 @@
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -47,7 +47,7 @@ void rpkg_function::get_line_string(std::string& input_path, std::string& filter
         {
             uint64_t hash_value = std::strtoull(filters.at(z).c_str(), nullptr, 16);
 
-            std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(hash_value);
+            std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(hash_value);
 
             if (it2 != hash_list_hash_map.end())
             {
@@ -63,24 +63,24 @@ void rpkg_function::get_line_string(std::string& input_path, std::string& filter
 
             if (rpkg_index != UINT32_MAX)
             {
-                std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(hash_value);
+                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(hash_value);
 
                 if (it != rpkgs.at(rpkg_index).hash_map.end())
                 {
                     uint64_t hash_size;
 
-                    if (rpkgs.at(rpkg_index).hash.at(it->second).is_lz4ed == 1)
+                    if (rpkgs.at(rpkg_index).hash.at(it->second).data.lz4ed)
                     {
-                        hash_size = rpkgs.at(rpkg_index).hash.at(it->second).hash_size;
+                        hash_size = rpkgs.at(rpkg_index).hash.at(it->second).data.header.data_size;
 
-                        if (rpkgs.at(rpkg_index).hash.at(it->second).is_xored == 1)
+                        if (rpkgs.at(rpkg_index).hash.at(it->second).data.xored)
                         {
                             hash_size &= 0x3FFFFFFF;
                         }
                     }
                     else
                     {
-                        hash_size = rpkgs.at(rpkg_index).hash.at(it->second).hash_size_final;
+                        hash_size = rpkgs.at(rpkg_index).hash.at(it->second).data.resource.size_final;
                     }
 
                     std::vector<char> input_data(hash_size, 0);
@@ -92,22 +92,22 @@ void rpkg_function::get_line_string(std::string& input_path, std::string& filter
                         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(rpkg_index).rpkg_file_path + " could not be read.");
                     }
 
-                    file.seekg(rpkgs.at(rpkg_index).hash.at(it->second).hash_offset, file.beg);
+                    file.seekg(rpkgs.at(rpkg_index).hash.at(it->second).data.header.data_offset, file.beg);
                     file.read(input_data.data(), hash_size);
                     file.close();
 
-                    if (rpkgs.at(rpkg_index).hash.at(it->second).is_xored == 1)
+                    if (rpkgs.at(rpkg_index).hash.at(it->second).data.xored)
                     {
                         crypto::xor_data(input_data.data(), (uint32_t)hash_size);
                     }
 
-                    uint32_t decompressed_size = rpkgs.at(rpkg_index).hash.at(it->second).hash_size_final;
+                    uint32_t decompressed_size = rpkgs.at(rpkg_index).hash.at(it->second).data.resource.size_final;
 
                     std::vector<char> output_data(decompressed_size, 0);
 
                     std::vector<char>* line_data;
 
-                    if (rpkgs.at(rpkg_index).hash.at(it->second).is_lz4ed)
+                    if (rpkgs.at(rpkg_index).hash.at(it->second).data.lz4ed)
                     {
                         LZ4_decompress_safe(input_data.data(), output_data.data(), (int)hash_size, decompressed_size);
 
@@ -124,13 +124,13 @@ void rpkg_function::get_line_string(std::string& input_path, std::string& filter
 
                     for (uint32_t i = 0; i < rpkgs.at(rpkg_index).hash.at(it->second).hash_reference_data.hash_reference.size(); i++)
                     {
-                        if (util::hash_type(rpkgs.at(rpkg_index).hash.at(it->second).hash_reference_data.hash_reference.at(i)) == "locr")
+                        if (util::hash_type(rpkgs.at(rpkg_index).hash.at(it->second).hash_reference_data.hash_reference.at(i)) == "LOCR")
                         {
                             uint32_t rpkg_index2 = rpkg_function::get_latest_hash(rpkgs.at(rpkg_index).hash.at(it->second).hash_reference_data.hash_reference.at(i));
 
                             if (rpkg_index2 != UINT32_MAX)
                             {
-                                std::map<uint64_t, uint64_t>::iterator it6 = rpkgs.at(rpkg_index2).hash_map.find(rpkgs.at(rpkg_index).hash.at(it->second).hash_reference_data.hash_reference.at(i));
+                                std::unordered_map<uint64_t, uint64_t>::iterator it6 = rpkgs.at(rpkg_index2).hash_map.find(rpkgs.at(rpkg_index).hash.at(it->second).hash_reference_data.hash_reference.at(i));
 
                                 std::string hash_string = util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_reference_data.hash_reference.at(i));
 

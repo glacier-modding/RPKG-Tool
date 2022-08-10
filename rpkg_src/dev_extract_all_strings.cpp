@@ -12,7 +12,7 @@
 #include "thirdparty/ww2ogg/wwriff.h"
 #include "thirdparty/revorb/revorb.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -38,7 +38,7 @@ void dev_function::dev_extract_all_strings(std::string& input_path, std::string&
     {
         for (uint64_t j = 0; j < rpkgs.at(i).hash.size(); j++)
         {
-            std::map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(rpkgs.at(i).hash.at(j).hash_value);
+            std::unordered_map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(rpkgs.at(i).hash.at(j).hash_value);
 
             if (it != hash_list_hash_map.end())
             {
@@ -46,7 +46,7 @@ void dev_function::dev_extract_all_strings(std::string& input_path, std::string&
             }
             else
             {
-                std::cout << rpkgs.at(i).hash.at(j).hash_file_name << "," << std::endl;
+                std::cout << util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(j).hash_value) + "." + rpkgs.at(i).hash.at(j).hash_resource_type << "," << std::endl;
             }
         }
     }

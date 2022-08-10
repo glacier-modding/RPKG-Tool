@@ -10,7 +10,7 @@
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -70,7 +70,7 @@ void dev_function::dev_extract_temp_pointers(std::string& input_path, std::strin
 
             if (rpkgs.at(i).rpkg_file_path == input_path || !input_path_is_rpkg_file)
             {
-                std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
                 if (it != rpkgs.at(rpkg_index).hash_map.end())
                 {
@@ -90,7 +90,7 @@ void dev_function::dev_extract_temp_pointers(std::string& input_path, std::strin
                     //uint32_t pointers_size = 0;
                     //uint32_t pointers_count = 0;
                     //std::vector<uint32_t> pointers;
-                    //std::map<uint32_t, uint32_t> pointers_map;
+                    //std::unordered_map<uint32_t, uint32_t> pointers_map;
 
                     //uint32_t bytes4 = 0;
 

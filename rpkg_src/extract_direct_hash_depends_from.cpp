@@ -6,7 +6,7 @@
 #include "rpkg.h"
 #include "hash.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -35,7 +35,7 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
 
         for (uint64_t i = 0; i < rpkgs.size(); i++)
         {
-            std::map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(i).hash_map.find(hash_value);
+            std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(i).hash_map.find(hash_value);
 
             hash_depends_variables temp_hash_depends_data;
 
@@ -61,13 +61,13 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
 
                         for (uint64_t j = 0; j < rpkgs.size(); j++)
                         {
-                            std::map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(j).hash_map.find(rpkgs.at(i).hash.at(it2->second).hash_reference_data.hash_reference.at(k));
+                            std::unordered_map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(j).hash_map.find(rpkgs.at(i).hash.at(it2->second).hash_reference_data.hash_reference.at(k));
 
                             if (it3 != rpkgs.at(j).hash_map.end())
                             {
                                 if (!found)
                                 {
-                                    temp_hash_depends_data.hash_dependency_file_name.push_back(rpkgs.at(j).hash.at(it3->second).hash_file_name);
+                                    temp_hash_depends_data.hash_dependency_file_name.push_back(util::uint64_t_to_hex_string(rpkgs.at(j).hash.at(it3->second).hash_value) + "." + rpkgs.at(j).hash.at(it3->second).hash_resource_type);
                                 }
 
                                 found = true;
@@ -78,7 +78,7 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
 
                         if (!found)
                         {
-                            temp_hash_depends_data.hash_dependency_file_name.push_back(rpkgs.at(i).hash.at(it2->second).hash_reference_data.hash_reference_string.at(k));
+                            temp_hash_depends_data.hash_dependency_file_name.push_back(util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(it2->second).hash_reference_data.hash_reference.at(k)));
                         }
 
                         temp_hash_depends_data.hash_dependency_map[hash_value] = temp_hash_depends_data.hash_dependency_map.size();
@@ -163,7 +163,7 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
                     {
                         reverse_dependency_count++;
 
-                        std::string rd = rpkgs.at(i).hash.at(j).hash_file_name;
+                        std::string rd = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(j).hash_value) + "." + rpkgs.at(i).hash.at(j).hash_resource_type;
 
                         if (reverse_dependency.size() > 0)
                         {
@@ -247,13 +247,13 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
 
         for (uint64_t i = 0; i < rpkgs.size(); i++)
         {
-            std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(std::strtoull(filters.at(z).c_str(), nullptr, 16));
+            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(std::strtoull(filters.at(z).c_str(), nullptr, 16));
 
             if (it != rpkgs.at(i).hash_map.end())
             {
                 filter_found = true;
 
-                filter_hash_file_name = rpkgs.at(i).hash.at(it->second).hash_file_name;
+                filter_hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(it->second).hash_value) + "." + rpkgs.at(i).hash.at(it->second).hash_resource_type;
             }
         }
 
@@ -267,18 +267,18 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
             {
                 uint64_t hash_value = std::strtoull(filters.at(z).c_str(), nullptr, 16);
 
-                std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(hash_value);
+                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(hash_value);
 
                 if (it != rpkgs.at(i).hash_map.end())
                 {
-                    filter_hash_string = rpkgs.at(i).hash.at(it->second).hash_string;
+                    filter_hash_string = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(it->second).hash_value);
 
                     uint32_t hash_reference_count = rpkgs.at(i).hash.at(it->second).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
                     for (uint32_t j = 0; j < hash_reference_count; j++)
                     {
                         hashes_to_extract.push_back(rpkgs.at(i).hash.at(it->second).hash_reference_data.hash_reference.at(j));
-                        hashes_to_extract_strings.push_back(rpkgs.at(i).hash.at(it->second).hash_reference_data.hash_reference_string.at(j));
+                        hashes_to_extract_strings.push_back(util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(it->second).hash_reference_data.hash_reference.at(j)));
                     }
                 }
             }
@@ -287,7 +287,7 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
             {
                 for (uint64_t i = 0; i < rpkgs.size(); i++)
                 {
-                    std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(hashes_to_extract.at(x));
+                    std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(hashes_to_extract.at(x));
 
                     if (it != rpkgs.at(i).hash_map.end())
                     {
@@ -299,7 +299,7 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
 
                                 file::create_directories(prim_output_dir);
 
-                                //std::cout << "rpkg_function::extract_prim_model_from(" << rpkgs.at(i).rpkg_file_path << ", " << rpkgs.at(i).hash.at(hash_index).hash_string << ", " << prim_output_dir << ");" << std::endl;
+                                //std::cout << "rpkg_function::extract_prim_model_from(" << rpkgs.at(i).rpkg_file_path << ", " << util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) << ", " << prim_output_dir << ");" << std::endl;
 
                                 rpkg_function::extract_prim_model_from(rpkgs.at(i).rpkg_file_path, hashes_to_extract_strings.at(x), prim_output_dir);
                             }

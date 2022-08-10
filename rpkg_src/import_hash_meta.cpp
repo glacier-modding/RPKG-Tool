@@ -31,28 +31,28 @@ void rpkg_function::import_hash_meta(hash& meta_data, std::string& hash_meta_fil
 
     meta_file.read(input, sizeof(bytes8));
     std::memcpy(&bytes8, input, sizeof(bytes8));
-    meta_data.hash_offset = bytes8;
+    meta_data.data.header.data_offset = bytes8;
 
     meta_file.read(input, sizeof(bytes4));
     std::memcpy(&bytes4, input, sizeof(bytes4));
-    meta_data.hash_size = bytes4;
+    meta_data.data.header.data_size = bytes4;
 
-    if ((meta_data.hash_size & 0x3FFFFFFF) != 0)
+    if ((meta_data.data.header.data_size & 0x3FFFFFFF) != 0)
     {
-        meta_data.is_lz4ed = true;
+        meta_data.data.lz4ed = true;
     }
     else
     {
-        meta_data.is_lz4ed = false;
+        meta_data.data.lz4ed = false;
     }
 
-    if ((meta_data.hash_size & 0x80000000) == 0x80000000)
+    if ((meta_data.data.header.data_size & 0x80000000) == 0x80000000)
     {
-        meta_data.is_xored = true;
+        meta_data.data.xored = true;
     }
     else
     {
-        meta_data.is_xored = false;
+        meta_data.data.xored = false;
     }
 
     meta_file.read(input, sizeof(bytes4));
@@ -61,27 +61,27 @@ void rpkg_function::import_hash_meta(hash& meta_data, std::string& hash_meta_fil
 
     meta_file.read(input, sizeof(bytes4));
     std::memcpy(&bytes4, input, sizeof(bytes4));
-    meta_data.hash_reference_table_size = bytes4;
+    meta_data.data.resource.reference_table_size = bytes4;
 
     meta_file.read(input, sizeof(bytes4));
     std::memcpy(&bytes4, input, sizeof(bytes4));
-    meta_data.hash_reference_table_dummy = bytes4;
+    meta_data.data.resource.reference_table_dummy = bytes4;
 
     meta_file.read(input, sizeof(bytes4));
     std::memcpy(&bytes4, input, sizeof(bytes4));
-    meta_data.hash_size_final = bytes4;
+    meta_data.data.resource.size_final = bytes4;
 
     meta_file.read(input, sizeof(bytes4));
     std::memcpy(&bytes4, input, sizeof(bytes4));
-    meta_data.hash_size_in_memory = bytes4;
+    meta_data.data.resource.size_in_memory = bytes4;
 
     meta_file.read(input, sizeof(bytes4));
     std::memcpy(&bytes4, input, sizeof(bytes4));
-    meta_data.hash_size_in_video_memory = bytes4;
+    meta_data.data.resource.size_in_video_memory = bytes4;
 
     hash_reference_variables temp_hash_reference_data;
 
-    if (meta_data.hash_reference_table_size != 0x0)
+    if (meta_data.data.resource.reference_table_size != 0x0)
     {
         temp_hash_reference_data.hash_value = meta_data.hash_value;
 
@@ -103,8 +103,6 @@ void rpkg_function::import_hash_meta(hash& meta_data, std::string& hash_meta_fil
             meta_file.read(input, sizeof(bytes8));
             std::memcpy(&bytes8, input, sizeof(bytes8));
             temp_hash_reference_data.hash_reference.push_back(bytes8);
-
-            temp_hash_reference_data.hash_reference_string.push_back(util::uint64_t_to_hex_string(bytes8));
         }
     }
     else

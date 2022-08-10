@@ -1,4 +1,6 @@
 #include "rpkg_function.h"
+#include "file_reader.hpp"
+#include "stream_reader.hpp"
 #include "global.h"
 #include "file.h"
 #include "util.h"
@@ -29,481 +31,228 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path, bool with_timing)
         return;
     }
 
-    std::ifstream file = std::ifstream(rpkg_file_path, std::ifstream::binary);
-    char input[1024];
-    uint8_t bytes1 = 0;
-    uint32_t bytes4 = 0, file_count = 0, table_offset = 0, table_size = 0, patch_entry_count = 0;
-    uint64_t bytes8 = 0, offset1 = 0, offset2 = 0, rpkg_file_size = 0;
-    std::string message = "Importing RPKG file data: ";
+    // Emplace back new RPKG in rpkgs
+    rpkgs.emplace_back();
+    rpkgs.back().rpkg_file_path = rpkg_file_path;
+    rpkgs.back().rpkg_file_name = file::get_base_file_name(rpkg_file_path);
 
-    if (!file.good())
-    {
-        LOG_AND_EXIT("Error: RPKG file " + rpkg_file_path + " could not be read.");
-    }
+    // Load RPKG file with FileReader
+    FileReader rpkg_file(rpkg_file_path);
 
-    file.seekg(0, file.end);
-    rpkg_file_size = file.tellg();
-    file.seekg(0, file.beg);
-
-    if (rpkg_file_size <= 0x4)
-    {
-        LOG_AND_RETURN("Error: " + rpkg_file_path + " is not a valid RPKG file.");
-    }
-
-    rpkg temp_rpkg;
-
-    temp_rpkg.rpkg_file_path = rpkg_file_path;
-    temp_rpkg.rpkg_file_name = file::get_base_file_name(rpkg_file_path);
-
-    file.read(input, 4);
-    input[4] = 0;
-
-    if (std::string(input) == "GKPR")
-    {
-        temp_rpkg.rpkg_file_version = 1;
-
-        LOG("Valid RPKGv1 file magic signature found.");
-    }
-    else if (std::string(input) == "2KPR")
-    {
-        temp_rpkg.rpkg_file_version = 2;
-
-        LOG("Valid RPKGv2 file magic signature found.");
-    }
-    else
-    {
-        LOG_AND_RETURN("Error: " + rpkg_file_path + " is not a valid RPKG file.");
-    }
-
-    if ((temp_rpkg.rpkg_file_version == 1 && rpkg_file_size <= 0x14) || (temp_rpkg.rpkg_file_version == 2 && rpkg_file_size <= 0x1D))
+    // Check for empty file
+    if (rpkg_file.Size() <= 0x4)
     {
         LOG_AND_RETURN("Error: " + rpkg_file_path + " is a empty RPKG file.");
     }
 
-    if (temp_rpkg.rpkg_file_version == 2)
+    // Determine RPKG file version
+    char magic[4];
+    rpkg_file.Read<char[4]>(&magic);
+    if (magic[0] == 'G' && magic[1] == 'K' && magic[2] == 'P' && magic[3] == 'R')
+        rpkgs.back().rpkg_file_version = 1;
+    else if (magic[0] == '2' && magic[1] == 'K' && magic[2] == 'P' && magic[3] == 'R')
     {
-        file.read(input, sizeof(bytes1));
-        temp_rpkg.rpkgv2_header.push_back(input[0]);
-        file.read(input, sizeof(bytes1));
-        temp_rpkg.rpkgv2_header.push_back(input[0]);
-        file.read(input, sizeof(bytes1));
-        temp_rpkg.rpkgv2_header.push_back(input[0]);
-        file.read(input, sizeof(bytes1));
-        temp_rpkg.rpkgv2_header.push_back(input[0]);
-        file.read(input, sizeof(bytes1));
-        temp_rpkg.rpkgv2_header.push_back(input[0]);
-        file.read(input, sizeof(bytes1));
-        temp_rpkg.rpkgv2_header.push_back(input[0]);
-        file.read(input, sizeof(bytes1));
-        temp_rpkg.rpkgv2_header.push_back(input[0]);
-        file.read(input, sizeof(bytes1));
-        temp_rpkg.rpkgv2_header.push_back(input[0]);
-        file.read(input, sizeof(bytes1));
-        temp_rpkg.rpkgv2_header.push_back(input[0]);
-    }
-
-    file.read(input, sizeof(file_count));
-    std::memcpy(&file_count, input, sizeof(file_count));
-    temp_rpkg.rpkg_file_count = file_count;
-
-    file.read(input, sizeof(table_offset));
-    std::memcpy(&table_offset, input, sizeof(table_offset));
-    temp_rpkg.rpkg_table_offset = table_offset;
-
-    file.read(input, sizeof(table_size));
-    std::memcpy(&table_size, input, sizeof(table_size));
-    temp_rpkg.rpkg_table_size = table_size;
-
-    uint64_t position = file.tellg();
-
-    file.read(input, sizeof(patch_entry_count));
-    std::memcpy(&patch_entry_count, input, sizeof(patch_entry_count));
-
-    temp_rpkg.patch_entry_count = patch_entry_count;
-
-    if (temp_rpkg.rpkg_file_version == 1 && ((uint64_t)patch_entry_count * (uint64_t)0x8 + (uint64_t)0x14 + (uint64_t)0x10) >= rpkg_file_size)
-    {
-        temp_rpkg.is_patch_file = false;
-
-        LOG("RPKGv1 file " << temp_rpkg.rpkg_file_name << " is not a patch file.");
-    }
-    else if (temp_rpkg.rpkg_file_version == 2 && ((uint64_t)patch_entry_count * (uint64_t)0x8 + (uint64_t)0x1D + (uint64_t)0x10) >= rpkg_file_size)
-    {
-        temp_rpkg.is_patch_file = false;
-
-        LOG("RPKGv2 file " << temp_rpkg.rpkg_file_name << " is not a patch file.");
+        rpkgs.back().rpkg_file_version = 2;
+        rpkgs.back().rpkgv2_header.resize(9);
+        rpkg_file.Read<char>(rpkgs.back().rpkgv2_header.data(), 9);
     }
     else
     {
-        char patch_zero_test = 0;
-        uint64_t patch_value = 0;
-
-        if (temp_rpkg.rpkg_file_version == 1)
-        {
-            file.seekg(((uint64_t)patch_entry_count * (uint64_t)0x8 + (uint64_t)0x14), file.beg);
-        }
-        else
-        {
-            file.seekg(((uint64_t)patch_entry_count * (uint64_t)0x8 + (uint64_t)0x1D), file.beg);
-        }
-
-        file.read(input, 0x7);
-        file.read(input, sizeof(bytes1));
-        std::memcpy(&patch_zero_test, input, sizeof(bytes1));
-        file.read(input, sizeof(bytes8));
-        std::memcpy(&patch_value, input, sizeof(bytes8));
-
-        if (temp_rpkg.rpkg_file_version == 1 && patch_value == ((uint64_t)table_offset + (uint64_t)table_size + (uint64_t)patch_entry_count * (uint64_t)0x8 + (uint64_t)0x14) && patch_zero_test == 0x0)
-        {
-            temp_rpkg.is_patch_file = true;
-
-            LOG("RPKGv1 file " << temp_rpkg.rpkg_file_name << " is a patch file.");
-        }
-        else if (temp_rpkg.rpkg_file_version == 2 && patch_value == ((uint64_t)table_offset + (uint64_t)table_size + (uint64_t)patch_entry_count * (uint64_t)0x8 + (uint64_t)0x1D) && patch_zero_test == 0x0)
-        {
-            temp_rpkg.is_patch_file = true;
-
-            LOG("RPKGv2 file " << temp_rpkg.rpkg_file_name << " is a patch file.");
-        }
-        else
-        {
-            temp_rpkg.is_patch_file = false;
-
-            if (temp_rpkg.rpkg_file_version == 1)
-            {
-                LOG("RPKGv1 file " << temp_rpkg.rpkg_file_name << " is not a patch file.");
-            }
-            else
-            {
-                LOG("RPKGv2 file " << temp_rpkg.rpkg_file_name << " is not a patch file.");
-            }
-        }
+        LOG_AND_RETURN("Error: " + rpkg_file_path + " is not a valid RPKG file.");
     }
 
-    file.seekg(position, file.beg);
+    // Read in RPKG main header
+    rpkg_file.Read<rpkg::Header>(&rpkgs.back().header);
 
-    uint64_t input_file_size = 0;
+    // Record patch offset for later, needed if RPKG is a patch file
+    uint64_t patch_offset = rpkg_file.Position();
 
-    if (temp_rpkg.is_patch_file)
+    // Check for empty RPKG file
+    if ((rpkgs.back().rpkg_file_version == 1 && rpkg_file.Size() <= 0x14) || (rpkgs.back().rpkg_file_version == 2 && rpkg_file.Size() <= 0x1D))
     {
-        if (temp_rpkg.rpkg_file_version == 1)
-        {
-            LOG("Importing index from RPKGv1 file: " << temp_rpkg.rpkg_file_name);
-        }
-        else
-        {
-            LOG("Importing index from RPKGv2 file: " << temp_rpkg.rpkg_file_name);
-        }
-
-        file.read(input, sizeof(patch_entry_count));
-        std::memcpy(&patch_entry_count, input, sizeof(patch_entry_count));
-        temp_rpkg.patch_entry_count = patch_entry_count;
-
-        for (uint64_t i = 0; i < patch_entry_count; i++)
-        {
-            file.read(input, sizeof(bytes8));
-            std::memcpy(&bytes8, input, sizeof(bytes8));
-            temp_rpkg.patch_entry_list.push_back(bytes8);
-        }
-
-        if (temp_rpkg.rpkg_file_version == 1)
-        {
-            input_file_size = (uint64_t)table_offset + (uint64_t)table_size + (uint64_t)0x14 + (uint64_t)patch_entry_count * (uint64_t)0x8;
-        }
-        else
-        {
-            input_file_size = (uint64_t)table_offset + (uint64_t)table_size + (uint64_t)0x1D + (uint64_t)patch_entry_count * (uint64_t)0x8;
-        }
+        LOG_AND_RETURN("Error: " + rpkg_file_path + " is a empty RPKG file.");
     }
+
+    // Perform tests to determine if RPKG is a patch file or not
+    if (rpkgs.back().rpkg_file_version == 1 && (rpkgs.back().header.patch_count * 8 + 0x24) >= rpkg_file.Size())
+        rpkgs.back().is_patch_file = false;
+    else if (rpkgs.back().rpkg_file_version == 2 && (rpkgs.back().header.patch_count * 8 + 0x2D) >= rpkg_file.Size())
+        rpkgs.back().is_patch_file = false;
     else
     {
-        if (temp_rpkg.rpkg_file_version == 1)
-        {
-            input_file_size = (uint64_t)table_offset + (uint64_t)table_size + (uint64_t)0x10;
-
-            LOG("Importing index from RPKGv1 file: " << temp_rpkg.rpkg_file_name);
-        }
+        if (rpkgs.back().rpkg_file_version == 1)
+            rpkg_file.SeekTo(rpkgs.back().header.patch_count * 8 + 0x1B);
         else
-        {
-            input_file_size = (uint64_t)table_offset + (uint64_t)table_size + (uint64_t)0x19;
+            rpkg_file.SeekTo(rpkgs.back().header.patch_count * 8 + 0x24);
 
-            LOG("Importing index from RPKGv2 file: " << temp_rpkg.rpkg_file_name);
+        uint8_t test_zero_value;
+        rpkg_file.Read<uint8_t>(&test_zero_value);
+        uint64_t test_header_offset;
+        rpkg_file.Read<uint64_t>(&test_header_offset);
+
+        if (rpkgs.back().rpkg_file_version == 1 && test_header_offset == (rpkgs.back().header.hash_header_table_size + rpkgs.back().header.hash_resource_table_size + rpkgs.back().header.patch_count * 8 + 0x14) && test_zero_value == 0)
+            rpkgs.back().is_patch_file = true;
+        else if (test_header_offset == (rpkgs.back().header.hash_header_table_size + rpkgs.back().header.hash_resource_table_size + rpkgs.back().header.patch_count * 8 + 0x1D) && test_zero_value == 0)
+            rpkgs.back().is_patch_file = true;
+    }
+
+    // Read in the patch list if RPKG is a patch file with a non zero patch list
+    if (rpkgs.back().is_patch_file)
+    {
+        if (rpkgs.back().header.patch_count > 0)
+        {
+            rpkg_file.SeekTo(patch_offset);
+            rpkgs.back().patch_entry_list.resize(rpkgs.back().header.patch_count);
+            rpkg_file.Read<uint64_t>(rpkgs.back().patch_entry_list.data(), rpkgs.back().header.patch_count);
         }
     }
 
-    position = (uint64_t)file.tellg();
+    std::string import_text = "Importing RPKG file: " + rpkgs.back().rpkg_file_name;
+    LOG_NO_ENDL(import_text);
 
-    offset2 = position + table_offset;
+    // Seek to the hash data table's offset
+    size_t hash_data_offset = 0x10;
+    if (rpkgs.back().rpkg_file_version == 2)
+        hash_data_offset += 9;
+    if (rpkgs.back().is_patch_file)
+        hash_data_offset += rpkgs.back().header.patch_count * 8 + 4;
 
-    std::vector<char> input_file_data(input_file_size, 0);
+    rpkg_file.SeekTo(hash_data_offset);
 
-    file.seekg(0x0, file.beg);
+    // Read both RPKG's hash tables at once into a temporary char buffer
+    size_t hash_tables_combined_size = rpkgs.back().header.hash_header_table_size + rpkgs.back().header.hash_resource_table_size;
+    std::vector<char> hash_tables(hash_tables_combined_size, 0);
+    rpkg_file.Read<char>(hash_tables.data(), hash_tables_combined_size);
 
-    file.read(input_file_data.data(), input_file_size);
+    // Load RPKG's hash tables in StreamReader
+    StreamReader hash_tables_stream(hash_tables.data(), hash_tables.size());
 
+    // Init timer
     std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
     int stringstream_length = 80;
 
-    std::map<uint64_t, uint64_t> temp_hashes_depends_map;
-
-    for (uint64_t i = 0; i < file_count; i++)
+    // Read in the hash files/resources data tables
+    for (size_t i = 0; i < rpkgs.back().header.hash_count; i++)
     {
-        if (with_timing)
+        // Emplace back new hash in rpkg
+        rpkgs.back().hash.emplace_back();
+
+        hash_tables_stream.Read<hash::HashHeader>(&rpkgs.back().hash.back().data.header);
+
+        rpkgs.back().hash_map[rpkgs.back().hash.back().data.header.hash] = (uint64_t)rpkgs.back().hash_map.size();
+    }
+
+    // Emplace back the hash depends map
+    hashes_depends_map.emplace_back();
+
+    // Read in the hash files/resources info tables
+    for (size_t i = 0; i < rpkgs.back().header.hash_count; i++)
+    {
+        //HashInfo hash_info;
+        hash_tables_stream.Read<hash::HashResource>(&rpkgs.back().hash[i].data.resource);
+
+        // Reverse the hash's resource type string
+        char type[4];
+        std::memcpy(&type, rpkgs.back().hash[i].data.resource.resource_type, 4);
+        rpkgs.back().hash[i].data.resource.resource_type[0] = type[3];
+        rpkgs.back().hash[i].data.resource.resource_type[1] = type[2];
+        rpkgs.back().hash[i].data.resource.resource_type[2] = type[1];
+        rpkgs.back().hash[i].data.resource.resource_type[3] = type[0];
+
+        // Determine hash's size and if it is LZ4ed and/or XORed
+        if ((rpkgs.back().hash[i].data.header.data_size & 0x3FFFFFFF) != 0)
         {
-            if (((i * (uint64_t)100000) / (uint64_t)file_count) % (uint64_t)100 == 0 && i > 0)
+            rpkgs.back().hash[i].data.lz4ed = true;
+            rpkgs.back().hash[i].data.size = rpkgs.back().hash[i].data.header.data_size;
+
+            if ((rpkgs.back().hash[i].data.header.data_size & 0x80000000) == 0x80000000)
             {
-                stringstream_length = console::update_console(message, file_count, i, start_time, stringstream_length);
-            }
-        }
-
-        hash temp_hash;
-
-        std::memcpy(&bytes8, &input_file_data[position], sizeof(bytes8));
-        position += sizeof(bytes8);
-
-        std::string value = util::uint64_t_to_hex_string(bytes8);
-        temp_hash.hash_value = bytes8;
-        temp_hash.hash_string = value;
-
-        temp_rpkg.hash_map[bytes8] = (uint64_t)temp_rpkg.hash_map.size();
-
-        std::memcpy(&bytes8, &input_file_data[position], sizeof(bytes8));
-        position += sizeof(bytes8);
-        temp_hash.hash_offset = bytes8;
-
-        std::memcpy(&bytes4, &input_file_data[position], sizeof(bytes4));
-        position += sizeof(bytes4);
-        temp_hash.hash_size = bytes4;
-
-        if ((temp_hash.hash_size & 0x3FFFFFFF) != 0)
-        {
-            temp_hash.is_lz4ed = true;
-        }
-        else
-        {
-            temp_hash.is_lz4ed = false;
-        }
-
-        if ((temp_hash.hash_size & 0x80000000) == 0x80000000)
-        {
-            temp_hash.is_xored = true;
-        }
-        else
-        {
-            temp_hash.is_xored = false;
-        }
-
-        offset1 = position;
-
-        position = offset2;
-
-        std::memcpy(&input, &input_file_data[position], sizeof(bytes4));
-        position += sizeof(bytes4);
-        input[4] = 0;
-        value = std::string(input);
-        std::reverse(value.begin(), value.end());
-        temp_hash.hash_resource_type = value;
-        temp_hash.hash_file_name = temp_hash.hash_string + "." + temp_hash.hash_resource_type;
-
-        std::memcpy(&bytes4, &input_file_data[position], sizeof(bytes4));
-        position += sizeof(bytes4);
-        temp_hash.hash_reference_table_size = bytes4;
-
-        std::memcpy(&bytes4, &input_file_data[position], sizeof(bytes4));
-        position += sizeof(bytes4);
-        temp_hash.hash_reference_table_dummy = bytes4;
-
-        std::memcpy(&bytes4, &input_file_data[position], sizeof(bytes4));
-        position += sizeof(bytes4);
-        temp_hash.hash_size_final = bytes4;
-
-        std::memcpy(&bytes4, &input_file_data[position], sizeof(bytes4));
-        position += sizeof(bytes4);
-        temp_hash.hash_size_in_memory = bytes4;
-
-        std::memcpy(&bytes4, &input_file_data[position], sizeof(bytes4));
-        position += sizeof(bytes4);
-        temp_hash.hash_size_in_video_memory = bytes4;
-
-        uint64_t hash_size;
-
-        if (temp_hash.is_lz4ed == 1)
-        {
-            hash_size = temp_hash.hash_size;
-
-            if (temp_hash.is_xored == 1)
-            {
-                hash_size &= 0x3FFFFFFF;
+                rpkgs.back().hash[i].data.size &= 0x3FFFFFFF;
+                rpkgs.back().hash[i].data.xored = true;
             }
         }
         else
         {
-            hash_size = temp_hash.hash_size_final;
+            rpkgs.back().hash[i].data.size = rpkgs.back().hash[i].data.resource.size_final;
+
+            if ((rpkgs.back().hash[i].data.header.data_size & 0x80000000) == 0x80000000)
+                rpkgs.back().hash[i].data.xored = true;
         }
 
-        if (temp_rpkg.hash_resource_types.size() > 0)
+        rpkgs.back().hash[i].hash_value = rpkgs.back().hash[i].data.header.hash;
+        rpkgs.back().hash[i].hash_resource_type = std::string(rpkgs.back().hash[i].data.resource.resource_type, 4);
+
+        if (rpkgs.back().hash_resource_types.size() > 0)
         {
             bool found = false;
 
-            for (uint32_t j = 0; j < temp_rpkg.hash_resource_types.size(); j++)
+            for (uint32_t j = 0; j < rpkgs.back().hash_resource_types.size(); j++)
             {
-                if (temp_rpkg.hash_resource_types.at(j) == value)
+                if (rpkgs.back().hash_resource_types.at(j) == rpkgs.back().hash[i].hash_resource_type)
                 {
                     found = true;
-
-                    temp_rpkg.hash_resource_types_data_size.at(j) += hash_size;
-
-                    temp_rpkg.hashes_indexes_based_on_resource_types.at(j).push_back(i);
-
-                    temp_rpkg.hashes_based_on_resource_types.at(j).push_back(temp_hash.hash_file_name);
+                    rpkgs.back().hash_resource_types_data_size.at(j) += rpkgs.back().hash[i].data.size;
+                    rpkgs.back().hashes_indexes_based_on_resource_types.at(j).push_back(i);
+                    rpkgs.back().hashes_based_on_resource_types.at(j).push_back(rpkgs.back().hash[i].data.header.hash);
                 }
             }
 
             if (!found)
             {
-                temp_rpkg.hash_resource_types.push_back(value);
-
-                temp_rpkg.hash_resource_types_data_size.push_back(hash_size);
-
+                rpkgs.back().hash_resource_types.push_back(rpkgs.back().hash[i].hash_resource_type);
+                rpkgs.back().hash_resource_types_data_size.push_back(rpkgs.back().hash[i].data.size);
                 std::vector<uint64_t> temp_hashes_indexes_based_on_resource_types;
-
                 temp_hashes_indexes_based_on_resource_types.push_back(i);
-
-                temp_rpkg.hashes_indexes_based_on_resource_types.push_back(temp_hashes_indexes_based_on_resource_types);
-
-                std::vector<std::string> temp_hashes_based_on_resource_types;
-
-                temp_hashes_based_on_resource_types.push_back(temp_hash.hash_file_name);
-
-                temp_rpkg.hashes_based_on_resource_types.push_back(temp_hashes_based_on_resource_types);
+                rpkgs.back().hashes_indexes_based_on_resource_types.push_back(temp_hashes_indexes_based_on_resource_types);
+                std::vector<uint64_t> temp_hashes_based_on_resource_types;
+                temp_hashes_based_on_resource_types.push_back(rpkgs.back().hash[i].data.header.hash);
+                rpkgs.back().hashes_based_on_resource_types.push_back(temp_hashes_based_on_resource_types);
             }
         }
         else
         {
-            temp_rpkg.hash_resource_types.push_back(value);
-
-            temp_rpkg.hash_resource_types_data_size.push_back(hash_size);
-
+            rpkgs.back().hash_resource_types.push_back(rpkgs.back().hash[i].hash_resource_type);
+            rpkgs.back().hash_resource_types_data_size.push_back(rpkgs.back().hash[i].data.size);
             std::vector<uint64_t> temp_hashes_indexes_based_on_resource_types;
-
             temp_hashes_indexes_based_on_resource_types.push_back(i);
-
-            temp_rpkg.hashes_indexes_based_on_resource_types.push_back(temp_hashes_indexes_based_on_resource_types);
-
-            std::vector<std::string> temp_hashes_based_on_resource_types;
-
-            temp_hashes_based_on_resource_types.push_back(temp_hash.hash_file_name);
-
-            temp_rpkg.hashes_based_on_resource_types.push_back(temp_hashes_based_on_resource_types);
+            rpkgs.back().hashes_indexes_based_on_resource_types.push_back(temp_hashes_indexes_based_on_resource_types);
+            std::vector<uint64_t> temp_hashes_based_on_resource_types;
+            temp_hashes_based_on_resource_types.push_back(rpkgs.back().hash[i].data.header.hash);
+            rpkgs.back().hashes_based_on_resource_types.push_back(temp_hashes_based_on_resource_types);
         }
 
-        hash_reference_variables temp_hash_reference_data;
-
-        if (temp_hash.hash_reference_table_size != 0x0)
+        if (rpkgs.back().hash[i].data.resource.reference_table_size > 0)
         {
-            temp_hash_reference_data.hash_value = temp_hash.hash_value;
+            uint32_t depends_count;
+            hash_tables_stream.Read<uint32_t>(&depends_count);
+            rpkgs.back().hash[i].hash_reference_data.hash_reference_count = depends_count;
+            depends_count &= 0x3FFFFFFF;
 
-            std::memcpy(&bytes4, &input_file_data[position], sizeof(bytes4));
-            position += sizeof(bytes4);
-            temp_hash_reference_data.hash_reference_count = bytes4;
+            rpkgs.back().hash[i].hash_reference_data.hash_reference_type.resize(depends_count);
+            hash_tables_stream.Read<uint8_t>(rpkgs.back().hash[i].hash_reference_data.hash_reference_type.data(), depends_count);
 
-            uint32_t temp_hash_reference_count = temp_hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+            rpkgs.back().hash[i].hash_reference_data.hash_reference.resize(depends_count);
+            hash_tables_stream.Read<uint64_t>(rpkgs.back().hash[i].hash_reference_data.hash_reference.data(), depends_count);
 
-            bool reference_table_normal = true;
+            rpkgs.back().hash[i].hash_reference_data.hash_value = rpkgs.back().hash[i].data.header.hash;
 
-            int zero_count = 0;
-
-            for (uint64_t j = 0; j < temp_hash_reference_count; j++)
+            for (uint64_t j = 0; j < depends_count; j++)
             {
-                if (input_file_data[position + (uint64_t)j * (uint64_t)0x8 + (uint64_t)0x7] == 0x0)
+                std::unordered_map<uint64_t, uint64_t>::iterator it = hashes_depends_map.back().find(rpkgs.back().hash[i].hash_reference_data.hash_reference.back());
+
+                if (it == hashes_depends_map.back().end())
                 {
-                    zero_count++;
+                    hashes_depends_map.back()[rpkgs.back().hash[i].hash_reference_data.hash_reference.back()] = hashes_depends_map.back().size();
                 }
             }
-
-            if (zero_count == temp_hash_reference_count)
-            {
-                reference_table_normal = false;
-            }
-
-            if (reference_table_normal)
-            {
-                for (uint64_t j = 0; j < temp_hash_reference_count; j++)
-                {
-                    std::memcpy(&bytes1, &input_file_data[position], sizeof(bytes1));
-                    position += sizeof(bytes1);
-                    temp_hash_reference_data.hash_reference_type.push_back(bytes1);
-                }
-
-                for (uint64_t j = 0; j < temp_hash_reference_count; j++)
-                {
-                    std::memcpy(&bytes8, &input_file_data[position], sizeof(bytes8));
-                    position += sizeof(bytes8);
-                    temp_hash_reference_data.hash_reference.push_back(bytes8);
-
-                    value = util::uint64_t_to_hex_string(bytes8);
-                    temp_hash_reference_data.hash_reference_string.push_back(value);
-
-                    std::map<uint64_t, uint64_t>::iterator it = temp_hashes_depends_map.find(temp_hash_reference_data.hash_reference.back());
-
-                    if (it == temp_hashes_depends_map.end())
-                    {
-                        temp_hashes_depends_map[temp_hash_reference_data.hash_reference.back()] = temp_hashes_depends_map.size();
-                    }
-                }
-            }
-            else
-            {
-                for (uint64_t j = 0; j < temp_hash_reference_count; j++)
-                {
-                    std::memcpy(&bytes8, &input_file_data[position], sizeof(bytes8));
-                    position += sizeof(bytes8);
-                    temp_hash_reference_data.hash_reference.push_back(bytes8);
-
-                    value = util::uint64_t_to_hex_string(bytes8);
-                    temp_hash_reference_data.hash_reference_string.push_back(value);
-
-                    std::map<uint64_t, uint64_t>::iterator it = temp_hashes_depends_map.find(temp_hash_reference_data.hash_reference.back());
-
-                    if (it == temp_hashes_depends_map.end())
-                    {
-                        temp_hashes_depends_map[temp_hash_reference_data.hash_reference.back()] = temp_hashes_depends_map.size();
-                    }
-                }
-
-                for (uint64_t j = 0; j < temp_hash_reference_count; j++)
-                {
-                    std::memcpy(&bytes1, &input_file_data[position], sizeof(bytes1));
-                    position += sizeof(bytes1);
-                    temp_hash_reference_data.hash_reference_type.push_back(bytes1);
-                }
-            }
-
-            offset2 = position;
         }
         else
         {
-            temp_hash_reference_data.hash_reference_count = 0x0;
-
-            offset2 = position;
-
-            offset2 += temp_hash.hash_reference_table_size;
+            rpkgs.back().hash[i].hash_reference_data.hash_reference_count = 0x0;
         }
-
-        temp_hash.hash_reference_data = temp_hash_reference_data;
-
-        temp_rpkg.hash.push_back(temp_hash);
-
-        position = offset1;
     }
 
-    hashes_depends_map_rpkg_file_paths.push_back(temp_rpkg.rpkg_file_path);
-
-    hashes_depends_map.push_back(temp_hashes_depends_map);
-
-    rpkgs.push_back(temp_rpkg);
-
-    file.close();
+    hashes_depends_map_rpkg_file_paths.push_back(rpkgs.back().rpkg_file_path);
 
     if (with_timing)
     {
@@ -511,9 +260,9 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path, bool with_timing)
 
         std::stringstream ss;
 
-        ss << message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
+        ss << "completed in " << std::fixed << std::setprecision(6) << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
 
-        LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+        LOG(std::string((72 - import_text.length() - ss.str().length()), '.') + ss.str());
 
         percent_progress = (uint32_t)100;
     }

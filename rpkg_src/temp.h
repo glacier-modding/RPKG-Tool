@@ -3,7 +3,7 @@
 #include "hash.h"
 #include <string>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <stdint.h>
 #include "thirdparty/rapidjson/document.h"
 #include "thirdparty/rapidjson/writer.h"
@@ -75,7 +75,7 @@ public:
 	std::vector<uint32_t> temp_logicalParent;
 	std::vector<std::string> tblu_entityName;
 	std::vector<uint64_t> tblu_entityId;
-	std::map<uint64_t, uint64_t> tblu_entityId_map;
+	std::unordered_map<uint64_t, uint64_t> tblu_entityId_map;
 	std::vector<uint32_t> temp_entityTypeResourceIndex;
 	std::vector<uint32_t> tblu_entityTypeResourceIndex;
 	std::vector<int32_t> temp_externalSceneTypeIndicesInResourceHeader;

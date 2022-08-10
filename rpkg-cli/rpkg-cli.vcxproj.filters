@@ -779,5 +779,11 @@
     <ClInclude Include="..\rpkg_src\mrtr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\rpkg_src\file_reader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rpkg_src\stream_reader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

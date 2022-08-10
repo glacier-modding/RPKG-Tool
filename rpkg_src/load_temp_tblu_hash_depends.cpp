@@ -6,7 +6,7 @@
 #include "util.h"
 #include "generic_function.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 
 int rpkg_function::load_temp_tblu_hash_depends(uint64_t rpkg_index, uint64_t hash_index)
 {
@@ -34,7 +34,7 @@ int rpkg_function::load_temp_tblu_hash_depends(uint64_t rpkg_index, uint64_t has
 
             for (uint64_t z = 0; z < rpkgs.size(); z++)
             {
-                std::map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(z).hash_map.find(rpkgs.at(rpkg_index).hash.at(hash_index).hash_reference_data.hash_reference.at(y));
+                std::unordered_map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(z).hash_map.find(rpkgs.at(rpkg_index).hash.at(hash_index).hash_reference_data.hash_reference.at(y));
 
                 if (it3 != rpkgs.at(z).hash_map.end())
                 {
@@ -58,7 +58,7 @@ int rpkg_function::load_temp_tblu_hash_depends(uint64_t rpkg_index, uint64_t has
 
             std::string ioi_string = "";
 
-            std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(std::strtoull(temporary_temp_hash_depends_data.hash_dependency_file_name.back().c_str(), nullptr, 16));
+            std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(std::strtoull(temporary_temp_hash_depends_data.hash_dependency_file_name.back().c_str(), nullptr, 16));
 
             if (it2 != hash_list_hash_map.end())
             {
@@ -166,7 +166,7 @@ int rpkg_function::load_temp_tblu_hash_depends(uint64_t rpkg_index, uint64_t has
 
     uint64_t tblu_hash_value = std::strtoull(tblu_file_name.c_str(), nullptr, 16);
 
-    std::map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(rpkg_index).hash_map.find(tblu_hash_value);
+    std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(rpkg_index).hash_map.find(tblu_hash_value);
 
     if (it2 != rpkgs.at(rpkg_index).hash_map.end())
     {
@@ -184,7 +184,7 @@ int rpkg_function::load_temp_tblu_hash_depends(uint64_t rpkg_index, uint64_t has
             {
                 rpkg_index = (uint64_t)rpkgs.size() - (uint64_t)0x1 - (uint64_t)x;
 
-                std::map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(rpkg_index).hash_map.find(tblu_hash_value);
+                std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(rpkg_index).hash_map.find(tblu_hash_value);
 
                 if (it2 != rpkgs.at(rpkg_index).hash_map.end())
                 {
@@ -228,7 +228,7 @@ int rpkg_function::load_temp_tblu_hash_depends(uint64_t rpkg_index, uint64_t has
 
             for (uint64_t z = 0; z < rpkgs.size(); z++)
             {
-                std::map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(z).hash_map.find(rpkgs.at(rpkg_index).hash.at(hash_index).hash_reference_data.hash_reference.at(y));
+                std::unordered_map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(z).hash_map.find(rpkgs.at(rpkg_index).hash.at(hash_index).hash_reference_data.hash_reference.at(y));
 
                 if (it3 != rpkgs.at(z).hash_map.end())
                 {
@@ -252,7 +252,7 @@ int rpkg_function::load_temp_tblu_hash_depends(uint64_t rpkg_index, uint64_t has
 
             std::string ioi_string = "";
 
-            std::map<uint64_t, uint64_t>::iterator it4 = hash_list_hash_map.find(std::strtoull(temporary_tblu_hash_depends_data.hash_dependency_file_name.back().c_str(), nullptr, 16));
+            std::unordered_map<uint64_t, uint64_t>::iterator it4 = hash_list_hash_map.find(std::strtoull(temporary_tblu_hash_depends_data.hash_dependency_file_name.back().c_str(), nullptr, 16));
 
             if (it4 != hash_list_hash_map.end())
             {

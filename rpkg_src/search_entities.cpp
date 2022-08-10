@@ -12,7 +12,7 @@
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -106,11 +106,11 @@ void rpkg_function::search_entities(std::string& input_path, std::string& filter
                         {
                             if (input_path == "" || input_path == rpkgs.at(rpkg_index).rpkg_file_path)
                             {
-                                std::map<uint64_t, uint64_t>::iterator it6 = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+                                std::unordered_map<uint64_t, uint64_t>::iterator it6 = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
                                 if (it6 != rpkgs.at(rpkg_index).hash_map.end())
                                 {
-                                    entities_hash_size_total += rpkgs.at(rpkg_index).hash.at(it6->second).hash_size_final;
+                                    entities_hash_size_total += rpkgs.at(rpkg_index).hash.at(it6->second).data.resource.size_final;
                                     entities_hash_count++;
                                 }
                             }
@@ -124,7 +124,7 @@ void rpkg_function::search_entities(std::string& input_path, std::string& filter
     uint64_t entities_hash_count_current = 0;
     uint64_t entities_hash_size_current = 0;
 
-    std::map<uint64_t, uint64_t> hash_searched;
+    std::unordered_map<uint64_t, uint64_t> hash_searched;
 
     std::string search_lower_case = util::to_lower_case(search);
 
@@ -167,7 +167,7 @@ void rpkg_function::search_entities(std::string& input_path, std::string& filter
                                 {
                                     if (input_path == "" || input_path == rpkgs.at(rpkg_index).rpkg_file_path)
                                     {
-                                        std::map<uint64_t, uint64_t>::iterator it6 = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+                                        std::unordered_map<uint64_t, uint64_t>::iterator it6 = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
                                         if (it6 != rpkgs.at(rpkg_index).hash_map.end())
                                         {
@@ -176,14 +176,14 @@ void rpkg_function::search_entities(std::string& input_path, std::string& filter
                                                 stringstream_length = console::update_console(message, entities_hash_size_total, entities_hash_size_current, start_time, stringstream_length);
                                             }
 
-                                            entities_hash_size_current += rpkgs.at(rpkg_index).hash.at(it6->second).hash_size_final;
+                                            entities_hash_size_current += rpkgs.at(rpkg_index).hash.at(it6->second).data.resource.size_final;
                                             entities_hash_count_current++;
 
-                                            std::map<uint64_t, uint64_t>::iterator it4 = hash_searched.find(temp_hash_value);
+                                            std::unordered_map<uint64_t, uint64_t>::iterator it4 = hash_searched.find(temp_hash_value);
 
                                             if (it4 == hash_searched.end())
                                             {
-                                                std::map<uint64_t, entity>::iterator it = deep_search_entities_map.find(temp_hash_value);
+                                                std::unordered_map<uint64_t, entity>::iterator it = deep_search_entities_map.find(temp_hash_value);
 
                                                 if (it == deep_search_entities_map.end())
                                                 {

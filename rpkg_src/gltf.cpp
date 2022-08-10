@@ -385,7 +385,7 @@ void gltf::output_to_single_file_with_textures(asset3ds& asset3ds_data, std::str
 
     std::string skin_id = "";
 
-    std::map<uint32_t, std::string> material_ids;
+    std::unordered_map<uint32_t, std::string> material_ids;
 
     for (uint32_t t = 0; t < textures.size(); t++)
     {
@@ -573,7 +573,7 @@ void gltf::output_to_single_file_with_textures(asset3ds& asset3ds_data, std::str
 
         std::string material_id = "";
 
-        std::map<uint32_t, std::string>::iterator it = material_ids.find(asset3ds_data.material_ids.at(o));
+        std::unordered_map<uint32_t, std::string>::iterator it = material_ids.find(asset3ds_data.material_ids.at(o));
 
         if (it != material_ids.end())
         {

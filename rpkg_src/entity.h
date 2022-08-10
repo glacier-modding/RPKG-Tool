@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <stdint.h>
 #include "thirdparty/zhmtools/ResourceLib_HM2.h"
 #include "thirdparty/zhmtools/ResourceLib_HM3.h"

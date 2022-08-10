@@ -77,26 +77,26 @@ bool rpkg_function::import_rpkg_meta(rpkg& rpkg_meta_data, std::string& rpkg_met
         }
 
         rpkg_meta_file.read(input, sizeof(bytes4));
-        std::memcpy(&rpkg_meta_data.rpkg_file_count, input, sizeof(bytes4));
+        std::memcpy(&rpkg_meta_data.header.hash_count, input, sizeof(bytes4));
 
         rpkg_meta_file.read(input, sizeof(bytes4));
-        std::memcpy(&rpkg_meta_data.rpkg_table_offset, input, sizeof(bytes4));
+        std::memcpy(&rpkg_meta_data.header.hash_header_table_size, input, sizeof(bytes4));
 
         rpkg_meta_file.read(input, sizeof(bytes4));
-        std::memcpy(&rpkg_meta_data.rpkg_table_size, input, sizeof(bytes4));
+        std::memcpy(&rpkg_meta_data.header.hash_resource_table_size, input, sizeof(bytes4));
 
         uint64_t position = rpkg_meta_file.tellg();
 
         rpkg_meta_file.read(input, sizeof(bytes4));
-        std::memcpy(&rpkg_meta_data.patch_entry_count, input, sizeof(bytes4));
+        std::memcpy(&rpkg_meta_data.header.patch_count, input, sizeof(bytes4));
 
-        if (rpkg_meta_data.rpkg_file_version == 1 && ((uint64_t)rpkg_meta_data.patch_entry_count * (uint64_t)0x8 + (uint64_t)0x14 + (uint64_t)0x10) >= rpkg_meta_file_size)
+        if (rpkg_meta_data.rpkg_file_version == 1 && ((uint64_t)rpkg_meta_data.header.patch_count * (uint64_t)0x8 + (uint64_t)0x14 + (uint64_t)0x10) >= rpkg_meta_file_size)
         {
             rpkg_meta_data.is_patch_file = false;
 
             LOG("RPKGv1 file " << rpkg_meta_file_path << " is not a patch file.");
         }
-        else if (rpkg_meta_data.rpkg_file_version == 2 && ((uint64_t)rpkg_meta_data.patch_entry_count * (uint64_t)0x8 + (uint64_t)0x1D + (uint64_t)0x10) >= rpkg_meta_file_size)
+        else if (rpkg_meta_data.rpkg_file_version == 2 && ((uint64_t)rpkg_meta_data.header.patch_count * (uint64_t)0x8 + (uint64_t)0x1D + (uint64_t)0x10) >= rpkg_meta_file_size)
         {
             rpkg_meta_data.is_patch_file = false;
 
@@ -109,11 +109,11 @@ bool rpkg_function::import_rpkg_meta(rpkg& rpkg_meta_data, std::string& rpkg_met
 
             if (rpkg_meta_data.rpkg_file_version == 1)
             {
-                rpkg_meta_file.seekg(((uint64_t)rpkg_meta_data.patch_entry_count * (uint64_t)0x8 + (uint64_t)0x14), rpkg_meta_file.beg);
+                rpkg_meta_file.seekg(((uint64_t)rpkg_meta_data.header.patch_count * (uint64_t)0x8 + (uint64_t)0x14), rpkg_meta_file.beg);
             }
             else
             {
-                rpkg_meta_file.seekg(((uint64_t)rpkg_meta_data.patch_entry_count * (uint64_t)0x8 + (uint64_t)0x1D), rpkg_meta_file.beg);
+                rpkg_meta_file.seekg(((uint64_t)rpkg_meta_data.header.patch_count * (uint64_t)0x8 + (uint64_t)0x1D), rpkg_meta_file.beg);
             }
 
             rpkg_meta_file.read(input, 0x7);
@@ -122,13 +122,13 @@ bool rpkg_function::import_rpkg_meta(rpkg& rpkg_meta_data, std::string& rpkg_met
             rpkg_meta_file.read(input, sizeof(bytes8));
             std::memcpy(&patchValue, input, sizeof(bytes8));
 
-            if (rpkg_meta_data.rpkg_file_version == 1 && patchValue == ((uint64_t)rpkg_meta_data.rpkg_table_offset + (uint64_t)rpkg_meta_data.rpkg_table_size + (uint64_t)rpkg_meta_data.patch_entry_count * (uint64_t)0x8 + (uint64_t)0x14) && patchZeroTest == 0x0)
+            if (rpkg_meta_data.rpkg_file_version == 1 && patchValue == ((uint64_t)rpkg_meta_data.header.hash_header_table_size + (uint64_t)rpkg_meta_data.header.hash_resource_table_size + (uint64_t)rpkg_meta_data.header.patch_count * (uint64_t)0x8 + (uint64_t)0x14) && patchZeroTest == 0x0)
             {
                 rpkg_meta_data.is_patch_file = true;
 
                 LOG("RPKGv1 file " << rpkg_meta_file_path << " is a patch file.");
             }
-            else if (rpkg_meta_data.rpkg_file_version == 2 && patchValue == ((uint64_t)rpkg_meta_data.rpkg_table_offset + (uint64_t)rpkg_meta_data.rpkg_table_size + (uint64_t)rpkg_meta_data.patch_entry_count * (uint64_t)0x8 + (uint64_t)0x1D) && patchZeroTest == 0x0)
+            else if (rpkg_meta_data.rpkg_file_version == 2 && patchValue == ((uint64_t)rpkg_meta_data.header.hash_header_table_size + (uint64_t)rpkg_meta_data.header.hash_resource_table_size + (uint64_t)rpkg_meta_data.header.patch_count * (uint64_t)0x8 + (uint64_t)0x1D) && patchZeroTest == 0x0)
             {
                 rpkg_meta_data.is_patch_file = true;
 
@@ -154,9 +154,9 @@ bool rpkg_function::import_rpkg_meta(rpkg& rpkg_meta_data, std::string& rpkg_met
         if (rpkg_meta_data.is_patch_file)
         {
             rpkg_meta_file.read(input, sizeof(bytes4));
-            std::memcpy(&rpkg_meta_data.patch_entry_count, input, sizeof(bytes4));
+            std::memcpy(&rpkg_meta_data.header.patch_count, input, sizeof(bytes4));
 
-            for (uint64_t i = 0; i < rpkg_meta_data.patch_entry_count; i++)
+            for (uint64_t i = 0; i < rpkg_meta_data.header.patch_count; i++)
             {
                 rpkg_meta_file.read(input, sizeof(bytes8));
                 std::memcpy(&bytes8, input, sizeof(bytes8));
@@ -164,7 +164,7 @@ bool rpkg_function::import_rpkg_meta(rpkg& rpkg_meta_data, std::string& rpkg_met
             }
         }
 
-        for (uint64_t i = 0; i < rpkg_meta_data.rpkg_file_count; i++)
+        for (uint64_t i = 0; i < rpkg_meta_data.header.patch_count; i++)
         {
             rpkg_meta_file.read(input, sizeof(bytes8));
             std::memcpy(&bytes8, input, sizeof(bytes8));
@@ -185,7 +185,7 @@ bool rpkg_function::import_rpkg_meta(rpkg& rpkg_meta_data, std::string& rpkg_met
     else
     {
         rpkg_meta_data.is_patch_file = true;
-        rpkg_meta_data.patch_entry_count = 0x0;
+        rpkg_meta_data.header.patch_count = 0x0;
 
         LOG("RPKG meta file matching the name of the folder was not found");
         LOG("   in it's root:" << input_rpkg_folder_path);

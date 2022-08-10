@@ -11,7 +11,7 @@
 #include "thirdparty/ww2ogg/wwriff.h"
 #include "thirdparty/revorb/revorb.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -85,7 +85,7 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
                             return;
                         }
 
-                        std::string hash_file_name = rpkgs.at(i).hash.at(hash_index).hash_file_name;
+                        std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
 
                         std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
 
@@ -111,7 +111,7 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
                             period_count++;
                         }
 
-                        wwev_hash_size_total += rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                        wwev_hash_size_total += rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
 
                         wwev_count++;
                     }
@@ -174,35 +174,35 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
                                 return;
                             }
 
-                            std::string hash_file_name = rpkgs.at(i).hash.at(hash_index).hash_file_name;
+                            std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
 
                             if (((wwev_count_current * (uint64_t)100000) / (uint64_t)wwev_count) % (uint64_t)10 == 0 && wwev_count_current > 0)
                             {
                                 stringstream_length = console::update_console(message, wwev_hash_size_total, wwev_hash_size_current, start_time, stringstream_length);
                             }
 
-                            wwev_hash_size_current += rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                            wwev_hash_size_current += rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
 
                             wwev_count_current++;
 
-                            if (!extract_single_hash || (extract_single_hash && filter == rpkgs.at(i).hash.at(hash_index).hash_string))
+                            if (!extract_single_hash || (extract_single_hash && filter == util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value)))
                             {
                                 std::string current_path = file::output_path_append("WWEV\\" + rpkgs.at(i).rpkg_file_name, output_path);
 
                                 uint64_t hash_size;
 
-                                if (rpkgs.at(i).hash.at(hash_index).is_lz4ed == 1)
+                                if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
                                 {
-                                    hash_size = rpkgs.at(i).hash.at(hash_index).hash_size;
+                                    hash_size = rpkgs.at(i).hash.at(hash_index).data.header.data_size;
 
-                                    if (rpkgs.at(i).hash.at(hash_index).is_xored == 1)
+                                    if (rpkgs.at(i).hash.at(hash_index).data.xored)
                                     {
                                         hash_size &= 0x3FFFFFFF;
                                     }
                                 }
                                 else
                                 {
-                                    hash_size = rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                                    hash_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
                                 }
 
                                 std::vector<char> input_data(hash_size, 0);
@@ -214,22 +214,22 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
                                     LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(i).rpkg_file_path + " could not be read.");
                                 }
 
-                                file.seekg(rpkgs.at(i).hash.at(hash_index).hash_offset, file.beg);
+                                file.seekg(rpkgs.at(i).hash.at(hash_index).data.header.data_offset, file.beg);
                                 file.read(input_data.data(), hash_size);
                                 file.close();
 
-                                if (rpkgs.at(i).hash.at(hash_index).is_xored == 1)
+                                if (rpkgs.at(i).hash.at(hash_index).data.xored)
                                 {
                                     crypto::xor_data(input_data.data(), (uint32_t)hash_size);
                                 }
 
-                                uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                                uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
 
                                 std::vector<char> output_data(decompressed_size, 0);
 
                                 std::vector<char>* wwev_data;
 
-                                if (rpkgs.at(i).hash.at(hash_index).is_lz4ed)
+                                if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
                                 {
                                     LZ4_decompress_safe(input_data.data(), output_data.data(), (int)hash_size, decompressed_size);
 
@@ -537,7 +537,7 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
                                     wwev_meta_data_file.close();
 
-                                    std::string final_path = current_path + "\\" + rpkgs.at(i).hash.at(hash_index).hash_file_name;
+                                    std::string final_path = current_path + "\\" + util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
 
                                     rpkg_function::extract_hash_meta(i, hash_index, final_path);
                                 }

@@ -13,7 +13,7 @@
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -84,7 +84,7 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
                 return;
             }
 
-            std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
             if (it != rpkgs.at(rpkg_index).hash_map.end())
             {
@@ -106,11 +106,11 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
 
                     if (output_path == "")
                     {
-                        asset_file_name = std::filesystem::current_path().generic_string() + "/" + rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name + ".glb";
+                        asset_file_name = std::filesystem::current_path().generic_string() + "/" + util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".glb";
                     }
                     else
                     {
-                        asset_file_name = file::output_path_append(rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name + ".glb", output_path);
+                        asset_file_name = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".glb", output_path);
 
                         file::create_directories(output_path);
                     }
@@ -123,7 +123,7 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
 
                     //temp_prim.extract_meta(meta_path);
 
-                    //std::string hash_meta_file_name = file::output_path_append(rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name, meta_path);
+                    //std::string hash_meta_file_name = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type, meta_path);
 
                     //rpkg_function::extract_hash_meta(rpkg_index, it->second, hash_meta_file_name);
 
@@ -140,7 +140,7 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
                             return;
                         }
 
-                        std::map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(temp_rpkg_index).hash_map.find(rpkgs.at(temp_prim.prim_rpkg_index).hash.at(temp_prim.prim_hash_index).hash_reference_data.hash_reference.at(d));
+                        std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(temp_rpkg_index).hash_map.find(rpkgs.at(temp_prim.prim_rpkg_index).hash.at(temp_prim.prim_hash_index).hash_reference_data.hash_reference.at(d));
 
                         if (it2 != rpkgs.at(temp_rpkg_index).hash_map.end())
                         {
@@ -154,7 +154,7 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
 
                                 temp_mati.map_textures();
 
-                                std::map<uint64_t, uint64_t>::iterator it3;
+                                std::unordered_map<uint64_t, uint64_t>::iterator it3;
 
                                 if (temp_mati.has_diffuse_texture)
                                 {
@@ -165,7 +165,7 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
                                         return;
                                     }
 
-                                    std::map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(temp_rpkg_index2).hash_map.find(temp_mati.diffuse_texture_hash);
+                                    std::unordered_map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(temp_rpkg_index2).hash_map.find(temp_mati.diffuse_texture_hash);
 
                                     if (it3 != rpkgs.at(temp_rpkg_index2).hash_map.end())
                                     {
@@ -199,7 +199,7 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
                                         return;
                                     }
 
-                                    std::map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(temp_rpkg_index2).hash_map.find(temp_mati.normal_texture_hash);
+                                    std::unordered_map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(temp_rpkg_index2).hash_map.find(temp_mati.normal_texture_hash);
 
                                     if (it3 != rpkgs.at(temp_rpkg_index2).hash_map.end())
                                     {
@@ -233,7 +233,7 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
                                         return;
                                     }
 
-                                    std::map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(temp_rpkg_index2).hash_map.find(temp_mati.emissive_texture_hash);
+                                    std::unordered_map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(temp_rpkg_index2).hash_map.find(temp_mati.emissive_texture_hash);
 
                                     if (it3 != rpkgs.at(temp_rpkg_index2).hash_map.end())
                                     {

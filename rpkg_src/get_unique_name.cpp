@@ -1,11 +1,11 @@
 #include "rpkg_function.h"
-#include <map>
+#include <unordered_map>
 
-void rpkg_function::get_unique_name(std::map<std::string, uint32_t>& wwem_name_map, std::string& wem_base_name)
+void rpkg_function::get_unique_name(std::unordered_map<std::string, uint32_t>& wwem_name_map, std::string& wem_base_name)
 {
     if (wwem_name_map.size() > 0)
     {
-        std::map<std::string, uint32_t>::iterator it = wwem_name_map.find(wem_base_name);
+        std::unordered_map<std::string, uint32_t>::iterator it = wwem_name_map.find(wem_base_name);
 
         if (it == wwem_name_map.end())
         {
@@ -21,7 +21,7 @@ void rpkg_function::get_unique_name(std::map<std::string, uint32_t>& wwem_name_m
             {
                 std::string test_name = wem_base_name + "-" + std::to_string(count);
 
-                std::map<std::string, uint32_t>::iterator it2 = wwem_name_map.find(test_name);
+                std::unordered_map<std::string, uint32_t>::iterator it2 = wwem_name_map.find(test_name);
 
                 if (it2 == wwem_name_map.end())
                 {

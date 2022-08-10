@@ -8,7 +8,7 @@
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -72,7 +72,7 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
 
                 if (rpkgs.at(i).rpkg_file_path == input_path)
                 {
-                    std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+                    std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
                     if (it != rpkgs.at(rpkg_index).hash_map.end())
                     {
@@ -112,22 +112,22 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
                             return;
                         }
 
-                        std::string temp_hash_file_name = rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name;
+                        std::string temp_hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type;
 
                         uint64_t temp_hash_size;
 
-                        if (rpkgs.at(rpkg_index).hash.at(it->second).is_lz4ed == 1)
+                        if (rpkgs.at(rpkg_index).hash.at(it->second).data.lz4ed)
                         {
-                            temp_hash_size = rpkgs.at(rpkg_index).hash.at(it->second).hash_size;
+                            temp_hash_size = rpkgs.at(rpkg_index).hash.at(it->second).data.header.data_size;
 
-                            if (rpkgs.at(rpkg_index).hash.at(it->second).is_xored == 1)
+                            if (rpkgs.at(rpkg_index).hash.at(it->second).data.xored)
                             {
                                 temp_hash_size &= 0x3FFFFFFF;
                             }
                         }
                         else
                         {
-                            temp_hash_size = rpkgs.at(rpkg_index).hash.at(it->second).hash_size_final;
+                            temp_hash_size = rpkgs.at(rpkg_index).hash.at(it->second).data.resource.size_final;
                         }
 
                         temp_input_data = std::vector<char>(temp_hash_size, 0);
@@ -139,20 +139,20 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
                             LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(rpkg_index).rpkg_file_path + " could not be read.");
                         }
 
-                        file.seekg(rpkgs.at(rpkg_index).hash.at(it->second).hash_offset, file.beg);
+                        file.seekg(rpkgs.at(rpkg_index).hash.at(it->second).data.header.data_offset, file.beg);
                         file.read(temp_input_data.data(), temp_hash_size);
                         file.close();
 
-                        if (rpkgs.at(rpkg_index).hash.at(it->second).is_xored == 1)
+                        if (rpkgs.at(rpkg_index).hash.at(it->second).data.xored)
                         {
                             crypto::xor_data(temp_input_data.data(), (uint32_t)temp_hash_size);
                         }
 
-                        uint32_t temp_decompressed_size = rpkgs.at(rpkg_index).hash.at(it->second).hash_size_final;
+                        uint32_t temp_decompressed_size = rpkgs.at(rpkg_index).hash.at(it->second).data.resource.size_final;
 
                         temp_output_data = std::vector<char>(temp_decompressed_size, 0);
 
-                        if (rpkgs.at(rpkg_index).hash.at(it->second).is_lz4ed)
+                        if (rpkgs.at(rpkg_index).hash.at(it->second).data.lz4ed)
                         {
                             LZ4_decompress_safe(temp_input_data.data(), temp_output_data.data(), (int)temp_hash_size, temp_decompressed_size);
 
@@ -172,18 +172,18 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
 
                             uint64_t tblu_hash_size;
 
-                            if (rpkgs.at(tblu_rpkg_index_1).hash.at(tblu_rpkg_index_2).is_lz4ed == 1)
+                            if (rpkgs.at(tblu_rpkg_index_1).hash.at(tblu_rpkg_index_2).data.lz4ed)
                             {
-                                tblu_hash_size = rpkgs.at(tblu_rpkg_index_1).hash.at(tblu_rpkg_index_2).hash_size;
+                                tblu_hash_size = rpkgs.at(tblu_rpkg_index_1).hash.at(tblu_rpkg_index_2).data.header.data_size;
 
-                                if (rpkgs.at(tblu_rpkg_index_1).hash.at(tblu_rpkg_index_2).is_xored == 1)
+                                if (rpkgs.at(tblu_rpkg_index_1).hash.at(tblu_rpkg_index_2).data.xored)
                                 {
                                     tblu_hash_size &= 0x3FFFFFFF;
                                 }
                             }
                             else
                             {
-                                tblu_hash_size = rpkgs.at(tblu_rpkg_index_1).hash.at(tblu_rpkg_index_2).hash_size_final;
+                                tblu_hash_size = rpkgs.at(tblu_rpkg_index_1).hash.at(tblu_rpkg_index_2).data.resource.size_final;
                             }
 
                             tblu_input_data = std::vector<char>(tblu_hash_size, 0);
@@ -195,20 +195,20 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
                                 LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(tblu_rpkg_index_1).rpkg_file_path + " could not be read.");
                             }
 
-                            file2.seekg(rpkgs.at(tblu_rpkg_index_1).hash.at(tblu_rpkg_index_2).hash_offset, file2.beg);
+                            file2.seekg(rpkgs.at(tblu_rpkg_index_1).hash.at(tblu_rpkg_index_2).data.header.data_offset, file2.beg);
                             file2.read(tblu_input_data.data(), tblu_hash_size);
                             file2.close();
 
-                            if (rpkgs.at(tblu_rpkg_index_1).hash.at(tblu_rpkg_index_2).is_xored == 1)
+                            if (rpkgs.at(tblu_rpkg_index_1).hash.at(tblu_rpkg_index_2).data.xored)
                             {
                                 crypto::xor_data(tblu_input_data.data(), (uint32_t)tblu_hash_size);
                             }
 
-                            uint32_t tblu_decompressed_size = rpkgs.at(tblu_rpkg_index_1).hash.at(tblu_rpkg_index_2).hash_size_final;
+                            uint32_t tblu_decompressed_size = rpkgs.at(tblu_rpkg_index_1).hash.at(tblu_rpkg_index_2).data.resource.size_final;
 
                             tblu_output_data = std::vector<char>(tblu_decompressed_size, 0);
 
-                            if (rpkgs.at(tblu_rpkg_index_1).hash.at(tblu_rpkg_index_2).is_lz4ed)
+                            if (rpkgs.at(tblu_rpkg_index_1).hash.at(tblu_rpkg_index_2).data.lz4ed)
                             {
                                 LZ4_decompress_safe(tblu_input_data.data(), tblu_output_data.data(), (int)tblu_hash_size, tblu_decompressed_size);
 
@@ -566,7 +566,7 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
 
                                 for (uint32_t e = 0; e < property_types_count; e++)
                                 {
-                                    std::map<uint32_t, uint32_t> temp_temp_property_types_offsets_map;
+                                    std::unordered_map<uint32_t, uint32_t> temp_temp_property_types_offsets_map;
 
                                     temp_property_types_offsets_map.push_back(temp_temp_property_types_offsets_map);
 
@@ -644,7 +644,7 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
 
                                             bool shared_value_found = false;
 
-                                            std::map<uint32_t, uint32_t>::iterator it3 = temp_property_types_offsets_map.at(property_type_index).find(property_offset);
+                                            std::unordered_map<uint32_t, uint32_t>::iterator it3 = temp_property_types_offsets_map.at(property_type_index).find(property_offset);
 
                                             if (it3 != temp_property_types_offsets_map.at(property_type_index).end())
                                             {
@@ -664,7 +664,7 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
 
                                             std::string property_string = "";
 
-                                            std::map<uint32_t, std::string>::iterator it2 = property_map->find(property_crc32_value);
+                                            std::unordered_map<uint32_t, std::string>::iterator it2 = property_map->find(property_crc32_value);
 
                                             if (it2 != property_map->end())
                                             {
@@ -685,7 +685,7 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
 
                                             LOG("    - " + property_string + "'s type: " + temp_property_types.at(property_type_index));
 
-                                            std::map<std::string, std::map<uint32_t, std::string>>::iterator it = enum_map->find(temp_property_types.at(property_type_index));
+                                            std::unordered_map<std::string, std::unordered_map<uint32_t, std::string>>::iterator it = enum_map->find(temp_property_types.at(property_type_index));
 
                                             if (it != enum_map->end())
                                             {

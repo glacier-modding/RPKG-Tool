@@ -212,6 +212,7 @@
     <ClInclude Include="..\rpkg_src\dev_function.h" />
     <ClInclude Include="..\rpkg_src\entity.h" />
     <ClInclude Include="..\rpkg_src\file.h" />
+    <ClInclude Include="..\rpkg_src\file_reader.hpp" />
     <ClInclude Include="..\rpkg_src\framework.h" />
     <ClInclude Include="..\rpkg_src\generic_function.h" />
     <ClInclude Include="..\rpkg_src\global.h" />
@@ -229,6 +230,7 @@
     <ClInclude Include="..\rpkg_src\rpkg_dll.h" />
     <ClInclude Include="..\rpkg_src\rpkg_function.h" />
     <ClInclude Include="..\rpkg_src\sdef.h" />
+    <ClInclude Include="..\rpkg_src\stream_reader.hpp" />
     <ClInclude Include="..\rpkg_src\task.h" />
     <ClInclude Include="..\rpkg_src\temp.h" />
     <ClInclude Include="..\rpkg_src\texd.h" />

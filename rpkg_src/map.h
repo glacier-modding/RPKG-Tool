@@ -70,17 +70,17 @@ public:
     bool matrixes_equal(matrix43& matrix1, matrix43& matrix2);
 
     std::vector<map_node> map_nodes;
-    std::map<uint64_t, uint64_t> map_temps_map;
+    std::unordered_map<uint64_t, uint64_t> map_temps_map;
     std::vector<temp> map_temps;
-    std::map<uint64_t, uint64_t> map_prims_map;
+    std::unordered_map<uint64_t, uint64_t> map_prims_map;
     std::vector<uint64_t> map_prims;
     std::string godot_tscn_file;
-    std::map<uint64_t, uint64_t> root_scenes;
+    std::unordered_map<uint64_t, uint64_t> root_scenes;
     std::vector<uint32_t> map_root_nodes;
-    std::map<uint64_t, std::vector<uint32_t>> temp_hash_map_node_map;
-    std::map<uint64_t, std::map<uint32_t, std::vector<uint32_t>>> m_eidParent_local_temp_hash_entityIndex_map;
-    std::map<uint64_t, std::map<uint64_t, std::vector<uint32_t>>> m_eidParent_external_externalSceneIndex_hash_entityID_map;
-    std::map<uint64_t, std::vector<uint32_t>> temp_hash_is_top_level_Local_node_map;
+    std::unordered_map<uint64_t, std::vector<uint32_t>> temp_hash_map_node_map;
+    std::unordered_map<uint64_t, std::unordered_map<uint32_t, std::vector<uint32_t>>> m_eidParent_local_temp_hash_entityIndex_map;
+    std::unordered_map<uint64_t, std::unordered_map<uint64_t, std::vector<uint32_t>>> m_eidParent_external_externalSceneIndex_hash_entityID_map;
+    std::unordered_map<uint64_t, std::vector<uint32_t>> temp_hash_is_top_level_Local_node_map;
     bool map_filter_volume_boxes = true;
     bool map_filter_volume_spheres = true;
     bool map_filter_visible = true;

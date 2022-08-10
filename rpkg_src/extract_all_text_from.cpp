@@ -9,7 +9,7 @@
 #include "thirdparty/lz4/lz4hc.h"
 #include "thirdparty/directxtex/DirectXTex.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -100,7 +100,7 @@ void rpkg_function::extract_all_text_from(std::string& input_path, std::string& 
                             return;
                         }
 
-                        std::string hash_file_name = rpkgs.at(i).hash.at(hash_index).hash_file_name;
+                        std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
 
                         std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
 
@@ -126,7 +126,7 @@ void rpkg_function::extract_all_text_from(std::string& input_path, std::string& 
                             period_count++;
                         }
 
-                        prim_hash_size_total += rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                        prim_hash_size_total += rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
 
                         prim_count++;
                     }
@@ -153,7 +153,7 @@ void rpkg_function::extract_all_text_from(std::string& input_path, std::string& 
             LOG("Extracting TEXT to texture files with filter \"" << filter << "\"");
         }
 
-        std::map<std::string, uint32_t> prim_name_map;
+        std::unordered_map<std::string, uint32_t> prim_name_map;
 
         std::vector<std::string> found_in;
         std::vector<std::string> not_found_in;
@@ -196,13 +196,13 @@ void rpkg_function::extract_all_text_from(std::string& input_path, std::string& 
                                 stringstream_length = console::update_console(message, prim_hash_size_total, prim_hash_size_current, start_time, stringstream_length);
                             }
 
-                            prim_hash_size_current += rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                            prim_hash_size_current += rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
 
                             prim_count_current++;
 
-                            if (!extract_single_hash || (extract_single_hash && filter == rpkgs.at(i).hash.at(hash_index).hash_string))
+                            if (!extract_single_hash || (extract_single_hash && filter == util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value)))
                             {
-                                std::string hash_file_name = rpkgs.at(i).hash.at(hash_index).hash_file_name;
+                                std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
 
                                 bool found = false;
 
@@ -233,7 +233,7 @@ void rpkg_function::extract_all_text_from(std::string& input_path, std::string& 
                                         extracted.at(input_filter_index) = true;
                                     }
 
-                                    rpkg_function::extract_text_from(rpkgs.at(i).rpkg_file_path, rpkgs.at(i).hash.at(hash_index).hash_string, output_path);
+                                    rpkg_function::extract_text_from(rpkgs.at(i).rpkg_file_path, util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value), output_path);
                                 }
                             }
                         }

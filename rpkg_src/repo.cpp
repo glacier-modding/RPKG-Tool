@@ -5,7 +5,7 @@
 #include "util.h"
 #include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
-#include <map>
+#include <unordered_map>
 #include <fstream>
 #include <sstream>
 #include <set>
@@ -25,18 +25,18 @@ repo::repo(uint64_t rpkgs_index, uint64_t hash_index)
 
     uint64_t repo_hash_size;
 
-    if (rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).is_lz4ed == 1)
+    if (rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).data.lz4ed)
     {
-        repo_hash_size = rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).hash_size;
+        repo_hash_size = rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).data.header.data_size;
 
-        if (rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).is_xored == 1)
+        if (rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).data.xored)
         {
             repo_hash_size &= 0x3FFFFFFF;
         }
     }
     else
     {
-        repo_hash_size = rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).hash_size_final;
+        repo_hash_size = rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).data.resource.size_final;
     }
 
     std::vector<char> repo_data;
@@ -50,20 +50,20 @@ repo::repo(uint64_t rpkgs_index, uint64_t hash_index)
         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(repo_rpkg_index).rpkg_file_path + " could not be read.");
     }
 
-    file.seekg(rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).hash_offset, file.beg);
+    file.seekg(rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).data.header.data_offset, file.beg);
     file.read(repo_input_data.data(), repo_hash_size);
     file.close();
 
-    if (rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).is_xored == 1)
+    if (rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).data.xored)
     {
         crypto::xor_data(repo_input_data.data(), (uint32_t)repo_hash_size);
     }
 
-    uint32_t repo_decompressed_size = rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).hash_size_final;
+    uint32_t repo_decompressed_size = rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).data.resource.size_final;
 
     std::vector<char> repo_output_data = std::vector<char>(repo_decompressed_size, 0);
 
-    if (rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).is_lz4ed)
+    if (rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).data.lz4ed)
     {
         LZ4_decompress_safe(repo_input_data.data(), repo_output_data.data(), (int)repo_hash_size, repo_decompressed_size);
 
@@ -377,7 +377,7 @@ void repo::get_runtimes(int category)
 {
     repo_response_data = "";
 
-    std::map<std::string, yyjson_mut_val*> repo_runtimes;
+    std::unordered_map<std::string, yyjson_mut_val*> repo_runtimes;
 
     std::string inventoryCategoryIcon = "";
 
@@ -568,7 +568,7 @@ void repo::get_image_hash(std::string id)
     {
         if (repo_modified[id].contains("Image"))
         {
-            std::map<std::string, uint64_t>::iterator it2 = ores_object.ores_entries.find(std::string(repo_modified[id]["Image"]));
+            std::unordered_map<std::string, uint64_t>::iterator it2 = ores_object.ores_entries.find(std::string(repo_modified[id]["Image"]));
 
             if (it2 != ores_object.ores_entries.end())
             {
@@ -582,8 +582,8 @@ void repo::get_image_hash(std::string id)
 
 void repo::unload_repo()
 {
-    //std::map<std::string, uint32_t>().swap(repo_entries_original);
-    //std::map<std::string, uint32_t>().swap(repo_entries_modified);
+    //std::unordered_map<std::string, uint32_t>().swap(repo_entries_original);
+    //std::unordered_map<std::string, uint32_t>().swap(repo_entries_modified);
 }
 
 void repo::load_ores(uint64_t rpkgs_index, uint64_t hash_index)

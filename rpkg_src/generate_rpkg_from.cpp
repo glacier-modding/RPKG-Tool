@@ -14,7 +14,7 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
-#include <map>
+#include <unordered_map>
 
 void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& filter, std::string& output_path)
 {
@@ -80,7 +80,7 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& fil
         std::vector<std::string> files;
         std::vector<uint64_t> hashes;
         std::vector<bool> hash_in_rpkg_meta;
-        std::map<uint64_t, uint64_t> hash_map;
+        std::unordered_map<uint64_t, uint64_t> hash_map;
         std::vector<std::string> hash_file_names;
         std::vector<std::string> hash_strings;
         std::vector<std::string> hash_resource_types;
@@ -203,7 +203,7 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& fil
         {
             for (uint64_t i = 0; i < rpkg_meta_data.meta_hash_value.size(); i++)
             {
-                std::map<uint64_t, uint64_t>::iterator it = hash_map.find(rpkg_meta_data.meta_hash_value.at(i));
+                std::unordered_map<uint64_t, uint64_t>::iterator it = hash_map.find(rpkg_meta_data.meta_hash_value.at(i));
 
                 if (it != hash_map.end())
                 {
@@ -281,17 +281,17 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& fil
             {
                 found_all_meta_files = false;
 
-                meta_data.is_lz4ed = true;
-                meta_data.is_xored = true;
+                meta_data.data.lz4ed = true;
+                meta_data.data.xored = true;
 
                 hash_reference_variables temp_hash_reference_data;
 
                 temp_hash_data.hash_reference_data = temp_hash_reference_data;
             }
 
-            if (meta_data.is_lz4ed)
+            if (meta_data.data.lz4ed)
             {
-                temp_hash_data.is_lz4ed = true;
+                temp_hash_data.data.lz4ed = true;
 
                 uint32_t compressed_size = LZ4_compressBound((int)input_file_size);
 
@@ -303,42 +303,42 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& fil
 
                 output_data_length.push_back(compressed_size_final);
 
-                if (meta_data.is_xored)
+                if (meta_data.data.xored)
                 {
                     crypto::xor_data(output_file_data.data(), (uint32_t)compressed_size_final);
 
-                    temp_hash_data.is_xored = 1;
-                    temp_hash_data.hash_size = (uint32_t)compressed_size_final | (uint32_t)0x80000000;
+                    temp_hash_data.data.xored = true;
+                    temp_hash_data.data.header.data_size = (uint32_t)compressed_size_final | (uint32_t)0x80000000;
                 }
                 else
                 {
-                    temp_hash_data.is_xored = 0;
-                    temp_hash_data.hash_size = (uint32_t)compressed_size_final;
+                    temp_hash_data.data.xored = false;
+                    temp_hash_data.data.header.data_size = (uint32_t)compressed_size_final;
                 }
 
                 if (use_hash_file_meta_data)
                 {
                     temp_hash_data.hash_value = meta_data.hash_value;
-                    temp_hash_data.hash_string = util::uint64_t_to_hex_string(meta_data.hash_value);
+                    //temp_hash_data.hash_string = util::uint64_t_to_hex_string(meta_data.hash_value);
                     temp_hash_data.hash_resource_type = meta_data.hash_resource_type;
-                    temp_hash_data.hash_reference_table_size = meta_data.hash_reference_table_size;
-                    temp_hash_data.hash_reference_table_dummy = meta_data.hash_reference_table_dummy;
-                    temp_hash_data.hash_size_final = (uint32_t)input_file_size;
+                    temp_hash_data.data.resource.reference_table_size = meta_data.data.resource.reference_table_size;
+                    temp_hash_data.data.resource.reference_table_dummy = meta_data.data.resource.reference_table_dummy;
+                    temp_hash_data.data.resource.size_final = (uint32_t)input_file_size;
 
-                    if (meta_data.hash_size_in_memory == 0xFFFFFFFF)
+                    if (meta_data.data.resource.size_in_memory == 0xFFFFFFFF)
                     {
-                        temp_hash_data.hash_size_in_memory = meta_data.hash_size_in_memory;
-                        temp_hash_data.hash_size_in_video_memory = meta_data.hash_size_in_video_memory;
+                        temp_hash_data.data.resource.size_in_memory = meta_data.data.resource.size_in_memory;
+                        temp_hash_data.data.resource.size_in_video_memory = meta_data.data.resource.size_in_video_memory;
                     }
                     else
                     {
-                        uint32_t resized_size_in_memory = (uint32_t)((double)input_file_size * ((double)meta_data.hash_size_in_memory / (double)meta_data.hash_size_final));
-                        uint32_t resized_difference_value = meta_data.hash_size_in_memory - (uint32_t)((double)meta_data.hash_size_final * ((double)meta_data.hash_size_in_memory / (double)meta_data.hash_size_final));
+                        uint32_t resized_size_in_memory = (uint32_t)((double)input_file_size * ((double)meta_data.data.resource.size_in_memory / (double)meta_data.data.resource.size_final));
+                        uint32_t resized_difference_value = meta_data.data.resource.size_in_memory - (uint32_t)((double)meta_data.data.resource.size_final * ((double)meta_data.data.resource.size_in_memory / (double)meta_data.data.resource.size_final));
 
                         resized_size_in_memory += resized_difference_value;
 
-                        temp_hash_data.hash_size_in_memory = resized_size_in_memory;
-                        temp_hash_data.hash_size_in_video_memory = meta_data.hash_size_in_video_memory;
+                        temp_hash_data.data.resource.size_in_memory = resized_size_in_memory;
+                        temp_hash_data.data.resource.size_in_video_memory = meta_data.data.resource.size_in_video_memory;
                     }
 
                 }
@@ -346,18 +346,18 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& fil
                 {
                     uint64_t hash_value = std::strtoll(hash_strings.at(files_index.at(i)).c_str(), nullptr, 16);
                     temp_hash_data.hash_value = hash_value;
-                    temp_hash_data.hash_string = hash_strings.at(files_index.at(i));
+                    //temp_hash_data.hash_string = hash_strings.at(files_index.at(i));
                     temp_hash_data.hash_resource_type = hash_resource_types.at(files_index.at(i));
-                    temp_hash_data.hash_reference_table_size = 0x0;
-                    temp_hash_data.hash_reference_table_dummy = 0x0;
-                    temp_hash_data.hash_size_final = (uint32_t)input_file_size;
-                    temp_hash_data.hash_size_in_memory = (uint32_t)compressed_size_final;
-                    temp_hash_data.hash_size_in_video_memory = 0x0;
+                    temp_hash_data.data.resource.reference_table_size = 0x0;
+                    temp_hash_data.data.resource.reference_table_dummy = 0x0;
+                    temp_hash_data.data.resource.size_final = (uint32_t)input_file_size;
+                    temp_hash_data.data.resource.size_in_memory = (uint32_t)compressed_size_final;
+                    temp_hash_data.data.resource.size_in_video_memory = 0x0;
                 }
             }
             else
             {
-                temp_hash_data.is_lz4ed = false;
+                temp_hash_data.data.lz4ed = false;
 
                 output_file_data = std::vector<char>(input_file_size, 0);
 
@@ -365,55 +365,55 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& fil
 
                 std::memcpy(output_file_data.data(), input_file_data.data(), input_file_size);
 
-                if (meta_data.is_xored)
+                if (meta_data.data.xored)
                 {
                     crypto::xor_data(output_file_data.data(), (uint32_t)input_file_size);
 
-                    temp_hash_data.is_xored = 1;
-                    temp_hash_data.hash_size = 0x80000000;
+                    temp_hash_data.data.xored = true;
+                    temp_hash_data.data.header.data_size = 0x80000000;
                 }
                 else
                 {
-                    temp_hash_data.is_xored = 0;
-                    temp_hash_data.hash_size = 0x0;
+                    temp_hash_data.data.xored = false;
+                    temp_hash_data.data.header.data_size = 0x0;
                 }
 
                 if (use_hash_file_meta_data)
                 {
                     temp_hash_data.hash_value = meta_data.hash_value;
-                    temp_hash_data.hash_string = util::uint64_t_to_hex_string(meta_data.hash_value);
+                    //temp_hash_data.hash_string = util::uint64_t_to_hex_string(meta_data.hash_value);
                     temp_hash_data.hash_resource_type = meta_data.hash_resource_type;
-                    temp_hash_data.hash_reference_table_size = meta_data.hash_reference_table_size;
-                    temp_hash_data.hash_reference_table_dummy = meta_data.hash_reference_table_dummy;
-                    temp_hash_data.hash_size_final = (uint32_t)input_file_size;
+                    temp_hash_data.data.resource.reference_table_size = meta_data.data.resource.reference_table_size;
+                    temp_hash_data.data.resource.reference_table_dummy = meta_data.data.resource.reference_table_dummy;
+                    temp_hash_data.data.resource.size_final = (uint32_t)input_file_size;
 
-                    if (meta_data.hash_size_in_memory == 0xFFFFFFFF)
+                    if (meta_data.data.resource.size_in_memory == 0xFFFFFFFF)
                     {
-                        temp_hash_data.hash_size_in_memory = meta_data.hash_size_in_memory;
-                        temp_hash_data.hash_size_in_video_memory = meta_data.hash_size_in_video_memory;
+                        temp_hash_data.data.resource.size_in_memory = meta_data.data.resource.size_in_memory;
+                        temp_hash_data.data.resource.size_in_video_memory = meta_data.data.resource.size_in_video_memory;
                     }
                     else
                     {
-                        uint32_t resized_size_in_memory = (uint32_t)((double)input_file_size * ((double)meta_data.hash_size_in_memory / (double)meta_data.hash_size_final));
-                        uint32_t resized_difference_value = meta_data.hash_size_in_memory - (uint32_t)((double)meta_data.hash_size_final * ((double)meta_data.hash_size_in_memory / (double)meta_data.hash_size_final));
+                        uint32_t resized_size_in_memory = (uint32_t)((double)input_file_size * ((double)meta_data.data.resource.size_in_memory / (double)meta_data.data.resource.size_final));
+                        uint32_t resized_difference_value = meta_data.data.resource.size_in_memory - (uint32_t)((double)meta_data.data.resource.size_final * ((double)meta_data.data.resource.size_in_memory / (double)meta_data.data.resource.size_final));
 
                         resized_size_in_memory += resized_difference_value;
 
-                        temp_hash_data.hash_size_in_memory = resized_size_in_memory;
-                        temp_hash_data.hash_size_in_video_memory = meta_data.hash_size_in_video_memory;
+                        temp_hash_data.data.resource.size_in_memory = resized_size_in_memory;
+                        temp_hash_data.data.resource.size_in_video_memory = meta_data.data.resource.size_in_video_memory;
                     }
                 }
                 else
                 {
                     uint64_t hash_value = std::strtoll(hash_strings.at(files_index.at(i)).c_str(), nullptr, 16);
                     temp_hash_data.hash_value = hash_value;
-                    temp_hash_data.hash_string = hash_strings.at(files_index.at(i));
+                    //temp_hash_data.hash_string = hash_strings.at(files_index.at(i));
                     temp_hash_data.hash_resource_type = hash_resource_types.at(files_index.at(i));
-                    temp_hash_data.hash_reference_table_size = 0x0;
-                    temp_hash_data.hash_reference_table_dummy = 0x0;
-                    temp_hash_data.hash_size_final = (uint32_t)input_file_size;
-                    temp_hash_data.hash_size_in_memory = (uint32_t)input_file_size;
-                    temp_hash_data.hash_size_in_video_memory = 0x0;
+                    temp_hash_data.data.resource.reference_table_size = 0x0;
+                    temp_hash_data.data.resource.reference_table_dummy = 0x0;
+                    temp_hash_data.data.resource.size_final = (uint32_t)input_file_size;
+                    temp_hash_data.data.resource.size_in_memory = (uint32_t)input_file_size;
+                    temp_hash_data.data.resource.size_in_video_memory = 0x0;
                 }
             }
 
@@ -454,18 +454,18 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& fil
         for (uint64_t j = 0; j < temp_rpkg_data.hash.size(); j++)
         {
             table_size += 0x18;
-            table_size += temp_rpkg_data.hash.at(j).hash_reference_table_size;
+            table_size += temp_rpkg_data.hash.at(j).data.resource.reference_table_size;
         }
 
         if (rpkg_meta_data.is_patch_file)
         {
             if (rpkg_meta_data.rpkg_file_version == 1)
             {
-                hash_offset = (uint64_t)table_offset + (uint64_t)table_size + (uint64_t)rpkg_meta_data.patch_entry_count * (uint64_t)0x8 + (uint64_t)0x14;
+                hash_offset = (uint64_t)table_offset + (uint64_t)table_size + (uint64_t)rpkg_meta_data.header.patch_count * (uint64_t)0x8 + (uint64_t)0x14;
             }
             else
             {
-                hash_offset = (uint64_t)table_offset + (uint64_t)table_size + (uint64_t)rpkg_meta_data.patch_entry_count * (uint64_t)0x8 + (uint64_t)0x1D;
+                hash_offset = (uint64_t)table_offset + (uint64_t)table_size + (uint64_t)rpkg_meta_data.header.patch_count * (uint64_t)0x8 + (uint64_t)0x1D;
             }
         }
         else
@@ -525,10 +525,10 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& fil
 
         if (rpkg_meta_data.is_patch_file)
         {
-            std::memcpy(&char4, &rpkg_meta_data.patch_entry_count, sizeof(uint32_t));
+            std::memcpy(&char4, &rpkg_meta_data.header.patch_count, sizeof(uint32_t));
             file.write(char4, sizeof(uint32_t));
 
-            for (uint64_t i = 0; i < rpkg_meta_data.patch_entry_count; i++)
+            for (uint64_t i = 0; i < rpkg_meta_data.header.patch_count; i++)
             {
                 std::memcpy(&char8, &rpkg_meta_data.patch_entry_list.at(i), sizeof(uint64_t));
                 file.write(char8, sizeof(uint64_t));
@@ -559,16 +559,16 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& fil
             std::memcpy(&char8, &hash_offset, sizeof(uint64_t));
             file.write(char8, sizeof(uint64_t));
 
-            std::memcpy(&char4, &temp_rpkg_data.hash.at(i).hash_size, sizeof(uint32_t));
+            std::memcpy(&char4, &temp_rpkg_data.hash.at(i).data.header.data_size, sizeof(uint32_t));
             file.write(char4, sizeof(uint32_t));
 
-            if (temp_rpkg_data.hash.at(i).is_lz4ed)
+            if (temp_rpkg_data.hash.at(i).data.lz4ed)
             {
-                hash_offset += temp_rpkg_data.hash.at(i).hash_size & 0x3FFFFFFF;
+                hash_offset += temp_rpkg_data.hash.at(i).data.header.data_size & 0x3FFFFFFF;
             }
             else
             {
-                hash_offset += temp_rpkg_data.hash.at(i).hash_size_final;
+                hash_offset += temp_rpkg_data.hash.at(i).data.resource.size_final;
             }
         }
 
@@ -608,20 +608,20 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& fil
             file.write(&temp_rpkg_data.hash.at(i).hash_resource_type[1], 0x1);
             file.write(&temp_rpkg_data.hash.at(i).hash_resource_type[0], 0x1);
 
-            std::memcpy(&char4, &temp_rpkg_data.hash.at(i).hash_reference_table_size, sizeof(uint32_t));
+            std::memcpy(&char4, &temp_rpkg_data.hash.at(i).data.resource.reference_table_size, sizeof(uint32_t));
             file.write(char4, sizeof(uint32_t));
-            std::memcpy(&char4, &temp_rpkg_data.hash.at(i).hash_reference_table_dummy, sizeof(uint32_t));
+            std::memcpy(&char4, &temp_rpkg_data.hash.at(i).data.resource.reference_table_dummy, sizeof(uint32_t));
             file.write(char4, sizeof(uint32_t));
-            std::memcpy(&char4, &temp_rpkg_data.hash.at(i).hash_size_final, sizeof(uint32_t));
+            std::memcpy(&char4, &temp_rpkg_data.hash.at(i).data.resource.size_final, sizeof(uint32_t));
             file.write(char4, sizeof(uint32_t));
-            std::memcpy(&char4, &temp_rpkg_data.hash.at(i).hash_size_in_memory, sizeof(uint32_t));
+            std::memcpy(&char4, &temp_rpkg_data.hash.at(i).data.resource.size_in_memory, sizeof(uint32_t));
             file.write(char4, sizeof(uint32_t));
-            std::memcpy(&char4, &temp_rpkg_data.hash.at(i).hash_size_in_video_memory, sizeof(uint32_t));
+            std::memcpy(&char4, &temp_rpkg_data.hash.at(i).data.resource.size_in_video_memory, sizeof(uint32_t));
             file.write(char4, sizeof(uint32_t));
 
             uint32_t temp_hash_reference_count = temp_rpkg_data.hash.at(i).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
-            if (temp_rpkg_data.hash.at(i).hash_reference_table_size > 0)
+            if (temp_rpkg_data.hash.at(i).data.resource.reference_table_size > 0)
             {
                 std::memcpy(&char4, &temp_rpkg_data.hash.at(i).hash_reference_data.hash_reference_count, sizeof(uint32_t));
                 file.write(char4, sizeof(uint32_t));

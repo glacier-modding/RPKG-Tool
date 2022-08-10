@@ -6,7 +6,7 @@
 #include "rpkg.h"
 #include "hash.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -44,7 +44,7 @@ void rpkg_function::hash_probe(std::string& input_path, std::string& filter, std
 
                 for (uint64_t i = 0; i < rpkgs.size(); i++)
                 {
-                    std::map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(i).hash_map.find(hash);
+                    std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(i).hash_map.find(hash);
 
                     if (it2 != rpkgs.at(i).hash_map.end())
                     {
@@ -53,10 +53,10 @@ void rpkg_function::hash_probe(std::string& input_path, std::string& filter, std
                         found_count++;
 
                         ss << std::endl << filters.at(z) << " is in RPKG file: " << rpkgs.at(i).rpkg_file_name << std::endl;
-                        ss << "  - Data offset: " << rpkgs.at(i).hash.at(it2->second).hash_offset << std::endl;
-                        ss << "  - Data size: " << (rpkgs.at(i).hash.at(it2->second).hash_size & 0x3FFFFFFF) << std::endl;
+                        ss << "  - Data offset: " << rpkgs.at(i).hash.at(it2->second).data.header.data_offset << std::endl;
+                        ss << "  - Data size: " << (rpkgs.at(i).hash.at(it2->second).data.header.data_size & 0x3FFFFFFF) << std::endl;
 
-                        if (rpkgs.at(i).hash.at(it2->second).is_lz4ed)
+                        if (rpkgs.at(i).hash.at(it2->second).data.lz4ed)
                         {
                             ss << "  - LZ4: True" << std::endl;
                         }
@@ -65,7 +65,7 @@ void rpkg_function::hash_probe(std::string& input_path, std::string& filter, std
                             ss << "  - LZ4: False" << std::endl;
                         }
 
-                        if (rpkgs.at(i).hash.at(it2->second).is_xored)
+                        if (rpkgs.at(i).hash.at(it2->second).data.xored)
                         {
                             ss << "  - XOR: True" << std::endl;
                         }
@@ -75,11 +75,11 @@ void rpkg_function::hash_probe(std::string& input_path, std::string& filter, std
                         }
 
                         ss << "  - Resource type: " << rpkgs.at(i).hash.at(it2->second).hash_resource_type << std::endl;
-                        ss << "  - Hash reference table size: " << rpkgs.at(i).hash.at(it2->second).hash_reference_table_size << std::endl;
+                        ss << "  - Hash reference table size: " << rpkgs.at(i).hash.at(it2->second).data.resource.reference_table_size << std::endl;
                         ss << "  - Forward hash depends: " << (rpkgs.at(i).hash.at(it2->second).hash_reference_data.hash_reference_count & 0x3FFFFFFF) << std::endl;
-                        ss << "  - Final size: " << rpkgs.at(i).hash.at(it2->second).hash_size_final << std::endl;
-                        ss << "  - Size in memory: " << rpkgs.at(i).hash.at(it2->second).hash_size_in_memory << std::endl;
-                        ss << "  - Size in video memory: " << rpkgs.at(i).hash.at(it2->second).hash_size_in_video_memory << std::endl << std::endl;
+                        ss << "  - Final size: " << rpkgs.at(i).hash.at(it2->second).data.resource.size_final << std::endl;
+                        ss << "  - Size in memory: " << rpkgs.at(i).hash.at(it2->second).data.resource.size_in_memory << std::endl;
+                        ss << "  - Size in video memory: " << rpkgs.at(i).hash.at(it2->second).data.resource.size_in_video_memory << std::endl << std::endl;
 
                     }
                 }

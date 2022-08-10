@@ -10,7 +10,7 @@
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <fstream>
 #include <set>
 
@@ -19,24 +19,24 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
     prim_rpkg_index = rpkgs_index;
     prim_hash_index = hash_index;
 
-    prim_file_name = rpkgs.at(rpkgs_index).hash.at(hash_index).hash_file_name;
+    prim_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value) + "." + rpkgs.at(rpkgs_index).hash.at(hash_index).hash_resource_type;
 
     load_hash_depends();
 
     uint64_t prim_hash_size;
 
-    if (rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).is_lz4ed == 1)
+    if (rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).data.lz4ed)
     {
-        prim_hash_size = rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).hash_size;
+        prim_hash_size = rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).data.header.data_size;
 
-        if (rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).is_xored == 1)
+        if (rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).data.xored)
         {
             prim_hash_size &= 0x3FFFFFFF;
         }
     }
     else
     {
-        prim_hash_size = rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).hash_size_final;
+        prim_hash_size = rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).data.resource.size_final;
     }
 
     prim_input_data = std::vector<char>(prim_hash_size, 0);
@@ -48,20 +48,20 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(prim_rpkg_index).rpkg_file_path + " could not be read.");
     }
 
-    file.seekg(rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).hash_offset, file.beg);
+    file.seekg(rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).data.header.data_offset, file.beg);
     file.read(prim_input_data.data(), prim_hash_size);
     file.close();
 
-    if (rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).is_xored == 1)
+    if (rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).data.xored)
     {
         crypto::xor_data(prim_input_data.data(), (uint32_t)prim_hash_size);
     }
 
-    uint32_t prim_decompressed_size = rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).hash_size_final;
+    uint32_t prim_decompressed_size = rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).data.resource.size_final;
 
     prim_output_data = std::vector<char>(prim_decompressed_size, 0);
 
-    if (rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).is_lz4ed)
+    if (rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).data.lz4ed)
     {
         LZ4_decompress_safe(prim_input_data.data(), prim_output_data.data(), (int)prim_hash_size, prim_decompressed_size);
 
@@ -90,7 +90,7 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
 
     //LOG("PRIM file: " + prim_file_name);
 
-    std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).hash_value);
+    std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).hash_value);
 
     if (it2 != hash_list_hash_map.end())
     {
@@ -608,7 +608,7 @@ void prim::load_hash_depends()
 
             for (uint64_t j = 0; j < rpkgs.size(); j++)
             {
-                std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(j).hash_map.find(rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).hash_reference_data.hash_reference.at(i));
+                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(j).hash_map.find(rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).hash_reference_data.hash_reference.at(i));
 
                 if (it != rpkgs.at(j).hash_map.end())
                 {
@@ -616,7 +616,7 @@ void prim::load_hash_depends()
                     {
                         if (!mati_found)
                         {
-                            mati_depends_file_name.push_back(rpkgs.at(j).hash.at(it->second).hash_file_name);
+                            mati_depends_file_name.push_back(util::uint64_t_to_hex_string(rpkgs.at(j).hash.at(it->second).hash_value) + "." + rpkgs.at(j).hash.at(it->second).hash_resource_type);
 
                             mati_depends_index.push_back(i);
 
@@ -639,7 +639,7 @@ void prim::load_hash_depends()
                     {
                         if (!borg_found)
                         {
-                            borg_depends_file_name.push_back(rpkgs.at(j).hash.at(it->second).hash_file_name);
+                            borg_depends_file_name.push_back(util::uint64_t_to_hex_string(rpkgs.at(j).hash.at(it->second).hash_value) + "." + rpkgs.at(j).hash.at(it->second).hash_resource_type);
 
                             borg_depends_index.push_back(i);
 

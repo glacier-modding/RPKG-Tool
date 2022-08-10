@@ -57,30 +57,30 @@ void rpkg_function::hash_meta_to_json(std::string& input_path, std::string& filt
 
         meta_file.read(input, sizeof(bytes8));
         std::memcpy(&bytes8, input, sizeof(bytes8));
-        meta_data.hash_offset = bytes8;
-        json_string += "\"hash_offset\":" + util::uint64_t_to_string(meta_data.hash_offset) + ",";
+        meta_data.data.header.data_offset = bytes8;
+        json_string += "\"hash_offset\":" + util::uint64_t_to_string(meta_data.data.header.data_offset) + ",";
 
         meta_file.read(input, sizeof(bytes4));
         std::memcpy(&bytes4, input, sizeof(bytes4));
-        meta_data.hash_size = bytes4;
-        json_string += "\"hash_size\":" + util::uint32_t_to_string(meta_data.hash_size) + ",";
+        meta_data.data.header.data_size = bytes4;
+        json_string += "\"hash_size\":" + util::uint32_t_to_string(meta_data.data.header.data_size) + ",";
 
-        if ((meta_data.hash_size & 0x3FFFFFFF) != 0)
+        if ((meta_data.data.header.data_size & 0x3FFFFFFF) != 0)
         {
-            meta_data.is_lz4ed = true;
+            meta_data.data.lz4ed = true;
         }
         else
         {
-            meta_data.is_lz4ed = false;
+            meta_data.data.lz4ed = false;
         }
 
-        if ((meta_data.hash_size & 0x80000000) == 0x80000000)
+        if ((meta_data.data.header.data_size & 0x80000000) == 0x80000000)
         {
-            meta_data.is_xored = true;
+            meta_data.data.xored = true;
         }
         else
         {
-            meta_data.is_xored = false;
+            meta_data.data.xored = false;
         }
 
         meta_file.read(input, sizeof(bytes4));
@@ -90,34 +90,34 @@ void rpkg_function::hash_meta_to_json(std::string& input_path, std::string& filt
 
         meta_file.read(input, sizeof(bytes4));
         std::memcpy(&bytes4, input, sizeof(bytes4));
-        meta_data.hash_reference_table_size = bytes4;
-        json_string += "\"hash_reference_table_size\":" + util::uint32_t_to_string(meta_data.hash_reference_table_size) + ",";
+        meta_data.data.resource.reference_table_size = bytes4;
+        json_string += "\"hash_reference_table_size\":" + util::uint32_t_to_string(meta_data.data.resource.reference_table_size) + ",";
 
         meta_file.read(input, sizeof(bytes4));
         std::memcpy(&bytes4, input, sizeof(bytes4));
-        meta_data.hash_reference_table_dummy = bytes4;
-        json_string += "\"hash_reference_table_dummy\":" + util::uint32_t_to_string(meta_data.hash_reference_table_dummy) + ",";
+        meta_data.data.resource.reference_table_dummy = bytes4;
+        json_string += "\"hash_reference_table_dummy\":" + util::uint32_t_to_string(meta_data.data.resource.reference_table_dummy) + ",";
 
         meta_file.read(input, sizeof(bytes4));
         std::memcpy(&bytes4, input, sizeof(bytes4));
-        meta_data.hash_size_final = bytes4;
-        json_string += "\"hash_size_final\":" + util::uint32_t_to_string(meta_data.hash_size_final) + ",";
+        meta_data.data.resource.size_final = bytes4;
+        json_string += "\"hash_size_final\":" + util::uint32_t_to_string(meta_data.data.resource.size_final) + ",";
 
         meta_file.read(input, sizeof(bytes4));
         std::memcpy(&bytes4, input, sizeof(bytes4));
-        meta_data.hash_size_in_memory = bytes4;
-        json_string += "\"hash_size_in_memory\":" + util::uint32_t_to_string(meta_data.hash_size_in_memory) + ",";
+        meta_data.data.resource.size_in_memory = bytes4;
+        json_string += "\"hash_size_in_memory\":" + util::uint32_t_to_string(meta_data.data.resource.size_in_memory) + ",";
 
         meta_file.read(input, sizeof(bytes4));
         std::memcpy(&bytes4, input, sizeof(bytes4));
-        meta_data.hash_size_in_video_memory = bytes4;
-        json_string += "\"hash_size_in_video_memory\":" + util::uint32_t_to_string(meta_data.hash_size_in_video_memory) + ",";
+        meta_data.data.resource.size_in_video_memory = bytes4;
+        json_string += "\"hash_size_in_video_memory\":" + util::uint32_t_to_string(meta_data.data.resource.size_in_video_memory) + ",";
 
         json_string += "\"hash_reference_data\":[";
 
         hash_reference_variables temp_hash_reference_data;
 
-        if (meta_data.hash_reference_table_size != 0x0)
+        if (meta_data.data.resource.reference_table_size != 0x0)
         {
             temp_hash_reference_data.hash_value = meta_data.hash_value;
 
@@ -142,7 +142,7 @@ void rpkg_function::hash_meta_to_json(std::string& input_path, std::string& filt
 
                 std::string hash_value_string = util::uint64_t_to_hex_string(bytes8);
 
-                std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(bytes8);
+                std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(bytes8);
 
                 if (it2 != hash_list_hash_map.end())
                 {
@@ -166,8 +166,6 @@ void rpkg_function::hash_meta_to_json(std::string& input_path, std::string& filt
                 {
                     json_string += ",";
                 }
-
-                temp_hash_reference_data.hash_reference_string.push_back(util::uint64_t_to_hex_string(bytes8));
             }
         }
         else

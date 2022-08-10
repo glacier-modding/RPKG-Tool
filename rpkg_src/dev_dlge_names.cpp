@@ -6,7 +6,7 @@
 #include "console.h"
 #include "util.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -43,13 +43,13 @@ void dev_function::dev_dlge_names(std::string& input_path, std::string& filter, 
 
                     if (rpkg_index != UINT32_MAX)
                     {
-                        std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(rpkgs.at(i).hash.at(hash_index).hash_value);
+                        std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(rpkgs.at(i).hash.at(hash_index).hash_value);
 
                         if (it != rpkgs.at(rpkg_index).hash_map.end())
                         {
                             uint64_t hash_index = rpkgs.at(rpkg_index).hash.at(it->second).hash_value;
 
-                            std::string hash_file_name = rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name;
+                            std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type;
 
                             nlohmann::ordered_json temp_json = nlohmann::ordered_json::array();
 
@@ -58,7 +58,7 @@ void dev_function::dev_dlge_names(std::string& input_path, std::string& filter, 
                                 temp_json.push_back(util::hash_to_ioi_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_reference_data.hash_reference.at(h), true));
                             }
 
-                            json[rpkgs.at(rpkg_index).hash.at(it->second).hash_string] = temp_json;
+                            json[util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value)] = temp_json;
                         }
                     }
                 }

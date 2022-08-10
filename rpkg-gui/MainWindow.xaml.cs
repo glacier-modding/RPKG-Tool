@@ -3082,13 +3082,16 @@ namespace rpkg
 
 		private void LoadHexEditor()
 		{
-			HexViewerTextBox.Text = "Hex view of " + currentHash + ":\n\n";
+			if (currentHash != "")
+			{
+				HexViewerTextBox.Text = "Hex view of " + currentHash + ":\n\n";
 
-			string[] hashDetails = currentHash.Split('.');
+				string[] hashDetails = currentHash.Split('.');
 
-			string hash = hashDetails[0];
+				string hash = hashDetails[0];
 
-			HexViewerTextBox.AppendText(Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgFilePath, hash)));
+				HexViewerTextBox.AppendText(Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgFilePath, hash)));
+			}
 		}
 
 		private void LoadImageViewer_TEXT(string hashFile, string hash)
@@ -3775,11 +3778,16 @@ namespace rpkg
 				massExtractName = "PRIM";
 			}
 
-			string inputFolder = SelectFolder("input", "Select Input Folder (Runtime folder or other folder with multiple RPKGs) To Extract " + massExtractName + " From:", "");
+			string inputFolder = "";
 
-			if (inputFolder == "")
+			if (!runtimeDirLoaded)
 			{
-				return;
+				inputFolder = SelectFolder("input", "Select Input Folder (Runtime folder or other folder with multiple RPKGs) To Extract " + massExtractName + " From:", "");
+
+				if (inputFolder == "")
+				{
+					return;
+				}
 			}
 
 			/*List<string> rpkgFiles = new List<string>();
@@ -4753,9 +4761,6 @@ private enum OggPlayerState
 
 		[DllImport("rpkg.dll", EntryPoint = "get_all_hashes_in_rpkg_count", CallingConvention = CallingConvention.Cdecl)]
 		public static extern UInt32 get_all_hashes_in_rpkg_count(string rpkg_file);
-
-		[DllImport("rpkg.dll", EntryPoint = "get_all_hashes_in_rpkg_at", CallingConvention = CallingConvention.Cdecl)]
-		public static extern IntPtr get_all_hashes_in_rpkg_at(string rpkg_file, UInt32 at_index);
 
 		[DllImport("rpkg.dll", EntryPoint = "get_hash_details", CallingConvention = CallingConvention.Cdecl)]
 		public static extern IntPtr get_hash_details(string rpkg_file, string hash_string);

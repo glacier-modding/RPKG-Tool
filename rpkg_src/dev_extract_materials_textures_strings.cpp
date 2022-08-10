@@ -34,22 +34,22 @@ void dev_function::dev_extract_materials_textures_strings(std::string& input_pat
                 {
                     uint64_t hash_index = rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).at(j);
 
-                    std::string hash_file_name = rpkgs.at(i).hash.at(hash_index).hash_file_name;
+                    std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
 
                     uint64_t hash_size;
 
-                    if (rpkgs.at(i).hash.at(hash_index).is_lz4ed == 1)
+                    if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
                     {
-                        hash_size = rpkgs.at(i).hash.at(hash_index).hash_size;
+                        hash_size = rpkgs.at(i).hash.at(hash_index).data.header.data_size;
 
-                        if (rpkgs.at(i).hash.at(hash_index).is_xored == 1)
+                        if (rpkgs.at(i).hash.at(hash_index).data.xored)
                         {
                             hash_size &= 0x3FFFFFFF;
                         }
                     }
                     else
                     {
-                        hash_size = rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                        hash_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
                     }
 
                     std::vector<char> input_data(hash_size, 0);
@@ -61,22 +61,22 @@ void dev_function::dev_extract_materials_textures_strings(std::string& input_pat
                         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(i).rpkg_file_path + " could not be read.");
                     }
 
-                    file.seekg(rpkgs.at(i).hash.at(hash_index).hash_offset, file.beg);
+                    file.seekg(rpkgs.at(i).hash.at(hash_index).data.header.data_offset, file.beg);
                     file.read(input_data.data(), hash_size);
                     file.close();
 
-                    if (rpkgs.at(i).hash.at(hash_index).is_xored == 1)
+                    if (rpkgs.at(i).hash.at(hash_index).data.xored)
                     {
                         crypto::xor_data(input_data.data(), (uint32_t)hash_size);
                     }
 
-                    uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                    uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
 
                     std::vector<char> output_data(decompressed_size, 0);
 
                     std::vector<char>* mati_data;
 
-                    if (rpkgs.at(i).hash.at(hash_index).is_lz4ed)
+                    if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
                     {
                         LZ4_decompress_safe(input_data.data(), output_data.data(), (int)hash_size, decompressed_size);
 
@@ -484,7 +484,7 @@ void dev_function::dev_extract_materials_textures_strings(std::string& input_pat
     substrings.push_back("/materials/artfoundation/");
     substrings.push_back("/_pro/ui/materials/");
 
-    std::map<uint64_t, uint64_t> mati_hashes_map;
+    std::unordered_map<uint64_t, uint64_t> mati_hashes_map;
     std::vector<uint64_t> mati_hashes;
     std::vector<std::string> mati_strings;
     std::vector<std::string> mati_substrings;
@@ -503,7 +503,7 @@ void dev_function::dev_extract_materials_textures_strings(std::string& input_pat
 
             uint64_t temp_mati_hash = std::strtoull(ioi_hash.c_str(), nullptr, 16);
 
-            std::map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(temp_mati_hash);
+            std::unordered_map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(temp_mati_hash);
 
             if (it != hash_list_hash_map.end())
             {
@@ -539,7 +539,7 @@ void dev_function::dev_extract_materials_textures_strings(std::string& input_pat
                         return;
                     }
 
-                    std::cout << std::endl << "For " << rpkgs.at(i).hash.at(hash_index).hash_file_name << std::endl;
+                    std::cout << std::endl << "For " << util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type << std::endl;
 
                     uint32_t hash_reference_count = rpkgs.at(i).hash.at(hash_index).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
@@ -555,7 +555,7 @@ void dev_function::dev_extract_materials_textures_strings(std::string& input_pat
                             {
                                 if (!found_at_all)
                                 {
-                                    std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(x).hash_map.find(rpkgs.at(i).hash.at(hash_index).hash_reference_data.hash_reference.at(k));
+                                    std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(x).hash_map.find(rpkgs.at(i).hash.at(hash_index).hash_reference_data.hash_reference.at(k));
 
                                     if (it != rpkgs.at(x).hash_map.end())
                                     {
@@ -569,7 +569,7 @@ void dev_function::dev_extract_materials_textures_strings(std::string& input_pat
                                             {
                                                 if (!found_at_all)
                                                 {
-                                                    std::map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(z).hash_map.find(rpkgs.at(i).hash.at(hash_index).hash_reference_data.hash_reference.at(k + 1));
+                                                    std::unordered_map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(z).hash_map.find(rpkgs.at(i).hash.at(hash_index).hash_reference_data.hash_reference.at(k + 1));
 
                                                     if (it3 != rpkgs.at(z).hash_map.end())
                                                     {
@@ -579,11 +579,13 @@ void dev_function::dev_extract_materials_textures_strings(std::string& input_pat
 
                                                             if (hash_resource_type2 == "MATI")
                                                             {
-                                                                std::string matt_hash_file_name = rpkgs.at(i).hash.at(hash_index).hash_file_name;
-                                                                std::string matb_hash_file_name = rpkgs.at(x).hash.at(it->second).hash_file_name;
-                                                                std::string mati_hash_file_name = rpkgs.at(z).hash.at(it3->second).hash_file_name;
+                                                            
+                                                            
+                                                                std::string matt_hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
+                                                                std::string matb_hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(x).hash.at(it->second).hash_value) + "." + rpkgs.at(x).hash.at(it->second).hash_resource_type;
+                                                                std::string mati_hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(z).hash.at(it3->second).hash_value) + "." + rpkgs.at(z).hash.at(it3->second).hash_resource_type;
 
-                                                                std::map<uint64_t, uint64_t>::iterator it6 = mati_hashes_map.find(rpkgs.at(z).hash.at(it3->second).hash_value);
+                                                                std::unordered_map<uint64_t, uint64_t>::iterator it6 = mati_hashes_map.find(rpkgs.at(z).hash.at(it3->second).hash_value);
 
                                                                 if (it6 != mati_hashes_map.end())
                                                                 {
@@ -595,7 +597,7 @@ void dev_function::dev_extract_materials_textures_strings(std::string& input_pat
                                                                 {
                                                                     std::cout << "NOT FOUND INSIDE1" << std::endl;
 
-                                                                    std::map<uint64_t, uint64_t>::iterator it4 = hash_list_hash_map.find(rpkgs.at(z).hash.at(it3->second).hash_value);
+                                                                    std::unordered_map<uint64_t, uint64_t>::iterator it4 = hash_list_hash_map.find(rpkgs.at(z).hash.at(it3->second).hash_value);
 
                                                                     if (it4 != hash_list_hash_map.end())
                                                                     {
@@ -891,13 +893,13 @@ void dev_function::dev_extract_materials_textures_strings(std::string& input_pat
 
                     for (uint64_t i = 0; i < rpkgs.size(); i++)
                     {
-                        std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(strtoull(ioi_hash.c_str(), nullptr, 16));
+                        std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(strtoull(ioi_hash.c_str(), nullptr, 16));
 
                         if (it != rpkgs.at(i).hash_map.end())
                         {
                             found = true;
 
-                            std::cout << "Found: " << rpkgs.at(i).hash.at(it->second).hash_file_name << "," << test_string << std::endl;
+                            std::cout << "Found: " << util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(it->second).hash_value) + "." + rpkgs.at(i).hash.at(it->second).hash_resource_type << "," << test_string << std::endl;
                             //std::cout << "Hash: " << ioi_hash << std::endl;
                         }
                     }

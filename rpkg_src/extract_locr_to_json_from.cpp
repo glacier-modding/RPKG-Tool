@@ -11,7 +11,7 @@
 #include "thirdparty/json/json.hpp"
 #include <iostream>
 #include <set>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -103,7 +103,7 @@ void rpkg_function::extract_locr_to_json_from(std::string &input_path, std::stri
                                 return;
                             }
 
-                            std::string hash_file_name = rpkgs.at(i).hash.at(hash_index).hash_file_name;
+                            std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
 
                             bool found = false;
 
@@ -145,18 +145,18 @@ void rpkg_function::extract_locr_to_json_from(std::string &input_path, std::stri
 
                                 uint64_t hash_size;
 
-                                if (rpkgs.at(i).hash.at(hash_index).is_lz4ed == 1)
+                                if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
                                 {
-                                    hash_size = rpkgs.at(i).hash.at(hash_index).hash_size;
+                                    hash_size = rpkgs.at(i).hash.at(hash_index).data.header.data_size;
 
-                                    if (rpkgs.at(i).hash.at(hash_index).is_xored == 1)
+                                    if (rpkgs.at(i).hash.at(hash_index).data.xored)
                                     {
                                         hash_size &= 0x3FFFFFFF;
                                     }
                                 }
                                 else
                                 {
-                                    hash_size = rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                                    hash_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
                                 }
 
                                 std::vector<char> input_data(hash_size, 0);
@@ -168,22 +168,22 @@ void rpkg_function::extract_locr_to_json_from(std::string &input_path, std::stri
                                     LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(i).rpkg_file_path + " could not be read.");
                                 }
 
-                                file.seekg(rpkgs.at(i).hash.at(hash_index).hash_offset, file.beg);
+                                file.seekg(rpkgs.at(i).hash.at(hash_index).data.header.data_offset, file.beg);
                                 file.read(input_data.data(), hash_size);
                                 file.close();
 
-                                if (rpkgs.at(i).hash.at(hash_index).is_xored == 1)
+                                if (rpkgs.at(i).hash.at(hash_index).data.xored)
                                 {
                                     crypto::xor_data(input_data.data(), (uint32_t)hash_size);
                                 }
 
-                                uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                                uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
 
                                 std::vector<char> output_data(decompressed_size, 0);
 
                                 std::vector<char> *locr_data;
 
-                                if (rpkgs.at(i).hash.at(hash_index).is_lz4ed)
+                                if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
                                 {
                                     LZ4_decompress_safe(input_data.data(), output_data.data(), (int)hash_size, decompressed_size);
 

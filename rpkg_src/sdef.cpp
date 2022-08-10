@@ -7,7 +7,7 @@
 #include "file.h"
 #include "thirdparty/lz4/lz4.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <fstream>
 #include <sstream>
 #include <set>
@@ -24,22 +24,22 @@ sdef::sdef(uint64_t rpkgs_index, uint64_t hash_index)
     sdef_rpkg_index = rpkgs_index;
     sdef_hash_index = hash_index;
 
-    sdef_file_name = rpkgs.at(rpkgs_index).hash.at(hash_index).hash_file_name;
+    sdef_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value) + "." + rpkgs.at(rpkgs_index).hash.at(hash_index).hash_resource_type;
 
     uint64_t sdef_hash_size;
 
-    if (rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).is_lz4ed == 1)
+    if (rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).data.lz4ed)
     {
-        sdef_hash_size = rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).hash_size;
+        sdef_hash_size = rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).data.header.data_size;
 
-        if (rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).is_xored == 1)
+        if (rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).data.xored)
         {
             sdef_hash_size &= 0x3FFFFFFF;
         }
     }
     else
     {
-        sdef_hash_size = rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).hash_size_final;
+        sdef_hash_size = rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).data.resource.size_final;
     }
 
     sdef_input_data = std::vector<char>(sdef_hash_size, 0);
@@ -51,20 +51,20 @@ sdef::sdef(uint64_t rpkgs_index, uint64_t hash_index)
         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(sdef_rpkg_index).rpkg_file_path + " could not be read.");
     }
 
-    file.seekg(rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).hash_offset, file.beg);
+    file.seekg(rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).data.header.data_offset, file.beg);
     file.read(sdef_input_data.data(), sdef_hash_size);
     file.close();
 
-    if (rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).is_xored == 1)
+    if (rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).data.xored)
     {
         crypto::xor_data(sdef_input_data.data(), (uint32_t)sdef_hash_size);
     }
 
-    const uint32_t sdef_decompressed_size = rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).hash_size_final;
+    const uint32_t sdef_decompressed_size = rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).data.resource.size_final;
 
     sdef_output_data = std::vector<char>(sdef_decompressed_size, 0);
 
-    if (rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).is_lz4ed)
+    if (rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).data.lz4ed)
     {
         LZ4_decompress_safe(sdef_input_data.data(), sdef_output_data.data(), (int)sdef_hash_size, sdef_decompressed_size);
 
@@ -133,8 +133,8 @@ void sdef::generate_json(std::string output_path)
     }
 
     file::create_directories(output_path);
-
-    std::ofstream json_file = std::ofstream(file::output_path_append(rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).hash_file_name + ".JSON", output_path), std::ofstream::binary);
+    
+    std::ofstream json_file = std::ofstream(file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).hash_value) + "." + rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).hash_resource_type + ".JSON", output_path), std::ofstream::binary);
 
     json_file << std::setw(4) << json << std::endl;
 
@@ -172,28 +172,28 @@ sdef::sdef(std::string sdef_path, std::string sdef_meta_path, uint64_t hash_valu
 
     sdef_meta_file.read(input, sizeof(bytes8));
     std::memcpy(&bytes8, input, sizeof(bytes8));
-    meta_data.hash_offset = bytes8;
+    meta_data.data.header.data_offset = bytes8;
 
     sdef_meta_file.read(input, sizeof(bytes4));
     std::memcpy(&bytes4, input, sizeof(bytes4));
-    meta_data.hash_size = bytes4;
+    meta_data.data.header.data_size = bytes4;
 
-    if ((meta_data.hash_size & 0x3FFFFFFF) != 0)
+    if ((meta_data.data.header.data_size & 0x3FFFFFFF) != 0)
     {
-        meta_data.is_lz4ed = true;
+        meta_data.data.lz4ed = true;
     }
     else
     {
-        meta_data.is_lz4ed = false;
+        meta_data.data.lz4ed = false;
     }
 
-    if ((meta_data.hash_size & 0x80000000) == 0x80000000)
+    if ((meta_data.data.header.data_size & 0x80000000) == 0x80000000)
     {
-        meta_data.is_xored = true;
+        meta_data.data.xored = true;
     }
     else
     {
-        meta_data.is_xored = false;
+        meta_data.data.xored = false;
     }
 
     sdef_meta_file.read(input, sizeof(bytes4));
@@ -202,27 +202,27 @@ sdef::sdef(std::string sdef_path, std::string sdef_meta_path, uint64_t hash_valu
 
     sdef_meta_file.read(input, sizeof(bytes4));
     std::memcpy(&bytes4, input, sizeof(bytes4));
-    meta_data.hash_reference_table_size = bytes4;
+    meta_data.data.resource.reference_table_size = bytes4;
 
     sdef_meta_file.read(input, sizeof(bytes4));
     std::memcpy(&bytes4, input, sizeof(bytes4));
-    meta_data.hash_reference_table_dummy = bytes4;
+    meta_data.data.resource.reference_table_dummy = bytes4;
 
     sdef_meta_file.read(input, sizeof(bytes4));
     std::memcpy(&bytes4, input, sizeof(bytes4));
-    meta_data.hash_size_final = bytes4;
+    meta_data.data.resource.size_final = bytes4;
 
     sdef_meta_file.read(input, sizeof(bytes4));
     std::memcpy(&bytes4, input, sizeof(bytes4));
-    meta_data.hash_size_in_memory = bytes4;
+    meta_data.data.resource.size_in_memory = bytes4;
 
     sdef_meta_file.read(input, sizeof(bytes4));
     std::memcpy(&bytes4, input, sizeof(bytes4));
-    meta_data.hash_size_in_video_memory = bytes4;
+    meta_data.data.resource.size_in_video_memory = bytes4;
 
     hash_reference_variables temp_hash_reference_data;
 
-    if (meta_data.hash_reference_table_size != 0x0)
+    if (meta_data.data.resource.reference_table_size != 0x0)
     {
         temp_hash_reference_data.hash_value = meta_data.hash_value;
 
@@ -244,7 +244,6 @@ sdef::sdef(std::string sdef_path, std::string sdef_meta_path, uint64_t hash_valu
             sdef_meta_file.read(input, sizeof(bytes8));
             std::memcpy(&bytes8, input, sizeof(bytes8));
             temp_hash_reference_data.hash_reference.push_back(bytes8);
-            temp_hash_reference_data.hash_reference_string.push_back(util::uint64_t_to_hex_string(bytes8));
         }
     }
     else

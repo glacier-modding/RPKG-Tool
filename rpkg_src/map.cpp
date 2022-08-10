@@ -76,13 +76,13 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
             LOG_AND_RETURN(task_status_string);
         }
 
-        std::map<uint64_t, uint64_t>::iterator ith = rpkgs.at(rpkg_index).hash_map.find(hash_value);
+        std::unordered_map<uint64_t, uint64_t>::iterator ith = rpkgs.at(rpkg_index).hash_map.find(hash_value);
 
         std::string map_hash_file_name = "";
 
         if (ith != rpkgs.at(rpkg_index).hash_map.end())
         {
-            map_hash_file_name = rpkgs.at(rpkg_index).hash.at(ith->second).hash_file_name;
+            map_hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(ith->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(ith->second).hash_resource_type;
         }
         else
         {
@@ -305,7 +305,7 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
 
         temp_map.get_root_scenes();
 
-        //std::map<uint64_t, uint64_t>::iterator it;
+        //std::unordered_map<uint64_t, uint64_t>::iterator it;
 
         //for (it = temp_map.root_scenes.begin(); it != temp_map.root_scenes.end(); ++it)
         //{
@@ -385,7 +385,7 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
             std::cout << "entityTypeResourceIndex_hash: " << util::uint64_t_to_hex_string(temp_map.map_nodes.at(m).entityTypeResourceIndex_hash) << std::endl;
             std::cout << "entityTypeResourceIndex_hash_type: " << temp_map.map_nodes.at(m).entityTypeResourceIndex_hash_type << std::endl;
 
-            std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(temp_map.map_nodes.at(m).entityTypeResourceIndex_hash);
+            std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(temp_map.map_nodes.at(m).entityTypeResourceIndex_hash);
 
             if (it2 != hash_list_hash_map.end())
             {
@@ -404,7 +404,7 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
                 {
                     std::cout << "externalSceneIndex_hash: " << util::uint64_t_to_hex_string(temp_map.map_nodes.at(m).externalSceneIndex_hash) << std::endl;
 
-                    std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(temp_map.map_nodes.at(m).externalSceneIndex_hash);
+                    std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(temp_map.map_nodes.at(m).externalSceneIndex_hash);
 
                     if (it2 != hash_list_hash_map.end())
                     {
@@ -445,7 +445,7 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
             bool temp_has_m_eidParents = false;
             uint32_t local_temp_entity_count = 0;
 
-            std::map<uint64_t, std::vector<uint32_t>>::iterator it = temp_map.temp_hash_map_node_map.find(temp_map.map_nodes.at(m).temp_hash);
+            std::unordered_map<uint64_t, std::vector<uint32_t>>::iterator it = temp_map.temp_hash_map_node_map.find(temp_map.map_nodes.at(m).temp_hash);
 
             if (it != temp_map.temp_hash_map_node_map.end())
             {
@@ -476,7 +476,7 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
 
             bool in_root_scene = false;
 
-            for (std::map<uint64_t, uint64_t>::iterator it2 = temp_map.root_scenes.begin(); it2 != temp_map.root_scenes.end(); ++it2)
+            for (std::unordered_map<uint64_t, uint64_t>::iterator it2 = temp_map.root_scenes.begin(); it2 != temp_map.root_scenes.end(); ++it2)
             {
                 if (temp_map.map_nodes.at(m).temp_hash == it2->first)
                 {
@@ -838,7 +838,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
         LOG_AND_RETURN(task_status_string);
     }
 
-    std::map<uint64_t, uint64_t>::iterator it6 = rpkgs.at(rpkg_index).hash_map.find(map_root_hash_value);
+    std::unordered_map<uint64_t, uint64_t>::iterator it6 = rpkgs.at(rpkg_index).hash_map.find(map_root_hash_value);
 
     if (it6 != rpkgs.at(rpkg_index).hash_map.end())
     {
@@ -1156,7 +1156,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
         if (rpkg_index != UINT32_MAX)
         {
-            std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash);
+            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash);
 
             if (it != rpkgs.at(rpkg_index).hash_map.end())
             {
@@ -1177,7 +1177,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
     LOG("\r" << ss.str() << std::string((temp_map.stringstream_length - ss.str().length()), ' '));
     timing_string = ss.str();
 
-    std::map<uint64_t, bool> temps_modified_map;
+    std::unordered_map<uint64_t, bool> temps_modified_map;
 
     task_map_status = MAP_NODE_CHANGES_CHECK;
 
@@ -1202,11 +1202,11 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
         if (temp_map.map_nodes.at(m).use_m_mTransform)
         {
-            std::map<uint64_t, uint64_t>::iterator it = temp_map.map_temps_map.find(temp_map.map_nodes.at(m).temp_hash);
+            std::unordered_map<uint64_t, uint64_t>::iterator it = temp_map.map_temps_map.find(temp_map.map_nodes.at(m).temp_hash);
 
             if (it != temp_map.map_temps_map.end())
             {
-                std::map<uint64_t, uint64_t>::iterator it2 = temp_map.map_temps.at(it->second).tblu_entityId_map.find(temp_map.map_nodes.at(m).entityId);
+                std::unordered_map<uint64_t, uint64_t>::iterator it2 = temp_map.map_temps.at(it->second).tblu_entityId_map.find(temp_map.map_nodes.at(m).entityId);
 
                 if (it2 != temp_map.map_temps.at(it->second).tblu_entityId_map.end())
                 {
@@ -1419,7 +1419,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
                         if (!temp_map.matrixes_equal(node_m_mTransform, m_mTransform))
                         {
-                            std::map<uint64_t, bool>::iterator temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
+                            std::unordered_map<uint64_t, bool>::iterator temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
 
                             if (temps_modified_map_it == temps_modified_map.end())
                             {
@@ -1487,7 +1487,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
                         if (!temp_map.matrixes_equal(node_m_mTransform, m_mTransform))
                         {
-                            std::map<uint64_t, bool>::iterator temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
+                            std::unordered_map<uint64_t, bool>::iterator temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
 
                             if (temps_modified_map_it == temps_modified_map.end())
                             {
@@ -1549,7 +1549,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
                     {
                         if (!temp_map.matrixes_equal(temp_map.map_nodes.at(m).m_mTransform, m_mTransform))
                         {
-                            std::map<uint64_t, bool>::iterator temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
+                            std::unordered_map<uint64_t, bool>::iterator temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
 
                             if (temps_modified_map_it == temps_modified_map.end())
                             {
@@ -1611,7 +1611,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
                     {
                         if (!temp_map.matrixes_equal(temp_map.map_nodes.at(m).m_mTransform, m_mTransform))
                         {
-                            std::map<uint64_t, bool>::iterator temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
+                            std::unordered_map<uint64_t, bool>::iterator temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
 
                             if (temps_modified_map_it == temps_modified_map.end())
                             {
@@ -1673,7 +1673,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
                     {
                         if (!temp_map.matrixes_equal(temp_map.map_nodes.at(m).m_mTransform, m_mTransform))
                         {
-                            std::map<uint64_t, bool>::iterator temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
+                            std::unordered_map<uint64_t, bool>::iterator temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
 
                             if (temps_modified_map_it == temps_modified_map.end())
                             {
@@ -1730,7 +1730,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
     LOG("\r" << ss.str() << std::string((temp_map.stringstream_length - ss.str().length()), ' '));
     timing_string = ss.str();
 
-    std::map<uint64_t, bool>::iterator temps_modified_map_it;
+    std::unordered_map<uint64_t, bool>::iterator temps_modified_map_it;
 
     task_map_status = MAP_WRITING_CHANGES_TO_QN;
 
@@ -1759,7 +1759,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
         //std::cout << "Modified: " << temps_modified_map_it->first << std::endl;
 
-        std::map<uint64_t, uint64_t>::iterator it_temp = temp_map.map_temps_map.find(temps_modified_map_it->first);
+        std::unordered_map<uint64_t, uint64_t>::iterator it_temp = temp_map.map_temps_map.find(temps_modified_map_it->first);
 
         if (it_temp != temp_map.map_temps_map.end())
         {
@@ -1787,7 +1787,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
             file::create_directories(output_rpkg_json_path);
 
-            std::string json_base_file_name = output_rpkg_json_path + "\\" + rpkgs.at(temp_map.map_temps.at(it_temp->second).temp_rpkg_index).hash.at(temp_map.map_temps.at(it_temp->second).temp_hash_index).hash_string;
+            std::string json_base_file_name = output_rpkg_json_path + "\\" + util::uint64_t_to_hex_string(rpkgs.at(temp_map.map_temps.at(it_temp->second).temp_rpkg_index).hash.at(temp_map.map_temps.at(it_temp->second).temp_hash_index).hash_value);
 
             //std::cout << file::output_path_append(json_base_file_name + ".entity.json", map_path) << std::endl;
 
@@ -1819,7 +1819,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
 void map::add_to_temp_hash_map_node_map(uint32_t map_node, uint64_t temp_hash)
 {
-    std::map<uint64_t, std::vector<uint32_t>>::iterator it = temp_hash_map_node_map.find(temp_hash);
+    std::unordered_map<uint64_t, std::vector<uint32_t>>::iterator it = temp_hash_map_node_map.find(temp_hash);
 
     if (it != temp_hash_map_node_map.end())
     {
@@ -1837,11 +1837,11 @@ void map::add_to_temp_hash_map_node_map(uint32_t map_node, uint64_t temp_hash)
 
 void map::add_to_m_eidParent_local_temp_hash_entityIndex_map(uint32_t map_node, uint64_t temp_hash, uint32_t entityIndex)
 {
-    std::map<uint64_t, std::map<uint32_t, std::vector<uint32_t>>>::iterator it = m_eidParent_local_temp_hash_entityIndex_map.find(temp_hash);
+    std::unordered_map<uint64_t, std::unordered_map<uint32_t, std::vector<uint32_t>>>::iterator it = m_eidParent_local_temp_hash_entityIndex_map.find(temp_hash);
 
     if (it != m_eidParent_local_temp_hash_entityIndex_map.end())
     {
-        std::map<uint32_t, std::vector<uint32_t>>::iterator it2 = it->second.find(entityIndex);
+        std::unordered_map<uint32_t, std::vector<uint32_t>>::iterator it2 = it->second.find(entityIndex);
 
         if (it2 != it->second.end())
         {
@@ -1858,7 +1858,7 @@ void map::add_to_m_eidParent_local_temp_hash_entityIndex_map(uint32_t map_node, 
     }
     else
     {
-        std::map<uint32_t, std::vector<uint32_t>> temp_temp_hash_entityIndex_map;
+        std::unordered_map<uint32_t, std::vector<uint32_t>> temp_temp_hash_entityIndex_map;
 
         std::vector<uint32_t> temp_map_node_vector;
 
@@ -1872,11 +1872,11 @@ void map::add_to_m_eidParent_local_temp_hash_entityIndex_map(uint32_t map_node, 
 
 void map::add_to_m_eidParent_external_externalSceneIndex_hash_entityID_map(uint32_t map_node, uint64_t externalSceneIndex_hash, uint64_t entityID)
 {
-    std::map<uint64_t, std::map<uint64_t, std::vector<uint32_t>>>::iterator it = m_eidParent_external_externalSceneIndex_hash_entityID_map.find(externalSceneIndex_hash);
+    std::unordered_map<uint64_t, std::unordered_map<uint64_t, std::vector<uint32_t>>>::iterator it = m_eidParent_external_externalSceneIndex_hash_entityID_map.find(externalSceneIndex_hash);
 
     if (it != m_eidParent_external_externalSceneIndex_hash_entityID_map.end())
     {
-        std::map<uint64_t, std::vector<uint32_t>>::iterator it2 = it->second.find(entityID);
+        std::unordered_map<uint64_t, std::vector<uint32_t>>::iterator it2 = it->second.find(entityID);
 
         if (it2 != it->second.end())
         {
@@ -1893,7 +1893,7 @@ void map::add_to_m_eidParent_external_externalSceneIndex_hash_entityID_map(uint3
     }
     else
     {
-        std::map<uint64_t, std::vector<uint32_t>> temp_externalSceneIndex_hash_entityID_map;
+        std::unordered_map<uint64_t, std::vector<uint32_t>> temp_externalSceneIndex_hash_entityID_map;
 
         std::vector<uint32_t> temp_map_node_vector;
 
@@ -1907,7 +1907,7 @@ void map::add_to_m_eidParent_external_externalSceneIndex_hash_entityID_map(uint3
 
 void map::add_to_temp_hash_is_top_level_Local_node_map(uint32_t map_node, uint64_t temp_hash)
 {
-    std::map<uint64_t, std::vector<uint32_t>>::iterator it = temp_hash_is_top_level_Local_node_map.find(temp_hash);
+    std::unordered_map<uint64_t, std::vector<uint32_t>>::iterator it = temp_hash_is_top_level_Local_node_map.find(temp_hash);
 
     if (it != temp_hash_is_top_level_Local_node_map.end())
     {
@@ -1943,7 +1943,7 @@ void map::extract_map_prims(std::string output_path, bool textured)
 
             map_percent_progress_map_nodes_prim = percent_progress;
 
-            std::map<uint64_t, uint64_t>::iterator it = map_prims_map.find(map_nodes.at(m).prim_hash);
+            std::unordered_map<uint64_t, uint64_t>::iterator it = map_prims_map.find(map_nodes.at(m).prim_hash);
 
             if (it != map_prims_map.end())
             {
@@ -1955,7 +1955,7 @@ void map::extract_map_prims(std::string output_path, bool textured)
 
                 if (rpkg_index != UINT32_MAX)
                 {
-                    std::map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(rpkg_index).hash_map.find(map_nodes.at(m).prim_hash);
+                    std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(rpkg_index).hash_map.find(map_nodes.at(m).prim_hash);
 
                     std::string prim_hash_string = util::uint64_t_to_hex_string(map_nodes.at(m).prim_hash);
 
@@ -2192,7 +2192,7 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
         if (rpkg_index != UINT32_MAX)
         {
-            std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(map_nodes.at(root_map_node).entityTypeResourceIndex_hash);
+            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(map_nodes.at(root_map_node).entityTypeResourceIndex_hash);
 
             if (it != rpkgs.at(rpkg_index).hash_map.end())
             {
@@ -2206,13 +2206,13 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
                     if (rpkg_index2 != UINT32_MAX)
                     {
-                        std::map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(rpkg_index2).hash_map.find(hash_reference_value);
+                        std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(rpkg_index2).hash_map.find(hash_reference_value);
 
                         if (it2 != rpkgs.at(rpkg_index2).hash_map.end())
                         {
                             if (rpkgs.at(rpkg_index2).hash.at(it2->second).hash_resource_type == "TEMP")
                             {
-                                //std::cout << rpkgs.at(rpkg_index).hash.at(it->second).hash_file_name << " has TEMP reference file: " << rpkgs.at(rpkg_index2).hash.at(it2->second).hash_file_name << std::endl;
+                                //std::cout << util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type << " has TEMP reference file: " << rpkgs.at(rpkg_index2).hash.at(it2->second).hash_file_name << std::endl;
 
                                 temp_entityTypeResourceIndex_hash = rpkgs.at(rpkg_index2).hash.at(it2->second).hash_value;
 
@@ -2228,11 +2228,11 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
     }
 
     {
-        std::map<uint64_t, std::map<uint32_t, std::vector<uint32_t>>>::iterator it = m_eidParent_local_temp_hash_entityIndex_map.find(map_nodes.at(root_map_node).temp_hash);
+        std::unordered_map<uint64_t, std::unordered_map<uint32_t, std::vector<uint32_t>>>::iterator it = m_eidParent_local_temp_hash_entityIndex_map.find(map_nodes.at(root_map_node).temp_hash);
 
         if (it != m_eidParent_local_temp_hash_entityIndex_map.end())
         {
-            std::map<uint32_t, std::vector<uint32_t>>::iterator it2 = it->second.find(map_nodes.at(root_map_node).subEntity);
+            std::unordered_map<uint32_t, std::vector<uint32_t>>::iterator it2 = it->second.find(map_nodes.at(root_map_node).subEntity);
 
             if (it2 != it->second.end())
             {
@@ -2290,7 +2290,7 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
                     if (map_nodes.at(n).has_prim_resource)
                     {
-                        std::map<uint64_t, uint64_t>::iterator it3 = map_prims_map.find(map_nodes.at(n).prim_hash);
+                        std::unordered_map<uint64_t, uint64_t>::iterator it3 = map_prims_map.find(map_nodes.at(n).prim_hash);
 
                         if (it3 != map_prims_map.end())
                         {
@@ -2473,11 +2473,11 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
     }
 
     {
-        std::map<uint64_t, std::map<uint64_t, std::vector<uint32_t>>>::iterator it = m_eidParent_external_externalSceneIndex_hash_entityID_map.find(map_nodes.at(root_map_node).temp_hash);
+        std::unordered_map<uint64_t, std::unordered_map<uint64_t, std::vector<uint32_t>>>::iterator it = m_eidParent_external_externalSceneIndex_hash_entityID_map.find(map_nodes.at(root_map_node).temp_hash);
 
         if (it != m_eidParent_external_externalSceneIndex_hash_entityID_map.end())
         {
-            std::map<uint64_t, std::vector<uint32_t>>::iterator it2 = it->second.find(map_nodes.at(root_map_node).entityId);
+            std::unordered_map<uint64_t, std::vector<uint32_t>>::iterator it2 = it->second.find(map_nodes.at(root_map_node).entityId);
 
             if (it2 != it->second.end())
             {
@@ -2534,7 +2534,7 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
                     if (map_nodes.at(n).has_prim_resource)
                     {
-                        std::map<uint64_t, uint64_t>::iterator it3 = map_prims_map.find(map_nodes.at(n).prim_hash);
+                        std::unordered_map<uint64_t, uint64_t>::iterator it3 = map_prims_map.find(map_nodes.at(n).prim_hash);
 
                         if (it3 != map_prims_map.end())
                         {
@@ -2718,7 +2718,7 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
     if (map_nodes.at(root_map_node).entityTypeResourceIndex_hash_type == "TEMP")
     {
-        std::map<uint64_t, std::vector<uint32_t>>::iterator it = temp_hash_is_top_level_Local_node_map.find(map_nodes.at(root_map_node).entityTypeResourceIndex_hash);
+        std::unordered_map<uint64_t, std::vector<uint32_t>>::iterator it = temp_hash_is_top_level_Local_node_map.find(map_nodes.at(root_map_node).entityTypeResourceIndex_hash);
 
         if (it != temp_hash_is_top_level_Local_node_map.end())
         {
@@ -2775,7 +2775,7 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
                 if (map_nodes.at(n).has_prim_resource)
                 {
-                    std::map<uint64_t, uint64_t>::iterator it3 = map_prims_map.find(map_nodes.at(n).prim_hash);
+                    std::unordered_map<uint64_t, uint64_t>::iterator it3 = map_prims_map.find(map_nodes.at(n).prim_hash);
 
                     if (it3 != map_prims_map.end())
                     {
@@ -2932,7 +2932,7 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
     {
         for (uint32_t a = 0; a < aset_temp_hashes.size(); a++)
         {
-            std::map<uint64_t, std::vector<uint32_t>>::iterator it = temp_hash_is_top_level_Local_node_map.find(aset_temp_hashes.at(a));
+            std::unordered_map<uint64_t, std::vector<uint32_t>>::iterator it = temp_hash_is_top_level_Local_node_map.find(aset_temp_hashes.at(a));
 
             if (it != temp_hash_is_top_level_Local_node_map.end())
             {
@@ -2989,7 +2989,7 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
                     if (map_nodes.at(n).has_prim_resource)
                     {
-                        std::map<uint64_t, uint64_t>::iterator it3 = map_prims_map.find(map_nodes.at(n).prim_hash);
+                        std::unordered_map<uint64_t, uint64_t>::iterator it3 = map_prims_map.find(map_nodes.at(n).prim_hash);
 
                         if (it3 != map_prims_map.end())
                         {
@@ -3192,7 +3192,7 @@ void map::get_map_node(temp& temp_temp)
 
                 if (rpkg_index != UINT32_MAX)
                 {
-                    std::map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(rpkg_index).hash_map.find(temp_map_node.entityTypeResourceIndex_hash);
+                    std::unordered_map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(rpkg_index).hash_map.find(temp_map_node.entityTypeResourceIndex_hash);
 
                     if (it3 != rpkgs.at(rpkg_index).hash_map.end())
                     {
@@ -3880,7 +3880,7 @@ void map::get_root_scenes()
         {
             //std::cout << "External scene TEMP file: " << util::uint64_t_to_hex_string(map_temps.at(t).temp_externalSceneHashes.at(s)) << std::endl;
 
-            std::map<uint64_t, uint64_t>::iterator it = root_scenes.find(map_temps.at(t).temp_externalSceneHashes.at(s));
+            std::unordered_map<uint64_t, uint64_t>::iterator it = root_scenes.find(map_temps.at(t).temp_externalSceneHashes.at(s));
 
             if (it == root_scenes.end())
             {
@@ -3894,7 +3894,7 @@ void map::get_root_scenes()
 
 void map::map_recursive_temp_loader(uint32_t rpkg_index, uint64_t hash_value)
 {
-    std::map<uint64_t, uint64_t>::iterator it = map_temps_map.find(hash_value);
+    std::unordered_map<uint64_t, uint64_t>::iterator it = map_temps_map.find(hash_value);
 
     if (it != map_temps_map.end())
     {
@@ -3932,7 +3932,7 @@ void map::map_recursive_temp_loader(uint32_t rpkg_index, uint64_t hash_value)
 
                 if (rpkg_index2 != UINT32_MAX)
                 {
-                    std::map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(rpkg_index2).hash_map.find(hash_reference_value);
+                    std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(rpkg_index2).hash_map.find(hash_reference_value);
 
                     if (it2 != rpkgs.at(rpkg_index2).hash_map.end())
                     {
@@ -3954,7 +3954,7 @@ void map::map_recursive_temp_loader(uint32_t rpkg_index, uint64_t hash_value)
 
                                 if (rpkg_index3 != UINT32_MAX)
                                 {
-                                    std::map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(rpkg_index3).hash_map.find(hash_reference_value2);
+                                    std::unordered_map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(rpkg_index3).hash_map.find(hash_reference_value2);
 
                                     if (it3 != rpkgs.at(rpkg_index3).hash_map.end())
                                     {

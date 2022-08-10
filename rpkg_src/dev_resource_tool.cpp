@@ -107,7 +107,7 @@ static void json_node_scan(const rapidjson::Value& doc, const rapidjson::Value& 
 
         std::cout << json_pointer << ": " << json_type << std::endl;
 
-        std::map<std::string, uint32_t>::iterator it = type_map_h3->find(json_type);
+        std::unordered_map<std::string, uint32_t>::iterator it = type_map_h3->find(json_type);
 
         if (it != type_map_h3->end())
         {
@@ -251,7 +251,7 @@ void dev_function::dev_resource_tool(std::string& input_path, std::string& filte
 
             if (rpkgs.at(i).rpkg_file_path == input_path || !input_path_is_rpkg_file)
             {
-                std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
                 if (it != rpkgs.at(rpkg_index).hash_map.end())
                 {
@@ -363,7 +363,7 @@ void dev_function::dev_resource_tool(std::string& input_path, std::string& filte
 
                     //json_node_scan(temp_json_subEntities, "/subEntities");
 
-                    //std::map<uint32_t, uint32_t> parents_map;
+                    //std::unordered_map<uint32_t, uint32_t> parents_map;
 
                     //std::vector<uint32_t> temps_indexes;
 
@@ -432,7 +432,7 @@ void dev_function::dev_resource_tool(std::string& input_path, std::string& filte
                                             {
                                                 std::cout << it4->value.GetString() << std::endl;
 
-                                                std::map<std::string, uint32_t>::iterator it = type_map->find(it4->value.GetString());
+                                                std::unordered_map<std::string, uint32_t>::iterator it = type_map->find(it4->value.GetString());
 
                                                 if (it != type_map->end())
                                                 {

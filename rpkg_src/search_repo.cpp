@@ -12,7 +12,7 @@
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -57,7 +57,7 @@ void rpkg_function::search_repo(std::string& input_path, std::string& filter, st
 
     if (repo_rpkg_index != UINT32_MAX)
     {
-        std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(repo_rpkg_index).hash_map.find(repo_hash_value);
+        std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(repo_rpkg_index).hash_map.find(repo_hash_value);
 
         if (it != rpkgs.at(repo_rpkg_index).hash_map.end())
         {
@@ -67,7 +67,7 @@ void rpkg_function::search_repo(std::string& input_path, std::string& filter, st
 
             if (ores_rpkg_index != UINT32_MAX)
             {
-                std::map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(ores_rpkg_index).hash_map.find(ores_hash_value);
+                std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(ores_rpkg_index).hash_map.find(ores_hash_value);
 
                 if (it2 != rpkgs.at(ores_rpkg_index).hash_map.end())
                 {

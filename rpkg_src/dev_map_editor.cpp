@@ -17,7 +17,7 @@
 #include "thirdparty/rapidjson/pointer.h"
 #include "thirdparty/rapidjson/stringbuffer.h"
 
-void extract_glb_and_return_coords(uint32_t temps_index, uint32_t entry_index, std::string parent_string, std::vector<uint64_t>& entityId_temp_index, std::vector<uint64_t>& entityId_m_eidParent_entityID, std::vector<uint64_t>& entityId_m_eidParent_entityIndex, std::multimap<std::string, uint64_t>& entityId_m_eidParent_entityIndex_map, std::vector<bool>& entityId_entity_logicalParent_top_level, std::vector<bool>& entityId_has_m_mTransform_and_m_eidParent, std::map<std::string, uint64_t>& entityId_temp_index_entityIndex_map, std::vector<std::string>& entityId_m_mTransform)
+void extract_glb_and_return_coords(uint32_t temps_index, uint32_t entry_index, std::string parent_string, std::vector<uint64_t>& entityId_temp_index, std::vector<uint64_t>& entityId_m_eidParent_entityID, std::vector<uint64_t>& entityId_m_eidParent_entityIndex, std::multimap<std::string, uint64_t>& entityId_m_eidParent_entityIndex_map, std::vector<bool>& entityId_entity_logicalParent_top_level, std::vector<bool>& entityId_has_m_mTransform_and_m_eidParent, std::unordered_map<std::string, uint64_t>& entityId_temp_index_entityIndex_map, std::vector<std::string>& entityId_m_mTransform)
 {
     if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND)
     {
@@ -36,7 +36,7 @@ void extract_glb_and_return_coords(uint32_t temps_index, uint32_t entry_index, s
 
         std::string property_name = "";
 
-        std::map<std::string, uint64_t>::iterator it4 = entityId_temp_index_entityIndex_map.find(std::to_string(temps_index) + ":" + util::int32_t_to_string(entry_index));
+        std::unordered_map<std::string, uint64_t>::iterator it4 = entityId_temp_index_entityIndex_map.find(std::to_string(temps_index) + ":" + util::int32_t_to_string(entry_index));
 
         if (it4 != entityId_temp_index_entityIndex_map.end())
         {
@@ -67,7 +67,7 @@ void extract_glb_and_return_coords(uint32_t temps_index, uint32_t entry_index, s
 
                     map_editor_glb_file_names.push_back(prim_asset_file_names);
 
-                    std::map<uint64_t, uint32_t>::iterator it = temps_map.find(rpkgs.at(temps.at(temps_index).temp_rpkg_index).hash.at(temps.at(temps_index).temp_hash_index).hash_reference_data.hash_reference.at(temps.at(temps_index).temp_entityTypeResourceIndex.at(entry_index)));
+                    std::unordered_map<uint64_t, uint32_t>::iterator it = temps_map.find(rpkgs.at(temps.at(temps_index).temp_rpkg_index).hash.at(temps.at(temps_index).temp_hash_index).hash_reference_data.hash_reference.at(temps.at(temps_index).temp_entityTypeResourceIndex.at(entry_index)));
 
                     if (it != temps_map.end())
                     {
@@ -90,7 +90,7 @@ void extract_glb_and_return_coords(uint32_t temps_index, uint32_t entry_index, s
                                 {
                                     std::cout << *it2 << std::endl;
 
-                                    std::map<uint64_t, uint32_t>::iterator it3 = temps_map.find(rpkgs.at(temps.at(it->second).temp_rpkg_index).hash.at(temps.at(it->second).temp_hash_index).hash_reference_data.hash_reference.at(temps.at(it->second).temp_entityTypeResourceIndex.at(*it2)));
+                                    std::unordered_map<uint64_t, uint32_t>::iterator it3 = temps_map.find(rpkgs.at(temps.at(it->second).temp_rpkg_index).hash.at(temps.at(it->second).temp_hash_index).hash_reference_data.hash_reference.at(temps.at(it->second).temp_entityTypeResourceIndex.at(*it2)));
 
                                     if (it3 != temps_map.end())
                                     {
@@ -218,7 +218,7 @@ void extract_glb_and_return_coords(uint32_t temps_index, uint32_t entry_index, s
         }
         else
         {
-            std::map<uint64_t, uint32_t>::iterator it = temps_map.find(rpkgs.at(temps.at(temps_index).temp_rpkg_index).hash.at(temps.at(temps_index).temp_hash_index).hash_reference_data.hash_reference.at(temps.at(temps_index).temp_entityTypeResourceIndex.at(entry_index)));
+            std::unordered_map<uint64_t, uint32_t>::iterator it = temps_map.find(rpkgs.at(temps.at(temps_index).temp_rpkg_index).hash.at(temps.at(temps_index).temp_hash_index).hash_reference_data.hash_reference.at(temps.at(temps_index).temp_entityTypeResourceIndex.at(entry_index)));
 
             if (it != temps_map.end())
             {
@@ -246,7 +246,7 @@ void extract_glb_and_return_coords(uint32_t temps_index, uint32_t entry_index, s
     }
 }
 
-void map_recursive_parent_mapper(uint64_t entityId, uint64_t entityId_index, std::string parent_string, std::map<uint64_t, uint64_t>& entityId_map, std::vector<uint64_t>& entityId_value, std::vector<uint64_t>& entityId_temp_index, std::vector<uint64_t>& entityId_entity_index, std::vector<uint64_t>& entityId_entity_logicalParent_index, std::vector<bool>& entityId_entity_logicalParent_top_level, std::map<std::string, uint64_t>& entityId_temp_entity_index_map, std::multimap<uint64_t, std::string>& entityId_temp_entity_index_map_temp_hash_depend_map, std::vector<std::string>& entityId_entityName, std::vector<bool>& entityId_m_eidParent_found, std::vector<uint64_t>& entityId_m_eidParent_entityID, std::vector<uint64_t>& entityId_m_eidParent_entityIndex)
+void map_recursive_parent_mapper(uint64_t entityId, uint64_t entityId_index, std::string parent_string, std::unordered_map<uint64_t, uint64_t>& entityId_map, std::vector<uint64_t>& entityId_value, std::vector<uint64_t>& entityId_temp_index, std::vector<uint64_t>& entityId_entity_index, std::vector<uint64_t>& entityId_entity_logicalParent_index, std::vector<bool>& entityId_entity_logicalParent_top_level, std::unordered_map<std::string, uint64_t>& entityId_temp_entity_index_map, std::multimap<uint64_t, std::string>& entityId_temp_entity_index_map_temp_hash_depend_map, std::vector<std::string>& entityId_entityName, std::vector<bool>& entityId_m_eidParent_found, std::vector<uint64_t>& entityId_m_eidParent_entityID, std::vector<uint64_t>& entityId_m_eidParent_entityIndex)
 {
     if (entityId_m_eidParent_found.at(entityId_index))
     {
@@ -259,7 +259,7 @@ void map_recursive_parent_mapper(uint64_t entityId, uint64_t entityId_index, std
         {
             std::string temp_entityId_temp_index = std::to_string(entityId_temp_index.at(entityId_index)) + ":" + std::to_string(entityId_m_eidParent_entityIndex.at(entityId_index));
 
-            std::map<std::string, uint64_t>::iterator itmap = entityId_temp_entity_index_map.find(temp_entityId_temp_index);
+            std::unordered_map<std::string, uint64_t>::iterator itmap = entityId_temp_entity_index_map.find(temp_entityId_temp_index);
 
             if (itmap != entityId_temp_entity_index_map.end())
             {
@@ -272,7 +272,7 @@ void map_recursive_parent_mapper(uint64_t entityId, uint64_t entityId_index, std
         }
         else
         {
-            std::map<uint64_t, uint64_t>::iterator itmap = entityId_map.find(entityId_m_eidParent_entityID.at(entityId_index));
+            std::unordered_map<uint64_t, uint64_t>::iterator itmap = entityId_map.find(entityId_m_eidParent_entityID.at(entityId_index));
 
             if (itmap != entityId_map.end())
             {
@@ -293,7 +293,7 @@ void map_recursive_parent_mapper(uint64_t entityId, uint64_t entityId_index, std
 
         std::string temp_entityId_temp_index = std::to_string(entityId_temp_index.at(entityId_index)) + ":" + std::to_string(entityId_entity_logicalParent_index.at(entityId_index));
 
-        std::map<std::string, uint64_t>::iterator itmap = entityId_temp_entity_index_map.find(temp_entityId_temp_index);
+        std::unordered_map<std::string, uint64_t>::iterator itmap = entityId_temp_entity_index_map.find(temp_entityId_temp_index);
 
         if (itmap != entityId_temp_entity_index_map.end())
         {
@@ -317,7 +317,7 @@ void map_recursive_parent_mapper(uint64_t entityId, uint64_t entityId_index, std
 
         for (std::multimap<uint64_t, std::string>::iterator it = er.first; it != er.second; it++)
         {
-            std::map<std::string, uint64_t>::iterator itmap = entityId_temp_entity_index_map.find(it->second);
+            std::unordered_map<std::string, uint64_t>::iterator itmap = entityId_temp_entity_index_map.find(it->second);
 
             if (itmap != entityId_temp_entity_index_map.end())
             {
@@ -341,7 +341,7 @@ void map_recursive_parent_mapper(uint64_t entityId, uint64_t entityId_index, std
     }
 }
 
-/*void map_recursive_parent_mapper(uint64_t entityId, uint64_t entityId_index, std::string parent_string, std::map<uint64_t, uint64_t>& entityId_map, std::vector<uint64_t>& entityId_value, std::vector<uint64_t>& entityId_temp_index, std::vector<uint64_t>& entityId_entity_index, std::vector<uint64_t>& entityId_entity_logicalParent_index, std::vector<bool>& entityId_entity_logicalParent_top_level, std::map<std::string, uint64_t>& entityId_temp_entity_index_map, std::multimap<uint64_t, std::string>& entityId_temp_entity_index_map_temp_hash_depend_map, std::vector<std::string>& entityId_entityName, std::vector<bool>& entityId_m_eidParent_found, std::vector<uint64_t>& entityId_m_eidParent_entityID, std::vector<uint64_t>& entityId_m_eidParent_entityIndex)
+/*void map_recursive_parent_mapper(uint64_t entityId, uint64_t entityId_index, std::string parent_string, std::unordered_map<uint64_t, uint64_t>& entityId_map, std::vector<uint64_t>& entityId_value, std::vector<uint64_t>& entityId_temp_index, std::vector<uint64_t>& entityId_entity_index, std::vector<uint64_t>& entityId_entity_logicalParent_index, std::vector<bool>& entityId_entity_logicalParent_top_level, std::unordered_map<std::string, uint64_t>& entityId_temp_entity_index_map, std::multimap<uint64_t, std::string>& entityId_temp_entity_index_map_temp_hash_depend_map, std::vector<std::string>& entityId_entityName, std::vector<bool>& entityId_m_eidParent_found, std::vector<uint64_t>& entityId_m_eidParent_entityID, std::vector<uint64_t>& entityId_m_eidParent_entityIndex)
 {
     if (entityId_m_eidParent_found.at(entityId_index))
     {
@@ -354,7 +354,7 @@ void map_recursive_parent_mapper(uint64_t entityId, uint64_t entityId_index, std
         {
             std::string temp_entityId_temp_index = std::to_string(entityId_temp_index.at(entityId_index)) + ":" + std::to_string(entityId_m_eidParent_entityIndex.at(entityId_index));
 
-            std::map<std::string, uint64_t>::iterator itmap = entityId_temp_entity_index_map.find(temp_entityId_temp_index);
+            std::unordered_map<std::string, uint64_t>::iterator itmap = entityId_temp_entity_index_map.find(temp_entityId_temp_index);
 
             if (itmap != entityId_temp_entity_index_map.end())
             {
@@ -367,7 +367,7 @@ void map_recursive_parent_mapper(uint64_t entityId, uint64_t entityId_index, std
         }
         else
         {
-            std::map<uint64_t, uint64_t>::iterator itmap = entityId_map.find(entityId_m_eidParent_entityID.at(entityId_index));
+            std::unordered_map<uint64_t, uint64_t>::iterator itmap = entityId_map.find(entityId_m_eidParent_entityID.at(entityId_index));
 
             if (itmap != entityId_map.end())
             {
@@ -388,7 +388,7 @@ void map_recursive_parent_mapper(uint64_t entityId, uint64_t entityId_index, std
 
         std::string temp_entityId_temp_index = std::to_string(entityId_temp_index.at(entityId_index)) + ":" + std::to_string(entityId_entity_logicalParent_index.at(entityId_index));
 
-        std::map<std::string, uint64_t>::iterator itmap = entityId_temp_entity_index_map.find(temp_entityId_temp_index);
+        std::unordered_map<std::string, uint64_t>::iterator itmap = entityId_temp_entity_index_map.find(temp_entityId_temp_index);
 
         if (itmap != entityId_temp_entity_index_map.end())
         {
@@ -412,7 +412,7 @@ void map_recursive_parent_mapper(uint64_t entityId, uint64_t entityId_index, std
 
         for (std::multimap<uint64_t, std::string>::iterator it = er.first; it != er.second; it++)
         {
-            std::map<std::string, uint64_t>::iterator itmap = entityId_temp_entity_index_map.find(it->second);
+            std::unordered_map<std::string, uint64_t>::iterator itmap = entityId_temp_entity_index_map.find(it->second);
 
             if (itmap != entityId_temp_entity_index_map.end())
             {
@@ -500,7 +500,7 @@ void dev_function::dev_map_editor(std::string& input_path, std::string& filter, 
 
             if (rpkgs.at(i).rpkg_file_path == input_path || !input_path_is_rpkg_file)
             {
-                std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
                 if (it != rpkgs.at(rpkg_index).hash_map.end())
                 {
@@ -508,7 +508,7 @@ void dev_function::dev_map_editor(std::string& input_path, std::string& filter, 
 
                     //temp_temp.load_data();
 
-                    std::map<uint32_t, uint32_t> parents_map;
+                    std::unordered_map<uint32_t, uint32_t> parents_map;
 
                     std::vector<uint32_t> temps_indexes;
 
@@ -527,7 +527,7 @@ void dev_function::dev_map_editor(std::string& input_path, std::string& filter, 
                     std::vector<uint64_t> entityId_m_eidParent_entityIndex;
                     std::multimap<std::string, uint64_t> entityId_m_eidParent_entityIndex_map;
                     std::vector<bool> entityId_entity_logicalParent_top_level;
-                    std::map<std::string, uint64_t> entityId_temp_index_entityIndex_map;
+                    std::unordered_map<std::string, uint64_t> entityId_temp_index_entityIndex_map;
                     std::vector<bool> entityId_has_m_mTransform_and_m_eidParent;
                     std::vector<std::string> entityId_m_mTransform;
 
@@ -807,13 +807,13 @@ void dev_function::dev_map_editor(std::string& input_path, std::string& filter, 
                         extract_glb_and_return_coords(0, *it, "", entityId_temp_index, entityId_m_eidParent_entityID, entityId_m_eidParent_entityIndex, entityId_m_eidParent_entityIndex_map, entityId_entity_logicalParent_top_level, entityId_has_m_mTransform_and_m_eidParent, entityId_temp_index_entityIndex_map, entityId_m_mTransform);
                     }
 
-                    /*std::map<uint64_t, uint64_t> entityId_map;
+                    /*std::unordered_map<uint64_t, uint64_t> entityId_map;
                     std::vector<uint64_t> entityId_value;
                     std::vector<uint64_t> entityId_temp_index;
                     std::vector<uint64_t> entityId_entity_index;
                     std::vector<uint64_t> entityId_entity_logicalParent_index;
                     std::vector<bool> entityId_entity_logicalParent_top_level;
-                    std::map<std::string, uint64_t> entityId_temp_entity_index_map;
+                    std::unordered_map<std::string, uint64_t> entityId_temp_entity_index_map;
                     std::multimap<uint64_t, std::string> entityId_temp_entity_index_map_temp_hash_depend_map;
                     std::vector<std::string> entityId_entityName;
                     std::vector<bool> entityId_m_eidParent_found;
@@ -836,7 +836,7 @@ void dev_function::dev_map_editor(std::string& input_path, std::string& filter, 
                                 {
                                     //std::cout <<temps.at(t).temp_file_name << ": " << temps.at(t).tblu_entityName.at(a) << " has a entityId of " << it1->value.GetUint64() << std::endl;
 
-                                    std::map<uint64_t, uint64_t>::iterator itmap = entityId_map.find(it1->value.GetUint64());
+                                    std::unordered_map<uint64_t, uint64_t>::iterator itmap = entityId_map.find(it1->value.GetUint64());
 
                                     if (itmap == entityId_map.end())
                                     {
@@ -993,7 +993,7 @@ void dev_function::dev_map_editor(std::string& input_path, std::string& filter, 
                         std::cout <<"LOL!!!" << std::endl;
                     }
 
-                    for (std::map<uint64_t, uint64_t>::iterator itmap = entityId_map.begin(); itmap != entityId_map.end(); itmap++)
+                    for (std::unordered_map<uint64_t, uint64_t>::iterator itmap = entityId_map.begin(); itmap != entityId_map.end(); itmap++)
                     {
                         map_recursive_parent_mapper(itmap->first, itmap->second, entityId_entityName.at(itmap->second), entityId_map, entityId_value, entityId_temp_index, entityId_entity_index, entityId_entity_logicalParent_index, entityId_entity_logicalParent_top_level, entityId_temp_entity_index_map, entityId_temp_entity_index_map_temp_hash_depend_map, entityId_entityName, entityId_m_eidParent_found, entityId_m_eidParent_entityID, entityId_m_eidParent_entityIndex);
                     }*/

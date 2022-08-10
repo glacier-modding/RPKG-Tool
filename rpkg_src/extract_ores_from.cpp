@@ -81,13 +81,13 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
 
         if (rpkg_index != UINT32_MAX)
         {
-            std::map<uint64_t, uint64_t>::iterator it6 = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+            std::unordered_map<uint64_t, uint64_t>::iterator it6 = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
             if (it6 != rpkgs.at(rpkg_index).hash_map.end())
             {
                 uint64_t hash_index = it6->second;
 
-                std::string hash_file_name = rpkgs.at(rpkg_index).hash.at(hash_index).hash_file_name;
+                std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(hash_index).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(hash_index).hash_resource_type;
 
                 ores temp_ores(rpkg_index, hash_index);
 
@@ -130,7 +130,7 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
                         {
                             uint64_t rpkg_index2 = i;
 
-                            std::map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(ores_entry.second);
+                            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(ores_entry.second);
 
                             if (it != rpkgs.at(i).hash_map.end())
                             {
@@ -156,7 +156,7 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
 
                                 for (uint64_t z = 0; z < filters.size(); z++)
                                 {
-                                    std::size_t found_position_hash = rpkgs.at(rpkg_index2).hash.at(hash_index2).hash_file_name.find(filters.at(z));
+                                    std::size_t found_position_hash = std::string(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index2).hash.at(hash_index2).hash_value) + "." + rpkgs.at(rpkg_index2).hash.at(hash_index2).hash_resource_type).find(filters.at(z));
 
                                     std::size_t found_position_ores = util::to_upper_case(ores_ioi_path).find(filters.at(z));
 

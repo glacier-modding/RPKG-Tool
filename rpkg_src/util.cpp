@@ -63,7 +63,7 @@ std::string util::hash_type(uint64_t hash_value)
 {
     if (hash_list_loaded)
     {
-        std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(hash_value);
+        std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(hash_value);
 
         if (it2 != hash_list_hash_map.end())
         {
@@ -83,7 +83,7 @@ std::string util::hash_to_ioi_string(uint64_t hash_value, bool return_hash_if_no
 {
     if (hash_list_loaded)
     {
-        std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(hash_value);
+        std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(hash_value);
 
         if (it2 != hash_list_hash_map.end())
         {
@@ -111,7 +111,7 @@ std::string util::hash_to_hash_list_string(uint64_t hash_value)
 {
     if (hash_list_loaded)
     {
-        std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(hash_value);
+        std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(hash_value);
 
         if (it2 != hash_list_hash_map.end())
         {

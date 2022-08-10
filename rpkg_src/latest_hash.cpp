@@ -7,7 +7,7 @@
 #include "rpkg.h"
 #include "hash.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -44,7 +44,7 @@ void rpkg_function::latest_hash(std::string& input_path, std::string& filter, st
         {
             uint64_t hash_value = std::strtoull(filters.at(z).c_str(), nullptr, 16);
 
-            std::map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(hash_value);
+            std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(hash_value);
 
             if (it2 != hash_list_hash_map.end())
             {
@@ -58,11 +58,14 @@ void rpkg_function::latest_hash(std::string& input_path, std::string& filter, st
 
             uint32_t hash_in_rpkg_index = get_latest_hash(hash_value);
 
-            LOG("The latest version of " + filters.at(z) + " is in: " + rpkgs.at(hash_in_rpkg_index).rpkg_file_name);
-
-            if (z != filters.size() - 1)
+            if (hash_in_rpkg_index != UINT32_MAX)
             {
-                LOG("");
+                LOG("The latest version of " + filters.at(z) + " is in: " + rpkgs.at(hash_in_rpkg_index).rpkg_file_name);
+
+                if (z != filters.size() - 1)
+                {
+                    LOG("");
+                }
             }
         }
     }

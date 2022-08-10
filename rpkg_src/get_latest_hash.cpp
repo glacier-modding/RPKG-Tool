@@ -7,7 +7,7 @@
 #include "rpkg.h"
 #include "hash.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -29,7 +29,7 @@ uint32_t rpkg_function::get_latest_hash(uint64_t hash_value)
 
     for (uint64_t i = 0; i < rpkgs.size(); i++)
     {
-        std::map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(i).hash_map.find(hash_value);
+        std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(i).hash_map.find(hash_value);
 
         if (it2 != rpkgs.at(i).hash_map.end())
         {
@@ -80,7 +80,7 @@ uint32_t rpkg_function::get_latest_hash(uint64_t hash_value)
             }
 
             if (log_output)
-                LOG(rpkgs.at(i).hash.at(it2->second).hash_file_name + " was found in RPKG file: " + rpkgs.at(i).rpkg_file_name);
+                LOG(util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(it2->second).hash_value) + "." + rpkgs.at(i).hash.at(it2->second).hash_resource_type + " was found in RPKG file: " + rpkgs.at(i).rpkg_file_name);
 
             hash_in_rpkgs.push_back(rpkgs.at(i).rpkg_file_name);
             hash_in_rpkgs_patch_list.push_back(false);
@@ -93,11 +93,11 @@ uint32_t rpkg_function::get_latest_hash(uint64_t hash_value)
 
             if (rpkgs.at(i).is_patch_file)
             {
-                if (rpkgs.at(i).patch_entry_count > 0)
+                if (rpkgs.at(i).header.patch_count > 0)
                 {
                     uint32_t patch_entry_count = 0;
 
-                    for (uint64_t j = 0; j < rpkgs.at(i).patch_entry_count; j++)
+                    for (uint64_t j = 0; j < rpkgs.at(i).header.patch_count; j++)
                     {
                         if (hash_value == rpkgs.at(i).patch_entry_list.at(j))
                         {

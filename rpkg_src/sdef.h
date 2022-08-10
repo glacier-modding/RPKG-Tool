@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <stdint.h>
 #include "hash.h"
 #include "thirdparty/json/json.hpp"

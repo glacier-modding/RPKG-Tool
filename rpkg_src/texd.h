@@ -2,7 +2,7 @@
 #include "hash.h"
 #include <string>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <stdint.h>
 
 class texd

@@ -31,7 +31,7 @@ void dev_function::dev_extract_all_hashes_in_game(rpkg_extraction_vars& rpkg_var
     uint64_t hash_total = 0;
     uint64_t hash_count = 0;
 
-    std::map<uint64_t, uint64_t> hashes_extracted;
+    std::unordered_map<uint64_t, uint64_t> hashes_extracted;
 
     for (uint64_t i = 0; i < rpkgs.size(); i++)
     {
@@ -50,7 +50,7 @@ void dev_function::dev_extract_all_hashes_in_game(rpkg_extraction_vars& rpkg_var
 
         for (uint64_t j = 0; j < rpkgs.at(i).hash.size(); j++)
         {
-            std::map<uint64_t, uint64_t>::iterator it = hashes_extracted.find(rpkgs.at(i).hash.at(j).hash_value);
+            std::unordered_map<uint64_t, uint64_t>::iterator it = hashes_extracted.find(rpkgs.at(i).hash.at(j).hash_value);
 
             if (it == hashes_extracted.end())
             {
@@ -60,10 +60,10 @@ void dev_function::dev_extract_all_hashes_in_game(rpkg_extraction_vars& rpkg_var
 
                 if (rpkg_index == UINT32_MAX)
                 {
-                    LOG_AND_RETURN("Error: The input entity (TEMP) hash " + rpkgs.at(i).hash.at(j).hash_file_name + " could not be found in any RPKGs.");
+                    LOG_AND_RETURN("Error: The input entity (TEMP) hash " + util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(j).hash_value) + "." + rpkgs.at(i).hash.at(j).hash_resource_type + " could not be found in any RPKGs.");
                 }
 
-                std::map<uint64_t, uint64_t>::iterator ith = rpkgs.at(rpkg_index).hash_map.find(rpkgs.at(i).hash.at(j).hash_value);
+                std::unordered_map<uint64_t, uint64_t>::iterator ith = rpkgs.at(rpkg_index).hash_map.find(rpkgs.at(i).hash.at(j).hash_value);
 
                 if (ith != rpkgs.at(rpkg_index).hash_map.end())
                 {
@@ -74,22 +74,22 @@ void dev_function::dev_extract_all_hashes_in_game(rpkg_extraction_vars& rpkg_var
 
                     hash_count++;
 
-                    std::string hash_file_name = rpkgs.at(rpkg_index).hash.at(ith->second).hash_file_name;
+                    std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(ith->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(ith->second).hash_resource_type;
 
                     uint64_t hash_size;
 
-                    if (rpkgs.at(rpkg_index).hash.at(ith->second).is_lz4ed == 1)
+                    if (rpkgs.at(rpkg_index).hash.at(ith->second).data.lz4ed)
                     {
-                        hash_size = rpkgs.at(rpkg_index).hash.at(ith->second).hash_size;
+                        hash_size = rpkgs.at(rpkg_index).hash.at(ith->second).data.header.data_size;
 
-                        if (rpkgs.at(rpkg_index).hash.at(ith->second).is_xored == 1)
+                        if (rpkgs.at(rpkg_index).hash.at(ith->second).data.xored)
                         {
                             hash_size &= 0x3FFFFFFF;
                         }
                     }
                     else
                     {
-                        hash_size = rpkgs.at(rpkg_index).hash.at(ith->second).hash_size_final;
+                        hash_size = rpkgs.at(rpkg_index).hash.at(ith->second).data.resource.size_final;
                     }
 
                     std::vector<char> input_data(hash_size, 0);
@@ -101,10 +101,10 @@ void dev_function::dev_extract_all_hashes_in_game(rpkg_extraction_vars& rpkg_var
                         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(rpkg_index).rpkg_file_path + " could not be read.");
                     }
 
-                    file.seekg(rpkgs.at(rpkg_index).hash.at(ith->second).hash_offset, file.beg);
+                    file.seekg(rpkgs.at(rpkg_index).hash.at(ith->second).data.header.data_offset, file.beg);
                     file.read(input_data.data(), hash_size);
 
-                    if (rpkgs.at(rpkg_index).hash.at(ith->second).is_xored == 1)
+                    if (rpkgs.at(rpkg_index).hash.at(ith->second).data.xored)
                     {
                         crypto::xor_data(input_data.data(), (uint32_t)hash_size);
                     }
@@ -119,10 +119,10 @@ void dev_function::dev_extract_all_hashes_in_game(rpkg_extraction_vars& rpkg_var
                     std::vector<char>* output_data;
                     uint64_t output_data_size;
 
-                    uint32_t decompressed_size = rpkgs.at(rpkg_index).hash.at(ith->second).hash_size_final;
+                    uint32_t decompressed_size = rpkgs.at(rpkg_index).hash.at(ith->second).data.resource.size_final;
                     std::vector<char> lz4_output_data(decompressed_size, 0);
 
-                    if (rpkgs.at(rpkg_index).hash.at(ith->second).is_lz4ed)
+                    if (rpkgs.at(rpkg_index).hash.at(ith->second).data.lz4ed)
                     {
                         LZ4_decompress_safe(input_data.data(), lz4_output_data.data(), (int)hash_size, decompressed_size);
 

@@ -8,7 +8,7 @@
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -92,7 +92,7 @@ void rpkg_function::extract_all_prim_from(std::string& input_path, std::string& 
                             return;
                         }
 
-                        std::string hash_file_name = rpkgs.at(i).hash.at(hash_index).hash_file_name;
+                        std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
 
                         std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
 
@@ -118,7 +118,7 @@ void rpkg_function::extract_all_prim_from(std::string& input_path, std::string& 
                             period_count++;
                         }
 
-                        prim_hash_size_total += rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                        prim_hash_size_total += rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
 
                         prim_count++;
                     }
@@ -145,7 +145,7 @@ void rpkg_function::extract_all_prim_from(std::string& input_path, std::string& 
             LOG("Extracting PRIM to GLB files with filter \"" << filter << "\"");
         }
 
-        std::map<std::string, uint32_t> prim_name_map;
+        std::unordered_map<std::string, uint32_t> prim_name_map;
 
         std::vector<std::string> found_in;
         std::vector<std::string> not_found_in;
@@ -188,13 +188,13 @@ void rpkg_function::extract_all_prim_from(std::string& input_path, std::string& 
                                 stringstream_length = console::update_console(message, prim_hash_size_total, prim_hash_size_current, start_time, stringstream_length);
                             }
 
-                            prim_hash_size_current += rpkgs.at(i).hash.at(hash_index).hash_size_final;
+                            prim_hash_size_current += rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
 
                             prim_count_current++;
 
-                            if (!extract_single_hash || (extract_single_hash && filter == rpkgs.at(i).hash.at(hash_index).hash_string))
+                            if (!extract_single_hash || (extract_single_hash && filter == util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value)))
                             {
-                                std::string hash_file_name = rpkgs.at(i).hash.at(hash_index).hash_file_name;
+                                std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
 
                                 bool found = false;
 
@@ -225,9 +225,9 @@ void rpkg_function::extract_all_prim_from(std::string& input_path, std::string& 
                                         extracted.at(input_filter_index) = true;
                                     }
 
-                                    //std::cout << "rpkg_function::extract_prim_to_gltf_from(" << rpkgs.at(i).rpkg_file_path << ", " << rpkgs.at(i).hash.at(hash_index).hash_string << ", " << prim_output_dir << ");" << std::endl;
+                                    //std::cout << "rpkg_function::extract_prim_to_gltf_from(" << rpkgs.at(i).rpkg_file_path << ", " << util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) << ", " << prim_output_dir << ");" << std::endl;
 
-                                    rpkg_function::extract_prim_from(rpkgs.at(i).rpkg_file_path, rpkgs.at(i).hash.at(hash_index).hash_string, prim_output_dir, type, true);
+                                    rpkg_function::extract_prim_from(rpkgs.at(i).rpkg_file_path, util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value), prim_output_dir, type, true);
                                     
                                     /*std::vector<uint32_t>().swap(temp_entry_index);
                                     std::vector<uint32_t>().swap(temp_logicalParent);
@@ -243,7 +243,7 @@ void rpkg_function::extract_all_prim_from(std::string& input_path, std::string& 
                                     std::vector<std::vector<uint32_t>>().swap(temp_property_types_shared_count);
                                     std::vector<std::vector<uint32_t>>().swap(temp_property_types_offsets);
                                     std::vector<std::vector<std::string>>().swap(temp_property_types_values);
-                                    std::vector<std::map<uint32_t, uint32_t>>().swap(temp_property_types_offsets_map);
+                                    std::vector<std::unordered_map<uint32_t, uint32_t>>().swap(temp_property_types_offsets_map);
                                     std::vector<std::vector<uint32_t>>().swap(property_crc32_values);
                                     std::vector<std::vector<uint32_t>>().swap(property_type_indexes);
                                     std::vector<std::vector<uint32_t>>().swap(property_offsets);
@@ -260,7 +260,7 @@ void rpkg_function::extract_all_prim_from(std::string& input_path, std::string& 
                                     std::vector<char>().swap(tblu_output_data);
                                     std::vector<matrix43>().swap(temp_world_coordinates);
                                     std::vector<std::string>().swap(temp_world_coordinates_property_names);
-                                    std::map<uint32_t, uint32_t>().swap(temp_world_coordinates_map);*/
+                                    std::unordered_map<uint32_t, uint32_t>().swap(temp_world_coordinates_map);*/
                                 }
                             }
                         }

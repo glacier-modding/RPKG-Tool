@@ -5,7 +5,7 @@
 #include "util.h"
 #include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
-#include <map>
+#include <unordered_map>
 #include <fstream>
 #include <sstream>
 #include <set>
@@ -25,18 +25,18 @@ ores::ores(uint64_t rpkgs_index, uint64_t hash_index)
 
     uint64_t ores_hash_size;
 
-    if (rpkgs.at(ores_rpkg_index).hash.at(ores_hash_index).is_lz4ed == 1)
+    if (rpkgs.at(ores_rpkg_index).hash.at(ores_hash_index).data.lz4ed)
     {
-        ores_hash_size = rpkgs.at(ores_rpkg_index).hash.at(ores_hash_index).hash_size;
+        ores_hash_size = rpkgs.at(ores_rpkg_index).hash.at(ores_hash_index).data.header.data_size;
 
-        if (rpkgs.at(ores_rpkg_index).hash.at(ores_hash_index).is_xored == 1)
+        if (rpkgs.at(ores_rpkg_index).hash.at(ores_hash_index).data.xored)
         {
             ores_hash_size &= 0x3FFFFFFF;
         }
     }
     else
     {
-        ores_hash_size = rpkgs.at(ores_rpkg_index).hash.at(ores_hash_index).hash_size_final;
+        ores_hash_size = rpkgs.at(ores_rpkg_index).hash.at(ores_hash_index).data.resource.size_final;
     }
 
     std::vector<char> ores_input_data = std::vector<char>(ores_hash_size, 0);
@@ -48,20 +48,20 @@ ores::ores(uint64_t rpkgs_index, uint64_t hash_index)
         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(ores_rpkg_index).rpkg_file_path + " could not be read.");
     }
 
-    file.seekg(rpkgs.at(ores_rpkg_index).hash.at(ores_hash_index).hash_offset, file.beg);
+    file.seekg(rpkgs.at(ores_rpkg_index).hash.at(ores_hash_index).data.header.data_offset, file.beg);
     file.read(ores_input_data.data(), ores_hash_size);
     file.close();
 
-    if (rpkgs.at(ores_rpkg_index).hash.at(ores_hash_index).is_xored == 1)
+    if (rpkgs.at(ores_rpkg_index).hash.at(ores_hash_index).data.xored)
     {
         crypto::xor_data(ores_input_data.data(), (uint32_t)ores_hash_size);
     }
 
-    uint32_t ores_decompressed_size = rpkgs.at(ores_rpkg_index).hash.at(ores_hash_index).hash_size_final;
+    uint32_t ores_decompressed_size = rpkgs.at(ores_rpkg_index).hash.at(ores_hash_index).data.resource.size_final;
 
     std::vector<char> ores_output_data = std::vector<char>(ores_decompressed_size, 0);
 
-    if (rpkgs.at(ores_rpkg_index).hash.at(ores_hash_index).is_lz4ed)
+    if (rpkgs.at(ores_rpkg_index).hash.at(ores_hash_index).data.lz4ed)
     {
         LZ4_decompress_safe(ores_input_data.data(), ores_output_data.data(), (int)ores_hash_size, ores_decompressed_size);
 

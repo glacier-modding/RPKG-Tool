@@ -11,7 +11,7 @@
 
 void dev_function::dev_extract_rpkg_supermetas(std::string& input_path, std::string& output_path)
 {
-    input_path = file::parse_input_folder_path(input_path);
+    /*input_path = file::parse_input_folder_path(input_path);
 
     std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
 
@@ -286,5 +286,5 @@ void dev_function::dev_extract_rpkg_supermetas(std::string& input_path, std::str
                 rpkg_super_meta_data_file.write(input_file_data.data(), input_file_size);
             }
         }
-    }
+    }*/
 }

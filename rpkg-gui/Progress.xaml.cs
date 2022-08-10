@@ -65,7 +65,10 @@ namespace rpkg
 
                 task_multiple_status = get_task_multiple_status();
 
-                timing_string = Marshal.PtrToStringAnsi(get_timing_string());
+                if (operation != (int)Operation.IMPORT)
+                {
+                    timing_string = Marshal.PtrToStringAnsi(get_timing_string());
+                }
 
                 task_status_string = Marshal.PtrToStringAnsi(get_task_status_string());
 
@@ -300,7 +303,11 @@ namespace rpkg
         void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             ProgressBar.Value = e.ProgressPercentage;
-            message.Content = timing_string;
+
+            if (operation != (int)Operation.IMPORT)
+            {
+                message.Content = timing_string;
+            }
         }
 
         void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
