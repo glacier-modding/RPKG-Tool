@@ -1311,9 +1311,9 @@ int search_imported_hashes(char* search_str, char* rpkg_file, char* resource_typ
 
                         if (it != hash_list_hash_map.end())
                         {
-                            if (hash_list_hash_strings.at(it->second).find(search_string) != std::string::npos || hash_list_hash_file_names.at(it->second).find(search_string) != std::string::npos)
+                            if (hash_list_hash_strings.at(it->second).find(search_string) != std::string::npos || hash_list_hash_file_names.at(it->second).find(util::to_upper_case(search_string)) != std::string::npos)
                             {
-                                search_imported_hashes_string.append(util::to_upper_case(hash_list_hash_file_names.at(it->second)));
+                                search_imported_hashes_string.append(hash_list_hash_file_names.at(it->second));
                                 search_imported_hashes_string.push_back(',');
 
                                 search_count++;
@@ -1323,7 +1323,7 @@ int search_imported_hashes(char* search_str, char* rpkg_file, char* resource_typ
                         {
                             std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hashes_based_on_resource_types.at(j).at(k)) + "." + rpkgs.at(i).hash_resource_types.at(j);
 
-                            if (util::to_lower_case(hash_file_name).find(search_string) != std::string::npos)
+                            if (hash_file_name.find(util::to_upper_case(search_string)) != std::string::npos)
                             {
                                 search_imported_hashes_string.append(hash_file_name);
                                 search_imported_hashes_string.push_back(',');
