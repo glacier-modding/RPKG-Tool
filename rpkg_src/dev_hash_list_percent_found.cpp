@@ -33,17 +33,10 @@ void dev_function::dev_hash_list_percent_found(std::string& input_path, std::str
     for (uint64_t h = 0; h < hash_list_hash_value_strings.size(); h++)
     {
         std::string hash_string = generic_function::compute_ioi_hash_string(hash_list_hash_strings.at(h));
-        hash_string = hash_string;
-        std::string hash_string_upper = "";
-
-        for (int i = 0; i < hash_string.length(); i++)
-        {
-            hash_string_upper += std::tolower(hash_string[i]);
-        }
 
         //std::cout << hash_string_upper << "," << hash_list_hash_value_strings.at(h) << std::endl;
 
-        if (hash_string_upper == hash_list_hash_value_strings.at(h))
+        if (hash_string == hash_list_hash_value_strings.at(h))
         {
             matched++;
             //std::cout << "MATCHED" << std::endl;
