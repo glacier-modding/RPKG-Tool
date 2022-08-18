@@ -11,7 +11,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -3624,32 +3623,11 @@ namespace rpkg
 
 		private void OpenRPKGFile_Click(object sender, RoutedEventArgs e)
 		{
-			var fileDialog = new Ookii.Dialogs.Wpf.VistaOpenFileDialog();
+			string rpkgPath = SelectFile("input", "Select an RPKG file to import:", "RPKG file|*.rpkg|All files|*.*", "");
 
-			fileDialog.Title = "Select an RPKG file to import:";
-
-			fileDialog.Filter = "RPKG file|*.rpkg|All files|*.*";
-
-			if (!System.IO.Directory.Exists(userSettings.InputFolder))
+			if (rpkgPath != "")
 			{
-				userSettings.InputFolder = System.IO.Directory.GetCurrentDirectory();
-
-				var options = new JsonSerializerOptions { WriteIndented = true };
-
-				string jsonString = JsonSerializer.Serialize(userSettings, options);
-
-				File.WriteAllText("rpkg.json", jsonString);
-			}
-
-			fileDialog.InitialDirectory = userSettings.InputFolder;
-
-			fileDialog.FileName = userSettings.InputFolder;
-
-			var fileDialogResult = fileDialog.ShowDialog();
-
-			if (fileDialogResult == true)
-			{
-				ImportRPKGFile(fileDialog.FileName);
+				ImportRPKGFile(rpkgPath);
 
 				//LoadHashDependsMap();
 			}
@@ -4328,36 +4306,33 @@ namespace rpkg
 
 			if (type == "input")
 			{
-				if (!File.Exists(initialFolder))
+				if (!Directory.Exists(initialFolder))
 				{
-					if (File.Exists(userSettings.InputFolder))
+					if (Directory.Exists(userSettings.InputFolder))
 					{
 						initialFolder = userSettings.InputFolder;
 					}
 					else
 					{
-						initialFolder = System.IO.Directory.GetCurrentDirectory();
+						initialFolder = Directory.GetCurrentDirectory();
 					}
 				}
-
-				folderDialog.SelectedPath = initialFolder;
 			}
 			else if (type == "output")
 			{
-				if (!File.Exists(initialFolder))
+				if (!Directory.Exists(initialFolder))
 				{
-					if (File.Exists(userSettings.OutputFolder))
+					if (Directory.Exists(userSettings.OutputFolder))
 					{
 						initialFolder = userSettings.OutputFolder;
 					}
 					else
 					{
-						initialFolder = System.IO.Directory.GetCurrentDirectory();
+						initialFolder = Directory.GetCurrentDirectory();
 					}
 				}
-
-				folderDialog.SelectedPath = initialFolder;
 			}
+			folderDialog.SelectedPath = initialFolder + Path.DirectorySeparatorChar;
 
 			var folderDialogResult = folderDialog.ShowDialog();
 
