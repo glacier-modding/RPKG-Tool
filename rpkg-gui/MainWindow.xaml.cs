@@ -1642,20 +1642,20 @@ namespace rpkg
 
 								/*List<string> rpkgFiles = new List<string>();
 
-                                foreach (var filePath in Directory.GetFiles(runtimeDirectory))
-                                {
-                                    if (filePath.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        rpkgFiles.Add(filePath);
-                                    }
-                                }
+								foreach (var filePath in Directory.GetFiles(runtimeDirectory))
+								{
+									if (filePath.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
+									{
+										rpkgFiles.Add(filePath);
+									}
+								}
 
-                                rpkgFiles.Sort(new NaturalStringComparer());
+								rpkgFiles.Sort(new NaturalStringComparer());
 
-                                foreach (string filePath in rpkgFiles)
-                                {
-                                    ImportRPKGFile(filePath);
-                                }*/
+								foreach (string filePath in rpkgFiles)
+								{
+									ImportRPKGFile(filePath);
+								}*/
 
 								ImportRPKGFileFolder(runtimeDirectory);
 
@@ -2404,20 +2404,20 @@ namespace rpkg
 
 								/*List<string> rpkgFiles = new List<string>();
 
-                                foreach (var filePath in Directory.GetFiles(runtimeDirectory))
-                                {
-                                    if (filePath.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        rpkgFiles.Add(filePath);
-                                    }
-                                }
+								foreach (var filePath in Directory.GetFiles(runtimeDirectory))
+								{
+									if (filePath.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
+									{
+										rpkgFiles.Add(filePath);
+									}
+								}
 
-                                rpkgFiles.Sort(new NaturalStringComparer());
+								rpkgFiles.Sort(new NaturalStringComparer());
 
-                                foreach (string filePath in rpkgFiles)
-                                {
-                                    ImportRPKGFile(filePath);
-                                }*/
+								foreach (string filePath in rpkgFiles)
+								{
+									ImportRPKGFile(filePath);
+								}*/
 
 								ImportRPKGFileFolder(runtimeDirectory);
 
@@ -2982,7 +2982,7 @@ namespace rpkg
 				SetDiscordStatus("REPO View", "");
 
 				if (RightTabControl.Visibility == Visibility.Visible)
-                {
+				{
 					RightTabControl.Visibility = Visibility.Collapsed;
 				}
 
@@ -3770,29 +3770,29 @@ namespace rpkg
 
 			/*List<string> rpkgFiles = new List<string>();
 
-            foreach (var filePath in Directory.GetFiles(inputFolder))
-            {
-                if (filePath.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
-                {
-                    rpkgFiles.Add(filePath);
-                }
-            }
+			foreach (var filePath in Directory.GetFiles(inputFolder))
+			{
+				if (filePath.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
+				{
+					rpkgFiles.Add(filePath);
+				}
+			}
 
-            rpkgFiles.Sort(new NaturalStringComparer());
+			rpkgFiles.Sort(new NaturalStringComparer());
 
-            bool anyRPKGImported = false;
+			bool anyRPKGImported = false;
 
-            foreach (string filePath in rpkgFiles)
-            {
-                ImportRPKGFile(filePath);
+			foreach (string filePath in rpkgFiles)
+			{
+				ImportRPKGFile(filePath);
 
-                anyRPKGImported = true;
-            }
+				anyRPKGImported = true;
+			}
 
-            if (anyRPKGImported)
-            {
-                //LoadHashDependsMap();
-            }*/
+			if (anyRPKGImported)
+			{
+				//LoadHashDependsMap();
+			}*/
 
 			ImportRPKGFileFolder(inputFolder);
 
@@ -4008,61 +4008,61 @@ namespace rpkg
 						MessageBoxShow(progress.task_status_string.Replace("_", "__"));
 
 						/*if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_GLB_MESH_NAME_MALFORMED)
-                        {
-                            MessageBoxShow("Error: GLB mesh name is malformed.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_ONLY_ONE_MESH_ALLOWED)
-                        {
-                            MessageBoxShow("Error: Only one mesh primitive per mesh is allowed.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_VERTEX_NOT_MULTIPLE_OF_3)
-                        {
-                            MessageBoxShow("Error: GLB vertex float size is not a multiple of 3.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISSING_POSITION_DATA)
-                        {
-                            MessageBoxShow("Error: GLB is missing POSITION data.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISMATCHED_BONES)
-                        {
-                            MessageBoxShow("Error: GLB has mismatched bones compared to the original BORG file.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_WEIGHTED_DATA_DOES_NOT_CONFORM)
-                        {
-                            MessageBoxShow("Error: GLB weighted data does not conform to IOI's specs (per vertex): JOINTS_0 (4 values), WEIGHTS_0 (4 values), JOINTS_1 (2 values), WEIGHTS_1 (2 values).");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_WEIGHTED_DATA_MISSING)
-                        {
-                            MessageBoxShow("Error: GLB is weighted, but does not have all necessary weighted data: JOINTS_0, WEIGHTS_0, JOINTS_1, WEIGHTS_1.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_NORMALS_DO_NOT_MATCH_VERTICES)
-                        {
-                            MessageBoxShow("Error: GLB vertex float size not equal to normal float size.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISSING_NORMAL_DATA)
-                        {
-                            MessageBoxShow("Error: GLB is missing NORMAL data.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_UVS_DO_NOT_MATCH_VERTICES)
-                        {
-                            MessageBoxShow("Error: GLB vertex float size not equal to UV float size.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISSING_UV_DATA)
-                        {
-                            MessageBoxShow("Error: GLB is missing TEXCOORD_0 data.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_COLORS_DO_NOT_MATCH_VERTICES)
-                        {
-                            MessageBoxShow("Error: GLB color size not equal to vertex size.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_COLORS_WRONG_FORMAT)
-                        {
-                            MessageBoxShow("Error: GLB color data is of the wrong format, needs to be of type VEC4, an unsigned byte or short, and normalized.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_TOO_MANY_PRIMARY_OBJECT_HEADERS)
-                        {
-                            MessageBoxShow("Error: PRIM has too many primary object headers.");
-                        }*/
+						{
+							MessageBoxShow("Error: GLB mesh name is malformed.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_ONLY_ONE_MESH_ALLOWED)
+						{
+							MessageBoxShow("Error: Only one mesh primitive per mesh is allowed.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_VERTEX_NOT_MULTIPLE_OF_3)
+						{
+							MessageBoxShow("Error: GLB vertex float size is not a multiple of 3.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISSING_POSITION_DATA)
+						{
+							MessageBoxShow("Error: GLB is missing POSITION data.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISMATCHED_BONES)
+						{
+							MessageBoxShow("Error: GLB has mismatched bones compared to the original BORG file.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_WEIGHTED_DATA_DOES_NOT_CONFORM)
+						{
+							MessageBoxShow("Error: GLB weighted data does not conform to IOI's specs (per vertex): JOINTS_0 (4 values), WEIGHTS_0 (4 values), JOINTS_1 (2 values), WEIGHTS_1 (2 values).");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_WEIGHTED_DATA_MISSING)
+						{
+							MessageBoxShow("Error: GLB is weighted, but does not have all necessary weighted data: JOINTS_0, WEIGHTS_0, JOINTS_1, WEIGHTS_1.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_NORMALS_DO_NOT_MATCH_VERTICES)
+						{
+							MessageBoxShow("Error: GLB vertex float size not equal to normal float size.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISSING_NORMAL_DATA)
+						{
+							MessageBoxShow("Error: GLB is missing NORMAL data.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_UVS_DO_NOT_MATCH_VERTICES)
+						{
+							MessageBoxShow("Error: GLB vertex float size not equal to UV float size.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISSING_UV_DATA)
+						{
+							MessageBoxShow("Error: GLB is missing TEXCOORD_0 data.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_COLORS_DO_NOT_MATCH_VERTICES)
+						{
+							MessageBoxShow("Error: GLB color size not equal to vertex size.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_COLORS_WRONG_FORMAT)
+						{
+							MessageBoxShow("Error: GLB color data is of the wrong format, needs to be of type VEC4, an unsigned byte or short, and normalized.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_TOO_MANY_PRIMARY_OBJECT_HEADERS)
+						{
+							MessageBoxShow("Error: PRIM has too many primary object headers.");
+						}*/
 
 						return_value = clear_temp_tblu_data();
 
@@ -4115,61 +4115,61 @@ namespace rpkg
 						MessageBoxShow(progress.task_status_string.Replace("_", "__"));
 
 						/*if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_GLB_MESH_NAME_MALFORMED)
-                        {
-                            MessageBoxShow("Error: GLB mesh name is malformed.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_ONLY_ONE_MESH_ALLOWED)
-                        {
-                            MessageBoxShow("Error: Only one mesh primitive per mesh is allowed.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_VERTEX_NOT_MULTIPLE_OF_3)
-                        {
-                            MessageBoxShow("Error: GLB vertex float size is not a multiple of 3.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISSING_POSITION_DATA)
-                        {
-                            MessageBoxShow("Error: GLB is missing POSITION data.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISMATCHED_BONES)
-                        {
-                            MessageBoxShow("Error: GLB has mismatched bones compared to the original BORG file.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_WEIGHTED_DATA_DOES_NOT_CONFORM)
-                        {
-                            MessageBoxShow("Error: GLB weighted data does not conform to IOI's specs (per vertex): JOINTS_0 (4 values), WEIGHTS_0 (4 values), JOINTS_1 (2 values), WEIGHTS_1 (2 values).");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_WEIGHTED_DATA_MISSING)
-                        {
-                            MessageBoxShow("Error: GLB is weighted, but does not have all necessary weighted data: JOINTS_0, WEIGHTS_0, JOINTS_1, WEIGHTS_1.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_NORMALS_DO_NOT_MATCH_VERTICES)
-                        {
-                            MessageBoxShow("Error: GLB vertex float size not equal to normal float size.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISSING_NORMAL_DATA)
-                        {
-                            MessageBoxShow("Error: GLB is missing NORMAL data.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_UVS_DO_NOT_MATCH_VERTICES)
-                        {
-                            MessageBoxShow("Error: GLB vertex float size not equal to UV float size.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISSING_UV_DATA)
-                        {
-                            MessageBoxShow("Error: GLB is missing TEXCOORD_0 data.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_COLORS_DO_NOT_MATCH_VERTICES)
-                        {
-                            MessageBoxShow("Error: GLB color size not equal to vertex size.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_COLORS_WRONG_FORMAT)
-                        {
-                            MessageBoxShow("Error: GLB color data is of the wrong format, needs to be of type VEC4, an unsigned byte or short, and normalized.");
-                        }
-                        else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_TOO_MANY_PRIMARY_OBJECT_HEADERS)
-                        {
-                            MessageBoxShow("Error: PRIM has too many primary object headers.");
-                        }*/
+						{
+							MessageBoxShow("Error: GLB mesh name is malformed.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_ONLY_ONE_MESH_ALLOWED)
+						{
+							MessageBoxShow("Error: Only one mesh primitive per mesh is allowed.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_VERTEX_NOT_MULTIPLE_OF_3)
+						{
+							MessageBoxShow("Error: GLB vertex float size is not a multiple of 3.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISSING_POSITION_DATA)
+						{
+							MessageBoxShow("Error: GLB is missing POSITION data.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISMATCHED_BONES)
+						{
+							MessageBoxShow("Error: GLB has mismatched bones compared to the original BORG file.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_WEIGHTED_DATA_DOES_NOT_CONFORM)
+						{
+							MessageBoxShow("Error: GLB weighted data does not conform to IOI's specs (per vertex): JOINTS_0 (4 values), WEIGHTS_0 (4 values), JOINTS_1 (2 values), WEIGHTS_1 (2 values).");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_WEIGHTED_DATA_MISSING)
+						{
+							MessageBoxShow("Error: GLB is weighted, but does not have all necessary weighted data: JOINTS_0, WEIGHTS_0, JOINTS_1, WEIGHTS_1.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_NORMALS_DO_NOT_MATCH_VERTICES)
+						{
+							MessageBoxShow("Error: GLB vertex float size not equal to normal float size.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISSING_NORMAL_DATA)
+						{
+							MessageBoxShow("Error: GLB is missing NORMAL data.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_UVS_DO_NOT_MATCH_VERTICES)
+						{
+							MessageBoxShow("Error: GLB vertex float size not equal to UV float size.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_MISSING_UV_DATA)
+						{
+							MessageBoxShow("Error: GLB is missing TEXCOORD_0 data.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_COLORS_DO_NOT_MATCH_VERTICES)
+						{
+							MessageBoxShow("Error: GLB color size not equal to vertex size.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_COLORS_WRONG_FORMAT)
+						{
+							MessageBoxShow("Error: GLB color data is of the wrong format, needs to be of type VEC4, an unsigned byte or short, and normalized.");
+						}
+						else if (progress.task_status == (int)Progress.RPKGStatus.PRIM_REBUILD_TOO_MANY_PRIMARY_OBJECT_HEADERS)
+						{
+							MessageBoxShow("Error: PRIM has too many primary object headers.");
+						}*/
 
 						return_value = clear_temp_tblu_data();
 
@@ -4241,29 +4241,29 @@ namespace rpkg
 
 				/*List<string> rpkgFiles = new List<string>();
 
-                foreach (var filePath in Directory.GetFiles(inputFolder))
-                {
-                    if (filePath.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
-                    {
-                        rpkgFiles.Add(filePath);
-                    }
-                }
+				foreach (var filePath in Directory.GetFiles(inputFolder))
+				{
+					if (filePath.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
+					{
+						rpkgFiles.Add(filePath);
+					}
+				}
 
-                rpkgFiles.Sort(new NaturalStringComparer());
+				rpkgFiles.Sort(new NaturalStringComparer());
 
-                bool anyRPKGImported = false;
+				bool anyRPKGImported = false;
 
-                foreach (string filePath in rpkgFiles)
-                {
-                    ImportRPKGFile(filePath);
+				foreach (string filePath in rpkgFiles)
+				{
+					ImportRPKGFile(filePath);
 
-                    anyRPKGImported = true;
-                }
+					anyRPKGImported = true;
+				}
 
-                if (anyRPKGImported)
-                {
-                    //LoadHashDependsMap();
-                }*/
+				if (anyRPKGImported)
+				{
+					//LoadHashDependsMap();
+				}*/
 			}
 		}
 
@@ -4981,8 +4981,8 @@ private enum OggPlayerState
 			MemoryStream memoryStream3 = new MemoryStream(Properties.Resources.i3, 0, Properties.Resources.i3.Length, true, true);
 
 			for (int i = 0; i < memoryStream1.Length; i++)
-            {
-                memoryStream1.GetBuffer()[i] = (byte)(memoryStream1.GetBuffer()[i] ^ 0x47);
+			{
+				memoryStream1.GetBuffer()[i] = (byte)(memoryStream1.GetBuffer()[i] ^ 0x47);
 			}
 
 			for (int i = 0; i < memoryStream2.Length; i++)
@@ -6797,18 +6797,18 @@ private enum OggPlayerState
 			UpdateHashDependsChanges(ref hashDependsNumber, ref hashDependsFlagsNumber, ref backup_rpkg_file, ref hashDependsCountFound, ref hashOffset);
 
 			/*if (hashDependsNumber != hashDependsList.Count)
-            {
-                MessageBoxShow("Error: Parsing the hash depends textboxes for the hash depends hash values.");
+			{
+				MessageBoxShow("Error: Parsing the hash depends textboxes for the hash depends hash values.");
 
-                return;
-            }
+				return;
+			}
 
-            if (hashDependsFlagsNumber != hashDependsFlagsList.Count)
-            {
-                MessageBoxShow("Error: Parsing the hash depends flags textboxes for the hash depends hash values.");
+			if (hashDependsFlagsNumber != hashDependsFlagsList.Count)
+			{
+				MessageBoxShow("Error: Parsing the hash depends flags textboxes for the hash depends hash values.");
 
-                return;
-            }*/
+				return;
+			}*/
 
 			if (hashDependsNumber != hashDependsFlagsNumber)
 			{
@@ -8820,13 +8820,13 @@ private enum OggPlayerState
 							rpkg_file_path = Marshal.PtrToStringAnsi(get_latest_hash_rpkg_path(hash));
 
 							if (rpkg_file_path == "")
-                            {
+							{
 								MessageBoxShow("Hash file/resource " + hash + " was not found in the currently loaded RPKGs.");
 
 								return;
-                            }
+							}
 							else
-                            {
+							{
 								buttons = new string[] { "Extract Entity (" + hash + ") To QN (QuickEntity) JSON", "Duplicate Entry", "Erase Entry", "Cancel" };
 							}
 						}
@@ -8839,7 +8839,7 @@ private enum OggPlayerState
 					rightClickMenu.ShowDialog();
 
 					if (rightClickMenu.buttonPressed == "button0" && buttons.Length == 4)
-                    {
+					{
 						string runtimeDirectory = rpkg_file_path.Substring(0, rpkg_file_path.LastIndexOf("\\"));
 
 						if (!runtimeDirectory.EndsWith("runtime", StringComparison.OrdinalIgnoreCase))
@@ -8972,7 +8972,7 @@ private enum OggPlayerState
 				}
 
 				if (REPOJSONTextEditor.Visibility == Visibility.Collapsed)
-                {
+				{
 					REPOVisualEditorTabControl.Visibility = Visibility.Collapsed;
 					REPOJSONTextEditor.Visibility = Visibility.Visible;
 				}
@@ -8982,15 +8982,15 @@ private enum OggPlayerState
 					LoadREPOJSON(ref node);
 				}
 				else
-                {
+				{
 					REPOJSONTextEditor.Text = "";
 					repoJSONTextEditorID = "";
-                }
+				}
 			}
 		}
 
 		void LoadREPOJSON(ref System.Windows.Forms.TreeNode node)
-        {
+		{
 			bool imageFound = false;
 
 			REPOImageViewer.Source = null;
@@ -9083,8 +9083,8 @@ private enum OggPlayerState
 			}
 		}
 
-        private void LoadREPOFromRPKGsButton_Click(object sender, RoutedEventArgs e)
-        {
+		private void LoadREPOFromRPKGsButton_Click(object sender, RoutedEventArgs e)
+		{
 			REPOJSONTextEditor.Text = "";
 			repoJSONTextEditorID = "";
 
@@ -9123,13 +9123,13 @@ private enum OggPlayerState
 			{
 				MessageBoxShow(Encoding.UTF8.GetString(repo_data));
 			}
-            else
-            {
+			else
+			{
 				LoadREPO();
 			}
 		}
 
-        private void LoadREPOFromFileButton_Click(object sender, RoutedEventArgs e)
+		private void LoadREPOFromFileButton_Click(object sender, RoutedEventArgs e)
 		{
 			REPOJSONTextEditor.Text = "";
 			repoJSONTextEditorID = "";
@@ -9162,7 +9162,7 @@ private enum OggPlayerState
 			}
 		}
 
-        private void REPOImportSMFREPOJSONButton_Click(object sender, RoutedEventArgs e)
+		private void REPOImportSMFREPOJSONButton_Click(object sender, RoutedEventArgs e)
 		{
 			REPOJSONTextEditor.Text = "";
 			repoJSONTextEditorID = "";
@@ -9200,8 +9200,8 @@ private enum OggPlayerState
 			}
 		}
 
-        private void REPOSaveChangesToSMFREPOJSONButton_Click(object sender, RoutedEventArgs e)
-        {
+		private void REPOSaveChangesToSMFREPOJSONButton_Click(object sender, RoutedEventArgs e)
+		{
 			if (REPOTreeView.Nodes.Count > 2)
 			{
 				string repoPath = SelectFile("output", "Select SMF REPO JSON File To Output To", "SMF REPO JSON files|*.repository.json|All files|*.*", "");
@@ -9209,7 +9209,7 @@ private enum OggPlayerState
 				if (repoPath != "")
 				{
 					if (!repoPath.ToLower().EndsWith(".repository.json"))
-                    {
+					{
 						repoPath += ".repository.json";
 					}
 
@@ -9238,7 +9238,7 @@ private enum OggPlayerState
 			//int isValidJSON = is_valid_json(REPOJSONTextEditor.Text);
 
 			if (REPOJSONTextEditor.Text == "")
-            {
+			{
 				REPOJSONStatus.Visibility = Visibility.Collapsed;
 			}
 			else
@@ -9265,8 +9265,8 @@ private enum OggPlayerState
 			}
 		}
 
-        private void REPOJSONTextEditor_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
-        {
+		private void REPOJSONTextEditor_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+		{
 			//MessageBoxShow(REPOJSONTextEditorName.Text);
 
 			if (repoJSONTextEditorID != "")
@@ -9276,21 +9276,21 @@ private enum OggPlayerState
 				repoJSONTextEditorID = Marshal.PtrToStringAnsi(get_repo_response_data());
 
 				if (repoJSONTextEditorID.StartsWith("Err"))
-                {
+				{
 					MessageBoxShow(repoJSONTextEditorID);
 
 					REPOJSONTextEditor.Text = "";
 					repoJSONTextEditorID = "";
 				}
 				else
-                {
+				{
 					UpdateNode();
 				}
 			}
 		}
 
 		void UpdateNode()
-        {
+		{
 			int response = get_repo_entry(repoJSONTextEditorID);
 
 			UInt32 repo_data_size = get_repo_response_data_size();
@@ -9489,7 +9489,7 @@ private enum OggPlayerState
 		}
 
 		void LoadREPOVisualEditor()
-        {
+		{
 			loadingVisualEditor = true;
 
 			REPOVisualEditorTabControl.Items.Clear();
@@ -9529,7 +9529,7 @@ private enum OggPlayerState
 				string jsonPointer = "";
 
 				if (jsonProperty.Value.ValueKind == JsonValueKind.Object)
-                {
+				{
 					TabItem tabItem = new TabItem();
 					tabItem.Header = jsonProperty.Name;
 					ScrollViewer scrollViewer = new ScrollViewer();
@@ -9600,7 +9600,7 @@ private enum OggPlayerState
 					}
 				}
 				else
-                {
+				{
 					jsonPointer = "/" + jsonProperty.Name.Replace("~", "~0").Replace("/", "~1");
 
 					AddRowToVisualEditor(jsonProperty.Name, jsonProperty.Value, ref jsonPointer, ref gridRoot, ref index, ref top);
@@ -9615,7 +9615,7 @@ private enum OggPlayerState
 		}
 
 		void AddRowToVisualEditor(string name, JsonElement element, ref string jsonPointer, ref Grid grid, ref int index, ref bool top)
-        {
+		{
 			RowDefinition rowDefinition = new RowDefinition();
 			rowDefinition.Height = GridLength.Auto;
 			grid.RowDefinitions.Add(rowDefinition);
@@ -9782,7 +9782,7 @@ private enum OggPlayerState
 			return null;
 		}
 
-        private void TextBox_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+		private void TextBox_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
 		{
 			if (loadingVisualEditor)
 				return;
@@ -9891,7 +9891,7 @@ private enum OggPlayerState
 			return "";
 		}
 
-        private void CheckBox_Changed(object sender, RoutedEventArgs e)
+		private void CheckBox_Changed(object sender, RoutedEventArgs e)
 		{
 			if (loadingVisualEditor)
 				return;
@@ -9907,7 +9907,7 @@ private enum OggPlayerState
 					update_json_at_pointer(repoJSONTextEditorID, pointer, "true");
 				}
 				else
-                {
+				{
 					update_json_at_pointer(repoJSONTextEditorID, pointer, "false");
 				}
 
@@ -9919,8 +9919,8 @@ private enum OggPlayerState
 			}
 		}
 
-        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
+		private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
 			if (loadingVisualEditor)
 				return;
 
@@ -9947,8 +9947,8 @@ private enum OggPlayerState
 			}
 		}
 
-        private void HexViewerTextBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
-        {
+		private void HexViewerTextBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+		{
 			bool controlKey = Keyboard.Modifiers == ModifierKeys.Control;
 
 			if (controlKey)
@@ -9970,7 +9970,7 @@ private enum OggPlayerState
 			}
 		}
 
-        private void DetailsTextBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+		private void DetailsTextBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
 		{
 			bool controlKey = Keyboard.Modifiers == ModifierKeys.Control;
 
@@ -9993,7 +9993,7 @@ private enum OggPlayerState
 			}
 		}
 
-        private void LocalizationTextBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+		private void LocalizationTextBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
 		{
 			bool controlKey = Keyboard.Modifiers == ModifierKeys.Control;
 
@@ -10016,7 +10016,7 @@ private enum OggPlayerState
 			}
 		}
 
-        private void REPOHashTextBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+		private void REPOHashTextBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
 		{
 			bool controlKey = Keyboard.Modifiers == ModifierKeys.Control;
 
@@ -10039,8 +10039,8 @@ private enum OggPlayerState
 			}
 		}
 
-        private void REPOJSONTextEditor_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
-        {
+		private void REPOJSONTextEditor_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+		{
 
 			bool controlKey = Keyboard.Modifiers == ModifierKeys.Control;
 
@@ -10087,5 +10087,5 @@ private enum OggPlayerState
 				}
 			}
 		}
-    }
+	}
 }
