@@ -3484,141 +3484,138 @@ namespace rpkg
 
 		private void ImportRPKGFileFolder(string folderPath)
 		{
-			if (!runtimeDirLoaded)
+			List<string> rpkgFiles = new List<string>();
+
+			foreach (var filePath in Directory.GetFiles(folderPath))
 			{
-				List<string> rpkgFiles = new List<string>();
-
-				foreach (var filePath in Directory.GetFiles(folderPath))
+				if (filePath.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
 				{
-					if (filePath.EndsWith(".rpkg", StringComparison.OrdinalIgnoreCase))
-					{
-						rpkgFiles.Add(filePath);
-					}
+					rpkgFiles.Add(filePath);
 				}
-
-				rpkgFiles.Sort(new NaturalStringComparer());
-
-				string rpkgListString = "";
-
-				List<string> rpkgList = new List<string>();
-
-				foreach (string filePath in rpkgFiles)
-				{
-					bool found = false;
-
-					foreach (System.Windows.Forms.TreeNode treeViewNode in MainTreeView.Nodes)
-					{
-						if (filePath == (treeViewNode.Text as string))
-						{
-							found = true;
-						}
-					}
-
-					if (!found)
-					{
-						rpkgListString += filePath + ",";
-
-						rpkgList.Add(filePath);
-					}
-				}
-
-				int return_value = reset_task_status();
-
-				execute_import_rpkgs temp_rpkgExecute = import_rpkgs;
-
-				IAsyncResult temp_ar = temp_rpkgExecute.BeginInvoke(folderPath, rpkgListString, null, null);
-
-				Progress progress = new Progress();
-
-				progress.message.Content = "Importing RPKG file(s) from " + folderPath + "...";
-
-				progress.operation = (int)Progress.Operation.MASS_EXTRACT;
-
-				progress.ShowDialog();
-
-				if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
-				{
-					//MessageBoxShow(progress.task_status_string);
-
-					return;
-				}
-
-				foreach (string filePath in rpkgList)
-				{
-					int rpkg_valid = is_rpkg_valid(filePath);
-
-					if (rpkg_valid == 1)
-					{
-						if (MainTreeView.Nodes.Count > 0)
-						{
-							if ((MainTreeView.Nodes[0] as System.Windows.Forms.TreeNode).Text.ToString() == "Click")
-							{
-								MainTreeView.Nodes.Clear();
-							}
-						}
-
-						MainTreeView.AfterExpand += MainTreeView_AfterExpand;
-
-						var item = new System.Windows.Forms.TreeNode();
-
-						item.Text = filePath;
-
-						MainTreeView.Nodes.Add(item);
-
-						List<string> resourceTypes = new List<string>();
-
-						UInt32 resourceTypeCount = get_resource_types_count(filePath);
-
-						for (UInt32 i = 0; i < resourceTypeCount; i++)
-						{
-							resourceTypes.Add(Marshal.PtrToStringAnsi(get_resource_types_at(filePath, i)));
-						}
-
-						resourceTypes.Sort();
-
-						foreach (string resourceType in resourceTypes)
-						{
-							var item2 = new System.Windows.Forms.TreeNode();
-
-							item2.Text = resourceType;
-
-							item2.Nodes.Add("");
-
-							//item2.Collapsed += Item2_Collapsed;
-
-							item.Nodes.Add(item2);
-						}
-					}
-				}
-
-				resetDeepSearchComboBoxes();
-
-				//LoadREPO();
-
-				if (oneOrMoreRPKGsHaveBeenImported)
-				{
-					if (LeftTabControl.SelectedIndex == 0)
-					{
-						SetDiscordStatus("Resource View", "");
-					}
-					else if (LeftTabControl.SelectedIndex == 2)
-					{
-						SetDiscordStatus("REPO View", "");
-					}
-					else if (LeftTabControl.SelectedIndex == 4)
-					{
-						SetDiscordStatus("Search View", "");
-					}
-					else if (LeftTabControl.SelectedIndex == 6)
-					{
-						SetDiscordStatus("Deep Search View", "");
-					}
-				}
-
-				oneOrMoreRPKGsHaveBeenImported = true;
-
-				runtimeDirLoaded = true;
 			}
+
+			rpkgFiles.Sort(new NaturalStringComparer());
+
+			string rpkgListString = "";
+
+			List<string> rpkgList = new List<string>();
+
+			foreach (string filePath in rpkgFiles)
+			{
+				bool found = false;
+
+				foreach (System.Windows.Forms.TreeNode treeViewNode in MainTreeView.Nodes)
+				{
+					if (filePath == (treeViewNode.Text as string))
+					{
+						found = true;
+					}
+				}
+
+				if (!found)
+				{
+					rpkgListString += filePath + ",";
+
+					rpkgList.Add(filePath);
+				}
+			}
+
+			int return_value = reset_task_status();
+
+			execute_import_rpkgs temp_rpkgExecute = import_rpkgs;
+
+			IAsyncResult temp_ar = temp_rpkgExecute.BeginInvoke(folderPath, rpkgListString, null, null);
+
+			Progress progress = new Progress();
+
+			progress.message.Content = "Importing RPKG file(s) from " + folderPath + "...";
+
+			progress.operation = (int)Progress.Operation.MASS_EXTRACT;
+
+			progress.ShowDialog();
+
+			if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
+			{
+				//MessageBoxShow(progress.task_status_string);
+
+				return;
+			}
+
+			foreach (string filePath in rpkgList)
+			{
+				int rpkg_valid = is_rpkg_valid(filePath);
+
+				if (rpkg_valid == 1)
+				{
+					if (MainTreeView.Nodes.Count > 0)
+					{
+						if ((MainTreeView.Nodes[0] as System.Windows.Forms.TreeNode).Text.ToString() == "Click")
+						{
+							MainTreeView.Nodes.Clear();
+						}
+					}
+
+					MainTreeView.AfterExpand += MainTreeView_AfterExpand;
+
+					var item = new System.Windows.Forms.TreeNode();
+
+					item.Text = filePath;
+
+					MainTreeView.Nodes.Add(item);
+
+					List<string> resourceTypes = new List<string>();
+
+					UInt32 resourceTypeCount = get_resource_types_count(filePath);
+
+					for (UInt32 i = 0; i < resourceTypeCount; i++)
+					{
+						resourceTypes.Add(Marshal.PtrToStringAnsi(get_resource_types_at(filePath, i)));
+					}
+
+					resourceTypes.Sort();
+
+					foreach (string resourceType in resourceTypes)
+					{
+						var item2 = new System.Windows.Forms.TreeNode();
+
+						item2.Text = resourceType;
+
+						item2.Nodes.Add("");
+
+						//item2.Collapsed += Item2_Collapsed;
+
+						item.Nodes.Add(item2);
+					}
+				}
+			}
+
+			resetDeepSearchComboBoxes();
+
+			//LoadREPO();
+
+			if (oneOrMoreRPKGsHaveBeenImported)
+			{
+				if (LeftTabControl.SelectedIndex == 0)
+				{
+					SetDiscordStatus("Resource View", "");
+				}
+				else if (LeftTabControl.SelectedIndex == 2)
+				{
+					SetDiscordStatus("REPO View", "");
+				}
+				else if (LeftTabControl.SelectedIndex == 4)
+				{
+					SetDiscordStatus("Search View", "");
+				}
+				else if (LeftTabControl.SelectedIndex == 6)
+				{
+					SetDiscordStatus("Deep Search View", "");
+				}
+			}
+
+			oneOrMoreRPKGsHaveBeenImported = true;
+
+			runtimeDirLoaded = true;
 		}
 
 		private void OpenRPKGFile_Click(object sender, RoutedEventArgs e)
