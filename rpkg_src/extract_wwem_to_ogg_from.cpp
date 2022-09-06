@@ -216,32 +216,37 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
                                         full_wwem_ioi_path_unknown = true;
                                     }
 
-                                    size_t pos1 = hash_list_string.find("[assembly:");
+                                    size_t pos_assembly = hash_list_string.find("[assembly:");
+                                    size_t pos_unknown = hash_list_string.find("[unknown:");
+                                    size_t string_length = 0;
+                                    size_t pos1 = std::string::npos;
                                     size_t pos2 = hash_list_string.find(".wav]");
                                     size_t pos3 = hash_list_string.find(".pc_wem");
 
-                                    if (pos1 != std::string::npos && pos2 != std::string::npos && pos3 != std::string::npos && (pos2 - pos1) > 12)
+                                    if (pos_assembly != std::string::npos)
                                     {
-                                        wwem_ioi_path.append(hash_list_string.substr((pos1 + 10), pos2 - (pos1 + 10)));
+                                        pos1 = pos_assembly;
+                                        string_length = 10;
 
+                                    }
+                                    else if (pos_unknown != std::string::npos)
+                                    {
+                                        pos1 = pos_unknown;
+                                        string_length = 9;
+                                    }
+
+                                    if (pos1 != std::string::npos && pos2 != std::string::npos && pos3 != std::string::npos && (pos2 - pos1) > (string_length + 2))
+                                    {
+                                        wwem_ioi_path.append(hash_list_string.substr((pos1 + string_length), pos2 - (pos1 + string_length)));
                                         std::replace(wwem_ioi_path.begin(), wwem_ioi_path.end(), '/', '\\');
-
                                         size_t pos4 = wwem_ioi_path.find_last_of("\\");
-
                                         wwem_base_name = wwem_ioi_path.substr(pos4 + 1);
-
                                         wwem_ioi_directory = wwem_ioi_path.substr(0, pos4);
 
                                         if (full_wwem_ioi_path_unknown)
                                         {
                                             wwem_ioi_path += "." + util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value);
-                                            //wwem_ioi_path.push_back('\\');
-                                            //wwem_ioi_path.append(wwem_base_name);
-                                            //wwem_ioi_directory.push_back('\\');
-                                            //wwem_ioi_directory.append(wwem_base_name);
                                         }
-
-                                        //rpkg_function::get_unique_name(wwem_name_map, wwem_ioi_path);
 
                                         wwem_ioi_path_found = true;
                                     }

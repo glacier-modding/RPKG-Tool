@@ -3755,14 +3755,11 @@ namespace rpkg
 
 			string inputFolder = "";
 
-			if (!runtimeDirLoaded)
-			{
-				inputFolder = SelectFolder("input", "Select Input Folder (Runtime folder or other folder with multiple RPKGs) To Extract " + massExtractName + " From:", "");
+			inputFolder = SelectFolder("input", "Select Input Folder (Runtime folder or other folder with multiple RPKGs) To Extract " + massExtractName + " From:", "");
 
-				if (inputFolder == "")
-				{
-					return;
-				}
+			if (inputFolder == "")
+			{
+				return;
 			}
 
 			/*List<string> rpkgFiles = new List<string>();
