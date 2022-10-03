@@ -316,6 +316,7 @@
                                 <ComboBoxItem Content="BLOB"/>
                                 <ComboBoxItem Content="BMSK"/>
                                 <ComboBoxItem Content="BORG"/>
+                                <ComboBoxItem Content="BOXC"/>
                                 <ComboBoxItem Content="CBLU"/>
                                 <ComboBoxItem Content="CLNG"/>
                                 <ComboBoxItem Content="CPPT"/>
