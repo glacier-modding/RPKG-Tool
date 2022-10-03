@@ -89,7 +89,7 @@ void console::display_usage_info()
     LOG("        Scans a directory, commonly Hitman's Runtime dir, and imports and");
     LOG("        scans all available RPKG files and their patch deletion lists for the existence");
     LOG("        of the hash file/resource, specified by -filter, and extracts and converts a given");
-    LOG("        entity (TEMP/TBLU) to a QN (QuickEntity) JSON.");
+    LOG("        entity (TEMP/TBLU) to a QN (QuickEntity v2.1) JSON.");
     LOG("    -extract_mati_to_json <path to RPKG file>");
     LOG("        Extracts one or more hash file/resources, specified by -filter, from the input RPKG file");
     LOG("        and converts them to MATI JSON(s).");
@@ -216,7 +216,7 @@ void console::display_usage_info()
     LOG("        map (entity/brick) whose hash is specified -filter, during the map import process.");
     LOG("        During the import process, the matrix transforms are parsed from the Godot v4 project");
     LOG("        files, located in the path specified by -map_path. Finally, any changes found in the");
-    LOG("        map are then written to a QN (QuickEntity) JSON, in the format specified by -qn_format.");
+    LOG("        map are then written to a QN (QuickEntity v2.1) JSON, in the format specified by -qn_format.");
     LOG("    -json_to_hash_meta <path to hash *.meta.JSON file>");
     LOG("        Converts a Hash meta JSON file (*.meta.JSON) into a Hash *.meta file.");
     LOG("    -json_to_mati <path to MATI.JSON file(s) / folder>");

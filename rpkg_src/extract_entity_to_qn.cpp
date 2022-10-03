@@ -57,7 +57,7 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
 
         ss << "Scanning folder: Done";
 
-        timing_string = "Extracting entity (TEMP/TBLU) to QN (QuickEntity) JSON...";
+        timing_string = "Extracting entity (TEMP/TBLU) to QN (QuickEntity v2.1) JSON...";
 
         //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
 
@@ -134,7 +134,7 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
 
                     end_time = std::chrono::high_resolution_clock::now();
 
-                    message = "Converting entity (TEMP/TBLU) from RT JSON to QN (QuickEntity) JSON...";
+                    message = "Converting entity (TEMP/TBLU) from RT JSON to QN (QuickEntity v2.1) JSON...";
 
                     ss.str(std::string());
 

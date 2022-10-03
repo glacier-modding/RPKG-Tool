@@ -20,7 +20,7 @@
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
         <Label Grid.Row="1" Content="Output Map Changes To:" FontWeight="Bold" FontSize="18" HorizontalAlignment="Center"/>
-        <Button x:Name="EntityJSONButton" Content="QN (QuickEntity) *.entity.json files" Width="300" Height="40" HorizontalAlignment="Center" Click="EntityJSONButton_Click" Grid.Row="3"/>
-        <Button x:Name="PatchJSONButton" Content="QN (QuickEntity) *.entity.patch.json files" Width="300" Height="40" HorizontalAlignment="Center" Click="PatchJSONButton_Click" Grid.Row="5"/>
+        <Button x:Name="EntityJSONButton" Content="QN (QuickEntity v2.1) *.entity.json files" Width="300" Height="40" HorizontalAlignment="Center" Click="EntityJSONButton_Click" Grid.Row="3"/>
+        <Button x:Name="PatchJSONButton" Content="QN (QuickEntity v2.1) *.entity.patch.json files" Width="300" Height="40" HorizontalAlignment="Center" Click="PatchJSONButton_Click" Grid.Row="5"/>
     </Grid>
 </mah:MetroWindow>

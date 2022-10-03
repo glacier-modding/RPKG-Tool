@@ -1479,7 +1479,7 @@ namespace rpkg
 						}
 						else if (hashType == "TEMP")
 						{
-							string[] buttons = { "Extract " + hashName, "Extract to QN (QuickEntity) JSON", "Edit " + hashName + " in Brick/Entity Editor (Recursive)", "Edit " + hashName + " in Brick/Entity Editor (Non-Recursive)", "Extract PRIM Models linked to " + hashName + " To GLB/TGA File(s)", "Extract PRIMs linked to " + hashName + " To GLB File(s)", "Cancel" };
+							string[] buttons = { "Extract " + hashName, "Extract to QN (QuickEntity v2.1) JSON", "Edit " + hashName + " in Brick/Entity Editor (Recursive)", "Edit " + hashName + " in Brick/Entity Editor (Non-Recursive)", "Extract PRIM Models linked to " + hashName + " To GLB/TGA File(s)", "Extract PRIMs linked to " + hashName + " To GLB File(s)", "Cancel" };
 
 							buttonCount = 7;
 
@@ -1735,7 +1735,7 @@ namespace rpkg
 
 								if (!runtimeDirectory.EndsWith("runtime", StringComparison.OrdinalIgnoreCase))
 								{
-									MessageBoxShow("The current RPKG does not exist in the Hitman runtime directory, can not perform QN (QuickEntity) JSON extraction.");
+									MessageBoxShow("The current RPKG does not exist in the Hitman runtime directory, can not perform QN (QuickEntity v2.1) JSON extraction.");
 
 									return;
 								}
@@ -1746,11 +1746,11 @@ namespace rpkg
 
 								filter = hashValue;
 
-								progress.message.Content = "Extracting " + hashName + " entity (TEMP/TBLU) to QN (QuickEntity) JSON...";
+								progress.message.Content = "Extracting " + hashName + " entity (TEMP/TBLU) to QN (QuickEntity v2.1) JSON...";
 
 								var fileDialog = new Ookii.Dialogs.Wpf.VistaSaveFileDialog();
 
-								fileDialog.Title = "Select file to save extracted QN (QuickEntity) JSON to:";
+								fileDialog.Title = "Select file to save extracted QN (QuickEntity v2.1) JSON to:";
 
 								fileDialog.Filter = "JSON file|*.json";
 
@@ -8821,7 +8821,7 @@ private enum OggPlayerState
 							}
 							else
 							{
-								buttons = new string[] { "Extract Entity (" + hash + ") To QN (QuickEntity) JSON", "Duplicate Entry", "Erase Entry", "Cancel" };
+								buttons = new string[] { "Extract Entity (" + hash + ") To QN (QuickEntity v2.1) JSON", "Duplicate Entry", "Erase Entry", "Cancel" };
 							}
 						}
 					}
@@ -8838,7 +8838,7 @@ private enum OggPlayerState
 
 						if (!runtimeDirectory.EndsWith("runtime", StringComparison.OrdinalIgnoreCase))
 						{
-							MessageBoxShow("The current RPKG does not exist in the Hitman runtime directory, can not perform QN (QuickEntity) JSON extraction.");
+							MessageBoxShow("The current RPKG does not exist in the Hitman runtime directory, can not perform QN (QuickEntity v2.1) JSON extraction.");
 
 							return;
 						}
@@ -8853,11 +8853,11 @@ private enum OggPlayerState
 
 						progress.operation = (int)Progress.Operation.MASS_EXTRACT;
 
-						progress.message.Content = "Extracting " + hash + " entity (TEMP/TBLU) to QN (QuickEntity) JSON...";
+						progress.message.Content = "Extracting " + hash + " entity (TEMP/TBLU) to QN (QuickEntity v2.1) JSON...";
 
 						var fileDialog = new Ookii.Dialogs.Wpf.VistaSaveFileDialog();
 
-						fileDialog.Title = "Select file to save extracted QN (QuickEntity) JSON to:";
+						fileDialog.Title = "Select file to save extracted QN (QuickEntity v2.1) JSON to:";
 
 						fileDialog.Filter = "JSON file|*.json";
 

@@ -1736,7 +1736,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
     temp_map.start_time = std::chrono::high_resolution_clock::now();
     temp_map.stringstream_length = 80;
-    temp_map.message = "Writing changes to QN (QuickEntity) JSON files: ";
+    temp_map.message = "Writing changes to QN (QuickEntity v2.1) JSON files: ";
     timing_string = temp_map.message + "0% done";
 
     uint32_t map_node_jsons_count = 0;
