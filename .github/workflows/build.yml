@@ -47,7 +47,7 @@ jobs:
         
     - name: Get the latest hash list
       run: |
-        Invoke-WebRequest -Uri "http://hitmandb.notex.app/latest-hashes.7z" -OutFile "_build\latest-hashes.7z"
+        Invoke-WebRequest -Uri "http://hitmandb.glaciermodding.org/latest-hashes.7z" -OutFile "_build\latest-hashes.7z"
         
     - name: Prepare artifacts
       run: |

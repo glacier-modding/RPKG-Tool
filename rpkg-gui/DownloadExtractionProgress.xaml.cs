@@ -52,7 +52,7 @@ namespace rpkg
 
                 webClient.DownloadFileCompleted += WebClient_DownloadFileCompleted;
 
-                Uri uri = new Uri("https://hitmandb.notex.app/latest-hashes.7z");
+                Uri uri = new Uri("https://hitmandb.glaciermodding.org/latest-hashes.7z");
 
                 webClient.DownloadFileAsync(uri, "latest-hashes.7z");
             }
@@ -101,7 +101,7 @@ namespace rpkg
             {
                 HttpClient http = new HttpClient() { Timeout = TimeSpan.FromSeconds(10) };
 
-                int.TryParse(http.GetAsync("https://hitmandb.notex.app/version").Result.Content.ReadAsStringAsync().Result, out currentVersionAvailable);
+                int.TryParse(http.GetAsync("https://hitmandb.glaciermodding.org/version").Result.Content.ReadAsStringAsync().Result, out currentVersionAvailable);
             }
         }
 

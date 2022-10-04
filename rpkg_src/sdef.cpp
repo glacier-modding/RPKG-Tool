@@ -88,7 +88,7 @@ void sdef::generate_json(std::string output_path)
     std::memcpy(&sdef_entry_count, &sdef_data.data()[position], 0x4);
     position += 0x4;
 
-    json["$schema"] = "https://wiki.notex.app/schemas/sdef.schema.json";
+    json["$schema"] = "https://wiki.glaciermodding.org/schemas/sdef.schema.json";
 
     for (uint32_t i = 0; i < sdef_entry_count; i++)
     {
@@ -262,7 +262,7 @@ sdef::sdef(std::string sdef_path, std::string sdef_meta_path, uint64_t hash_valu
     std::memcpy(&sdef_entry_count, &sdef_data.data()[position], 0x4);
     position += 0x4;
 
-    json["$schema"] = "https://wiki.notex.app/schemas/sdef.schema.json";
+    json["$schema"] = "https://wiki.glaciermodding.org/schemas/sdef.schema.json";
 
     for (uint32_t i = 0; i < sdef_entry_count; i++)
     {
