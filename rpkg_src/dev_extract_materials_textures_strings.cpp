@@ -1,11 +1,9 @@
 #include "dev_function.h"
 #include "global.h"
-#include "file.h"
 #include "util.h"
 #include "crypto.h"
 #include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
 #include <fstream>
 #include <iostream>
 #include <filesystem>
@@ -88,10 +86,6 @@ void dev_function::dev_extract_materials_textures_strings(std::string& input_pat
                     }
 
                     uint64_t position = 0x10;
-
-                    uint8_t bytes1 = 0;
-                    uint32_t bytes4 = 0;
-                    uint64_t bytes8 = 0;
 
                     std::string mati_string = std::string(&mati_data->data()[position]);
 
@@ -497,7 +491,7 @@ void dev_function::dev_extract_materials_textures_strings(std::string& input_pat
         {
             std::string test_string = "[assembly:" + substrings.at(j) + mati_hash_strings.at(i) + "].pc_mi";
 
-            std::string ioi_hash = dev_function::dev_compute_ioi_hash(test_string);
+            std::string ioi_hash = generic_function::compute_ioi_hash(test_string);
 
             //std::cout << test_string << "," << ioi_hash << std::endl;
 
@@ -887,7 +881,7 @@ void dev_function::dev_extract_materials_textures_strings(std::string& input_pat
                     test_string.append(param2.at(y));
                     test_string.append(param3.at(z));
 
-                    std::string ioi_hash = dev_function::dev_compute_ioi_hash(test_string);
+                    std::string ioi_hash = generic_function::compute_ioi_hash(test_string);
 
                     //std::cout << "Testing: " << test_string << std::endl;
 

@@ -76,7 +76,7 @@ std::string util::hash_type(uint64_t hash_value)
 
 uint64_t util::ioi_string_to_hash(std::string ioi_string)
 {
-    return std::strtoull(generic_function::compute_ioi_hash_string(ioi_string).c_str(), nullptr, 16);
+    return std::strtoull(generic_function::compute_ioi_hash(ioi_string).c_str(), nullptr, 16);
 }
 
 std::string util::hash_to_ioi_string(uint64_t hash_value, bool return_hash_if_not_found)
@@ -89,7 +89,7 @@ std::string util::hash_to_ioi_string(uint64_t hash_value, bool return_hash_if_no
         {
             if (hash_list_hash_strings.at(it2->second) != "")
             {
-                if (hash_value == std::strtoull(generic_function::compute_ioi_hash_string(hash_list_hash_strings.at(it2->second)).c_str(), nullptr, 16))
+                if (hash_value == std::strtoull(generic_function::compute_ioi_hash(hash_list_hash_strings.at(it2->second)).c_str(), nullptr, 16))
                 {
                     return hash_list_hash_strings.at(it2->second);
                 }       
@@ -446,10 +446,7 @@ bool util::float_equal(float float_existing, float float_new, float tolerance)
     {
         return false;
     }
-    else
-    {
-        return true;
-    }
+    return true;
 }
 
 std::wstring util::string_to_wstring(const std::string& input_string)

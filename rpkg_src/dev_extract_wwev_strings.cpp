@@ -2,26 +2,15 @@
 #include "file.h"
 #include "global.h"
 #include "crypto.h"
-#include "console.h"
 #include "util.h"
 #include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
-#include "thirdparty/ww2ogg/packed_codebooks_aoTuV_603.h"
-#include "thirdparty/ww2ogg/wwriff.h"
-#include "thirdparty/revorb/revorb.h"
 #include <iostream>
-#include <unordered_map>
-#include <chrono>
-#include <sstream>
 #include <fstream>
 #include <regex>
 #include <filesystem>
 
 void dev_function::dev_extract_wwev_strings(std::string& input_path, std::string& filter, std::string& output_path)
 {
-    uint64_t wwev_count_current = 0;
-    uint64_t wwev_hash_size_current = 0;
-
     for (uint64_t i = 0; i < rpkgs.size(); i++)
     {
         for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++)
@@ -94,9 +83,7 @@ void dev_function::dev_extract_wwev_strings(std::string& input_path, std::string
                     uint32_t position = 0;
 
                     char input[1024];
-                    uint8_t bytes1 = 0;
                     uint32_t bytes4 = 0;
-                    uint64_t bytes8 = 0;
 
                     std::memcpy(&wwev_file_name_length, &wwev_data->data()[position], sizeof(bytes4));
 
@@ -130,10 +117,6 @@ void dev_function::dev_extract_wwev_strings(std::string& input_path, std::string
                     position += 0x4;
 
                     std::memcpy(&wwev_file_count_test, &wwev_data->data()[position], sizeof(bytes4));
-
-                    bool found = false;
-
-                    uint64_t input_filter_index = 0;
 
                     current_path.append("\\");
                     current_path.append(std::string(wwev_file_name.data()));

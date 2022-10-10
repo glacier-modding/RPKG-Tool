@@ -3,7 +3,6 @@
 #include "global.h"
 #include <string>
 #include <iostream>
-#include <regex>
 #include <vector>
 #include <sstream>
 

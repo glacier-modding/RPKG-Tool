@@ -1,14 +1,10 @@
 #pragma once
 
-#include "hash.h"
 #include <string>
 #include <vector>
 #include <unordered_map>
 #include <stdint.h>
 #include "thirdparty/rapidjson/document.h"
-#include "thirdparty/rapidjson/writer.h"
-#include "thirdparty/rapidjson/stringbuffer.h"
-#include "thirdparty/zhmtools/ResourceLib_HM2.h"
 #include "thirdparty/zhmtools/ResourceLib_HM3.h"
 #include "thirdparty/json/json.hpp"
 

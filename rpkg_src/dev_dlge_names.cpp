@@ -3,12 +3,8 @@
 #include "generic_function.h"
 #include "file.h"
 #include "global.h"
-#include "console.h"
 #include "util.h"
-#include <iostream>
 #include <unordered_map>
-#include <chrono>
-#include <sstream>
 #include <fstream>
 #include <regex>
 #include <filesystem>
