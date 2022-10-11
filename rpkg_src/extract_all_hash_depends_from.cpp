@@ -5,13 +5,9 @@
 #include "util.h"
 #include "rpkg.h"
 #include "hash.h"
-#include <iostream>
 #include <unordered_map>
 #include <chrono>
-#include <sstream>
-#include <fstream>
 #include <filesystem>
-#include <set>
 
 void recursive_hash_depends_search(uint64_t hash_value, std::vector<uint64_t>& hashes_to_extract, std::unordered_map<uint64_t, uint64_t>& hashes_to_extract_map)
 {

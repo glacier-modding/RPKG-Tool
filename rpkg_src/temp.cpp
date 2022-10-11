@@ -3,11 +3,9 @@
 #include "file.h"
 #include "global.h"
 #include "crypto.h"
-#include "console.h"
 #include "util.h"
 #include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
 #include "thirdparty/rapidjson/document.h"
 #include "thirdparty/rapidjson/writer.h"
 #include "thirdparty/rapidjson/stringbuffer.h"
@@ -465,7 +463,7 @@ void temp::load_hash_depends()
 
             if (it2 != hash_list_hash_map.end())
             {
-                if (hash_value_string == generic_function::compute_ioi_hash_string(hash_list_hash_strings.at(it2->second)))
+                if (hash_value_string == generic_function::compute_ioi_hash(hash_list_hash_strings.at(it2->second)))
                 {
                     temp_meta_strings.push_back(hash_list_hash_strings.at(it2->second));
                 }
@@ -663,7 +661,7 @@ void temp::load_hash_depends()
 
                 if (it2 != hash_list_hash_map.end())
                 {
-                    if (hash_value_string == generic_function::compute_ioi_hash_string(hash_list_hash_strings.at(it2->second)))
+                    if (hash_value_string == generic_function::compute_ioi_hash(hash_list_hash_strings.at(it2->second)))
                     {
                         tblu_meta_strings.push_back(hash_list_hash_strings.at(it2->second));
                     }

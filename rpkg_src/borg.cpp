@@ -3,15 +3,11 @@
 #include "file.h"
 #include "global.h"
 #include "crypto.h"
-#include "console.h"
 #include "util.h"
-#include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
 #include <unordered_map>
 #include <fstream>
-#include <set>
 
 borg::borg()
 {
@@ -66,24 +62,16 @@ borg::borg(uint64_t rpkgs_index, uint64_t hash_index)
     if (rpkgs.at(borg_rpkg_index).hash.at(borg_hash_index).data.lz4ed)
     {
         LZ4_decompress_safe(borg_input_data.data(), borg_output_data.data(), (int)borg_hash_size, borg_decompressed_size);
-
-        borg_data = borg_output_data;
     }
-    else
-    {
-        borg_data = borg_input_data;
-    }
+    
+    borg_data = borg_output_data;
 
     std::vector<char>().swap(borg_output_data);
     std::vector<char>().swap(borg_input_data);
 
     char input[1024];
-    char char2[2];
-    char char4[4];
-    uint8_t bytes1 = 0;
     uint16_t bytes2 = 0;
     uint32_t bytes4 = 0;
-    uint64_t bytes8 = 0;
 
     std::memcpy(&borg_primary_header_offset, &borg_data.data()[borg_position], sizeof(bytes4));
     borg_position += 0x4;

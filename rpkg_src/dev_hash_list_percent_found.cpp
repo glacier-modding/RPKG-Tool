@@ -1,22 +1,8 @@
 #include "rpkg_function.h"
 #include "dev_function.h"
-#include "file.h"
 #include "global.h"
-#include "crypto.h"
-#include "console.h"
-#include "util.h"
 #include "generic_function.h"
-#include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
-#include "thirdparty/ww2ogg/packed_codebooks_aoTuV_603.h"
-#include "thirdparty/ww2ogg/wwriff.h"
-#include "thirdparty/revorb/revorb.h"
 #include <iostream>
-#include <unordered_map>
-#include <chrono>
-#include <sstream>
-#include <fstream>
-#include <regex>
 #include <filesystem>
 
 void dev_function::dev_hash_list_percent_found(std::string& input_path, std::string& filter, std::string& output_path)
@@ -32,7 +18,7 @@ void dev_function::dev_hash_list_percent_found(std::string& input_path, std::str
 
     for (uint64_t h = 0; h < hash_list_hash_value_strings.size(); h++)
     {
-        std::string hash_string = generic_function::compute_ioi_hash_string(hash_list_hash_strings.at(h));
+        std::string hash_string = generic_function::compute_ioi_hash(hash_list_hash_strings.at(h));
 
         //std::cout << hash_string_upper << "," << hash_list_hash_value_strings.at(h) << std::endl;
 

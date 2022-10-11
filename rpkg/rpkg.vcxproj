@@ -15,11 +15,9 @@
     <ClCompile Include="..\rpkg_src\command_line.cpp" />
     <ClCompile Include="..\rpkg_src\compute_ioi_hash.cpp" />
     <ClCompile Include="..\rpkg_src\compute_ioi_hash_from_file.cpp" />
-    <ClCompile Include="..\rpkg_src\compute_ioi_hash_string.cpp" />
     <ClCompile Include="..\rpkg_src\console.cpp" />
     <ClCompile Include="..\rpkg_src\crypto.cpp" />
     <ClCompile Include="..\rpkg_src\decrypt_packagedefinition_thumbs.cpp" />
-    <ClCompile Include="..\rpkg_src\dev_compute_ioi_hash.cpp" />
     <ClCompile Include="..\rpkg_src\dev_diff_rpkg_supermetas.cpp" />
     <ClCompile Include="..\rpkg_src\dev_dlge_names.cpp" />
     <ClCompile Include="..\rpkg_src\dev_extract_all_hashes_in_game.cpp" />
@@ -334,6 +332,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>..\rpkg_src\thirdparty\ogg\include;..\rpkg_src\thirdparty\vorbis\include;..\rpkg_src\thirdparty\GLTFSDK\Inc;..\rpkg_src\thirdparty\</AdditionalIncludeDirectories>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

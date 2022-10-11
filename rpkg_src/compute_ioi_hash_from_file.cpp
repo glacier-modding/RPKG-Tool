@@ -38,11 +38,7 @@ void generic_function::compute_ioi_hash_from_file(std::string& input_path)
 
             std::unordered_map<std::string, uint64_t>::iterator it = ioi_string_map.find(substring);
 
-            if (it != ioi_string_map.end())
-            {
-
-            }
-            else
+            if (it == ioi_string_map.end())
             {
                 ioi_strings.push_back(ioi_string);
                 ioi_string_map[ioi_string] = ioi_strings.size() - 1;
@@ -72,7 +68,7 @@ void generic_function::compute_ioi_hash_from_file(std::string& input_path)
 
         for (uint64_t m = 0; m < 16; m++)
         {
-            ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)(unsigned char)signature[m];
+            ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)signature[m];
         }
 
         ss.str(std::string());
@@ -81,7 +77,7 @@ void generic_function::compute_ioi_hash_from_file(std::string& input_path)
 
         for (uint64_t m = 1; m < 8; m++)
         {
-            ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)(unsigned char)signature[m];
+            ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)signature[m];
         }
 
         std::cout << ss.str() << "," << ioi_strings.at(j) << std::endl;

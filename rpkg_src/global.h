@@ -8,6 +8,8 @@
 #include <vector>
 #include <stdint.h>
 #include "thirdparty/json/json.hpp"
+// ReSharper disable once CppUnusedIncludeDirective
+#include <iostream>
 
 #ifdef RPKG_CLI
 #define LOG(x) std::cout << x << std::endl

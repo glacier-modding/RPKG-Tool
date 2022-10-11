@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <vector>
 #include <unordered_map>
 #include <stdint.h>
 #include "thirdparty/zhmtools/ResourceLib_HM2.h"

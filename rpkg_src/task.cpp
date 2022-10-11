@@ -14,7 +14,7 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
 {
     if (command == "-compute_ioi_hash")
     {
-        generic_function::compute_ioi_hash(filter);
+        LOG("IOI Hash: " + generic_function::compute_ioi_hash(filter));
     }
     if (command == "-compute_ioi_hash_from_file")
     {
