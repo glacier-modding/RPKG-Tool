@@ -1,7 +1,6 @@
 #include "generic_function.h"
 #include "global.h"
 #include "file.h"
-#include "util.h"
 #include <fstream>
 #include <iostream>
 

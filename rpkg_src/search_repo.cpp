@@ -1,24 +1,13 @@
 #include "rpkg_function.h"
-#include "file.h"
 #include "global.h"
-#include "gltf.h"
-#include "obj.h"
-#include "prim.h"
 #include "repo.h"
-#include "crypto.h"
-#include "console.h"
 #include "util.h"
-#include "generic_function.h"
-#include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
 #include <unordered_map>
 #include <chrono>
 #include <sstream>
-#include <fstream>
 #include <regex>
 #include <filesystem>
-#include <set>
 
 void rpkg_function::search_repo(std::string& input_path, std::string& filter, std::string& search, std::string& search_type, std::string& output_path, int max_results)
 {
@@ -42,12 +31,12 @@ void rpkg_function::search_repo(std::string& input_path, std::string& filter, st
 
     std::string search_lower_case = util::to_lower_case(search);
 
-    uint32_t search_crc32_dec = std::strtoul(search.c_str(), nullptr, 10);
+    // uint32_t search_crc32_dec = std::strtoul(search.c_str(), nullptr, 10);
 
-    uint32_t search_crc32_hex = std::strtoul(search.c_str(), nullptr, 16);
+    // uint32_t search_crc32_hex = std::strtoul(search.c_str(), nullptr, 16);
 
     std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-    int stringstream_length = 80;
+    // int stringstream_length = 80;
 
     std::string message = "Searching REPO (00204D1AFD76AB13)...";
 
@@ -57,7 +46,7 @@ void rpkg_function::search_repo(std::string& input_path, std::string& filter, st
 
     if (repo_rpkg_index != UINT32_MAX)
     {
-        std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(repo_rpkg_index).hash_map.find(repo_hash_value);
+        const std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(repo_rpkg_index).hash_map.find(repo_hash_value);
 
         if (it != rpkgs.at(repo_rpkg_index).hash_map.end())
         {

@@ -3,15 +3,10 @@
 #include "global.h"
 #include "crypto.h"
 #include "util.h"
-#include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
 #include <unordered_map>
 #include <fstream>
-#include <sstream>
-#include <set>
-#include <algorithm>
 #include <iomanip>
-#include <iostream>
 
 ores::ores()
 {

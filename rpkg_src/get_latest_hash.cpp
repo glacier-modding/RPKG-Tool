@@ -15,9 +15,6 @@
 
 uint32_t rpkg_function::get_latest_hash(uint64_t hash_value)
 {
-    uint32_t hash_in_rpkgs_index_by_chunk_number = 0;
-    uint32_t hash_in_rpkgs_index_by_patch_number = 0;
-
     std::vector<std::string> hash_in_rpkgs;
     std::vector<bool> hash_in_rpkgs_patch_list;
     std::vector<bool> hash_in_rpkgs_deleted;
@@ -201,8 +198,5 @@ uint32_t rpkg_function::get_latest_hash(uint64_t hash_value)
     {
         return UINT32_MAX;
     }
-    else
-    {
-        return rpkg_indexes.at(hash_in_rpkg_index);
-    }
+    return rpkg_indexes.at(hash_in_rpkg_index);
 }

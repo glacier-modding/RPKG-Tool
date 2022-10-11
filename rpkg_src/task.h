@@ -10,4 +10,3 @@ public:
 	static void process_and_execute_files_draged_and_dropped(std::vector<std::string>& dragged_and_dropped_files);
 	static void process_and_execute_command_line_args(std::vector<std::vector<std::string>>& commands);
 };
-

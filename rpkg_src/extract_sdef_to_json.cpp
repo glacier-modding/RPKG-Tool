@@ -2,14 +2,11 @@
 #include "generic_function.h"
 #include "file.h"
 #include "global.h"
-#include "crypto.h"
 #include "util.h"
 #include "sdef.h"
-#include "thirdparty/lz4/lz4.h"
 #include <unordered_map>
 #include <chrono>
 #include <sstream>
-#include <fstream>
 #include <regex>
 #include <filesystem>
 #include <iostream>
@@ -18,8 +15,6 @@ void rpkg_function::extract_sdef_to_json(std::string& input_path, std::string& f
 {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
-
-    bool input_path_is_rpkg_file = false;
 
     if (!std::filesystem::is_regular_file(input_path))
     {

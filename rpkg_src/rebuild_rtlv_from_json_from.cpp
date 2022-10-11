@@ -2,16 +2,9 @@
 #include "file.h"
 #include "global.h"
 #include "crypto.h"
-#include "console.h"
 #include "util.h"
-#include "rpkg.h"
-#include "hash.h"
-#include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
 #include "thirdparty/json/json.hpp"
 #include <iostream>
-#include <set>
-#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -230,12 +223,9 @@ void rpkg_function::rebuild_rtlv_from_json_from(std::string& input_path, std::st
                 }
 
                 std::vector<char> rtlv_data;
-
-                char char2[2] = "";
+                
                 char char4[4] = "";
                 char char8[8] = "";
-                uint32_t bytes4 = 0;
-                uint64_t bytes8 = 0;
 
                 uint32_t position = 0;
 

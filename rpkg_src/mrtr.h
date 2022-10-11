@@ -3,7 +3,6 @@
 #include <vector>
 #include <unordered_map>
 #include <stdint.h>
-#include "hash.h"
 #include "global.h"
 #include "thirdparty/json/json.hpp"
 

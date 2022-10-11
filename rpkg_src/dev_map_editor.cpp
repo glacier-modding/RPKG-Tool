@@ -11,7 +11,6 @@
 #include <regex>
 #include <sstream>
 #include <algorithm>
-#include <Windows.h>
 #include "thirdparty/rapidjson/document.h"
 #include "thirdparty/rapidjson/writer.h"
 #include "thirdparty/rapidjson/pointer.h"

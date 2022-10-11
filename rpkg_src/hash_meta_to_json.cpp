@@ -4,10 +4,8 @@
 #include "file.h"
 #include "util.h"
 #include <fstream>
-#include <iostream>
 #include <filesystem>
 #include <regex>
-#include <Windows.h>
 #include "thirdparty/rapidjson/document.h"
 #include "thirdparty/rapidjson/prettywriter.h"
 #include "thirdparty/rapidjson/stringbuffer.h"

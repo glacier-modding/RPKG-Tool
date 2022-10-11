@@ -2,7 +2,6 @@
 #include "rpkg_function.h"
 #include "global.h"
 #include "crypto.h"
-#include "console.h"
 #include "util.h"
 #include "file.h"
 #include "thirdparty/lz4/lz4.h"
@@ -11,7 +10,6 @@
 #include <unordered_map>
 #include <fstream>
 #include <sstream>
-#include <set>
 #include <filesystem>
 #include <typeinfo>
 

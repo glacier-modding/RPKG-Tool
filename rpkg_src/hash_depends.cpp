@@ -2,7 +2,6 @@
 #include "generic_function.h"
 #include "file.h"
 #include "global.h"
-#include "console.h"
 #include "util.h"
 #include "rpkg.h"
 #include "hash.h"
@@ -10,7 +9,6 @@
 #include <unordered_map>
 #include <chrono>
 #include <sstream>
-#include <fstream>
 #include <filesystem>
 
 void rpkg_function::hash_depends(std::string& input_path, std::string& filter, std::string& output_path)

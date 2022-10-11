@@ -7,7 +7,6 @@
 #include "crypto.h"
 #include "global.h"
 #include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
 #include <chrono>
 #include <filesystem>
 #include <iostream>
@@ -28,11 +27,6 @@ void rpkg_function::generate_rpkg_quickly_from(std::string& input_path, std::str
 
         std::string rpkg_file_name;
         std::string rpkg_meta_file_name;
-
-        uint64_t position = 0;
-        uint8_t bytes1 = 0;
-        uint32_t bytes4 = 0;
-        uint64_t bytes8 = 0;
 
         std::string base_folder_name = "";
 

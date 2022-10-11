@@ -41,10 +41,6 @@ void dev_function::dev_extract_all_strings(std::string& input_path, std::string&
         }
     }
 
-	std::cout << "Extracting ORES strings..." << std::endl;
-
-	dev_function::dev_extract_ores_strings(input_path, filter, output_path);
-
 	std::cout << "Extracting WWEM strings..." << std::endl;
 
 	dev_function::dev_extract_wwem_strings(input_path, filter, output_path);
@@ -56,8 +52,4 @@ void dev_function::dev_extract_all_strings(std::string& input_path, std::string&
 	std::cout << "Extracting WWEV strings..." << std::endl;
 
 	dev_function::dev_extract_wwev_strings(input_path, filter, output_path);
-
-	std::cout << "Extracting Materials strings..." << std::endl;
-
-	dev_function::dev_extract_materials_textures_strings(input_path, filter, output_path);
 }

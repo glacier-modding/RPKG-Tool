@@ -20,7 +20,6 @@
 #include <string_view>
 #include <set>
 #include <filesystem>
-#include <Windows.h>
 
 using json = nlohmann::ordered_json;
 
