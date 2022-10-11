@@ -2,21 +2,20 @@
 #include "console.h"
 #include "global.h"
 #include "file.h"
-#include "rpkg.h"
 #include "task.h"
-#include "generic_function.h"
 #include <string>
 #include <vector>
 #include <iostream>
-#include <windows.h>
+
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 
 int main(int argc, char* argv[])
 {
 	// Gets the folder of the executable (OSX/Linux not tested)
 	#if defined(PLATFORM_POSIX) || defined(__linux__)
-		std::string sp;
-		std::ifstream("/proc/self/comm") >> sp;
-		exe_path = sp;
+        #error "This platform is not yet supported"
 	#elif defined(_WIN32)
 		char buf[MAX_PATH];
 		GetModuleFileNameA(nullptr, buf, MAX_PATH);
@@ -47,7 +46,7 @@ int main(int argc, char* argv[])
                 {
                     std::exit(0);
                 }
-                else if (input == "h" || input == "help")
+                if (input == "h" || input == "help")
                 {
                     console::display_usage_info();
                 }

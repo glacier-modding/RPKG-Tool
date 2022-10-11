@@ -8,7 +8,6 @@
 #include "map.h"
 #include <string>
 #include <vector>
-#include <iostream>
 
 void task::execute(std::string &command, std::string &input_path, std::string &filter, std::string &search, std::string &search_type, std::string &output_path)
 {
@@ -47,10 +46,6 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
         rpkg_vars.output_path = output_path;
 
         rpkg_function::extract_from_rpkgs(rpkg_vars);
-    }
-    else if (command == "-dev_extract_temp_from")
-    {
-        rpkg_function::dev_extract_temp_from(input_path, filter, output_path);
     }
     else if (command == "-extract_gfxf_from")
     {
@@ -249,29 +244,9 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     {
         dev_function::dev_extract_wwev_strings(input_path, filter, output_path);
     }
-    else if (command == "-dev_extract_materials_textures_strings")
-    {
-        dev_function::dev_extract_materials_textures_strings(input_path, filter, output_path);
-    }
     else if (command == "-dev_extract_wwise_ids")
     {
         dev_function::dev_extract_wwise_ids(input_path, filter, output_path);
-    }
-    else if (command == "-dev_extract_temp_pointers")
-    {
-        dev_function::dev_extract_temp_pointers(input_path, filter, output_path);
-    }
-    else if (command == "-dev_extract_ores_strings")
-    {
-        dev_function::dev_extract_ores_strings(input_path, filter, output_path);
-    }
-    else if (command == "-dev_resource_tool")
-    {
-        dev_function::dev_resource_tool(input_path, filter, output_path);
-    }
-    else if (command == "-dev_extract_temp_strings")
-    {
-        //dev_function::dev_extract_temp_strings(input_path, filter, output_path);
     }
     else if (command == "-dev_hash_list_percent_found")
     {
@@ -304,16 +279,6 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     else if (command == "-extract_entity_to_qn")
     {
         rpkg_function::extract_entity_to_qn(input_path, filter, output_path);
-    }
-    else if (command == "-dev_extract_all_hashes_in_game")
-    {
-        rpkg_extraction_vars rpkg_vars;
-
-        rpkg_vars.input_path = input_path;
-        rpkg_vars.filter = filter;
-        rpkg_vars.output_path = output_path;
-
-        dev_function::dev_extract_all_hashes_in_game(rpkg_vars);
     }
     else if (command == "-extract_to_rt_json")
     {
@@ -379,14 +344,14 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
 
 void task::process_and_execute_files_draged_and_dropped(std::vector<std::string> &dragged_and_dropped_files)
 {
-    for (int i = 0; i < dragged_and_dropped_files.size(); i++)
+    for (std::string& dragged_and_dropped_file : dragged_and_dropped_files)
     {
-        if (file::is_rpkg_file(dragged_and_dropped_files.at(i)))
+        if (file::is_rpkg_file(dragged_and_dropped_file))
         {
             std::string command = "-extract_from_rpkg";
             std::string empty = "";
 
-            task::execute(command, dragged_and_dropped_files.at(i), empty, empty, empty, empty);
+            task::execute(command, dragged_and_dropped_file, empty, empty, empty, empty);
         }
     }
 }
@@ -402,23 +367,15 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
     std::vector<std::string> commands_without_paths = {"-compute_ioi_hash"};
     std::vector<std::string> commands_with_paths = {"-compute_ioi_hash_from_file",
                                                     "-decrypt_packagedefinition_thumbs",
-                                                    "-dev_extract_temp_from",
                                                     "-dev_diff_rpkg_supermetas",
                                                     "-dev_dlge_names",
                                                     "-dev_extract_rpkg_supermetas",
                                                     "-dev_extract_all_strings",
-                                                    "-dev_extract_all_entity_ids",
-                                                    "-dev_extract_temp_pointers",
-                                                    "-dev_extract_temp_strings",
-                                                    "-dev_extract_ores_strings",
-                                                    "-dev_extract_materials_textures_strings",
                                                     "-dev_extract_wwem_strings",
                                                     "-dev_extract_wwes_strings",
                                                     "-dev_extract_wwev_strings",
                                                     "-dev_extract_wwise_ids",
-                                                    "-dev_resource_tool",
                                                     "-dev_hash_list_percent_found",
-                                                    "-dev_extract_all_hashes_in_game",
                                                     "-encrypt_packagedefinition_thumbs",
                                                     "-extract_from_rpkg",
                                                     "-extract_from_rpkgs",

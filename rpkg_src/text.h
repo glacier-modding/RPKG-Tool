@@ -1,5 +1,4 @@
 #pragma once
-#include "hash.h"
 #include "texd.h"
 #include "thirdparty/directxtex/DirectXTex.h"
 #include "thirdparty/directxtex/DDS.h"

@@ -2,10 +2,7 @@
 #include "rpkg_function.h"
 #include "file.h"
 #include "global.h"
-#include "crypto.h"
-#include "console.h"
 #include "util.h"
-#include "generic_function.h"
 #include <iostream>
 #include <unordered_map>
 
@@ -19,7 +16,7 @@ void rpkg_function::recursive_temp_loader(uint32_t rpkgs_index, uint32_t hash_in
 		{
 			temps.emplace_back(temp(rpkgs_index, hash_index, temp_version));
 
-			uint64_t temps_index = temps.size() - 1;
+			const uint64_t temps_index = temps.size() - 1;
 
 			temps.at(temps_index).temp_temps_index = temps_index;
 
@@ -64,7 +61,7 @@ void rpkg_function::recursive_temp_loader(uint32_t rpkgs_index, uint32_t hash_in
 		{
 			LOG("Recursive loop detected at level " + util::uint32_t_to_string(level) + " and the duplicate TEMP file is: " + util::uint64_t_to_hex_string(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value) + "." + rpkgs.at(rpkgs_index).hash.at(hash_index).hash_resource_type);
 
-			std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value);
+			const std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value);
 
 			if (it2 != hash_list_hash_map.end())
 			{

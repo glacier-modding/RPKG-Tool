@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <stdint.h>
+#include <cstdint>
 #include "thirdparty/rapidjson/document.h"
 #include "thirdparty/zhmtools/ResourceLib_HM3.h"
 #include "thirdparty/json/json.hpp"

@@ -1,17 +1,10 @@
 #include "rpkg_function.h"
 #include "file.h"
 #include "global.h"
-#include "crypto.h"
-#include "console.h"
 #include "util.h"
 #include "gpudevice.h"
-#include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
 #include "thirdparty/directxtex/DirectXTex.h"
-#include "thirdparty/directxtex/DDS.h"
 #include <iostream>
-#include <unordered_map>
-#include <chrono>
 #include <sstream>
 #include <fstream>
 #include <regex>
@@ -56,8 +49,8 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
     uint64_t rpkg_file_name_length = 0;
     uint64_t texd_hash_value = 0;
-    uint32_t texd_data_size = 0;
-    uint32_t text_data_size = 0;
+    // uint32_t texd_data_size = 0;
+    // uint32_t text_data_size = 0;
     uint16_t text_header_magic = 0;
     uint16_t text_type = 0;
     uint32_t text_file_size = 0;

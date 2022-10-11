@@ -3,11 +3,9 @@
 #include "stream_reader.hpp"
 #include "global.h"
 #include "file.h"
-#include "util.h"
 #include "hash.h"
 #include "console.h"
 #include <iostream>
-#include <fstream>
 #include <sstream>
 
 void rpkg_function::import_rpkg(std::string& rpkg_file_path, bool with_timing)

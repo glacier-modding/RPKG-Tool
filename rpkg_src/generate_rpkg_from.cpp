@@ -29,11 +29,6 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& fil
         std::string rpkg_file_name;
         std::string rpkg_meta_file_name;
 
-        uint64_t position = 0;
-        uint8_t bytes1 = 0;
-        uint32_t bytes4 = 0;
-        uint64_t bytes8 = 0;
-
         std::string base_folder_name = "";
 
         std::size_t pos = input_rpkg_folder_path.find_last_of("\\/");
@@ -229,7 +224,7 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& fil
                 return;
             }
 
-            if (((i * (uint64_t)100000) / (uint64_t)files_index.size()) % (uint64_t)100 == 0 && i > 0)
+            if (((i * (uint64_t)100000) / files_index.size()) % (uint64_t)100 == 0 && i > 0)
             {
                 stringstream_length = console::update_console(message, files_index.size(), i, start_time, stringstream_length);
             }

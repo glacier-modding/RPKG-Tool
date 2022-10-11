@@ -6,7 +6,6 @@
 #include "thirdparty/lz4/lz4.h"
 #include <iostream>
 #include <unordered_map>
-#include <chrono>
 #include <fstream>
 #include <regex>
 #include <filesystem>
@@ -22,10 +21,6 @@ void dev_function::dev_extract_wwes_strings(std::string& input_path, std::string
     uint64_t total_wwes_fxas_not_linked = 0;
 
     uint64_t wwes_count = 0;
-
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-    double console_update_rate = 1.0 / 2.0;
-    int period_count = 1;
 
     for (uint64_t i = 0; i < rpkgs.size(); i++)
     {

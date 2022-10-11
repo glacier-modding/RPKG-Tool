@@ -59,7 +59,6 @@ public:
 	static void extract_all_prim_from(std::string& input_path, std::string& filter, std::string& output_path, int type);
 	static void extract_prim_from(std::string& input_path, std::string filter, std::string& output_path, int type, bool rotate);
 	static int load_temp_tblu_hash_depends(uint64_t rpkg_index, uint64_t hash_index);
-	static void dev_extract_temp_from(std::string& input_path, std::string& filter, std::string& output_path);
 	static void extract_temp_from(std::string& input_path, std::string& filter, std::string& output_path);
 	static void extract_prel_refs(std::string& input_path, std::string& filter, std::string& output_path);
 	static void get_unique_name(std::unordered_map<std::string, uint32_t>& wwem_name_map, std::string& wem_base_name);

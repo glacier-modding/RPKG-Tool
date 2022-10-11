@@ -1,11 +1,9 @@
 #include "gltf.h"
 #include "file.h"
-#include "util.h"
 #include <GLTFSDK/BufferBuilder.h>
 #include <GLTFSDK/IStreamWriter.h>
 #include <GLTFSDK/GLBResourceWriter.h>
 #include <GLTFSDK/Serialize.h>
-#include <iostream>
 #include <sstream>
 #include <fstream>
 #include <filesystem>

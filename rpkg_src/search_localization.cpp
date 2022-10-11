@@ -1,24 +1,12 @@
 #include "rpkg_function.h"
-#include "file.h"
 #include "global.h"
-#include "gltf.h"
-#include "obj.h"
-#include "prim.h"
-#include "mati.h"
-#include "crypto.h"
 #include "console.h"
 #include "util.h"
-#include "generic_function.h"
-#include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
-#include <unordered_map>
 #include <chrono>
 #include <sstream>
-#include <fstream>
 #include <regex>
 #include <filesystem>
-#include <set>
 
 void rpkg_function::search_localization(std::string& input_path, std::string& filter, std::string& search, std::string& search_type, std::string& output_path, bool search_dlge, bool search_locr, bool search_rtlv, int max_results)
 {

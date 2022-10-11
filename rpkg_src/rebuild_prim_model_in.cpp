@@ -1,12 +1,9 @@
 #include "rpkg_function.h"
 #include "file.h"
 #include "global.h"
-#include "crypto.h"
 #include "console.h"
 #include "util.h"
-#include "prim.h"
 #include <iostream>
-#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <fstream>

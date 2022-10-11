@@ -2,7 +2,6 @@
 #include "global.h"
 #include "generic_function.h"
 #include "file.h"
-#include "util.h"
 #include "mati.h"
 #include <iostream>
 #include <filesystem>

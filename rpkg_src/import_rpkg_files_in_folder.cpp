@@ -1,10 +1,6 @@
 #include "rpkg_function.h"
-#include "util.h"
-#include "global.h"
 #include "file.h"
 #include <filesystem>
-#include <iostream>
-#include <sstream>
 
 void rpkg_function::import_rpkg_files_in_folder(std::string& input_rpkg_folder_path)
 {

@@ -3,16 +3,11 @@
 #include "util.h"
 #include "ores.h"
 #include "global.h"
-#include "crypto.h"
-#include "console.h"
 #include "generic_function.h"
-#include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
 #include <chrono>
 #include <filesystem>
 #include <sstream>
-#include <fstream>
 #include <regex>
 
 void rpkg_function::extract_ores_from(std::string& input_path, std::string& filter, std::string& output_path)

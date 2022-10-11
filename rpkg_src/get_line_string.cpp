@@ -2,13 +2,11 @@
 #include "generic_function.h"
 #include "file.h"
 #include "global.h"
-#include "console.h"
 #include "util.h"
 #include "rpkg.h"
 #include "hash.h"
 #include "crypto.h"
 #include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
 #include <unordered_map>
 #include <chrono>

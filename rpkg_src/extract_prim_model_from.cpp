@@ -2,23 +2,15 @@
 #include "file.h"
 #include "global.h"
 #include "gltf.h"
-#include "obj.h"
 #include "prim.h"
 #include "mati.h"
-#include "crypto.h"
-#include "console.h"
 #include "util.h"
-#include "generic_function.h"
-#include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
 #include <unordered_map>
 #include <chrono>
 #include <sstream>
-#include <fstream>
 #include <regex>
 #include <filesystem>
-#include <set>
 
 void rpkg_function::extract_prim_model_from(std::string& input_path, std::string filter, std::string& output_path)
 {

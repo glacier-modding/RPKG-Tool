@@ -1,18 +1,12 @@
 #include "rpkg_function.h"
 #include "file.h"
 #include "global.h"
-#include "crypto.h"
 #include "console.h"
 #include "util.h"
 #include "prim.h"
-#include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
 #include "thirdparty/json/json.hpp"
 #include "thirdparty/mikktspace/mikktspace.h"
 #include "thirdparty/directxmath/DirectXMath.h"
-#include "thirdparty/directxmath/DirectXCollision.h"
-#include "thirdparty/directxmath/DirectXColors.h"
-#include "thirdparty/directxmath/DirectXPackedVector.h"
 #include <GLTFSDK/GLTF.h>
 #include <GLTFSDK/GLTFResourceReader.h>
 #include <GLTFSDK/GLBResourceReader.h>
@@ -570,7 +564,7 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
 
                             std::string accessorId;
                             std::vector<uint16_t> indices_data;
-                            uint32_t indices_data_size = 0;
+                            // uint32_t indices_data_size = 0;
                             std::vector<float> vertices_data;
                             uint32_t vertices_data_size = 0;
                             std::vector<float> normals_data;
@@ -597,7 +591,7 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, std::string& filter
                             std::vector<float> vertices_compression_bias(3, 0);
                             std::vector<float> uvs_compression_scale(2, 0);
                             std::vector<float> uvs_compression_bias(2, 0);
-                            uint32_t offset_mesh = 0;
+                            // uint32_t offset_mesh = 0;
                             uint32_t offset_sub_mesh = 0;
                             uint32_t offset_sub_mesh_pointer = 0;
                             uint32_t offset_indices = 0;

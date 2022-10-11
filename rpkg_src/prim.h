@@ -1,10 +1,9 @@
 #pragma once
-#include "hash.h"
 #include "global.h"
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <stdint.h>
+#include <cstdint>
 
 class prim
 {

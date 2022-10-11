@@ -8,7 +8,6 @@
 #include <sstream>
 #include <iomanip>
 #include <regex>
-#include <Windows.h>
 
 std::string util::generate_guid()
 {

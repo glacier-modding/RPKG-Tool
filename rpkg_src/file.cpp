@@ -4,7 +4,6 @@
 #include <string>
 #include <fstream>
 #include <iostream>
-#include <sstream>
 
 uint64_t file::get_hash_value_from_path(std::filesystem::path path, std::string extension)
 {
