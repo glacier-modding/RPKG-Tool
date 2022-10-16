@@ -9,7 +9,7 @@ class prim
 {
 public:
 	prim(uint64_t rpkgs_index, uint64_t hash_index);
-    prim(std::string prim_file_path);
+	explicit prim(const std::string& prim_file_path);
 
 	void load_hash_depends();
     void extract_meta(std::string output_path);

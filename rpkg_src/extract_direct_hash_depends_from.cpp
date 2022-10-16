@@ -1,15 +1,12 @@
 #include "rpkg_function.h"
 #include "file.h"
 #include "global.h"
-#include "console.h"
 #include "util.h"
 #include "rpkg.h"
 #include "hash.h"
 #include <iostream>
 #include <unordered_map>
-#include <chrono>
 #include <sstream>
-#include <fstream>
 #include <filesystem>
 
 void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, std::string& filter, std::string& output_path, bool extract_prim_models)
@@ -23,15 +20,11 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
 
     std::vector<std::string> filters = util::parse_input_filter(filter);
 
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-    double console_update_rate = 1.0 / 2.0;
-    int period_count = 1;
-
-    for (uint64_t z = 0; z < filters.size(); z++)
+    for (auto& filter : filters)
     {
         std::vector<hash_depends_variables> hash_depends_data;
 
-        uint64_t hash_value = std::strtoull(filters.at(z).c_str(), nullptr, 16);
+        uint64_t hash_value = std::strtoull(filter.c_str(), nullptr, 16);
 
         for (uint64_t i = 0; i < rpkgs.size(); i++)
         {
@@ -45,11 +38,11 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
             {
                 temp_hash_depends_data.hash_value = hash_value;
 
-                temp_hash_depends_data.hash_string = filters.at(z);
+                temp_hash_depends_data.hash_string = filter;
 
                 uint32_t temp_hash_reference_count = rpkgs.at(i).hash.at(it2->second).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
-                LOG(filters.at(z) << " has " << temp_hash_reference_count << " dependencies in " << rpkgs.at(i).rpkg_file_name);
+                LOG(filter << " has " << temp_hash_reference_count << " dependencies in " << rpkgs.at(i).rpkg_file_name);
 
                 if (temp_hash_reference_count > 0)
                 {
@@ -103,17 +96,17 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
             }
         }
 
-        LOG(filters.at(z) << " has dependencies in " << rpkg_dependency_count << " RPKG files:" << std::endl);
+        LOG(filter << " has dependencies in " << rpkg_dependency_count << " RPKG files:" << std::endl);
 
         for (uint64_t i = 0; i < hash_depends_data.size(); i++)
         {
             if (hash_depends_data.at(i).hash_dependency.size() > 0)
             {
-                LOG(filters.at(z) << " depends on " << hash_depends_data.at(i).hash_dependency_file_name.size() << " other hash files/resources in RPKG file: " << hash_depends_data.at(i).rpkg_file_name);
+                LOG(filter << " depends on " << hash_depends_data.at(i).hash_dependency_file_name.size() << " other hash files/resources in RPKG file: " << hash_depends_data.at(i).rpkg_file_name);
 
                 if (hash_depends_data.at(i).hash_dependency_file_name.size() > 0)
                 {
-                    LOG(filters.at(z) << "'s dependencies:");
+                    LOG(filter << "'s dependencies:");
 
                     for (uint64_t j = 0; j < hash_depends_data.at(i).hash_dependency_file_name.size(); j++)
                     {
@@ -205,11 +198,11 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
             }
         }
 
-        LOG(filters.at(z) << " has reverse dependencies in " << reverse_dependency.size() << " RPKG files:" << std::endl);
+        LOG(filter << " has reverse dependencies in " << reverse_dependency.size() << " RPKG files:" << std::endl);
 
         if (reverse_dependency.size() > 0)
         {
-            LOG(filters.at(z) << "'s reverse dependencies:");
+            LOG(filter << "'s reverse dependencies:");
 
             for (uint64_t i = 0; i < reverse_dependency.size(); i++)
             {
@@ -239,21 +232,21 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
         }
     }
 
-    for (uint64_t z = 0; z < filters.size(); z++)
+    for (auto& filter : filters)
     {
         bool filter_found = false;
 
         std::string filter_hash_file_name = "";
 
-        for (uint64_t i = 0; i < rpkgs.size(); i++)
+        for (auto& rpkg : rpkgs)
         {
-            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(std::strtoull(filters.at(z).c_str(), nullptr, 16));
+            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkg.hash_map.find(std::strtoull(filter.c_str(), nullptr, 16));
 
-            if (it != rpkgs.at(i).hash_map.end())
+            if (it != rpkg.hash_map.end())
             {
                 filter_found = true;
 
-                filter_hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(it->second).hash_value) + "." + rpkgs.at(i).hash.at(it->second).hash_resource_type;
+                filter_hash_file_name = util::uint64_t_to_hex_string(rpkg.hash.at(it->second).hash_value) + "." + rpkg.hash.at(it->second).hash_resource_type;
             }
         }
 
@@ -261,39 +254,36 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
         {
             std::vector<uint64_t> hashes_to_extract;
             std::vector<std::string> hashes_to_extract_strings;
-            std::string filter_hash_string = "";
 
-            for (uint64_t i = 0; i < rpkgs.size(); i++)
+            for (auto& rpkg : rpkgs)
             {
-                uint64_t hash_value = std::strtoull(filters.at(z).c_str(), nullptr, 16);
+                uint64_t hash_value = std::strtoull(filter.c_str(), nullptr, 16);
 
-                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(hash_value);
+                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkg.hash_map.find(hash_value);
 
-                if (it != rpkgs.at(i).hash_map.end())
+                if (it != rpkg.hash_map.end())
                 {
-                    filter_hash_string = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(it->second).hash_value);
-
-                    uint32_t hash_reference_count = rpkgs.at(i).hash.at(it->second).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+                    uint32_t hash_reference_count = rpkg.hash.at(it->second).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
                     for (uint32_t j = 0; j < hash_reference_count; j++)
                     {
-                        hashes_to_extract.push_back(rpkgs.at(i).hash.at(it->second).hash_reference_data.hash_reference.at(j));
-                        hashes_to_extract_strings.push_back(util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(it->second).hash_reference_data.hash_reference.at(j)));
+                        hashes_to_extract.push_back(rpkg.hash.at(it->second).hash_reference_data.hash_reference.at(j));
+                        hashes_to_extract_strings.push_back(util::uint64_t_to_hex_string(rpkg.hash.at(it->second).hash_reference_data.hash_reference.at(j)));
                     }
                 }
             }
 
             for (uint64_t x = 0; x < hashes_to_extract.size(); x++)
             {
-                for (uint64_t i = 0; i < rpkgs.size(); i++)
+                for (auto& rpkg : rpkgs)
                 {
-                    std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(hashes_to_extract.at(x));
+                    std::unordered_map<uint64_t, uint64_t>::iterator it = rpkg.hash_map.find(hashes_to_extract.at(x));
 
-                    if (it != rpkgs.at(i).hash_map.end())
+                    if (it != rpkg.hash_map.end())
                     {
                         if (extract_prim_models)
                         {
-                            if (rpkgs.at(i).hash.at(it->second).hash_resource_type == "PRIM")
+                            if (rpkg.hash.at(it->second).hash_resource_type == "PRIM")
                             {
                                 std::string prim_output_dir = file::output_path_append("DIRECTDEPENDS\\" + filter_hash_file_name + "\\PRIMMODELS\\", output_path);
 
@@ -301,14 +291,14 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
 
                                 //std::cout << "rpkg_function::extract_prim_model_from(" << rpkgs.at(i).rpkg_file_path << ", " << util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) << ", " << prim_output_dir << ");" << std::endl;
 
-                                rpkg_function::extract_prim_model_from(rpkgs.at(i).rpkg_file_path, hashes_to_extract_strings.at(x), prim_output_dir);
+                                rpkg_function::extract_prim_model_from(rpkg.rpkg_file_path, hashes_to_extract_strings.at(x), prim_output_dir);
                             }
                         }
                         else
                         {
                             rpkg_extraction_vars rpkg_vars;
 
-                            rpkg_vars.input_path = rpkgs.at(i).rpkg_file_path;
+                            rpkg_vars.input_path = rpkg.rpkg_file_path;
                             rpkg_vars.filter = hashes_to_extract_strings.at(x);
                             rpkg_vars.output_path = file::output_path_append("DIRECTDEPENDS\\" + filter_hash_file_name + "\\", output_path);
 

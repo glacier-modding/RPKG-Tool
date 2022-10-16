@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
                     args.push_back(input.substr(pos1));
                 }
 
-                if (args.size() > 0)
+                if (!args.empty())
                 {
                     std::cout << "Running command: " << input << std::endl << std::endl;
 

@@ -63,13 +63,13 @@ void rpkg_function::extract_rtlv_to_json_from(std::string &input_path, std::stri
         uint64_t rtlv_count = 0;
         uint64_t rtlv_current_count = 0;
 
-        for (uint64_t i = 0; i < rpkgs.size(); i++)
+        for (auto& rpkg : rpkgs)
         {
-            for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++)
+            for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++)
             {
-                if (rpkgs.at(i).hash_resource_types.at(r) == "RTLV")
+                if (rpkg.hash_resource_types.at(r) == "RTLV")
                 {
-                    rtlv_count += rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).size();
+                    rtlv_count += rpkg.hashes_indexes_based_on_resource_types.at(r).size();
                 }
             }
         }
@@ -82,30 +82,29 @@ void rpkg_function::extract_rtlv_to_json_from(std::string &input_path, std::stri
         std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
         int stringstream_length = 80;
 
-        for (uint64_t i = 0; i < rpkgs.size(); i++)
+        for (auto& rpkg : rpkgs)
         {
-            if (rpkgs.at(i).rpkg_file_path == input_path || !input_path_is_rpkg_file)
+            if (rpkg.rpkg_file_path == input_path || !input_path_is_rpkg_file)
             {
                 bool archive_folder_created = false;
 
-                for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++)
+                for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++)
                 {
-                    if (rpkgs.at(i).hash_resource_types.at(r) == "RTLV")
+                    if (rpkg.hash_resource_types.at(r) == "RTLV")
                     {
-                        for (uint64_t j = 0; j < rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).size(); j++)
+                        for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++)
                         {
-                            uint64_t hash_index = rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).at(j);
+                            uint64_t hash_index = rpkg.hashes_indexes_based_on_resource_types.at(r).at(j);
 
                             if (gui_control == ABORT_CURRENT_TASK)
                             {
                                 return;
                             }
 
-                            std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
+                            std::string hash_file_name = util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
+                                rpkg.hash.at(hash_index).hash_resource_type;
 
                             bool found = false;
-
-                            uint64_t input_filter_index = 0;
 
                             for (uint64_t z = 0; z < filters.size(); z++)
                             {
@@ -115,8 +114,6 @@ void rpkg_function::extract_rtlv_to_json_from(std::string &input_path, std::stri
                                 {
                                     found = true;
 
-                                    input_filter_index = z;
-
                                     break;
                                 }
                             }
@@ -125,14 +122,14 @@ void rpkg_function::extract_rtlv_to_json_from(std::string &input_path, std::stri
                             {
                                 std::string message = "Extracting RTLV as JSON: ";
 
-                                if (((rtlv_current_count * (uint64_t)100000) / (uint64_t)rtlv_count) % (uint64_t)100 == 0 && rtlv_current_count > 0 && !output_to_string)
+                                if (((rtlv_current_count * static_cast<uint64_t>(100000)) / rtlv_count) % static_cast<uint64_t>(100) == 0 && rtlv_current_count > 0 && !output_to_string)
                                 {
                                     stringstream_length = console::update_console(message, rtlv_count, rtlv_current_count, start_time, stringstream_length);
                                 }
 
                                 rtlv_current_count++;
 
-                                std::string current_path = file::output_path_append("RTLV\\" + rpkgs.at(i).rpkg_file_name, output_path);
+                                std::string current_path = file::output_path_append("RTLV\\" + rpkg.rpkg_file_name, output_path);
 
                                 if (!archive_folder_created && !output_to_string)
                                 {
@@ -143,47 +140,47 @@ void rpkg_function::extract_rtlv_to_json_from(std::string &input_path, std::stri
 
                                 uint64_t hash_size;
 
-                                if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
+                                if (rpkg.hash.at(hash_index).data.lz4ed)
                                 {
-                                    hash_size = rpkgs.at(i).hash.at(hash_index).data.header.data_size;
+                                    hash_size = rpkg.hash.at(hash_index).data.header.data_size;
 
-                                    if (rpkgs.at(i).hash.at(hash_index).data.xored)
+                                    if (rpkg.hash.at(hash_index).data.xored)
                                     {
                                         hash_size &= 0x3FFFFFFF;
                                     }
                                 }
                                 else
                                 {
-                                    hash_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
+                                    hash_size = rpkg.hash.at(hash_index).data.resource.size_final;
                                 }
 
                                 std::vector<char> input_data(hash_size, 0);
 
-                                std::ifstream file = std::ifstream(rpkgs.at(i).rpkg_file_path, std::ifstream::binary);
+                                std::ifstream file = std::ifstream(rpkg.rpkg_file_path, std::ifstream::binary);
 
                                 if (!file.good())
                                 {
-                                    LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(i).rpkg_file_path + " could not be read.");
+                                    LOG_AND_EXIT("Error: RPKG file " + rpkg.rpkg_file_path + " could not be read.");
                                 }
 
-                                file.seekg(rpkgs.at(i).hash.at(hash_index).data.header.data_offset, file.beg);
+                                file.seekg(rpkg.hash.at(hash_index).data.header.data_offset, file.beg);
                                 file.read(input_data.data(), hash_size);
                                 file.close();
 
-                                if (rpkgs.at(i).hash.at(hash_index).data.xored)
+                                if (rpkg.hash.at(hash_index).data.xored)
                                 {
-                                    crypto::xor_data(input_data.data(), (uint32_t)hash_size);
+                                    crypto::xor_data(input_data.data(), static_cast<uint32_t>(hash_size));
                                 }
 
-                                uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
+                                uint32_t decompressed_size = rpkg.hash.at(hash_index).data.resource.size_final;
 
                                 std::vector<char> output_data(decompressed_size, 0);
 
                                 std::vector<char> *rtlv_data;
 
-                                if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
+                                if (rpkg.hash.at(hash_index).data.lz4ed)
                                 {
-                                    LZ4_decompress_safe(input_data.data(), output_data.data(), (int)hash_size, decompressed_size);
+                                    LZ4_decompress_safe(input_data.data(), output_data.data(), static_cast<int>(hash_size), decompressed_size);
 
                                     rtlv_data = &output_data;
                                 }
@@ -194,7 +191,6 @@ void rpkg_function::extract_rtlv_to_json_from(std::string &input_path, std::stri
 
                                 uint32_t rtlv_data_size = 0;
                                 uint64_t rtlv_header_value = 0;
-                                uint32_t rtlv_identifier = 0;
                                 std::vector<char> rtlv_footer;
                                 uint32_t rtlv_header_data_size = 0;
                                 std::vector<char> rtlv_header;
@@ -216,7 +212,6 @@ void rpkg_function::extract_rtlv_to_json_from(std::string &input_path, std::stri
                                 uint32_t position = 0;
 
                                 char char4[4] = "";
-                                uint8_t bytes1 = 0;
                                 uint16_t bytes2 = 0;
                                 uint32_t bytes4 = 0;
                                 uint64_t bytes8 = 0;
@@ -278,9 +273,9 @@ void rpkg_function::extract_rtlv_to_json_from(std::string &input_path, std::stri
 
                                     std::memcpy(&char4, &rtlv_header_data_size, sizeof(bytes4));
 
-                                    for (uint64_t k = 0; k < sizeof(bytes4); k++)
+                                    for (char& k : char4)
                                     {
-                                        json_meta_data.push_back(char4[k]);
+                                        json_meta_data.push_back(k);
                                     }
 
                                     for (uint64_t k = 0; k < rtlv_header_data_size; k++)
@@ -355,26 +350,26 @@ void rpkg_function::extract_rtlv_to_json_from(std::string &input_path, std::stri
 
                                             if (language_data_sizes.back() % 8 != 0)
                                             {
-                                                LOG_AND_EXIT("Error: RTLV file " + hash_file_name + " in " + rpkgs.at(i).rpkg_file_name + " is malformed.");
+                                                LOG_AND_EXIT("Error: RTLV file " + hash_file_name + " in " + rpkg.rpkg_file_name + " is malformed.");
                                             }
 
-                                            for (uint32_t m = 0; m < (uint32_t)language_data_sizes.back() / 8; m++)
+                                            for (uint32_t m = 0; m < static_cast<uint32_t>(language_data_sizes.back()) / 8; m++)
                                             {
                                                 uint32_t data[2];
-                                                std::memcpy(data, &temp_string[(uint64_t)m * (uint64_t)8], sizeof(uint32_t));
-                                                std::memcpy(data + 1, &temp_string[(uint64_t)m * (uint64_t)8 + (uint64_t)4], sizeof(uint32_t));
+                                                std::memcpy(data, &temp_string[static_cast<uint64_t>(m) * static_cast<uint64_t>(8)], sizeof(uint32_t));
+                                                std::memcpy(data + 1, &temp_string[static_cast<uint64_t>(m) * static_cast<uint64_t>(8) + static_cast<uint64_t>(4)], sizeof(uint32_t));
 
                                                 crypto::xtea_decrypt_localization(data);
 
-                                                std::memcpy(&temp_string[(uint64_t)m * (uint64_t)8], data, sizeof(uint32_t));
-                                                std::memcpy(&temp_string[(uint64_t)m * (uint64_t)8 + (uint64_t)4], data + 1, sizeof(uint32_t));
+                                                std::memcpy(&temp_string[static_cast<uint64_t>(m) * static_cast<uint64_t>(8)], data, sizeof(uint32_t));
+                                                std::memcpy(&temp_string[static_cast<uint64_t>(m) * static_cast<uint64_t>(8) + static_cast<uint64_t>(4)], data + 1, sizeof(uint32_t));
                                             }
 
-                                            uint32_t last_zero_position = (uint32_t)temp_string.size();
+                                            uint32_t last_zero_position = static_cast<uint32_t>(temp_string.size());
 
                                             if (temp_string.size() > 0)
                                             {
-                                                uint32_t m = (uint32_t)(temp_string.size() - 1);
+                                                uint32_t m = static_cast<uint32_t>(temp_string.size() - 1);
 
                                                 while (m >= 0)
                                                 {
@@ -382,11 +377,8 @@ void rpkg_function::extract_rtlv_to_json_from(std::string &input_path, std::stri
                                                     {
                                                         break;
                                                     }
-                                                    else
-                                                    {
-                                                        last_zero_position--;
-                                                    }
 
+                                                    last_zero_position--;
                                                     m--;
                                                 }
                                             }
@@ -462,7 +454,7 @@ void rpkg_function::extract_rtlv_to_json_from(std::string &input_path, std::stri
 
         if (!output_to_string)
         {
-            percent_progress = (uint32_t)100;
+            percent_progress = static_cast<uint32_t>(100);
 
             task_single_status = TASK_SUCCESSFUL;
             task_multiple_status = TASK_SUCCESSFUL;

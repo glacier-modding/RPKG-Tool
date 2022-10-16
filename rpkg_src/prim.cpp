@@ -6,13 +6,10 @@
 #include "console.h"
 #include "util.h"
 #include "borg.h"
-#include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
-#include <iostream>
 #include <unordered_map>
 #include <fstream>
-#include <set>
 
 prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
 {
@@ -79,12 +76,9 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
 
     asset3ds_data.root_name = prim_file_name;
 
-    char input[1024];
-    char char4[4];
     uint8_t bytes1 = 0;
     uint16_t bytes2 = 0;
     uint32_t bytes4 = 0;
-    uint64_t bytes8 = 0;
 
     uint32_t prim_position = 0;
 
@@ -306,7 +300,7 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
     asset3ds_data.weighted = prim_object_is_weighted;
 }
 
-prim::prim(std::string prim_file_path)
+prim::prim(const std::string& prim_file_path)
 {
     std::ifstream file = std::ifstream(prim_file_path, std::ifstream::binary);
 
@@ -589,7 +583,7 @@ prim::prim(std::string prim_file_path)
 
 void prim::load_hash_depends()
 {
-    uint32_t prim_hash_reference_count = rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+    const uint32_t prim_hash_reference_count = rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
     if (prim_hash_reference_count > 0)
     {

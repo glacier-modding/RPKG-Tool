@@ -3,7 +3,7 @@
 #include "hash.h"
 #include <string>
 #include <vector>
-#include <stdint.h>
+#include <cstdint>
 
 struct rpkg_extraction_vars
 {
@@ -23,7 +23,7 @@ class rpkg_function
 public:
 	static void mrtr_to_json(std::string& input_path, std::string& filter, std::string& output_path);
 	static void json_to_mrtr(std::string& input_path, std::string& filter, std::string& output_path);
-	static void extract_mrtr_to_json(std::string& input_path, std::string& filter, std::string& output_path);
+	static void extract_mrtr_to_json(std::string& input_path, const std::string& filter, const std::string& output_path);
 	static void search_repo(std::string& input_path, std::string& filter, std::string& search, std::string& search_type, std::string& output_path, int max_results);
 	static void sdef_to_json(std::string& input_path, std::string& filter, std::string& output_path);
 	static void json_to_sdef(std::string& input_path, std::string& filter, std::string& output_path);
@@ -45,7 +45,7 @@ public:
 	static void edit_patch_deletion_list(std::string& input_path, std::string& filter, std::string& search, std::string& search_type, std::string& output_path);
 	static void extract_all_hash_depends_from(std::string& input_path, std::string& filter, std::string& output_path, bool extract_prim_models);
 	static void extract_non_base_hash_depends_from(std::string& input_path, std::string& filter, std::string& output_path, bool extract_prim_models);
-	static void extract_all_prim_model_of_temp_from(std::string& input_path, std::string& filter, std::string& output_path);
+	static void extract_all_prim_model_of_temp_from(std::string& input_path, const std::string& filter, std::string& output_path);
 	static void extract_all_prim_model_from(std::string& input_path, std::string& filter, std::string& output_path);
 	static void rebuild_prim_model_in(std::string& input_path, std::string& filter, std::string& output_path);
 	static void extract_prim_model_from(std::string& input_path, std::string filter, std::string& output_path);
@@ -53,14 +53,14 @@ public:
 	static bool rebuild_text(std::string& text_folder, std::string& tga_file_path, std::string& text_file_name, std::string& meta_file_path, std::string& rpkg_output_file, std::string& rpkgs_path, bool generate_rpkgs);
 	static void rebuild_text_in(std::string& input_path, std::string& filter, std::string& output_path, bool generate_rpkgs);
 	static void extract_all_text_from(std::string& input_path, std::string& filter, std::string& output_path);
-	static void extract_text_from(std::string& input_path, std::string filter, std::string& output_path);
-	static void extract_all_prim_of_temp_from(std::string& input_path, std::string& filter, std::string& output_path, int type);
+	static void extract_text_from(std::string& input_path, const std::string& filter, const std::string& output_path);
+	static void extract_all_prim_of_temp_from(std::string& input_path, const std::string& filter, std::string& output_path, int type);
 	static void recursive_temp_loader(uint32_t rpkgs_index, uint32_t hash_index, uint32_t temp_version, std::unordered_map<uint32_t, uint32_t>& parents_map, std::vector<uint32_t> temps_indexes, uint32_t level, uint32_t level_max, uint32_t temps_max);
 	static void extract_all_prim_from(std::string& input_path, std::string& filter, std::string& output_path, int type);
 	static void extract_prim_from(std::string& input_path, std::string filter, std::string& output_path, int type, bool rotate);
 	static int load_temp_tblu_hash_depends(uint64_t rpkg_index, uint64_t hash_index);
 	static void extract_temp_from(std::string& input_path, std::string& filter, std::string& output_path);
-	static void extract_prel_refs(std::string& input_path, std::string& filter, std::string& output_path);
+	static void extract_prel_refs(std::string& input_path);
 	static void get_unique_name(std::unordered_map<std::string, uint32_t>& wwem_name_map, std::string& wem_base_name);
 	static void hash_probe_from_file(std::string& input_path, std::string& filter, std::string& output_path);
 	static void hash_probe(std::string& input_path, std::string& filter, std::string& output_path);

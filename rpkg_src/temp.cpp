@@ -11,7 +11,6 @@
 #include "thirdparty/rapidjson/stringbuffer.h"
 #include "thirdparty/rapidjson/pointer.h"
 #include "thirdparty/directxmath/DirectXMath.h"
-#include <iostream>
 #include <unordered_map>
 #include <fstream>
 #include <sstream>
@@ -45,7 +44,7 @@ temp::temp(uint64_t rpkgs_index, uint64_t hash_index)
     load_hash_depends();
 }
 
-temp::temp(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
+temp::temp(const uint64_t rpkgs_index, const uint64_t hash_index, const uint32_t temp_version)
 {
     temp_file_version = temp_version;
 
@@ -220,7 +219,7 @@ void temp::load_temp_data()
         resource_tool_converter = HM3_GetConverterForResource("TEMP");
     }
 
-    temp_json_input = resource_tool_converter->FromMemoryToJsonString((const void*)temp_data.data(), (size_t)temp_data.size());
+    temp_json_input = resource_tool_converter->FromMemoryToJsonString((const void*)temp_data.data(), temp_data.size());
 
     //resource_tool_ConvertMemoryResourceToJson(&type[0], (void*)temp_data.data(), (uint64_t)temp_data.size());
 
@@ -300,7 +299,7 @@ void temp::load_tblu_data()
         resource_tool_converter = HM3_GetConverterForResource("TBLU");
     }
 
-    tblu_json_input = resource_tool_converter->FromMemoryToJsonString((const void*)tblu_data.data(), (size_t)tblu_data.size());
+    tblu_json_input = resource_tool_converter->FromMemoryToJsonString((const void*)tblu_data.data(), tblu_data.size());
 
     //resource_tool_ConvertMemoryResourceToJson(&type[0], (void*)tblu_data.data(), (uint64_t)tblu_data.size());
 
@@ -2623,7 +2622,7 @@ int temp::generate_temp_file_from_data(std::string temp_path)
     return 0;
 }
 
-void temp::get_all_bricks()
+void temp::get_all_bricks() const
 {
     response_string = "";
 

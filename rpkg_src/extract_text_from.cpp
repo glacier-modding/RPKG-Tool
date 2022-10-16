@@ -11,7 +11,7 @@
 #include <regex>
 #include <filesystem>
 
-void rpkg_function::extract_text_from(std::string& input_path, std::string filter, std::string& output_path)
+void rpkg_function::extract_text_from(std::string& input_path, const std::string& filter, const std::string& output_path)
 {
     task_single_status = TASK_EXECUTING;
     //task_multiple_status = TASK_EXECUTING;
@@ -52,7 +52,7 @@ void rpkg_function::extract_text_from(std::string& input_path, std::string filte
 
         //std::vector<std::string>().swap(prim_asset_file_names);
 
-        std::vector<std::string> filters = util::parse_input_filter(filter);
+        const std::vector<std::string> filters = util::parse_input_filter(filter);
 
         for (uint64_t f = 0; f < filters.size(); f++)
         {

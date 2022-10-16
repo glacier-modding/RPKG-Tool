@@ -3,7 +3,7 @@
 #include "thirdparty/directxmath/DirectXMath.h"
 #include <string>
 #include <vector>
-#include <stdint.h>
+#include <cstdint>
 
 class borg
 {

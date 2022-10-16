@@ -66,9 +66,9 @@ void generic_function::compute_ioi_hash_from_file(std::string& input_path)
 
         std::stringstream ss;
 
-        for (uint64_t m = 0; m < 16; m++)
+        for (unsigned char m : signature)
         {
-            ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)signature[m];
+            ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)m;
         }
 
         ss.str(std::string());

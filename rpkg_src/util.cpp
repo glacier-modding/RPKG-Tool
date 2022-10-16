@@ -38,7 +38,7 @@ std::string util::generate_guid()
 
 bool util::is_valid_hash(std::string hash)
 {
-    std::string valid_chars = "0123456789ABCDEF";
+    const std::string valid_chars = "0123456789ABCDEF";
 
     hash = util::to_upper_case(hash);
 
@@ -58,7 +58,7 @@ bool util::is_valid_hash(std::string hash)
     return true;
 }
 
-std::string util::hash_type(uint64_t hash_value)
+std::string util::hash_type(const uint64_t hash_value)
 {
     if (hash_list_loaded)
     {
@@ -73,12 +73,12 @@ std::string util::hash_type(uint64_t hash_value)
     return "";
 }
 
-uint64_t util::ioi_string_to_hash(std::string ioi_string)
+uint64_t util::ioi_string_to_hash(const std::string& ioi_string)
 {
     return std::strtoull(generic_function::compute_ioi_hash(ioi_string).c_str(), nullptr, 16);
 }
 
-std::string util::hash_to_ioi_string(uint64_t hash_value, bool return_hash_if_not_found)
+std::string util::hash_to_ioi_string(const uint64_t hash_value, const bool return_hash_if_not_found)
 {
     if (hash_list_loaded)
     {
@@ -100,10 +100,7 @@ std::string util::hash_to_ioi_string(uint64_t hash_value, bool return_hash_if_no
     {
         return util::uint64_t_to_hex_string(hash_value);
     }
-    else
-    {
-        return "";
-    }
+    return "";
 }
 
 std::string util::hash_to_hash_list_string(uint64_t hash_value)
@@ -128,47 +125,31 @@ bool util::floats_equal(float value1, float value2)
 {
     if (value1 == 0.0f)
     {
-        if (value2 < 0.00000001f)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return value2 < 0.00000001f;
     }
-    else if (value2 == 0.0f)
+    if (value2 == 0.0f)
     {
-        if (value1 < 0.00000001f)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return value1 < 0.00000001f;
     }
-    else if (std::fabs(value1 - value2) <= 0.00000001f)
+    if (std::fabs(value1 - value2) <= 0.00000001f)
     {
         return true;
     }
-    else
-    {
-        return (std::fabs(value1 - value2) <= 1E-5 * std::fmax(std::fabs(value1), std::fabs(value2)));
-    }
+    return (std::fabs(value1 - value2) <= 1E-5 * std::fmax(std::fabs(value1), std::fabs(value2)));
 }
 
-std::string util::find_string_between_strings(std::string_view& input_string, std::string string_before, std::string string_after)
+std::string util::find_string_between_strings(std::string_view& input_string, const std::string& string_before,
+                                              const std::string& string_after)
 {
     std::string output_string = "";
 
-    size_t pos1 = input_string.find(string_before);
+    const size_t pos1 = input_string.find(string_before);
 
     if (pos1 != std::string::npos)
     {
-        size_t position_after_string_before = pos1 + string_before.length();
+        const size_t position_after_string_before = pos1 + string_before.length();
 
-        size_t pos2 = input_string.substr(position_after_string_before).find(string_after);
+        const size_t pos2 = input_string.substr(position_after_string_before).find(string_after);
 
         if (pos2 != std::string::npos)
         {
@@ -179,7 +160,7 @@ std::string util::find_string_between_strings(std::string_view& input_string, st
     return output_string;
 }
 
-void util::split_string_view(std::string_view& temp_string_view, std::string split_string, std::vector<uint64_t>& split_positions)
+void util::split_string_view(const std::string_view& temp_string_view, const std::string& split_string, std::vector<uint64_t>& split_positions)
 {
     bool done = false;
 
@@ -187,7 +168,7 @@ void util::split_string_view(std::string_view& temp_string_view, std::string spl
 
     while (!done)
     {
-        size_t pos1 = temp_string_view.substr(position).find(split_string);
+        const size_t pos1 = temp_string_view.substr(position).find(split_string);
 
         if (pos1 != std::string::npos)
         {
@@ -202,7 +183,7 @@ void util::split_string_view(std::string_view& temp_string_view, std::string spl
     }
 }
 
-void util::split_string(std::string& temp_string, std::string split_string, std::vector<uint64_t>& split_positions)
+void util::split_string(const std::string& temp_string, const std::string& split_string, std::vector<uint64_t>& split_positions)
 {
     bool done = false;
 
@@ -210,7 +191,7 @@ void util::split_string(std::string& temp_string, std::string split_string, std:
 
     while (!done)
     {
-        size_t pos1 = temp_string.substr(position).find(split_string);
+        const size_t pos1 = temp_string.substr(position).find(split_string);
 
         if (pos1 != std::string::npos)
         {
@@ -225,14 +206,14 @@ void util::split_string(std::string& temp_string, std::string split_string, std:
     }
 }
 
-std::string util::string_to_hex_string(std::string input_string)
+std::string util::string_to_hex_string(const std::string input_string)
 {
     std::string output_string;
 
     for (uint64_t k = 0; k < input_string.size(); k++)
     {
         char value[5];
-        sprintf_s(value, "\\x%02X", (int)(unsigned char)input_string.data()[k]);
+        sprintf_s(value, "\\x%02X", static_cast<unsigned char>(input_string.data()[k]));
         output_string += value;
     }
 
@@ -281,21 +262,21 @@ std::string util::to_upper_case(std::string s)
 
 std::string util::to_lower_case(std::string s)
 {
-    for (uint64_t i = 0; i < s.length(); i++)
+    for (char& i : s)
     {
-        s[i] = std::tolower(s[i]);
+        i = std::tolower(i);
     }
 
     return s;
 }
 
-std::string util::remove_all_string_from_string(std::string input_string, std::string to_remove)
+std::string util::remove_all_string_from_string(std::string input_string, const std::string& to_remove)
 {
     bool done = false;
 
     while (!done)
     {
-        size_t pos = input_string.find(to_remove);
+        const size_t pos = input_string.find(to_remove);
 
         if (pos != std::string::npos)
         {
@@ -310,96 +291,93 @@ std::string util::remove_all_string_from_string(std::string input_string, std::s
     return input_string;
 }
 
-std::string util::uint64_t_to_hex_string_for_qn(uint64_t bytes8)
+std::string util::uint64_t_to_hex_string_for_qn(const uint64_t bytes8)
 {
     std::stringstream ss;
     ss << std::hex << bytes8;
     return ss.str();
 }
 
-std::string util::uint64_t_to_hex_string(uint64_t bytes8)
+std::string util::uint64_t_to_hex_string(const uint64_t bytes8)
 {
     std::stringstream ss;
     ss << std::hex << std::setw(16) << std::setfill('0') << std::uppercase << bytes8;
     return ss.str();
 }
 
-std::string util::uint32_t_to_hex_string(uint32_t bytes4)
+std::string util::uint32_t_to_hex_string(const uint32_t bytes4)
 {
     std::stringstream ss;
     ss << std::hex << std::setw(8) << std::setfill('0') << std::uppercase << bytes4;
     return ss.str();
 }
 
-std::string util::uint16_t_to_hex_string(uint16_t bytes2)
+std::string util::uint16_t_to_hex_string(const uint16_t bytes2)
 {
     std::stringstream ss;
     ss << std::hex << std::setw(4) << std::setfill('0') << std::uppercase << bytes2;
     return ss.str();
 }
 
-std::string util::uint8_t_to_hex_string(uint8_t bytes1)
+std::string util::uint8_t_to_hex_string(const uint8_t bytes1)
 {
     std::stringstream ss;
-    ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)(unsigned char)bytes1;
+    ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(static_cast<unsigned char>(bytes1));
     return ss.str();
 }
 
-std::string util::uint64_t_to_string(uint64_t bytes8)
+std::string util::uint64_t_to_string(const uint64_t bytes8)
 {
     std::stringstream ss;
     ss << bytes8;
     return ss.str();
 }
 
-std::string util::uint32_t_to_string(uint32_t bytes4)
+std::string util::uint32_t_to_string(const uint32_t bytes4)
 {
     std::stringstream ss;
     ss << bytes4;
     return ss.str();
 }
 
-std::string util::uint16_t_to_string(uint16_t bytes2)
+std::string util::uint16_t_to_string(const uint16_t bytes2)
 {
     std::stringstream ss;
     ss << bytes2;
     return ss.str();
 }
 
-std::string util::short_to_string(short bytes2)
+std::string util::short_to_string(const short bytes2)
 {
     std::stringstream ss;
     ss << bytes2;
     return ss.str();
 }
 
-std::string util::bool_to_string(bool value)
+std::string util::bool_to_string(const bool value)
 {
     if (value)
     {
         return "True";
     }
-    else
-    {
-        return "False";
-    }
+    return "False";
 }
 
-std::string util::uint8_t_to_string(uint8_t bytes1)
+std::string util::uint8_t_to_string(const uint8_t bytes1)
 {
     std::stringstream ss;
-    ss << (int)(unsigned char)bytes1;
+    ss << static_cast<int>(static_cast<unsigned char>(bytes1));
     return ss.str();
 }
 
-std::string util::int32_t_to_string(int32_t bytes4)
+std::string util::int32_t_to_string(const int32_t bytes4)
 {
     std::stringstream ss;
     ss << bytes4;
     return ss.str();
 }
 
-std::string util::float_to_string(float bytes4)
+std::string util::float_to_string(const float bytes4)
 {
     std::stringstream ss;
     ss << std::fixed << std::setprecision(10) << bytes4;
@@ -426,11 +404,11 @@ void util::replace_all_string_in_string(std::string& input, const std::string& t
     input.swap(new_string);
 }
 
-bool util::float_equal(float float_existing, float float_new, float tolerance)
+bool util::float_equal(const float float_existing, const float float_new, const float tolerance)
 {
-    float float_new_abs = std::abs(float_new);
-    float float_existing_abs = std::abs(float_existing);
-    float difference = 0;
+    const float float_new_abs = std::abs(float_new);
+    const float float_existing_abs = std::abs(float_existing);
+    float difference;
 
     if (float_new_abs > float_existing_abs)
     {
@@ -454,7 +432,7 @@ std::wstring util::string_to_wstring(const std::string& input_string)
     {
         return std::wstring();
     }
-    int num_chars = MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, input_string.c_str(), input_string.length(), NULL, 0);
+    const int num_chars = MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, input_string.c_str(), input_string.length(), NULL, 0);
     std::wstring wstrTo;
     if (num_chars)
     {
@@ -469,18 +447,11 @@ std::wstring util::string_to_wstring(const std::string& input_string)
 
 bool util::lz4_compress_hc(const char* source, std::vector<char>& destination, int source_size, int& compressed_size)
 {
-    int compressed_bound = LZ4_compressBound(source_size);
+    const int compressed_bound = LZ4_compressBound(source_size);
 
     destination = std::vector<char>(compressed_bound, 0);
 
     compressed_size = LZ4_compress_HC(source, destination.data(), source_size, compressed_bound, LZ4HC_CLEVEL_MAX);
 
-    if (compressed_size == 0)
-    {
-        return false;
-    }
-    else
-    {
-        return true;
-    }
+    return compressed_size != 0;
 }

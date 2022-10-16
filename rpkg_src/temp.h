@@ -36,7 +36,7 @@ public:
 	void update_temp_file(uint32_t entry_index, char* update_data, uint32_t update_data_size);
 	void export_json_files(std::string& json_file_path);
 	int generate_temp_file_from_data(std::string temp_path);
-	void get_all_bricks();
+	void get_all_bricks() const;
 	void get_entry_name_string(int entry_index);
 	bool rt_json_to_qn_json();
 	void convert_to_qn_reference(rapidjson::Document& json_document, rapidjson::Value& reference, std::string pointer_string);
