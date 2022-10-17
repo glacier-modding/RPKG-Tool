@@ -5,7 +5,7 @@
 #include <iostream>
 #include <filesystem>
 
-void dev_function::dev_hash_list_percent_found(std::string& input_path, std::string& filter, std::string& output_path)
+void dev_function::dev_hash_list_percent_found()
 {
     if (!hash_list_loaded)
     {

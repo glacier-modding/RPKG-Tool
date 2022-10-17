@@ -5,7 +5,7 @@ class dev_function
 {
 public:
 	static void dev_dlge_names(std::string& input_path, std::string& filter, std::string& output_path);
-	static void dev_hash_list_percent_found(std::string& input_path, std::string& filter, std::string& output_path);
+	static void dev_hash_list_percent_found();
 	static void dev_map_editor(std::string& input_path, std::string& filter, std::string& output_path);
 	static void dev_diff_rpkg_supermetas(std::string& input_path, std::string& filter, std::string& output_path);
 	static void dev_extract_rpkg_supermetas(std::string& input_path, std::string& output_path);

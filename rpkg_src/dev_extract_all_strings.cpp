@@ -24,11 +24,11 @@ void dev_function::dev_extract_all_strings(std::string& input_path, std::string&
 
 	std::cout << "Extracting all known hashes from loaded RPKGs vs the Hash List..." << std::endl;
 
-    for (uint64_t i = 0; i < rpkgs.size(); i++)
+    for (auto& rpkg : rpkgs)
     {
-        for (uint64_t j = 0; j < rpkgs.at(i).hash.size(); j++)
+        for (auto& j : rpkg.hash)
         {
-            std::unordered_map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(rpkgs.at(i).hash.at(j).hash_value);
+            std::unordered_map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(j.hash_value);
 
             if (it != hash_list_hash_map.end())
             {
@@ -36,20 +36,20 @@ void dev_function::dev_extract_all_strings(std::string& input_path, std::string&
             }
             else
             {
-                std::cout << util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(j).hash_value) + "." + rpkgs.at(i).hash.at(j).hash_resource_type << "," << std::endl;
+                std::cout << util::uint64_t_to_hex_string(j.hash_value) + "." + j.hash_resource_type << "," << std::endl;
             }
         }
     }
 
 	std::cout << "Extracting WWEM strings..." << std::endl;
 
-	dev_function::dev_extract_wwem_strings(input_path, filter, output_path);
+	dev_function::dev_extract_wwem_strings(output_path);
 
 	std::cout << "Extracting WWES strings..." << std::endl;
 
-	dev_function::dev_extract_wwes_strings(input_path, filter, output_path);
+	dev_function::dev_extract_wwes_strings(output_path);
 
 	std::cout << "Extracting WWEV strings..." << std::endl;
 
-	dev_function::dev_extract_wwev_strings(input_path, filter, output_path);
+	dev_function::dev_extract_wwev_strings(output_path);
 }

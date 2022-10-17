@@ -242,7 +242,7 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-dev_extract_wwev_strings")
     {
-        dev_function::dev_extract_wwev_strings(input_path, filter, output_path);
+        dev_function::dev_extract_wwev_strings(output_path);
     }
     else if (command == "-dev_extract_wwise_ids")
     {
