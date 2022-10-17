@@ -10,7 +10,7 @@
 #include <regex>
 #include <filesystem>
 
-void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string& filter, std::string& output_path)
+void dev_function::dev_extract_wwem_strings(std::string& output_path)
 {    
     std::unordered_map<std::string, uint64_t> fxas_to_wwem_ioi_path_map;
     std::vector<std::string> fxas_wwem_ioi_path;

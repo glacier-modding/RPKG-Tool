@@ -10,7 +10,7 @@
 #include <regex>
 #include <filesystem>
 
-void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& filter, std::string& output_path)
+void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& output_path)
 {
     input_path = file::parse_input_folder_path(input_path);
 

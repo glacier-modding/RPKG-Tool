@@ -9,7 +9,7 @@
 #include <regex>
 #include <filesystem>
 
-void dev_function::dev_extract_wwev_strings(std::string& input_path, std::string& filter, std::string& output_path)
+void dev_function::dev_extract_wwev_strings(std::string& output_path)
 {
     for (uint64_t i = 0; i < rpkgs.size(); i++)
     {
