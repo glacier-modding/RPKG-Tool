@@ -246,7 +246,7 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-dev_extract_wwise_ids")
     {
-        dev_function::dev_extract_wwise_ids(input_path, filter, output_path);
+        dev_function::dev_extract_wwise_ids(input_path, output_path);
     }
     else if (command == "-dev_hash_list_percent_found")
     {

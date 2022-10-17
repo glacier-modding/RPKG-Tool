@@ -10,7 +10,7 @@
 #include <filesystem>
 #include "thirdparty/json/json.hpp"
 
-void dev_function::dev_dlge_names(std::string& input_path, std::string& filter, std::string& output_path)
+void dev_function::dev_dlge_names(std::string& input_path, const std::string& output_path)
 {
     input_path = file::parse_input_folder_path(input_path);
 
@@ -29,34 +29,33 @@ void dev_function::dev_dlge_names(std::string& input_path, std::string& filter, 
     {
         for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++)
         {
-            if (rpkgs.at(i).hash_resource_types.at(r) == "DLGE")
+            if (rpkgs.at(i).hash_resource_types.at(r) != "DLGE")
+                continue;
+            
+            for (uint64_t j = 0; j < rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).size(); j++)
             {
-                for (uint64_t j = 0; j < rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).size(); j++)
+                const uint64_t hash_index = rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).at(j);
+
+                const uint32_t rpkg_index = rpkg_function::get_latest_hash(rpkgs.at(i).hash.at(hash_index).hash_value);
+
+                if (rpkg_index == UINT32_MAX)
+                    continue;
+
+                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(rpkgs.at(i).hash.at(hash_index).hash_value);
+
+                if (it != rpkgs.at(rpkg_index).hash_map.end())
                 {
-                    uint64_t hash_index = rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).at(j);
+                    std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type;
 
-                    uint32_t rpkg_index = rpkg_function::get_latest_hash(rpkgs.at(i).hash.at(hash_index).hash_value);
+                    nlohmann::ordered_json temp_json = nlohmann::ordered_json::array();
 
-                    if (rpkg_index != UINT32_MAX)
+                    for (const unsigned long long h : rpkgs.at(rpkg_index).hash.at(it->second).hash_reference_data.
+                                                            hash_reference)
                     {
-                        std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(rpkgs.at(i).hash.at(hash_index).hash_value);
-
-                        if (it != rpkgs.at(rpkg_index).hash_map.end())
-                        {
-                            uint64_t hash_index = rpkgs.at(rpkg_index).hash.at(it->second).hash_value;
-
-                            std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type;
-
-                            nlohmann::ordered_json temp_json = nlohmann::ordered_json::array();
-
-                            for (uint32_t h = 0; h < rpkgs.at(rpkg_index).hash.at(it->second).hash_reference_data.hash_reference.size(); h++)
-                            {
-                                temp_json.push_back(util::hash_to_ioi_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_reference_data.hash_reference.at(h), true));
-                            }
-
-                            json[util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value)] = temp_json;
-                        }
+                        temp_json.push_back(util::hash_to_ioi_string(h, true));
                     }
+
+                    json[util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value)] = temp_json;
                 }
             }
         }
