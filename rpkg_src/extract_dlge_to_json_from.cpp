@@ -7,7 +7,6 @@
 #include "rpkg.h"
 #include "hash.h"
 #include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
 #include "thirdparty/json/json.hpp"
 #include <iostream>
 #include <unordered_map>
@@ -64,13 +63,13 @@ void rpkg_function::extract_dlge_to_json_from(std::string &input_path, std::stri
         uint64_t dlge_count = 0;
         uint64_t dlge_current_count = 0;
 
-        for (uint64_t i = 0; i < rpkgs.size(); i++)
+        for (auto& rpkg : rpkgs)
         {
-            for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++)
+            for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++)
             {
-                if (rpkgs.at(i).hash_resource_types.at(r) == "DLGE")
+                if (rpkg.hash_resource_types.at(r) == "DLGE")
                 {
-                    dlge_count += rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).size();
+                    dlge_count += rpkg.hashes_indexes_based_on_resource_types.at(r).size();
                 }
             }
         }
@@ -106,8 +105,6 @@ void rpkg_function::extract_dlge_to_json_from(std::string &input_path, std::stri
 
                             bool found = false;
 
-                            uint64_t input_filter_index = 0;
-
                             for (uint64_t z = 0; z < filters.size(); z++)
                             {
                                 std::size_t found_position = hash_file_name.find(filters.at(z));
@@ -115,8 +112,6 @@ void rpkg_function::extract_dlge_to_json_from(std::string &input_path, std::stri
                                 if (found_position != std::string::npos && filters.at(z) != "")
                                 {
                                     found = true;
-
-                                    input_filter_index = z;
 
                                     break;
                                 }
@@ -126,7 +121,7 @@ void rpkg_function::extract_dlge_to_json_from(std::string &input_path, std::stri
                             {
                                 std::string message = "Extracting DLGE as JSON: ";
 
-                                if (((dlge_current_count * (uint64_t)100000) / (uint64_t)dlge_count) % (uint64_t)100 == 0 && dlge_current_count > 0 && !output_to_string)
+                                if (((dlge_current_count * (uint64_t)100000) / dlge_count) % (uint64_t)100 == 0 && dlge_current_count > 0 && !output_to_string)
                                 {
                                     stringstream_length = console::update_console(message, dlge_count, dlge_current_count, start_time, stringstream_length);
                                 }
@@ -429,11 +424,8 @@ void rpkg_function::extract_dlge_to_json_from(std::string &input_path, std::stri
                                                 {
                                                     break;
                                                 }
-                                                else
-                                                {
-                                                    last_zero_position--;
-                                                }
-
+                                                
+                                                last_zero_position--;
                                                 m--;
                                             }
                                         }

@@ -7,7 +7,7 @@ struct crc32
 {
 	static void generate_table(uint32_t(&table)[256])
 	{
-		uint32_t polynomial = 0xEDB88320;
+		constexpr uint32_t polynomial = 0xEDB88320;
 		for (uint32_t i = 0; i < 256; i++)
 		{
 			uint32_t c = i;
@@ -24,7 +24,7 @@ struct crc32
 		}
 	}
 
-	static uint32_t update(uint32_t(&table)[256], uint32_t initial, const void* buf, size_t len)
+	static uint32_t update(const uint32_t(&table)[256], const uint32_t initial, const void* buf, const size_t len)
 	{
 		uint32_t c = initial ^ 0xFFFFFFFF;
 		const uint8_t* u = static_cast<const uint8_t*>(buf);

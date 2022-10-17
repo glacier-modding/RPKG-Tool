@@ -93,9 +93,9 @@ void dev_function::dev_extract_wwev_strings(std::string& input_path, std::string
 
                     std::memcpy(&hash, &rpkgs.at(i).hash.at(hash_index).hash_value, 0x8);
 
-                    for (uint64_t k = 0; k < sizeof(uint64_t); k++)
+                    for (char& k : hash)
                     {
-                        wwev_meta_data.push_back(hash[k]);
+                        wwev_meta_data.push_back(k);
                     }
 
                     std::memcpy(&input, &wwev_data->data()[position], (wwev_file_name_length + (uint64_t)0xC));

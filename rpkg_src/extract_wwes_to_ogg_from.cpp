@@ -139,7 +139,7 @@ void rpkg_function::extract_wwes_to_ogg_from(std::string& input_path, std::strin
 
         std::string message = "Extracting WWES to IOI Paths: ";
 
-        if (filter != "")
+        if (!filter.empty())
         {
             LOG("Extracting WWES to *.wem/*.ogg files with filter \"" << filter << "\"");
         }
@@ -156,7 +156,7 @@ void rpkg_function::extract_wwes_to_ogg_from(std::string& input_path, std::strin
             not_found_in.push_back("");
         }
 
-        for (uint64_t i = 0; i < rpkgs.size(); i++)
+        for (auto& rpkg : rpkgs)
         {
             std::vector<bool> extracted;
 
@@ -165,35 +165,38 @@ void rpkg_function::extract_wwes_to_ogg_from(std::string& input_path, std::strin
                 extracted.push_back(false);
             }
 
-            if (rpkgs.at(i).rpkg_file_path == input_path || !input_path_is_rpkg_file)
+            if (rpkg.rpkg_file_path == input_path || !input_path_is_rpkg_file)
             {
-                for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++)
+                for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++)
                 {
-                    if (rpkgs.at(i).hash_resource_types.at(r) == "WWES")
+                    if (rpkg.hash_resource_types.at(r) == "WWES")
                     {
-                        for (uint64_t j = 0; j < rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).size(); j++)
+                        for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++)
                         {
-                            uint64_t hash_index = rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).at(j);
+                            uint64_t hash_index = rpkg.hashes_indexes_based_on_resource_types.at(r).at(j);
 
                             if (gui_control == ABORT_CURRENT_TASK)
                             {
                                 return;
                             }
 
-                            std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
+                            std::string hash_file_name = util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
+                                rpkg.hash.at(hash_index).hash_resource_type;
 
-                            if (((wwes_count_current * (uint64_t)100000) / (uint64_t)wwes_count) % (uint64_t)10 == 0 && wwes_count_current > 0)
+                            if (((wwes_count_current * (uint64_t)100000) / wwes_count) % (uint64_t)10 == 0 && wwes_count_current > 0)
                             {
                                 stringstream_length = console::update_console(message, wwes_hash_size_total, wwes_hash_size_current, start_time, stringstream_length);
                             }
 
-                            wwes_hash_size_current += rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
+                            wwes_hash_size_current += rpkg.hash.at(hash_index).data.resource.size_final;
 
                             wwes_count_current++;
 
-                            if (!extract_single_hash || (extract_single_hash && filter == util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value)))
+                            if (!extract_single_hash || (extract_single_hash && filter == util::uint64_t_to_hex_string(
+                                rpkg.hash.at(hash_index).hash_value)))
                             {
-                                std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
+                                std::string hash_file_name = util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
+                                    rpkg.hash.at(hash_index).hash_resource_type;
 
                                 std::string hash_list_string = "";
                                 std::string wwes_ioi_path = "";
@@ -203,12 +206,12 @@ void rpkg_function::extract_wwes_to_ogg_from(std::string& input_path, std::strin
                                 bool full_wwes_ioi_path_unknown = false;
                                 bool wwes_ioi_path_found = false;
 
-                                std::unordered_map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(rpkgs.at(i).hash.at(hash_index).hash_value);
+                                std::unordered_map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(rpkg.hash.at(hash_index).hash_value);
 
                                 if (it != hash_list_hash_map.end())
                                 {
                                     hash_list_string = hash_list_hash_strings.at(it->second);
-                                    wwes_ioi_path = file::output_path_append("WWES\\" + rpkgs.at(i).rpkg_file_name + "\\assembly", output_path);
+                                    wwes_ioi_path = file::output_path_append("WWES\\" + rpkg.rpkg_file_name + "\\assembly", output_path);
 
                                     if (hash_list_string.find("/unknown/") != std::string::npos)
                                     {
@@ -233,7 +236,7 @@ void rpkg_function::extract_wwes_to_ogg_from(std::string& input_path, std::strin
 
                                         if (full_wwes_ioi_path_unknown)
                                         {
-                                            wwes_ioi_path += "." + util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value);
+                                            wwes_ioi_path += "." + util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value);
                                             //wwes_ioi_path.push_back('\\');
                                             //wwes_ioi_path.append(wwes_base_name);
                                             //wwes_ioi_directory.push_back('\\');
@@ -250,45 +253,45 @@ void rpkg_function::extract_wwes_to_ogg_from(std::string& input_path, std::strin
                                 {
                                     uint64_t hash_size;
 
-                                    if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
+                                    if (rpkg.hash.at(hash_index).data.lz4ed)
                                     {
-                                        hash_size = rpkgs.at(i).hash.at(hash_index).data.header.data_size;
+                                        hash_size = rpkg.hash.at(hash_index).data.header.data_size;
 
-                                        if (rpkgs.at(i).hash.at(hash_index).data.xored)
+                                        if (rpkg.hash.at(hash_index).data.xored)
                                         {
                                             hash_size &= 0x3FFFFFFF;
                                         }
                                     }
                                     else
                                     {
-                                        hash_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
+                                        hash_size = rpkg.hash.at(hash_index).data.resource.size_final;
                                     }
 
                                     std::vector<char> input_data(hash_size, 0);
 
-                                    std::ifstream file = std::ifstream(rpkgs.at(i).rpkg_file_path, std::ifstream::binary);
+                                    std::ifstream file = std::ifstream(rpkg.rpkg_file_path, std::ifstream::binary);
 
                                     if (!file.good())
                                     {
-                                        LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(i).rpkg_file_path + " could not be read.");
+                                        LOG_AND_EXIT("Error: RPKG file " + rpkg.rpkg_file_path + " could not be read.");
                                     }
 
-                                    file.seekg(rpkgs.at(i).hash.at(hash_index).data.header.data_offset, file.beg);
+                                    file.seekg(rpkg.hash.at(hash_index).data.header.data_offset, file.beg);
                                     file.read(input_data.data(), hash_size);
                                     file.close();
 
-                                    if (rpkgs.at(i).hash.at(hash_index).data.xored)
+                                    if (rpkg.hash.at(hash_index).data.xored)
                                     {
                                         crypto::xor_data(input_data.data(), (uint32_t)hash_size);
                                     }
 
-                                    uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
+                                    uint32_t decompressed_size = rpkg.hash.at(hash_index).data.resource.size_final;
 
                                     std::vector<char> output_data(decompressed_size, 0);
 
                                     std::vector<char>* wwes_data;
 
-                                    if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
+                                    if (rpkg.hash.at(hash_index).data.lz4ed)
                                     {
                                         LZ4_decompress_safe(input_data.data(), output_data.data(), (int)hash_size, decompressed_size);
 
@@ -382,7 +385,7 @@ void rpkg_function::extract_wwes_to_ogg_from(std::string& input_path, std::strin
                                         }
                                         catch (const Parse_error& pe)
                                         {
-                                            LOG("WWEV resource found: " << hash_file_name << " in RPKG file: " << rpkgs.at(i).rpkg_file_name);
+                                            LOG("WWEV resource found: " << hash_file_name << " in RPKG file: " << rpkg.rpkg_file_name);
                                             LOG("Error parsing ogg file " << wem_file_name << " could not be created.");
                                             LOG("Error: " << pe);
                                         }
@@ -414,22 +417,22 @@ void rpkg_function::extract_wwes_to_ogg_from(std::string& input_path, std::strin
                 {
                     if (found_in.at(z) == "")
                     {
-                        found_in.at(z).append(rpkgs.at(i).rpkg_file_name);
+                        found_in.at(z).append(rpkg.rpkg_file_name);
                     }
                     else
                     {
-                        found_in.at(z).append(", " + rpkgs.at(i).rpkg_file_name);
+                        found_in.at(z).append(", " + rpkg.rpkg_file_name);
                     }
                 }
                 else
                 {
                     if (not_found_in.at(z) == "")
                     {
-                        not_found_in.at(z).append(rpkgs.at(i).rpkg_file_name);
+                        not_found_in.at(z).append(rpkg.rpkg_file_name);
                     }
                     else
                     {
-                        not_found_in.at(z).append(", " + rpkgs.at(i).rpkg_file_name);
+                        not_found_in.at(z).append(", " + rpkg.rpkg_file_name);
                     }
                 }
             }

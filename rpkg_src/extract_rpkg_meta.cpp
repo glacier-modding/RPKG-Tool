@@ -41,9 +41,9 @@ void rpkg_function::extract_rpkg_meta(uint64_t i, std::string& hash_file_path)
 
     if (rpkgs.at(i).rpkg_file_version == 2)
     {
-        for (uint64_t j = 0; j < rpkgs.at(i).rpkgv2_header.size(); j++)
+        for (char& j : rpkgs.at(i).rpkgv2_header)
         {
-            std::memcpy(&char1, &rpkgs.at(i).rpkgv2_header.at(j), sizeof(uint8_t));
+            std::memcpy(&char1, &j, sizeof(uint8_t));
 
             rpkg_meta_data.push_back(char1[0]);
         }
@@ -51,32 +51,32 @@ void rpkg_function::extract_rpkg_meta(uint64_t i, std::string& hash_file_path)
 
     std::memcpy(&char4, &rpkgs.at(i).header.hash_count, sizeof(uint32_t));
 
-    for (uint64_t j = 0; j < sizeof(uint32_t); j++)
+    for (char& j : char4)
     {
-        rpkg_meta_data.push_back(char4[j]);
+        rpkg_meta_data.push_back(j);
     }
 
     std::memcpy(&char4, &rpkgs.at(i).header.hash_header_table_size, sizeof(uint32_t));
 
-    for (uint64_t j = 0; j < sizeof(uint32_t); j++)
+    for (char& j : char4)
     {
-        rpkg_meta_data.push_back(char4[j]);
+        rpkg_meta_data.push_back(j);
     }
 
     std::memcpy(&char4, &rpkgs.at(i).header.hash_resource_table_size, sizeof(uint32_t));
 
-    for (uint64_t j = 0; j < sizeof(uint32_t); j++)
+    for (char& j : char4)
     {
-        rpkg_meta_data.push_back(char4[j]);
+        rpkg_meta_data.push_back(j);
     }
 
     if (rpkgs.at(i).is_patch_file)
     {
         std::memcpy(&char4, &rpkgs.at(i).header.patch_count, sizeof(uint32_t));
 
-        for (uint64_t j = 0; j < sizeof(uint32_t); j++)
+        for (char& j : char4)
         {
-            rpkg_meta_data.push_back(char4[j]);
+            rpkg_meta_data.push_back(j);
         }
 
         if (rpkgs.at(i).header.patch_count > 0)
@@ -86,9 +86,9 @@ void rpkg_function::extract_rpkg_meta(uint64_t i, std::string& hash_file_path)
             for (uint64_t j = 0; j < rpkgs.at(i).header.patch_count; j++)
             {
                 std::memcpy(&char8, &rpkgs.at(i).patch_entry_list.at(j), sizeof(uint64_t));
-                for (uint64_t k = 0; k < sizeof(uint64_t); k++)
+                for (char& k : char8)
                 {
-                    rpkg_meta_data.push_back(char8[k]);
+                    rpkg_meta_data.push_back(k);
                 }
 
                 patch_entry_count++;
@@ -101,27 +101,27 @@ void rpkg_function::extract_rpkg_meta(uint64_t i, std::string& hash_file_path)
         }
     }
 
-    for (uint64_t j = 0; j < rpkgs.at(i).hash.size(); j++)
+    for (auto& j : rpkgs.at(i).hash)
     {
-        std::memcpy(&char8, &rpkgs.at(i).hash.at(j).hash_value, sizeof(uint64_t));
+        std::memcpy(&char8, &j.hash_value, sizeof(uint64_t));
 
-        for (uint64_t j = 0; j < sizeof(uint64_t); j++)
+        for (char& j : char8)
         {
-            rpkg_meta_data.push_back(char8[j]);
+            rpkg_meta_data.push_back(j);
         }
 
-        std::memcpy(&char8, &rpkgs.at(i).hash.at(j).data.header.data_offset, sizeof(uint64_t));
+        std::memcpy(&char8, &j.data.header.data_offset, sizeof(uint64_t));
 
-        for (uint64_t j = 0; j < sizeof(uint64_t); j++)
+        for (char& j : char8)
         {
-            rpkg_meta_data.push_back(char8[j]);
+            rpkg_meta_data.push_back(j);
         }
 
-        std::memcpy(&char4, &rpkgs.at(i).hash.at(j).data.header.data_size, sizeof(uint32_t));
+        std::memcpy(&char4, &j.data.header.data_size, sizeof(uint32_t));
 
-        for (uint64_t j = 0; j < sizeof(uint32_t); j++)
+        for (char& j : char4)
         {
-            rpkg_meta_data.push_back(char4[j]);
+            rpkg_meta_data.push_back(j);
         }
     }
 

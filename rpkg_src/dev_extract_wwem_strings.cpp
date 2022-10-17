@@ -6,7 +6,6 @@
 #include "thirdparty/lz4/lz4.h"
 #include <iostream>
 #include <unordered_map>
-#include <chrono>
 #include <fstream>
 #include <regex>
 #include <filesystem>
@@ -28,10 +27,6 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
     std::vector<uint64_t> wwem_hashes;
     std::vector<std::string> wwem_ioi_paths;
     std::vector<std::string> wwem_ioi_short_paths;
-
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-    double console_update_rate = 1.0 / 2.0;
-    int period_count = 1;
 
     for (uint64_t i = 0; i < rpkgs.size(); i++)
     {
@@ -249,67 +244,68 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
         }
     }
 
-    for (uint64_t i = 0; i < rpkgs.size(); i++)
+    for (auto& rpkg : rpkgs)
     {
-        for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++)
+        for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++)
         {
-            if (rpkgs.at(i).hash_resource_types.at(r) == "FXAS")
+            if (rpkg.hash_resource_types.at(r) == "FXAS")
             {
-                for (uint64_t j = 0; j < rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).size(); j++)
+                for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++)
                 {
-                    uint64_t hash_index = rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).at(j);
+                    uint64_t hash_index = rpkg.hashes_indexes_based_on_resource_types.at(r).at(j);
 
-                    uint32_t hash_reference_count = rpkgs.at(i).hash.at(hash_index).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+                    uint32_t hash_reference_count = rpkg.hash.at(hash_index).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
                     for (uint32_t k = 0; k < hash_reference_count; k++)
                     {
-                        std::unordered_map<uint64_t, uint64_t>::iterator it = fxas_hash.find(rpkgs.at(i).hash.at(hash_index).hash_reference_data.hash_reference.at(k));
+                        std::unordered_map<uint64_t, uint64_t>::iterator it = fxas_hash.find(rpkg.hash.at(hash_index).hash_reference_data.hash_reference.at(k));
 
                         if (it == fxas_hash.end())
                         {
-                            std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(it->second).hash_value) + "." + rpkgs.at(i).hash.at(it->second).hash_resource_type;
+                            std::string hash_file_name = util::uint64_t_to_hex_string(rpkg.hash.at(it->second).hash_value) + "." +
+                                rpkg.hash.at(it->second).hash_resource_type;
 
                             uint64_t hash_size;
 
-                            if (rpkgs.at(i).hash.at(it->second).data.lz4ed)
+                            if (rpkg.hash.at(it->second).data.lz4ed)
                             {
-                                hash_size = rpkgs.at(i).hash.at(it->second).data.header.data_size;
+                                hash_size = rpkg.hash.at(it->second).data.header.data_size;
 
-                                if (rpkgs.at(i).hash.at(it->second).data.xored)
+                                if (rpkg.hash.at(it->second).data.xored)
                                 {
                                     hash_size &= 0x3FFFFFFF;
                                 }
                             }
                             else
                             {
-                                hash_size = rpkgs.at(i).hash.at(it->second).data.resource.size_final;
+                                hash_size = rpkg.hash.at(it->second).data.resource.size_final;
                             }
 
                             std::vector<char> input_data(hash_size, 0);
 
-                            std::ifstream file = std::ifstream(rpkgs.at(i).rpkg_file_path, std::ifstream::binary);
+                            std::ifstream file = std::ifstream(rpkg.rpkg_file_path, std::ifstream::binary);
 
                             if (!file.good())
                             {
-                                LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(i).rpkg_file_path + " could not be read.");
+                                LOG_AND_EXIT("Error: RPKG file " + rpkg.rpkg_file_path + " could not be read.");
                             }
 
-                            file.seekg(rpkgs.at(i).hash.at(it->second).data.header.data_offset, file.beg);
+                            file.seekg(rpkg.hash.at(it->second).data.header.data_offset, file.beg);
                             file.read(input_data.data(), hash_size);
                             file.close();
 
-                            if (rpkgs.at(i).hash.at(it->second).data.xored)
+                            if (rpkg.hash.at(it->second).data.xored)
                             {
                                 crypto::xor_data(input_data.data(), (uint32_t)hash_size);
                             }
 
-                            uint32_t decompressed_size = rpkgs.at(i).hash.at(it->second).data.resource.size_final;
+                            uint32_t decompressed_size = rpkg.hash.at(it->second).data.resource.size_final;
 
                             std::vector<char> output_data(decompressed_size, 0);
 
                             std::vector<char>* fxas_data;
 
-                            if (rpkgs.at(i).hash.at(it->second).data.lz4ed)
+                            if (rpkg.hash.at(it->second).data.lz4ed)
                             {
                                 LZ4_decompress_safe(input_data.data(), output_data.data(), (int)hash_size, decompressed_size);
 
@@ -422,8 +418,6 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
 
     std::unordered_map<std::string, uint32_t> wwem_name_map;
 
-    uint64_t wwem_map_index = 0;
-
     for (uint64_t i = 0; i < rpkgs.size(); i++)
     {
         for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++)
@@ -501,15 +495,11 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
                     }
 
                     uint32_t wwem_file_name_length = 0;
-                    uint32_t wwem_file_count = 0;
-                    uint32_t wwem_file_count_test = 0;
 
                     uint32_t position = 0;
 
                     char input[1024];
-                    uint8_t bytes1 = 0;
                     uint32_t bytes4 = 0;
-                    uint64_t bytes8 = 0;
 
                     bool adtllabl_not_found = true;
 
@@ -569,9 +559,9 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
 
                         std::string lowercase;
 
-                        for (int z = 0; z < wwem_string.length(); z++)
+                        for (char z : wwem_string)
                         {
-                            lowercase.push_back(std::tolower(wwem_string[z]));
+                            lowercase.push_back(std::tolower(z));
                         }
 
                         bool short_path_found = false;
@@ -794,15 +784,11 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
                                                     }
 
                                                     uint32_t wwev_file_name_length = 0;
-                                                    uint32_t wwev_file_count = 0;
-                                                    uint32_t wwev_file_count_test = 0;
 
                                                     uint32_t position = 0;
 
                                                     char input[1024];
-                                                    uint8_t bytes1 = 0;
                                                     uint32_t bytes4 = 0;
-                                                    uint64_t bytes8 = 0;
 
                                                     std::memcpy(&wwev_file_name_length, &wwev_data->data()[position], sizeof(bytes4));
 
@@ -812,9 +798,9 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
 
                                                     std::memcpy(&hash, &rpkgs.at(a).hash.at(hash_index2).hash_value, 0x8);
 
-                                                    for (uint64_t k = 0; k < sizeof(uint64_t); k++)
+                                                    for (char& k : hash)
                                                     {
-                                                        wwev_meta_data.push_back(hash[k]);
+                                                        wwev_meta_data.push_back(k);
                                                     }
 
                                                     std::memcpy(&input, &wwev_data->data()[position], (wwev_file_name_length + (uint64_t)0xC));

@@ -5,10 +5,7 @@
 #include "file.h"
 #include "crypto.h"
 #include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
-#include <iostream>
 #include <fstream>
-#include <iomanip>
 #include <regex>
 #include <sstream>
 #include <filesystem>
@@ -37,10 +34,7 @@ void rpkg_function::extract_from_rpkgs(rpkg_extraction_vars &rpkg_vars)
     {
         LOG_AND_EXIT("Error: Input path is a file not a folder.");
     }
-    else
-    {
-        rpkg_vars.input_path = file::parse_input_folder_path(rpkg_vars.input_path);
-    }
+    rpkg_vars.input_path = file::parse_input_folder_path(rpkg_vars.input_path);
 
     if (file::path_exists(rpkg_vars.input_path))
     {

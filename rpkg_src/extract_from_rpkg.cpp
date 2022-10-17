@@ -5,10 +5,8 @@
 #include "file.h"
 #include "crypto.h"
 #include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
 #include <iostream>
 #include <fstream>
-#include <iomanip>
 #include <regex>
 #include <sstream>
 
@@ -93,9 +91,9 @@ void rpkg_function::extract_from_rpkg(rpkg_extraction_vars& rpkg_vars)
                     }
                 }
 
-                if (found || rpkg_vars.filter == "")
+                if (found || rpkg_vars.filter.empty())
                 {
-                    if (filters.size() > 0)
+                    if (!filters.empty())
                     {
                         extracted.at(input_filter_index) = true;
                     }

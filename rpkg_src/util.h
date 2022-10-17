@@ -8,18 +8,19 @@ public:
     static std::string generate_guid();
     static bool is_valid_hash(std::string hash);
     static std::string hash_type(uint64_t hash_value);
-    static uint64_t ioi_string_to_hash(std::string ioi_string);
+    static uint64_t ioi_string_to_hash(const std::string& ioi_string);
     static std::string hash_to_ioi_string(uint64_t hash_value, bool return_hash_if_not_found);
     static std::string hash_to_hash_list_string(uint64_t hash_value);
     static bool floats_equal(float value1, float value2);
-    static std::string find_string_between_strings(std::string_view& input_string, std::string string_before, std::string string_after);
-    static void split_string(std::string& temp_string, std::string split_string, std::vector<uint64_t>& split_positions);
-    static void split_string_view(std::string_view& temp_string_view, std::string split_string, std::vector<uint64_t>& split_positions);
+    static std::string find_string_between_strings(std::string_view& input_string, const std::string& string_before,
+                                                   const std::string& string_after);
+    static void split_string(const std::string& temp_string, const std::string& split_string, std::vector<uint64_t>& split_positions);
+    static void split_string_view(const std::string_view& temp_string_view, const std::string& split_string, std::vector<uint64_t>& split_positions);
     static std::string string_to_hex_string(std::string input_string);
     static std::vector<std::string> parse_input_filter(std::string input_string);
     static std::string to_upper_case(std::string s);
     static std::string to_lower_case(std::string s);
-    static std::string remove_all_string_from_string(std::string input_string, std::string to_remove);
+    static std::string remove_all_string_from_string(std::string input_string, const std::string& to_remove);
     static std::string uint64_t_to_hex_string_for_qn(uint64_t bytes8);
     static std::string uint64_t_to_hex_string(uint64_t bytes8);
     static std::string uint32_t_to_hex_string(uint32_t bytes4);

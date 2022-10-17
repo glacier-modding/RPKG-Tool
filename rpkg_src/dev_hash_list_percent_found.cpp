@@ -31,5 +31,5 @@ void dev_function::dev_hash_list_percent_found(std::string& input_path, std::str
 
     std::cout << "The number of hashes in the hash list: " << hash_list_hash_value_strings.size() << std::endl;
     std::cout << "The number of hashes matched in the hash list: " << matched << std::endl;
-    std::cout << "The percentage of hashes in the hash list that were matched: " << (double)(((double)matched / (double)hash_list_hash_value_strings.size()) * (double)100.0) << "%" << std::endl;
+    std::cout << "The percentage of hashes in the hash list that were matched: " << static_cast<double>(matched) / static_cast<double>(hash_list_hash_value_strings.size()) * 100.0 << "%" << std::endl;
 }

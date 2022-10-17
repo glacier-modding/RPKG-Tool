@@ -12,7 +12,7 @@
 #include <regex>
 #include <filesystem>
 
-void rpkg_function::extract_prel_refs(std::string& input_path, std::string& filter, std::string& output_path)
+void rpkg_function::extract_prel_refs(std::string& input_path)
 {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
@@ -50,66 +50,67 @@ void rpkg_function::extract_prel_refs(std::string& input_path, std::string& filt
 
         //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
 
-        for (uint64_t i = 0; i < rpkgs.size(); i++)
+        for (auto& rpkg : rpkgs)
         {
-            if (rpkgs.at(i).rpkg_file_path == input_path || !input_path_is_rpkg_file)
+            if (rpkg.rpkg_file_path == input_path || !input_path_is_rpkg_file)
             {
-                for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++)
+                for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++)
                 {
-                    if (rpkgs.at(i).hash_resource_types.at(r) == "PREL")
+                    if (rpkg.hash_resource_types.at(r) == "PREL")
                     {
-                        for (uint64_t j = 0; j < rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).size(); j++)
+                        for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++)
                         {
-                            uint64_t hash_index = rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).at(j);
+                            uint64_t hash_index = rpkg.hashes_indexes_based_on_resource_types.at(r).at(j);
 
                             if (gui_control == ABORT_CURRENT_TASK)
                             {
                                 return;
                             }
                             
-                            std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
+                            std::string hash_file_name = util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
+                                rpkg.hash.at(hash_index).hash_resource_type;
 
                             uint64_t hash_size;
 
-                            if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
+                            if (rpkg.hash.at(hash_index).data.lz4ed)
                             {
-                                hash_size = rpkgs.at(i).hash.at(hash_index).data.header.data_size;
+                                hash_size = rpkg.hash.at(hash_index).data.header.data_size;
 
-                                if (rpkgs.at(i).hash.at(hash_index).data.xored)
+                                if (rpkg.hash.at(hash_index).data.xored)
                                 {
                                     hash_size &= 0x3FFFFFFF;
                                 }
                             }
                             else
                             {
-                                hash_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
+                                hash_size = rpkg.hash.at(hash_index).data.resource.size_final;
                             }
 
                             std::vector<char> input_data(hash_size, 0);
 
-                            std::ifstream file = std::ifstream(rpkgs.at(i).rpkg_file_path, std::ifstream::binary);
+                            std::ifstream file = std::ifstream(rpkg.rpkg_file_path, std::ifstream::binary);
 
                             if (!file.good())
                             {
-                                LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(i).rpkg_file_path + " could not be read.");
+                                LOG_AND_EXIT("Error: RPKG file " + rpkg.rpkg_file_path + " could not be read.");
                             }
 
-                            file.seekg(rpkgs.at(i).hash.at(hash_index).data.header.data_offset, file.beg);
+                            file.seekg(rpkg.hash.at(hash_index).data.header.data_offset, file.beg);
                             file.read(input_data.data(), hash_size);
                             file.close();
 
-                            if (rpkgs.at(i).hash.at(hash_index).data.xored)
+                            if (rpkg.hash.at(hash_index).data.xored)
                             {
                                 crypto::xor_data(input_data.data(), (uint32_t)hash_size);
                             }
 
-                            uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
+                            uint32_t decompressed_size = rpkg.hash.at(hash_index).data.resource.size_final;
 
                             std::vector<char> output_data(decompressed_size, 0);
 
                             std::vector<char>* prel_data;
 
-                            if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
+                            if (rpkg.hash.at(hash_index).data.lz4ed)
                             {
                                 LZ4_decompress_safe(input_data.data(), output_data.data(), (int)hash_size, decompressed_size);
 

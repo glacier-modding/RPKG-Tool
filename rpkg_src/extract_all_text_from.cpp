@@ -152,8 +152,6 @@ void rpkg_function::extract_all_text_from(std::string& input_path, std::string& 
         std::vector<std::string> found_in;
         std::vector<std::string> not_found_in;
 
-        uint64_t prim_map_index = 0;
-
         for (uint64_t z = 0; z < filters.size(); z++)
         {
             found_in.push_back("");

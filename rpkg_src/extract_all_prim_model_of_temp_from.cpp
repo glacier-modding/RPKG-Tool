@@ -8,7 +8,7 @@
 #include <regex>
 #include <filesystem>
 
-void rpkg_function::extract_all_prim_model_of_temp_from(std::string& input_path, std::string& filter, std::string& output_path)
+void rpkg_function::extract_all_prim_model_of_temp_from(std::string& input_path, const std::string& filter, std::string& output_path)
 {
     task_single_status = TASK_EXECUTING;
     //task_multiple_status = TASK_EXECUTING;
@@ -57,11 +57,11 @@ void rpkg_function::extract_all_prim_model_of_temp_from(std::string& input_path,
 
         //std::vector<std::string>().swap(prim_asset_file_names);
 
-        std::vector<std::string> filters = util::parse_input_filter(filter);
+        const std::vector<std::string> filters = util::parse_input_filter(filter);
 
-        for (uint64_t f = 0; f < filters.size(); f++)
+        for (auto& filter : filters)
         {
-            uint64_t temp_hash_value = std::strtoull(filters.at(f).c_str(), nullptr, 16);
+            uint64_t temp_hash_value = std::strtoull(filter.c_str(), nullptr, 16);
 
             for (uint64_t i = 0; i < rpkgs.size(); i++)
             {

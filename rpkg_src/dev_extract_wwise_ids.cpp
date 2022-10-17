@@ -16,61 +16,62 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& f
 
     rpkg_function::import_rpkg_files_in_folder(input_path);
 
-    for (uint64_t i = 0; i < rpkgs.size(); i++)
+    for (auto& rpkg : rpkgs)
     {
-        for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++)
+        for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++)
         {
-            if (rpkgs.at(i).hash_resource_types.at(r) == "WWEV")
+            if (rpkg.hash_resource_types.at(r) == "WWEV")
             {
-                for (uint64_t j = 0; j < rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).size(); j++)
+                for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++)
                 {
-                    uint64_t hash_index = rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).at(j);
+                    uint64_t hash_index = rpkg.hashes_indexes_based_on_resource_types.at(r).at(j);
 
-                    std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
+                    std::string hash_file_name = util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
+                        rpkg.hash.at(hash_index).hash_resource_type;
 
-                    std::string current_path = file::output_path_append("WWEV\\" + rpkgs.at(i).rpkg_file_name, output_path);
+                    std::string current_path = file::output_path_append("WWEV\\" + rpkg.rpkg_file_name, output_path);
 
                     uint64_t hash_size;
 
-                    if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
+                    if (rpkg.hash.at(hash_index).data.lz4ed)
                     {
-                        hash_size = rpkgs.at(i).hash.at(hash_index).data.header.data_size;
+                        hash_size = rpkg.hash.at(hash_index).data.header.data_size;
 
-                        if (rpkgs.at(i).hash.at(hash_index).data.xored)
+                        if (rpkg.hash.at(hash_index).data.xored)
                         {
                             hash_size &= 0x3FFFFFFF;
                         }
                     }
                     else
                     {
-                        hash_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
+                        hash_size = rpkg.hash.at(hash_index).data.resource.size_final;
                     }
 
                     std::vector<char> input_data(hash_size, 0);
 
-                    std::ifstream file = std::ifstream(rpkgs.at(i).rpkg_file_path, std::ifstream::binary);
+                    std::ifstream file = std::ifstream(rpkg.rpkg_file_path, std::ifstream::binary);
 
                     if (!file.good())
                     {
-                        LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(i).rpkg_file_path + " could not be read.");
+                        LOG_AND_EXIT("Error: RPKG file " + rpkg.rpkg_file_path + " could not be read.");
                     }
 
-                    file.seekg(rpkgs.at(i).hash.at(hash_index).data.header.data_offset, file.beg);
+                    file.seekg(rpkg.hash.at(hash_index).data.header.data_offset, file.beg);
                     file.read(input_data.data(), hash_size);
                     file.close();
 
-                    if (rpkgs.at(i).hash.at(hash_index).data.xored)
+                    if (rpkg.hash.at(hash_index).data.xored)
                     {
                         crypto::xor_data(input_data.data(), (uint32_t)hash_size);
                     }
 
-                    uint32_t decompressed_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
+                    uint32_t decompressed_size = rpkg.hash.at(hash_index).data.resource.size_final;
 
                     std::vector<char> output_data(decompressed_size, 0);
 
                     std::vector<char>* wwev_data;
 
-                    if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
+                    if (rpkg.hash.at(hash_index).data.lz4ed)
                     {
                         LZ4_decompress_safe(input_data.data(), output_data.data(), (int)hash_size, decompressed_size);
 
@@ -88,9 +89,7 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& f
                     uint32_t position = 0;
 
                     char input[1024];
-                    uint8_t bytes1 = 0;
                     uint32_t bytes4 = 0;
-                    uint64_t bytes8 = 0;
 
                     std::memcpy(&wwev_file_name_length, &wwev_data->data()[position], sizeof(bytes4));
 
@@ -98,7 +97,7 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& f
 
                     char hash[8];
 
-                    std::memcpy(&hash, &rpkgs.at(i).hash.at(hash_index).hash_value, 0x8);
+                    std::memcpy(&hash, &rpkg.hash.at(hash_index).hash_value, 0x8);
 
                     std::memcpy(&input, &wwev_data->data()[position], (wwev_file_name_length + (uint64_t)0xC));
 
@@ -116,10 +115,6 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& f
 
                     std::memcpy(&wwev_file_count_test, &wwev_data->data()[position], sizeof(bytes4));
 
-                    bool found = false;
-
-                    uint64_t input_filter_index = 0;
-
                     current_path.append("\\");
                     current_path.append(std::string(wwev_file_name.data()));
 
@@ -127,7 +122,8 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& f
 
                     std::string ogg_path = current_path + "\\ogg";
 
-                    std::string final_path = current_path + "\\" + util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
+                    std::string final_path = current_path + "\\" + util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
+                        rpkg.hash.at(hash_index).hash_resource_type;
 
                     std::cout << hash_file_name << "," << "[assembly:/sound/wwise/exportedwwisedata/events/unknown/" << wwev_file_name.data() << ".wwiseevent].pc_wwisebank" << std::endl;
 
@@ -161,9 +157,9 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& f
                     {
                         std::memcpy(&bytes4, &wwev_data->data()[position], 0x4);
 
-                        if (bytes4 == 0)
+                        if (bytes4 != 0)
                         {
-
+                            return;
                         }
                         else
                         {
@@ -203,37 +199,35 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& f
 
                         if (bytes4 == 0)
                         {
-
+                            return;
                         }
-                        else
+
+                        std::memcpy(&bytes4, &wwev_data->data()[position], 0x4);
+
+                        uint32_t length = bytes4;
+
+                        position += 0x4;
+
+                        for (uint64_t k = 0; k < length; k++)
                         {
+                            position += 0x4;
+
                             std::memcpy(&bytes4, &wwev_data->data()[position], 0x4);
 
-                            uint32_t length = bytes4;
+                            std::cout << "WWEV Link Type(1) " << std::to_string(k) << ": " << std::endl;
+                            std::cout << "  - Wwise ID: " << util::uint32_t_to_hex_string(bytes4) << std::endl;
 
                             position += 0x4;
 
-                            for (uint64_t k = 0; k < length; k++)
-                            {
-                                position += 0x4;
+                            uint32_t wem_size;
 
-                                std::memcpy(&bytes4, &wwev_data->data()[position], 0x4);
+                            std::memcpy(&wem_size, &wwev_data->data()[position], sizeof(bytes4));
 
-                                std::cout << "WWEV Link Type(1) " << std::to_string(k) << ": " << std::endl;
-                                std::cout << "  - Wwise ID: " << util::uint32_t_to_hex_string(bytes4) << std::endl;
+                            position += 0x4;
 
-                                position += 0x4;
+                            std::cout << "  - Length: " << util::uint32_t_to_hex_string(wem_size) << std::endl;
 
-                                uint32_t wem_size;
-
-                                std::memcpy(&wem_size, &wwev_data->data()[position], sizeof(bytes4));
-
-                                position += 0x4;
-
-                                std::cout << "  - Length: " << util::uint32_t_to_hex_string(wem_size) << std::endl;
-
-                                position += wem_size;
-                            }
+                            position += wem_size;
                         }
                     }
                 }

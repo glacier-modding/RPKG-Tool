@@ -144,8 +144,6 @@ void rpkg_function::extract_all_prim_from(std::string& input_path, std::string& 
         std::vector<std::string> found_in;
         std::vector<std::string> not_found_in;
 
-        uint64_t prim_map_index = 0;
-
         for (uint64_t z = 0; z < filters.size(); z++)
         {
             found_in.push_back("");
@@ -153,7 +151,7 @@ void rpkg_function::extract_all_prim_from(std::string& input_path, std::string& 
             not_found_in.push_back("");
         }
 
-        for (uint64_t i = 0; i < rpkgs.size(); i++)
+        for (auto& rpkg : rpkgs)
         {
             std::vector<bool> extracted;
 
@@ -162,33 +160,35 @@ void rpkg_function::extract_all_prim_from(std::string& input_path, std::string& 
                 extracted.push_back(false);
             }
 
-            if (rpkgs.at(i).rpkg_file_path == input_path || !input_path_is_rpkg_file)
+            if (rpkg.rpkg_file_path == input_path || !input_path_is_rpkg_file)
             {
-                for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++)
+                for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++)
                 {
-                    if (rpkgs.at(i).hash_resource_types.at(r) == "PRIM")
+                    if (rpkg.hash_resource_types.at(r) == "PRIM")
                     {
-                        for (uint64_t j = 0; j < rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).size(); j++)
+                        for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++)
                         {
-                            uint64_t hash_index = rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).at(j);
+                            uint64_t hash_index = rpkg.hashes_indexes_based_on_resource_types.at(r).at(j);
 
                             if (gui_control == ABORT_CURRENT_TASK)
                             {
                                 return;
                             }
 
-                            if (((prim_count_current * (uint64_t)100000) / (uint64_t)prim_count) % (uint64_t)10 == 0 && prim_count_current > 0)
+                            if (((prim_count_current * (uint64_t)100000) / prim_count) % (uint64_t)10 == 0 && prim_count_current > 0)
                             {
                                 stringstream_length = console::update_console(message, prim_hash_size_total, prim_hash_size_current, start_time, stringstream_length);
                             }
 
-                            prim_hash_size_current += rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
+                            prim_hash_size_current += rpkg.hash.at(hash_index).data.resource.size_final;
 
                             prim_count_current++;
 
-                            if (!extract_single_hash || (extract_single_hash && filter == util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value)))
+                            if (!extract_single_hash || (extract_single_hash && filter == util::uint64_t_to_hex_string(
+                                rpkg.hash.at(hash_index).hash_value)))
                             {
-                                std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
+                                std::string hash_file_name = util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
+                                    rpkg.hash.at(hash_index).hash_resource_type;
 
                                 bool found = false;
 
@@ -210,7 +210,7 @@ void rpkg_function::extract_all_prim_from(std::string& input_path, std::string& 
 
                                 if (found || filter == "")
                                 {
-                                    std::string prim_output_dir = file::output_path_append("PRIM\\" + rpkgs.at(i).rpkg_file_name, output_path);
+                                    std::string prim_output_dir = file::output_path_append("PRIM\\" + rpkg.rpkg_file_name, output_path);
 
                                     file::create_directories(prim_output_dir);
 
@@ -221,7 +221,8 @@ void rpkg_function::extract_all_prim_from(std::string& input_path, std::string& 
 
                                     //std::cout << "rpkg_function::extract_prim_to_gltf_from(" << rpkgs.at(i).rpkg_file_path << ", " << util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) << ", " << prim_output_dir << ");" << std::endl;
 
-                                    rpkg_function::extract_prim_from(rpkgs.at(i).rpkg_file_path, util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value), prim_output_dir, type, true);
+                                    rpkg_function::extract_prim_from(rpkg.rpkg_file_path, util::uint64_t_to_hex_string(
+                                                                         rpkg.hash.at(hash_index).hash_value), prim_output_dir, type, true);
                                     
                                     /*std::vector<uint32_t>().swap(temp_entry_index);
                                     std::vector<uint32_t>().swap(temp_logicalParent);
@@ -268,22 +269,22 @@ void rpkg_function::extract_all_prim_from(std::string& input_path, std::string& 
                 {
                     if (found_in.at(z) == "")
                     {
-                        found_in.at(z).append(rpkgs.at(i).rpkg_file_name);
+                        found_in.at(z).append(rpkg.rpkg_file_name);
                     }
                     else
                     {
-                        found_in.at(z).append(", " + rpkgs.at(i).rpkg_file_name);
+                        found_in.at(z).append(", " + rpkg.rpkg_file_name);
                     }
                 }
                 else
                 {
                     if (not_found_in.at(z) == "")
                     {
-                        not_found_in.at(z).append(rpkgs.at(i).rpkg_file_name);
+                        not_found_in.at(z).append(rpkg.rpkg_file_name);
                     }
                     else
                     {
-                        not_found_in.at(z).append(", " + rpkgs.at(i).rpkg_file_name);
+                        not_found_in.at(z).append(", " + rpkg.rpkg_file_name);
                     }
                 }
             }

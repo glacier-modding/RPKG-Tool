@@ -70,9 +70,9 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
 
         std::vector<std::string> filters = util::parse_input_filter(filter);
 
-        for (uint64_t f = 0; f < filters.size(); f++)
+        for (auto& filter : filters)
         {
-            uint64_t temp_hash_value = std::strtoull(filters.at(f).c_str(), nullptr, 16);
+            uint64_t temp_hash_value = std::strtoull(filter.c_str(), nullptr, 16);
 
             uint32_t rpkg_index = rpkg_function::get_latest_hash(temp_hash_value);
 
@@ -125,7 +125,7 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
                             file::create_directories(output_path);
                         }
 
-                        temp_output_path = file::output_path_append(filters.at(f) + ".entity.json", output_path);
+                        temp_output_path = file::output_path_append(filter + ".entity.json", output_path);
                     }
 
                     start_time = std::chrono::high_resolution_clock::now();
