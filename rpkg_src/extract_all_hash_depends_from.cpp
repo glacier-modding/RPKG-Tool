@@ -15,23 +15,23 @@ void recursive_hash_depends_search(uint64_t hash_value, std::vector<uint64_t>& h
     {
         std::unordered_map<uint64_t, uint64_t>::iterator it = rpkg.hash_map.find(hash_value);
 
-        if (it != rpkg.hash_map.end())
+        if (it == rpkg.hash_map.end())
+            continue;
+
+        const uint32_t hash_reference_count = rpkg.hash.at(it->second).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+
+        for (uint32_t j = 0; j < hash_reference_count; j++)
         {
-            const uint32_t hash_reference_count = rpkg.hash.at(it->second).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+            std::unordered_map<uint64_t, uint64_t>::iterator it2 = hashes_to_extract_map.find(rpkg.hash.at(it->second).hash_reference_data.hash_reference.at(j));
 
-            for (uint32_t j = 0; j < hash_reference_count; j++)
-            {
-                std::unordered_map<uint64_t, uint64_t>::iterator it2 = hashes_to_extract_map.find(rpkg.hash.at(it->second).hash_reference_data.hash_reference.at(j));
+            if (it2 != hashes_to_extract_map.end())
+                continue;
 
-                if (it2 == hashes_to_extract_map.end())
-                {
-                    hashes_to_extract.push_back(rpkg.hash.at(it->second).hash_reference_data.hash_reference.at(j));
+            hashes_to_extract.push_back(rpkg.hash.at(it->second).hash_reference_data.hash_reference.at(j));
 
-                    hashes_to_extract_map[rpkg.hash.at(it->second).hash_reference_data.hash_reference.at(j)] = hashes_to_extract.size();
+            hashes_to_extract_map[rpkg.hash.at(it->second).hash_reference_data.hash_reference.at(j)] = hashes_to_extract.size();
 
-                    recursive_hash_depends_search(rpkg.hash.at(it->second).hash_reference_data.hash_reference.at(j), hashes_to_extract, hashes_to_extract_map);
-                }
-            }
+            recursive_hash_depends_search(rpkg.hash.at(it->second).hash_reference_data.hash_reference.at(j), hashes_to_extract, hashes_to_extract_map);
         }
     }
 }
@@ -59,12 +59,12 @@ void rpkg_function::extract_all_hash_depends_from(std::string& input_path, std::
         {
             std::unordered_map<uint64_t, uint64_t>::iterator it = rpkg.hash_map.find(std::strtoull(filter.c_str(), nullptr, 16));
 
-            if (it != rpkg.hash_map.end())
-            {
-                filter_found = true;
+            if (it == rpkg.hash_map.end())
+                continue;
 
-                filter_hash_file_name = util::uint64_t_to_hex_string(rpkg.hash.at(it->second).hash_value) + "." + rpkg.hash.at(it->second).hash_resource_type;
-            }
+            filter_found = true;
+
+            filter_hash_file_name = util::uint64_t_to_hex_string(rpkg.hash.at(it->second).hash_value) + "." + rpkg.hash.at(it->second).hash_resource_type;
         }
 
         if (filter_found)
@@ -101,7 +101,7 @@ void rpkg_function::extract_all_hash_depends_from(std::string& input_path, std::
                     return;
                 }
 
-                if (((x * (uint64_t)100000) / hashes_to_extract.size()) % (uint64_t)100 == 0 && x > 0)
+                if (((x * static_cast<uint64_t>(100000)) / hashes_to_extract.size()) % static_cast<uint64_t>(100) == 0 && x > 0)
                 {
                     stringstream_length = console::update_console(message, hashes_to_extract.size(), x, start_time, stringstream_length);
                 }
@@ -170,12 +170,12 @@ void rpkg_function::extract_non_base_hash_depends_from(std::string& input_path, 
         {
             std::unordered_map<uint64_t, uint64_t>::iterator it = rpkg.hash_map.find(std::strtoull(filter.c_str(), nullptr, 16));
 
-            if (it != rpkg.hash_map.end())
-            {
-                filter_found = true;
+            if (it == rpkg.hash_map.end())
+                continue;
 
-                filter_hash_file_name = util::uint64_t_to_hex_string(rpkg.hash.at(it->second).hash_value) + "." + rpkg.hash.at(it->second).hash_resource_type;
-            }
+            filter_found = true;
+
+            filter_hash_file_name = util::uint64_t_to_hex_string(rpkg.hash.at(it->second).hash_value) + "." + rpkg.hash.at(it->second).hash_resource_type;
         }
 
         if (filter_found)
@@ -212,7 +212,7 @@ void rpkg_function::extract_non_base_hash_depends_from(std::string& input_path, 
                     return;
                 }
 
-                if (((x * (uint64_t)100000) / hashes_to_extract.size()) % (uint64_t)100 == 0 && x > 0)
+                if (((x * static_cast<uint64_t>(100000)) / hashes_to_extract.size()) % static_cast<uint64_t>(100) == 0 && x > 0)
                 {
                     stringstream_length = console::update_console(message, hashes_to_extract.size(), x, start_time, stringstream_length);
                 }
@@ -221,36 +221,36 @@ void rpkg_function::extract_non_base_hash_depends_from(std::string& input_path, 
                 {
                     std::unordered_map<uint64_t, uint64_t>::iterator it = rpkg.hash_map.find(hashes_to_extract.at(x));
 
-                    if (it != rpkg.hash_map.end())
+                    if (it == rpkg.hash_map.end())
+                        continue;
+
+                    if (extract_prim_models)
                     {
-                        if (extract_prim_models)
+                        if (rpkg.hash.at(it->second).hash_resource_type == "PRIM")
                         {
-                            if (rpkg.hash.at(it->second).hash_resource_type == "PRIM")
-                            {
-                                std::string prim_output_dir = file::output_path_append("ALLDEPENDS\\" + filter_hash_file_name + "\\PRIMMODELS\\", output_path);
+                            std::string prim_output_dir = file::output_path_append("ALLDEPENDS\\" + filter_hash_file_name + "\\PRIMMODELS\\", output_path);
 
-                                file::create_directories(prim_output_dir);
+                            file::create_directories(prim_output_dir);
 
-                                //std::cout << "rpkg_function::extract_prim_model_from(" << rpkgs.at(i).rpkg_file_path << ", " << util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) << ", " << prim_output_dir << ");" << std::endl;
+                            //std::cout << "rpkg_function::extract_prim_model_from(" << rpkgs.at(i).rpkg_file_path << ", " << util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) << ", " << prim_output_dir << ");" << std::endl;
 
-                                std::string hash_filter = util::uint64_t_to_hex_string(hashes_to_extract.at(x));
+                            std::string hash_filter = util::uint64_t_to_hex_string(hashes_to_extract.at(x));
 
-                                rpkg_function::extract_prim_model_from(rpkg.rpkg_file_path, hash_filter, prim_output_dir);
-                            }
+                            rpkg_function::extract_prim_model_from(rpkg.rpkg_file_path, hash_filter, prim_output_dir);
                         }
-                        else
+                    }
+                    else
+                    {
+                        if ((rpkg.rpkg_file_path.find("chunk0.rpkg") == std::string::npos) && (rpkg.rpkg_file_path.find("chunk0patch") == std::string::npos) && (
+                            rpkg.rpkg_file_path.find("chunk1.rpkg") == std::string::npos) && (rpkg.rpkg_file_path.find("chunk1patch") == std::string::npos))
                         {
-                            if ((rpkg.rpkg_file_path.find("chunk0.rpkg") == std::string::npos) && (rpkg.rpkg_file_path.find("chunk0patch") == std::string::npos) && (
-                                rpkg.rpkg_file_path.find("chunk1.rpkg") == std::string::npos) && (rpkg.rpkg_file_path.find("chunk1patch") == std::string::npos))
-                            {
-                                rpkg_extraction_vars rpkg_vars;
+                            rpkg_extraction_vars rpkg_vars;
 
-                                rpkg_vars.input_path = rpkg.rpkg_file_path;
-                                rpkg_vars.filter = util::uint64_t_to_hex_string(hashes_to_extract.at(x));
-                                rpkg_vars.output_path = file::output_path_append("ALLDEPENDS\\" + filter_hash_file_name + "\\", output_path);
+                            rpkg_vars.input_path = rpkg.rpkg_file_path;
+                            rpkg_vars.filter = util::uint64_t_to_hex_string(hashes_to_extract.at(x));
+                            rpkg_vars.output_path = file::output_path_append("ALLDEPENDS\\" + filter_hash_file_name + "\\", output_path);
 
-                                extract_from_rpkg_with_map(rpkg_vars);
-                            }
+                            extract_from_rpkg_with_map(rpkg_vars);
                         }
                     }
                 }
