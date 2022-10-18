@@ -1,16 +1,11 @@
 #include "rpkg_function.h"
-#include "generic_function.h"
-#include "file.h"
 #include "global.h"
-#include "console.h"
 #include "util.h"
 #include "rpkg.h"
 #include "hash.h"
 #include <iostream>
 #include <unordered_map>
 #include <chrono>
-#include <sstream>
-#include <fstream>
 #include <filesystem>
 
 uint32_t rpkg_function::get_latest_hash(uint64_t hash_value)
@@ -92,8 +87,6 @@ uint32_t rpkg_function::get_latest_hash(uint64_t hash_value)
             {
                 if (rpkgs.at(i).header.patch_count > 0)
                 {
-                    uint32_t patch_entry_count = 0;
-
                     for (uint64_t j = 0; j < rpkgs.at(i).header.patch_count; j++)
                     {
                         if (hash_value == rpkgs.at(i).patch_entry_list.at(j))
@@ -169,12 +162,9 @@ uint32_t rpkg_function::get_latest_hash(uint64_t hash_value)
     {
         for (uint64_t j = 0; j < chunk_numbers_deleted.size(); j++)
         {
-            if (chunk_numbers.at(i) == chunk_numbers_deleted.at(j))
+            if (chunk_numbers.at(i) == chunk_numbers_deleted.at(j) && patch_numbers.at(i) <= patch_numbers_deleted.at(j))
             {
-                if (patch_numbers.at(i) <= patch_numbers_deleted.at(j))
-                {
-                    hash_in_rpkgs_deleted.at(i) = true;
-                }
+                hash_in_rpkgs_deleted.at(i) = true;
             }
         }
     }
@@ -194,7 +184,7 @@ uint32_t rpkg_function::get_latest_hash(uint64_t hash_value)
         }
     }
 
-    if (rpkg_indexes.size() == 0)
+    if (rpkg_indexes.empty())
     {
         return UINT32_MAX;
     }

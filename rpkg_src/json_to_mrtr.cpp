@@ -5,7 +5,7 @@
 #include <iostream>
 #include <filesystem>
 
-void rpkg_function::json_to_mrtr(std::string& input_path, std::string& filter, std::string& output_path)
+void rpkg_function::json_to_mrtr(std::string& input_path, std::string& output_path)
 {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;

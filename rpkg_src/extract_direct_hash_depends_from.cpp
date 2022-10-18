@@ -34,63 +34,63 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
 
             temp_hash_depends_data.rpkg_file_name = rpkgs.at(i).rpkg_file_name;
 
-            if (it2 != rpkgs.at(i).hash_map.end())
+            if (it2 == rpkgs.at(i).hash_map.end())
+                continue;
+
+            temp_hash_depends_data.hash_value = hash_value;
+
+            temp_hash_depends_data.hash_string = filter;
+
+            uint32_t temp_hash_reference_count = rpkgs.at(i).hash.at(it2->second).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+
+            LOG(filter << " has " << temp_hash_reference_count << " dependencies in " << rpkgs.at(i).rpkg_file_name);
+
+            if (temp_hash_reference_count > 0)
             {
-                temp_hash_depends_data.hash_value = hash_value;
-
-                temp_hash_depends_data.hash_string = filter;
-
-                uint32_t temp_hash_reference_count = rpkgs.at(i).hash.at(it2->second).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
-
-                LOG(filter << " has " << temp_hash_reference_count << " dependencies in " << rpkgs.at(i).rpkg_file_name);
-
-                if (temp_hash_reference_count > 0)
+                for (uint64_t k = 0; k < temp_hash_reference_count; k++)
                 {
-                    for (uint64_t k = 0; k < temp_hash_reference_count; k++)
+                    std::vector<std::string> dependency_in_rpkg_file;
+
+                    bool found = false;
+
+                    for (uint64_t j = 0; j < rpkgs.size(); j++)
                     {
-                        std::vector<std::string> dependency_in_rpkg_file;
+                        std::unordered_map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(j).hash_map.find(rpkgs.at(i).hash.at(it2->second).hash_reference_data.hash_reference.at(k));
 
-                        bool found = false;
-
-                        for (uint64_t j = 0; j < rpkgs.size(); j++)
-                        {
-                            std::unordered_map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(j).hash_map.find(rpkgs.at(i).hash.at(it2->second).hash_reference_data.hash_reference.at(k));
-
-                            if (it3 != rpkgs.at(j).hash_map.end())
-                            {
-                                if (!found)
-                                {
-                                    temp_hash_depends_data.hash_dependency_file_name.push_back(util::uint64_t_to_hex_string(rpkgs.at(j).hash.at(it3->second).hash_value) + "." + rpkgs.at(j).hash.at(it3->second).hash_resource_type);
-                                }
-
-                                found = true;
-
-                                dependency_in_rpkg_file.push_back(rpkgs.at(j).rpkg_file_name);
-                            }
-                        }
+                        if (it3 == rpkgs.at(j).hash_map.end())
+                            continue;
 
                         if (!found)
                         {
-                            temp_hash_depends_data.hash_dependency_file_name.push_back(util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(it2->second).hash_reference_data.hash_reference.at(k)));
+                            temp_hash_depends_data.hash_dependency_file_name.push_back(util::uint64_t_to_hex_string(rpkgs.at(j).hash.at(it3->second).hash_value) + "." + rpkgs.at(j).hash.at(it3->second).hash_resource_type);
                         }
 
-                        temp_hash_depends_data.hash_dependency_map[hash_value] = temp_hash_depends_data.hash_dependency_map.size();
+                        found = true;
 
-                        temp_hash_depends_data.hash_dependency.push_back(util::uint64_t_to_hex_string(hash_value));
-
-                        temp_hash_depends_data.hash_dependency_in_rpkg.push_back(dependency_in_rpkg_file);
+                        dependency_in_rpkg_file.push_back(rpkgs.at(j).rpkg_file_name);
                     }
-                }
 
-                hash_depends_data.push_back(temp_hash_depends_data);
+                    if (!found)
+                    {
+                        temp_hash_depends_data.hash_dependency_file_name.push_back(util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(it2->second).hash_reference_data.hash_reference.at(k)));
+                    }
+
+                    temp_hash_depends_data.hash_dependency_map[hash_value] = temp_hash_depends_data.hash_dependency_map.size();
+
+                    temp_hash_depends_data.hash_dependency.push_back(util::uint64_t_to_hex_string(hash_value));
+
+                    temp_hash_depends_data.hash_dependency_in_rpkg.push_back(dependency_in_rpkg_file);
+                }
             }
+
+            hash_depends_data.push_back(temp_hash_depends_data);
         }
 
         int rpkg_dependency_count = 0;
 
-        for (uint64_t i = 0; i < hash_depends_data.size(); i++)
+        for (auto& hash_depend : hash_depends_data)
         {
-            if (hash_depends_data.at(i).hash_dependency.size() > 0)
+            if (hash_depend.hash_dependency.size() > 0)
             {
                 rpkg_dependency_count++;
             }
@@ -100,43 +100,43 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
 
         for (uint64_t i = 0; i < hash_depends_data.size(); i++)
         {
-            if (hash_depends_data.at(i).hash_dependency.size() > 0)
+            if (hash_depends_data.at(i).hash_dependency.size() <= 0)
+                continue;
+
+            LOG(filter << " depends on " << hash_depends_data.at(i).hash_dependency_file_name.size() << " other hash files/resources in RPKG file: " << hash_depends_data.at(i).rpkg_file_name);
+
+            if (hash_depends_data.at(i).hash_dependency_file_name.size() > 0)
             {
-                LOG(filter << " depends on " << hash_depends_data.at(i).hash_dependency_file_name.size() << " other hash files/resources in RPKG file: " << hash_depends_data.at(i).rpkg_file_name);
+                LOG(filter << "'s dependencies:");
 
-                if (hash_depends_data.at(i).hash_dependency_file_name.size() > 0)
+                for (uint64_t j = 0; j < hash_depends_data.at(i).hash_dependency_file_name.size(); j++)
                 {
-                    LOG(filter << "'s dependencies:");
+                    LOG_NO_ENDL("Hash file/resource: " << hash_depends_data.at(i).hash_dependency_file_name.at(j));
 
-                    for (uint64_t j = 0; j < hash_depends_data.at(i).hash_dependency_file_name.size(); j++)
+                    if (hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).size() > 0)
                     {
-                        LOG_NO_ENDL("Hash file/resource: " << hash_depends_data.at(i).hash_dependency_file_name.at(j));
+                        LOG_NO_ENDL(", Found in RPKG files: ");
 
-                        if (hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).size() > 0)
+                        for (uint64_t k = 0; k < hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).size(); k++)
                         {
-                            LOG_NO_ENDL(", Found in RPKG files: ");
+                            LOG_NO_ENDL(hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).at(k));
 
-                            for (uint64_t k = 0; k < hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).size(); k++)
+                            if (k < hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).size() - 1)
                             {
-                                LOG_NO_ENDL(hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).at(k));
-
-                                if (k < hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).size() - 1)
-                                {
-                                    LOG_NO_ENDL(", ");
-                                }
+                                LOG_NO_ENDL(", ");
                             }
+                        }
 
-                            LOG_NO_ENDL(std::endl);
-                        }
-                        else
-                        {
-                            LOG(", Found in RPKG files: None");
-                        }
+                        LOG_NO_ENDL(std::endl);
+                    }
+                    else
+                    {
+                        LOG(", Found in RPKG files: None");
                     }
                 }
-
-                LOG_NO_ENDL(std::endl);
             }
+
+            LOG_NO_ENDL(std::endl);
         }
 
         uint32_t reverse_dependency_count = 0;
@@ -144,55 +144,55 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
         std::vector<std::string> reverse_dependency;
         std::vector<std::vector<std::string>> reverse_dependency_in_rpkg_file;
 
-        for (uint64_t i = 0; i < rpkgs.size(); i++)
+        for (auto& rpkg : rpkgs)
         {
-            for (uint64_t j = 0; j < rpkgs.at(i).hash.size(); j++)
+            for (uint64_t j = 0; j < rpkg.hash.size(); j++)
             {
-                uint32_t temp_hash_reference_count = rpkgs.at(i).hash.at(j).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+                uint32_t temp_hash_reference_count = rpkg.hash.at(j).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
                 for (uint64_t k = 0; k < temp_hash_reference_count; k++)
                 {
-                    if (rpkgs.at(i).hash.at(j).hash_reference_data.hash_reference.at(k) == hash_value)
+                    if (rpkg.hash.at(j).hash_reference_data.hash_reference.at(k) != hash_value)
+                        continue;
+
+                    reverse_dependency_count++;
+
+                    std::string rd = util::uint64_t_to_hex_string(rpkg.hash.at(j).hash_value) + "." + rpkg.hash.at(j).hash_resource_type;
+
+                    if (!reverse_dependency.empty())
                     {
-                        reverse_dependency_count++;
+                        bool found = false;
 
-                        std::string rd = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(j).hash_value) + "." + rpkgs.at(i).hash.at(j).hash_resource_type;
-
-                        if (reverse_dependency.size() > 0)
+                        for (uint64_t k = 0; k < reverse_dependency.size(); k++)
                         {
-                            bool found = false;
-
-                            for (uint64_t k = 0; k < reverse_dependency.size(); k++)
+                            if (reverse_dependency.at(k) == rd)
                             {
-                                if (reverse_dependency.at(k) == rd)
-                                {
-                                    found = true;
+                                found = true;
 
-                                    reverse_dependency_in_rpkg_file.at(k).push_back(rpkgs.at(i).rpkg_file_name);
-                                }
-                            }
-
-                            if (!found)
-                            {
-                                reverse_dependency.push_back(rd);
-
-                                std::vector<std::string> rpkgFiles;
-
-                                rpkgFiles.push_back(rpkgs.at(i).rpkg_file_name);
-
-                                reverse_dependency_in_rpkg_file.push_back(rpkgFiles);
+                                reverse_dependency_in_rpkg_file.at(k).push_back(rpkg.rpkg_file_name);
                             }
                         }
-                        else
+
+                        if (!found)
                         {
                             reverse_dependency.push_back(rd);
 
                             std::vector<std::string> rpkgFiles;
 
-                            rpkgFiles.push_back(rpkgs.at(i).rpkg_file_name);
+                            rpkgFiles.push_back(rpkg.rpkg_file_name);
 
                             reverse_dependency_in_rpkg_file.push_back(rpkgFiles);
                         }
+                    }
+                    else
+                    {
+                        reverse_dependency.push_back(rd);
+
+                        std::vector<std::string> rpkgFiles;
+
+                        rpkgFiles.push_back(rpkg.rpkg_file_name);
+
+                        reverse_dependency_in_rpkg_file.push_back(rpkgFiles);
                     }
                 }
             }
@@ -250,61 +250,61 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
             }
         }
 
-        if (filter_found)
+        if (!filter_found)
+            continue;
+
+        std::vector<uint64_t> hashes_to_extract;
+        std::vector<std::string> hashes_to_extract_strings;
+
+        for (auto& rpkg : rpkgs)
         {
-            std::vector<uint64_t> hashes_to_extract;
-            std::vector<std::string> hashes_to_extract_strings;
+            uint64_t hash_value = std::strtoull(filter.c_str(), nullptr, 16);
 
-            for (auto& rpkg : rpkgs)
+            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkg.hash_map.find(hash_value);
+
+            if (it != rpkg.hash_map.end())
             {
-                uint64_t hash_value = std::strtoull(filter.c_str(), nullptr, 16);
+                uint32_t hash_reference_count = rpkg.hash.at(it->second).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
-                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkg.hash_map.find(hash_value);
-
-                if (it != rpkg.hash_map.end())
+                for (uint32_t j = 0; j < hash_reference_count; j++)
                 {
-                    uint32_t hash_reference_count = rpkg.hash.at(it->second).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
-
-                    for (uint32_t j = 0; j < hash_reference_count; j++)
-                    {
-                        hashes_to_extract.push_back(rpkg.hash.at(it->second).hash_reference_data.hash_reference.at(j));
-                        hashes_to_extract_strings.push_back(util::uint64_t_to_hex_string(rpkg.hash.at(it->second).hash_reference_data.hash_reference.at(j)));
-                    }
+                    hashes_to_extract.push_back(rpkg.hash.at(it->second).hash_reference_data.hash_reference.at(j));
+                    hashes_to_extract_strings.push_back(util::uint64_t_to_hex_string(rpkg.hash.at(it->second).hash_reference_data.hash_reference.at(j)));
                 }
             }
+        }
 
-            for (uint64_t x = 0; x < hashes_to_extract.size(); x++)
+        for (uint64_t x = 0; x < hashes_to_extract.size(); x++)
+        {
+            for (auto& rpkg : rpkgs)
             {
-                for (auto& rpkg : rpkgs)
+                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkg.hash_map.find(hashes_to_extract.at(x));
+
+                if (it == rpkg.hash_map.end())
+                    continue;
+
+                if (extract_prim_models)
                 {
-                    std::unordered_map<uint64_t, uint64_t>::iterator it = rpkg.hash_map.find(hashes_to_extract.at(x));
-
-                    if (it != rpkg.hash_map.end())
+                    if (rpkg.hash.at(it->second).hash_resource_type == "PRIM")
                     {
-                        if (extract_prim_models)
-                        {
-                            if (rpkg.hash.at(it->second).hash_resource_type == "PRIM")
-                            {
-                                std::string prim_output_dir = file::output_path_append("DIRECTDEPENDS\\" + filter_hash_file_name + "\\PRIMMODELS\\", output_path);
+                        std::string prim_output_dir = file::output_path_append("DIRECTDEPENDS\\" + filter_hash_file_name + "\\PRIMMODELS\\", output_path);
 
-                                file::create_directories(prim_output_dir);
+                        file::create_directories(prim_output_dir);
 
-                                //std::cout << "rpkg_function::extract_prim_model_from(" << rpkgs.at(i).rpkg_file_path << ", " << util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) << ", " << prim_output_dir << ");" << std::endl;
+                        //std::cout << "rpkg_function::extract_prim_model_from(" << rpkgs.at(i).rpkg_file_path << ", " << util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) << ", " << prim_output_dir << ");" << std::endl;
 
-                                rpkg_function::extract_prim_model_from(rpkg.rpkg_file_path, hashes_to_extract_strings.at(x), prim_output_dir);
-                            }
-                        }
-                        else
-                        {
-                            rpkg_extraction_vars rpkg_vars;
-
-                            rpkg_vars.input_path = rpkg.rpkg_file_path;
-                            rpkg_vars.filter = hashes_to_extract_strings.at(x);
-                            rpkg_vars.output_path = file::output_path_append("DIRECTDEPENDS\\" + filter_hash_file_name + "\\", output_path);
-
-                            extract_from_rpkg_with_map(rpkg_vars);
-                        }
+                        rpkg_function::extract_prim_model_from(rpkg.rpkg_file_path, hashes_to_extract_strings.at(x), prim_output_dir);
                     }
+                }
+                else
+                {
+                    rpkg_extraction_vars rpkg_vars;
+
+                    rpkg_vars.input_path = rpkg.rpkg_file_path;
+                    rpkg_vars.filter = hashes_to_extract_strings.at(x);
+                    rpkg_vars.output_path = file::output_path_append("DIRECTDEPENDS\\" + filter_hash_file_name + "\\", output_path);
+
+                    extract_from_rpkg_with_map(rpkg_vars);
                 }
             }
         }

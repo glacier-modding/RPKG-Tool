@@ -17,140 +17,140 @@ extern "C" void MD5Final(unsigned char digest[16], struct MD5Context* ctx);
 extern "C" void MD5Transform(uint32 buf[4], uint32 in[16]);
 
 
-void rpkg_function::hash_probe_from_file(std::string& input_path, std::string& filter, std::string& output_path)
+void rpkg_function::hash_probe_from_file(std::string& input_path, std::string& filter)
 {
     std::string input_rpkg_folder_path = file::parse_input_folder_path(input_path);
 
-    if (file::path_exists(input_rpkg_folder_path))
+    if (!file::path_exists(input_rpkg_folder_path))
     {
-        std::string H1 = "Z:\\HITMAN1\\";
-        std::string H2 = "Z:\\HITMAN2\\Runtime\\";
-        std::string H3 = "C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\";
+        LOG_AND_EXIT("Error: The folder " + input_rpkg_folder_path + " to search for RPKG files for hash probe mode does not exist.");
+    }
 
-        rpkg_function::import_rpkg_files_in_folder(H1);
-        rpkg_function::import_rpkg_files_in_folder(H2);
-        rpkg_function::import_rpkg_files_in_folder(H3);
+    std::string H1 = "Z:\\HITMAN1\\";
+    std::string H2 = "Z:\\HITMAN2\\Runtime\\";
+    std::string H3 = "C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\";
 
-        std::stringstream ss;
+    rpkg_function::import_rpkg_files_in_folder(H1);
+    rpkg_function::import_rpkg_files_in_folder(H2);
+    rpkg_function::import_rpkg_files_in_folder(H3);
 
-        ss << "Scanning folder: Done";
+    std::stringstream ss;
 
-        //LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+    ss << "Scanning folder: Done";
 
-        std::ifstream file = std::ifstream(filter, std::ifstream::binary);
+    //LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
 
-        if (!file.good())
+    std::ifstream file = std::ifstream(filter, std::ifstream::binary);
+
+    if (!file.good())
+    {
+        std::cout << "Error: " + filter + " could not be read." << std::endl;
+    }
+
+    std::unordered_map<std::string, uint64_t> ioi_string_map;
+    std::vector<std::string> ioi_strings;
+
+    std::string line = "";
+
+    while (std::getline(file, line))
+    {
+        if (line.length() > 4)
         {
-            std::cout << "Error: " + filter + " could not be read." << std::endl;
-        }
+            std::string ioi_string = line;
 
-        std::unordered_map<std::string, uint64_t> ioi_string_map;
-        std::vector<std::string> ioi_strings;
+            size_t pos = ioi_string.find_last_of('\r');
 
-        std::string line = "";
-
-        while (std::getline(file, line))
-        {
-            if (line.length() > 4)
+            if (pos != std::string::npos)
             {
-                std::string ioi_string = line;
-
-                size_t pos = ioi_string.find_last_of('\r');
-
-                if (pos != std::string::npos)
-                {
-                    ioi_string.erase(pos, 1);
-                }
-
-                std::string substring = ioi_string;
-
-                //std::cout << "String: " << ioi_string << std::endl;
-
-                std::unordered_map<std::string, uint64_t>::iterator it = ioi_string_map.find(substring);
-
-                if (it != ioi_string_map.end())
-                {
-
-                }
-                else
-                {
-                    ioi_strings.push_back(ioi_string);
-                    ioi_string_map[ioi_string] = ioi_strings.size() - 1;
-                }
-            }
-        }
-
-        for (int j = 0; j < ioi_strings.size(); j++)
-        {
-            unsigned char signature[16];
-            struct MD5Context md5c;
-
-            std::string lowercase;
-
-            for (int i = 0; i < ioi_strings.at(j).length(); i++)
-            {
-                lowercase.push_back(std::tolower(ioi_strings.at(j)[i]));
+                ioi_string.erase(pos, 1);
             }
 
-            //LOG(main_data->console_prefix << "Input: " << main_data->input_to_ioi_hash << ", " << lowercase);
+            std::string substring = ioi_string;
 
-            MD5Init(&md5c);
-            MD5Update(&md5c, (unsigned char*)lowercase.c_str(), (unsigned int)lowercase.length());
-            MD5Final(signature, &md5c);
+            //std::cout << "String: " << ioi_string << std::endl;
 
-            std::stringstream ss;
+            std::unordered_map<std::string, uint64_t>::iterator it = ioi_string_map.find(substring);
 
-            for (uint64_t m = 0; m < 16; m++)
+            if (it != ioi_string_map.end())
             {
-                ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)(unsigned char)signature[m];
+
             }
-
-            ss.str(std::string());
-
-            ss << "00";
-
-            for (uint64_t m = 1; m < 8; m++)
+            else
             {
-                ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)(unsigned char)signature[m];
-            }
-
-            //std::cout << ss.str() << "," << ioi_strings.at(j) << std::endl;
-
-            int found_count = 0;
-
-            uint64_t hash = std::strtoull(ss.str().c_str(), nullptr, 16);
-
-            if (hash != 0)
-            {
-                bool found = false;
-
-                for (uint64_t i = 0; i < rpkgs.size(); i++)
-                {
-                    std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(i).hash_map.find(hash);
-
-                    if (it2 != rpkgs.at(i).hash_map.end())
-                    {
-                        found = true;
-
-                        found_count++;
-
-                        std::cout << util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(it2->second).hash_value) + "." + rpkgs.at(i).hash.at(it2->second).hash_resource_type << "," << ioi_strings.at(j) << "," << rpkgs.at(i).rpkg_file_path << std::endl;
-                    }
-                }
-
-                if (found)
-                {
-                    LOG("Hash \"" << ss.str() << "\" was found in " << found_count << " RPKG files.");
-                }
-                else
-                {
-                    LOG("Hash \"" << ss.str() << "," << ioi_strings.at(j) << "\" was not found in any RPKG files.");
-                }
+                ioi_strings.push_back(ioi_string);
+                ioi_string_map[ioi_string] = ioi_strings.size() - 1;
             }
         }
     }
-    else
+
+    for (auto& ioi_string : ioi_strings)
     {
-        LOG_AND_EXIT("Error: The folder " + input_rpkg_folder_path + " to search for RPKG files for hash probe mode does not exist.");
+        unsigned char signature[16];
+        struct MD5Context md5c;
+
+        std::string lowercase;
+
+        for (char i : ioi_string)
+        {
+            lowercase.push_back(std::tolower(i));
+        }
+
+        //LOG(main_data->console_prefix << "Input: " << main_data->input_to_ioi_hash << ", " << lowercase);
+
+        MD5Init(&md5c);
+        MD5Update(&md5c, (unsigned char*)lowercase.c_str(), static_cast<unsigned int>(lowercase.length()));
+        MD5Final(signature, &md5c);
+
+        std::stringstream ss;
+
+        for (unsigned char m : signature)
+        {
+            ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(m);
+        }
+
+        ss.str(std::string());
+
+        ss << "00";
+
+        for (uint64_t m = 1; m < 8; m++)
+        {
+            ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(signature[m]);
+        }
+
+        //std::cout << ss.str() << "," << ioi_strings.at(j) << std::endl;
+
+        int found_count = 0;
+
+        uint64_t hash = std::strtoull(ss.str().c_str(), nullptr, 16);
+
+        if (hash == 0)
+            continue;
+
+        bool found = false;
+
+        for (auto& rpkg : rpkgs)
+        {
+            std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkg.hash_map.find(hash);
+
+            if (it2 != rpkg.hash_map.end())
+            {
+                found = true;
+
+                found_count++;
+
+                std::cout << util::uint64_t_to_hex_string(rpkg.hash.at(it2->second).hash_value) + "." + rpkg.hash.at(it2->second).hash_resource_type << "," <<
+                    ioi_string << "," <<
+                    rpkg.rpkg_file_path << std::endl;
+            }
+        }
+
+        if (found)
+        {
+            LOG("Hash \"" << ss.str() << "\" was found in " << found_count << " RPKG files.");
+        }
+        else
+        {
+            LOG("Hash \"" << ss.str() << "," << ioi_string << "\" was not found in any RPKG files.");
+        }
     }
 }

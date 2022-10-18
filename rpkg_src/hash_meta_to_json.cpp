@@ -10,7 +10,7 @@
 #include "thirdparty/rapidjson/prettywriter.h"
 #include "thirdparty/rapidjson/stringbuffer.h"
 
-void rpkg_function::hash_meta_to_json(std::string& input_path, std::string& filter, std::string& output_path)
+void rpkg_function::hash_meta_to_json(std::string& input_path)
 {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
