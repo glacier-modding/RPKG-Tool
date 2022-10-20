@@ -24,75 +24,73 @@ void rpkg_function::extract_all_prim_of_temp_from(std::string& input_path, const
         input_path = file::parse_input_folder_path(input_path);
     }
 
-    if (file::path_exists(input_path))
+    if (!file::path_exists(input_path))
     {
-        if (!input_path_is_rpkg_file)
+        LOG_AND_EXIT("Error: The folder " + input_path + " to with the input RPKGs does not exist.");
+    }
+
+    if (!input_path_is_rpkg_file)
+    {
+        rpkg_function::import_rpkg_files_in_folder(input_path);
+    }
+    else
+    {
+        rpkg_function::import_rpkg(input_path, true);
+    }
+
+    std::stringstream ss;
+
+    ss << "Scanning folder: Done";
+
+    //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
+
+    timing_string = "Extracting linked PRIMs To GLB File(s)...";
+
+    //LOG("Loading Hash List...");
+
+    //generic_function::load_hash_list(true);
+
+    //LOG("Loading Hash List: Done");
+
+    //std::vector<std::string>().swap(prim_asset_file_names);
+
+    const std::vector<std::string> filters = util::parse_input_filter(filter);
+
+    for (auto& filter : filters)
+    {
+        uint64_t temp_hash_value = std::strtoull(filter.c_str(), nullptr, 16);
+
+        for (uint64_t i = 0; i < rpkgs.size(); i++)
         {
-            rpkg_function::import_rpkg_files_in_folder(input_path);
-        }
-        else
-        {
-            rpkg_function::import_rpkg(input_path, true);
-        }
+            const uint64_t rpkg_index = i;
 
-        std::stringstream ss;
-
-        ss << "Scanning folder: Done";
-
-        //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
-
-        timing_string = "Extracting linked PRIMs To GLB File(s)...";
-
-        //LOG("Loading Hash List...");
-
-        //generic_function::load_hash_list(true);
-
-        //LOG("Loading Hash List: Done");
-
-        //std::vector<std::string>().swap(prim_asset_file_names);
-
-        const std::vector<std::string> filters = util::parse_input_filter(filter);
-
-        for (auto& filter : filters)
-        {
-            uint64_t temp_hash_value = std::strtoull(filter.c_str(), nullptr, 16);
-
-            for (uint64_t i = 0; i < rpkgs.size(); i++)
+            if (rpkgs.at(i).rpkg_file_path == input_path)
             {
-                uint64_t rpkg_index = i;
+                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
-                if (rpkgs.at(i).rpkg_file_path == input_path)
+                if (it != rpkgs.at(rpkg_index).hash_map.end())
                 {
-                    std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
-
-                    if (it != rpkgs.at(rpkg_index).hash_map.end())
+                    if (gui_control == ABORT_CURRENT_TASK)
                     {
-                        if (gui_control == ABORT_CURRENT_TASK)
+                        return;
+                    }
+
+                    std::string temp_hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type;
+
+                    if (rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type == "TEMP")
+                    {
+                        temp temp_temp(rpkg_index, it->second);
+
+                        for (uint64_t j = 0; j < temp_temp.prim_depends_file_name.size(); j++)
                         {
-                            return;
-                        }
-
-                        std::string temp_hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type;
-
-                        if (rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type == "TEMP")
-                        {
-                            temp temp_temp(rpkg_index, it->second);
-
-                            for (uint64_t j = 0; j < temp_temp.prim_depends_file_name.size(); j++)
-                            {
-                                rpkg_function::extract_prim_from(rpkgs.at(temp_temp.prim_depends_rpkg_index.at(j).at(temp_temp.prim_depends_rpkg_index_index.at(j))).rpkg_file_path, temp_temp.prim_depends_file_name.at(j), output_path, type, true);
-                            }
+                            rpkg_function::extract_prim_from(rpkgs.at(temp_temp.prim_depends_rpkg_index.at(j).at(temp_temp.prim_depends_rpkg_index_index.at(j))).rpkg_file_path, temp_temp.prim_depends_file_name.at(j), output_path, type, true);
                         }
                     }
                 }
             }
         }
+    }
 
-        task_single_status = TASK_SUCCESSFUL;
-        task_multiple_status = TASK_SUCCESSFUL;
-    }
-    else
-    {
-        LOG_AND_EXIT("Error: The folder " + input_path + " to with the input RPKGs does not exist.");
-    }
+    task_single_status = TASK_SUCCESSFUL;
+    task_multiple_status = TASK_SUCCESSFUL;
 }

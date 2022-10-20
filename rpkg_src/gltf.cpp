@@ -142,7 +142,7 @@ void gltf::output_to_single_file(asset3ds& asset3ds_data, std::string& file_path
             node.children.push_back(std::to_string(b));
         }
 
-        document.nodes.Append(std::move(node), AppendIdPolicy::GenerateOnEmpty).id;
+        document.nodes.Append(std::move(node), AppendIdPolicy::GenerateOnEmpty);
     }
 
     for (uint32_t o = 0; o < asset3ds_data.vertexes.size(); o++)
@@ -234,9 +234,9 @@ void gltf::output_to_single_file(asset3ds& asset3ds_data, std::string& file_path
 
                 temp_skin.name = "S_" + asset3ds_data.root_name;
 
-                for (uint32_t b = 0; b < joints.size(); b++)
+                for (const auto& joint : joints)
                 {
-                    temp_skin.jointIds.push_back(joints.at(b));
+                    temp_skin.jointIds.push_back(joint);
                 }
 
                 bufferBuilder.AddBufferView(BufferViewTarget::ARRAY_BUFFER);
@@ -270,9 +270,9 @@ void gltf::output_to_single_file(asset3ds& asset3ds_data, std::string& file_path
 
     Scene scene;
 
-    for (uint32_t b = 0; b < node_ids.size(); b++)
+    for (const auto& node_id : node_ids)
     {
-        scene.nodes.push_back(node_ids.at(b));
+        scene.nodes.push_back(node_id);
     }
 
     document.SetDefaultScene(std::move(scene), AppendIdPolicy::GenerateOnEmpty);
@@ -385,14 +385,14 @@ void gltf::output_to_single_file_with_textures(asset3ds& asset3ds_data, std::str
 
     std::unordered_map<uint32_t, std::string> material_ids;
 
-    for (uint32_t t = 0; t < textures.size(); t++)
+    for (auto& t : textures)
     {
         Material material;
 
-        if (textures.at(t).has_diffuse_texture)
+        if (t.has_diffuse_texture)
         {
             Image image;
-            image.bufferViewId = bufferBuilder.AddBufferView(textures.at(t).texture_diffuse_jpg.data(), textures.at(t).texture_diffuse_jpg.size()).id;
+            image.bufferViewId = bufferBuilder.AddBufferView(t.texture_diffuse_jpg.data(), t.texture_diffuse_jpg.size()).id;
             image.mimeType = "image/jpeg";
             std::string image_id = document.images.Append(std::move(image), AppendIdPolicy::GenerateOnEmpty).id;
 
@@ -403,10 +403,10 @@ void gltf::output_to_single_file_with_textures(asset3ds& asset3ds_data, std::str
             material.metallicRoughness.baseColorTexture.textureId = texture_id;
         }
 
-        if (textures.at(t).has_normal_texture)
+        if (t.has_normal_texture)
         {
             Image image;
-            image.bufferViewId = bufferBuilder.AddBufferView(textures.at(t).texture_normal_jpg.data(), textures.at(t).texture_normal_jpg.size()).id;
+            image.bufferViewId = bufferBuilder.AddBufferView(t.texture_normal_jpg.data(), t.texture_normal_jpg.size()).id;
             image.mimeType = "image/jpeg";
             std::string image_id = document.images.Append(std::move(image), AppendIdPolicy::GenerateOnEmpty).id;
 
@@ -417,10 +417,10 @@ void gltf::output_to_single_file_with_textures(asset3ds& asset3ds_data, std::str
             material.normalTexture.textureId = texture_id;
         }
 
-        if (textures.at(t).has_emissive_texture)
+        if (t.has_emissive_texture)
         {
             Image image;
-            image.bufferViewId = bufferBuilder.AddBufferView(textures.at(t).texture_emissive_jpg.data(), textures.at(t).texture_emissive_jpg.size()).id;
+            image.bufferViewId = bufferBuilder.AddBufferView(t.texture_emissive_jpg.data(), t.texture_emissive_jpg.size()).id;
             image.mimeType = "image/jpeg";
             std::string image_id = document.images.Append(std::move(image), AppendIdPolicy::GenerateOnEmpty).id;
 
@@ -434,7 +434,7 @@ void gltf::output_to_single_file_with_textures(asset3ds& asset3ds_data, std::str
         material.metallicRoughness.metallicFactor = 0.0f;
         material.metallicRoughness.roughnessFactor = 0.0f;
 
-        material_ids[textures.at(t).material_id] = document.materials.Append(std::move(material), AppendIdPolicy::GenerateOnEmpty).id;
+        material_ids[t.material_id] = document.materials.Append(std::move(material), AppendIdPolicy::GenerateOnEmpty).id;
     }
 
     for (uint32_t o = 0; o < asset3ds_data.vertexes.size(); o++)
@@ -461,7 +461,7 @@ void gltf::output_to_single_file_with_textures(asset3ds& asset3ds_data, std::str
             node.children.push_back(std::to_string(b));
         }
 
-        document.nodes.Append(std::move(node), AppendIdPolicy::GenerateOnEmpty).id;
+        document.nodes.Append(std::move(node), AppendIdPolicy::GenerateOnEmpty);
     }
 
     for (uint32_t o = 0; o < asset3ds_data.vertexes.size(); o++)
@@ -553,9 +553,9 @@ void gltf::output_to_single_file_with_textures(asset3ds& asset3ds_data, std::str
 
                 temp_skin.name = "S_" + asset3ds_data.root_name;
 
-                for (uint32_t b = 0; b < joints.size(); b++)
+                for (const auto& joint : joints)
                 {
-                    temp_skin.jointIds.push_back(joints.at(b));
+                    temp_skin.jointIds.push_back(joint);
                 }
 
                 bufferBuilder.AddBufferView(BufferViewTarget::ARRAY_BUFFER);
@@ -598,9 +598,9 @@ void gltf::output_to_single_file_with_textures(asset3ds& asset3ds_data, std::str
 
     Scene scene;
 
-    for (uint32_t b = 0; b < node_ids.size(); b++)
+    for (const auto& node_id : node_ids)
     {
-        scene.nodes.push_back(node_ids.at(b));
+        scene.nodes.push_back(node_id);
     }
 
     document.SetDefaultScene(std::move(scene), AppendIdPolicy::GenerateOnEmpty);

@@ -6,7 +6,7 @@
 #include <iostream>
 #include <filesystem>
 
-void rpkg_function::json_to_sdef(std::string& input_path, std::string& filter, std::string& output_path)
+void rpkg_function::json_to_sdef(std::string& input_path, std::string& output_path)
 {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
@@ -47,7 +47,7 @@ void rpkg_function::json_to_sdef(std::string& input_path, std::string& filter, s
 
         for (std::filesystem::path& file : files)
         {
-            uint64_t hash_value = file::get_hash_value_from_path(file, ".SDEF.JSON");
+            const uint64_t hash_value = file::get_hash_value_from_path(file, ".SDEF.JSON");
 
             if (hash_value)
             {

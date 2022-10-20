@@ -6,7 +6,7 @@
 #include <iostream>
 #include <filesystem>
 
-void rpkg_function::json_to_mati(std::string& input_path, std::string& filter, std::string& output_path)
+void rpkg_function::json_to_mati(const std::string& input_path, const std::string& output_path)
 {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
@@ -21,7 +21,7 @@ void rpkg_function::json_to_mati(std::string& input_path, std::string& filter, s
         {
             files.push_back(std::filesystem::path(input_path));
 
-            if (output_path != "")
+            if (!output_path.empty())
             {
                 if (std::filesystem::exists(output_path))
                 {
@@ -47,7 +47,7 @@ void rpkg_function::json_to_mati(std::string& input_path, std::string& filter, s
 
         for (std::filesystem::path& file : files)
         {
-            uint64_t hash_value = file::get_hash_value_from_path(file, ".MATI.JSON");
+            const uint64_t hash_value = file::get_hash_value_from_path(file, ".MATI.JSON");
 
             if (hash_value)
             {

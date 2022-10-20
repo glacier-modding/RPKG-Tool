@@ -1832,7 +1832,7 @@ int generate_rpkg_files_from_data(char* temp_path)
         std::cout << *it << std::endl;
         std::cout << std::string(temp_path) << std::endl;
 
-        rpkg_function::generate_rpkg_from(input_path, filter, output_path);
+        rpkg_function::generate_rpkg_from(input_path, output_path);
     }
 
     return 0;

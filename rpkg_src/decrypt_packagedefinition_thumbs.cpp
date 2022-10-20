@@ -46,8 +46,6 @@ void generic_function::decrypt_packagedefinition_thumbs(std::string &input_path,
         input_data.push_back(0x0);
     }
 
-    uint32_t zero_pad_length = (uint32_t)(packagedefinitions_thumbs_file_size - input_data.size());
-
     for (uint64_t i = 0; i < input_data.size() / 8; i++)
     {
         uint32_t data[2];
@@ -70,10 +68,7 @@ void generic_function::decrypt_packagedefinition_thumbs(std::string &input_path,
             {
                 break;
             }
-            else
-            {
-                last_zero_position--;
-            }
+            last_zero_position--;
         }
     }
 

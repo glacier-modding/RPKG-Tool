@@ -5,11 +5,11 @@
 #include <fstream>
 #include <iostream>
 
-uint64_t file::get_hash_value_from_path(std::filesystem::path path, std::string extension)
+uint64_t file::get_hash_value_from_path(const std::filesystem::path& path, const std::string& extension)
 {
-    std::string file_name = path.filename().string();
+    const std::string file_name = path.filename().string();
 
-    uint64_t hash_value = 0;
+    constexpr uint64_t hash_value = 0;
 
     if (file_name.length() <= extension.length())
     {
@@ -21,7 +21,7 @@ uint64_t file::get_hash_value_from_path(std::filesystem::path path, std::string 
         return hash_value;
     }
 
-    std::string hash_string = util::to_upper_case(file_name.substr(0, (file_name.length() - extension.length())));
+    const std::string hash_string = util::to_upper_case(file_name.substr(0, (file_name.length() - extension.length())));
 
     if (!util::is_valid_hash(hash_string))
     {
@@ -48,9 +48,9 @@ std::vector<std::filesystem::path> file::get_recursive_file_list(std::string pat
     return files;
 }
 
-bool file::write_to_file(std::string file_path, std::string& data)
+bool file::write_to_file(const std::string& file_name, const std::string& data)
 {
-    std::ofstream output_file = std::ofstream(file_path, std::ofstream::binary);
+    std::ofstream output_file = std::ofstream(file_name, std::ofstream::binary);
 
     if (!output_file.good())
     {
@@ -69,7 +69,7 @@ bool file::path_exists(const std::string& path)
     return std::filesystem::exists(path);
 }
 
-void file::create_directories(std::string path)
+void file::create_directories(const std::string& path)
 {
     if (!file::path_exists(path))
     {
@@ -80,31 +80,26 @@ void file::create_directories(std::string path)
     }
 }
 
-std::string file::output_path_append(std::string file_name, std::string output_path)
+std::string file::output_path_append(const std::string& file_name, std::string output_path)
 {
-    std::string path = "";
     std::string base_file_name = file_name;
 
     if (output_path == "")
     {
-        path = file_name;
+        return file_name;
     }
-    else
+
+    if (output_path.substr(output_path.length() - 1, 1) == "\\")
     {
-        if (output_path.substr(output_path.length() - 1, 1) == "\\")
-        {
-            output_path = output_path.substr(0, output_path.length() - 1);
-        }
-
-        if (output_path.substr(output_path.length() - 1, 1) == "/")
-        {
-            output_path = output_path.substr(0, output_path.length() - 1);
-        }
-
-        path = output_path + "\\" + file_name;
+        output_path = output_path.substr(0, output_path.length() - 1);
     }
 
-    return path;
+    if (output_path.substr(output_path.length() - 1, 1) == "/")
+    {
+        output_path = output_path.substr(0, output_path.length() - 1);
+    }
+
+    return output_path + "\\" + file_name;
 }
 
 std::string file::parse_input_folder_path(std::string input)
@@ -127,29 +122,23 @@ std::string file::parse_input_folder_path(std::string input)
     return input;
 }
 
-std::string file::get_base_file_name(std::string input)
+std::string file::get_base_file_name(const std::string& input)
 {
-    std::string input_file_name = "";
-
-    size_t pos = input.find_last_of("\\/");
+    const size_t pos = input.find_last_of("\\/");
 
     if (pos != std::string::npos)
     {
-        input_file_name = input.substr(pos + 1, input.length() - (pos + 1));
-    }
-    else
-    {
-        input_file_name = input;
+        return input.substr(pos + 1, input.length() - (pos + 1));
     }
 
-    return input_file_name;
+    return input;
 }
 
-std::string file::get_root_file_name(std::string input)
+std::string file::get_root_file_name(const std::string& input)
 {
     std::string root_file_name = "";
 
-    size_t pos = input.find_last_of(".");
+    const size_t pos = input.find_last_of(".");
 
     if (pos != std::string::npos)
     {
@@ -159,13 +148,11 @@ std::string file::get_root_file_name(std::string input)
     return root_file_name;
 }
 
-void file::parse_input_file_name(std::string input, std::string ends_with)
+void file::parse_input_file_name(const std::string& input, const std::string& ends_with)
 {
-    std::string input_file_name = "";
+    const std::string input_file_name = file::get_base_file_name(input);
 
-    input_file_name = file::get_base_file_name(input);
-
-    int ends_with_length = (int)ends_with.length();
+    const int ends_with_length = static_cast<int>(ends_with.length());
 
     if (util::to_upper_case(input_file_name.substr((input_file_name.length() - ends_with_length), ends_with_length)) != util::to_upper_case(ends_with))
     {
@@ -173,41 +160,17 @@ void file::parse_input_file_name(std::string input, std::string ends_with)
     }
 }
 
-bool file::is_json_file(std::string input)
+bool file::is_json_file(const std::string& input)
 {
-    if (input.length() > 6)
-    {
-        if (util::to_upper_case(input.substr((input.length() - 5), 5)) == ".JSON")
-        {
-            return true;
-        }
-    }
-
-    return false;
+    return input.length() > 6 && util::to_upper_case(input.substr(input.length() - 5, 5)) == ".JSON";
 }
 
-bool file::is_rpkg_file(std::string input)
+bool file::is_rpkg_file(const std::string& input)
 {
-    if (input.length() > 6)
-    {
-        if (util::to_upper_case(input.substr((input.length() - 5), 5)) == ".RPKG")
-        {
-            return true;
-        }
-    }
-
-    return false;
+    return input.length() > 6 && util::to_upper_case(input.substr(input.length() - 5, 5)) == ".RPKG";
 }
 
-bool file::is_supermeta_file(std::string input)
+bool file::is_supermeta_file(const std::string& input)
 {
-    if (input.length() > 11)
-    {
-        if (util::to_upper_case(input.substr((input.length() - 10), 10)) == ".SUPERMETA")
-        {
-            return true;
-        }
-    }
-
-    return false;
+    return input.length() > 11 && util::to_upper_case(input.substr(input.length() - 10, 10)) == ".SUPERMETA";
 }

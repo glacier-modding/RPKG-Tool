@@ -10,7 +10,7 @@
 #include "thirdparty/rapidjson/document.h"
 #include "thirdparty/rapidjson/writer.h"
 
-void rpkg_function::json_to_hash_meta(std::string& input_path, std::string& filter, std::string& output_path)
+void rpkg_function::json_to_hash_meta(std::string& input_path)
 {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
@@ -65,9 +65,9 @@ void rpkg_function::json_to_hash_meta(std::string& input_path, std::string& filt
 
         std::memcpy(&char8, &temp_uint64_t, 0x8);
 
-        for (uint32_t j = 0; j < 0x8; j++)
+        for (char& j : char8)
         {
-            meta_data.push_back(char8[j]);
+            meta_data.push_back(j);
         }
 
         const rapidjson::Value& hash_offset = document["hash_offset"];
@@ -87,9 +87,9 @@ void rpkg_function::json_to_hash_meta(std::string& input_path, std::string& filt
 
         std::memcpy(&char8, &temp_uint64_t, 0x8);
 
-        for (uint32_t j = 0; j < 0x8; j++)
+        for (char& j : char8)
         {
-            meta_data.push_back(char8[j]);
+            meta_data.push_back(j);
         }
 
         const rapidjson::Value& hash_size = document["hash_size"];
@@ -109,9 +109,9 @@ void rpkg_function::json_to_hash_meta(std::string& input_path, std::string& filt
 
         std::memcpy(&char4, &temp_uint32_t, 0x4);
 
-        for (uint32_t j = 0; j < 0x4; j++)
+        for (char& j : char4)
         {
-            meta_data.push_back(char4[j]);
+            meta_data.push_back(j);
         }
 
         const rapidjson::Value& hash_resource_type = document["hash_resource_type"];
@@ -129,9 +129,9 @@ void rpkg_function::json_to_hash_meta(std::string& input_path, std::string& filt
 
         temp_string = hash_resource_type.GetString();
 
-        for (uint32_t j = 0; j < temp_string.length(); j++)
+        for (char& j : temp_string)
         {
-            meta_data.push_back(temp_string[j]);
+            meta_data.push_back(j);
         }
 
         const rapidjson::Value& hash_reference_data = document["hash_reference_data"];
@@ -175,14 +175,14 @@ void rpkg_function::json_to_hash_meta(std::string& input_path, std::string& filt
         }
         else
         {
-            temp_uint32_t = hash_reference_data_size * (uint32_t)0x9 + (uint32_t)0x4;
+            temp_uint32_t = hash_reference_data_size * static_cast<uint32_t>(0x9) + static_cast<uint32_t>(0x4);
         }
 
         std::memcpy(&char4, &temp_uint32_t, 0x4);
 
-        for (uint32_t j = 0; j < 0x4; j++)
+        for (char& j : char4)
         {
-            meta_data.push_back(char4[j]);
+            meta_data.push_back(j);
         }
 
         const rapidjson::Value& hash_reference_table_dummy = document["hash_reference_table_dummy"];
@@ -202,9 +202,9 @@ void rpkg_function::json_to_hash_meta(std::string& input_path, std::string& filt
 
         std::memcpy(&char4, &temp_uint32_t, 0x4);
 
-        for (uint32_t j = 0; j < 0x4; j++)
+        for (char& j : char4)
         {
-            meta_data.push_back(char4[j]);
+            meta_data.push_back(j);
         }
 
         const rapidjson::Value& hash_size_final = document["hash_size_final"];
@@ -224,9 +224,9 @@ void rpkg_function::json_to_hash_meta(std::string& input_path, std::string& filt
 
         std::memcpy(&char4, &temp_uint32_t, 0x4);
 
-        for (uint32_t j = 0; j < 0x4; j++)
+        for (char& j : char4)
         {
-            meta_data.push_back(char4[j]);
+            meta_data.push_back(j);
         }
 
         const rapidjson::Value& hash_size_in_memory = document["hash_size_in_memory"];
@@ -246,9 +246,9 @@ void rpkg_function::json_to_hash_meta(std::string& input_path, std::string& filt
 
         std::memcpy(&char4, &temp_uint32_t, 0x4);
 
-        for (uint32_t j = 0; j < 0x4; j++)
+        for (char& j : char4)
         {
-            meta_data.push_back(char4[j]);
+            meta_data.push_back(j);
         }
 
         const rapidjson::Value& hash_size_in_video_memory = document["hash_size_in_video_memory"];
@@ -268,9 +268,9 @@ void rpkg_function::json_to_hash_meta(std::string& input_path, std::string& filt
 
         std::memcpy(&char4, &temp_uint32_t, 0x4);
 
-        for (uint32_t j = 0; j < 0x4; j++)
+        for (char& j : char4)
         {
-            meta_data.push_back(char4[j]);
+            meta_data.push_back(j);
         }
 
         if (hash_reference_data_size > 0)
@@ -279,9 +279,9 @@ void rpkg_function::json_to_hash_meta(std::string& input_path, std::string& filt
 
             std::memcpy(&char4, &temp_uint32_t, 0x4);
 
-            for (uint32_t j = 0; j < 0x4; j++)
+            for (char& j : char4)
             {
-                meta_data.push_back(char4[j]);
+                meta_data.push_back(j);
             }
 
             for (rapidjson::SizeType i = 0; i < hash_reference_data.Size(); i++)
@@ -340,9 +340,9 @@ void rpkg_function::json_to_hash_meta(std::string& input_path, std::string& filt
 
                 std::memcpy(&char8, &temp_uint64_t, 0x8);
 
-                for (uint32_t j = 0; j < 0x8; j++)
+                for (char& j : char8)
                 {
-                    meta_data.push_back(char8[j]);
+                    meta_data.push_back(j);
                 }
             }
         }

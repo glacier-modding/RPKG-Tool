@@ -24,7 +24,7 @@ void generic_function::compute_ioi_hash_from_file(std::string& input_path)
     std::unordered_map<std::string, uint64_t> ioi_string_map;
     std::vector<std::string> ioi_strings;
 
-    std::string line = "";
+    std::string line;
 
     while (std::getline(file, line))
     {
@@ -32,9 +32,7 @@ void generic_function::compute_ioi_hash_from_file(std::string& input_path)
         {
             std::string ioi_string = line.substr(0, line.length() - 33);
 
-            std::string substring = ioi_string;
-
-            //std::cout << "String: " << ioi_string << std::endl;
+            const std::string& substring = ioi_string;
 
             std::unordered_map<std::string, uint64_t>::iterator it = ioi_string_map.find(substring);
 
@@ -46,29 +44,27 @@ void generic_function::compute_ioi_hash_from_file(std::string& input_path)
         }
     }
 
-    for (int j = 0; j < ioi_strings.size(); j++)
+    for (std::string& ioi_string : ioi_strings)
     {
         unsigned char signature[16];
         struct MD5Context md5c;
 
         std::string lowercase;
 
-        for (int i = 0; i < ioi_strings.at(j).length(); i++)
+        for (char i : ioi_string)
         {
-            lowercase += std::tolower(ioi_strings.at(j)[i]);
+            lowercase += std::tolower(i);
         }
 
-        //LOG(main_data->console_prefix << "Input: " << main_data->input_to_ioi_hash << ", " << lowercase);
-
         MD5Init(&md5c);
-        MD5Update(&md5c, (unsigned char*)lowercase.c_str(), (unsigned int)lowercase.length());
+        MD5Update(&md5c, (unsigned char*)lowercase.c_str(), static_cast<unsigned int>(lowercase.length()));
         MD5Final(signature, &md5c);
 
         std::stringstream ss;
 
         for (unsigned char m : signature)
         {
-            ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)m;
+            ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(m);
         }
 
         ss.str(std::string());
@@ -77,9 +73,9 @@ void generic_function::compute_ioi_hash_from_file(std::string& input_path)
 
         for (uint64_t m = 1; m < 8; m++)
         {
-            ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (int)signature[m];
+            ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(signature[m]);
         }
 
-        std::cout << ss.str() << "," << ioi_strings.at(j) << std::endl;
+        std::cout << ss.str() << "," << ioi_string << std::endl;
     }
 }

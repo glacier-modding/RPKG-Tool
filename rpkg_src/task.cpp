@@ -133,15 +133,15 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-generate_rpkg_from")
     {
-        rpkg_function::generate_rpkg_from(input_path, filter, output_path);
+        rpkg_function::generate_rpkg_from(input_path, output_path);
     }
     else if (command == "-generate_rpkg_quickly_from")
     {
-        rpkg_function::generate_rpkg_quickly_from(input_path, filter, output_path);
+        rpkg_function::generate_rpkg_quickly_from(input_path, output_path);
     }
     else if (command == "-hash_depends")
     {
-        rpkg_function::hash_depends(input_path, filter, output_path);
+        rpkg_function::hash_depends(input_path, filter);
     }
     else if (command == "-extract_all_hash_depends_from")
     {
@@ -165,11 +165,11 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-hash_probe")
     {
-        rpkg_function::hash_probe(input_path, filter, output_path);
+        rpkg_function::hash_probe(input_path, filter);
     }
     else if (command == "-hash_probe_from_file")
     {
-        rpkg_function::hash_probe_from_file(input_path, filter, output_path);
+        rpkg_function::hash_probe_from_file(input_path, filter);
     }
     else if (command == "-import_rpkg")
     {
@@ -234,31 +234,31 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-dev_extract_wwem_strings")
     {
-        dev_function::dev_extract_wwem_strings(input_path, filter, output_path);
+        dev_function::dev_extract_wwem_strings(output_path);
     }
     else if (command == "-dev_extract_wwes_strings")
     {
-        dev_function::dev_extract_wwes_strings(input_path, filter, output_path);
+        dev_function::dev_extract_wwes_strings(output_path);
     }
     else if (command == "-dev_extract_wwev_strings")
     {
-        dev_function::dev_extract_wwev_strings(input_path, filter, output_path);
+        dev_function::dev_extract_wwev_strings(output_path);
     }
     else if (command == "-dev_extract_wwise_ids")
     {
-        dev_function::dev_extract_wwise_ids(input_path, filter, output_path);
+        dev_function::dev_extract_wwise_ids(input_path, output_path);
     }
     else if (command == "-dev_hash_list_percent_found")
     {
-        dev_function::dev_hash_list_percent_found(input_path, filter, output_path);
+        dev_function::dev_hash_list_percent_found();
     }
     else if (command == "-hash_meta_to_json")
     {
-        rpkg_function::hash_meta_to_json(input_path, filter, output_path);
+        rpkg_function::hash_meta_to_json(input_path);
     }
     else if (command == "-json_to_hash_meta")
     {
-        rpkg_function::json_to_hash_meta(input_path, filter, output_path);
+        rpkg_function::json_to_hash_meta(input_path);
     }
     else if (command == "-latest_hash")
     {
@@ -290,7 +290,7 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-json_to_mati")
     {
-        rpkg_function::json_to_mati(input_path, filter, output_path);
+        rpkg_function::json_to_mati(input_path, output_path);
     }
     else if (command == "-mati_to_json")
     {
@@ -314,7 +314,7 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-json_to_sdef")
     {
-        rpkg_function::json_to_sdef(input_path, filter, output_path);
+        rpkg_function::json_to_sdef(input_path, output_path);
     }
     else if (command == "-sdef_to_json")
     {
@@ -322,7 +322,7 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-dev_dlge_names")
     {
-        dev_function::dev_dlge_names(input_path, filter, output_path);
+        dev_function::dev_dlge_names(input_path, output_path);
     }
     else if (command == "-search_repo")
     {
@@ -334,7 +334,7 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-json_to_mrtr")
     {
-        rpkg_function::json_to_mrtr(input_path, filter, output_path);
+        rpkg_function::json_to_mrtr(input_path, output_path);
     }
     else if (command == "-mrtr_to_json")
     {

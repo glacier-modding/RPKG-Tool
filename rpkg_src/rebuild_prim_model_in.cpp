@@ -246,7 +246,7 @@ void rpkg_function::rebuild_prim_model_in(std::string& input_path, std::string& 
             //std::cout << *it << std::endl;
             //std::cout << output_path_string << std::endl;
 
-            rpkg_function::generate_rpkg_from(input_path, filter, output_path_string);
+            rpkg_function::generate_rpkg_from(input_path, output_path_string);
         }
 
         std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();

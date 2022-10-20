@@ -14,9 +14,9 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path, bool with_timing)
 
     task_single_status = TASK_EXECUTING;
 
-    for (uint64_t j = 0; j < rpkgs.size(); j++)
+    for (auto& rpkg : rpkgs)
     {
-        if (rpkgs.at(j).rpkg_file_path == rpkg_file_path)
+        if (rpkg.rpkg_file_path == rpkg_file_path)
         {
             found = true;
         }
@@ -127,7 +127,6 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path, bool with_timing)
 
     // Init timer
     std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-    int stringstream_length = 80;
 
     // Read in the hash files/resources data tables
     for (size_t i = 0; i < rpkgs.back().header.hash_count; i++)
@@ -180,7 +179,7 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path, bool with_timing)
         rpkgs.back().hash[i].hash_value = rpkgs.back().hash[i].data.header.hash;
         rpkgs.back().hash[i].hash_resource_type = std::string(rpkgs.back().hash[i].data.resource.resource_type, 4);
 
-        if (rpkgs.back().hash_resource_types.size() > 0)
+        if (!rpkgs.back().hash_resource_types.empty())
         {
             bool found = false;
 
@@ -262,7 +261,7 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path, bool with_timing)
 
         LOG(std::string((72 - import_text.length() - ss.str().length()), '.') + ss.str());
 
-        percent_progress = (uint32_t)100;
+        percent_progress = static_cast<uint32_t>(100);
     }
 
     task_single_status = TASK_SUCCESSFUL;

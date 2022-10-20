@@ -6,7 +6,7 @@
 #include <fstream>
 #include <string>
 
-void rpkg_function::import_hash_meta(hash& meta_data, std::string& hash_meta_file_path)
+void rpkg_function::import_hash_meta(hash& meta_data, const std::string& hash_meta_file_path)
 {
     std::ifstream meta_file = std::ifstream(hash_meta_file_path, std::ifstream::binary);
 

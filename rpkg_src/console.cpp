@@ -12,20 +12,20 @@
 #define _fileno fileno
 #endif
 
-int console::update_console(std::string& message, uint64_t indexMax, uint64_t index, std::chrono::time_point<std::chrono::high_resolution_clock> start_time, int stringstream_length)
+int console::update_console(const std::string& message, const uint64_t indexMax, const uint64_t index, const std::chrono::time_point<std::chrono::high_resolution_clock> start_time, int stringstream_length)
 {
-    std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-    double timeInSecondsFromstart_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+    const std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
+    const double secs_since_start = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
 
-    double percent = ((double)index / (double)indexMax) * 100.0;
+    const double percent = (static_cast<double>(index) / static_cast<double>(indexMax)) * 100.0;
     std::stringstream ss;
-    ss << message << std::fixed << std::setprecision(1) << percent << "% Done" << " in " << timeInSecondsFromstart_time << "s, estimated completion in " << (timeInSecondsFromstart_time / (double)index) * (indexMax - index) << "s";
+    ss << message << std::fixed << std::setprecision(1) << percent << "% Done" << " in " << secs_since_start << "s, estimated completion in " << (secs_since_start / static_cast<double>(index)) * (indexMax - index) << "s";
 
-    percent_progress = (uint32_t)percent;
+    percent_progress = static_cast<uint32_t>(percent);
 
     if (ss.str().length() > stringstream_length)
     {
-        stringstream_length = (int)ss.str().length();
+        stringstream_length = static_cast<int>(ss.str().length());
     }
 
     timing_string = ss.str();
