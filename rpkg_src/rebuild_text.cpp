@@ -77,7 +77,7 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
     uint32_t text_texd_scale_width = 0;
     uint32_t text_texd_scale_height = 0;
     uint32_t text_texture_data_offset = 0;
-    uint32_t text_texture_data_size = 0;
+    // uint32_t text_texture_data_size = 0;
     bool texd_found = false;
     bool text_is_lz4ed = false;
 
@@ -362,27 +362,27 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
         //if (texd_tga.GetImage(0, 0, 0)->width != texd_width || texd_tga.GetImage(0, 0, 0)->height != texd_height)
         //{
-            //LOG("Error: Dimensions of imported TGA file " + texture_file_path.generic_string() + " do not match original TEXD's dimentions.");
-            //LOG("Warning: Dimensions of imported TGA file " + texture_file_path.generic_string() + " do not match original TEXD's dimentions.");
+        //LOG("Error: Dimensions of imported TGA file " + texture_file_path.generic_string() + " do not match original TEXD's dimentions.");
+        //LOG("Warning: Dimensions of imported TGA file " + texture_file_path.generic_string() + " do not match original TEXD's dimentions.");
 
-            LOG("TEXD width original: " + util::uint16_t_to_string(texd_width));
-            LOG("TEXD height original: " + util::uint16_t_to_string(texd_height));
-            LOG("TEXD width imported: " + util::uint16_t_to_string(texd_tga.GetImage(0, 0, 0)->width));
-            LOG("TEXD width imported: " + util::uint16_t_to_string(texd_tga.GetImage(0, 0, 0)->height));
+        LOG("TEXD width original: " + util::uint16_t_to_string(texd_width));
+        LOG("TEXD height original: " + util::uint16_t_to_string(texd_height));
+        LOG("TEXD width imported: " + util::uint16_t_to_string(texd_tga.GetImage(0, 0, 0)->width));
+        LOG("TEXD width imported: " + util::uint16_t_to_string(texd_tga.GetImage(0, 0, 0)->height));
 
-            header_texd_width = texd_tga.GetImage(0, 0, 0)->width;
-            header_texd_height = texd_tga.GetImage(0, 0, 0)->height;
+        header_texd_width = texd_tga.GetImage(0, 0, 0)->width;
+        header_texd_height = texd_tga.GetImage(0, 0, 0)->height;
 
-            //std::exit(0);
+        //std::exit(0);
 
-            //LOG("Attempting to resize the imported image to " + util::uint16_t_to_string(texd_width) + "x" + util::uint16_t_to_string(texd_height));
+        //LOG("Attempting to resize the imported image to " + util::uint16_t_to_string(texd_width) + "x" + util::uint16_t_to_string(texd_height));
 
-            //hresult = DirectX::Resize(*texd_tga.GetImage(0, 0, 0), texd_width, texd_height, DirectX::TEX_FILTER_DEFAULT, texd_tga);
+        //hresult = DirectX::Resize(*texd_tga.GetImage(0, 0, 0), texd_width, texd_height, DirectX::TEX_FILTER_DEFAULT, texd_tga);
 
-            //if (FAILED(hresult))
-            //{
-                //LOG_AND_EXIT("Error: TGA resizing of " + texture_file_path.generic_string() + " for TEXD failed.");
-            //}
+        //if (FAILED(hresult))
+        //{
+        //LOG_AND_EXIT("Error: TGA resizing of " + texture_file_path.generic_string() + " for TEXD failed.");
+        //}
         //}
 
         hresult = DirectX::Resize(*texd_tga.GetImage(0, 0, 0), text_width, text_height, DirectX::TEX_FILTER_DEFAULT, text_tga);
@@ -623,7 +623,7 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
             std::cout << "  - TEXD compressed mipmaps (" << m << ") height: " << texd_mipmaps_compressed.GetImage(0, 0, 0)->height << std::endl;
 
-            mipmap_count_1 += (uint32_t)texd_mipmaps_compressed.GetPixelsSize();
+            mipmap_count_1 += static_cast<uint32_t>(texd_mipmaps_compressed.GetPixelsSize());
 
             mipmaps_table_1.push_back(mipmap_count_1);
 
@@ -648,9 +648,9 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
                     return false;
                 }
 
-                texd_images_sizes.push_back((uint32_t)texd_image_size);
+                texd_images_sizes.push_back(static_cast<uint32_t>(texd_image_size));
 
-                mipmap_count_2 += (uint32_t)texd_image_size;
+                mipmap_count_2 += static_cast<uint32_t>(texd_image_size);
 
                 mipmaps_table_2.push_back(mipmap_count_2);
             }
@@ -660,9 +660,9 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
                 std::memcpy(texd_images.back().data(), texd_mipmaps_compressed.GetImage(0, 0, 0)->pixels, texd_mipmaps_compressed.GetPixelsSize());
 
-                texd_images_sizes.push_back((uint32_t)texd_mipmaps_compressed.GetPixelsSize());
+                texd_images_sizes.push_back(static_cast<uint32_t>(texd_mipmaps_compressed.GetPixelsSize()));
 
-                mipmap_count_2 += (uint32_t)texd_mipmaps_compressed.GetPixelsSize();
+                mipmap_count_2 += static_cast<uint32_t>(texd_mipmaps_compressed.GetPixelsSize());
 
                 mipmaps_table_2.push_back(mipmap_count_2);
             }
@@ -694,7 +694,7 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
         {
             int text_image_size = 0;
 
-            bool result = util::lz4_compress_hc((const char*)text_tga_compressed.GetImage(0, 0, 0)->pixels, text_images.back(), text_tga_compressed.GetPixelsSize(), text_image_size);
+            bool result = util::lz4_compress_hc(reinterpret_cast<const char*>(text_tga_compressed.GetImage(0, 0, 0)->pixels), text_images.back(), text_tga_compressed.GetPixelsSize(), text_image_size);
 
             if (result != 0)
             {
@@ -709,7 +709,7 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
                 return false;
             }
 
-            text_images_sizes.push_back((uint32_t)text_image_size);
+            text_images_sizes.push_back(static_cast<uint32_t>(text_image_size));
         }
         else
         {
@@ -717,7 +717,7 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
             std::memcpy(text_images.back().data(), text_tga_compressed.GetImage(0, 0, 0)->pixels, text_tga_compressed.GetPixelsSize());
 
-            text_images_sizes.push_back((uint32_t)text_tga_compressed.GetPixelsSize());
+            text_images_sizes.push_back(static_cast<uint32_t>(text_tga_compressed.GetPixelsSize()));
         }
     }
     else
@@ -750,7 +750,7 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
                 std::cout << "  - TEXT compressed mipmaps (" << m << ") height: " << text_mipmaps_compressed.GetImage(0, 0, 0)->height << std::endl;
 
-                mipmap_count_1 += (uint32_t)text_mipmaps_compressed.GetPixelsSize();
+                mipmap_count_1 += static_cast<uint32_t>(text_mipmaps_compressed.GetPixelsSize());
 
                 mipmaps_table_1.push_back(mipmap_count_1);
 
@@ -760,7 +760,7 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
                 {
                     int text_image_size = 0;
 
-                    bool result = util::lz4_compress_hc((const char*)text_mipmaps_compressed.GetImage(0, 0, 0)->pixels, text_images.back(), text_mipmaps_compressed.GetPixelsSize(), text_image_size);
+                    bool result = util::lz4_compress_hc(reinterpret_cast<const char*>(text_mipmaps_compressed.GetImage(0, 0, 0)->pixels), text_images.back(), text_mipmaps_compressed.GetPixelsSize(), text_image_size);
 
                     if (result != 0)
                     {
@@ -775,11 +775,11 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
                         return false;
                     }
 
-                    mipmap_count_2 += (uint32_t)text_image_size;
+                    mipmap_count_2 += static_cast<uint32_t>(text_image_size);
 
                     mipmaps_table_2.push_back(mipmap_count_2);
 
-                    text_images_sizes.push_back((uint32_t)text_image_size);
+                    text_images_sizes.push_back(static_cast<uint32_t>(text_image_size));
                 }
                 else
                 {
@@ -787,11 +787,11 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
                     std::memcpy(text_images.back().data(), text_mipmaps_compressed.GetImage(0, 0, 0)->pixels, text_mipmaps_compressed.GetPixelsSize());
 
-                    mipmap_count_2 += (uint32_t)text_mipmaps_compressed.GetPixelsSize();
+                    mipmap_count_2 += static_cast<uint32_t>(text_mipmaps_compressed.GetPixelsSize());
 
                     mipmaps_table_2.push_back(mipmap_count_2);
 
-                    text_images_sizes.push_back((uint32_t)text_mipmaps_compressed.GetPixelsSize());
+                    text_images_sizes.push_back(static_cast<uint32_t>(text_mipmaps_compressed.GetPixelsSize()));
                 }
             }
         }
@@ -821,7 +821,7 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
             std::cout << "  - TEXT compressed mipmaps (0) height: " << text_tga_compressed.GetImage(0, 0, 0)->height << std::endl;
 
-            mipmap_count_1 += (uint32_t)text_tga_compressed.GetPixelsSize();
+            mipmap_count_1 += static_cast<uint32_t>(text_tga_compressed.GetPixelsSize());
 
             mipmaps_table_1.push_back(mipmap_count_1);
 
@@ -846,11 +846,11 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
                     return false;
                 }
 
-                mipmap_count_2 += (uint32_t)text_image_size;
+                mipmap_count_2 += static_cast<uint32_t>(text_image_size);
 
                 mipmaps_table_2.push_back(mipmap_count_2);
 
-                text_images_sizes.push_back((uint32_t)text_image_size);
+                text_images_sizes.push_back(static_cast<uint32_t>(text_image_size));
             }
             else
             {
@@ -858,11 +858,11 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
                 std::memcpy(text_images.back().data(), text_tga_compressed.GetImage(0, 0, 0)->pixels, text_tga_compressed.GetPixelsSize());
 
-                mipmap_count_2 += (uint32_t)text_tga_compressed.GetPixelsSize();
+                mipmap_count_2 += static_cast<uint32_t>(text_tga_compressed.GetPixelsSize());
 
                 mipmaps_table_2.push_back(mipmap_count_2);
 
-                text_images_sizes.push_back((uint32_t)text_tga_compressed.GetPixelsSize());
+                text_images_sizes.push_back(static_cast<uint32_t>(text_tga_compressed.GetPixelsSize()));
             }
         }        
     }

@@ -97,7 +97,7 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-extract_prim_textured_from")
     {
-        rpkg_function::extract_prim_textured_from(input_path, filter, output_path, true);
+        rpkg_function::extract_prim_textured_from(input_path, filter, output_path);
     }
     else if (command == "-extract_all_text_from")
     {
@@ -177,11 +177,11 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-rebuild_prim_model_in")
     {
-        rpkg_function::rebuild_prim_model_in(input_path, filter, output_path);
+        rpkg_function::rebuild_prim_model_in(input_path, output_path);
     }
     else if (command == "-rebuild_prim_in")
     {
-        rpkg_function::rebuild_prim_in(input_path, filter, output_path, true);
+        rpkg_function::rebuild_prim_in(input_path, true);
     }
     else if (command == "-rebuild_text_in")
     {
@@ -189,7 +189,7 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-rebuild_gfxf_in")
     {
-        rpkg_function::rebuild_gfxf_in(input_path, filter, output_path);
+        rpkg_function::rebuild_gfxf_in(input_path);
     }
     else if (command == "-rebuild_wwev_in")
     {
@@ -201,11 +201,11 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-rebuild_locr_from_json_from")
     {
-        rpkg_function::rebuild_locr_from_json_from(input_path, filter, output_path);
+        rpkg_function::rebuild_locr_from_json_from(input_path);
     }
     else if (command == "-rebuild_rtlv_from_json_from")
     {
-        rpkg_function::rebuild_rtlv_from_json_from(input_path, filter, output_path);
+        rpkg_function::rebuild_rtlv_from_json_from(input_path);
     }
     else if (command == "-search_rpkg")
     {

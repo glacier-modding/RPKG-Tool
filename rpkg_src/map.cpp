@@ -1963,7 +1963,7 @@ void map::extract_map_prims(std::string output_path, bool textured)
                     {
                         if (textured)
                         {
-                            rpkg_function::extract_prim_textured_from(rpkgs.at(rpkg_index).rpkg_file_path, prim_hash_string, output_path, false);
+                            rpkg_function::extract_prim_textured_from(rpkgs.at(rpkg_index).rpkg_file_path, prim_hash_string, output_path);
                         }
                         else
                         {

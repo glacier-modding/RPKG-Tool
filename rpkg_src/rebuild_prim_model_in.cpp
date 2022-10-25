@@ -11,7 +11,7 @@
 #include <filesystem>
 #include <set>
 
-void rpkg_function::rebuild_prim_model_in(std::string& input_path, std::string& filter, std::string& output_path)
+void rpkg_function::rebuild_prim_model_in(std::string& input_path, std::string& output_path)
 {
     task_single_status = TASK_EXECUTING;
 
@@ -23,7 +23,7 @@ void rpkg_function::rebuild_prim_model_in(std::string& input_path, std::string& 
 
         LOG("Rebuilding PRIM files in" + input_rpkg_folder_path);
 
-        rpkg_function::rebuild_prim_in(input_path, filter_string, output_path, false);
+        rpkg_function::rebuild_prim_in(input_path, false);
 
         if (task_multiple_status != PRIM_REBUILD_SUCCESSFUL)
         {
@@ -81,65 +81,59 @@ void rpkg_function::rebuild_prim_model_in(std::string& input_path, std::string& 
                 period_count++;
             }
 
-            if (std::filesystem::is_directory(entry.path().string()))
-            {
-                input_folder = entry.path().string();
+            if (!std::filesystem::is_directory(entry.path().string()))
+                continue;
 
-                if (input_folder.substr(input_folder.length() - 1, 1) == "\\")
+            input_folder = entry.path().string();
+
+            if (input_folder.substr(input_folder.length() - 1, 1) == "\\")
+            {
+                input_folder = input_folder.substr(0, input_folder.length() - 1);
+            }
+
+            if (input_folder.length() <= 7 || util::to_upper_case(input_folder.substr(input_folder.length() - 7, 7)) != "REBUILT" || !file::path_exists(input_folder + "\\rpkgfilename.txt"))
+                continue;
+
+            std::ifstream rpkg_file_name_file = std::ifstream(input_folder + "\\rpkgfilename.txt", std::ifstream::binary);
+
+            if (!rpkg_file_name_file.good())
+            {
+                LOG_AND_EXIT("Error: RPKG file name file " + input_folder + "\\rpkgfilename.txt" + " could not be opened.");
+            }
+
+            rpkg_file_name_file.seekg(0, rpkg_file_name_file.end);
+
+            uint32_t rpkg_file_name_file_size = rpkg_file_name_file.tellg();
+
+            rpkg_file_name_file.seekg(0, rpkg_file_name_file.beg);
+
+            char input[1024];
+
+            rpkg_file_name_file.read(input, rpkg_file_name_file_size);
+
+            input[rpkg_file_name_file_size] = 0;
+
+            rpkg_file_name_file.close();
+
+            std::string rpkg_output_file_name_string = std::string(input);
+
+            if (rpkg_output_file_name_string != "")
+            {
+                bool prim_folder_found = false;
+
+                for (auto& rebuilt_folder : rebuilt_folders)
                 {
-                    input_folder = input_folder.substr(0, input_folder.length() - 1);
+                    if (input_folder == rebuilt_folder)
+                    {
+                        prim_folder_found = true;
+                    }
                 }
 
-                if (input_folder.length() > 7)
+                if (!prim_folder_found)
                 {
-                    if (util::to_upper_case(input_folder.substr((input_folder.length() - 7), 7)) == "REBUILT")
-                    {
-                        if (file::path_exists(input_folder + "\\rpkgfilename.txt"))
-                        {
-                            std::ifstream rpkg_file_name_file = std::ifstream(input_folder + "\\rpkgfilename.txt", std::ifstream::binary);
+                    rebuilt_folders.push_back(input_folder);
 
-                            if (!rpkg_file_name_file.good())
-                            {
-                                LOG_AND_EXIT("Error: RPKG file name file " + input_folder + "\\rpkgfilename.txt" + " could not be opened.");
-                            }
-
-                            rpkg_file_name_file.seekg(0, rpkg_file_name_file.end);
-
-                            uint32_t rpkg_file_name_file_size = rpkg_file_name_file.tellg();
-
-                            rpkg_file_name_file.seekg(0, rpkg_file_name_file.beg);
-
-                            char input[1024];
-
-                            rpkg_file_name_file.read(input, rpkg_file_name_file_size);
-
-                            input[rpkg_file_name_file_size] = 0;
-
-                            rpkg_file_name_file.close();
-
-                            std::string rpkg_output_file_name_string = std::string(input);
-
-                            if (rpkg_output_file_name_string != "")
-                            {
-                                bool prim_folder_found = false;
-
-                                for (uint64_t i = 0; i < rebuilt_folders.size(); i++)
-                                {
-                                    if (input_folder == rebuilt_folders.at(i))
-                                    {
-                                        prim_folder_found = true;
-                                    }
-                                }
-
-                                if (!prim_folder_found)
-                                {
-                                    rebuilt_folders.push_back(input_folder);
-
-                                    rpkg_file_names.push_back(rpkg_output_file_name_string);
-                                }
-                            }
-                        }
-                    }
+                    rpkg_file_names.push_back(rpkg_output_file_name_string);
                 }
             }
         }
@@ -168,7 +162,7 @@ void rpkg_function::rebuild_prim_model_in(std::string& input_path, std::string& 
                 return;
             }
 
-            if (((i * (uint64_t)100000) / (uint64_t)rebuilt_folders.size()) % (uint64_t)10 == 0 && i > 0)
+            if (((i * (uint64_t)100000) / rebuilt_folders.size()) % (uint64_t)10 == 0 && i > 0)
             {
                 stringstream_length = console::update_console(message, rebuilt_folders.size(), i, start_time, stringstream_length);
             }

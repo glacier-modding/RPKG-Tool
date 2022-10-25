@@ -1,7 +1,6 @@
 #include "rpkg_function.h"
 #include "file.h"
 #include "global.h"
-#include <iostream>
 #include <fstream>
 
 void rpkg_function::extract_rpkg_meta(uint64_t i, std::string& hash_file_path)
