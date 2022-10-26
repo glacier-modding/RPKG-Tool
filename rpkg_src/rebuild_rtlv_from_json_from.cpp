@@ -4,7 +4,6 @@
 #include "crypto.h"
 #include "util.h"
 #include "thirdparty/json/json.hpp"
-#include <iostream>
 #include <chrono>
 #include <sstream>
 #include <fstream>
@@ -13,7 +12,7 @@
 
 using json = nlohmann::ordered_json;
 
-void rpkg_function::rebuild_rtlv_from_json_from(std::string& input_path, std::string& filter, std::string& output_path)
+void rpkg_function::rebuild_rtlv_from_json_from(std::string& input_path)
 {
     task_single_status = TASK_EXECUTING;
 

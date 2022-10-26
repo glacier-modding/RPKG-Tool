@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <stdint.h>
+#include <cstdint>
 
 class text
 {
@@ -14,14 +14,14 @@ public:
 	text(uint64_t rpkgs_index, uint64_t hash_index);
 
 	void load_hash_depends();
-	bool save_text_to_jpg(std::string png_path);
-	bool save_texd_to_jpg(std::string png_path);
-	void save_text_to_png(std::string png_path);
-	void save_texd_to_png(std::string png_path);
-	void save_text_to_tga(std::string tga_path);
-	void save_texd_to_tga(std::string tga_path);
-	uint32_t calculate_mips_count(uint32_t width, uint32_t height);
-	void generate_tga_meta_files(std::string meta_path);
+	bool save_text_to_jpg(const std::string& png_path);
+	bool save_texd_to_jpg(const std::string& png_path);
+	void save_text_to_png(const std::string& png_path);
+	void save_texd_to_png(const std::string& png_path);
+	void save_text_to_tga(const std::string& tga_path);
+	void save_texd_to_tga(const std::string& tga_path);
+	static uint32_t calculate_mips_count(uint32_t width, uint32_t height);
+	void generate_tga_meta_files(const std::string& meta_path) const;
 
 	std::string text_file_name = "";
 	uint32_t text_rpkg_index = 0;
