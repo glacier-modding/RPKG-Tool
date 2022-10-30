@@ -93,11 +93,6 @@ void console::display_usage_info()
     LOG("    -extract_mati_to_json <path to RPKG file>");
     LOG("        Extracts one or more hash file/resources, specified by -filter, from the input RPKG file");
     LOG("        and converts them to MATI JSON(s).");
-    LOG("    -extract_non_chunk0_hash_depends_from <path to folder containing RPKG files>");
-    LOG("        Extracts all of the recursive hash barring those in chunk0, specified by -filter,");
-    LOG("        of a given hash file/resource.");
-    LOG("        Scans a directory, commonly Hitman's Runtime dir, and imports and");
-    LOG("        scans all available RPKG files for dependency information.");
     LOG("    -extract_non_base_hash_depends_from <path to folder containing RPKG files>");
     LOG("        Extracts all of the recursive hash barring those in chunk0 and chunk1, specified by -filter,");
     LOG("        of a given hash file/resource.");
@@ -320,8 +315,6 @@ void console::display_usage_info()
     LOG("        rpkg-cli.exe -json_to_hash_meta \"C:\\00123456789ABCDE.meta.JSON\"");
     LOG("    Extracts all of the recursive hash depends, specified by -filter, of a given hash file/resource:");
     LOG("        rpkg-cli.exe -filter 00123456789ABCDE -extract_all_hash_depends_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"");
-    LOG("    Extracts all of the recursive hash depends barring those in chunk0, specified by -filter, of a given hash file/resource:");
-    LOG("        rpkg-cli.exe -filter 00123456789ABCDE -extract_non_chunk0_hash_depends_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"");
     LOG("    Extracts all of the recursive hash depends barring those in chunk0/chunk1, specified by -filter, of a given hash file/resource:");
     LOG("        rpkg-cli.exe -filter 00123456789ABCDE -extract_non_base_hash_depends_from \"C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\"");
     LOG("    Extracts all of the recursive PRIM Model(s) (GLB/TGA) hash depends, specified by -filter, of a given hash file/resource:");
