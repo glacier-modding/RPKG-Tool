@@ -6,7 +6,6 @@
       "displayName": "Basic Config",
       "description": "Basic build using Ninja generator",
       "generator": "Ninja",
-      "hidden": true,
       "binaryDir": "${sourceDir}/cmake-build-${presetName}",
       "architecture": {
         "value": "x64",
@@ -21,24 +20,24 @@
       }
     },
     {
-      "name": "Debug",
+      "name": "DebugSettings",
       "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" },
       "hidden": true
     },
     {
-      "name": "Release",
+      "name": "ReleaseSettings",
       "cacheVariables": { "CMAKE_BUILD_TYPE": "RelWithDebInfo" },
       "hidden": true
     },
     {
       "name": "debug",
       "description": "MSVC for x64 (Debug)",
-      "inherits": [ "base", "Debug" ]
+      "inherits": [ "base", "DebugSettings" ]
     },
     {
       "name": "release",
       "description": "MSVC for x64 (Release)",
-      "inherits": [ "base", "Release" ]
+      "inherits": [ "base", "ReleaseSettings" ]
     }
   ]
 }
