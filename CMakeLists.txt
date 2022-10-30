@@ -156,7 +156,7 @@ set(thirdparty
         ${lib-zhmtools}
 )
 
-set(common-src
+set(RPKG_COMMON_SOURCES
         src/borg.cpp
         src/borg.h
         src/compute_ioi_hash.cpp
@@ -279,8 +279,19 @@ set(common-src
         src/util.cpp
 )
 
-add_library(rpkg-lib src/rpkg_dll.cpp src/rpkg_dll.h ${common-src} ${thirdparty})
-add_executable(rpkg-cli src/cli/main.cpp src/cli/command_line.cpp ${common-src} ${thirdparty})
+set(RPKG_LIB_SOURCES
+        src/lib/rpkg_dll.cpp
+        src/lib/rpkg_dll.h
+)
+
+set(RPKG_CLI_SOURCES
+        src/cli/main.cpp
+        src/cli/command_line.cpp
+        src/cli/command_line.h
+)
+
+add_library(rpkg-lib ${RPKG_LIB_SOURCES} ${RPKG_COMMON_SOURCES} ${thirdparty})
+add_executable(rpkg-cli ${RPKG_CLI_SOURCES} ${RPKG_COMMON_SOURCES} ${thirdparty})
 
 target_compile_definitions(rpkg-lib PUBLIC RPKG_DLL)
 target_compile_definitions(rpkg-cli PUBLIC RPKG_CLI)

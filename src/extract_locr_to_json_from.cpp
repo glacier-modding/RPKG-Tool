@@ -6,14 +6,13 @@
 #include "util.h"
 #include "rpkg.h"
 #include "hash.h"
-#include "../thirdparty/lz4/lz4.h"
-#include "../thirdparty/json/json.hpp"
+#include "thirdparty/lz4/lz4.h"
+#include "thirdparty/json/json.hpp"
 #include <iostream>
 #include <set>
 #include <chrono>
 #include <sstream>
 #include <fstream>
-#include <regex>
 #include <filesystem>
 
 using json = nlohmann::ordered_json;

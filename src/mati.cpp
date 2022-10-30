@@ -4,7 +4,7 @@
 #include "crypto.h"
 #include "util.h"
 #include "file.h"
-#include "../thirdparty/lz4/lz4.h"
+#include "thirdparty/lz4/lz4.h"
 #include <iostream>
 #include <unordered_map>
 #include <fstream>
@@ -12,10 +12,7 @@
 #include <filesystem>
 #include <typeinfo>
 
-mati::mati()
-{
-
-}
+mati::mati() = default;
 
 mati::mati(uint64_t rpkgs_index, uint64_t hash_index)
 {

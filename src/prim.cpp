@@ -6,8 +6,8 @@
 #include "console.h"
 #include "util.h"
 #include "borg.h"
-#include "../thirdparty/lz4/lz4.h"
-#include "../thirdparty/lz4/lz4hc.h"
+#include "thirdparty/lz4/lz4.h"
+#include "thirdparty/lz4/lz4hc.h"
 #include <unordered_map>
 #include <fstream>
 

@@ -10,7 +10,6 @@
 #include <unordered_map>
 #include <sstream>
 #include <fstream>
-#include <regex>
 #include <filesystem>
 #include "thirdparty/zhmtools/ResourceLib_HM2016.h"
 #include "thirdparty/zhmtools/ResourceLib_HM2.h"

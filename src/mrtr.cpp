@@ -4,7 +4,7 @@
 #include "crypto.h"
 #include "util.h"
 #include "file.h"
-#include "../thirdparty/lz4/lz4.h"
+#include "thirdparty/lz4/lz4.h"
 #include "DirectXMath.h"
 #include <iostream>
 #include <unordered_map>

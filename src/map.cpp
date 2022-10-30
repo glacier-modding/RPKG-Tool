@@ -15,15 +15,15 @@
 #include <regex>
 #include <sstream>
 #include <algorithm>
-#include "../thirdparty/rapidjson/document.h"
-#include "../thirdparty/rapidjson/prettywriter.h"
-#include "../thirdparty/rapidjson/writer.h"
-#include "../thirdparty/rapidjson/pointer.h"
-#include "../thirdparty/rapidjson/stringbuffer.h"
-#include "../thirdparty/directxmath/DirectXMath.h"
-#include "../thirdparty/directxmath/DirectXCollision.h"
-#include "../thirdparty/directxmath/DirectXColors.h"
-#include "../thirdparty/directxmath/DirectXPackedVector.h"
+#include "thirdparty/rapidjson/document.h"
+#include "thirdparty/rapidjson/prettywriter.h"
+#include "thirdparty/rapidjson/writer.h"
+#include "thirdparty/rapidjson/pointer.h"
+#include "thirdparty/rapidjson/stringbuffer.h"
+#include "thirdparty/directxmath/DirectXMath.h"
+#include "thirdparty/directxmath/DirectXCollision.h"
+#include "thirdparty/directxmath/DirectXColors.h"
+#include "thirdparty/directxmath/DirectXPackedVector.h"
 
 map::map() = default;
 

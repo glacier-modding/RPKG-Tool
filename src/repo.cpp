@@ -1,19 +1,15 @@
 #include "repo.h"
-#include "rpkg_function.h"
 #include "global.h"
 #include "crypto.h"
 #include "util.h"
-#include "../thirdparty/lz4/lz4.h"
+#include "thirdparty/lz4/lz4.h"
 #include <unordered_map>
 #include <fstream>
 #include <sstream>
 #include <iomanip>
 #include <iostream>
 
-repo::repo()
-{
-    
-}
+repo::repo() = default;
 
 repo::repo(uint64_t rpkgs_index, uint64_t hash_index)
 {

@@ -4,9 +4,9 @@
 #include "crypto.h"
 #include "util.h"
 #include "texd.h"
-#include "../thirdparty/lz4/lz4.h"
-#include "../thirdparty/directxtex/DirectXTex.h"
-#include "../thirdparty/directxtex/DDS.h"
+#include "thirdparty/lz4/lz4.h"
+#include "thirdparty/directxtex/DirectXTex.h"
+#include "thirdparty/directxtex/DDS.h"
 #include <unordered_map>
 #include <fstream>
 #include <locale>

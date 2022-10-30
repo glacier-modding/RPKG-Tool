@@ -1,17 +1,13 @@
 #include "ores.h"
-#include "rpkg_function.h"
 #include "global.h"
 #include "crypto.h"
 #include "util.h"
-#include "../thirdparty/lz4/lz4.h"
+#include "thirdparty/lz4/lz4.h"
 #include <unordered_map>
 #include <fstream>
 #include <iomanip>
 
-ores::ores()
-{
-
-}
+ores::ores() = default;
 
 ores::ores(uint64_t rpkgs_index, uint64_t hash_index)
 {

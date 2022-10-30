@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <cstdint>
 #include "global.h"
-#include "../thirdparty/json/json.hpp"
+#include "thirdparty/json/json.hpp"
 
 struct mrtr_entry
 {

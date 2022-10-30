@@ -3,11 +3,10 @@
 #include "global.h"
 #include "console.h"
 #include "util.h"
-#include "../thirdparty/directxtex/DirectXTex.h"
+#include "thirdparty/directxtex/DirectXTex.h"
 #include <iostream>
 #include <chrono>
 #include <sstream>
-#include <regex>
 #include <filesystem>
 #include <set>
 

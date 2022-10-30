@@ -1,7 +1,7 @@
 #pragma once
 #include "texd.h"
-#include "../thirdparty/directxtex/DirectXTex.h"
-#include "../thirdparty/directxtex/DDS.h"
+#include "thirdparty/directxtex/DirectXTex.h"
+#include "thirdparty/directxtex/DDS.h"
 #include <string>
 #include <vector>
 #include <unordered_map>

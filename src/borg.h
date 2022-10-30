@@ -1,6 +1,6 @@
 #pragma once
 #include "global.h"
-#include "../thirdparty/directxmath/DirectXMath.h"
+#include "thirdparty/directxmath/DirectXMath.h"
 #include <string>
 #include <vector>
 #include <cstdint>

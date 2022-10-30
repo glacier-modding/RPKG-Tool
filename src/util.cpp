@@ -1,9 +1,9 @@
 #include "util.h"
 #include "global.h"
 #include "generic_function.h"
-#include "../thirdparty/lz4/lz4.h"
-#include "../thirdparty/lz4/lz4hc.h"
-#include "../thirdparty/directxtex/DirectXTex.h"
+#include "thirdparty/lz4/lz4.h"
+#include "thirdparty/lz4/lz4hc.h"
+#include "thirdparty/directxtex/DirectXTex.h"
 #include <string>
 #include <sstream>
 #include <iomanip>
