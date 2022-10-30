@@ -385,9 +385,4 @@ FodyWeavers.xsd
 *.msm
 *.msp
 
-# JetBrains Rider
-.idea/
-*.sln.iml
-
-# Custom patterns
-/rpkg-gui/Costura64/
+.idea/workspace.xml
