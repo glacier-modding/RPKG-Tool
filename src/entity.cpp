@@ -13,10 +13,7 @@
 #pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM2.lib")
 #pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM3.lib")
 
-entity::entity()
-{
-
-}
+entity::entity() = default;
 
 entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
 {

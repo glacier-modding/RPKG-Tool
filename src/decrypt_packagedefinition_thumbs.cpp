@@ -77,7 +77,7 @@ void generic_function::decrypt_packagedefinition_thumbs(std::string &input_path,
     uint32_t crc = crc32::update(table, 0, input_data.data(), last_zero_position);
 
     uint32_t old_crc = 0;
-    memcpy(&old_crc, &checksum_raw.data()[0], sizeof(old_crc));
+    memcpy(&old_crc, &checksum_raw[0], sizeof(old_crc));
 
     std::string output_file_base_name = file::output_path_append(file::get_base_file_name(input_path), output_path);
 

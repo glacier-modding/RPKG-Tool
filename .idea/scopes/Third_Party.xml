@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="Third Party" pattern="file[rpkg]:thirdparty//*" />
+</component>

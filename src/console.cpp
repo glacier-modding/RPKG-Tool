@@ -4,13 +4,13 @@
 #include <iomanip>
 #include <sstream>
 
-//#ifdef _WIN64
-#include <io.h>
-//#else
-//#include <unistd.h>
-//#define _isatty isatty
-//#define _fileno fileno
-//#endif
+#ifdef _WIN64
+    #include <io.h>
+#else
+    #include <unistd.h>
+    #define _isatty isatty
+    #define _fileno fileno
+#endif
 
 int console::update_console(const std::string& message, const uint64_t indexMax, const uint64_t index, const std::chrono::time_point<std::chrono::high_resolution_clock> start_time, int stringstream_length)
 {
@@ -424,6 +424,7 @@ void console::display_licenses() {
     LOG("");
     LOG("");
     LOG("");
+
     LOG("LICENSE for ww2ogg:");
     LOG("");
     LOG("Copyright (c) 2002, Xiph.org Foundation");
@@ -458,32 +459,7 @@ void console::display_licenses() {
     LOG("");
     LOG("");
     LOG("");
-    LOG("LICENSE for Costura Fody:");
-    LOG("");
-    LOG("The MIT License");
-    LOG("");
-    LOG("Copyright (c) 2012 Simon Cropp and contributors");
-    LOG("");
-    LOG("Permission is hereby granted, free of charge, to any person obtaining a copy");
-    LOG("of this software and associated documentation files (the \"Software\"), to deal");
-    LOG("in the Software without restriction, including without limitation the rights");
-    LOG("to use, copy, modify, merge, publish, distribute, sublicense, and/or sell");
-    LOG("copies of the Software, and to permit persons to whom the Software is");
-    LOG("furnished to do so, subject to the following conditions:");
-    LOG("");
-    LOG("The above copyright notice and this permission notice shall be included in");
-    LOG("all copies or substantial portions of the Software.");
-    LOG("");
-    LOG("THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR");
-    LOG("IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,");
-    LOG("FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE");
-    LOG("AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER");
-    LOG("LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,");
-    LOG("OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN");
-    LOG("THE SOFTWARE.");
-    LOG("");
-    LOG("");
-    LOG("");
+
     LOG("LICENSE for json:");
     LOG("");
     LOG("MIT License ");
@@ -510,6 +486,7 @@ void console::display_licenses() {
     LOG("");
     LOG("");
     LOG("");
+
     LOG("LICENSE for lz4:");
     LOG("");
     LOG("LZ4 Library");
@@ -539,32 +516,7 @@ void console::display_licenses() {
     LOG("");
     LOG("");
     LOG("");
-    LOG("LICENSE for MahApps.Metro:");
-    LOG("");
-    LOG("MIT License");
-    LOG("");
-    LOG("Copyright (c) .NET Foundation and Contributors. All rights reserved.");
-    LOG("");
-    LOG("Permission is hereby granted, free of charge, to any person obtaining a copy");
-    LOG("of this software and associated documentation files (the \"Software\"), to deal");
-    LOG("in the Software without restriction, including without limitation the rights");
-    LOG("to use, copy, modify, merge, publish, distribute, sublicense, and/or sell");
-    LOG("copies of the Software, and to permit persons to whom the Software is");
-    LOG("furnished to do so, subject to the following conditions:");
-    LOG("");
-    LOG("The above copyright notice and this permission notice shall be included in all");
-    LOG("copies or substantial portions of the Software.");
-    LOG("");
-    LOG("THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR");
-    LOG("IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,");
-    LOG("FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE");
-    LOG("AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER");
-    LOG("LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,");
-    LOG("OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE");
-    LOG("SOFTWARE.");
-    LOG("");
-    LOG("");
-    LOG("");
+
     LOG("LICENSE for ogg:");
     LOG("");
     LOG("Copyright (c) 2002, Xiph.org Foundation");
@@ -598,41 +550,7 @@ void console::display_licenses() {
     LOG("");
     LOG("");
     LOG("");
-    LOG("LICENSE for Ookii Dialogs:");
-    LOG("");
-    LOG("BSD 3-Clause License");
-    LOG("");
-    LOG("Copyright (c) C. Augusto Proiete 2018-2021");
-    LOG("Copyright (c) Sven Groot         2009-2018");
-    LOG("All rights reserved.");
-    LOG("");
-    LOG("Redistribution and use in source and binary forms, with or without");
-    LOG("modification, are permitted provided that the following conditions are met:");
-    LOG("");
-    LOG("1. Redistributions of source code must retain the above copyright notice, this");
-    LOG("   list of conditions and the following disclaimer.");
-    LOG("");
-    LOG("2. Redistributions in binary form must reproduce the above copyright notice,");
-    LOG("   this list of conditions and the following disclaimer in the documentation");
-    LOG("   and/or other materials provided with the distribution.");
-    LOG("");
-    LOG("3. Neither the name of the copyright holder nor the names of its");
-    LOG("   contributors may be used to endorse or promote products derived from");
-    LOG("   this software without specific prior written permission.");
-    LOG("");
-    LOG("THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"");
-    LOG("AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE");
-    LOG("IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE");
-    LOG("DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE");
-    LOG("FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL");
-    LOG("DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR");
-    LOG("SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER");
-    LOG("CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,");
-    LOG("OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE");
-    LOG("OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.");
-    LOG("");
-    LOG("");
-    LOG("");
+
     LOG("LICENSE for revorb:");
     LOG("");
     LOG("REVORB - Recomputes page granule positions in Ogg Vorbis files.");
@@ -654,6 +572,7 @@ void console::display_licenses() {
     LOG("");
     LOG("");
     LOG("");
+
     LOG("LICENSE for vorbis:");
     LOG("");
     LOG("Copyright (c) 2002-2020 Xiph.org Foundation");
@@ -687,6 +606,7 @@ void console::display_licenses() {
     LOG("");
     LOG("");
     LOG("");
+
     LOG("LICENSE for SharpCompress:");
     LOG("");
     LOG("The MIT License (MIT)");
@@ -713,6 +633,7 @@ void console::display_licenses() {
     LOG("");
     LOG("");
     LOG("");
+
     LOG("LICENSE for NAudio:");
     LOG("");
     LOG("Copyright 2020 Mark Heath");
@@ -737,6 +658,7 @@ void console::display_licenses() {
     LOG("");
     LOG("");
     LOG("");
+
     LOG("LICENSE for Helix Toolkit:");
     LOG("");
     LOG("The MIT License (MIT)");
@@ -764,6 +686,7 @@ void console::display_licenses() {
     LOG("");
     LOG("");
     LOG("");
+
     LOG("LICENSE for DirectXTex:");
     LOG("");
     LOG("The MIT License (MIT)");
@@ -789,6 +712,7 @@ void console::display_licenses() {
     LOG("");
     LOG("");
     LOG("");
+
     LOG("LICENSE for DirectXMath:");
     LOG("");
     LOG("The MIT License (MIT)");
@@ -814,6 +738,7 @@ void console::display_licenses() {
     LOG("");
     LOG("");
     LOG("");
+
     LOG("LICENSE for glTF-SDK:");
     LOG("");
     LOG("MIT License");
@@ -840,6 +765,7 @@ void console::display_licenses() {
     LOG("");
     LOG("");
     LOG("");
+
     LOG("LICENSE for mikktspace:");
     LOG("");
     LOG("Copyright (C) 2011 by Morten S. Mikkelsen");
@@ -862,6 +788,7 @@ void console::display_licenses() {
     LOG("");
     LOG("");
     LOG("");
+
     LOG("LICENSE for ResourceTool (DLL):");
     LOG("");
     LOG("                   GNU LESSER GENERAL PUBLIC LICENSE");
@@ -1029,55 +956,4 @@ void console::display_licenses() {
     LOG("apply, that proxy's public statement of acceptance of any version is");
     LOG("permanent authorization for you to choose that version for the");
     LOG("Library.");
-    LOG("");
-    LOG("");
-    LOG("");
-    LOG("LICENSE FOR Silk icon set 1.3");
-    LOG("");
-    LOG("_________________________________________");
-    LOG("Mark James");
-    LOG("http://www.famfamfam.com/lab/icons/silk/");
-    LOG("_________________________________________");
-    LOG("");
-    LOG("This work is licensed under a");
-    LOG("Creative Commons Attribution 2.5 License.");
-    LOG("[http://creativecommons.org/licenses/by/2.5/ ]");
-    LOG("");
-    LOG("This means you may use it for any purpose,");
-    LOG("and make any changes you like.");
-    LOG("All I ask is that you include a link back");
-    LOG("to this page in your credits.");
-    LOG("");
-    LOG("Are you using this icon set ? Send me an email");
-    LOG("(including a link or picture if available) to");
-    LOG("mjames@gmail.com");
-    LOG("");
-    LOG("Any other questions about this icon set please");
-    LOG("contact mjames@gmail.com");
-    LOG("");
-    LOG("");
-    LOG("");
-    LOG("LICENSE for AvalonEdit:");
-    LOG("");
-    LOG("MIT License");
-    LOG("");
-    LOG("Copyright (c) AvalonEdit Contributors");
-    LOG("");
-    LOG("Permission is hereby granted, free of charge, to any person obtaining a copy");
-    LOG("of this software and associated documentation files (the \"Software\"), to deal");
-    LOG("in the Software without restriction, including without limitation the rights");
-    LOG("to use, copy, modify, merge, publish, distribute, sublicense, and/or sell");
-    LOG("copies of the Software, and to permit persons to whom the Software is");
-    LOG("furnished to do so, subject to the following conditions:");
-    LOG("");
-    LOG("The above copyright notice and this permission notice shall be included in all");
-    LOG("copies or substantial portions of the Software.");
-    LOG("");
-    LOG("THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR");
-    LOG("IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,");
-    LOG("FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE");
-    LOG("AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER");
-    LOG("LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,");
-    LOG("OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE");
-    LOG("SOFTWARE.");
 }

@@ -1,7 +1,8 @@
 // Retrieved on 2021-10-30 from https://gist.github.com/timepp/1f678e200d9e0f2a043a9ec6b3690635
+// Modified for use in RPKG
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 struct crc32
 {

@@ -1,17 +1,17 @@
 cmake_minimum_required(VERSION 3.5)
-project (GLTFSDK)
+project(GLTFSDK)
 
-file(GLOB source_files
+file(GLOB GLTFSDK_SOURCE_FILES
     "${CMAKE_CURRENT_LIST_DIR}/Source/*.cpp"
 )
-file(GLOB gen_header_files
+file(GLOB GLTFSDK_GEN_HEADER_FILES
     "${CMAKE_CURRENT_LIST_DIR}/Inc/*.h"
 )
-file(GLOB header_files
+file(GLOB GLTFSDK_HEADER_FILES
     "${CMAKE_CURRENT_LIST_DIR}/Inc/GLTFSDK/*.h"
 )
 
-add_library(GLTFSDK ${source_files} ${gen_header_files} ${header_files})
+add_library(GLTFSDK ${GLTFSDK_SOURCE_FILES} ${GLTFSDK_GEN_HEADER_FILES} ${GLTFSDK_HEADER_FILES})
 
 if (MSVC)
     # Generate PDB files in all configurations, not just Debug (/Zi)

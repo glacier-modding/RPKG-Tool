@@ -6,7 +6,6 @@
 #include "util.h"
 #include <unordered_map>
 #include <fstream>
-#include <regex>
 #include <filesystem>
 #include "thirdparty/json/json.hpp"
 
@@ -41,7 +40,7 @@ void dev_function::dev_dlge_names(std::string& input_path, const std::string& ou
                 if (rpkg_index == UINT32_MAX)
                     continue;
 
-                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(rpkgs.at(i).hash.at(hash_index).hash_value);
+                auto it = rpkgs.at(rpkg_index).hash_map.find(rpkgs.at(i).hash.at(hash_index).hash_value);
 
                 if (it != rpkgs.at(rpkg_index).hash_map.end())
                 {

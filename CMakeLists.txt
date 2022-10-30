@@ -285,8 +285,10 @@ add_executable(rpkg-cli src/cli/main.cpp src/cli/command_line.cpp ${common-src} 
 target_compile_definitions(rpkg-lib PUBLIC RPKG_DLL)
 target_compile_definitions(rpkg-cli PUBLIC RPKG_CLI)
 
-target_compile_options(rpkg-lib PUBLIC /bigobj)
-target_compile_options(rpkg-cli PUBLIC /bigobj)
+if (MSVC)
+    target_compile_options(rpkg-lib PUBLIC "/bigobj")
+    target_compile_options(rpkg-cli PUBLIC "/bigobj")
+endif()
 
 target_link_directories(rpkg-cli PUBLIC ${PROJECT_SOURCE_DIR}/thirdparty/zhmtools)
 target_link_libraries(rpkg-cli PUBLIC GLTFSDK DirectXTex ResourceLib_HM2 ResourceLib_HM2016 ResourceLib_HM3)

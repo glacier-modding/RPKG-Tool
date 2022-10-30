@@ -8,7 +8,6 @@
 #include <unordered_map>
 #include <fstream>
 #include <regex>
-#include <filesystem>
 
 void dev_function::dev_extract_wwem_strings(std::string& output_path)
 {
@@ -68,7 +67,7 @@ void dev_function::dev_extract_wwem_strings(std::string& output_path)
                         if (hash_resource_type != "WWEM")
                             continue;
 
-                        std::unordered_map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(x).hash_map.find(rpkgs.at(i).hash.at(hash_index).hash_reference_data.hash_reference.at(k + 1));
+                        auto it3 = rpkgs.at(x).hash_map.find(rpkgs.at(i).hash.at(hash_index).hash_reference_data.hash_reference.at(k + 1));
 
                         if (it3 == rpkgs.at(x).hash_map.end())
                             continue;
@@ -167,7 +166,7 @@ void dev_function::dev_extract_wwem_strings(std::string& output_path)
                                         break;
                                     }
 
-                                    if (fxas_data->data()[position_start] < 0x20 || fxas_data->data()[position_start] > 0x7E)
+                                    if ((*fxas_data)[position_start] < 0x20 || (*fxas_data)[position_start] > 0x7E)
                                     {
                                         done_searching_start = true;
                                         break;
@@ -345,7 +344,7 @@ void dev_function::dev_extract_wwem_strings(std::string& output_path)
                                         break;
                                     }
 
-                                    if (fxas_data->data()[position_start] < 0x20 || fxas_data->data()[position_start] > 0x7E)
+                                    if ((*fxas_data)[position_start] < 0x20 || (*fxas_data)[position_start] > 0x7E)
                                     {
                                         done_searching_start = true;
                                         break;
@@ -493,7 +492,7 @@ void dev_function::dev_extract_wwem_strings(std::string& output_path)
                 {
                     for (int k = 0; k < adtllabl.length(); k++)
                     {
-                        if (wwem_data->data()[position + k] != adtllabl[k])
+                        if ((*wwem_data)[position + k] != adtllabl[k])
                         {
                             break;
                         }
@@ -521,14 +520,14 @@ void dev_function::dev_extract_wwem_strings(std::string& output_path)
                 {
                     position += static_cast<uint32_t>(adtllabl.length());
 
-                    std::memcpy(&wwem_file_name_length, (&wwem_data->data()[0] + position), sizeof(bytes4));
+                    std::memcpy(&wwem_file_name_length, (&(*wwem_data)[0] + position), sizeof(bytes4));
                     position += 0x8;
 
                     wwem_file_name_length -= 0x4;
 
                     std::vector<char> wwem_file_name;
 
-                    std::memcpy(&input, (&wwem_data->data()[0] + position), wwem_file_name_length);
+                    std::memcpy(&input, (&(*wwem_data)[0] + position), wwem_file_name_length);
                     for (uint64_t k = 0; k < wwem_file_name_length; k++)
                     {
                         if (input[k] != 0)
@@ -628,7 +627,6 @@ void dev_function::dev_extract_wwem_strings(std::string& output_path)
 
                         if (it != fxas_to_wwem_ioi_path_map.end())
                         {
-
                             total_wwem_fxas_linked++;
 
                             std::size_t pos = fxas_wwem_ioi_path.at(it->second).find_last_of("\\/");
@@ -772,7 +770,7 @@ void dev_function::dev_extract_wwem_strings(std::string& output_path)
                                     char input[1024];
                                     uint32_t bytes4 = 0;
 
-                                    std::memcpy(&wwev_file_name_length, &wwev_data->data()[position], sizeof(bytes4));
+                                    std::memcpy(&wwev_file_name_length, &(*wwev_data)[position], sizeof(bytes4));
 
                                     std::vector<char> wwev_meta_data;
 
@@ -785,7 +783,7 @@ void dev_function::dev_extract_wwem_strings(std::string& output_path)
                                         wwev_meta_data.push_back(k);
                                     }
 
-                                    std::memcpy(&input, &wwev_data->data()[position], (wwev_file_name_length + static_cast<uint64_t>(0xC)));
+                                    std::memcpy(&input, &(*wwev_data)[position], (wwev_file_name_length + static_cast<uint64_t>(0xC)));
                                     for (uint64_t k = 0; k < (wwev_file_name_length + static_cast<uint64_t>(0xC)); k++)
                                     {
                                         wwev_meta_data.push_back(input[k]);
@@ -796,7 +794,7 @@ void dev_function::dev_extract_wwem_strings(std::string& output_path)
                                     std::vector<char> wwev_file_name(static_cast<uint64_t>(wwev_file_name_length) + static_cast<uint64_t>(1), 0);
                                     wwev_file_name[wwev_file_name_length] = 0;
 
-                                    std::memcpy(wwev_file_name.data(), &wwev_data->data()[position], wwev_file_name_length);
+                                    std::memcpy(wwev_file_name.data(), &(*wwev_data)[position], wwev_file_name_length);
 
                                     wwem_string = std::string(wwev_file_name.data());
 
