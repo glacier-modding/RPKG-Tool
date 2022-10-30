@@ -41,7 +41,7 @@ jobs:
 
     - name: Build
       run: |
-        cmake --build build
+        cmake --build cmake-build-release
 
 #    - name: Collect artifacts
 #      run: |
