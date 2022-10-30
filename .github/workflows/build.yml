@@ -18,7 +18,7 @@ jobs:
 
     strategy:
       matrix:
-        target: [rpkg-cli, rpkg-dll]
+        target: [rpkg-cli, rpkg-lib]
 
     steps:    
     - name: Checkout
