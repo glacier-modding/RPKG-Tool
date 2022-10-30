@@ -151,6 +151,10 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     {
         rpkg_function::extract_non_base_hash_depends_from(input_path, filter, output_path, false);
     }
+    else if (command == "-extract_non_chunk0_hash_depends_from")
+    {
+        rpkg_function::extract_non_chunk0_hash_depends_from(input_path, filter, output_path, false);
+    }
     else if (command == "-extract_all_hash_depends_prim_models_from")
     {
         rpkg_function::extract_all_hash_depends_from(input_path, filter, output_path, true);
