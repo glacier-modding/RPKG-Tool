@@ -45,7 +45,6 @@ public:
 	static void edit_patch_deletion_list(std::string& input_path, std::string& filter, std::string& search, std::string& search_type, std::string& output_path);
 	static void extract_all_hash_depends_from(std::string& input_path, std::string& filter, std::string& output_path, bool extract_prim_models);
 	static void extract_non_base_hash_depends_from(std::string& input_path, std::string& filter, std::string& output_path, bool extract_prim_models);
-	static void extract_non_chunk0_hash_depends_from(std::string& input_path, std::string& filter, std::string& output_path, bool extract_prim_models);
 	static void extract_all_prim_model_of_temp_from(std::string& input_path, const std::string& filter, std::string& output_path);
 	static void extract_all_prim_model_from(std::string& input_path, std::string& filter, std::string& output_path);
 	static void rebuild_prim_model_in(std::string& input_path, std::string& output_path);
