@@ -27,9 +27,9 @@ jobs:
     - name: Run CMake
       uses: lukka/run-cmake@v10
       with:
-        configurePreset: "ninja"
-        buildPreset: "ninja"
-      
+        configurePreset: "base"
+        buildPreset: "release"
+
 #    - name: Collect artifacts
 #      run: |
 #        cd _build
