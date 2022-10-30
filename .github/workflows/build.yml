@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - main
+      - rewrite
     tags:
       - v*
   pull_request:
     types: [ opened, synchronize, reopened ]
-
   workflow_dispatch:
 
 jobs:
@@ -20,59 +20,44 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1.0.2
+    - name: Get latest CMake and ninja
+      # Using 'latest' branch, the most recent CMake and ninja are installed.
+      uses: lukka/get-cmake@latest
 
-    - name: Restore NuGet packages
-      run: nuget restore rpkg.sln
-
-    - name: Build
-      run: |
-        msbuild /m /p:Configuration=Release /p:Platform=x64 rpkg.sln
+    - name: Run CMake
+      uses: lukka/run-cmake@v10
+      with:
+        configurePreset: "ninja"
+        buildPreset: "ninja"
       
-    - name: Collect artifacts
-      run: |
-        cd _build
-        mkdir _rpkg
-        Copy-Item Release/rpkg.exe -Destination _rpkg/
-        Copy-Item Release/rpkg-cli.exe -Destination _rpkg/
-        
-    - name: Get the latest release of ResourceLib
-      uses: robinraju/release-downloader@v1
-      with:
-        repository: "OrfeasZ/ZHMTools"
-        latest: true
-        fileName: "ResourceLib-win-x64.zip"
-        out-file-path: _build
-        
-    - name: Get the latest hash list
-      run: |
-        Invoke-WebRequest -Uri "https://hitmandb.glaciermodding.org/latest-hashes.7z" -OutFile "_build\latest-hashes.7z"
-        
-    - name: Prepare artifacts
-      run: |
-        cd _build
-        7z e latest-hashes.7z -o_rpkg
-        7z e ResourceLib-win-x64.zip -o_rpkg -i!"ResourceLib_*.dll"
-        git clone https://github.com/glacier-modding/RPKG-Tool _rpkg-src
-        
-    - name: Upload build artifact - RPKG
-      uses: actions/upload-artifact@v2
-      with:
-        name: "rpkg"
-        path: |
-          _build/_rpkg/*
-          
-    - name: Upload build artifact - RPKG-src
-      uses: actions/upload-artifact@v2
-      with:
-        name: "rpkg-src"
-        path: |
-          _build/_rpkg-src/**/*
-          !_build/_rpkg-src/.git/**/*
-          !_build/_rpkg-src/.github/**/*
-          !_build/_rpkg-src/.gitignore
-  
+#    - name: Collect artifacts
+#      run: |
+#        cd _build
+#        mkdir _rpkg
+#        Copy-Item Release/rpkg.exe -Destination _rpkg/
+#        Copy-Item Release/rpkg-cli.exe -Destination _rpkg/
+
+#    - name: Get the latest release of ResourceLib
+#      uses: robinraju/release-downloader@v1
+#      with:
+#        repository: "OrfeasZ/ZHMTools"
+#        latest: true
+#        fileName: "ResourceLib-win-x64.zip"
+#        out-file-path: _build
+
+#    - name: Prepare artifacts
+#      run: |
+#        cd _build
+#        7z e latest-hashes.7z -o_rpkg
+#        7z e ResourceLib-win-x64.zip -o_rpkg -i!"ResourceLib_*.dll"
+#
+#    - name: Upload build artifact - RPKG
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: "rpkg"
+#        path: |
+#          _build/_rpkg/*
+
   create_release:
     name: Create release
     needs: [build_windows]
@@ -106,7 +91,7 @@ jobs:
 
     strategy:
       matrix:
-        artifact: [ "rpkg", "rpkg-src" ]
+        artifact: [ "rpkg" ]
     
     steps:
     - name: Get version
