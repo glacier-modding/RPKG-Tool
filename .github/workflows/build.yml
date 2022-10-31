@@ -77,7 +77,7 @@ jobs:
       with:
         name: ${{ matrix.target }}
         path: |
-          cmake-build-release/*.{exe,dll,pdb,manifest,lib,exp}
+          cmake-build-release/*.{exe,dll,pdb,manifest,lib,exp,txt}
 
   create_release:
     name: Create release
