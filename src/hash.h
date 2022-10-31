@@ -24,6 +24,13 @@ struct hash_reference_variables
     std::vector<uint64_t> hash_reference;
 };
 
+enum HashExtractionStrategy {
+    ALL,
+    ALL_NON_BASE,
+    ALL_NON_BOOT,
+    PRIMS_ONLY,
+};
+
 class hash
 {
 public:

@@ -145,15 +145,19 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-extract_all_hash_depends_from")
     {
-        rpkg_function::extract_all_hash_depends_from(input_path, filter, output_path, false);
+        rpkg_function::extract_all_hash_depends_from(input_path, filter, output_path, HashExtractionStrategy::ALL);
     }
     else if (command == "-extract_non_base_hash_depends_from")
     {
-        rpkg_function::extract_non_base_hash_depends_from(input_path, filter, output_path, false);
+        rpkg_function::extract_all_hash_depends_from(input_path, filter, output_path, HashExtractionStrategy::ALL_NON_BASE);
+    }
+    else if (command == "-extract_non_boot_hash_depends_from")
+    {
+        rpkg_function::extract_all_hash_depends_from(input_path, filter, output_path, HashExtractionStrategy::ALL_NON_BOOT);
     }
     else if (command == "-extract_all_hash_depends_prim_models_from")
     {
-        rpkg_function::extract_all_hash_depends_from(input_path, filter, output_path, true);
+        rpkg_function::extract_all_hash_depends_from(input_path, filter, output_path, HashExtractionStrategy::PRIMS_ONLY);
     }
     else if (command == "-extract_direct_hash_depends_from")
     {
@@ -421,6 +425,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-mrtr_to_json",
                                                     "-extract_all_hash_depends_from",
                                                     "-extract_non_base_hash_depends_from",
+                                                    "-extract_non_boot_hash_depends_from"
                                                     "-extract_all_hash_depends_prim_models_from",
                                                     "-extract_direct_hash_depends_from",
                                                     "-extract_direct_hash_depends_prim_models_from",
@@ -441,63 +446,63 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
 
     int command_count = 0;
 
-    for (int i = 0; i < commands.size(); i++)
+    for (auto& i : commands)
     {
-        if (std::find(commands_with_paths.begin(), commands_with_paths.end(), commands.at(i).at(0)) != commands_with_paths.end())
+        if (std::find(commands_with_paths.begin(), commands_with_paths.end(), i.at(0)) != commands_with_paths.end())
         {
-            command = commands.at(i).at(0);
-            input_path = commands.at(i).at(1);
+            command = i.at(0);
+            input_path = i.at(1);
             command_count++;
         }
-        else if (std::find(commands_without_paths.begin(), commands_without_paths.end(), commands.at(i).at(0)) != commands_without_paths.end())
+        else if (std::find(commands_without_paths.begin(), commands_without_paths.end(), i.at(0)) != commands_without_paths.end())
         {
-            command = commands.at(i).at(0);
-            filter = commands.at(i).at(1);
+            command = i.at(0);
+            filter = i.at(1);
             command_count++;
         }
-        else if (util::to_lower_case(commands.at(i).at(0)) == "-search")
+        else if (util::to_lower_case(i.at(0)) == "-search")
         {
             search_type = "text";
-            search = commands.at(i).at(1);
+            search = i.at(1);
         }
-        else if (util::to_lower_case(commands.at(i).at(0)) == "-text_search")
+        else if (util::to_lower_case(i.at(0)) == "-text_search")
         {
             search_type = "text";
-            search = commands.at(i).at(1);
+            search = i.at(1);
         }
-        else if (util::to_lower_case(commands.at(i).at(0)) == "-hex_search")
+        else if (util::to_lower_case(i.at(0)) == "-hex_search")
         {
             search_type = "hex";
-            search = commands.at(i).at(1);
+            search = i.at(1);
         }
-        else if (util::to_lower_case(commands.at(i).at(0)) == "-regex_search")
+        else if (util::to_lower_case(i.at(0)) == "-regex_search")
         {
             search_type = "regex";
-            search = commands.at(i).at(1);
+            search = i.at(1);
         }
-        else if (util::to_lower_case(commands.at(i).at(0)) == "-filter")
+        else if (util::to_lower_case(i.at(0)) == "-filter")
         {
-            filter = commands.at(i).at(1);
+            filter = i.at(1);
         }
-        else if (util::to_lower_case(commands.at(i).at(0)) == "-map_path")
+        else if (util::to_lower_case(i.at(0)) == "-map_path")
         {
-            filter = commands.at(i).at(1);
+            filter = i.at(1);
         }
-        else if (util::to_lower_case(commands.at(i).at(0)) == "-map_filters")
+        else if (util::to_lower_case(i.at(0)) == "-map_filters")
         {
-            search = commands.at(i).at(1);
+            search = i.at(1);
         }
-        else if (util::to_lower_case(commands.at(i).at(0)) == "-qn_format")
+        else if (util::to_lower_case(i.at(0)) == "-qn_format")
         {
-            search = commands.at(i).at(1);
+            search = i.at(1);
         }
-        else if (util::to_lower_case(commands.at(i).at(0)) == "-version")
+        else if (util::to_lower_case(i.at(0)) == "-version")
         {
-            search = commands.at(i).at(1);
+            search = i.at(1);
         }
-        else if (util::to_lower_case(commands.at(i).at(0)) == "-output_path")
+        else if (util::to_lower_case(i.at(0)) == "-output_path")
         {
-            output_path = commands.at(i).at(1);
+            output_path = i.at(1);
         }
         else
         {
