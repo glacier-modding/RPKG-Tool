@@ -63,14 +63,14 @@ jobs:
         fileName: "ResourceLib-win-x64.zip"
         out-file-path: cmake-build-release
 
+    - name: Fetch hash list
+      run: |
+        Invoke-WebRequest -Uri "https://hitmandb.glaciermodding.org/latest-hashes.7z" -OutFile "cmake-build-release\latest-hashes.7z"
+
     - name: Prepare artifacts
       run: |
         cd cmake-build-release
         7z e ResourceLib-win-x64.zip -o . -i!"ResourceLib_*.dll"
-
-    - name: Fetch hash list
-      run: |
-        Invoke-WebRequest -Uri "https://hitmandb.glaciermodding.org/latest-hashes.7z" -OutFile "cmake-build-release\latest-hashes.7z"
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v2

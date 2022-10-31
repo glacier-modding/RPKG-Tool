@@ -35,6 +35,4 @@ public:
     std::vector<DirectX::XMMATRIX> bones_bind_matrix;
     std::vector<DirectX::XMMATRIX> bones_local_transforms;
     std::vector<float> bones_inverse_bind_matrices;
-
-    void bs_compiler_hack(uint32_t bytes4);
 };
