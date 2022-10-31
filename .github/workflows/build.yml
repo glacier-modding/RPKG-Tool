@@ -28,6 +28,12 @@ jobs:
       # Using 'latest' branch, the most recent CMake and ninja are installed.
       uses: lukka/get-cmake@latest
 
+    - name: CMake cache
+      uses: actions/cache@v3
+      with:
+        path: cmake-build-release
+        key: ${{ matrix.target }}
+
     - name: Setup VS environment
       uses: ilammy/msvc-dev-cmd@v1
       with:
@@ -47,13 +53,6 @@ jobs:
       run: |
         cmake --build cmake-build-release --target ${{ matrix.target }}
 
-#    - name: Collect artifacts
-#      run: |
-#        cd _build
-#        mkdir _rpkg
-#        Copy-Item Release/rpkg.exe -Destination _rpkg/
-#        Copy-Item Release/rpkg-cli.exe -Destination _rpkg/
-
 #    - name: Get the latest release of ResourceLib
 #      uses: robinraju/release-downloader@v1
 #      with:
@@ -65,15 +64,21 @@ jobs:
 #    - name: Prepare artifacts
 #      run: |
 #        cd _build
-#        7z e latest-hashes.7z -o_rpkg
 #        7z e ResourceLib-win-x64.zip -o_rpkg -i!"ResourceLib_*.dll"
 
-#    - name: Upload build artifact - RPKG
-#      uses: actions/upload-artifact@v2
-#      with:
-#        name: "rpkg"
-#        path: |
-#          _build/_rpkg/*
+    - name: Upload rpkg-cli
+      uses: actions/upload-artifact@v2
+      skip: ${{ matrix.target }} != 'rpkg-cli'
+      with:
+        name: rpkg-cli
+        path: cmake-build-release/rpkg-cli.exe
+
+    - name: Upload rpkg-lib
+      uses: actions/upload-artifact@v2
+      skip: ${{ matrix.target }} != 'rpkg-lib'
+      with:
+        name: rpkg-lib
+        path: cmake-build-release/rpkg-lib.dll
 
   create_release:
     name: Create release

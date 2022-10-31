@@ -114,6 +114,7 @@ set(lib-vorbis
         thirdparty/vorbis/lib/sharedbook.c
         thirdparty/vorbis/lib/lookup.c
         thirdparty/vorbis/lib/bitrate.c
+        thirdparty/vorbis/lib/vorbisfile.c
 )
 set(lib-ww2ogg
         thirdparty/ww2ogg/Bit_stream.h
@@ -290,7 +291,7 @@ set(RPKG_CLI_SOURCES
         src/cli/command_line.h
 )
 
-add_library(rpkg-lib ${RPKG_LIB_SOURCES} ${RPKG_COMMON_SOURCES} ${thirdparty})
+add_library(rpkg-lib SHARED ${RPKG_LIB_SOURCES} ${RPKG_COMMON_SOURCES} ${thirdparty})
 add_executable(rpkg-cli ${RPKG_CLI_SOURCES} ${RPKG_COMMON_SOURCES} ${thirdparty})
 
 target_compile_definitions(rpkg-lib PUBLIC RPKG_DLL)
