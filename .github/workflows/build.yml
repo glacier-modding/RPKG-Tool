@@ -70,7 +70,7 @@ jobs:
     - name: Prepare artifacts
       run: |
         cd cmake-build-release
-        7z e ResourceLib-win-x64.zip -o .\ -i!"ResourceLib_*.dll"
+        7z e ResourceLib-win-x64.zip -o_rpkg -i!"ResourceLib_*.dll"
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v2
