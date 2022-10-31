@@ -40,8 +40,11 @@ jobs:
 
     - name: Generate projects
       run: |
-        mkdir cmake-build-release
-        cd cmake-build-release
+        $path = "cmake-build-release"
+        If(!(test-path -PathType container $path)) {
+          mkdir $path
+        }
+        cd $path
         cmake -G Ninja `
           -DCMAKE_BUILD_TYPE=RelWithDebInfo `
           -DCMAKE_CXX_COMPILER=cl `
