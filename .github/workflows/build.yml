@@ -55,18 +55,18 @@ jobs:
       run: |
         cmake --build cmake-build-release --target ${{ matrix.target }}
 
-#    - name: Get the latest release of ResourceLib
-#      uses: robinraju/release-downloader@v1
-#      with:
-#        repository: "OrfeasZ/ZHMTools"
-#        latest: true
-#        fileName: "ResourceLib-win-x64.zip"
-#        out-file-path: _build
+    - name: Get the latest release of ResourceLib
+      uses: robinraju/release-downloader@v1
+      with:
+        repository: "OrfeasZ/ZHMTools"
+        latest: true
+        fileName: "ResourceLib-win-x64.zip"
+        out-file-path: cmake-build-release
 
-#    - name: Prepare artifacts
-#      run: |
-#        cd _build
-#        7z e ResourceLib-win-x64.zip -o_rpkg -i!"ResourceLib_*.dll"
+    - name: Prepare artifacts
+      run: |
+        cd cmake-build-release
+        7z e ResourceLib-win-x64.zip -o. -i!"ResourceLib_*.dll"
 
     - name: Fetch hash list
       run: |
@@ -76,7 +76,8 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: ${{ matrix.target }}
-        path: cmake-build-release/${{ matrix.target }}.*
+        path: |
+          cmake-build-release/*.{exe,dll,pdb,manifest,lib,exp}
 
   create_release:
     name: Create release
