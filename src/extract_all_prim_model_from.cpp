@@ -9,25 +9,33 @@
 #include <filesystem>
 
 void
-rpkg_function::extract_all_prim_model_from(std::string &input_path, std::string &filter, std::string &output_path) {
+rpkg_function::extract_all_prim_model_from(std::string& input_path, std::string& filter, std::string& output_path)
+{
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
     bool input_path_is_rpkg_file = false;
 
-    if (std::filesystem::is_regular_file(input_path)) {
+    if (std::filesystem::is_regular_file(input_path))
+    {
         input_path_is_rpkg_file = true;
-    } else {
+    }
+    else
+    {
         input_path = file::parse_input_folder_path(input_path);
     }
 
-    if (!file::path_exists(input_path)) {
+    if (!file::path_exists(input_path))
+    {
         LOG_AND_EXIT("Error: The folder " + input_path + " to with the input RPKGs does not exist.");
     }
 
-    if (!input_path_is_rpkg_file) {
+    if (!input_path_is_rpkg_file)
+    {
         rpkg_function::import_rpkg_files_in_folder(input_path);
-    } else {
+    }
+    else
+    {
         //rpkg_function::import_rpkg(input_path);
 
         std::filesystem::path base_folder_path = input_path;
@@ -51,8 +59,10 @@ rpkg_function::extract_all_prim_model_from(std::string &input_path, std::string 
 
     bool extract_single_hash = false;
 
-    if (filters.size() == 1) {
-        if (util::is_valid_hash(filters.at(0))) {
+    if (filters.size() == 1)
+    {
+        if (util::is_valid_hash(filters.at(0)))
+        {
             extract_single_hash = true;
         }
     }
@@ -64,13 +74,18 @@ rpkg_function::extract_all_prim_model_from(std::string &input_path, std::string 
     double console_update_rate = 1.0 / 2.0;
     int period_count = 1;
 
-    for (auto &rpkg: rpkgs) {
-        for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++) {
-            if (rpkg.hash_resource_types.at(r) == "PRIM") {
-                for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++) {
+    for (auto& rpkg : rpkgs)
+    {
+        for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++)
+        {
+            if (rpkg.hash_resource_types.at(r) == "PRIM")
+            {
+                for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++)
+                {
                     uint64_t hash_index = rpkg.hashes_indexes_based_on_resource_types.at(r).at(j);
 
-                    if (gui_control == ABORT_CURRENT_TASK) {
+                    if (gui_control == ABORT_CURRENT_TASK)
+                    {
                         return;
                     }
 
@@ -84,10 +99,12 @@ rpkg_function::extract_all_prim_model_from(std::string &input_path, std::string 
                                                               std::chrono::duration_cast<std::chrono::nanoseconds>(
                                                                       end_time - start_time).count());
 
-                    if (time_in_seconds_from_start_time > console_update_rate) {
+                    if (time_in_seconds_from_start_time > console_update_rate)
+                    {
                         start_time = end_time;
 
-                        if (period_count > 3) {
+                        if (period_count > 3)
+                        {
                             period_count = 0;
                         }
 
@@ -124,7 +141,8 @@ rpkg_function::extract_all_prim_model_from(std::string &input_path, std::string 
 
     std::string message = "Extracting PRIM MODEL to GLB/TGA files: ";
 
-    if (!filter.empty()) {
+    if (!filter.empty())
+    {
         LOG("Extracting PRIM MODEL to GLB/TGA files with filter \"" << filter << "\"");
     }
 
@@ -133,31 +151,40 @@ rpkg_function::extract_all_prim_model_from(std::string &input_path, std::string 
     std::vector<std::string> found_in;
     std::vector<std::string> not_found_in;
 
-    for (uint64_t z = 0; z < filters.size(); z++) {
+    for (uint64_t z = 0; z < filters.size(); z++)
+    {
         found_in.push_back("");
 
         not_found_in.push_back("");
     }
 
-    for (auto &rpkg: rpkgs) {
+    for (auto& rpkg : rpkgs)
+    {
         std::vector<bool> extracted;
 
-        for (uint64_t z = 0; z < filters.size(); z++) {
+        for (uint64_t z = 0; z < filters.size(); z++)
+        {
             extracted.push_back(false);
         }
 
-        if (rpkg.rpkg_file_path == input_path || !input_path_is_rpkg_file) {
-            for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++) {
-                if (rpkg.hash_resource_types.at(r) == "PRIM") {
-                    for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++) {
+        if (rpkg.rpkg_file_path == input_path || !input_path_is_rpkg_file)
+        {
+            for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++)
+            {
+                if (rpkg.hash_resource_types.at(r) == "PRIM")
+                {
+                    for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++)
+                    {
                         uint64_t hash_index = rpkg.hashes_indexes_based_on_resource_types.at(r).at(j);
 
-                        if (gui_control == ABORT_CURRENT_TASK) {
+                        if (gui_control == ABORT_CURRENT_TASK)
+                        {
                             return;
                         }
 
                         if (((prim_count_current * (uint64_t) 100000) / (uint64_t) prim_count) % (uint64_t) 10 ==
-                            0 && prim_count_current > 0) {
+                            0 && prim_count_current > 0)
+                        {
                             stringstream_length = console::update_console(message, prim_hash_size_total,
                                                                           prim_hash_size_current, start_time,
                                                                           stringstream_length);
@@ -168,7 +195,8 @@ rpkg_function::extract_all_prim_model_from(std::string &input_path, std::string 
                         prim_count_current++;
 
                         if (!extract_single_hash || (extract_single_hash && filter == util::uint64_t_to_hex_string(
-                                rpkg.hash.at(hash_index).hash_value))) {
+                                rpkg.hash.at(hash_index).hash_value)))
+                        {
                             std::string hash_file_name =
                                     util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
                                     rpkg.hash.at(hash_index).hash_resource_type;
@@ -177,10 +205,12 @@ rpkg_function::extract_all_prim_model_from(std::string &input_path, std::string 
 
                             uint64_t input_filter_index = 0;
 
-                            for (uint64_t z = 0; z < filters.size(); z++) {
+                            for (uint64_t z = 0; z < filters.size(); z++)
+                            {
                                 std::size_t found_position_hash = hash_file_name.find(filters.at(z));
 
-                                if ((found_position_hash != std::string::npos && !filters.at(z).empty())) {
+                                if ((found_position_hash != std::string::npos && !filters.at(z).empty()))
+                                {
                                     found = true;
 
                                     input_filter_index = z;
@@ -189,13 +219,15 @@ rpkg_function::extract_all_prim_model_from(std::string &input_path, std::string 
                                 }
                             }
 
-                            if (found || filter.empty()) {
+                            if (found || filter.empty())
+                            {
                                 std::string prim_output_dir = file::output_path_append(rpkg.rpkg_file_name,
                                                                                        output_path);
 
                                 file::create_directories(prim_output_dir);
 
-                                if (!filters.empty()) {
+                                if (!filters.empty())
+                                {
                                     extracted.at(input_filter_index) = true;
                                 }
 
@@ -245,17 +277,27 @@ rpkg_function::extract_all_prim_model_from(std::string &input_path, std::string 
             }
         }
 
-        for (uint64_t z = 0; z < filters.size(); z++) {
-            if (extracted.at(z)) {
-                if (found_in.at(z).empty()) {
+        for (uint64_t z = 0; z < filters.size(); z++)
+        {
+            if (extracted.at(z))
+            {
+                if (found_in.at(z).empty())
+                {
                     found_in.at(z).append(rpkg.rpkg_file_name);
-                } else {
+                }
+                else
+                {
                     found_in.at(z).append(", " + rpkg.rpkg_file_name);
                 }
-            } else {
-                if (not_found_in.at(z).empty()) {
+            }
+            else
+            {
+                if (not_found_in.at(z).empty())
+                {
                     not_found_in.at(z).append(rpkg.rpkg_file_name);
-                } else {
+                }
+                else
+                {
                     not_found_in.at(z).append(", " + rpkg.rpkg_file_name);
                 }
             }
@@ -274,8 +316,10 @@ rpkg_function::extract_all_prim_model_from(std::string &input_path, std::string 
 
     percent_progress = (uint32_t) 100;
 
-    if (!filter.empty()) {
-        for (uint64_t z = 0; z < filters.size(); z++) {
+    if (!filter.empty())
+    {
+        for (uint64_t z = 0; z < filters.size(); z++)
+        {
             LOG(std::endl << "\"" << filters.at(z) << "\" was found in and extracted from: " << found_in.at(z));
 
             LOG(std::endl << "\"" << filters.at(z) << "\" was not found in RPKG file(s): " << not_found_in.at(z));
