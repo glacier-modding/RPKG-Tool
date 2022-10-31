@@ -67,14 +67,14 @@ jobs:
 
     - name: Upload rpkg-cli
       uses: actions/upload-artifact@v2
-      skip: ${{ matrix.target }} != 'rpkg-cli'
+      if: ${{ matrix.target }} != 'rpkg-cli'
       with:
         name: rpkg-cli
         path: cmake-build-release/rpkg-cli.exe
 
     - name: Upload rpkg-lib
       uses: actions/upload-artifact@v2
-      skip: ${{ matrix.target }} != 'rpkg-lib'
+      if: ${{ matrix.target }} != 'rpkg-lib'
       with:
         name: rpkg-lib
         path: cmake-build-release/rpkg-lib.dll
