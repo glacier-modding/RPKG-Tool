@@ -6,9 +6,6 @@
 #include <unordered_map>
 #include <chrono>
 
-// just because you don't know it msvc doesn't mean it doesn't exist
-#pragma warning(disable: 4068)
-
 // we have to be recursive, no other way to do this
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "misc-no-recursion"

@@ -6,7 +6,6 @@
 #include "thirdparty/lz4/lz4.h"
 #include <iostream>
 #include <fstream>
-#include <regex>
 
 void rpkg_function::extract_from_rpkg_with_map(rpkg_extraction_vars& rpkg_vars)
 {
@@ -30,7 +29,7 @@ void rpkg_function::extract_from_rpkg_with_map(rpkg_extraction_vars& rpkg_vars)
 
         uint64_t hash_value = std::strtoull(rpkg_vars.filter.c_str(), nullptr, 16);
 
-        std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(hash_value);
+        auto it = rpkgs.at(i).hash_map.find(hash_value);
 
         if (it == rpkgs.at(i).hash_map.end())
             continue;
@@ -53,13 +52,6 @@ void rpkg_function::extract_from_rpkg_with_map(rpkg_extraction_vars& rpkg_vars)
             hash_size = rpkgs.at(i).hash.at(it->second).data.resource.size_final;
         }
 
-        //if (rpkg_vars.ores_mode)
-        //{
-        //    std::ofstream ores_meta_hash_file = std::ofstream(rpkg_vars.ores_path + "_" + hash_file_name, std::ofstream::binary);
-
-        //    ores_meta_hash_file.close();
-        //}
-
         std::vector<char> input_data(hash_size, 0);
 
         std::ifstream file = std::ifstream(rpkg_vars.input_path, std::ifstream::binary);
@@ -69,7 +61,7 @@ void rpkg_function::extract_from_rpkg_with_map(rpkg_extraction_vars& rpkg_vars)
             LOG_AND_EXIT("Error: RPKG file " + rpkg_vars.input_path + " could not be read.");
         }
 
-        file.seekg(rpkgs.at(i).hash.at(it->second).data.header.data_offset, file.beg);
+        file.seekg(rpkgs.at(i).hash.at(it->second).data.header.data_offset, std::ifstream::beg);
         file.read(input_data.data(), hash_size);
 
         if (rpkgs.at(i).hash.at(it->second).data.xored)

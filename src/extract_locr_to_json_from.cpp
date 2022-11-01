@@ -4,8 +4,6 @@
 #include "crypto.h"
 #include "console.h"
 #include "util.h"
-#include "rpkg.h"
-#include "hash.h"
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/json/json.hpp"
 #include <iostream>

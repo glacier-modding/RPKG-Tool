@@ -304,8 +304,9 @@ target_compile_definitions(rpkg-lib PUBLIC RPKG_DLL)
 target_compile_definitions(rpkg-cli PUBLIC RPKG_CLI)
 
 if (MSVC)
-    target_compile_options(rpkg-lib PUBLIC "/bigobj" "/W3")
-    target_compile_options(rpkg-cli PUBLIC "/bigobj" "/W3")
+    # C4068 - no unknown pragma
+    target_compile_options(rpkg-lib PUBLIC "/bigobj" "/W3" "/wd4068")
+    target_compile_options(rpkg-cli PUBLIC "/bigobj" "/W3" "/wd4068")
 endif()
 
 target_link_directories(rpkg-cli PUBLIC ${PROJECT_SOURCE_DIR}/thirdparty/zhmtools)

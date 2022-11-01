@@ -3,15 +3,12 @@
 #include "file.h"
 #include "global.h"
 #include "util.h"
-#include "rpkg.h"
-#include "hash.h"
 #include "crypto.h"
 #include "thirdparty/lz4/lz4.h"
 #include <iostream>
 #include <unordered_map>
 #include <sstream>
 #include <fstream>
-#include <filesystem>
 
 void rpkg_function::get_line_string(std::string& input_path, std::string& filter, std::string& output_path)
 {

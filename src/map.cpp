@@ -1,12 +1,9 @@
 #include "rpkg_function.h"
-#include "dev_function.h"
 #include "global.h"
 #include "file.h"
 #include "util.h"
 #include "crypto.h"
 #include "temp.h"
-#include "prim.h"
-#include "gltf.h"
 #include "map.h"
 #include "generic_function.h"
 #include <fstream>
@@ -14,16 +11,10 @@
 #include <filesystem>
 #include <regex>
 #include <sstream>
-#include <algorithm>
 #include "thirdparty/rapidjson/document.h"
-#include "thirdparty/rapidjson/prettywriter.h"
-#include "thirdparty/rapidjson/writer.h"
 #include "thirdparty/rapidjson/pointer.h"
 #include "thirdparty/rapidjson/stringbuffer.h"
 #include "thirdparty/directxmath/DirectXMath.h"
-#include "thirdparty/directxmath/DirectXCollision.h"
-#include "thirdparty/directxmath/DirectXColors.h"
-#include "thirdparty/directxmath/DirectXPackedVector.h"
 
 map::map() = default;
 
@@ -102,7 +93,7 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
         std::regex re("^([^, ]+)[, ]+");
         std::regex_search(map_filters, m, re);
 
-        if (m.size() > 0)
+        if (!m.empty())
         {
             map_filters_values.push_back(util::to_upper_case(m[1].str()));
 
@@ -442,14 +433,12 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
             bool temp_has_m_eidParents = false;
             uint32_t local_temp_entity_count = 0;
 
-            std::unordered_map<uint64_t, std::vector<uint32_t>>::iterator it = temp_map.temp_hash_map_node_map.find(temp_map.map_nodes.at(m).temp_hash);
+            auto it = temp_map.temp_hash_map_node_map.find(temp_map.map_nodes.at(m).temp_hash);
 
             if (it != temp_map.temp_hash_map_node_map.end())
             {
-                for (uint32_t i = 0; i < it->second.size(); i++)
+                for (unsigned int n : it->second)
                 {
-                    uint32_t n = it->second.at(i);
-
                     if (temp_map.map_nodes.at(n).has_m_eidParent_local)
                     {
                         local_temp_entity_count++;
@@ -473,7 +462,7 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
 
             bool in_root_scene = false;
 
-            for (std::unordered_map<uint64_t, uint64_t>::iterator it2 = temp_map.root_scenes.begin(); it2 != temp_map.root_scenes.end(); ++it2)
+            for (auto it2 = temp_map.root_scenes.begin(); it2 != temp_map.root_scenes.end(); ++it2)
             {
                 if (temp_map.map_nodes.at(m).temp_hash == it2->first)
                 {
@@ -491,9 +480,9 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
 
                 bool map_root_node_found = false;
 
-                for (uint64_t n = 0; n < temp_map.map_root_nodes.size(); n++)
+                for (unsigned int map_root_node : temp_map.map_root_nodes)
                 {
-                    if (m == temp_map.map_root_nodes.at(n))
+                    if (m == map_root_node)
                     {
                         map_root_node_found = true;
                     }
@@ -520,7 +509,7 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
         {
             std::string prim_hash_string = util::uint64_t_to_hex_string(temp_map.map_prims.at(p));
 
-            temp_map.godot_tscn_file += "[ext_resource type=\"PackedScene\" path=\"res://" + prim_hash_string + ".PRIM.glb\" id=" + util::uint32_t_to_string(p) + "]\n";
+            temp_map.godot_tscn_file += R"([ext_resource type="PackedScene" path="res://)" + prim_hash_string + ".PRIM.glb\" id=" + util::uint32_t_to_string(p) + "]\n";
         }
 
         temp_map.godot_tscn_file += "[node name=\"Node3D\" type=\"Node3D\"]\n";
@@ -655,7 +644,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 {
     log_output = false;
 
-    if (input_path == "")
+    if (input_path.empty())
     {
         task_status_string = "Error: The input_path folder does not exist.";
 
@@ -664,7 +653,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
         LOG_AND_RETURN(task_status_string);
     }
 
-    if (map_path == "")
+    if (map_path.empty())
     {
         task_status_string = "Error: The map_path folder " + map_path + " does not exist, missing -map_path in the command line?";
 
@@ -737,7 +726,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
     for (const auto& entry : std::filesystem::directory_iterator(map_path))
     {
-        if (map_root_hash_string == "")
+        if (map_root_hash_string.empty())
         {
             std::cout << entry.path().string() << std::endl;
 
@@ -767,7 +756,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
                     {
                         hash_file_name = util::to_upper_case(file_name.substr(0, (file_name.length() - 5)));
 
-                        pos = hash_file_name.find_last_of(".");
+                        pos = hash_file_name.find_last_of('.');
 
                         if (pos != std::string::npos)
                         {
@@ -802,7 +791,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
         }
     }
 
-    if (map_root_hash_string == "")
+    if (map_root_hash_string.empty())
     {
         task_status_string = "Error: The map_path folder does not contain a Godot scene file of the format: 0000000000000000.TEMP.TSCN\nwhere 0000000000000000 is the hash value for the map's main entity (TEMP) file/resource.";
 
@@ -835,7 +824,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
         LOG_AND_RETURN(task_status_string);
     }
 
-    std::unordered_map<uint64_t, uint64_t>::iterator it6 = rpkgs.at(rpkg_index).hash_map.find(map_root_hash_value);
+    auto it6 = rpkgs.at(rpkg_index).hash_map.find(map_root_hash_value);
 
     if (it6 != rpkgs.at(rpkg_index).hash_map.end())
     {
@@ -857,9 +846,9 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
         LOG_AND_RETURN(task_status_string);
     }
 
-    input_file.seekg(0, input_file.end);
+    input_file.seekg(0, std::ifstream::end);
     uint64_t input_file_size = (uint64_t)input_file.tellg();
-    input_file.seekg(0, input_file.beg);
+    input_file.seekg(0, std::ifstream::beg);
     std::string godot_scene_file(input_file_size, '\0');
     input_file.read(&godot_scene_file[0], input_file_size);
     input_file.close();
@@ -972,11 +961,11 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
         std::string meta_data = util::find_string_between_strings(temp_string_view, "editor_description = \"", "\"");
 
-        size_t pos1 = meta_data.find(",");
+        size_t pos1 = meta_data.find(',');
 
         if (pos1 != std::string::npos)
         {
-            size_t pos2 = meta_data.substr(pos1 + 1).find(",");
+            size_t pos2 = meta_data.substr(pos1 + 1).find(',');
 
             if (pos2 != std::string::npos)
             {
@@ -984,7 +973,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
                 std::string entityId = meta_data.substr((pos1 + 1), pos2);
                 std::string use_transform = meta_data.substr(pos1 + pos2 + 2);
 
-                if (temp_hash != "" && entityId != "")
+                if (!temp_hash.empty() && !entityId.empty())
                 {
                     temp_map_node.temp_hash_string = temp_hash;
 
@@ -1051,7 +1040,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
         util::split_string_view(temp_string_view, ",", transform_comma_positions);
 
-        if (transform_comma_positions.size() != 0 && transform_comma_positions.size() != 11)
+        if (!transform_comma_positions.empty() && transform_comma_positions.size() != 11)
         {
             task_status_string = "Error: The Godot scene file " + map_root_tscn_file_name + " is corrupt.";
 
@@ -1062,7 +1051,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
         float matrix_values[12] = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f };
 
-        if (transform_comma_positions.size() != 0)
+        if (!transform_comma_positions.empty())
         {
             for (uint64_t c = 0; c < (transform_comma_positions.size() + 1); c++)
             {
@@ -1153,7 +1142,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
         if (rpkg_index != UINT32_MAX)
         {
-            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash);
+            auto it = rpkgs.at(rpkg_index).hash_map.find(temp_hash);
 
             if (it != rpkgs.at(rpkg_index).hash_map.end())
             {
@@ -1199,11 +1188,11 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
         if (temp_map.map_nodes.at(m).use_m_mTransform)
         {
-            std::unordered_map<uint64_t, uint64_t>::iterator it = temp_map.map_temps_map.find(temp_map.map_nodes.at(m).temp_hash);
+            auto it = temp_map.map_temps_map.find(temp_map.map_nodes.at(m).temp_hash);
 
             if (it != temp_map.map_temps_map.end())
             {
-                std::unordered_map<uint64_t, uint64_t>::iterator it2 = temp_map.map_temps.at(it->second).tblu_entityId_map.find(temp_map.map_nodes.at(m).entityId);
+                auto it2 = temp_map.map_temps.at(it->second).tblu_entityId_map.find(temp_map.map_nodes.at(m).entityId);
 
                 if (it2 != temp_map.map_temps.at(it->second).tblu_entityId_map.end())
                 {
@@ -1416,7 +1405,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
                         if (!temp_map.matrixes_equal(node_m_mTransform, m_mTransform))
                         {
-                            std::unordered_map<uint64_t, bool>::iterator temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
+                            auto temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
 
                             if (temps_modified_map_it == temps_modified_map.end())
                             {
@@ -1440,7 +1429,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
                                 }
                             }
 
-                            if (transform_property_pointer == "")
+                            if (transform_property_pointer.empty())
                             {
                                 transform_property_pointer = transform_post_init_property_pointer;
                             }
@@ -1461,7 +1450,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
                                 temp_json_value->GetObject()["Trans"]["z"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.transform.z);
                             }
 
-                            if (primitive_scale_property_pointer == "")
+                            if (primitive_scale_property_pointer.empty())
                             {
                                 primitive_scale_property_pointer = primitive_scale_post_init_property_pointer;
                             }
@@ -1484,7 +1473,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
                         if (!temp_map.matrixes_equal(node_m_mTransform, m_mTransform))
                         {
-                            std::unordered_map<uint64_t, bool>::iterator temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
+                            auto temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
 
                             if (temps_modified_map_it == temps_modified_map.end())
                             {
@@ -1508,7 +1497,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
                                 }
                             }
 
-                            if (transform_property_pointer == "")
+                            if (transform_property_pointer.empty())
                             {
                                 transform_property_pointer = transform_post_init_property_pointer;
                             }
@@ -1529,7 +1518,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
                                 temp_json_value->GetObject()["Trans"]["z"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.transform.z);
                             }
 
-                            if (global_size_property_pointer == "")
+                            if (global_size_property_pointer.empty())
                             {
                                 global_size_property_pointer = global_size_post_init_property_pointer;
                             }
@@ -1546,7 +1535,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
                     {
                         if (!temp_map.matrixes_equal(temp_map.map_nodes.at(m).m_mTransform, m_mTransform))
                         {
-                            std::unordered_map<uint64_t, bool>::iterator temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
+                            auto temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
 
                             if (temps_modified_map_it == temps_modified_map.end())
                             {
@@ -1570,7 +1559,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
                                 }
                             }
 
-                            if (transform_property_pointer == "")
+                            if (transform_property_pointer.empty())
                             {
                                 transform_property_pointer = transform_post_init_property_pointer;
                             }
@@ -1608,7 +1597,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
                     {
                         if (!temp_map.matrixes_equal(temp_map.map_nodes.at(m).m_mTransform, m_mTransform))
                         {
-                            std::unordered_map<uint64_t, bool>::iterator temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
+                            auto temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
 
                             if (temps_modified_map_it == temps_modified_map.end())
                             {
@@ -1670,7 +1659,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
                     {
                         if (!temp_map.matrixes_equal(temp_map.map_nodes.at(m).m_mTransform, m_mTransform))
                         {
-                            std::unordered_map<uint64_t, bool>::iterator temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
+                            auto temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
 
                             if (temps_modified_map_it == temps_modified_map.end())
                             {
@@ -1694,7 +1683,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
                                 }
                             }
 
-                            if (transform_property_pointer == "")
+                            if (transform_property_pointer.empty())
                             {
                                 transform_property_pointer = transform_post_init_property_pointer;
                             }
@@ -1756,7 +1745,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
         //std::cout << "Modified: " << temps_modified_map_it->first << std::endl;
 
-        std::unordered_map<uint64_t, uint64_t>::iterator it_temp = temp_map.map_temps_map.find(temps_modified_map_it->first);
+        auto it_temp = temp_map.map_temps_map.find(temps_modified_map_it->first);
 
         if (it_temp != temp_map.map_temps_map.end())
         {
@@ -1772,7 +1761,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
             }
             else
             {
-                pos = rpkg_file_short_name.find(".");
+                pos = rpkg_file_short_name.find('.');
 
                 if (pos != std::string::npos)
                 {
@@ -1816,7 +1805,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
 void map::add_to_temp_hash_map_node_map(uint32_t map_node, uint64_t temp_hash)
 {
-    std::unordered_map<uint64_t, std::vector<uint32_t>>::iterator it = temp_hash_map_node_map.find(temp_hash);
+    auto it = temp_hash_map_node_map.find(temp_hash);
 
     if (it != temp_hash_map_node_map.end())
     {
@@ -1834,11 +1823,11 @@ void map::add_to_temp_hash_map_node_map(uint32_t map_node, uint64_t temp_hash)
 
 void map::add_to_m_eidParent_local_temp_hash_entityIndex_map(uint32_t map_node, uint64_t temp_hash, uint32_t entityIndex)
 {
-    std::unordered_map<uint64_t, std::unordered_map<uint32_t, std::vector<uint32_t>>>::iterator it = m_eidParent_local_temp_hash_entityIndex_map.find(temp_hash);
+    auto it = m_eidParent_local_temp_hash_entityIndex_map.find(temp_hash);
 
     if (it != m_eidParent_local_temp_hash_entityIndex_map.end())
     {
-        std::unordered_map<uint32_t, std::vector<uint32_t>>::iterator it2 = it->second.find(entityIndex);
+        auto it2 = it->second.find(entityIndex);
 
         if (it2 != it->second.end())
         {
@@ -1869,11 +1858,11 @@ void map::add_to_m_eidParent_local_temp_hash_entityIndex_map(uint32_t map_node, 
 
 void map::add_to_m_eidParent_external_externalSceneIndex_hash_entityID_map(uint32_t map_node, uint64_t externalSceneIndex_hash, uint64_t entityID)
 {
-    std::unordered_map<uint64_t, std::unordered_map<uint64_t, std::vector<uint32_t>>>::iterator it = m_eidParent_external_externalSceneIndex_hash_entityID_map.find(externalSceneIndex_hash);
+    auto it = m_eidParent_external_externalSceneIndex_hash_entityID_map.find(externalSceneIndex_hash);
 
     if (it != m_eidParent_external_externalSceneIndex_hash_entityID_map.end())
     {
-        std::unordered_map<uint64_t, std::vector<uint32_t>>::iterator it2 = it->second.find(entityID);
+        auto it2 = it->second.find(entityID);
 
         if (it2 != it->second.end())
         {
@@ -1904,7 +1893,7 @@ void map::add_to_m_eidParent_external_externalSceneIndex_hash_entityID_map(uint3
 
 void map::add_to_temp_hash_is_top_level_Local_node_map(uint32_t map_node, uint64_t temp_hash)
 {
-    std::unordered_map<uint64_t, std::vector<uint32_t>>::iterator it = temp_hash_is_top_level_Local_node_map.find(temp_hash);
+    auto it = temp_hash_is_top_level_Local_node_map.find(temp_hash);
 
     if (it != temp_hash_is_top_level_Local_node_map.end())
     {
@@ -1922,9 +1911,9 @@ void map::add_to_temp_hash_is_top_level_Local_node_map(uint32_t map_node, uint64
 
 void map::extract_map_prims(std::string output_path, bool textured)
 {
-    for (uint64_t m = 0; m < map_nodes.size(); m++)
+    for (auto & map_node : map_nodes)
     {
-        if (map_nodes.at(m).has_prim_resource)
+        if (map_node.has_prim_resource)
         {
             if (gui_control == ABORT_CURRENT_TASK)
             {
@@ -1940,7 +1929,7 @@ void map::extract_map_prims(std::string output_path, bool textured)
 
             map_percent_progress_map_nodes_prim = percent_progress;
 
-            std::unordered_map<uint64_t, uint64_t>::iterator it = map_prims_map.find(map_nodes.at(m).prim_hash);
+            auto it = map_prims_map.find(map_node.prim_hash);
 
             if (it != map_prims_map.end())
             {
@@ -1948,13 +1937,13 @@ void map::extract_map_prims(std::string output_path, bool textured)
             }
             else
             {
-                uint32_t rpkg_index = rpkg_function::get_latest_hash(map_nodes.at(m).prim_hash);
+                uint32_t rpkg_index = rpkg_function::get_latest_hash(map_node.prim_hash);
 
                 if (rpkg_index != UINT32_MAX)
                 {
-                    std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(rpkg_index).hash_map.find(map_nodes.at(m).prim_hash);
+                    auto it2 = rpkgs.at(rpkg_index).hash_map.find(map_node.prim_hash);
 
-                    std::string prim_hash_string = util::uint64_t_to_hex_string(map_nodes.at(m).prim_hash);
+                    std::string prim_hash_string = util::uint64_t_to_hex_string(map_node.prim_hash);
 
                     if (it2 != rpkgs.at(rpkg_index).hash_map.end())
                     {
@@ -1970,15 +1959,15 @@ void map::extract_map_prims(std::string output_path, bool textured)
 
                     if (file::path_exists(file::output_path_append(prim_hash_string + ".PRIM.glb", output_path)))
                     {
-                        map_prims_map[map_nodes.at(m).prim_hash] = map_prims_map.size();
+                        map_prims_map[map_node.prim_hash] = map_prims_map.size();
 
-                        map_prims.push_back(map_nodes.at(m).prim_hash);
+                        map_prims.push_back(map_node.prim_hash);
 
-                        map_nodes.at(m).map_prims_index = map_prims.size() - 1;
+                        map_node.map_prims_index = map_prims.size() - 1;
                     }
                     else
                     {
-                        map_nodes.at(m).has_prim_resource = false;
+                        map_node.has_prim_resource = false;
                     }
                 }
             }
@@ -2161,9 +2150,9 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
     {
         bool in_parent_node = false;
 
-        for (uint64_t p = 0; p < map_nodes.at(root_map_node).parent_map_nodes.size(); p++)
+        for (unsigned int p : map_nodes.at(root_map_node).parent_map_nodes)
         {
-            if (parent_map_node == map_nodes.at(root_map_node).parent_map_nodes.at(p))
+            if (parent_map_node == p)
             {
                 in_parent_node = true;
             }
@@ -2189,7 +2178,7 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
         if (rpkg_index != UINT32_MAX)
         {
-            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(map_nodes.at(root_map_node).entityTypeResourceIndex_hash);
+            auto it = rpkgs.at(rpkg_index).hash_map.find(map_nodes.at(root_map_node).entityTypeResourceIndex_hash);
 
             if (it != rpkgs.at(rpkg_index).hash_map.end())
             {
@@ -2203,7 +2192,7 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
                     if (rpkg_index2 != UINT32_MAX)
                     {
-                        std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(rpkg_index2).hash_map.find(hash_reference_value);
+                        auto it2 = rpkgs.at(rpkg_index2).hash_map.find(hash_reference_value);
 
                         if (it2 != rpkgs.at(rpkg_index2).hash_map.end())
                         {
@@ -2225,18 +2214,16 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
     }
 
     {
-        std::unordered_map<uint64_t, std::unordered_map<uint32_t, std::vector<uint32_t>>>::iterator it = m_eidParent_local_temp_hash_entityIndex_map.find(map_nodes.at(root_map_node).temp_hash);
+        auto it = m_eidParent_local_temp_hash_entityIndex_map.find(map_nodes.at(root_map_node).temp_hash);
 
         if (it != m_eidParent_local_temp_hash_entityIndex_map.end())
         {
-            std::unordered_map<uint32_t, std::vector<uint32_t>>::iterator it2 = it->second.find(map_nodes.at(root_map_node).subEntity);
+            auto it2 = it->second.find(map_nodes.at(root_map_node).subEntity);
 
             if (it2 != it->second.end())
             {
-                for (uint32_t i = 0; i < it2->second.size(); i++)
+                for (unsigned int n : it2->second)
                 {
-                    uint32_t n = it2->second.at(i);
-
                     //std::cout << map_nodes.at(root_map_node).entryName << "(" << util::uint64_t_to_hex_string(map_nodes.at(root_map_node).temp_hash) << ")" << " is an m_eidParent_local to " << map_nodes.at(n).entryName << std::endl;
 
                     //std::string node_string = map_nodes.at(n).entryName + " (" + util::uint32_t_to_string(map_nodes.at(n).subEntity) + ")";
@@ -2287,13 +2274,13 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
                     if (map_nodes.at(n).has_prim_resource)
                     {
-                        std::unordered_map<uint64_t, uint64_t>::iterator it3 = map_prims_map.find(map_nodes.at(n).prim_hash);
+                        auto it3 = map_prims_map.find(map_nodes.at(n).prim_hash);
 
                         if (it3 != map_prims_map.end())
                         {
                             if (level == 0)
                             {
-                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\".\" instance=ExtResource( " + util::uint32_t_to_string(it3->second) + " )]\n";
+                                godot_tscn_file += "[node name=\"" + node_string + R"(" parent="." instance=ExtResource( )" + util::uint32_t_to_string(it3->second) + " )]\n";
                             }
                             else
                             {
@@ -2433,7 +2420,7 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
                         }
                         else
                         {
-                            godot_tscn_file += "[node name=\"" + node_string + "\" type=\"Node3D\" parent=\"" + map_node_string + "\"]\n";
+                            godot_tscn_file += "[node name=\"" + node_string + R"(" type="Node3D" parent=")" + map_node_string + "\"]\n";
                         }
 
                         godot_tscn_file += "transform = Transform3D(" + transform_string + ")\n";
@@ -2470,18 +2457,16 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
     }
 
     {
-        std::unordered_map<uint64_t, std::unordered_map<uint64_t, std::vector<uint32_t>>>::iterator it = m_eidParent_external_externalSceneIndex_hash_entityID_map.find(map_nodes.at(root_map_node).temp_hash);
+        auto it = m_eidParent_external_externalSceneIndex_hash_entityID_map.find(map_nodes.at(root_map_node).temp_hash);
 
         if (it != m_eidParent_external_externalSceneIndex_hash_entityID_map.end())
         {
-            std::unordered_map<uint64_t, std::vector<uint32_t>>::iterator it2 = it->second.find(map_nodes.at(root_map_node).entityId);
+            auto it2 = it->second.find(map_nodes.at(root_map_node).entityId);
 
             if (it2 != it->second.end())
             {
-                for (uint32_t i = 0; i < it2->second.size(); i++)
+                for (unsigned int n : it2->second)
                 {
-                    uint32_t n = it2->second.at(i);
-
                     //std::cout << map_nodes.at(root_map_node).entryName << "(" << util::uint64_t_to_hex_string(map_nodes.at(root_map_node).temp_hash) << ")" << " is an m_eidParent_external to " << map_nodes.at(n).entryName << std::endl;
 
                     //std::string node_string = map_nodes.at(n).entryName + " (" + util::uint32_t_to_string(map_nodes.at(n).subEntity) + ")";
@@ -2531,13 +2516,13 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
                     if (map_nodes.at(n).has_prim_resource)
                     {
-                        std::unordered_map<uint64_t, uint64_t>::iterator it3 = map_prims_map.find(map_nodes.at(n).prim_hash);
+                        auto it3 = map_prims_map.find(map_nodes.at(n).prim_hash);
 
                         if (it3 != map_prims_map.end())
                         {
                             if (level == 0)
                             {
-                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\".\" instance=ExtResource( " + util::uint32_t_to_string(it3->second) + " )]\n";
+                                godot_tscn_file += "[node name=\"" + node_string + R"(" parent="." instance=ExtResource( )" + util::uint32_t_to_string(it3->second) + " )]\n";
                             }
                             else
                             {
@@ -2677,7 +2662,7 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
                         }
                         else
                         {
-                            godot_tscn_file += "[node name=\"" + node_string + "\" type=\"Node3D\" parent=\"" + map_node_string + "\"]\n";
+                            godot_tscn_file += "[node name=\"" + node_string + R"(" type="Node3D" parent=")" + map_node_string + "\"]\n";
                         }
 
                         godot_tscn_file += "transform = Transform3D(" + transform_string + ")\n";
@@ -2715,14 +2700,12 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
     if (map_nodes.at(root_map_node).entityTypeResourceIndex_hash_type == "TEMP")
     {
-        std::unordered_map<uint64_t, std::vector<uint32_t>>::iterator it = temp_hash_is_top_level_Local_node_map.find(map_nodes.at(root_map_node).entityTypeResourceIndex_hash);
+        auto it = temp_hash_is_top_level_Local_node_map.find(map_nodes.at(root_map_node).entityTypeResourceIndex_hash);
 
         if (it != temp_hash_is_top_level_Local_node_map.end())
         {
-            for (uint32_t i = 0; i < it->second.size(); i++)
+            for (unsigned int n : it->second)
             {
-                uint32_t n = it->second.at(i);
-
                 //std::cout << map_nodes.at(root_map_node).entryName << "(" << util::uint64_t_to_hex_string(map_nodes.at(root_map_node).temp_hash) << ")" << " is an m_eidParent_local to " << map_nodes.at(n).entryName << std::endl;
 
                 //std::string node_string = map_nodes.at(n).entryName + " (" + util::uint32_t_to_string(map_nodes.at(n).subEntity) + ")";
@@ -2772,13 +2755,13 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
                 if (map_nodes.at(n).has_prim_resource)
                 {
-                    std::unordered_map<uint64_t, uint64_t>::iterator it3 = map_prims_map.find(map_nodes.at(n).prim_hash);
+                    auto it3 = map_prims_map.find(map_nodes.at(n).prim_hash);
 
                     if (it3 != map_prims_map.end())
                     {
                         if (level == 0)
                         {
-                            godot_tscn_file += "[node name=\"" + node_string + "\" parent=\".\" instance=ExtResource( " + util::uint32_t_to_string(it3->second) + " )]\n";
+                            godot_tscn_file += "[node name=\"" + node_string + R"(" parent="." instance=ExtResource( )" + util::uint32_t_to_string(it3->second) + " )]\n";
                         }
                         else
                         {
@@ -2927,16 +2910,14 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
     if (has_aset_with_temp_resource)
     {
-        for (uint32_t a = 0; a < aset_temp_hashes.size(); a++)
+        for (unsigned long long aset_temp_hashe : aset_temp_hashes)
         {
-            std::unordered_map<uint64_t, std::vector<uint32_t>>::iterator it = temp_hash_is_top_level_Local_node_map.find(aset_temp_hashes.at(a));
+            auto it = temp_hash_is_top_level_Local_node_map.find(aset_temp_hashe);
 
             if (it != temp_hash_is_top_level_Local_node_map.end())
             {
-                for (uint32_t i = 0; i < it->second.size(); i++)
+                for (unsigned int n : it->second)
                 {
-                    uint32_t n = it->second.at(i);
-
                     //std::cout << map_nodes.at(root_map_node).entryName << "(" << util::uint64_t_to_hex_string(map_nodes.at(root_map_node).temp_hash) << ")" << " is an m_eidParent_local to " << map_nodes.at(n).entryName << std::endl;
 
                     //std::string node_string = map_nodes.at(n).entryName + " (" + util::uint32_t_to_string(map_nodes.at(n).subEntity) + ")";
@@ -2986,13 +2967,13 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
                     if (map_nodes.at(n).has_prim_resource)
                     {
-                        std::unordered_map<uint64_t, uint64_t>::iterator it3 = map_prims_map.find(map_nodes.at(n).prim_hash);
+                        auto it3 = map_prims_map.find(map_nodes.at(n).prim_hash);
 
                         if (it3 != map_prims_map.end())
                         {
                             if (level == 0)
                             {
-                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\".\" instance=ExtResource( " + util::uint32_t_to_string(it3->second) + " )]\n";
+                                godot_tscn_file += "[node name=\"" + node_string + R"(" parent="." instance=ExtResource( )" + util::uint32_t_to_string(it3->second) + " )]\n";
                             }
                             else
                             {
@@ -3189,7 +3170,7 @@ void map::get_map_node(temp& temp_temp)
 
                 if (rpkg_index != UINT32_MAX)
                 {
-                    std::unordered_map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(rpkg_index).hash_map.find(temp_map_node.entityTypeResourceIndex_hash);
+                    auto it3 = rpkgs.at(rpkg_index).hash_map.find(temp_map_node.entityTypeResourceIndex_hash);
 
                     if (it3 != rpkgs.at(rpkg_index).hash_map.end())
                     {
@@ -3864,24 +3845,24 @@ void map::get_map_node(temp& temp_temp)
 
 void map::get_root_scenes()
 {
-    for (uint64_t t = 0; t < map_temps.size(); t++)
+    for (auto & map_temp : map_temps)
     {
         //std::cout << "TEMP file: " << map_temps.at(t).temp_file_name << std::endl;
 
-        for (uint64_t s = 0; s < map_temps.at(t).temp_externalSceneTypeIndicesInResourceHeader.size(); s++)
+        for (uint64_t s = 0; s < map_temp.temp_externalSceneTypeIndicesInResourceHeader.size(); s++)
         {
             //std::cout << "External scene TEMP file index: " << map_temps.at(t).temp_externalSceneTypeIndicesInResourceHeader.at(s) << std::endl;
         }
 
-        for (uint64_t s = 0; s < map_temps.at(t).temp_externalSceneHashes.size(); s++)
+        for (uint64_t s = 0; s < map_temp.temp_externalSceneHashes.size(); s++)
         {
             //std::cout << "External scene TEMP file: " << util::uint64_t_to_hex_string(map_temps.at(t).temp_externalSceneHashes.at(s)) << std::endl;
 
-            std::unordered_map<uint64_t, uint64_t>::iterator it = root_scenes.find(map_temps.at(t).temp_externalSceneHashes.at(s));
+            auto it = root_scenes.find(map_temp.temp_externalSceneHashes.at(s));
 
             if (it == root_scenes.end())
             {
-                root_scenes[map_temps.at(t).temp_externalSceneHashes.at(s)] = root_scenes.size();
+                root_scenes[map_temp.temp_externalSceneHashes.at(s)] = root_scenes.size();
 
                 get_root_scenes();
             }
@@ -3891,7 +3872,7 @@ void map::get_root_scenes()
 
 void map::map_recursive_temp_loader(uint32_t rpkg_index, uint64_t hash_value)
 {
-    std::unordered_map<uint64_t, uint64_t>::iterator it = map_temps_map.find(hash_value);
+    auto it = map_temps_map.find(hash_value);
 
     if (it != map_temps_map.end())
     {
@@ -3929,7 +3910,7 @@ void map::map_recursive_temp_loader(uint32_t rpkg_index, uint64_t hash_value)
 
                 if (rpkg_index2 != UINT32_MAX)
                 {
-                    std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(rpkg_index2).hash_map.find(hash_reference_value);
+                    auto it2 = rpkgs.at(rpkg_index2).hash_map.find(hash_reference_value);
 
                     if (it2 != rpkgs.at(rpkg_index2).hash_map.end())
                     {
@@ -3951,7 +3932,7 @@ void map::map_recursive_temp_loader(uint32_t rpkg_index, uint64_t hash_value)
 
                                 if (rpkg_index3 != UINT32_MAX)
                                 {
-                                    std::unordered_map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(rpkg_index3).hash_map.find(hash_reference_value2);
+                                    auto it3 = rpkgs.at(rpkg_index3).hash_map.find(hash_reference_value2);
 
                                     if (it3 != rpkgs.at(rpkg_index3).hash_map.end())
                                     {

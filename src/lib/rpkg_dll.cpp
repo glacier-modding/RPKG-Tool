@@ -22,6 +22,9 @@
 
 using json = nlohmann::ordered_json;
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "readability-non-const-parameter"
+
 int load_hash_list(char* path)
 {
     generic_function::load_hash_list(true, std::string(path));
@@ -430,7 +433,7 @@ char* get_hash_details(char* rpkg_file, char* hash_string)
                 ss << std::dec << "There are " << reverse_dependency.size()
                    << " reverse hash depends (within the currently loaded RPKGs):" << std::endl;
 
-                if (reverse_dependency.size() > 0)
+                if (!reverse_dependency.empty())
                 {
                     for (const auto &i : reverse_dependency)
                     {
@@ -3008,7 +3011,7 @@ int create_patch(const char* patch_path)
 
 int import_patch(const char* patch_path)
 {
-    if (repos.size() > 0)
+    if (!repos.empty())
     {
         repos[0].import_patch(patch_path);
     }
@@ -3056,3 +3059,4 @@ int update_json_at_pointer(const char* id, const char* json_pointer, const char*
 
     return 0;
 }
+#pragma clang diagnostic pop

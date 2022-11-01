@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 #define RPKG_EXPORT extern "C" __declspec(dllexport)
 
@@ -226,9 +226,9 @@ RPKG_EXPORT int get_repo_child_entries(char* id);
 
 RPKG_EXPORT int get_repo_category(int category);
 
-RPKG_EXPORT int get_repo_json(const char* id);
+RPKG_EXPORT int get_repo_json(char* id);
 
-RPKG_EXPORT char* get_repo_image_hash(const char* id);
+RPKG_EXPORT char* get_repo_image_hash(char* id);
 
 RPKG_EXPORT char* get_latest_hash_rpkg_path(char* hash);
 
