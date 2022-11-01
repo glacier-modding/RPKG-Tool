@@ -22,7 +22,7 @@ jobs:
 
     steps:    
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Get latest CMake and Ninja
       # Using 'latest' branch, the most recent CMake and ninja are installed.
@@ -67,9 +67,10 @@ jobs:
         cp cmake-build-release/*.exe _rpkg
         cp cmake-build-release/*.pdb _rpkg
         cp cmake-build-release/*.lib _rpkg
+        cp thirdparty/zhmtools/*.dll _rpkg
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.target }}
         path: _rpkg
