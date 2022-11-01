@@ -4,7 +4,6 @@
 #include "file.h"
 #include "global.h"
 #include "util.h"
-#include <unordered_map>
 #include <fstream>
 #include <filesystem>
 #include "thirdparty/json/json.hpp"

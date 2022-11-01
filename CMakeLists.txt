@@ -6,18 +6,25 @@ set(CMAKE_CXX_STANDARD 17)
 add_subdirectory(thirdparty/GLTFSDK)
 add_subdirectory(thirdparty/directxtex)
 
-set(lib-directxmath
-        thirdparty/directxmath/DirectXCollision.h
-        thirdparty/directxmath/DirectXCollision.inl
-        thirdparty/directxmath/DirectXColors.h
-        thirdparty/directxmath/DirectXMath.h
-        thirdparty/directxmath/DirectXMathConvert.inl
-        thirdparty/directxmath/DirectXMathMatrix.inl
-        thirdparty/directxmath/DirectXMathMisc.inl
-        thirdparty/directxmath/DirectXMathVector.inl
-        thirdparty/directxmath/DirectXPackedVector.h
-        thirdparty/directxmath/DirectXPackedVector.inl
+option(WITH_DIRECTX_SUPPORT
+        "If DirectX components and support for .PRIM, .TEXT, and .BORG should be compiled. Currently only works on Windows."
+        ON
 )
+
+if (WITH_DIRECTX_SUPPORT)
+    set(lib-directxmath
+            thirdparty/directxmath/DirectXCollision.h
+            thirdparty/directxmath/DirectXCollision.inl
+            thirdparty/directxmath/DirectXColors.h
+            thirdparty/directxmath/DirectXMath.h
+            thirdparty/directxmath/DirectXMathConvert.inl
+            thirdparty/directxmath/DirectXMathMatrix.inl
+            thirdparty/directxmath/DirectXMathMisc.inl
+            thirdparty/directxmath/DirectXMathVector.inl
+            thirdparty/directxmath/DirectXPackedVector.h
+            thirdparty/directxmath/DirectXPackedVector.inl
+    )
+endif()
 set(lib-json
         thirdparty/json/json.hpp
 )
@@ -297,8 +304,8 @@ target_compile_definitions(rpkg-lib PUBLIC RPKG_DLL)
 target_compile_definitions(rpkg-cli PUBLIC RPKG_CLI)
 
 if (MSVC)
-    target_compile_options(rpkg-lib PUBLIC "/bigobj")
-    target_compile_options(rpkg-cli PUBLIC "/bigobj")
+    target_compile_options(rpkg-lib PUBLIC "/bigobj" "/W3")
+    target_compile_options(rpkg-cli PUBLIC "/bigobj" "/W3")
 endif()
 
 target_link_directories(rpkg-cli PUBLIC ${PROJECT_SOURCE_DIR}/thirdparty/zhmtools)

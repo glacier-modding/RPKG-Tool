@@ -35,7 +35,7 @@ public:
 
 	void SeekTo(size_t offset) { position = offset; }
 
-	size_t Size() { return size; }
+	[[nodiscard]] size_t Size() const { return size; }
 
 	size_t StreamPosition() { return reinterpret_cast<uintptr_t>(stream) + position; }
 

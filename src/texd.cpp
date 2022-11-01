@@ -1,5 +1,4 @@
 #include "texd.h"
-#include "rpkg_function.h"
 #include "file.h"
 #include "global.h"
 #include "crypto.h"

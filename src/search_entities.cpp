@@ -6,10 +6,10 @@
 #include <unordered_map>
 #include <chrono>
 #include <sstream>
-#include <regex>
-#include <filesystem>
 
-void rpkg_function::search_entities(std::string& input_path, std::string& filter, std::string& search, std::string& search_type, std::string& output_path, bool search_entity_ids, bool search_entity_names, bool search_property_names, bool search_property_values, int max_results)
+void rpkg_function::search_entities(std::string& input_path, std::string& search, bool search_entity_ids,
+                                    bool search_entity_names, bool search_property_names,
+                                    bool search_property_values, int max_results)
 {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
@@ -22,49 +22,6 @@ void rpkg_function::search_entities(std::string& input_path, std::string& filter
 
     uint32_t results_count = 0;
 
-    /*bool input_path_is_rpkg_file = false;
-
-    if (std::filesystem::is_regular_file(input_path))
-    {
-        input_path_is_rpkg_file = true;
-    }
-    else
-    {
-        input_path = file::parse_input_folder_path(input_path);
-    }
-
-    if (file::path_exists(input_path))
-    {
-        if (!input_path_is_rpkg_file)
-        {
-            rpkg_function::import_rpkg_files_in_folder(input_path);
-        }
-        else
-        {
-            rpkg_function::import_rpkg(input_path, false);
-        }
-
-        std::filesystem::path base_folder_path = input_path;
-
-        std::string parent_path = base_folder_path.parent_path().string();
-
-        //rpkg_function::import_rpkg_files_in_folder(parent_path);
-
-        std::stringstream ss;
-
-        ss << "Scanning folder: Done";
-
-        timing_string = "Searching entities (TEMP/TBLU)...";
-
-        //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
-
-        if (!hash_list_loaded)
-        {
-            LOG("Loading Hash List...");
-            //generic_function::load_hash_list(true);
-            LOG("Loading Hash List: Done");
-        }*/
-
     uint64_t entities_hash_count = 0;
     uint64_t entities_hash_size_total = 0;
 
@@ -72,7 +29,7 @@ void rpkg_function::search_entities(std::string& input_path, std::string& filter
     {
         std::string message = "Searching " + rpkgs.at(i).rpkg_file_name + "...";
 
-        if (input_path == "" || input_path == rpkgs.at(i).rpkg_file_path)
+        if (input_path.empty() || input_path == rpkgs.at(i).rpkg_file_path)
         {
             for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++)
             {
@@ -91,18 +48,18 @@ void rpkg_function::search_entities(std::string& input_path, std::string& filter
 
                         uint32_t rpkg_index = rpkg_function::get_latest_hash(temp_hash_value);
 
-                        if (rpkg_index != UINT32_MAX)
-                        {
-                            if (input_path == "" || input_path == rpkgs.at(rpkg_index).rpkg_file_path)
-                            {
-                                std::unordered_map<uint64_t, uint64_t>::iterator it6 = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+                        if (rpkg_index == UINT32_MAX)
+                            continue;
 
-                                if (it6 != rpkgs.at(rpkg_index).hash_map.end())
-                                {
-                                    entities_hash_size_total += rpkgs.at(rpkg_index).hash.at(it6->second).data.resource.size_final;
-                                    entities_hash_count++;
-                                }
-                            }
+                        if (!input_path.empty() && input_path != rpkgs.at(rpkg_index).rpkg_file_path)
+                            continue;
+
+                        auto it6 = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+
+                        if (it6 != rpkgs.at(rpkg_index).hash_map.end())
+                        {
+                            entities_hash_size_total += rpkgs.at(rpkg_index).hash.at(it6->second).data.resource.size_final;
+                            entities_hash_count++;
                         }
                     }
                 }
@@ -124,7 +81,7 @@ void rpkg_function::search_entities(std::string& input_path, std::string& filter
     {
         std::string message = "Searching " + rpkgs.at(i).rpkg_file_name + "...";
 
-        if (input_path == "" || input_path == rpkgs.at(i).rpkg_file_path)
+        if (input_path.empty() || input_path == rpkgs.at(i).rpkg_file_path)
         {
             for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++)
             {
@@ -133,65 +90,60 @@ void rpkg_function::search_entities(std::string& input_path, std::string& filter
                     return;
                 }
 
-                if (results_count < max_results)
+                if (results_count >= max_results || rpkgs.at(i).hash_resource_types.at(r) != "TEMP")
+                    continue;
+
+                for (uint64_t j2 = 0; j2 < rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).size(); j2++)
                 {
-                    if (rpkgs.at(i).hash_resource_types.at(r) == "TEMP")
+                    if (gui_control == ABORT_CURRENT_TASK)
                     {
-                        for (uint64_t j = 0; j < rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).size(); j++)
+                        return;
+                    }
+
+                    if (results_count < max_results)
+                    {
+                        uint64_t hashIndex = rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).at(j2);
+
+                        uint64_t tempHashValue = rpkgs.at(i).hash.at(hashIndex).hash_value;
+
+                        uint32_t rpkgIndex = rpkg_function::get_latest_hash(tempHashValue);
+
+                        if (rpkgIndex == UINT32_MAX ||
+                            !(input_path.empty() || input_path == rpkgs.at(rpkgIndex).rpkg_file_path))
+                            continue;
+
+                        auto it61 = rpkgs.at(rpkgIndex).hash_map.find(tempHashValue);
+
+                        if (!(it61 != rpkgs.at(rpkgIndex).hash_map.end()))
+                            continue;
+
+                        if (((entities_hash_count_current * (uint64_t)100000) / (uint64_t)entities_hash_count) % (uint64_t)10 == 0 && entities_hash_count_current > 0)
                         {
-                            if (gui_control == ABORT_CURRENT_TASK)
-                            {
-                                return;
-                            }
-
-                            if (results_count < max_results)
-                            {
-                                uint64_t hash_index = rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).at(j);
-
-                                uint64_t temp_hash_value = rpkgs.at(i).hash.at(hash_index).hash_value;
-
-                                uint32_t rpkg_index = rpkg_function::get_latest_hash(temp_hash_value);
-
-                                if (rpkg_index != UINT32_MAX)
-                                {
-                                    if (input_path == "" || input_path == rpkgs.at(rpkg_index).rpkg_file_path)
-                                    {
-                                        std::unordered_map<uint64_t, uint64_t>::iterator it6 = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
-
-                                        if (it6 != rpkgs.at(rpkg_index).hash_map.end())
-                                        {
-                                            if (((entities_hash_count_current * (uint64_t)100000) / (uint64_t)entities_hash_count) % (uint64_t)10 == 0 && entities_hash_count_current > 0)
-                                            {
-                                                stringstream_length = console::update_console(message, entities_hash_size_total, entities_hash_size_current, start_time, stringstream_length);
-                                            }
-
-                                            entities_hash_size_current += rpkgs.at(rpkg_index).hash.at(it6->second).data.resource.size_final;
-                                            entities_hash_count_current++;
-
-                                            std::unordered_map<uint64_t, uint64_t>::iterator it4 = hash_searched.find(temp_hash_value);
-
-                                            if (it4 == hash_searched.end())
-                                            {
-                                                std::unordered_map<uint64_t, entity>::iterator it = deep_search_entities_map.find(temp_hash_value);
-
-                                                if (it == deep_search_entities_map.end())
-                                                {
-                                                    deep_search_entities_map.emplace(temp_hash_value, entity(rpkg_index, it6->second, 3));
-
-                                                    results_count = deep_search_entities_map[temp_hash_value].search(search_lower_case, search_entity_ids, search_entity_names, search_property_names, search_property_values, results_count, max_results);
-                                                }
-                                                else
-                                                {
-                                                    results_count = deep_search_entities_map[temp_hash_value].search(search_lower_case, search_entity_ids, search_entity_names, search_property_names, search_property_values, results_count, max_results);
-                                                }
-
-                                                hash_searched[temp_hash_value] = hash_searched.size();
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            stringstream_length = console::update_console(message, entities_hash_size_total, entities_hash_size_current, start_time, stringstream_length);
                         }
+
+                        entities_hash_size_current += rpkgs.at(rpkgIndex).hash.at(it61->second).data.resource.size_final;
+                        entities_hash_count_current++;
+
+                        auto it4 = hash_searched.find(tempHashValue);
+
+                        if (!(it4 == hash_searched.end()))
+                            continue;
+
+                        auto it = deep_search_entities_map.find(tempHashValue);
+
+                        if (it == deep_search_entities_map.end())
+                        {
+                            deep_search_entities_map.emplace(tempHashValue, entity(rpkgIndex, it61->second, 3));
+
+                            results_count = deep_search_entities_map[tempHashValue].search(search_lower_case, search_entity_ids, search_entity_names, search_property_names, search_property_values, results_count, max_results);
+                        }
+                        else
+                        {
+                            results_count = deep_search_entities_map[tempHashValue].search(search_lower_case, search_entity_ids, search_entity_names, search_property_names, search_property_values, results_count, max_results);
+                        }
+
+                        hash_searched[tempHashValue] = hash_searched.size();
                     }
                 }
             }

@@ -1,6 +1,3 @@
 #include "rpkg.h"
 
-rpkg::rpkg()
-{
-
-}
+rpkg::rpkg() = default;

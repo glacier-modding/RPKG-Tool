@@ -2753,7 +2753,7 @@ int deep_search_localization(char* input_path, char* search_value, int search_dl
     if (search_rtlv != 0)
         search_rtlv_bool = true;
 
-    rpkg_function::search_localization(input_path_string, filter, search, search_type, output_path, search_dlge_bool,
+    rpkg_function::search_localization(input_path_string, search, output_path, search_dlge_bool,
                                        search_locr_bool, search_rtlv_bool, max_results);
 
     return 0;
@@ -2798,7 +2798,7 @@ int deep_search_entities(char* input_path, char* search_value, bool search_entit
     if (search_property_values != 0)
         search_property_values_bool = true;
 
-    rpkg_function::search_entities(input_path_string, filter, search, search_type, output_path, search_entity_ids_bool,
+    rpkg_function::search_entities(input_path_string, search, search_entity_ids_bool,
                                    search_entity_names_bool, search_property_names_bool, search_property_values_bool,
                                    max_results);
 

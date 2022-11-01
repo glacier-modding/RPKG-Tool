@@ -302,11 +302,11 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-search_entities")
     {
-        rpkg_function::search_entities(input_path, filter, search, search_type, output_path, true, true, true, true, 1000);
+        rpkg_function::search_entities(input_path, search, true, true, true, true, 1000);
     }
     else if (command == "-search_localization")
     {
-        rpkg_function::search_localization(input_path, filter, search, search_type, output_path, true, true, true, 1000);
+        rpkg_function::search_localization(input_path, search, output_path, true, true, true, 1000);
     }
     else if (command == "-get_line_string")
     {
@@ -330,7 +330,7 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-search_repo")
     {
-        rpkg_function::search_repo(input_path, filter, search, search_type, output_path, 1000);
+        rpkg_function::search_repo(input_path, search, 1000);
     }
     else if (command == "-extract_mrtr_to_json")
     {
@@ -425,7 +425,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-mrtr_to_json",
                                                     "-extract_all_hash_depends_from",
                                                     "-extract_non_base_hash_depends_from",
-                                                    "-extract_non_boot_hash_depends_from"
+                                                    "-extract_non_boot_hash_depends_from",
                                                     "-extract_all_hash_depends_prim_models_from",
                                                     "-extract_direct_hash_depends_from",
                                                     "-extract_direct_hash_depends_prim_models_from",

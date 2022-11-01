@@ -43,7 +43,7 @@ repo::repo(uint64_t rpkgs_index, uint64_t hash_index)
         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(repo_rpkg_index).rpkg_file_path + " could not be read.");
     }
 
-    file.seekg(rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).data.header.data_offset, file.beg);
+    file.seekg(rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).data.header.data_offset, std::ifstream::beg);
     file.read(repo_input_data.data(), repo_hash_size);
     file.close();
 
@@ -103,13 +103,13 @@ repo::repo(uint64_t rpkgs_index, uint64_t hash_index)
     std::vector<char>().swap(repo_data);
 }
 
-repo::repo(std::string repo_path)
+repo::repo(const std::string& repo_path)
 {
     std::ifstream repo_file(repo_path, std::ifstream::binary);
 
-    repo_file.seekg(0, repo_file.end);
+    repo_file.seekg(0, std::ifstream::end);
     uint64_t repo_file_size = repo_file.tellg();
-    repo_file.seekg(0, repo_file.beg);
+    repo_file.seekg(0, std::ifstream::beg);
 
     std::vector<char> repo_data = std::vector<char>(repo_file_size, 0);
 
@@ -150,11 +150,11 @@ repo::repo(std::string repo_path)
     std::vector<char>().swap(repo_data);
 }
 
-std::string repo::pretty_json(std::string input_json)
+[[maybe_unused]] std::string repo::pretty_json(const std::string& input_json)
 {
     yyjson_doc* doc = yyjson_read(input_json.c_str(), input_json.length(), 0);
 
-    char* json = yyjson_write(doc, YYJSON_WRITE_PRETTY, NULL);
+    char* json = yyjson_write(doc, YYJSON_WRITE_PRETTY, nullptr);
 
     std::string output_json = std::string(json);
 
@@ -163,7 +163,7 @@ std::string repo::pretty_json(std::string input_json)
     return output_json;
 }
 
-int repo::valid_json(std::string input_json)
+int repo::valid_json(const std::string& input_json)
 {
     yyjson_doc* doc = yyjson_read(input_json.c_str(), input_json.length(), 0);
     
@@ -183,7 +183,7 @@ void repo::check_json(std::string input_json)
 
     yyjson_read_flag flag = YYJSON_READ_ALLOW_INVALID_UNICODE;
 
-    yyjson_doc* doc = yyjson_read_opts((char*)input_json.c_str(), input_json.length(), flag, NULL, &error);
+    yyjson_doc* doc = yyjson_read_opts((char*)input_json.c_str(), input_json.length(), flag, nullptr, &error);
 
     if (doc)
     {
@@ -225,7 +225,7 @@ void repo::check_json(std::string input_json)
     }
 }
 
-uint32_t repo::search(std::string search_string, uint32_t results_count, uint32_t max_results)
+uint32_t repo::search(const std::string& search_string, uint32_t results_count, uint32_t max_results)
 {
     return results_count;
 }
@@ -267,7 +267,7 @@ void repo::load_repo()
     output.close();*/
 }
 
-void repo::get_child_entries(std::string id)
+void repo::get_child_entries(const std::string& id)
 {
     
 }
@@ -372,7 +372,7 @@ void repo::get_runtimes(int category)
 
     std::unordered_map<std::string, yyjson_mut_val*> repo_runtimes;
 
-    std::string inventoryCategoryIcon = "";
+    std::string inventoryCategoryIcon;
 
     if (category == RUNTIME_QUESTITEMS)
         inventoryCategoryIcon = "questitem";
@@ -553,7 +553,7 @@ void repo::get_behaviours()
     }
 }
 
-void repo::get_image_hash(std::string id)
+void repo::get_image_hash(const std::string& id)
 {
     repo_response_data = "";
 
@@ -561,7 +561,7 @@ void repo::get_image_hash(std::string id)
     {
         if (repo_modified[id].contains("Image"))
         {
-            std::unordered_map<std::string, uint64_t>::iterator it2 = ores_object.ores_entries.find(std::string(repo_modified[id]["Image"]));
+            auto it2 = ores_object.ores_entries.find(std::string(repo_modified[id]["Image"]));
 
             if (it2 != ores_object.ores_entries.end())
             {
@@ -573,7 +573,7 @@ void repo::get_image_hash(std::string id)
     }
 }
 
-void repo::unload_repo()
+[[maybe_unused]] void repo::unload_repo()
 {
     //std::unordered_map<std::string, uint32_t>().swap(repo_entries_original);
     //std::unordered_map<std::string, uint32_t>().swap(repo_entries_modified);
@@ -584,7 +584,7 @@ void repo::load_ores(uint64_t rpkgs_index, uint64_t hash_index)
     ores_object = ores(rpkgs_index, hash_index);
 }
 
-void repo::get_json(std::string id)
+void repo::get_json(const std::string& id)
 {
     repo_response_data = "";
 
@@ -598,7 +598,7 @@ void repo::get_json(std::string id)
     }
 }
 
-void repo::save_json(std::string id, std::string json)
+void repo::save_json(const std::string& id, const std::string& json)
 {
     if (repo_modified.contains(id))
     {
@@ -636,7 +636,7 @@ void repo::save_json(std::string id, std::string json)
     }
 }
 
-void repo::create_patch(std::string patch_path)
+void repo::create_patch(const std::string& patch_path) const
 {
     nlohmann::json repo_patch;
     nlohmann::json smf_json_patch = nlohmann::json::object();
@@ -706,13 +706,13 @@ void repo::create_patch(std::string patch_path)
     }
 }
 
-void repo::import_patch(std::string patch_path)
+void repo::import_patch(const std::string& patch_path)
 {
     std::ifstream patch_file(patch_path, std::ifstream::binary);
 
-    patch_file.seekg(0, patch_file.end);
+    patch_file.seekg(0, std::ifstream::end);
     uint64_t patch_file_size = patch_file.tellg();
-    patch_file.seekg(0, patch_file.beg);
+    patch_file.seekg(0, std::ifstream::beg);
 
     std::vector<char> patch_data = std::vector<char>(patch_file_size, 0);
 
@@ -742,7 +742,7 @@ void repo::import_patch(std::string patch_path)
     }
 }
 
-void repo::duplicate_entry(std::string id)
+void repo::duplicate_entry(const std::string& id)
 {
     std::string guid = util::generate_guid();
 
@@ -755,12 +755,12 @@ void repo::duplicate_entry(std::string id)
     get_entry(guid);
 }
 
-void repo::erase_entry(std::string id)
+void repo::erase_entry(const std::string& id)
 {
     repo_modified.erase(id);
 }
 
-void repo::get_entry(std::string id)
+void repo::get_entry(const std::string& id)
 {
     repo_response_data = "";
 
@@ -838,7 +838,7 @@ void repo::get_entry(std::string id)
     }
 }
 
-void repo::update_json_at_pointer(std::string id, std::string json_pointer, std::string value)
+void repo::update_json_at_pointer(const std::string& id, const std::string& json_pointer, const std::string& value)
 {
     if (repo_modified.contains(id))
     {

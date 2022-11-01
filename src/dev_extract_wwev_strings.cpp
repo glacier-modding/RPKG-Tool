@@ -6,8 +6,6 @@
 #include "thirdparty/lz4/lz4.h"
 #include <iostream>
 #include <fstream>
-#include <regex>
-#include <filesystem>
 
 void dev_function::dev_extract_wwev_strings(std::string& output_path)
 {
