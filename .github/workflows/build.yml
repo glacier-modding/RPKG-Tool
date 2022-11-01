@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - rewrite
     tags:
       - v*
   pull_request:
@@ -55,29 +56,23 @@ jobs:
       run: |
         cmake --build cmake-build-release --target ${{ matrix.target }}
 
-    - name: Get the latest release of ResourceLib
-      uses: robinraju/release-downloader@v1
-      with:
-        repository: "OrfeasZ/ZHMTools"
-        latest: true
-        fileName: "ResourceLib-win-x64.zip"
-        out-file-path: cmake-build-release
-
     - name: Fetch hash list
       run: |
-        Invoke-WebRequest -Uri "https://hitmandb.glaciermodding.org/latest-hashes.7z" -OutFile "cmake-build-release\latest-hashes.7z"
+        Invoke-WebRequest -Uri "https://hitmandb.glaciermodding.org/latest-hashes.7z" -OutFile "latest-hashes.7z"
 
-    - name: Prepare artifacts
+    - name: Prepare build
       run: |
-        cd cmake-build-release
-        7z e ResourceLib-win-x64.zip -o_rpkg -i!"ResourceLib_*.dll"
+        7z e latest-hashes.7z -o_rpkg
+        cp cmake-build-release/*.dll _rpkg
+        cp cmake-build-release/*.exe _rpkg
+        cp cmake-build-release/*.pdb _rpkg
+        cp cmake-build-release/*.lib _rpkg
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v2
       with:
         name: ${{ matrix.target }}
-        path: |
-          cmake-build-release/*.{exe,dll,pdb,manifest,lib,exp,txt}
+        path: _rpkg
 
   create_release:
     name: Create release

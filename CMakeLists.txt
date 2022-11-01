@@ -139,7 +139,6 @@ set(lib-zhmtools
         thirdparty/zhmtools/ResourceLib_HM2.h
         thirdparty/zhmtools/ResourceLib_HM3.h
         thirdparty/zhmtools/ResourceLib_HM2016.h
-        thirdparty/zhmtools/ResourceLib_HMA.h
         thirdparty/zhmtools/ResourceLibCommon.h
 )
 set(thirdparty
