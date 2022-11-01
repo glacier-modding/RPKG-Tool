@@ -112,7 +112,7 @@ jobs:
 
     strategy:
       matrix:
-        artifact: [ "rpkg" ]
+        artifact: [ "rpkg-cli", "rpkg-lib" ]
 
     steps:
     - name: Get version
