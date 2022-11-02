@@ -143,23 +143,23 @@ rpkg_function::extract_all_hash_depends_from(std::string& input_path, std::strin
                     continue;
                 }
 
-                bool condition = true;
+                bool should_extract = true;
 
-                const bool is_boot_chunk = rpkg1.rpkg_file_path.find("chunk0.rpkg") == std::string::npos &&
-                                           rpkg1.rpkg_file_path.find("chunk0patch") == std::string::npos;
-                const bool is_base_chunk = rpkg1.rpkg_file_path.find("chunk1.rpkg") == std::string::npos &&
-                                           rpkg1.rpkg_file_path.find("chunk1patch") == std::string::npos;
+                const bool not_boot_chunk = rpkg1.rpkg_file_path.find("chunk0.rpkg") == std::string::npos &&
+                                            rpkg1.rpkg_file_path.find("chunk0patch") == std::string::npos;
+                const bool not_base_chunk = rpkg1.rpkg_file_path.find("chunk1.rpkg") == std::string::npos &&
+                                            rpkg1.rpkg_file_path.find("chunk1patch") == std::string::npos;
 
                 if (strategy == HashExtractionStrategy::ALL_NON_BASE)
                 {
-                    condition = !(is_boot_chunk || is_base_chunk);
+                    should_extract = not_boot_chunk && not_base_chunk;
                 }
                 else if (strategy == HashExtractionStrategy::ALL_NON_BOOT)
                 {
-                    condition = !is_boot_chunk;
+                    should_extract = not_boot_chunk;
                 }
 
-                if (!condition)
+                if (!should_extract)
                 {
                     continue;
                 }
