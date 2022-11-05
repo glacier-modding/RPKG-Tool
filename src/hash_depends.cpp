@@ -3,12 +3,9 @@
 #include "file.h"
 #include "global.h"
 #include "util.h"
-#include "rpkg.h"
 #include "hash.h"
 #include <iostream>
-#include <unordered_map>
 #include <sstream>
-#include <filesystem>
 
 void rpkg_function::hash_depends(std::string& input_path, std::string& filter)
 {
@@ -44,7 +41,7 @@ void rpkg_function::hash_depends(std::string& input_path, std::string& filter)
 
         for (uint64_t i = 0; i < rpkgs.size(); i++)
         {
-            std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(i).hash_map.find(hash_value);
+            auto it2 = rpkgs.at(i).hash_map.find(hash_value);
 
             hash_depends_variables temp_hash_depends_data;
 
@@ -70,7 +67,7 @@ void rpkg_function::hash_depends(std::string& input_path, std::string& filter)
 
                         for (uint64_t j = 0; j < rpkgs.size(); j++)
                         {
-                            std::unordered_map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(j).hash_map.find(rpkgs.at(i).hash.at(it2->second).hash_reference_data.hash_reference.at(k));
+                            auto it3 = rpkgs.at(j).hash_map.find(rpkgs.at(i).hash.at(it2->second).hash_reference_data.hash_reference.at(k));
 
                             if (it3 != rpkgs.at(j).hash_map.end())
                             {
@@ -129,7 +126,7 @@ void rpkg_function::hash_depends(std::string& input_path, std::string& filter)
                     {
                         LOG("Hash file/resource: " << i.hash_dependency_file_name.at(j));
 
-                        std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(std::strtoull(i.hash_dependency_file_name.at(j).c_str(), nullptr, 16));
+                        auto it2 = hash_list_hash_map.find(std::strtoull(i.hash_dependency_file_name.at(j).c_str(), nullptr, 16));
 
                         if (it2 != hash_list_hash_map.end())
                         {
@@ -239,7 +236,7 @@ void rpkg_function::hash_depends(std::string& input_path, std::string& filter)
         {
             LOG("Hash file/resource: " << reverse_dependency.at(i));
 
-            std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(std::strtoull(reverse_dependency.at(i).c_str(), nullptr, 16));
+            auto it2 = hash_list_hash_map.find(std::strtoull(reverse_dependency.at(i).c_str(), nullptr, 16));
 
             if (it2 != hash_list_hash_map.end())
             {

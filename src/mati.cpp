@@ -193,7 +193,7 @@ void mati::load_hash_depends()
 
             if (pos1 != std::string::npos)
             {
-                size_t pos2 = text_depends_in_rpkgs_string_view.substr(pos1).find(".");
+                size_t pos2 = text_depends_in_rpkgs_string_view.substr(pos1).find('.');
 
                 if (pos2 != std::string::npos)
                 {
@@ -245,7 +245,7 @@ void mati::load_hash_depends()
 
             if (pos1 != std::string::npos)
             {
-                size_t pos2 = mate_depends_in_rpkgs_string_view.substr(pos1).find(".");
+                size_t pos2 = mate_depends_in_rpkgs_string_view.substr(pos1).find('.');
 
                 if (pos2 != std::string::npos)
                 {

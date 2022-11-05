@@ -1,14 +1,11 @@
 #include "prim.h"
-#include "rpkg_function.h"
 #include "file.h"
 #include "global.h"
 #include "crypto.h"
-#include "console.h"
 #include "util.h"
 #include "borg.h"
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
-#include <unordered_map>
 #include <fstream>
 
 prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
@@ -45,7 +42,7 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(prim_rpkg_index).rpkg_file_path + " could not be read.");
     }
 
-    file.seekg(rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).data.header.data_offset, file.beg);
+    file.seekg(rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).data.header.data_offset, std::ifstream::beg);
     file.read(prim_input_data.data(), prim_hash_size);
     file.close();
 
@@ -84,7 +81,7 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
 
     //LOG("PRIM file: " + prim_file_name);
 
-    std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).hash_value);
+    auto it2 = hash_list_hash_map.find(rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).hash_value);
 
     if (it2 != hash_list_hash_map.end())
     {
@@ -288,7 +285,7 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
         }
     }
 
-    if (borg_depends_file_name.size() > 0)
+    if (!borg_depends_file_name.empty())
     {
         borg temp_borg(borg_depends_rpkg_index.at(0).at(borg_depends_rpkg_index_index.at(0)), borg_depends_hash_index.at(0).at(borg_depends_hash_index_index.at(0)));
 
@@ -309,7 +306,7 @@ prim::prim(const std::string& prim_file_path)
         LOG_AND_EXIT("Error: PRIM file " + prim_file_path + " could not be read.");
     }
 
-    file.seekg(0, file.beg);
+    file.seekg(0, std::ifstream::beg);
 
     uint64_t rpkg_file_name_length = 0;
     uint32_t prim_decompressed_size = 0;
@@ -569,7 +566,7 @@ prim::prim(const std::string& prim_file_path)
         }
     }
 
-    if (borg_depends_file_name.size() > 0)
+    if (!borg_depends_file_name.empty())
     {
         //borg temp_borg(borg_depends_rpkg_index.at(0).at(borg_depends_rpkg_index_index.at(0)), borg_depends_hash_index.at(0).at(borg_depends_hash_index_index.at(0)));
 
@@ -602,7 +599,7 @@ void prim::load_hash_depends()
 
             for (uint64_t j = 0; j < rpkgs.size(); j++)
             {
-                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(j).hash_map.find(rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).hash_reference_data.hash_reference.at(i));
+                auto it = rpkgs.at(j).hash_map.find(rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).hash_reference_data.hash_reference.at(i));
 
                 if (it != rpkgs.at(j).hash_map.end())
                 {
@@ -696,7 +693,7 @@ void prim::load_hash_depends()
 
             if (pos1 != std::string::npos)
             {
-                size_t pos2 = mati_depends_in_rpkgs_string_view.substr(pos1).find(".");
+                size_t pos2 = mati_depends_in_rpkgs_string_view.substr(pos1).find('.');
 
                 if (pos2 != std::string::npos)
                 {
@@ -748,7 +745,7 @@ void prim::load_hash_depends()
 
             if (pos1 != std::string::npos)
             {
-                size_t pos2 = borg_depends_in_rpkgs_string_view.substr(pos1).find(".");
+                size_t pos2 = borg_depends_in_rpkgs_string_view.substr(pos1).find('.');
 
                 if (pos2 != std::string::npos)
                 {
@@ -783,15 +780,10 @@ void prim::load_hash_depends()
     }
 }
 
-prim::prim_header::prim_header()
-{
-
-}
+prim::prim_header::prim_header() = default;
 
 prim::prim_header::prim_header(std::vector<char>& prim_data, uint32_t& prim_position)
 {
-    char input[1024];
-    char char4[4];
     uint8_t bytes1 = 0;
     uint16_t bytes2 = 0;
     uint32_t bytes4 = 0;
@@ -815,15 +807,10 @@ prim::prim_header::prim_header(std::vector<char>& prim_data, uint32_t& prim_posi
     //LOG("  - PRIM header type value: " + util::uint16_t_to_hex_string(type));
 }
 
-prim::prim_object_header::prim_object_header()
-{
-
-}
+prim::prim_object_header::prim_object_header() = default;
 
 prim::prim_object_header::prim_object_header(std::vector<char>& prim_data, uint32_t& prim_position)
 {
-    char input[1024];
-    char char4[4];
     uint8_t bytes1 = 0;
     uint16_t bytes2 = 0;
     uint32_t bytes4 = 0;
@@ -913,15 +900,10 @@ prim::prim_object_header::prim_object_header(std::vector<char>& prim_data, uint3
     //LOG("      - z: " + util::float_to_string(bounding_box_max.z));
 }
 
-prim::prim_object::prim_object()
-{
-
-}
+prim::prim_object::prim_object() = default;
 
 prim::prim_object::prim_object(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number)
 {
-    char input[1024];
-    char char4[4];
     uint8_t bytes1 = 0;
     uint16_t bytes2 = 0;
     uint32_t bytes4 = 0;
@@ -1081,15 +1063,10 @@ prim::prim_object::prim_object(std::vector<char>& prim_data, uint32_t& prim_posi
     //LOG("          - z: " + util::float_to_string(bounding_box_max.z));
 }
 
-prim::prim_mesh::prim_mesh()
-{
-
-}
+prim::prim_mesh::prim_mesh() = default;
 
 prim::prim_mesh::prim_mesh(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number)
 {
-    char input[1024];
-    char char4[4];
     uint8_t bytes1 = 0;
     uint16_t bytes2 = 0;
     uint32_t bytes4 = 0;
@@ -1169,15 +1146,10 @@ prim::prim_mesh::prim_mesh(std::vector<char>& prim_data, uint32_t& prim_position
     prim_position = prim_position_backup;
 }
 
-prim::prim_weighted_mesh::prim_weighted_mesh()
-{
-
-}
+prim::prim_weighted_mesh::prim_weighted_mesh() = default;
 
 prim::prim_weighted_mesh::prim_weighted_mesh(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number)
 {
-    char input[1024];
-    char char4[4];
     uint8_t bytes1 = 0;
     uint16_t bytes2 = 0;
     uint32_t bytes4 = 0;
@@ -1209,15 +1181,10 @@ prim::prim_weighted_mesh::prim_weighted_mesh(std::vector<char>& prim_data, uint3
 
 }
 
-prim::prim_sub_mesh::prim_sub_mesh()
-{
-
-}
+prim::prim_sub_mesh::prim_sub_mesh() = default;
 
 prim::prim_sub_mesh::prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number, prim_mesh& temp_prim_mesh, std::vector<char>& prim_meta_data, bool flag_high_resolution, bool& success)
 {
-    char input[1024];
-    char char4[4];
     uint8_t bytes1 = 0;
     uint16_t bytes2 = 0;
     uint32_t bytes4 = 0;
@@ -1674,15 +1641,10 @@ prim::prim_sub_mesh::prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_
     }
 }
 
-prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh()
-{
-
-}
+prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh() = default;
 
 prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number, prim_weighted_mesh& temp_weighted_prim_mesh, std::vector<char>& prim_meta_data, bool flag_high_resolution, bool& success)
 {
-    char input[1024];
-    char char4[4];
     uint8_t bytes1 = 0;
     uint16_t bytes2 = 0;
     uint32_t bytes4 = 0;
@@ -2282,7 +2244,6 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
 
             success = false;
 
-
             //return;
         }
     }
@@ -2321,7 +2282,7 @@ void prim::extract_meta(std::string output_path)
     }
     else
     {
-        pos = rpkg_base_file_name.find(".");
+        pos = rpkg_base_file_name.find('.');
 
         if (pos != std::string::npos)
         {
@@ -2351,7 +2312,7 @@ void prim::extract_meta(std::string output_path)
     std::memcpy(&char4, &compressed_size_final, 0x4);
     output_file.write(char4, 0x4);
 
-    if (borg_depends_file_name.size() > 0)
+    if (!borg_depends_file_name.empty())
     {
         uint32_t bone_count = asset3ds_data.bones_data.size();
         std::memcpy(&char4, &bone_count, 0x4);
@@ -2364,17 +2325,17 @@ void prim::extract_meta(std::string output_path)
 
     output_file.write(output_file_data.data(), compressed_size_final);
 
-    if (borg_depends_file_name.size() > 0)
+    if (!borg_depends_file_name.empty())
     {
-        for (uint32_t b = 0; b < asset3ds_data.bones_data.size(); b++)
+        for (auto & b : asset3ds_data.bones_data)
         {
-            uint32_t bone_name_length = asset3ds_data.bones_data.at(b).name.length();
+            uint32_t bone_name_length = b.name.length();
             bone_name_length++;
 
             std::memcpy(&char4, &bone_name_length, 0x4);
             output_file.write(char4, 0x4);
 
-            output_file.write(asset3ds_data.bones_data.at(b).name.c_str(), asset3ds_data.bones_data.at(b).name.length());
+            output_file.write(b.name.c_str(), b.name.length());
             output_file.write("\0", 0x1);
         }
     }

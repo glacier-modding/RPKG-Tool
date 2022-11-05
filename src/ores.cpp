@@ -3,9 +3,7 @@
 #include "crypto.h"
 #include "util.h"
 #include "thirdparty/lz4/lz4.h"
-#include <unordered_map>
 #include <fstream>
-#include <iomanip>
 
 ores::ores() = default;
 
@@ -39,7 +37,7 @@ ores::ores(uint64_t rpkgs_index, uint64_t hash_index)
         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(ores_rpkg_index).rpkg_file_path + " could not be read.");
     }
 
-    file.seekg(rpkgs.at(ores_rpkg_index).hash.at(ores_hash_index).data.header.data_offset, file.beg);
+    file.seekg(rpkgs.at(ores_rpkg_index).hash.at(ores_hash_index).data.header.data_offset, std::ifstream::beg);
     file.read(ores_input_data.data(), ores_hash_size);
     file.close();
 
@@ -76,7 +74,6 @@ ores::ores(uint64_t rpkgs_index, uint64_t hash_index)
 
     uint8_t bytes1 = 0;
     uint32_t bytes4 = 0;
-    uint64_t bytes8 = 0;
 
     std::memcpy(&bytes4, (&ores_data.data()[0] + position), sizeof(bytes4));
     position = bytes4 + 0xC;

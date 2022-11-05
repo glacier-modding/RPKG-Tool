@@ -201,7 +201,7 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-rebuild_dlge_from_json_from")
     {
-        rpkg_function::rebuild_dlge_from_json_from(input_path, filter, output_path);
+        rpkg_function::rebuild_dlge_from_json_from(input_path, output_path);
     }
     else if (command == "-rebuild_locr_from_json_from")
     {
