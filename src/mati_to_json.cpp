@@ -24,7 +24,7 @@ void rpkg_function::mati_to_json(std::string& input_path, std::string& filter, s
         {
             files.push_back(std::filesystem::path(input_path));
 
-            if (output_path != "")
+            if (!output_path.empty())
             {
                 if (std::filesystem::exists(output_path))
                 {
@@ -60,7 +60,7 @@ void rpkg_function::mati_to_json(std::string& input_path, std::string& filter, s
 
                     LOG(timing_string);
 
-                    if (output_path == "")
+                    if (output_path.empty())
                     {
                         mati temp_mati(file.string(), file.string() + ".meta", hash_value, file.parent_path().string(), output_path_is_file);
                     }

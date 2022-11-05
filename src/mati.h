@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <stdint.h>
+#include <cstdint>
 #include "hash.h"
 #include "thirdparty/json/json.hpp"
 

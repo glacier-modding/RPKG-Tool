@@ -34,7 +34,7 @@ void generic_function::compute_ioi_hash_from_file(std::string& input_path)
 
             const std::string& substring = ioi_string;
 
-            std::unordered_map<std::string, uint64_t>::iterator it = ioi_string_map.find(substring);
+            auto it = ioi_string_map.find(substring);
 
             if (it == ioi_string_map.end())
             {

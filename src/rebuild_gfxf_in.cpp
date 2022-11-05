@@ -7,7 +7,6 @@
 #include <chrono>
 #include <sstream>
 #include <fstream>
-#include <regex>
 #include <filesystem>
 
 void rpkg_function::rebuild_gfxf_in(std::string& input_path)
@@ -61,29 +60,29 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
             period_count++;
         }
 
-        if (std::filesystem::is_directory(entry.path().string()))
+        if (!std::filesystem::is_directory(entry.path().string()))
+            continue;
+
+        input_folder = entry.path().string();
+
+        if (input_folder.substr(input_folder.length() - 1, 1) == "\\")
         {
-            input_folder = entry.path().string();
+            input_folder = input_folder.substr(0, input_folder.length() - 1);
+        }
 
-            if (input_folder.substr(input_folder.length() - 1, 1) == "\\")
+        bool gfxf_folder_found = false;
+
+        for (auto& gfxf_folder : gfxf_folders)
+        {
+            if (input_folder == gfxf_folder)
             {
-                input_folder = input_folder.substr(0, input_folder.length() - 1);
+                gfxf_folder_found = true;
             }
+        }
 
-            bool gfxf_folder_found = false;
-
-            for (auto& gfxf_folder : gfxf_folders)
-            {
-                if (input_folder == gfxf_folder)
-                {
-                    gfxf_folder_found = true;
-                }
-            }
-
-            if (!gfxf_folder_found)
-            {
-                gfxf_folders.push_back(input_folder);
-            }
+        if (!gfxf_folder_found)
+        {
+            gfxf_folders.push_back(input_folder);
         }
     }
 
@@ -150,7 +149,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
             {
                 hash_file_name = util::to_upper_case(file_name.substr(0, (file_name.length() - 4)));
 
-                pos = hash_file_name.find_last_of(".");
+                pos = hash_file_name.find_last_of('.');
 
                 if (pos != std::string::npos)
                 {

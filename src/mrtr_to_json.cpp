@@ -22,7 +22,7 @@ void rpkg_function::mrtr_to_json(std::string& input_path, std::string& filter, s
         {
             files.push_back(std::filesystem::path(input_path));
 
-            if (output_path != "")
+            if (!output_path.empty())
             {
                 if (std::filesystem::exists(output_path))
                 {
@@ -42,10 +42,6 @@ void rpkg_function::mrtr_to_json(std::string& input_path, std::string& filter, s
             files = file::get_recursive_file_list(input_path);
         }
 
-        //LOG("Loading Hash List...");
-        //generic_function::load_hash_list(true);
-        //LOG("Loading Hash List: Done");
-
         for (std::filesystem::path& file : files)
         {
             uint64_t hash_value = file::get_hash_value_from_path(file, ".mrtr");
@@ -56,7 +52,7 @@ void rpkg_function::mrtr_to_json(std::string& input_path, std::string& filter, s
 
                 LOG(timing_string);
 
-                if (output_path == "")
+                if (output_path.empty())
                 {
                     mrtr temp_mrtr(file.string(), "", hash_value, file.parent_path().string(), output_path_is_file);
                 }

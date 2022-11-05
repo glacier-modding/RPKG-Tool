@@ -14,7 +14,6 @@ extern "C" void MD5Update(struct MD5Context* ctx, unsigned char* buf, unsigned l
 extern "C" void MD5Final(unsigned char digest[16], struct MD5Context* ctx);
 extern "C" void MD5Transform(uint32 buf[4], uint32 in[16]);
 
-
 void rpkg_function::hash_probe_from_file(std::string& input_path, std::string& filter)
 {
     std::string input_rpkg_folder_path = file::parse_input_folder_path(input_path);
@@ -24,9 +23,9 @@ void rpkg_function::hash_probe_from_file(std::string& input_path, std::string& f
         LOG_AND_EXIT("Error: The folder " + input_rpkg_folder_path + " to search for RPKG files for hash probe mode does not exist.");
     }
 
-    std::string H1 = "Z:\\HITMAN1\\";
-    std::string H2 = R"(Z:\HITMAN2\Runtime\)";
-    std::string H3 = R"(C:\Program Files\Epic Games\HITMAN3\Runtime\)";
+    const std::string H1 = R"(Z:\HITMAN1\)";
+    const std::string H2 = R"(Z:\HITMAN2\Runtime\)";
+    const std::string H3 = R"(C:\Program Files\Epic Games\HITMAN3\Runtime\)";
 
     rpkg_function::import_rpkg_files_in_folder(H1);
     rpkg_function::import_rpkg_files_in_folder(H2);
@@ -69,10 +68,10 @@ void rpkg_function::hash_probe_from_file(std::string& input_path, std::string& f
 
             auto it = ioi_string_map.find(substring);
 
-            if (!(it != ioi_string_map.end())) {
-                ioi_strings.push_back(ioi_string);
-                ioi_string_map[ioi_string] = ioi_strings.size() - 1;
-            }
+            if (it != ioi_string_map.end()) continue;
+
+            ioi_strings.push_back(ioi_string);
+            ioi_string_map[ioi_string] = ioi_strings.size() - 1;
         }
     }
 
@@ -87,8 +86,6 @@ void rpkg_function::hash_probe_from_file(std::string& input_path, std::string& f
         {
             lowercase.push_back(std::tolower(i));
         }
-
-        //LOG(main_data->console_prefix << "Input: " << main_data->input_to_ioi_hash << ", " << lowercase);
 
         MD5Init(&md5c);
         MD5Update(&md5c, (unsigned char*)lowercase.c_str(), static_cast<unsigned int>(lowercase.length()));
@@ -109,8 +106,6 @@ void rpkg_function::hash_probe_from_file(std::string& input_path, std::string& f
         {
             ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(signature[m]);
         }
-
-        //std::cout << ss.str() << "," << ioi_strings.at(j) << std::endl;
 
         int found_count = 0;
 
