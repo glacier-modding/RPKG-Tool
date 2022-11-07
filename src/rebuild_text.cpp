@@ -5,9 +5,7 @@
 #include "gpudevice.h"
 #include "thirdparty/directxtex/DirectXTex.h"
 #include <iostream>
-#include <sstream>
 #include <fstream>
-#include <regex>
 #include <filesystem>
 
 bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file_path, std::string& text_file_name, std::string& meta_file_path, std::string& rpkg_output_file, std::string& rpkgs_path, bool generate_rpkgs)
@@ -884,16 +882,16 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
         std::memcpy(&char2, &header_texd_width, 0x2);
 
-        for (uint64_t n = 0; n < 0x2; n++)
+        for (char n : char2)
         {
-            text_file_data.push_back(char2[n]);
+            text_file_data.push_back(n);
         }
 
         std::memcpy(&char2, &header_texd_height, 0x2);
 
-        for (uint64_t n = 0; n < 0x2; n++)
+        for (char n : char2)
         {
-            text_file_data.push_back(char2[n]);
+            text_file_data.push_back(n);
         }
 
         for (uint64_t m = 0; m < 0x2; m++)
@@ -909,7 +907,6 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
         {
             text_file_data.push_back(meta_data.data()[meta_position + 0x13 + m]);
         }
-
     }
     else
     {
@@ -925,9 +922,9 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
         {
             std::memcpy(&char4, &mipmaps_table_1.at(m), 0x4);
 
-            for (uint64_t n = 0; n < 0x4; n++)
+            for (char n : char4)
             {
-                text_file_data.push_back(char4[n]);
+                text_file_data.push_back(n);
             }
         }
         else
@@ -945,9 +942,9 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
         {
             std::memcpy(&char4, &mipmaps_table_2.at(m), 0x4);
 
-            for (uint64_t n = 0; n < 0x4; n++)
+            for (char n : char4)
             {
-                text_file_data.push_back(char4[n]);
+                text_file_data.push_back(n);
             }
         }
         else

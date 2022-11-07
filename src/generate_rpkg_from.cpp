@@ -16,7 +16,7 @@
 #include <sstream>
 #include <unordered_map>
 
-void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& output_path)
+void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& output_path, bool compress)
 {
     task_single_status = TASK_EXECUTING;
 
@@ -201,7 +201,7 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
     {
         for (unsigned long long i : rpkg_meta_data.meta_hash_value)
         {
-            std::unordered_map<uint64_t, uint64_t>::iterator it = hash_map.find(i);
+            auto it = hash_map.find(i);
 
             if (it != hash_map.end())
             {
@@ -297,7 +297,13 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
 
             uint64_t compressed_size_final;
 
-            compressed_size_final = LZ4_compress_HC(input_file_data.data(), output_file_data.data(), static_cast<int>(input_file_size), compressed_size, LZ4HC_CLEVEL_MAX);
+            if (compress)
+            {
+                compressed_size_final = LZ4_compress_HC(input_file_data.data(), output_file_data.data(), static_cast<int>(input_file_size), compressed_size, LZ4HC_CLEVEL_MAX);
+            } else
+            {
+                compressed_size_final = LZ4_compress_fast(input_file_data.data(), output_file_data.data(), static_cast<int>(input_file_size), compressed_size, 15);
+            }
 
             output_data_length.push_back(compressed_size_final);
 
@@ -340,7 +346,6 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
                     temp_hash_data.data.resource.size_in_memory = resized_size_in_memory;
                     temp_hash_data.data.resource.size_in_video_memory = meta_data.data.resource.size_in_video_memory;
                 }
-
             }
             else
             {
@@ -449,7 +454,6 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
     uint32_t table_offset = hash_count * 0x14;
     uint32_t table_size = 0x0;
     uint64_t hash_offset = 0x0;
-    uint64_t total_hash_size = 0x0;
 
     table_size = 0x0;
 

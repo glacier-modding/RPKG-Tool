@@ -221,7 +221,6 @@ set(RPKG_COMMON_SOURCES
         src/file.cpp
         src/file_reader.hpp
         src/generate_rpkg_from.cpp
-        src/generate_rpkg_quickly_from.cpp
         src/get_latest_hash.cpp
         src/get_line_string.cpp
         src/get_unique_name.cpp

@@ -3,11 +3,8 @@
 #include "global.h"
 #include "util.h"
 #include "text.h"
-#include "thirdparty/directxtex/DirectXTex.h"
-#include <unordered_map>
 #include <chrono>
 #include <sstream>
-#include <regex>
 #include <filesystem>
 
 void rpkg_function::extract_text_from(std::string& input_path, const std::string& filter, const std::string& output_path)
@@ -49,9 +46,9 @@ void rpkg_function::extract_text_from(std::string& input_path, const std::string
 
     const std::vector<std::string> filters = util::parse_input_filter(filter);
 
-    for (uint64_t f = 0; f < filters.size(); f++)
+    for (const auto & filter : filters)
     {
-        uint64_t text_hash_value = std::strtoull(filters.at(f).c_str(), nullptr, 16);
+        uint64_t text_hash_value = std::strtoull(filter.c_str(), nullptr, 16);
 
         for (uint64_t i = 0; i < rpkgs.size(); i++)
         {
@@ -60,7 +57,7 @@ void rpkg_function::extract_text_from(std::string& input_path, const std::string
             if (rpkgs.at(i).rpkg_file_path != input_path)
                 continue;
 
-            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(text_hash_value);
+            auto it = rpkgs.at(rpkg_index).hash_map.find(text_hash_value);
 
             if (it == rpkgs.at(rpkg_index).hash_map.end())
                 continue;

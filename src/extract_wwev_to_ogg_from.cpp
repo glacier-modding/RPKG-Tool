@@ -307,10 +307,10 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
                         }
                     }
 
-                    if (!found && filter != "")
+                    if (!found && !filter.empty())
                         continue;
 
-                    if (filters.size() > 0)
+                    if (!filters.empty())
                     {
                         extracted.at(input_filter_index) = true;
                     }
@@ -548,7 +548,7 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
             }
         }
 
-        if (filter == "")
+        if (filter.empty())
             continue;
 
         for (uint64_t z = 0; z < filters.size(); z++)
@@ -566,7 +566,7 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
             }
             else
             {
-                if (not_found_in.at(z) == "")
+                if (not_found_in.at(z).empty())
                 {
                     not_found_in.at(z).append(rpkgs.at(i).rpkg_file_name);
                 }
@@ -588,7 +588,7 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
     percent_progress = static_cast<uint32_t>(100);
 
-    if (filter != "")
+    if (!filter.empty())
     {
         for (uint64_t z = 0; z < filters.size(); z++)
         {

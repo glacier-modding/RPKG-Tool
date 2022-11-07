@@ -2742,7 +2742,7 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, bool generate_rpkgs
             //std::cout << *it << std::endl;
             //std::cout << output_path_string << std::endl;
 
-            rpkg_function::generate_rpkg_from(input_path, output_path_string);
+            rpkg_function::generate_rpkg_from(input_path, output_path_string, true);
         }
     }
 

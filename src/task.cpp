@@ -133,11 +133,11 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-generate_rpkg_from")
     {
-        rpkg_function::generate_rpkg_from(input_path, output_path);
+        rpkg_function::generate_rpkg_from(input_path, output_path, true);
     }
     else if (command == "-generate_rpkg_quickly_from")
     {
-        rpkg_function::generate_rpkg_quickly_from(input_path, output_path);
+        rpkg_function::generate_rpkg_from(input_path, output_path, false);
     }
     else if (command == "-hash_depends")
     {
@@ -189,7 +189,7 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-rebuild_text_in")
     {
-        rpkg_function::rebuild_text_in(input_path, filter, output_path, true);
+        rpkg_function::rebuild_text_in(input_path, output_path, true);
     }
     else if (command == "-rebuild_gfxf_in")
     {
@@ -197,7 +197,7 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-rebuild_wwev_in")
     {
-        rpkg_function::rebuild_wwev_in(input_path, filter, output_path);
+        rpkg_function::rebuild_wwev_in(input_path);
     }
     else if (command == "-rebuild_dlge_from_json_from")
     {

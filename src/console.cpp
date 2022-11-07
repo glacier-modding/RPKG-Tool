@@ -198,8 +198,7 @@ void console::display_usage_info()
     LOG("        Generates a RPKG file from hash file(s) in a given folder and all subfolders.");
     LOG("        The folder name is used for the filename of the generated RPKG file.");
     LOG("    -generate_rpkg_quickly_from <path to folder to generate rpkg from>");
-    LOG("        Generates a RPKG file from hash file(s) in a given folder and all subfolders, but q u i c k l y.");
-    LOG("        The folder name is used for the filename of the generated RPKG file.");
+    LOG("        Same as -generate_rpkg_from but with faster generation.");
     LOG("    -hash_depends <path to folder containing RPKG files>");
     LOG("        Lists the forward and reverse depends of a given hash file/resource.");
     LOG("        Scans a directory, commonly Hitman's Runtime dir, and imports and");

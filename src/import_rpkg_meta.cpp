@@ -120,11 +120,11 @@ bool rpkg_function::import_rpkg_meta(rpkg& rpkg_meta_data, const std::string& rp
 
         if (rpkg_meta_data.rpkg_file_version == 1)
         {
-            rpkg_meta_file.seekg((static_cast<uint64_t>(rpkg_meta_data.header.patch_count) * static_cast<uint64_t>(0x8) + static_cast<uint64_t>(0x14)), rpkg_meta_file.beg);
+            rpkg_meta_file.seekg((static_cast<uint64_t>(rpkg_meta_data.header.patch_count) * static_cast<uint64_t>(0x8) + static_cast<uint64_t>(0x14)), std::ifstream::beg);
         }
         else
         {
-            rpkg_meta_file.seekg((static_cast<uint64_t>(rpkg_meta_data.header.patch_count) * static_cast<uint64_t>(0x8) + static_cast<uint64_t>(0x1D)), rpkg_meta_file.beg);
+            rpkg_meta_file.seekg((static_cast<uint64_t>(rpkg_meta_data.header.patch_count) * static_cast<uint64_t>(0x8) + static_cast<uint64_t>(0x1D)), std::ifstream::beg);
         }
 
         rpkg_meta_file.read(input, 0x7);

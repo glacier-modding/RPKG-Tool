@@ -77,7 +77,7 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
 
     if (rpkg_index != UINT32_MAX)
     {
-        std::unordered_map<uint64_t, uint64_t>::iterator it6 = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+        auto it6 = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
         if (it6 != rpkgs.at(rpkg_index).hash_map.end())
         {
@@ -127,7 +127,7 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
                     {
                         uint64_t rpkg_index2 = i;
 
-                        std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(ores_entry.second);
+                        auto it = rpkgs.at(i).hash_map.find(ores_entry.second);
 
                         if (it != rpkgs.at(i).hash_map.end())
                         {
@@ -143,7 +143,7 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
 
                             std::replace(ores_ioi_path.begin(), ores_ioi_path.end(), '/', '\\');
 
-                            size_t pos3 = ores_ioi_path.find_last_of("\\");
+                            size_t pos3 = ores_ioi_path.find_last_of('\\');
 
                             // ores_base_name = ores_ioi_path.substr(pos3 + 1);
 
@@ -157,7 +157,7 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
 
                                 std::size_t found_position_ores = util::to_upper_case(ores_ioi_path).find(filters.at(z));
 
-                                if ((found_position_hash != std::string::npos && filters.at(z) != "") || (found_position_ores != std::string::npos && filters.at(z) != ""))
+                                if ((found_position_hash != std::string::npos && !filters.at(z).empty()) || (found_position_ores != std::string::npos && !filters.at(z).empty()))
                                 {
                                     found = true;
 
@@ -165,7 +165,7 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
                                 }
                             }
 
-                            if (found || filter == "")
+                            if (found || filter.empty())
                             {
                                 file::create_directories(ores_ioi_directory);
 
