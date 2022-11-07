@@ -8,10 +8,9 @@
 #include <vector>
 #include <cstdint>
 #include "thirdparty/json/json.hpp"
-// ReSharper disable once CppUnusedIncludeDirective
-#include <iostream>
 
 #ifdef RPKG_CLI
+#include <iostream>
 #define LOG(x) std::cout << x << std::endl
 #define LOG_NO_ENDL(x) std::cout << x
 #define LOG_AND_EXIT(x) std::cout << x << std::endl; if (interative_mode) { return; } else std::exit(0)

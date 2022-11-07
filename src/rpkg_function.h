@@ -53,7 +53,7 @@ public:
     static void extract_prim_model_from(std::string& input_path, std::string filter, std::string& output_path);
     static void rebuild_prim_in(std::string& input_path, bool generate_rpkgs);
     static bool rebuild_text(std::string& text_folder, std::string& tga_file_path, std::string& text_file_name, std::string& meta_file_path, std::string& rpkg_output_file, std::string& rpkgs_path, bool generate_rpkgs);
-    static void rebuild_text_in(std::string& input_path, std::string& filter, std::string& output_path, bool generate_rpkgs);
+    static void rebuild_text_in(std::string& input_path, std::string& output_path, bool generate_rpkgs);
     static void extract_all_text_from(std::string& input_path, std::string& filter, std::string& output_path);
     static void extract_text_from(std::string& input_path, const std::string& filter, const std::string& output_path);
     static void extract_all_prim_of_temp_from(std::string& input_path, const std::string& filter, std::string& output_path, int type);
@@ -74,10 +74,9 @@ public:
     static void extract_rtlv_to_json_from(std::string& input_path, std::string& filter, std::string& output_path, bool output_to_string);
     static void extract_locr_to_json_from(std::string& input_path, std::string& filter, std::string& output_path, bool output_to_string);
     static void extract_dlge_to_json_from(std::string& input_path, std::string& filter, std::string& output_path, bool output_to_string);
-    static void generate_rpkg_from(std::string& input_path, std::string& output_path);
-    static void generate_rpkg_quickly_from(std::string& input_path, std::string& output_path);
+    static void generate_rpkg_from(std::string& input_path, std::string& output_path, bool compress);
     static void rebuild_gfxf_in(std::string& input_path);
-    static void rebuild_wwev_in(std::string& input_path, std::string& filter, std::string& output_path);
+    static void rebuild_wwev_in(std::string& input_path);
     static void extract_wwem_to_ogg_from(std::string& input_path, std::string& filter, std::string& output_path);
     static void extract_wwev_to_ogg_from(std::string& input_path, std::string& filter, std::string& output_path);
     static void extract_wwes_to_ogg_from(std::string& input_path, std::string& filter, std::string& output_path);

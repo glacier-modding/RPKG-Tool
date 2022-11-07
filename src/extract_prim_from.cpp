@@ -5,10 +5,7 @@
 #include "obj.h"
 #include "prim.h"
 #include "util.h"
-#include <unordered_map>
-#include <chrono>
 #include <sstream>
-#include <regex>
 #include <filesystem>
 #include <utility>
 
@@ -65,7 +62,7 @@ void rpkg_function::extract_prim_from(std::string& input_path, std::string filte
             if (rpkgs.at(i).rpkg_file_path != input_path)
                 continue;
 
-            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+            auto it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
             if (it != rpkgs.at(rpkg_index).hash_map.end())
             {
@@ -76,13 +73,13 @@ void rpkg_function::extract_prim_from(std::string& input_path, std::string filte
 
                 prim temp_prim(rpkg_index, it->second);
 
-                if (temp_prim.asset3ds_data.vertexes.size() > 0 && temp_prim.success)
+                if (!temp_prim.asset3ds_data.vertexes.empty() && temp_prim.success)
                 {
                     if (type == GLB_SINGLE)
                     {
                         std::string asset_file_name = "";
 
-                        if (output_path == "")
+                        if (output_path.empty())
                         {
                             asset_file_name = std::filesystem::current_path().generic_string() + "/" + util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".glb";
                         }

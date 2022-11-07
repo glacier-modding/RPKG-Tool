@@ -1834,14 +1834,14 @@ int generate_rpkg_files_from_data(char* temp_path)
 {
     std::set<std::string> directory_set;
 
-    for (uint64_t i = 0; i < temps.size(); i++)
+    for (auto & temp : temps)
     {
-        if (temps.at(i).file_has_been_changed)
+        if (temp.file_has_been_changed)
         {
             std::string temp_path_string = std::string(temp_path);
 
             std::string rpkg_base_file_name = file::get_root_file_name(
-                    rpkgs.at(temps.at(i).temp_rpkg_index).rpkg_file_name);
+                    rpkgs.at(temp.temp_rpkg_index).rpkg_file_name);
 
             rpkg_base_file_name = util::to_lower_case(rpkg_base_file_name);
 
@@ -1860,15 +1860,15 @@ int generate_rpkg_files_from_data(char* temp_path)
 
             temp_path_string.push_back('\\');
             temp_path_string.append(util::uint64_t_to_hex_string(
-                    rpkgs.at(temps.at(i).temp_rpkg_index).hash.at(temps.at(i).temp_hash_index).hash_value) + "." +
-                                    rpkgs.at(temps.at(i).temp_rpkg_index).hash.at(
-                                            temps.at(i).temp_hash_index).hash_resource_type);
+                    rpkgs.at(temp.temp_rpkg_index).hash.at(temp.temp_hash_index).hash_value) + "." +
+                                    rpkgs.at(temp.temp_rpkg_index).hash.at(
+                                            temp.temp_hash_index).hash_resource_type);
 
-            temps.at(i).generate_temp_file_from_data(temp_path_string);
+            temp.generate_temp_file_from_data(temp_path_string);
         }
     }
 
-    for (std::set<std::string>::iterator it = directory_set.begin(); it != directory_set.end(); it++)
+    for (auto it = directory_set.begin(); it != directory_set.end(); it++)
     {
         std::string input_path = *it;
         std::string filter = "";
@@ -1877,7 +1877,7 @@ int generate_rpkg_files_from_data(char* temp_path)
         std::cout << *it << std::endl;
         std::cout << std::string(temp_path) << std::endl;
 
-        rpkg_function::generate_rpkg_from(input_path, output_path);
+        rpkg_function::generate_rpkg_from(input_path, output_path, true);
     }
 
     return 0;
@@ -2022,7 +2022,7 @@ int get_temp_version(char* temp_hash, char* rpkg_file_path)
 
         if (rpkgs.at(i).rpkg_file_path == rpkg_file_path_string)
         {
-            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+            auto it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
             if (it != rpkgs.at(rpkg_index).hash_map.end())
             {

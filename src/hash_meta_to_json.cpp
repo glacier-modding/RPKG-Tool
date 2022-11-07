@@ -43,7 +43,7 @@ void rpkg_function::hash_meta_to_json(std::string& input_path)
         meta_file.read(input, sizeof(bytes8));
         std::memcpy(&bytes8, input, sizeof(bytes8));
         meta_data.hash_value = bytes8;
-        json_string += "\"hash_value\":\"" + util::uint64_t_to_hex_string(meta_data.hash_value) + "\",";
+        json_string += R"("hash_value":")" + util::uint64_t_to_hex_string(meta_data.hash_value) + "\",";
 
         meta_file.read(input, sizeof(bytes8));
         std::memcpy(&bytes8, input, sizeof(bytes8));
@@ -76,7 +76,7 @@ void rpkg_function::hash_meta_to_json(std::string& input_path)
         meta_file.read(input, sizeof(bytes4));
         input[4] = 0x0;
         meta_data.hash_resource_type = std::string(input);
-        json_string += "\"hash_resource_type\":\"" + meta_data.hash_resource_type + "\",";
+        json_string += R"("hash_resource_type":")" + meta_data.hash_resource_type + "\",";
 
         meta_file.read(input, sizeof(bytes4));
         std::memcpy(&bytes4, input, sizeof(bytes4));
@@ -132,25 +132,25 @@ void rpkg_function::hash_meta_to_json(std::string& input_path)
 
                 std::string hash_value_string = util::uint64_t_to_hex_string(bytes8);
 
-                std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(bytes8);
+                auto it2 = hash_list_hash_map.find(bytes8);
 
                 if (it2 != hash_list_hash_map.end())
                 {
                     if (hash_value_string == generic_function::compute_ioi_hash(hash_list_hash_strings.at(it2->second)))
                     {
-                        json_string += "{\"hash\":\"" + hash_list_hash_strings.at(it2->second) + "\",";
+                        json_string += R"({"hash":")" + hash_list_hash_strings.at(it2->second) + "\",";
                     }
                     else
                     {
-                        json_string += "{\"hash\":\"" + util::uint64_t_to_hex_string(bytes8) + "\",";
+                        json_string += R"({"hash":")" + util::uint64_t_to_hex_string(bytes8) + "\",";
                     }
                 }
                 else
                 {
-                    json_string += "{\"hash\":\"" + util::uint64_t_to_hex_string(bytes8) + "\",";
+                    json_string += R"({"hash":")" + util::uint64_t_to_hex_string(bytes8) + "\",";
                 }
 
-                json_string += "\"flag\":\"" + util::uint8_t_to_hex_string(temp_hash_reference_data.hash_reference_type.at(j)) + "\"}";
+                json_string += R"("flag":")" + util::uint8_t_to_hex_string(temp_hash_reference_data.hash_reference_type.at(j)) + "\"}";
 
                 if (j < temp_hash_reference_count - 1)
                 {
