@@ -20,19 +20,13 @@ jobs:
       matrix:
         target: [rpkg-cli, rpkg-lib]
 
-    steps:    
+    steps:
     - name: Checkout
       uses: actions/checkout@v3
 
     - name: Get latest CMake and Ninja
-      # Using 'latest' branch, the most recent CMake and ninja are installed.
-      uses: lukka/get-cmake@latest
-
-    - name: CMake cache
-      uses: actions/cache@v3
-      with:
-        path: cmake-build-release
-        key: ${{ matrix.target }}
+      run: |
+        choco install -y cmake ninja
 
     - name: Setup VS environment
       uses: ilammy/msvc-dev-cmd@v1
@@ -41,11 +35,8 @@ jobs:
 
     - name: Generate projects
       run: |
-        $path = "cmake-build-release"
-        If(!(test-path -PathType container $path)) {
-          mkdir $path
-        }
-        cd $path
+        mkdir cmake-build-release
+        cd cmake-build-release
         cmake -G Ninja `
           -DCMAKE_BUILD_TYPE=RelWithDebInfo `
           -DCMAKE_CXX_COMPILER=cl `
