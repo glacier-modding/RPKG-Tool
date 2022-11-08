@@ -14,7 +14,7 @@ on:
 jobs:
   build_windows:
     name: Build (Windows)
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     strategy:
       matrix:
@@ -74,6 +74,24 @@ jobs:
       with:
         name: ${{ matrix.target }}
         path: _rpkg
+
+  build_gui:
+    name: "Build GUI"
+    needs: [build_windows]
+    runs-on: windows-2022
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      - name: Restore NuGet packages
+        run: cd rpkg-gui && nuget restore rpkg.sln
+
+      - name: Build
+        run: |
+          cd rpkg-gui && msbuild /m /p:Configuration=Release /p:Platform=x64 rpkg.sln
 
   create_release:
     name: Create release
