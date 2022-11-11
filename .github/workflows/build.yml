@@ -79,6 +79,14 @@ jobs:
         with:
           msbuild-architecture: x64
 
+      - name: NuGet package cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: Restore NuGet packages
         run: cd rpkg-gui && nuget restore rpkg.sln
 
@@ -91,6 +99,12 @@ jobs:
       - name: Build
         run: |
           cd rpkg-gui && msbuild /m /p:Configuration=Release /p:Platform=x64 rpkg.sln
+
+      - name: Upload GUI artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: rpkg-gui
+          path: _build
 
   create_release:
     name: Create release
