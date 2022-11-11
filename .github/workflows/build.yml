@@ -26,7 +26,7 @@ jobs:
 
     - name: Get latest CMake and Ninja
       run: |
-        choco install -y cmake ninja
+        choco install -y ninja
 
     - name: Setup VS environment
       uses: ilammy/msvc-dev-cmd@v1
