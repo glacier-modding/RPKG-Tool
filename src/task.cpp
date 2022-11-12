@@ -171,10 +171,6 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     {
         rpkg_function::hash_probe(input_path, filter);
     }
-    else if (command == "-hash_probe_from_file")
-    {
-        rpkg_function::hash_probe_from_file(input_path, filter);
-    }
     else if (command == "-import_rpkg")
     {
         rpkg_function::import_rpkg(input_path, true);
@@ -430,7 +426,6 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-extract_direct_hash_depends_from",
                                                     "-extract_direct_hash_depends_prim_models_from",
                                                     "-hash_probe",
-                                                    "-hash_probe_from_file",
                                                     "-rebuild_prim_model_in",
                                                     "-rebuild_prim_in",
                                                     "-rebuild_text_in",

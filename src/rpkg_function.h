@@ -64,7 +64,6 @@ public:
     static void extract_temp_from(std::string& input_path, std::string& filter, std::string& output_path);
     static void extract_prel_refs(std::string& input_path);
     static void get_unique_name(std::unordered_map<std::string, uint32_t>& wwem_name_map, std::string& wem_base_name);
-    static void hash_probe_from_file(std::string& input_path, std::string& filter);
     static void hash_probe(const std::string& input_path, const std::string& filter);
     static void extract_direct_hash_depends_from(std::string& input_path, std::string& filter, std::string& output_path, bool extract_prim_models);
     static void hash_depends(std::string& input_path, std::string& filter);

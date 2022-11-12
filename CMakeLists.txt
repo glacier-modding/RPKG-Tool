@@ -233,7 +233,6 @@ set(RPKG_COMMON_SOURCES
         src/hash_depends.cpp
         src/hash_meta_to_json.cpp
         src/hash_probe.cpp
-        src/hash_probe_from_file.cpp
         src/import_hash_meta.cpp
         src/import_rpkg.cpp
         src/import_rpkg_files_in_folder.cpp
