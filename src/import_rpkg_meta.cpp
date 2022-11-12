@@ -175,7 +175,7 @@ bool rpkg_function::import_rpkg_meta(rpkg& rpkg_meta_data, const std::string& rp
         }
     }
 
-    for (uint64_t i = 0; i < rpkg_meta_data.header.patch_count; i++)
+    for (uint64_t i = 0; i < rpkg_meta_data.header.hash_count; i++)
     {
         rpkg_meta_file.read(input, sizeof(bytes8));
         std::memcpy(&bytes8, input, sizeof(bytes8));

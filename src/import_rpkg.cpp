@@ -106,7 +106,7 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path, bool with_timing)
     }
 
     std::string import_text = "Importing RPKG file: " + rpkgs.back().rpkg_file_name;
-    LOG_NO_ENDL(import_text);
+    LOG(import_text);
 
     // Seek to the hash data table's offset
     size_t hash_data_offset = 0x10;
@@ -253,14 +253,7 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path, bool with_timing)
 
     if (with_timing)
     {
-        std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-        std::stringstream ss;
-
-        ss << "completed in " << std::fixed << std::setprecision(6) << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
-
-        LOG(std::string((72 - import_text.length() - ss.str().length()), '.') + ss.str());
-
+        // The GUI needs this to know when importing is finished
         percent_progress = static_cast<uint32_t>(100);
     }
 
