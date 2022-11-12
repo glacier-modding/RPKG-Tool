@@ -74,7 +74,7 @@ public:
     static void extract_rtlv_to_json_from(std::string& input_path, std::string& filter, std::string& output_path, bool output_to_string);
     static void extract_locr_to_json_from(std::string& input_path, std::string& filter, std::string& output_path, bool output_to_string);
     static void extract_dlge_to_json_from(std::string& input_path, std::string& filter, std::string& output_path, bool output_to_string);
-    static void generate_rpkg_from(std::string& input_path, std::string& output_path, bool compress);
+    static void generate_rpkg_from(std::string& input_path, std::string& output_path, bool increased_compression);
     static void rebuild_gfxf_in(std::string& input_path);
     static void rebuild_wwev_in(std::string& input_path);
     static void extract_wwem_to_ogg_from(std::string& input_path, std::string& filter, std::string& output_path);

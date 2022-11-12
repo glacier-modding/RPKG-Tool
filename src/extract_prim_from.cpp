@@ -64,67 +64,67 @@ void rpkg_function::extract_prim_from(std::string& input_path, std::string filte
 
             auto it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
-            if (it != rpkgs.at(rpkg_index).hash_map.end())
+            if (!(it != rpkgs.at(rpkg_index).hash_map.end()))
+                continue;
+
+            if (gui_control == ABORT_CURRENT_TASK)
             {
-                if (gui_control == ABORT_CURRENT_TASK)
+                return;
+            }
+
+            prim temp_prim(rpkg_index, it->second);
+
+            if (temp_prim.asset3ds_data.vertexes.empty() || !temp_prim.success)
+                continue;
+
+            if (type == GLB_SINGLE)
+            {
+                std::string asset_file_name = "";
+
+                if (output_path.empty())
                 {
-                    return;
+                    asset_file_name = std::filesystem::current_path().generic_string() + "/" + util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".glb";
+                }
+                else
+                {
+                    asset_file_name = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".glb", output_path);
                 }
 
-                prim temp_prim(rpkg_index, it->second);
+                file::create_directories(output_path);
 
-                if (!temp_prim.asset3ds_data.vertexes.empty() && temp_prim.success)
-                {
-                    if (type == GLB_SINGLE)
-                    {
-                        std::string asset_file_name = "";
+                prim_asset_file_names.push_back(asset_file_name);
 
-                        if (output_path.empty())
-                        {
-                            asset_file_name = std::filesystem::current_path().generic_string() + "/" + util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".glb";
-                        }
-                        else
-                        {
-                            asset_file_name = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".glb", output_path);
-                        }
+                std::string meta_path = output_path + "\\" + "metas";
 
-                        file::create_directories(output_path);
+                file::create_directories(meta_path);
 
-                        prim_asset_file_names.push_back(asset_file_name);
+                temp_prim.extract_meta(meta_path);
 
-                        std::string meta_path = output_path + "\\" + "metas";
+                std::string hash_meta_file_name = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type, meta_path);
 
-                        file::create_directories(meta_path);
+                rpkg_function::extract_hash_meta(rpkg_index, it->second, hash_meta_file_name);
 
-                        temp_prim.extract_meta(meta_path);
+                gltf::output_to_single_file(temp_prim.asset3ds_data, asset_file_name, type, rotate);
+            }
+            else if (type == GLTF_SINGLE)
+            {
+                std::string asset_file_name = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".gltf", output_path);
 
-                        std::string hash_meta_file_name = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type, meta_path);
+                prim_asset_file_names.push_back(asset_file_name);
 
-                        rpkg_function::extract_hash_meta(rpkg_index, it->second, hash_meta_file_name);
+                temp_prim.extract_meta(output_path);
 
-                        gltf::output_to_single_file(temp_prim.asset3ds_data, asset_file_name, type, rotate);
-                    }
-                    else if (type == GLTF_SINGLE)
-                    {
-                        std::string asset_file_name = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".gltf", output_path);
+                gltf::output_to_single_file(temp_prim.asset3ds_data, asset_file_name, type, rotate);
+            }
+            else if (type == OBJ_SINGLE)
+            {
+                std::string asset_file_name = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".obj", output_path);
 
-                        prim_asset_file_names.push_back(asset_file_name);
+                prim_asset_file_names.push_back(asset_file_name);
 
-                        temp_prim.extract_meta(output_path);
+                //temp_prim.extract_meta(output_path);
 
-                        gltf::output_to_single_file(temp_prim.asset3ds_data, asset_file_name, type, rotate);
-                    }
-                    else if (type == OBJ_SINGLE)
-                    {
-                        std::string asset_file_name = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".obj", output_path);
-
-                        prim_asset_file_names.push_back(asset_file_name);
-
-                        //temp_prim.extract_meta(output_path);
-
-                        obj::output_to_single_file(temp_prim.asset3ds_data, asset_file_name);
-                    }
-                }
+                obj::output_to_single_file(temp_prim.asset3ds_data, asset_file_name);
             }
         }
     }

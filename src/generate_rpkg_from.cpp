@@ -16,7 +16,7 @@
 #include <sstream>
 #include <unordered_map>
 
-void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& output_path, bool compress)
+void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& output_path, bool increased_compression)
 {
     task_single_status = TASK_EXECUTING;
 
@@ -297,7 +297,7 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
 
             uint64_t compressed_size_final;
 
-            if (compress)
+            if (increased_compression)
             {
                 compressed_size_final = LZ4_compress_HC(input_file_data.data(), output_file_data.data(), static_cast<int>(input_file_size), compressed_size, LZ4HC_CLEVEL_MAX);
             } else

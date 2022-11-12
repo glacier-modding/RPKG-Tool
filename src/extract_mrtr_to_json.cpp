@@ -6,7 +6,6 @@
 #include <unordered_map>
 #include <chrono>
 #include <sstream>
-#include <regex>
 #include <filesystem>
 
 void rpkg_function::extract_mrtr_to_json(std::string& input_path, const std::string& filter, const std::string& output_path)
