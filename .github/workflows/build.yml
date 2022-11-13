@@ -104,7 +104,10 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: rpkg-gui
-          path: _build
+          path: |
+            _build/Release
+            !_build/Release/*.pdb
+            !_build/Release/rpkg.exe.config
 
   create_release:
     name: Create release
