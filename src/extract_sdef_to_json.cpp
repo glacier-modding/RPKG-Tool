@@ -4,10 +4,8 @@
 #include "global.h"
 #include "util.h"
 #include "sdef.h"
-#include <unordered_map>
 #include <chrono>
 #include <sstream>
-#include <regex>
 #include <filesystem>
 
 void rpkg_function::extract_sdef_to_json(std::string& input_path, const std::string& filter, const std::string& output_path)
@@ -49,7 +47,7 @@ void rpkg_function::extract_sdef_to_json(std::string& input_path, const std::str
             if (rpkgs.at(i).rpkg_file_path != input_path)
                 continue;
 
-            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(text_hash_value);
+            auto it = rpkgs.at(rpkg_index).hash_map.find(text_hash_value);
 
             if (it != rpkgs.at(rpkg_index).hash_map.end())
             {

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(rpkg)
+project(rpkg VERSION 2.26.0)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -163,6 +163,8 @@ set(thirdparty
         ${lib-zhmtools}
 )
 
+configure_file(src/version.h.in src/version.h)
+
 set(RPKG_COMMON_SOURCES
         src/borg.cpp
         src/borg.h
@@ -219,7 +221,6 @@ set(RPKG_COMMON_SOURCES
         src/file.cpp
         src/file_reader.hpp
         src/generate_rpkg_from.cpp
-        src/generate_rpkg_quickly_from.cpp
         src/get_latest_hash.cpp
         src/get_line_string.cpp
         src/get_unique_name.cpp
@@ -232,7 +233,6 @@ set(RPKG_COMMON_SOURCES
         src/hash_depends.cpp
         src/hash_meta_to_json.cpp
         src/hash_probe.cpp
-        src/hash_probe_from_file.cpp
         src/import_hash_meta.cpp
         src/import_rpkg.cpp
         src/import_rpkg_files_in_folder.cpp
@@ -316,3 +316,5 @@ target_link_directories(rpkg-lib PUBLIC ${PROJECT_SOURCE_DIR}/thirdparty/zhmtool
 target_link_libraries(rpkg-lib PUBLIC GLTFSDK DirectXTex ResourceLib_HM2 ResourceLib_HM2016 ResourceLib_HM3)
 
 include_directories(${CMAKE_SOURCE_DIR})
+# Pre-processed version header file (on configure step, before build)
+include_directories(${CMAKE_BINARY_DIR}/src)

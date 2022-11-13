@@ -11,3 +11,4 @@ CTestTestfile.cmake
 _deps
 .idea/workspace.xml
 cmake-build-*
+_build

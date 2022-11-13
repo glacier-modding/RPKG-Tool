@@ -13,7 +13,7 @@
 
 using json = nlohmann::ordered_json;
 
-void rpkg_function::rebuild_dlge_from_json_from(std::string &input_path, std::string &filter, std::string &output_path)
+void rpkg_function::rebuild_dlge_from_json_from(std::string& input_path, std::string& output_path)
 {
     task_single_status = TASK_EXECUTING;
 
@@ -88,7 +88,7 @@ void rpkg_function::rebuild_dlge_from_json_from(std::string &input_path, std::st
             hash_file_name = util::to_upper_case(json_file_name.substr(0, (json_file_name.length() - 5)));
         }
 
-        pos = hash_file_name.find_last_of(".");
+        pos = hash_file_name.find_last_of('.');
 
         if (pos != std::string::npos)
         {

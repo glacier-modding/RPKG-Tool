@@ -57,7 +57,7 @@ temp::temp(const uint64_t rpkgs_index, const uint64_t hash_index, const uint32_t
     temp_rpkg_index = rpkgs_index;
     temp_hash_index = hash_index;
 
-    temp_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value) + "." + rpkgs.at(rpkgs_index).hash.at(hash_index).hash_resource_type;;
+    temp_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value) + "." + rpkgs.at(rpkgs_index).hash.at(hash_index).hash_resource_type;
 
     tblu_return_value = TEMP_TBLU_NOT_FOUND_IN_DEPENDS;
 

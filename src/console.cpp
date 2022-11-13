@@ -3,6 +3,7 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include "version.h"
 
 #ifdef _WIN64
     #include <io.h>
@@ -40,7 +41,7 @@ int console::update_console(const std::string& message, const uint64_t indexMax,
 
 void console::display_usage_info()
 {
-    LOG("rpkg-cli v2.25.0 - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files.");
+    LOG("rpkg-cli " << RPKG_VERSION << " - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files.");
     LOG("--------------------------------------------------------------------------------");
     LOG("Note: All the information used to build this program was gleaned");
     LOG("      in a completely 'clean room' environment.");
@@ -197,8 +198,7 @@ void console::display_usage_info()
     LOG("        Generates a RPKG file from hash file(s) in a given folder and all subfolders.");
     LOG("        The folder name is used for the filename of the generated RPKG file.");
     LOG("    -generate_rpkg_quickly_from <path to folder to generate rpkg from>");
-    LOG("        Generates a RPKG file from hash file(s) in a given folder and all subfolders, but q u i c k l y.");
-    LOG("        The folder name is used for the filename of the generated RPKG file.");
+    LOG("        Same as -generate_rpkg_from but with faster generation.");
     LOG("    -hash_depends <path to folder containing RPKG files>");
     LOG("        Lists the forward and reverse depends of a given hash file/resource.");
     LOG("        Scans a directory, commonly Hitman's Runtime dir, and imports and");
@@ -603,86 +603,6 @@ void console::display_licenses() {
     LOG("THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT");
     LOG("(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE");
     LOG("OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.");
-    LOG("");
-    LOG("");
-    LOG("");
-
-    LOG("LICENSE for SharpCompress:");
-    LOG("");
-    LOG("The MIT License (MIT)");
-    LOG("");
-    LOG("Copyright (c) 2014  Adam Hathcock");
-    LOG("");
-    LOG("Permission is hereby granted, free of charge, to any person obtaining a copy");
-    LOG("of this software and associated documentation files (the \"Software\"), to deal");
-    LOG("in the Software without restriction, including without limitation the rights");
-    LOG("to use, copy, modify, merge, publish, distribute, sublicense, and/or sell");
-    LOG("copies of the Software, and to permit persons to whom the Software is");
-    LOG("furnished to do so, subject to the following conditions:");
-    LOG("");
-    LOG("The above copyright notice and this permission notice shall be included in");
-    LOG("all copies or substantial portions of the Software.");
-    LOG("");
-    LOG("THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR");
-    LOG("IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,");
-    LOG("FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE");
-    LOG("AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER");
-    LOG("LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,");
-    LOG("OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN");
-    LOG("THE SOFTWARE.");
-    LOG("");
-    LOG("");
-    LOG("");
-
-    LOG("LICENSE for NAudio:");
-    LOG("");
-    LOG("Copyright 2020 Mark Heath");
-    LOG("");
-    LOG("Permission is hereby granted, free of charge, to any person obtaining a copy");
-    LOG("of this software and associated documentation files (the \"Software\"), to deal");
-    LOG("in the Software without restriction, including without limitation the rights");
-    LOG("to use, copy, modify, merge, publish, distribute, sublicense, and/or sell");
-    LOG("copies of the Software, and to permit persons to whom the Software is");
-    LOG("furnished to do so, subject to the following conditions:");
-    LOG("");
-    LOG("The above copyright notice and this permission notice shall be included in");
-    LOG("all copies or substantial portions of the Software.");
-    LOG("");
-    LOG("THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR");
-    LOG("IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,");
-    LOG("FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE ");
-    LOG("AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER ");
-    LOG("LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING");
-    LOG("FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS");
-    LOG("IN THE SOFTWARE.");
-    LOG("");
-    LOG("");
-    LOG("");
-
-    LOG("LICENSE for Helix Toolkit:");
-    LOG("");
-    LOG("The MIT License (MIT)");
-    LOG("");
-    LOG("Copyright (c) 2019 Helix Toolkit contributors");
-    LOG("");
-    LOG("Permission is hereby granted, free of charge, to any person obtaining a");
-    LOG("copy of this software and associated documentation files (the");
-    LOG("\"Software\"), to deal in the Software without restriction, including");
-    LOG("without limitation the rights to use, copy, modify, merge, publish,");
-    LOG("distribute, sublicense, and/or sell copies of the Software, and to");
-    LOG("permit persons to whom the Software is furnished to do so, subject to");
-    LOG("the following conditions:");
-    LOG("");
-    LOG("The above copyright notice and this permission notice shall be included");
-    LOG("in all copies or substantial portions of the Software.");
-    LOG("");
-    LOG("THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS");
-    LOG("OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF");
-    LOG("MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.");
-    LOG("IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY");
-    LOG("CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,");
-    LOG("TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE");
-    LOG("SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.");
     LOG("");
     LOG("");
     LOG("");

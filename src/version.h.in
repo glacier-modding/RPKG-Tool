@@ -1,0 +1,4 @@
+#pragma once
+#define RPKG_VERSION "@rpkg_VERSION@"
+#define RPKG_MAJOR_VERSION @rpkg_VERSION_MAJOR@
+#define RPKG_MINOR_VERSION @rpkg_VERSION_MINOR@

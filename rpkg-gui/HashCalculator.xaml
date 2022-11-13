@@ -1,0 +1,36 @@
+﻿<mah:MetroWindow x:Class="rpkg.HashCalculator"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:rpkg"
+        mc:Ignorable="d"
+        Name="IOIHashCalculator" Loaded="IOIHashCalculator_Loaded"
+        Title="IOI Hash Calculator" Height="800" Width="1280" WindowStartupLocation="CenterScreen" FontFamily="Consolas">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" MinWidth="10"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*" MinWidth="10"/>
+        </Grid.ColumnDefinitions>
+        <DockPanel Grid.Row="0" Grid.ColumnSpan="3">
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Click="Save_Click" Header="Save to clipboard"/>
+            </Menu>
+        </DockPanel>
+        <Label Grid.Row="1" Grid.Column="0" Content="Input strings to hash (one per line):"/>
+        <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal">
+            <Label Content="Output IOI Hashes of input strings:"/>
+            <Label Content="(calculating...)" x:Name="CalculatingLabel" Visibility="Hidden"/>
+        </StackPanel>
+        <TextBox Grid.Row="2" Grid.Column="0" x:Name="InputTextBox" TextChanged="InputTextBox_TextChanged" AcceptsReturn="True" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap"/>
+        <GridSplitter HorizontalAlignment="Right" VerticalAlignment="Stretch" Grid.Row="2"  Grid.Column="1" ResizeBehavior="PreviousAndNext" Width="5"/>
+        <TextBox Grid.Row="2" Grid.Column="2" x:Name="OutputTextBox" IsReadOnly="True" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap"/>
+    </Grid>
+</mah:MetroWindow>

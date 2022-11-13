@@ -5,10 +5,7 @@
 #include "prim.h"
 #include "mati.h"
 #include "util.h"
-#include <unordered_map>
-#include <chrono>
 #include <sstream>
-#include <regex>
 #include <filesystem>
 #include <utility>
 
@@ -57,7 +54,7 @@ void rpkg_function::extract_prim_model_from(std::string& input_path, std::string
             if (rpkgs.at(i).rpkg_file_path != input_path)
                 continue;
 
-            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+            auto it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
             if (it != rpkgs.at(rpkg_index).hash_map.end())
             {
@@ -68,52 +65,52 @@ void rpkg_function::extract_prim_model_from(std::string& input_path, std::string
 
                 prim temp_prim(rpkg_index, it->second);
 
-                if (temp_prim.asset3ds_data.vertexes.size() > 0 && temp_prim.success)
+                if (temp_prim.asset3ds_data.vertexes.empty() || !temp_prim.success)
+                    continue;
+
+                std::string asset_file_name = "";
+
+                if (output_path.empty())
                 {
-                    std::string asset_file_name = "";
+                    output_path = std::filesystem::current_path().generic_string();
 
-                    if (output_path == "")
+                    std::string to_replace = "/";
+                    std::string replace_with = "\\";
+
+                    util::replace_all_string_in_string(output_path, to_replace, replace_with);
+                }
+
+                std::string prim_output_path = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + "\\PRIM\\" + rpkgs.at(rpkg_index).rpkg_file_name, output_path);
+
+                std::string text_output_path = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type, output_path);
+
+                asset_file_name = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".glb", prim_output_path);
+
+                file::create_directories(prim_output_path);
+
+                file::create_directories(text_output_path);
+
+                prim_asset_file_names.push_back(asset_file_name);
+
+                std::string meta_path = prim_output_path + "\\" + "metas";
+
+                file::create_directories(meta_path);
+
+                temp_prim.extract_meta(meta_path);
+
+                std::string hash_meta_file_name = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type, meta_path);
+
+                rpkg_function::extract_hash_meta(rpkg_index, it->second, hash_meta_file_name);
+
+                gltf::output_to_single_file(temp_prim.asset3ds_data, asset_file_name, GLB_SINGLE, true);
+
+                for (uint64_t j = 0; j < temp_prim.mati_depends_file_name.size(); j++)
+                {
+                    mati temp_mati(temp_prim.mati_depends_rpkg_index.at(j).at(temp_prim.mati_depends_rpkg_index_index.at(j)), temp_prim.mati_depends_hash_index.at(j).at(temp_prim.mati_depends_hash_index_index.at(j)));
+
+                    for (uint64_t k = 0; k < temp_mati.text_depends_file_name.size(); k++)
                     {
-                        output_path = std::filesystem::current_path().generic_string();
-
-                        std::string to_replace = "/";
-                        std::string replace_with = "\\";
-
-                        util::replace_all_string_in_string(output_path, to_replace, replace_with);
-                    }
-
-                    std::string prim_output_path = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + "\\PRIM\\" + rpkgs.at(rpkg_index).rpkg_file_name, output_path);
-
-                    std::string text_output_path = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type, output_path);
-
-                    asset_file_name = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".glb", prim_output_path);
-
-                    file::create_directories(prim_output_path);
-
-                    file::create_directories(text_output_path);
-
-                    prim_asset_file_names.push_back(asset_file_name);
-
-                    std::string meta_path = prim_output_path + "\\" + "metas";
-
-                    file::create_directories(meta_path);
-
-                    temp_prim.extract_meta(meta_path);
-
-                    std::string hash_meta_file_name = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type, meta_path);
-
-                    rpkg_function::extract_hash_meta(rpkg_index, it->second, hash_meta_file_name);
-
-                    gltf::output_to_single_file(temp_prim.asset3ds_data, asset_file_name, GLB_SINGLE, true);
-
-                    for (uint64_t j = 0; j < temp_prim.mati_depends_file_name.size(); j++)
-                    {
-                        mati temp_mati(temp_prim.mati_depends_rpkg_index.at(j).at(temp_prim.mati_depends_rpkg_index_index.at(j)), temp_prim.mati_depends_hash_index.at(j).at(temp_prim.mati_depends_hash_index_index.at(j)));
-
-                        for (uint64_t k = 0; k < temp_mati.text_depends_file_name.size(); k++)
-                        {
-                            rpkg_function::extract_text_from(temp_mati.text_depends_in_rpkgs.at(k).at(temp_mati.text_depends_in_rpkgs_index.at(k)), temp_mati.text_depends_file_name.at(k), text_output_path);
-                        }
+                        rpkg_function::extract_text_from(temp_mati.text_depends_in_rpkgs.at(k).at(temp_mati.text_depends_in_rpkgs_index.at(k)), temp_mati.text_depends_file_name.at(k), text_output_path);
                     }
                 }
             }

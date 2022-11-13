@@ -82,9 +82,7 @@ void file::create_directories(const std::string& path)
 
 std::string file::output_path_append(const std::string& file_name, std::string output_path)
 {
-    std::string base_file_name = file_name;
-
-    if (output_path == "")
+    if (output_path.empty())
     {
         return file_name;
     }
@@ -138,7 +136,7 @@ std::string file::get_root_file_name(const std::string& input)
 {
     std::string root_file_name = "";
 
-    const size_t pos = input.find_last_of(".");
+    const size_t pos = input.find_last_of('.');
 
     if (pos != std::string::npos)
     {

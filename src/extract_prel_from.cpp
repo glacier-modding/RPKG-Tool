@@ -6,10 +6,8 @@
 #include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
 #include <iostream>
-#include <unordered_map>
 #include <sstream>
 #include <fstream>
-#include <regex>
 #include <filesystem>
 
 void rpkg_function::extract_prel_refs(std::string& input_path)
@@ -100,7 +98,7 @@ void rpkg_function::extract_prel_refs(std::string& input_path)
                     LOG_AND_EXIT("Error: RPKG file " + rpkg.rpkg_file_path + " could not be read.");
                 }
 
-                file.seekg(rpkg.hash.at(hash_index).data.header.data_offset, file.beg);
+                file.seekg(rpkg.hash.at(hash_index).data.header.data_offset, std::ifstream::beg);
                 file.read(input_data.data(), hash_size);
                 file.close();
 
@@ -143,7 +141,7 @@ void rpkg_function::extract_prel_refs(std::string& input_path)
 
                 std::string ioi_string = "";
 
-                std::unordered_map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(master_hash_value);
+                auto it = hash_list_hash_map.find(master_hash_value);
 
                 if (it != hash_list_hash_map.end())
                 {
@@ -165,7 +163,7 @@ void rpkg_function::extract_prel_refs(std::string& input_path)
 
                     std::string ioi_string = "";
 
-                    std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(master_hash_depends.back());
+                    auto it2 = hash_list_hash_map.find(master_hash_depends.back());
 
                     if (it2 != hash_list_hash_map.end())
                     {

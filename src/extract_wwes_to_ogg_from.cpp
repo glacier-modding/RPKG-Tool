@@ -211,7 +211,7 @@ void rpkg_function::extract_wwes_to_ogg_from(std::string& input_path, std::strin
                         bool full_wwes_ioi_path_unknown = false;
                         bool wwes_ioi_path_found = false;
 
-                        std::unordered_map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(rpkg.hash.at(hash_index).hash_value);
+                        auto it = hash_list_hash_map.find(rpkg.hash.at(hash_index).hash_value);
 
                         if (it != hash_list_hash_map.end())
                         {
@@ -233,7 +233,7 @@ void rpkg_function::extract_wwes_to_ogg_from(std::string& input_path, std::strin
 
                                 std::replace(wwes_ioi_path.begin(), wwes_ioi_path.end(), '/', '\\');
 
-                                size_t pos4 = wwes_ioi_path.find_last_of("\\");
+                                size_t pos4 = wwes_ioi_path.find_last_of('\\');
 
                                 wwes_base_name = wwes_ioi_path.substr(pos4 + 1);
 
@@ -275,7 +275,7 @@ void rpkg_function::extract_wwes_to_ogg_from(std::string& input_path, std::strin
                                 LOG_AND_EXIT("Error: RPKG file " + rpkg.rpkg_file_path + " could not be read.");
                             }
 
-                            file.seekg(rpkg.hash.at(hash_index).data.header.data_offset, file.beg);
+                            file.seekg(rpkg.hash.at(hash_index).data.header.data_offset, std::ifstream::beg);
                             file.read(input_data.data(), hash_size);
                             file.close();
 
@@ -324,11 +324,11 @@ void rpkg_function::extract_wwes_to_ogg_from(std::string& input_path, std::strin
                                 }
                             }
 
-                            if (found || filter == "")
+                            if (found || filter.empty())
                             {
                                 file::create_directories(wwes_ioi_directory);
 
-                                if (filters.size() > 0)
+                                if (!filters.empty())
                                 {
                                     extracted.at(input_filter_index) = true;
                                 }
@@ -395,7 +395,7 @@ void rpkg_function::extract_wwes_to_ogg_from(std::string& input_path, std::strin
         {
             if (extracted.at(z))
             {
-                if (found_in.at(z) == "")
+                if (found_in.at(z).empty())
                 {
                     found_in.at(z).append(rpkg.rpkg_file_name);
                 }
@@ -406,7 +406,7 @@ void rpkg_function::extract_wwes_to_ogg_from(std::string& input_path, std::strin
             }
             else
             {
-                if (not_found_in.at(z) == "")
+                if (not_found_in.at(z).empty())
                 {
                     not_found_in.at(z).append(rpkg.rpkg_file_name);
                 }
@@ -428,7 +428,7 @@ void rpkg_function::extract_wwes_to_ogg_from(std::string& input_path, std::strin
 
     percent_progress = static_cast<uint32_t>(100);
 
-    if (filter != "")
+    if (!filter.empty())
     {
         for (uint64_t z = 0; z < filters.size(); z++)
         {
