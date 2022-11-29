@@ -1,24 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using System.Net.Http;
 using System.Net;
 using SharpCompress.Archives;
-using SharpCompress.IO;
-using System.Threading;
 using System.ComponentModel;
 using MahApps.Metro.Controls;
-using ControlzEx.Theming;
 
 namespace rpkg
 {
@@ -36,10 +22,10 @@ namespace rpkg
             base.OnRenderSizeChanged(sizeInfo);
 
             if (sizeInfo.HeightChanged)
-                this.Top += (sizeInfo.PreviousSize.Height - sizeInfo.NewSize.Height) / 2;
+                Top += (sizeInfo.PreviousSize.Height - sizeInfo.NewSize.Height) / 2;
 
             if (sizeInfo.WidthChanged)
-                this.Left += (sizeInfo.PreviousSize.Width - sizeInfo.NewSize.Width) / 2;
+                Left += (sizeInfo.PreviousSize.Width - sizeInfo.NewSize.Width) / 2;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -69,7 +55,7 @@ namespace rpkg
 
         private void WebClient_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void WebClient_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
@@ -107,7 +93,7 @@ namespace rpkg
 
         void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         public int operation = 0;

@@ -1,21 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using System.Threading;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using MahApps.Metro.Controls;
-using ControlzEx.Theming;
 
 namespace rpkg
 {
@@ -44,10 +32,10 @@ namespace rpkg
             base.OnRenderSizeChanged(sizeInfo);
 
             if (sizeInfo.HeightChanged)
-                this.Top += (sizeInfo.PreviousSize.Height - sizeInfo.NewSize.Height) / 2;
+                Top += (sizeInfo.PreviousSize.Height - sizeInfo.NewSize.Height) / 2;
 
             if (sizeInfo.WidthChanged)
-                this.Left += (sizeInfo.PreviousSize.Width - sizeInfo.NewSize.Width) / 2;
+                Left += (sizeInfo.PreviousSize.Width - sizeInfo.NewSize.Width) / 2;
         }
 
         void worker_DoWork(object sender, DoWorkEventArgs e)
@@ -313,16 +301,16 @@ namespace rpkg
         void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             normal_exit = true;
-            this.Close();
+            Close();
         }
 
         protected override void OnClosing(CancelEventArgs e)
         {
             if (!normal_exit)
             {
-                System.Windows.MessageBoxResult response = System.Windows.MessageBox.Show("Are you sure you want to cancel the current operation?", "", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question, System.Windows.MessageBoxResult.OK);
+                MessageBoxResult response = MessageBox.Show("Are you sure you want to cancel the current operation?", "", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.OK);
 
-                if (response == System.Windows.MessageBoxResult.No)
+                if (response == MessageBoxResult.No)
                 {
                     e.Cancel = true;
                 }

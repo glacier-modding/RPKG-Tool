@@ -136,11 +136,13 @@ void rpkg_function::search_entities(std::string& input_path, std::string& search
                         {
                             deep_search_entities_map.emplace(tempHashValue, entity(rpkgIndex, it61->second, 3));
 
-                            results_count = deep_search_entities_map[tempHashValue].search(search_lower_case, search_entity_ids, search_entity_names, search_property_names, search_property_values, results_count, max_results);
+                            results_count = deep_search_entities_map[tempHashValue].search(search_lower_case,
+                                                                                           results_count, max_results);
                         }
                         else
                         {
-                            results_count = deep_search_entities_map[tempHashValue].search(search_lower_case, search_entity_ids, search_entity_names, search_property_names, search_property_values, results_count, max_results);
+                            results_count = deep_search_entities_map[tempHashValue].search(search_lower_case,
+                                                                                           results_count, max_results);
                         }
 
                         hash_searched[tempHashValue] = hash_searched.size();

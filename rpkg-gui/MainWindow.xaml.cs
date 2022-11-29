@@ -2,32 +2,24 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using MahApps.Metro.Controls;
 using ControlzEx.Theming;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Ookii.Dialogs.Wpf;
-using System.Net.Http;
 using System.Diagnostics;
 using System.Security;
 using NAudio.Wave;
 using HelixToolkit.Wpf;
-using HelixToolkit;
 using System.ComponentModel;
 using System.Drawing;
-using System.Runtime.CompilerServices;
 using DiscordRPC;
 using Button = System.Windows.Controls.Button;
 using ICSharpCode.AvalonEdit.Highlighting;
@@ -123,7 +115,7 @@ namespace rpkg
 		{
 			InitializeComponent();
 
-			ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.DodgerBlue)));
+			ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.DodgerBlue)));
 
 			timestamp = Timestamps.Now;
 		}
@@ -155,8 +147,8 @@ namespace rpkg
 				userSettings = new UserSettings();
 
 				userSettings.ColorTheme = "Dark/Red";
-				userSettings.InputFolder = System.IO.Directory.GetCurrentDirectory();
-				userSettings.OutputFolder = System.IO.Directory.GetCurrentDirectory();
+				userSettings.InputFolder = Directory.GetCurrentDirectory();
+				userSettings.OutputFolder = Directory.GetCurrentDirectory();
 
 				string jsonString = JsonSerializer.Serialize(userSettings, options);
 
@@ -806,7 +798,7 @@ namespace rpkg
 
 							return_value = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hash, 0, 0);
 
-							string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+							string currentDirectory = Directory.GetCurrentDirectory();
 
 							string inputOGGFile = currentDirectory + "\\" + hash + ".ogg";
 
@@ -836,7 +828,7 @@ namespace rpkg
 
 								waveFormat = new WaveFormat(pcmSampleRate, 16, pcmChannels);
 
-								pcmSource = new NAudio.Wave.RawSourceWaveStream(pcmMemoryStream, waveFormat);
+								pcmSource = new RawSourceWaveStream(pcmMemoryStream, waveFormat);
 
 								oggPlayerState = (int)OggPlayerState.READY;
 							}
@@ -886,7 +878,7 @@ namespace rpkg
 
 								return_value = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hash, 1, 0);
 
-								string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+								string currentDirectory = Directory.GetCurrentDirectory();
 
 								string inputOGGFile = currentDirectory + "\\" + hash + ".ogg";
 
@@ -918,7 +910,7 @@ namespace rpkg
 
 										waveFormat = new WaveFormat(pcmSampleRate, 16, pcmChannels);
 
-										pcmSource = new NAudio.Wave.RawSourceWaveStream(pcmMemoryStream, waveFormat);
+										pcmSource = new RawSourceWaveStream(pcmMemoryStream, waveFormat);
 
 										oggPlayerState = (int)OggPlayerState.READY;
 									}
@@ -1748,7 +1740,7 @@ namespace rpkg
 
 								progress.message.Content = "Extracting " + hashName + " entity (TEMP/TBLU) to QN (QuickEntity v2.1) JSON...";
 
-								var fileDialog = new Ookii.Dialogs.Wpf.VistaSaveFileDialog();
+								var fileDialog = new VistaSaveFileDialog();
 
 								fileDialog.Title = "Select file to save extracted QN (QuickEntity v2.1) JSON to:";
 
@@ -1762,7 +1754,7 @@ namespace rpkg
 								}
 								else
 								{
-									initialFolder = System.IO.Directory.GetCurrentDirectory();
+									initialFolder = Directory.GetCurrentDirectory();
 								}
 
 								fileDialog.InitialDirectory = initialFolder;
@@ -2069,7 +2061,7 @@ namespace rpkg
 									}
 									else
 									{
-										initialFolder = System.IO.Directory.GetCurrentDirectory();
+										initialFolder = Directory.GetCurrentDirectory();
 									}
 
 									entityBrickEditor.inputFolder = initialFolder;
@@ -2081,7 +2073,7 @@ namespace rpkg
 									}
 									else
 									{
-										initialFolder = System.IO.Directory.GetCurrentDirectory();
+										initialFolder = Directory.GetCurrentDirectory();
 									}
 
 									entityBrickEditor.outputFolder = initialFolder;
@@ -2313,7 +2305,7 @@ namespace rpkg
 									}
 									else
 									{
-										initialFolder = System.IO.Directory.GetCurrentDirectory();
+										initialFolder = Directory.GetCurrentDirectory();
 									}
 
 									entityBrickEditor.inputFolder = initialFolder;
@@ -2325,7 +2317,7 @@ namespace rpkg
 									}
 									else
 									{
-										initialFolder = System.IO.Directory.GetCurrentDirectory();
+										initialFolder = Directory.GetCurrentDirectory();
 									}
 
 									entityBrickEditor.outputFolder = initialFolder;
@@ -3101,7 +3093,7 @@ namespace rpkg
 
 				bitmapImage.BeginInit();
 
-				string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+				string currentDirectory = Directory.GetCurrentDirectory();
 
 				string png_file_name = currentDirectory + "\\" + hashFile + ".png";
 
@@ -3209,7 +3201,7 @@ namespace rpkg
 
 			return_value = task_execute(command, input_path, filter, search, search_type, output_path);
 
-			string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+			string currentDirectory = Directory.GetCurrentDirectory();
 
 			List<string> objFileNames = new List<string>();
 			List<int> objFileSizes = new List<int>();
@@ -3632,7 +3624,7 @@ namespace rpkg
 
 		private void Extract_Click(object sender, RoutedEventArgs e)
 		{
-			var fileDialog = new Ookii.Dialogs.Wpf.VistaOpenFileDialog();
+			var fileDialog = new VistaOpenFileDialog();
 
 			fileDialog.Title = "Select an RPKG file to extract from:";
 
@@ -3646,7 +3638,7 @@ namespace rpkg
 			}
 			else
 			{
-				initialFolder = System.IO.Directory.GetCurrentDirectory();
+				initialFolder = Directory.GetCurrentDirectory();
 			}
 
 			fileDialog.InitialDirectory = initialFolder;
@@ -4292,7 +4284,7 @@ namespace rpkg
 
 		private string SelectFolder(string type, string description, string initialFolder)
 		{
-			var folderDialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
+			var folderDialog = new VistaFolderBrowserDialog();
 
 			folderDialog.Description = description;
 
@@ -4357,7 +4349,7 @@ namespace rpkg
 		{
 			if (type == "input")
 			{
-				var fileDialog = new Ookii.Dialogs.Wpf.VistaOpenFileDialog();
+				var fileDialog = new VistaOpenFileDialog();
 
 				fileDialog.Title = description;
 
@@ -4371,7 +4363,7 @@ namespace rpkg
 				}
 				else
 				{
-					initialFolder = System.IO.Directory.GetCurrentDirectory();
+					initialFolder = Directory.GetCurrentDirectory();
 				}
 
 				fileDialog.InitialDirectory = initialFolder;
@@ -4385,7 +4377,7 @@ namespace rpkg
 			}
 			else if (type == "output")
 			{
-				var fileDialog = new Ookii.Dialogs.Wpf.VistaSaveFileDialog();
+				var fileDialog = new VistaSaveFileDialog();
 
 				fileDialog.Title = description;
 
@@ -4399,7 +4391,7 @@ namespace rpkg
 				}
 				else
 				{
-					initialFolder = System.IO.Directory.GetCurrentDirectory();
+					initialFolder = Directory.GetCurrentDirectory();
 				}
 
 				fileDialog.InitialDirectory = initialFolder;
@@ -4449,52 +4441,52 @@ namespace rpkg
 		private void SetColorTheme(string brightness, string color)
 		{
 			if (brightness == "Light" && color == "Blue")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.DodgerBlue)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.DodgerBlue)));
 			if (brightness == "Light" && color == "Brown")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.BurlyWood)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.BurlyWood)));
 			if (brightness == "Light" && color == "Green")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.Green)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.Green)));
 			if (brightness == "Light" && color == "Orange")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.Orange)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.Orange)));
 			if (brightness == "Light" && color == "Purple")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.Purple)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.Purple)));
 			if (brightness == "Light" && color == "Red")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.Red)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.Red)));
 			if (brightness == "Light" && color == "Yellow")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.Yellow)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.Yellow)));
 			if (brightness == "Light" && color == "White")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.White)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.White)));
 			if (brightness == "Dark" && color == "Blue")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.DodgerBlue)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.DodgerBlue)));
 			if (brightness == "Dark" && color == "Brown")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.BurlyWood)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.BurlyWood)));
 			if (brightness == "Dark" && color == "Green")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.Green)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.Green)));
 			if (brightness == "Dark" && color == "Orange")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.Orange)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.Orange)));
 			if (brightness == "Dark" && color == "Purple")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.Purple)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.Purple)));
 			if (brightness == "Dark" && color == "Red")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.Red)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.Red)));
 			if (brightness == "Dark" && color == "Yellow")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.Yellow)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.Yellow)));
 			if (brightness == "Dark" && color == "White")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.White)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.White)));
 
 			if (brightness == "Dark")
 			{
-				MainTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
-				MainTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
-				SearchRPKGsTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
-				SearchRPKGsTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
-				DeepSearchEntitiesTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
-				DeepSearchEntitiesTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
-				DeepSearchLocalizationTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
-				DeepSearchLocalizationTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
-				REPOTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
-				REPOTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
-				SearchHashListTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
-				SearchHashListTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
+				MainTreeView.ForeColor = ColorTranslator.FromHtml("#FFFFFF");
+				MainTreeView.BackColor = ColorTranslator.FromHtml("#252525");
+				SearchRPKGsTreeView.ForeColor = ColorTranslator.FromHtml("#FFFFFF");
+				SearchRPKGsTreeView.BackColor = ColorTranslator.FromHtml("#252525");
+				DeepSearchEntitiesTreeView.ForeColor = ColorTranslator.FromHtml("#FFFFFF");
+				DeepSearchEntitiesTreeView.BackColor = ColorTranslator.FromHtml("#252525");
+				DeepSearchLocalizationTreeView.ForeColor = ColorTranslator.FromHtml("#FFFFFF");
+				DeepSearchLocalizationTreeView.BackColor = ColorTranslator.FromHtml("#252525");
+				REPOTreeView.ForeColor = ColorTranslator.FromHtml("#FFFFFF");
+				REPOTreeView.BackColor = ColorTranslator.FromHtml("#252525");
+				SearchHashListTreeView.ForeColor = ColorTranslator.FromHtml("#FFFFFF");
+				SearchHashListTreeView.BackColor = ColorTranslator.FromHtml("#252525");
 				xshdJSONDark = XmlReader.Create(new MemoryStream(Properties.Resources.JSON_Dark));
 				REPOJSONTextEditor.SyntaxHighlighting = HighlightingLoader.Load(xshdJSONDark, HighlightingManager.Instance);
 				REPOJSONTextEditor.Foreground = System.Windows.Media.Brushes.White;
@@ -4502,18 +4494,18 @@ namespace rpkg
 			}
 			else if (brightness == "Light")
 			{
-				MainTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
-				MainTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
-				SearchRPKGsTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
-				SearchRPKGsTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
-				DeepSearchEntitiesTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
-				DeepSearchEntitiesTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
-				DeepSearchLocalizationTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
-				DeepSearchLocalizationTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
-				REPOTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
-				REPOTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
-				SearchHashListTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
-				SearchHashListTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+				MainTreeView.ForeColor = ColorTranslator.FromHtml("#000000");
+				MainTreeView.BackColor = ColorTranslator.FromHtml("#FFFFFF");
+				SearchRPKGsTreeView.ForeColor = ColorTranslator.FromHtml("#000000");
+				SearchRPKGsTreeView.BackColor = ColorTranslator.FromHtml("#FFFFFF");
+				DeepSearchEntitiesTreeView.ForeColor = ColorTranslator.FromHtml("#000000");
+				DeepSearchEntitiesTreeView.BackColor = ColorTranslator.FromHtml("#FFFFFF");
+				DeepSearchLocalizationTreeView.ForeColor = ColorTranslator.FromHtml("#000000");
+				DeepSearchLocalizationTreeView.BackColor = ColorTranslator.FromHtml("#FFFFFF");
+				REPOTreeView.ForeColor = ColorTranslator.FromHtml("#000000");
+				REPOTreeView.BackColor = ColorTranslator.FromHtml("#FFFFFF");
+				SearchHashListTreeView.ForeColor = ColorTranslator.FromHtml("#000000");
+				SearchHashListTreeView.BackColor = ColorTranslator.FromHtml("#FFFFFF");
 				xshdJSONLight = XmlReader.Create(new MemoryStream(Properties.Resources.JSON_Light));
 				REPOJSONTextEditor.SyntaxHighlighting = HighlightingLoader.Load(xshdJSONLight, HighlightingManager.Instance);
 				REPOJSONTextEditor.Foreground = System.Windows.Media.Brushes.Black;
@@ -4548,7 +4540,7 @@ namespace rpkg
 		private System.Windows.Threading.DispatcherTimer searchRPKGsInputTimer;
 		private System.Windows.Threading.DispatcherTimer searchHashListInputTimer;
 		private System.Windows.Threading.DispatcherTimer OGGPlayerTimer;
-		private NAudio.Wave.WaveOut waveOut;
+		private WaveOut waveOut;
 		private MemoryStream pcmMemoryStream;
 		private int pcmSampleSize;
 		private int pcmSampleRate;
@@ -4563,7 +4555,7 @@ namespace rpkg
 		public List<string> hashDependsFlagsList;
 		public int hashDependsPage;
 		public bool discordOn = false;
-		public DiscordRPC.Timestamps timestamp;
+		public Timestamps timestamp;
 		public bool runtimeDirLoaded = false;
 		BackgroundWorker deepSearchEntitiesWorker;
 		BackgroundWorker deepSearchLocalizationWorker;
@@ -4691,7 +4683,7 @@ private enum OggPlayerState
 		FileInfo file;
 		FileStream stream;
 		WaveFormat waveFormat;
-		NAudio.Wave.RawSourceWaveStream pcmSource;
+		RawSourceWaveStream pcmSource;
 
 		public delegate int execute_import_rpkgs(string rpkgs_path, string rpkgs_list);
 		public delegate int execute_load_recursive_temps(string temp_hash, string rpkg_file_path, UInt32 temp_version);
@@ -5129,7 +5121,7 @@ private enum OggPlayerState
 
 					int return_value = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hashData[0], 1, newIndex);
 
-					string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+					string currentDirectory = Directory.GetCurrentDirectory();
 
 					string inputOGGFile = currentDirectory + "\\" + hashData[0] + ".ogg";
 
@@ -5173,7 +5165,7 @@ private enum OggPlayerState
 
 							waveFormat = new WaveFormat(pcmSampleRate, 16, pcmChannels);
 
-							pcmSource = new NAudio.Wave.RawSourceWaveStream(pcmMemoryStream, waveFormat);
+							pcmSource = new RawSourceWaveStream(pcmMemoryStream, waveFormat);
 
 							oggPlayerState = (int)OggPlayerState.READY;
 						}
@@ -5302,11 +5294,11 @@ private enum OggPlayerState
 					oggPlayerStoppedNew = false;
 
 					waveOut = new WaveOut();
-					NAudio.Wave.MultiplexingWaveProvider multiplexingWaveProvider;
+					MultiplexingWaveProvider multiplexingWaveProvider;
 					multiplexingWaveProvider = new MultiplexingWaveProvider(new IWaveProvider[] { pcmSource }, 2);
 					multiplexingWaveProvider.ConnectInputToOutput(0, 0);
 					multiplexingWaveProvider.ConnectInputToOutput(0, 1);
-					var wait = new System.Threading.ManualResetEventSlim(false);
+					var wait = new ManualResetEventSlim(false);
 					waveOut.PlaybackStopped += (s, ee) => wait.Set();
 
 					try
@@ -5372,7 +5364,7 @@ private enum OggPlayerState
 
 				int return_value = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hashData[0], 1, OGGPlayerComboBox.SelectedIndex);
 
-				string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+				string currentDirectory = Directory.GetCurrentDirectory();
 
 				string inputOGGFile = currentDirectory + "\\" + hashData[0] + ".ogg";
 
@@ -5418,7 +5410,7 @@ private enum OggPlayerState
 
 						waveFormat = new WaveFormat(pcmSampleRate, 16, pcmChannels);
 
-						pcmSource = new NAudio.Wave.RawSourceWaveStream(pcmMemoryStream, waveFormat);
+						pcmSource = new RawSourceWaveStream(pcmMemoryStream, waveFormat);
 
 						oggPlayerState = (int)OggPlayerState.RESET;
 					}
@@ -7290,15 +7282,15 @@ private enum OggPlayerState
 
 		private void ConvertHashMetaFileToJSON_Click(object sender, RoutedEventArgs e)
 		{
-			var fileDialog = new Ookii.Dialogs.Wpf.VistaOpenFileDialog();
+			var fileDialog = new VistaOpenFileDialog();
 
 			fileDialog.Title = "Select an input Hash meta file:";
 
 			fileDialog.Filter = "meta file|*.meta|All files|*.*";
 
-			if (!System.IO.Directory.Exists(userSettings.InputFolder))
+			if (!Directory.Exists(userSettings.InputFolder))
 			{
-				userSettings.InputFolder = System.IO.Directory.GetCurrentDirectory();
+				userSettings.InputFolder = Directory.GetCurrentDirectory();
 
 				var options = new JsonSerializerOptions { WriteIndented = true };
 
@@ -7364,15 +7356,15 @@ private enum OggPlayerState
 
 		private void ConvertJSONToHashMetaFile_Click(object sender, RoutedEventArgs e)
 		{
-			var fileDialog = new Ookii.Dialogs.Wpf.VistaOpenFileDialog();
+			var fileDialog = new VistaOpenFileDialog();
 
 			fileDialog.Title = "Select an input Hash meta.JSON file:";
 
 			fileDialog.Filter = "meta.JSON file|*.meta.JSON|All files|*.*";
 
-			if (!System.IO.Directory.Exists(userSettings.InputFolder))
+			if (!Directory.Exists(userSettings.InputFolder))
 			{
-				userSettings.InputFolder = System.IO.Directory.GetCurrentDirectory();
+				userSettings.InputFolder = Directory.GetCurrentDirectory();
 
 				var options = new JsonSerializerOptions { WriteIndented = true };
 
@@ -7610,7 +7602,7 @@ private enum OggPlayerState
 
 			if (runtimeDirectory == "")
 			{
-				MessageBoxShow("To extract a main map (entity):\n- Import all the RPKGs from the Hitman Runtime folder\n- Click this button again.");
+				MessageBoxShow("To read_file a main map (entity):\n- Import all the RPKGs from the Hitman Runtime folder\n- Click this button again.");
 
 				return;
 			}
@@ -8894,7 +8886,7 @@ private enum OggPlayerState
 
 						progress.message.Content = "Extracting " + hash + " entity (TEMP/TBLU) to QN (QuickEntity v2.1) JSON...";
 
-						var fileDialog = new Ookii.Dialogs.Wpf.VistaSaveFileDialog();
+						var fileDialog = new VistaSaveFileDialog();
 
 						fileDialog.Title = "Select file to save extracted QN (QuickEntity v2.1) JSON to:";
 
@@ -8908,7 +8900,7 @@ private enum OggPlayerState
 						}
 						else
 						{
-							initialFolder = System.IO.Directory.GetCurrentDirectory();
+							initialFolder = Directory.GetCurrentDirectory();
 						}
 
 						fileDialog.InitialDirectory = initialFolder;
@@ -9462,7 +9454,7 @@ private enum OggPlayerState
 			public void Restore()
 			{
 				Children.Clear();
-				this.ForEach(clone => clone.Restore());
+				ForEach(clone => clone.Restore());
 				Children.AddRange(this.Select(n => n.Parent).ToArray());
 			}
 		}
@@ -9657,7 +9649,7 @@ private enum OggPlayerState
 			textBlock.FontWeight = FontWeights.Bold;
 			textBlock.HorizontalAlignment = HorizontalAlignment.Stretch;
 			textBlock.VerticalAlignment = VerticalAlignment.Center;
-			System.Windows.Media.BrushConverter brushConverter = new BrushConverter();
+			BrushConverter brushConverter = new BrushConverter();
 			textBlock.Background = (System.Windows.Media.Brush)brushConverter.ConvertFromString("#2e2e2e");
 			Border border = new Border();
 			border.BorderBrush = System.Windows.Media.Brushes.White;
@@ -10108,14 +10100,14 @@ private enum OggPlayerState
 				{
 					if (treeView.Font.Size < 64)
 					{
-						treeView.Font = new System.Drawing.Font("Consolas", Math.Min(64, treeView.Font.Size + 1));
+						treeView.Font = new Font("Consolas", Math.Min(64, treeView.Font.Size + 1));
 					}
 				}
 				else
 				{
 					if (treeView.Font.Size > 4)
 					{
-						treeView.Font = new System.Drawing.Font("Consolas", Math.Max(4, treeView.Font.Size - 1));
+						treeView.Font = new Font("Consolas", Math.Max(4, treeView.Font.Size - 1));
 					}
 				}
 			}

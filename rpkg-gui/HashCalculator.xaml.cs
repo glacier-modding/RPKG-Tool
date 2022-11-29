@@ -1,22 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using System.IO;
-using System.ComponentModel;
 using System.Runtime.InteropServices;
-using System.Threading;
 using MahApps.Metro.Controls;
-using ControlzEx.Theming;
 using System.Security.Cryptography;
 using System.Buffers;
 
@@ -134,7 +123,7 @@ namespace rpkg
 
         private void Exit_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
@@ -150,12 +139,8 @@ namespace rpkg
             Clipboard.SetText(foundHashes);
         }
 
-
-
-
         [DllImport("rpkg-lib.dll", EntryPoint = "get_hash_name_from_hash_value", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool get_hash_name_from_hash_value(UInt64 hash_value, [Out, MarshalAs(UnmanagedType.LPArray, SizeConst = 22)] char[] hash_name);
 
     }
-
 }

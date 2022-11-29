@@ -13,7 +13,8 @@ public:
     entity();
     entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version);
 
-    uint32_t search(std::string search_string, bool search_entity_ids, bool search_entity_names, bool search_property_names, bool search_property_values, uint32_t results_count, uint32_t max_results);
+    uint32_t
+    search(const std::string& search_string, uint32_t results_count, uint32_t max_results) const;
 
     uint32_t temp_rpkg_index = 0;
     uint32_t temp_hash_index = 0;
