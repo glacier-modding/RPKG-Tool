@@ -7,7 +7,6 @@
 #include "thirdparty/lz4/lz4.h"
 #include <iostream>
 #include <fstream>
-#include <regex>
 #include <sstream>
 
 void rpkg_function::extract_from_rpkg(rpkg_extraction_vars& rpkg_vars)
@@ -23,7 +22,7 @@ void rpkg_function::extract_from_rpkg(rpkg_extraction_vars& rpkg_vars)
 
     std::vector<std::string> filters = util::parse_input_filter(rpkg_vars.filter);
 
-    if (filters.size() > 0)
+    if (!filters.empty())
     {
         LOG("Extract: All hash files with filter \"" << rpkg_vars.filter << "\"");
     }
@@ -124,7 +123,7 @@ void rpkg_function::extract_from_rpkg(rpkg_extraction_vars& rpkg_vars)
                     LOG_AND_EXIT("Error: RPKG file " + rpkg_vars.input_path + " could not be read.");
                 }
 
-                file.seekg(rpkgs.at(i).hash.at(j).data.header.data_offset, file.beg);
+                file.seekg(rpkgs.at(i).hash.at(j).data.header.data_offset, std::ifstream::beg);
                 file.read(input_data.data(), hash_size);
 
                 if (rpkgs.at(i).hash.at(j).data.xored)

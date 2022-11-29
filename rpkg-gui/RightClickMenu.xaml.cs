@@ -1,18 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using MahApps.Metro.Controls;
-using ControlzEx.Theming;
 
 namespace rpkg
 {
@@ -27,11 +15,11 @@ namespace rpkg
 
             for (int i = 0; i < buttons.Length; i++)
             {
-                System.Windows.Controls.Button newButton = new Button();
+                Button newButton = new Button();
 
                 newButton.Content = buttons[i];
                 newButton.Name = "button" + i.ToString();
-                newButton.Click += this.Button_Click;
+                newButton.Click += Button_Click;
                 newButton.Height = 34;
                 newButton.Padding = new Thickness(8, 0, 8, 0);
 
@@ -52,7 +40,7 @@ namespace rpkg
                     newButton.Margin = new Thickness(8, 4, 8, 4);
                 }
 
-                this.MainStackPanel.Children.Add(newButton);
+                MainStackPanel.Children.Add(newButton);
             }
         }
 
@@ -60,7 +48,7 @@ namespace rpkg
         {
             buttonPressed = (sender as Button).Name;
 
-            this.Close();
+            Close();
         }
 
         public string buttonPressed = "";

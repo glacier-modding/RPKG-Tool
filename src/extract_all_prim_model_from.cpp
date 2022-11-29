@@ -78,51 +78,51 @@ rpkg_function::extract_all_prim_model_from(std::string& input_path, std::string&
     {
         for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++)
         {
-            if (rpkg.hash_resource_types.at(r) == "PRIM")
+            if (rpkg.hash_resource_types.at(r) != "PRIM")
+                continue;
+
+            for (uint64_t j2 = 0; j2 < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j2++)
             {
-                for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++)
+                uint64_t hashIndex = rpkg.hashes_indexes_based_on_resource_types.at(r).at(j2);
+
+                if (gui_control == ABORT_CURRENT_TASK)
                 {
-                    uint64_t hash_index = rpkg.hashes_indexes_based_on_resource_types.at(r).at(j);
-
-                    if (gui_control == ABORT_CURRENT_TASK)
-                    {
-                        return;
-                    }
-
-                    std::string hash_file_name =
-                            util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
-                            rpkg.hash.at(hash_index).hash_resource_type;
-
-                    std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-                    double time_in_seconds_from_start_time = (0.000000001 *
-                                                              std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                                                      end_time - start_time).count());
-
-                    if (time_in_seconds_from_start_time > console_update_rate)
-                    {
-                        start_time = end_time;
-
-                        if (period_count > 3)
-                        {
-                            period_count = 0;
-                        }
-
-                        std::stringstream ss;
-
-                        ss << "Scanning RPKGs for PRIM files" << std::string(period_count, '.');
-
-                        timing_string = ss.str();
-
-                        LOG_NO_ENDL("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-                        period_count++;
-                    }
-
-                    prim_hash_size_total += rpkg.hash.at(hash_index).data.resource.size_final;
-
-                    prim_count++;
+                    return;
                 }
+
+                std::string hashFileName =
+                        util::uint64_t_to_hex_string(rpkg.hash.at(hashIndex).hash_value) + "." +
+                        rpkg.hash.at(hashIndex).hash_resource_type;
+
+                std::chrono::time_point endTime = std::chrono::high_resolution_clock::now();
+
+                double time_in_seconds_from_start_time = (0.000000001 *
+                                                          std::chrono::duration_cast<std::chrono::nanoseconds>(
+                                                                  endTime - start_time).count());
+
+                if (time_in_seconds_from_start_time > console_update_rate)
+                {
+                    start_time = endTime;
+
+                    if (period_count > 3)
+                    {
+                        period_count = 0;
+                    }
+
+                    std::stringstream ss1;
+
+                    ss1 << "Scanning RPKGs for PRIM files" << std::string(period_count, '.');
+
+                    timing_string = ss1.str();
+
+                    LOG_NO_ENDL("\r" << ss1.str() << std::string((80 - ss1.str().length()), ' '));
+
+                    period_count++;
+                }
+
+                prim_hash_size_total += rpkg.hash.at(hashIndex).data.resource.size_final;
+
+                prim_count++;
             }
         }
     }
@@ -171,106 +171,106 @@ rpkg_function::extract_all_prim_model_from(std::string& input_path, std::string&
         {
             for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++)
             {
-                if (rpkg.hash_resource_types.at(r) == "PRIM")
+                if (rpkg.hash_resource_types.at(r) != "PRIM")
+                    continue;
+
+                for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++)
                 {
-                    for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++)
+                    uint64_t hash_index = rpkg.hashes_indexes_based_on_resource_types.at(r).at(j);
+
+                    if (gui_control == ABORT_CURRENT_TASK)
                     {
-                        uint64_t hash_index = rpkg.hashes_indexes_based_on_resource_types.at(r).at(j);
+                        return;
+                    }
 
-                        if (gui_control == ABORT_CURRENT_TASK)
+                    if (((prim_count_current * (uint64_t) 100000) / (uint64_t) prim_count) % (uint64_t) 10 ==
+                        0 && prim_count_current > 0)
+                    {
+                        stringstream_length = console::update_console(message, prim_hash_size_total,
+                                                                      prim_hash_size_current, start_time,
+                                                                      stringstream_length);
+                    }
+
+                    prim_hash_size_current += rpkg.hash.at(hash_index).data.resource.size_final;
+
+                    prim_count_current++;
+
+                    if (!extract_single_hash || (extract_single_hash && filter == util::uint64_t_to_hex_string(
+                            rpkg.hash.at(hash_index).hash_value)))
+                    {
+                        std::string hash_file_name =
+                                util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
+                                rpkg.hash.at(hash_index).hash_resource_type;
+
+                        bool found = false;
+
+                        uint64_t input_filter_index = 0;
+
+                        for (uint64_t z = 0; z < filters.size(); z++)
                         {
-                            return;
+                            std::size_t found_position_hash = hash_file_name.find(filters.at(z));
+
+                            if ((found_position_hash != std::string::npos && !filters.at(z).empty()))
+                            {
+                                found = true;
+
+                                input_filter_index = z;
+
+                                break;
+                            }
                         }
 
-                        if (((prim_count_current * (uint64_t) 100000) / (uint64_t) prim_count) % (uint64_t) 10 ==
-                            0 && prim_count_current > 0)
+                        if (found || filter.empty())
                         {
-                            stringstream_length = console::update_console(message, prim_hash_size_total,
-                                                                          prim_hash_size_current, start_time,
-                                                                          stringstream_length);
-                        }
+                            std::string prim_output_dir = file::output_path_append(rpkg.rpkg_file_name,
+                                                                                   output_path);
 
-                        prim_hash_size_current += rpkg.hash.at(hash_index).data.resource.size_final;
+                            file::create_directories(prim_output_dir);
 
-                        prim_count_current++;
-
-                        if (!extract_single_hash || (extract_single_hash && filter == util::uint64_t_to_hex_string(
-                                rpkg.hash.at(hash_index).hash_value)))
-                        {
-                            std::string hash_file_name =
-                                    util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
-                                    rpkg.hash.at(hash_index).hash_resource_type;
-
-                            bool found = false;
-
-                            uint64_t input_filter_index = 0;
-
-                            for (uint64_t z = 0; z < filters.size(); z++)
+                            if (!filters.empty())
                             {
-                                std::size_t found_position_hash = hash_file_name.find(filters.at(z));
-
-                                if ((found_position_hash != std::string::npos && !filters.at(z).empty()))
-                                {
-                                    found = true;
-
-                                    input_filter_index = z;
-
-                                    break;
-                                }
+                                extracted.at(input_filter_index) = true;
                             }
 
-                            if (found || filter.empty())
-                            {
-                                std::string prim_output_dir = file::output_path_append(rpkg.rpkg_file_name,
-                                                                                       output_path);
+                            //std::cout << "rpkg_function::extract_prim_model_from(" << rpkgs.at(i).rpkg_file_path << ", " << util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) << ", " << prim_output_dir << ");" << std::endl;
 
-                                file::create_directories(prim_output_dir);
+                            rpkg_function::extract_prim_model_from(rpkg.rpkg_file_path,
+                                                                   util::uint64_t_to_hex_string(
+                                                                           rpkg.hash.at(hash_index).hash_value),
+                                                                   prim_output_dir);
 
-                                if (!filters.empty())
-                                {
-                                    extracted.at(input_filter_index) = true;
-                                }
-
-                                //std::cout << "rpkg_function::extract_prim_model_from(" << rpkgs.at(i).rpkg_file_path << ", " << util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) << ", " << prim_output_dir << ");" << std::endl;
-
-                                rpkg_function::extract_prim_model_from(rpkg.rpkg_file_path,
-                                                                       util::uint64_t_to_hex_string(
-                                                                               rpkg.hash.at(hash_index).hash_value),
-                                                                       prim_output_dir);
-
-                                /*std::vector<uint32_t>().swap(temp_entry_index);
-                                std::vector<uint32_t>().swap(temp_logicalParent);
-                                std::vector<uint32_t>().swap(temp_entityTypeResourceIndex);
-                                std::vector<uint32_t>().swap(temp_propertyValues_start_offsets);
-                                std::vector<uint32_t>().swap(temp_propertyValues_end_offsets);
-                                std::vector<uint32_t>().swap(temp_postInitPropertyValues_start_offsets);
-                                std::vector<uint32_t>().swap(temp_postInitPropertyValues_end_offsets);
-                                std::vector<uint32_t>().swap(temp_platformSpecificPropertyValues_start_offsets);
-                                std::vector<uint32_t>().swap(temp_platformSpecificPropertyValues_end_offsets);
-                                std::vector<std::string>().swap(temp_property_types);
-                                std::vector<std::vector<bool>>().swap(temp_property_types_shared);
-                                std::vector<std::vector<uint32_t>>().swap(temp_property_types_shared_count);
-                                std::vector<std::vector<uint32_t>>().swap(temp_property_types_offsets);
-                                std::vector<std::vector<std::string>>().swap(temp_property_types_values);
-                                std::vector<std::unordered_map<uint32_t, uint32_t>>().swap(temp_property_types_offsets_map);
-                                std::vector<std::vector<uint32_t>>().swap(property_crc32_values);
-                                std::vector<std::vector<uint32_t>>().swap(property_type_indexes);
-                                std::vector<std::vector<uint32_t>>().swap(property_offsets);
-                                std::vector<std::vector<uint32_t>>().swap(property_pointer_offsets);
-                                std::vector<uint32_t>().swap(tblu_entry_index);
-                                std::vector<uint32_t>().swap(tblu_logicalParent);
-                                std::vector<uint32_t>().swap(tblu_entityTypeResourceIndex);
-                                std::vector<uint64_t>().swap(tblu_entityId);
-                                std::vector<uint32_t>().swap(tblu_editorOnly);
-                                std::vector<std::string>().swap(tblu_entityName);
-                                std::vector<char>().swap(temp_input_data);
-                                std::vector<char>().swap(temp_output_data);
-                                std::vector<char>().swap(tblu_input_data);
-                                std::vector<char>().swap(tblu_output_data);
-                                std::vector<matrix43>().swap(temp_world_coordinates);
-                                std::vector<std::string>().swap(temp_world_coordinates_property_names);
-                                std::unordered_map<uint32_t, uint32_t>().swap(temp_world_coordinates_map);*/
-                            }
+                            /*std::vector<uint32_t>().swap(temp_entry_index);
+                            std::vector<uint32_t>().swap(temp_logicalParent);
+                            std::vector<uint32_t>().swap(temp_entityTypeResourceIndex);
+                            std::vector<uint32_t>().swap(temp_propertyValues_start_offsets);
+                            std::vector<uint32_t>().swap(temp_propertyValues_end_offsets);
+                            std::vector<uint32_t>().swap(temp_postInitPropertyValues_start_offsets);
+                            std::vector<uint32_t>().swap(temp_postInitPropertyValues_end_offsets);
+                            std::vector<uint32_t>().swap(temp_platformSpecificPropertyValues_start_offsets);
+                            std::vector<uint32_t>().swap(temp_platformSpecificPropertyValues_end_offsets);
+                            std::vector<std::string>().swap(temp_property_types);
+                            std::vector<std::vector<bool>>().swap(temp_property_types_shared);
+                            std::vector<std::vector<uint32_t>>().swap(temp_property_types_shared_count);
+                            std::vector<std::vector<uint32_t>>().swap(temp_property_types_offsets);
+                            std::vector<std::vector<std::string>>().swap(temp_property_types_values);
+                            std::vector<std::unordered_map<uint32_t, uint32_t>>().swap(temp_property_types_offsets_map);
+                            std::vector<std::vector<uint32_t>>().swap(property_crc32_values);
+                            std::vector<std::vector<uint32_t>>().swap(property_type_indexes);
+                            std::vector<std::vector<uint32_t>>().swap(property_offsets);
+                            std::vector<std::vector<uint32_t>>().swap(property_pointer_offsets);
+                            std::vector<uint32_t>().swap(tblu_entry_index);
+                            std::vector<uint32_t>().swap(tblu_logicalParent);
+                            std::vector<uint32_t>().swap(tblu_entityTypeResourceIndex);
+                            std::vector<uint64_t>().swap(tblu_entityId);
+                            std::vector<uint32_t>().swap(tblu_editorOnly);
+                            std::vector<std::string>().swap(tblu_entityName);
+                            std::vector<char>().swap(temp_input_data);
+                            std::vector<char>().swap(temp_output_data);
+                            std::vector<char>().swap(tblu_input_data);
+                            std::vector<char>().swap(tblu_output_data);
+                            std::vector<matrix43>().swap(temp_world_coordinates);
+                            std::vector<std::string>().swap(temp_world_coordinates_property_names);
+                            std::unordered_map<uint32_t, uint32_t>().swap(temp_world_coordinates_map);*/
                         }
                     }
                 }

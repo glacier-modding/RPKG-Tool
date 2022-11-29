@@ -2,12 +2,10 @@
 #include "file.h"
 #include "global.h"
 #include "util.h"
-#include "rpkg.h"
 #include "hash.h"
 #include <iostream>
 #include <unordered_map>
 #include <sstream>
-#include <filesystem>
 
 void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, std::string& filter, std::string& output_path, bool extract_prim_models)
 {
@@ -28,7 +26,7 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
 
         for (uint64_t i = 0; i < rpkgs.size(); i++)
         {
-            std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(i).hash_map.find(hash_value);
+            auto it2 = rpkgs.at(i).hash_map.find(hash_value);
 
             hash_depends_variables temp_hash_depends_data;
 
@@ -55,7 +53,7 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
 
                     for (uint64_t j = 0; j < rpkgs.size(); j++)
                     {
-                        std::unordered_map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(j).hash_map.find(rpkgs.at(i).hash.at(it2->second).hash_reference_data.hash_reference.at(k));
+                        auto it3 = rpkgs.at(j).hash_map.find(rpkgs.at(i).hash.at(it2->second).hash_reference_data.hash_reference.at(k));
 
                         if (it3 == rpkgs.at(j).hash_map.end())
                             continue;
@@ -90,7 +88,7 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
 
         for (auto& hash_depend : hash_depends_data)
         {
-            if (hash_depend.hash_dependency.size() > 0)
+            if (!hash_depend.hash_dependency.empty())
             {
                 rpkg_dependency_count++;
             }
@@ -98,30 +96,30 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
 
         LOG(filter << " has dependencies in " << rpkg_dependency_count << " RPKG files:" << std::endl);
 
-        for (uint64_t i = 0; i < hash_depends_data.size(); i++)
+        for (auto & i : hash_depends_data)
         {
-            if (hash_depends_data.at(i).hash_dependency.size() <= 0)
+            if (i.hash_dependency.empty())
                 continue;
 
-            LOG(filter << " depends on " << hash_depends_data.at(i).hash_dependency_file_name.size() << " other hash files/resources in RPKG file: " << hash_depends_data.at(i).rpkg_file_name);
+            LOG(filter << " depends on " << i.hash_dependency_file_name.size() << " other hash files/resources in RPKG file: " << i.rpkg_file_name);
 
-            if (hash_depends_data.at(i).hash_dependency_file_name.size() > 0)
+            if (!i.hash_dependency_file_name.empty())
             {
                 LOG(filter << "'s dependencies:");
 
-                for (uint64_t j = 0; j < hash_depends_data.at(i).hash_dependency_file_name.size(); j++)
+                for (uint64_t j = 0; j < i.hash_dependency_file_name.size(); j++)
                 {
-                    LOG_NO_ENDL("Hash file/resource: " << hash_depends_data.at(i).hash_dependency_file_name.at(j));
+                    LOG_NO_ENDL("Hash file/resource: " << i.hash_dependency_file_name.at(j));
 
-                    if (hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).size() > 0)
+                    if (!i.hash_dependency_in_rpkg.at(j).empty())
                     {
                         LOG_NO_ENDL(", Found in RPKG files: ");
 
-                        for (uint64_t k = 0; k < hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).size(); k++)
+                        for (uint64_t k = 0; k < i.hash_dependency_in_rpkg.at(j).size(); k++)
                         {
-                            LOG_NO_ENDL(hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).at(k));
+                            LOG_NO_ENDL(i.hash_dependency_in_rpkg.at(j).at(k));
 
-                            if (k < hash_depends_data.at(i).hash_dependency_in_rpkg.at(j).size() - 1)
+                            if (k < i.hash_dependency_in_rpkg.at(j).size() - 1)
                             {
                                 LOG_NO_ENDL(", ");
                             }
@@ -200,7 +198,7 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
 
         LOG(filter << " has reverse dependencies in " << reverse_dependency.size() << " RPKG files:" << std::endl);
 
-        if (reverse_dependency.size() > 0)
+        if (!reverse_dependency.empty())
         {
             LOG(filter << "'s reverse dependencies:");
 
@@ -208,7 +206,7 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
             {
                 LOG_NO_ENDL("Hash file/resource: " << reverse_dependency.at(i));
 
-                if (reverse_dependency_in_rpkg_file.at(i).size() > 0)
+                if (!reverse_dependency_in_rpkg_file.at(i).empty())
                 {
                     LOG_NO_ENDL(", Found in RPKG files: ");
 
@@ -240,7 +238,7 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
 
         for (auto& rpkg : rpkgs)
         {
-            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkg.hash_map.find(std::strtoull(filter.c_str(), nullptr, 16));
+            auto it = rpkg.hash_map.find(std::strtoull(filter.c_str(), nullptr, 16));
 
             if (it != rpkg.hash_map.end())
             {
@@ -260,7 +258,7 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
         {
             uint64_t hash_value = std::strtoull(filter.c_str(), nullptr, 16);
 
-            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkg.hash_map.find(hash_value);
+            auto it = rpkg.hash_map.find(hash_value);
 
             if (it != rpkg.hash_map.end())
             {
@@ -278,7 +276,7 @@ void rpkg_function::extract_direct_hash_depends_from(std::string& input_path, st
         {
             for (auto& rpkg : rpkgs)
             {
-                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkg.hash_map.find(hashes_to_extract.at(x));
+                auto it = rpkg.hash_map.find(hashes_to_extract.at(x));
 
                 if (it == rpkg.hash_map.end())
                     continue;

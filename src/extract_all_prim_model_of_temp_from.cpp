@@ -62,7 +62,7 @@ void rpkg_function::extract_all_prim_model_of_temp_from(std::string& input_path,
         {
             const uint64_t rpkg_index = i;
 
-            if (!(rpkgs.at(i).rpkg_file_path == input_path))
+            if (rpkgs.at(i).rpkg_file_path != input_path)
                 continue;
 
             auto it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);

@@ -5,10 +5,8 @@
 #include "util.h"
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/rapidjson/stringbuffer.h"
-#include "thirdparty/directxmath/DirectXMath.h"
 #include <unordered_map>
 #include <fstream>
-#include <iomanip>
 
 #pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM2.lib")
 #pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM3.lib")
@@ -38,31 +36,31 @@ entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
 
             for (uint64_t j = 0; j < rpkgs.size(); j++)
             {
-                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(j).hash_map.find(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_reference_data.hash_reference.at(i));
+                auto it = rpkgs.at(j).hash_map.find(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_reference_data.hash_reference.at(i));
 
-                if (it != rpkgs.at(j).hash_map.end())
+                if (it == rpkgs.at(j).hash_map.end())
+                    continue;
+
+                if (rpkgs.at(j).hash.at(it->second).hash_resource_type != "TBLU")
+                    continue;
+
+                if (!tblu_found)
                 {
-                    if (rpkgs.at(j).hash.at(it->second).hash_resource_type == "TBLU")
+                    tblu_depends_file_name.push_back(util::uint64_t_to_hex_string(rpkgs.at(j).hash.at(it->second).hash_value) + "." + rpkgs.at(j).hash.at(it->second).hash_resource_type);
+
+                    tblu_return_value = TEMP_TBLU_FOUND;
+
+                    tblu_hash_value = rpkgs.at(j).hash.at(it->second).hash_value;
+                }
+                else
+                {
+                    if (util::uint64_t_to_hex_string(rpkgs.at(j).hash.at(it->second).hash_value) + "." + rpkgs.at(j).hash.at(it->second).hash_resource_type != tblu_depends_file_name.back())
                     {
-                        if (!tblu_found)
-                        {
-                            tblu_depends_file_name.push_back(util::uint64_t_to_hex_string(rpkgs.at(j).hash.at(it->second).hash_value) + "." + rpkgs.at(j).hash.at(it->second).hash_resource_type);
-
-                            tblu_return_value = TEMP_TBLU_FOUND;
-
-                            tblu_hash_value = rpkgs.at(j).hash.at(it->second).hash_value;
-                        }
-                        else
-                        {
-                            if (util::uint64_t_to_hex_string(rpkgs.at(j).hash.at(it->second).hash_value) + "." + rpkgs.at(j).hash.at(it->second).hash_resource_type != tblu_depends_file_name.back())
-                            {
-                                tblu_return_value = TEMP_TBLU_TOO_MANY;
-                            }
-                        }
-
-                        tblu_found = true;
+                        tblu_return_value = TEMP_TBLU_TOO_MANY;
                     }
                 }
+
+                tblu_found = true;
             }
         }
     }
@@ -73,7 +71,7 @@ entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
 
         if (rpkg_index != UINT32_MAX)
         {
-            std::unordered_map<uint64_t, uint64_t>::iterator it6 = rpkgs.at(rpkg_index).hash_map.find(tblu_hash_value);
+            auto it6 = rpkgs.at(rpkg_index).hash_map.find(tblu_hash_value);
 
             if (it6 != rpkgs.at(rpkg_index).hash_map.end())
             {
@@ -107,7 +105,7 @@ entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
                     LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(temp_rpkg_index).rpkg_file_path + " could not be read.");
                 }
 
-                file.seekg(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.header.data_offset, file.beg);
+                file.seekg(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.header.data_offset, std::ifstream::beg);
                 file.read(temp_input_data.data(), temp_hash_size);
                 file.close();
 
@@ -182,7 +180,7 @@ entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
                     LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(tblu_rpkg_index).rpkg_file_path + " could not be read.");
                 }
 
-                file2.seekg(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).data.header.data_offset, file2.beg);
+                file2.seekg(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).data.header.data_offset, std::ifstream::beg);
                 file2.read(tblu_input_data.data(), tblu_hash_size);
                 file2.close();
 
@@ -232,7 +230,8 @@ entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
     }
 }
 
-uint32_t entity::search(std::string search_string, bool search_entity_ids, bool search_entity_names, bool search_property_names, bool search_property_values, uint32_t results_count, uint32_t max_results)
+uint32_t
+entity::search(const std::string& search_string, uint32_t results_count, uint32_t max_results) const
 {
     yyjson_val* temp_root = yyjson_doc_get_root(temp_yyjson_doc);
     yyjson_val* tblu_root = yyjson_doc_get_root(tblu_yyjson_doc);
