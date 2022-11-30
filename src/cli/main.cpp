@@ -1,7 +1,6 @@
 #include "command_line.h"
 #include "../console.h"
 #include "../global.h"
-#include "../file.h"
 #include "../task.h"
 #include <string>
 #include <vector>
@@ -19,7 +18,7 @@ int main(int argc, char* argv[])
 	#elif defined(_WIN32)
 		char buf[MAX_PATH];
 		GetModuleFileNameA(nullptr, buf, MAX_PATH);
-		exe_path = std::string(buf).substr(0, std::string(buf).find_last_of("\\"));
+		exe_path = std::string(buf).substr(0, std::string(buf).find_last_of('\\'));
 	#else
 		exe_path = "";
 	#endif
@@ -54,7 +53,7 @@ int main(int argc, char* argv[])
                 std::vector<std::string> args;
 
                 size_t pos1 = 0;
-                size_t pos2 = input.find(" ");
+                size_t pos2 = input.find(' ');
 
                 bool no_errors = true;
 
@@ -68,7 +67,7 @@ int main(int argc, char* argv[])
                     {
                         if (input[pos1] == '\'')
                         {
-                            size_t pos3 = input.substr(pos1 + 1).find("\'");
+                            size_t pos3 = input.substr(pos1 + 1).find('\'');
 
                             if (pos3 != std::string::npos)
                             {
@@ -79,7 +78,7 @@ int main(int argc, char* argv[])
                         }
                         else if (input[pos1] == '\"')
                         {
-                            size_t pos3 = input.substr(pos1 + 1).find("\"");
+                            size_t pos3 = input.substr(pos1 + 1).find('\"');
 
                             if (pos3 != std::string::npos)
                             {
@@ -90,7 +89,7 @@ int main(int argc, char* argv[])
                         }
                     }
 
-                    pos2 = input.substr(pos1).find(" ");
+                    pos2 = input.substr(pos1).find(' ');
                 }
 
                 if (pos1 < input.length())

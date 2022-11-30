@@ -34,7 +34,6 @@ set(lib-lz4
         thirdparty/lz4/lz4.h
         thirdparty/lz4/lz4frame.c
         thirdparty/lz4/lz4frame.h
-        thirdparty/lz4/lz4frame_static.h
         thirdparty/lz4/lz4hc.c
         thirdparty/lz4/lz4hc.h
         thirdparty/lz4/xxhash.c
@@ -255,8 +254,6 @@ set(RPKG_COMMON_SOURCES
         src/obj.cpp
         src/obj.h
         src/ores.cpp
-        src/pch.cpp
-        src/pch.h
         src/prim.cpp
         src/prim.h
         src/rebuild_dlge_from_json_from.cpp
@@ -305,8 +302,8 @@ target_compile_definitions(rpkg-cli PUBLIC RPKG_CLI)
 
 if (MSVC)
     # C4068 - no unknown pragma
-    target_compile_options(rpkg-lib PUBLIC "/bigobj" "/W3" "/wd4068")
-    target_compile_options(rpkg-cli PUBLIC "/bigobj" "/W3" "/wd4068")
+    target_compile_options(rpkg-lib PUBLIC "/bigobj" "/W3" "/wd4068" "/Gy")
+    target_compile_options(rpkg-cli PUBLIC "/bigobj" "/W3" "/wd4068" "/Gy")
 endif()
 
 target_link_directories(rpkg-cli PUBLIC ${PROJECT_SOURCE_DIR}/thirdparty/zhmtools)
