@@ -164,7 +164,7 @@ RPKG_EXPORT int search_temp_files(uint32_t temps_index, char* search_str, int ma
 
 RPKG_EXPORT char* get_search_temp_files();
 
-RPKG_EXPORT int generate_png_from_text(char* rpkg_file, char* hash_string, const char* png_path);
+RPKG_EXPORT int generate_png_from_text(char* rpkg_file, char* hash_string, char* png_path);
 
 RPKG_EXPORT int unload_rpkg(char* rpkg_file);
 
