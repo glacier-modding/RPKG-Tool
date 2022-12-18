@@ -2,33 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using System.IO;
 using System.ComponentModel;
-using System.Drawing;
 using System.Runtime.InteropServices;
-using System.Threading;
 using MahApps.Metro.Controls;
-using ControlzEx.Theming;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using Application = System.Windows.Application;
 using Brushes = System.Windows.Media.Brushes;
 using Button = System.Windows.Controls.Button;
 using Color = System.Windows.Media.Color;
 using ComboBox = System.Windows.Controls.ComboBox;
-using ListBox = System.Windows.Forms.ListBox;
 using TextBox = System.Windows.Controls.TextBox;
-using TreeView = System.Windows.Controls.TreeView;
 using TextBlock = System.Windows.Controls.TextBlock;
 
 namespace rpkg
@@ -103,23 +90,22 @@ namespace rpkg
 
         private void MetroWindow_Activated(object sender, EventArgs e)
         {
-            if (hidden)
+            if (!hidden) return;
+
+            if (currentThemeBrightness == "Dark")
             {
-                if (currentThemeBrightness == "Dark")
-                {
-                    MainTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
-                    MainTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
-                }
-                else if (currentThemeBrightness == "Light")
-                {
-                    MainTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
-                    MainTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
-                }
-
-                LoadLoadingWindow();
-
-                hidden = false;
+                MainTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+                MainTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
             }
+            else if (currentThemeBrightness == "Light")
+            {
+                MainTreeView.ForeColor = System.Drawing.ColorTranslator.FromHtml("#000000");
+                MainTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+            }
+
+            LoadLoadingWindow();
+
+            hidden = false;
         }
 
         private void LoadImageList()
@@ -149,7 +135,7 @@ namespace rpkg
             }
 
             visitedNodes = null;
-            visitedNodes = new List<System.Windows.Forms.TreeNode>();
+            visitedNodes = new List<TreeNode>();
 
             controls = null;
             controls = new List<string>();
@@ -174,7 +160,7 @@ namespace rpkg
             MainTreeView.AfterSelect += MainTreeView_AfterSelect;
 
             {
-                var topItem = new System.Windows.Forms.TreeNode();
+                var topItem = new TreeNode();
 
                 topItem.Text = tempFileNameFull.Replace("(", "").Replace(")", "");
 
@@ -213,7 +199,7 @@ namespace rpkg
 
                         if (MainTreeView.ImageList == null) LoadImageList();
 
-                        var item = new System.Windows.Forms.TreeNode();
+                        var item = new TreeNode();
 
                         item.Text = entryName + " (" + entryIndex.ToString() + ")";
                         item.Name = entryName.ToString();
@@ -226,7 +212,7 @@ namespace rpkg
                 }
 
                 int nodeCount = topItem.Nodes.Count;
-                System.Windows.Forms.TreeNode[] nodes = new System.Windows.Forms.TreeNode[nodeCount];
+                TreeNode[] nodes = new TreeNode[nodeCount];
                 topItem.Nodes.CopyTo(nodes, 0);
 
                 MainTreeView.Nodes.Add(topItem);
@@ -251,7 +237,7 @@ namespace rpkg
 
                         //MessageBoxShow(temp_index_hash_reference.ToString());
 
-                        var topItem = new System.Windows.Forms.TreeNode();
+                        var topItem = new TreeNode();
 
                         topItem.Text = brick;
 
@@ -290,13 +276,11 @@ namespace rpkg
 
                                 if (MainTreeView.ImageList == null) LoadImageList();
 
-                                var item = new System.Windows.Forms.TreeNode();
+                                var item = new TreeNode();
 
                                 item.Text = entryName + " (" + entryIndex.ToString() + ")";
                                 item.Name = entryName.ToString();
                                 item.Tag = entryIndex.ToString() + "," + temp_index_hash_reference.ToString();
-                                
-                                
 
                                 LoadTreeView(ref item);
 
@@ -305,7 +289,7 @@ namespace rpkg
                         }
 
                         int nodeCount = topItem.Nodes.Count;
-                        System.Windows.Forms.TreeNode[] nodes = new System.Windows.Forms.TreeNode[nodeCount];
+                        TreeNode[] nodes = new TreeNode[nodeCount];
                         topItem.Nodes.CopyTo(nodes, 0);
 
                         MainTreeView.Nodes.Add(topItem);
@@ -329,12 +313,9 @@ namespace rpkg
             }
         }
 
-        private void LoadTreeView(ref System.Windows.Forms.TreeNode masterTreeViewItem)
+        private void LoadTreeView(ref TreeNode masterTreeViewItem)
         {
             List<TreeNode> nodesToAdd = new List<TreeNode>();
-
-            string entityName = masterTreeViewItem.Name;
-
 
             UInt32 temp_entryIndex = 0;
 
@@ -346,7 +327,6 @@ namespace rpkg
 
             UInt32.TryParse(nodeData.Split(',')[1], out temp_temp_index);
 
-            
             string hashReferenceData = Marshal.PtrToStringAnsi(get_entries_hash_references(temp_temp_index, temp_entryIndex));
 
             string[] hashReferences = hashReferenceData.Split(',');
@@ -380,7 +360,7 @@ namespace rpkg
 
                         //MessageBoxShow(entryIndex.ToString() + ", " + entryNameLength.ToString() + ", " + entryName);
 
-                        var itemHashReference = new System.Windows.Forms.TreeNode();
+                        var itemHashReference = new TreeNode();
 
                         itemHashReference.Text = entryName + " (" + entryIndex.ToString() + ") (" + temp_index_hash_reference.ToString() + ")";
                         itemHashReference.Name = entryName.ToString();
@@ -417,7 +397,7 @@ namespace rpkg
 
                     //MessageBoxShow(entryIndex.ToString() + ", " + entryNameLength.ToString() + ", " + entryName);
 
-                    var item2 = new System.Windows.Forms.TreeNode();
+                    var item2 = new TreeNode();
 
                     item2.Text = entryName + " (" + entryIndex.ToString() + ")";
                     item2.Name = entryName.ToString();
@@ -442,9 +422,6 @@ namespace rpkg
             {
                 masterTreeViewItem.Nodes.Add(tn);
             }
-
-
-
         }
 
         private void loadNodeIcon(ref TreeNode tn, string hashReference)
@@ -476,9 +453,6 @@ namespace rpkg
 
             tn.ImageIndex = iconIndex;
             tn.SelectedImageIndex = iconIndex;
-
-
-            
         }
 
         private void GoToNode_Click(object sender, RoutedEventArgs e)
@@ -493,7 +467,7 @@ namespace rpkg
 
             tempMessage.Show();
 
-            foreach (System.Windows.Forms.TreeNode node in MainTreeView.Nodes)
+            foreach (TreeNode node in MainTreeView.Nodes)
             {
                 if (!foundNode)
                 {
@@ -504,32 +478,31 @@ namespace rpkg
             tempMessage.Close();
         }
 
-        void GoToNode(System.Windows.Forms.TreeNode mainNode, ref string nodeName, ref bool foundNode)
+        void GoToNode(TreeNode mainNode, ref string nodeName, ref bool foundNode)
         {
-            foreach (System.Windows.Forms.TreeNode node in mainNode.Nodes)
+            foreach (TreeNode node in mainNode.Nodes)
             {
-                if (!foundNode)
+                if (foundNode) continue;
+
+                GoToNode(node, ref nodeName, ref foundNode);
+
+                if (node.Text.StartsWith(nodeName))
                 {
-                    GoToNode(node, ref nodeName, ref foundNode);
+                    foundNode = true;
 
-                    if (node.Text.StartsWith(nodeName))
-                    {
-                        foundNode = true;
+                    MainTreeView.Focus();
 
-                        MainTreeView.Focus();
-
-                        MainTreeView.SelectedNode = node;
-
-                        //MessageBoxShow(node.Text);
-                    }
-
-                    //if (foundNode)
-                    //{
-                    //node.Expand();
+                    MainTreeView.SelectedNode = node;
 
                     //MessageBoxShow(node.Text);
-                    //}
                 }
+
+                //if (foundNode)
+                //{
+                //node.Expand();
+
+                //MessageBoxShow(node.Text);
+                //}
             }
         }
 
@@ -597,109 +570,6 @@ namespace rpkg
                         }
                     }
                 }
-
-                bool update = false;
-
-                foreach (bool controlChange in controlsChanged)
-                {
-                    if (controlChange)
-                    {
-                        update = true;
-                    }
-                }
-
-                if (update)
-                {
-                    MemoryStream updateDataMemoryStream = new MemoryStream();
-                    BinaryWriter updateDataWriter = new BinaryWriter(updateDataMemoryStream);
-
-                    for (int i = 0; i < controls.Count; i++)
-                    {
-                        DependencyObject descendant = FindDescendant(EditorWindow, controls[i]);
-
-                        if (descendant != null)
-                        {
-                            if (descendant is TextBox)
-                            {
-                                string value = (descendant as TextBox).Text;
-
-                                if (value != "" && controlsChanged[i])
-                                {
-                                    //MessageBoxShow("Textbox: " + controlJSONPointers[i] + ": " + value);
-
-                                    UInt32 controlJSONPointersLength = (UInt32)controlJSONPointers[i].Length;
-                                    UInt32 controlJSONPointersTypesLength = (UInt32)controlJSONPointersTypes[i].Length;
-                                    UInt32 valueLength = (UInt32)value.Length;
-
-                                    updateDataWriter.Write(controlJSONPointersLength);
-                                    updateDataWriter.Write(Encoding.UTF8.GetBytes(controlJSONPointers[i]));
-                                    updateDataWriter.Write(controlJSONPointersTypesLength);
-                                    updateDataWriter.Write(Encoding.UTF8.GetBytes(controlJSONPointersTypes[i]));
-                                    updateDataWriter.Write(valueLength);
-                                    updateDataWriter.Write(Encoding.UTF8.GetBytes(value));
-                                }
-                                else if (value == "" && controlJSONPointersTypes[i] != "ZString")
-                                {
-                                    MessageBoxShow("Error: The textbox for " + controlJSONPointers[i] + " is empty, can not proceed.");
-
-                                    return;
-                                }
-                            }
-                            else if (descendant is ComboBox)
-                            {
-                                string value = (descendant as ComboBox).SelectedItem.ToString();
-
-                                if (value != "" && controlsChanged[i])
-                                {
-                                    //MessageBoxShow("Textbox: " + controlJSONPointers[i] + ": " + value + ", length: " + value.Length.ToString());
-
-                                    UInt32 controlJSONPointersLength = (UInt32)controlJSONPointers[i].Length;
-                                    UInt32 controlJSONPointersTypesLength = (UInt32)controlJSONPointersTypes[i].Length;
-                                    UInt32 valueLength = (UInt32)value.Length;
-
-                                    updateDataWriter.Write(controlJSONPointersLength);
-                                    updateDataWriter.Write(Encoding.UTF8.GetBytes(controlJSONPointers[i]));
-                                    updateDataWriter.Write(controlJSONPointersTypesLength);
-                                    updateDataWriter.Write(Encoding.UTF8.GetBytes(controlJSONPointersTypes[i]));
-                                    updateDataWriter.Write(valueLength);
-                                    updateDataWriter.Write(Encoding.UTF8.GetBytes(value));
-                                }
-                                else if (value == "" && controlJSONPointersTypes[i] != "ZString")
-                                {
-                                    MessageBoxShow("Error: The combobox for " + controlJSONPointers[i] + " is empty, can not proceed.");
-
-                                    return;
-                                }
-                            }
-                        }
-                    }
-
-                    updateDataWriter.Flush();
-
-                    byte[] updateData = updateDataMemoryStream.ToArray();
-
-                    GCHandle updateDataHandle = GCHandle.Alloc(updateData, GCHandleType.Pinned);
-                    try
-                    {
-                        IntPtr address = updateDataHandle.AddrOfPinnedObject();
-
-                        int return_value = update_temp_file(temp_index, entity_index, address, (UInt32)updateData.Length);
-                    }
-                    finally
-                    {
-                        if (updateDataHandle.IsAllocated)
-                        {
-                            updateDataHandle.Free();
-                        }
-                    }
-
-                    string responseString = Marshal.PtrToStringAnsi(get_response_string());
-
-                    if (responseString != "")
-                    {
-                        MessageBoxShow(responseString);
-                    }
-                }
             }
         }
 
@@ -707,7 +577,7 @@ namespace rpkg
         {
             if (visitedNodes.Count > 1)
             {
-                System.Windows.Forms.TreeNode node;
+                TreeNode node;
 
                 if (MainTreeView.SelectedNode == visitedNodes[visitedNodes.Count - 1] && visitedNodes.Count >= 2)
                 {
@@ -729,11 +599,11 @@ namespace rpkg
             }
         }
 
-        private void MainTreeView_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
+        private void MainTreeView_AfterSelect(object sender, TreeViewEventArgs e)
         {
             if (!hidden)
             {
-                System.Windows.Forms.TreeNode item = (e.Node as System.Windows.Forms.TreeNode);
+                TreeNode item = (e.Node as TreeNode);
 
                 if (visitedNodes.Count == 0)
                 {
@@ -748,8 +618,6 @@ namespace rpkg
                 }
 
                 //item.IsSelected = true;
-
-                string header = item.Text.ToString();
 
                 if (MainTreeView.Nodes.Count > 0)
                 {
@@ -945,8 +813,6 @@ namespace rpkg
             }
         }
 
-
-
         private void AppendInput_TEMP(string valueType, string typeString)
         {
             int entry_data_size = get_temp_entries(temp_index, valueType, typeString);
@@ -1087,13 +953,13 @@ namespace rpkg
 
                                     propertyValueVals[i].Add(valueString);
 
-                                    string debugString = propertyValuePropertyIDs[i] + "\n";
-                                    debugString += propertyValueTypes[i] + "\n";
-                                    debugString += propertyValues[i][propertyValueValNames[i].Count - 1] + "\n";
-                                    debugString += propertyValueValNames[i][propertyValueValNames[i].Count - 1] + "\n";
-                                    debugString += propertyValueJSONPointers[i][propertyValueJSONPointers[i].Count - 1] + "\n";
-                                    debugString += propertyValueJSONPointersTypes[i][propertyValueJSONPointersTypes[i].Count - 1] + "\n";
-                                    debugString += propertyValueVals[i][propertyValueVals[i].Count - 1] + "\n";
+                                    // string debugString = propertyValuePropertyIDs[i] + "\n";
+                                    // debugString += propertyValueTypes[i] + "\n";
+                                    // debugString += propertyValues[i][propertyValueValNames[i].Count - 1] + "\n";
+                                    // debugString += propertyValueValNames[i][propertyValueValNames[i].Count - 1] + "\n";
+                                    // debugString += propertyValueJSONPointers[i][propertyValueJSONPointers[i].Count - 1] + "\n";
+                                    // debugString += propertyValueJSONPointersTypes[i][propertyValueJSONPointersTypes[i].Count - 1] + "\n";
+                                    // debugString += propertyValueVals[i][propertyValueVals[i].Count - 1] + "\n";
 
                                     //MessageBoxShow(debugString);
                                 }
@@ -1282,13 +1148,13 @@ namespace rpkg
 
                                     propertyValueVals[i].Add(valueString);
 
-                                    string debugString = propertyValuePropertyIDs[i] + "\n";
-                                    debugString += propertyValueTypes[i] + "\n";
-                                    debugString += propertyValues[i][propertyValueValNames[i].Count - 1] + "\n";
-                                    debugString += propertyValueValNames[i][propertyValueValNames[i].Count - 1] + "\n";
-                                    debugString += propertyValueJSONPointers[i][propertyValueJSONPointers[i].Count - 1] + "\n";
-                                    debugString += propertyValueJSONPointersTypes[i][propertyValueJSONPointersTypes[i].Count - 1] + "\n";
-                                    debugString += propertyValueVals[i][propertyValueVals[i].Count - 1] + "\n";
+                                    // string debugString = propertyValuePropertyIDs[i] + "\n";
+                                    // debugString += propertyValueTypes[i] + "\n";
+                                    // debugString += propertyValues[i][propertyValueValNames[i].Count - 1] + "\n";
+                                    // debugString += propertyValueValNames[i][propertyValueValNames[i].Count - 1] + "\n";
+                                    // debugString += propertyValueJSONPointers[i][propertyValueJSONPointers[i].Count - 1] + "\n";
+                                    // debugString += propertyValueJSONPointersTypes[i][propertyValueJSONPointersTypes[i].Count - 1] + "\n";
+                                    // debugString += propertyValueVals[i][propertyValueVals[i].Count - 1] + "\n";
 
                                     //MessageBoxShow(debugString);
                                 }
@@ -1365,7 +1231,6 @@ namespace rpkg
 
         private void AppendInput_Default(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
-
             Grid grid = new Grid();
 
             ColumnDefinition columnDefinition = new ColumnDefinition();
@@ -1391,7 +1256,6 @@ namespace rpkg
                 if (propertyValueValNames[propertyIndex][i].Contains("/externalSceneIndex")) continue;
                 if (propertyValueValNames[propertyIndex][i].Contains("/exposedEntity")) continue;
 
-
                 if (propertyValueValNames[propertyIndex][i].Length > 0)
                 {
                     RowDefinition rowDefinition = new RowDefinition();
@@ -1407,7 +1271,6 @@ namespace rpkg
                     rowDefinition.Height = new GridLength(8);
                     grid.RowDefinitions.Add(rowDefinition);
 
-                    
                     TextBlock label = new TextBlock();
                     label.Text = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
                     grid.Children.Add(label);
@@ -1472,8 +1335,6 @@ namespace rpkg
                     }
                     else
                     {
-                        
-
                         if (propertyValueValNames[propertyIndex][i].Contains("/entityIndex"))
                         {
                             int temp_entity_index = 0;
@@ -1578,7 +1439,6 @@ namespace rpkg
 
         private void AppendInput_bool(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes)
         {
-
             Grid grid = new Grid();
 
             ColumnDefinition columnDefinition = new ColumnDefinition();
@@ -1690,8 +1550,6 @@ namespace rpkg
 
         private void AppendInput_enum(UInt32 temp_index, int propertyIndex, ref List<string> propertyValuePropertyIDs, ref List<string> propertyValueTypes, ref List<string>[] propertyValueVals, ref List<string>[] propertyValueValNames, ref List<string>[] propertyValueJSONPointers, ref List<string>[] propertyValueJSONPointersTypes, ref string enumValues)
         {
-            
-
             Grid grid = new Grid();
 
             ColumnDefinition columnDefinition = new ColumnDefinition();
@@ -1728,8 +1586,6 @@ namespace rpkg
                     rowDefinition = new RowDefinition();
                     rowDefinition.Height = new GridLength(8);
                     grid.RowDefinitions.Add(rowDefinition);
-
-
 
                     TextBlock label = new TextBlock();
                     label.Text = formatPropertyName(propertyValuePropertyIDs[propertyIndex]) + ":"; ;
@@ -1927,7 +1783,7 @@ namespace rpkg
                 float.TryParse(propertyValueVals[propertyIndex][3], NumberStyles.Float, CultureInfo.InvariantCulture, out a);
             }
 
-            MahApps.Metro.Controls.ColorCanvas colorCanvas = new ColorCanvas();
+            ColorCanvas colorCanvas = new ColorCanvas();
             colorCanvas.Name = "cc_" + colorPickerName;
 
             colorCanvas.R = FloatToByte(r);
@@ -2027,9 +1883,6 @@ namespace rpkg
             int rowCount = 1;
 
             int columnCount = 0;
-
-
-
 
             for (int i = 0; i < propertyValueVals[propertyIndex].Count; i++)
             {
@@ -2433,20 +2286,19 @@ namespace rpkg
         private void ZGuidTextBoxChanged(object sender, TextChangedEventArgs e)
         {
             TextBox textBox = sender as TextBox;
-            if (textBox != null)
+            if (textBox == null) return;
+            
+            string value = textBox.Text;
+            var regex = new Regex(@"[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?");
+            if (!regex.IsMatch(value))
             {
-                string value = textBox.Text;
-                var regex = new Regex(@"[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?");
-                if (!regex.IsMatch(value))
-                {
-                    textBox.Foreground = Brushes.Firebrick;
-                }
-                else
-                {
-                    //because of the themes it gets difficult to find the correct foreground color.
-                    //it will now use the same color as the filter textbox, since the filters color is unlikely to ever change.
-                    textBox.Foreground = FilterTextBox.Foreground;
-                }
+                textBox.Foreground = Brushes.Firebrick;
+            }
+            else
+            {
+                //because of the themes it gets difficult to find the correct foreground color.
+                //it will now use the same color as the filter textbox, since the filters color is unlikely to ever change.
+                textBox.Foreground = FilterTextBox.Foreground;
             }
         }
 
@@ -2454,20 +2306,19 @@ namespace rpkg
 
         void TextBoxChanged(string controlName)
         {
-            if (textBoxesLoaded)
-            {
-                string[] controlData = controlName.Split('_');
+            if (!textBoxesLoaded) return;
+            
+            string[] controlData = controlName.Split('_');
 
-                UInt32 controlNumber = 0;
+            UInt32 controlNumber = 0;
 
-                UInt32.TryParse(controlData[1], out controlNumber);
+            UInt32.TryParse(controlData[1], out controlNumber);
 
-                tempFilesChanged.Add(controlsTEMPIndexes[(int)controlNumber]);
+            tempFilesChanged.Add(controlsTEMPIndexes[(int)controlNumber]);
 
-                controlsChanged[(int)controlNumber] = true;
+            controlsChanged[(int)controlNumber] = true;
 
-                //MessageBoxShow(controlsTEMPIndexes[(int)controlNumber].ToString());
-            }
+            //MessageBoxShow(controlsTEMPIndexes[(int)controlNumber].ToString());
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -2477,136 +2328,130 @@ namespace rpkg
 
         private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (textBoxesLoaded)
-            {
-                string[] controlData = (sender as ComboBox).Name.Split('_');
+            if (!textBoxesLoaded) return;
 
-                UInt32 controlNumber = 0;
+            string[] controlData = (sender as ComboBox).Name.Split('_');
 
-                UInt32.TryParse(controlData[1], out controlNumber);
+            UInt32 controlNumber = 0;
 
-                tempFilesChanged.Add(controlsTEMPIndexes[(int)controlNumber]);
+            UInt32.TryParse(controlData[1], out controlNumber);
 
-                controlsChanged[(int)controlNumber] = true;
+            tempFilesChanged.Add(controlsTEMPIndexes[(int)controlNumber]);
 
-                //MessageBoxShow(controlsTEMPIndexes[(int)controlNumber].ToString());
-            }
+            controlsChanged[(int)controlNumber] = true;
+
+            //MessageBoxShow(controlsTEMPIndexes[(int)controlNumber].ToString());
         }
 
         private bool ProcessZGuid(string controlName, string zguidString)
         {
             foreach (ZGuid zguid in controlZGuids)
             {
-                if (zguid.controlName == controlName)
+                if (zguid.controlName != controlName) continue;
+
+                string[] zguidData = zguidString.Split('-');
+
+                if (zguidData.Length == 5)
                 {
-                    string[] zguidData = zguidString.Split('-');
-
-                    if (zguidData.Length == 5)
+                    if (zguidData[0].Length == 8 && zguidData[1].Length == 4 && zguidData[2].Length == 4 && zguidData[3].Length == 4 && zguidData[4].Length == 12)
                     {
-                        if (zguidData[0].Length == 8 && zguidData[1].Length == 4 && zguidData[2].Length == 4 && zguidData[3].Length == 4 && zguidData[4].Length == 12)
+                        bool return_value = UInt32.TryParse(zguidData[0], NumberStyles.HexNumber, null, out zguid._a);
+
+                        if (!return_value)
                         {
-                            bool return_value = UInt32.TryParse(zguidData[0], System.Globalization.NumberStyles.HexNumber, null, out zguid._a);
-
-                            if (!return_value)
-                            {
-                                MessageBoxShow("Error: ZGuid value " + zguidData[0] + " could not be converted to a UInt32 value.");
-                                return false;
-                            }
-
-                            return_value = UInt16.TryParse(zguidData[1], System.Globalization.NumberStyles.HexNumber, null, out zguid._b);
-
-                            if (!return_value)
-                            {
-                                MessageBoxShow("Error: ZGuid value " + zguidData[1] + " could not be converted to a UInt16 value.");
-                                return false;
-                            }
-
-                            return_value = UInt16.TryParse(zguidData[2], System.Globalization.NumberStyles.HexNumber, null, out zguid._c);
-
-                            if (!return_value)
-                            {
-                                MessageBoxShow("Error: ZGuid value " + zguidData[2] + " could not be converted to a UInt16 value.");
-                                return false;
-                            }
-
-                            return_value = byte.TryParse(zguidData[3].Substring(0, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._d);
-
-                            if (!return_value)
-                            {
-                                MessageBoxShow("Error: ZGuid value " + zguidData[3].Substring(0, 2) + " could not be converted to a byte value.");
-                                return false;
-                            }
-
-                            return_value = byte.TryParse(zguidData[3].Substring(2, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._e);
-
-                            if (!return_value)
-                            {
-                                MessageBoxShow("Error: ZGuid value " + zguidData[3].Substring(2, 2) + " could not be converted to a byte value.");
-                                return false;
-                            }
-
-                            return_value = byte.TryParse(zguidData[4].Substring(0, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._f);
-
-                            if (!return_value)
-                            {
-                                MessageBoxShow("Error: ZGuid value " + zguidData[4].Substring(0, 2) + " could not be converted to a byte value.");
-                                return false;
-                            }
-
-                            return_value = byte.TryParse(zguidData[4].Substring(2, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._g);
-
-                            if (!return_value)
-                            {
-                                MessageBoxShow("Error: ZGuid value " + zguidData[4].Substring(2, 2) + " could not be converted to a byte value.");
-                                return false;
-                            }
-
-                            return_value = byte.TryParse(zguidData[4].Substring(4, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._h);
-
-                            if (!return_value)
-                            {
-                                MessageBoxShow("Error: ZGuid value " + zguidData[4].Substring(4, 2) + " could not be converted to a byte value.");
-                                return false;
-                            }
-
-                            return_value = byte.TryParse(zguidData[4].Substring(6, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._i);
-
-                            if (!return_value)
-                            {
-                                MessageBoxShow("Error: ZGuid value " + zguidData[4].Substring(6, 2) + " could not be converted to a byte value.");
-                                return false;
-                            }
-
-                            return_value = byte.TryParse(zguidData[4].Substring(8, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._j);
-
-                            if (!return_value)
-                            {
-                                MessageBoxShow("Error: ZGuid value " + zguidData[4].Substring(8, 2) + " could not be converted to a byte value.");
-                                return false;
-                            }
-
-                            return_value = byte.TryParse(zguidData[4].Substring(10, 2), System.Globalization.NumberStyles.HexNumber, null, out zguid._k);
-
-                            if (!return_value)
-                            {
-                                MessageBoxShow("Error: ZGuid value " + zguidData[4].Substring(10, 2) + " could not be converted to a byte value.");
-                                return false;
-                            }
-
-                            return true;
-                        }
-                        else
-                        {
-                            MessageBoxShow("Error: ZGuid value is not 36 characters long and in the format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX.\n\nWhere the Xs are in the range 0-9 and A-F.");
+                            MessageBoxShow("Error: ZGuid value " + zguidData[0] + " could not be converted to a UInt32 value.");
                             return false;
                         }
+
+                        return_value = UInt16.TryParse(zguidData[1], NumberStyles.HexNumber, null, out zguid._b);
+
+                        if (!return_value)
+                        {
+                            MessageBoxShow("Error: ZGuid value " + zguidData[1] + " could not be converted to a UInt16 value.");
+                            return false;
+                        }
+
+                        return_value = UInt16.TryParse(zguidData[2], NumberStyles.HexNumber, null, out zguid._c);
+
+                        if (!return_value)
+                        {
+                            MessageBoxShow("Error: ZGuid value " + zguidData[2] + " could not be converted to a UInt16 value.");
+                            return false;
+                        }
+
+                        return_value = byte.TryParse(zguidData[3].Substring(0, 2), NumberStyles.HexNumber, null, out zguid._d);
+
+                        if (!return_value)
+                        {
+                            MessageBoxShow("Error: ZGuid value " + zguidData[3].Substring(0, 2) + " could not be converted to a byte value.");
+                            return false;
+                        }
+
+                        return_value = byte.TryParse(zguidData[3].Substring(2, 2), NumberStyles.HexNumber, null, out zguid._e);
+
+                        if (!return_value)
+                        {
+                            MessageBoxShow("Error: ZGuid value " + zguidData[3].Substring(2, 2) + " could not be converted to a byte value.");
+                            return false;
+                        }
+
+                        return_value = byte.TryParse(zguidData[4].Substring(0, 2), NumberStyles.HexNumber, null, out zguid._f);
+
+                        if (!return_value)
+                        {
+                            MessageBoxShow("Error: ZGuid value " + zguidData[4].Substring(0, 2) + " could not be converted to a byte value.");
+                            return false;
+                        }
+
+                        return_value = byte.TryParse(zguidData[4].Substring(2, 2), NumberStyles.HexNumber, null, out zguid._g);
+
+                        if (!return_value)
+                        {
+                            MessageBoxShow("Error: ZGuid value " + zguidData[4].Substring(2, 2) + " could not be converted to a byte value.");
+                            return false;
+                        }
+
+                        return_value = byte.TryParse(zguidData[4].Substring(4, 2), NumberStyles.HexNumber, null, out zguid._h);
+
+                        if (!return_value)
+                        {
+                            MessageBoxShow("Error: ZGuid value " + zguidData[4].Substring(4, 2) + " could not be converted to a byte value.");
+                            return false;
+                        }
+
+                        return_value = byte.TryParse(zguidData[4].Substring(6, 2), NumberStyles.HexNumber, null, out zguid._i);
+
+                        if (!return_value)
+                        {
+                            MessageBoxShow("Error: ZGuid value " + zguidData[4].Substring(6, 2) + " could not be converted to a byte value.");
+                            return false;
+                        }
+
+                        return_value = byte.TryParse(zguidData[4].Substring(8, 2), NumberStyles.HexNumber, null, out zguid._j);
+
+                        if (!return_value)
+                        {
+                            MessageBoxShow("Error: ZGuid value " + zguidData[4].Substring(8, 2) + " could not be converted to a byte value.");
+                            return false;
+                        }
+
+                        return_value = byte.TryParse(zguidData[4].Substring(10, 2), NumberStyles.HexNumber, null, out zguid._k);
+
+                        if (!return_value)
+                        {
+                            MessageBoxShow("Error: ZGuid value " + zguidData[4].Substring(10, 2) + " could not be converted to a byte value.");
+                            return false;
+                        }
+
+                        return true;
                     }
-                    else
-                    {
-                        MessageBoxShow("Error: ZGuid value is not 36 characters long and in the format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX.\n\nWhere the Xs are in the range 0-9 and A-F.");
-                        return false;
-                    }
+
+                    MessageBoxShow("Error: ZGuid value is not 36 characters long and in the format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX.\n\nWhere the Xs are in the range 0-9 and A-F.");
+                    return false;
                 }
+
+                MessageBoxShow("Error: ZGuid value is not 36 characters long and in the format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX.\n\nWhere the Xs are in the range 0-9 and A-F.");
+                return false;
             }
             return false;
         }
@@ -2652,8 +2497,6 @@ namespace rpkg
 
             return zguidString;
         }
-
-
 
         public string GetNewControlName(UInt32 temp_index, string input, string type)
         {
@@ -2845,7 +2688,7 @@ namespace rpkg
                 string filter = FilterTextBox.Text.ToLower();
                 int childrenVisibleCount = 0;
 
-                foreach (System.Windows.Forms.TreeNode node in MainTreeView.Nodes)
+                foreach (TreeNode node in MainTreeView.Nodes)
                 {
                     FilterNodes(node, ref filter, childrenVisibleCount);
                 }
@@ -2855,7 +2698,7 @@ namespace rpkg
         }
 
         #region treeView navigation
-        private int FilterNodes(System.Windows.Forms.TreeNode parentNode, ref string filter, int childrenVisibleCount)
+        private int FilterNodes(TreeNode parentNode, ref string filter, int childrenVisibleCount)
         {
             int currentChildrenVisibleCount = 0;
 
@@ -2863,16 +2706,11 @@ namespace rpkg
             {
                 if (parentNode.Nodes.Count > 0)
                 {
-                    foreach (System.Windows.Forms.TreeNode node in parentNode.Nodes)
+                    foreach (TreeNode node in parentNode.Nodes)
                     {
                         currentChildrenVisibleCount += FilterNodes(node, ref filter, 0);
                     }
                 }
-
-                //if (parentNode.Text.ToLower().Contains("pier_area_entrance_stairs_a (9425)"))
-                //{
-                //MessageBoxShow("LOL!!!");
-                //}
 
                 if (!parentNode.Text.ToLower().Contains(filter) && currentChildrenVisibleCount == 0)
                 {
@@ -2932,20 +2770,20 @@ namespace rpkg
 
         public class TreeViewBackup : List<TreeViewBackup>
         {
-            public System.Windows.Forms.TreeNode Parent { get; }
-            public System.Windows.Forms.TreeNodeCollection Children { get; }
+            public TreeNode Parent { get; }
+            public TreeNodeCollection Children { get; }
 
-            public TreeViewBackup(System.Windows.Forms.TreeNodeCollection children, System.Windows.Forms.TreeNode parent = null)
+            public TreeViewBackup(TreeNodeCollection children, TreeNode parent = null)
             {
                 Parent = parent;
                 Children = children;
-                AddRange(Children.Cast<System.Windows.Forms.TreeNode>().Select(child => new TreeViewBackup(child.Nodes, child)));
+                AddRange(Children.Cast<TreeNode>().Select(child => new TreeViewBackup(child.Nodes, child)));
             }
 
             public void Restore()
             {
                 Children.Clear();
-                this.ForEach(clone => clone.Restore());
+                ForEach(clone => clone.Restore());
                 Children.AddRange(this.Select(n => n.Parent).ToArray());
             }
         }
@@ -2954,7 +2792,7 @@ namespace rpkg
         {
             clear_temp_tblu_data();
             hidden = true;
-            this.Hide();
+            Hide();
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -2963,7 +2801,7 @@ namespace rpkg
 
             clear_temp_tblu_data();
             hidden = true;
-            this.Hide();
+            Hide();
         }
 
         private void MessageBoxShow(string messageBoxString)
@@ -3028,9 +2866,9 @@ namespace rpkg
 
         private string StringByteToStringFloat(byte input)
         {
-            int temp_int = (int)input;
+            int temp_int = input;
 
-            float temp_float = (float)temp_int / 255.0F;
+            float temp_float = temp_int / 255.0F;
 
             return temp_float.ToString(CultureInfo.InvariantCulture);
         }
@@ -3094,7 +2932,7 @@ namespace rpkg
         public string currentThemeBrightness = "Dark";
         public TreeViewBackup treeViewBackup;
         public Message message;
-        public List<System.Windows.Forms.TreeNode> visitedNodes;
+        public List<TreeNode> visitedNodes;
 
         #region defined data types
 
@@ -3186,8 +3024,6 @@ namespace rpkg
                 this.entityIndex = entityIndex;
                 this.exposedEntity = exposedEntity;
             }
-
-
         }
 
         #endregion
@@ -3200,20 +3036,11 @@ namespace rpkg
 
         #region imported methods
 
-        [DllImport("rpkg-lib.dll", EntryPoint = "task_execute", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int task_execute(string csharp_command, string csharp_input_path, string csharp_filter, string search, string search_type, string csharp_output_path);
-
-        [DllImport("rpkg-lib.dll", EntryPoint = "reset_task_status", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int reset_task_status();
-
         [DllImport("rpkg-lib.dll", EntryPoint = "clear_temp_tblu_data", CallingConvention = CallingConvention.Cdecl)]
         public static extern int clear_temp_tblu_data();
 
         [DllImport("rpkg-lib.dll", EntryPoint = "get_entries_with_logical_parent", CallingConvention = CallingConvention.Cdecl)]
         public static extern int get_entries_with_logical_parent(UInt32 temps_index, UInt32 logical_parent);
-
-        [DllImport("rpkg-lib.dll", EntryPoint = "get_entries_with_logical_parent_string", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_entries_with_logical_parent_string(UInt32 vector_index);
 
         [DllImport("rpkg-lib.dll", EntryPoint = "get_entries_with_logical_parent_data", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr get_entries_with_logical_parent_data();
@@ -3224,20 +3051,11 @@ namespace rpkg
         [DllImport("rpkg-lib.dll", EntryPoint = "get_entries", CallingConvention = CallingConvention.Cdecl)]
         public static extern int get_entries(UInt32 temps_index, UInt32 entry_index, string value_type);
 
-        [DllImport("rpkg-lib.dll", EntryPoint = "get_entries_data", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_entries_data();
-
         [DllImport("rpkg-lib.dll", EntryPoint = "get_entries_hash_reference_data", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr get_entries_hash_reference_data(UInt32 temps_index, UInt32 entry_index);
 
         [DllImport("rpkg-lib.dll", EntryPoint = "get_entries_hash_references", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr get_entries_hash_references(UInt32 temps_index, UInt32 entry_index);
-
-        [DllImport("rpkg-lib.dll", EntryPoint = "update_temp_file", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int update_temp_file(UInt32 temps_index, UInt32 entry_index, IntPtr update_data, UInt32 update_data_size);
-
-        [DllImport("rpkg-lib.dll", EntryPoint = "generate_temp_file_from_data", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int generate_temp_file_from_data(UInt32 temps_index, string temp_file_path);
 
         [DllImport("rpkg-lib.dll", EntryPoint = "get_enum_values", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr get_enum_values(UInt32 temps_index, string property_type);
@@ -3245,35 +3063,14 @@ namespace rpkg
         [DllImport("rpkg-lib.dll", EntryPoint = "get_temp_index", CallingConvention = CallingConvention.Cdecl)]
         public static extern int get_temp_index(string temp_hash_string);
 
-        [DllImport("rpkg-lib.dll", EntryPoint = "get_number_of_changed_temps", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_number_of_changed_temps();
-
-        [DllImport("rpkg-lib.dll", EntryPoint = "generate_temp_files_from_data", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int generate_temp_files_from_data(string temp_path);
-
-        [DllImport("rpkg-lib.dll", EntryPoint = "get_total_numer_of_temps", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_total_numer_of_temps();
-
-        [DllImport("rpkg-lib.dll", EntryPoint = "generate_rpkg_files_from_data", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int generate_rpkg_files_from_data(string temp_path);
-
         [DllImport("rpkg-lib.dll", EntryPoint = "get_top_level_logical_parents", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr get_top_level_logical_parents(UInt32 temps_index);
 
         [DllImport("rpkg-lib.dll", EntryPoint = "get_all_bricks", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr get_all_bricks(UInt32 temps_index);
 
-        [DllImport("rpkg-lib.dll", EntryPoint = "search_temp_files", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int search_temp_files(UInt32 temps_index, string search_str, int max_results);
-
-        [DllImport("rpkg-lib.dll", EntryPoint = "get_search_temp_files", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr get_search_temp_files();
-
         [DllImport("rpkg-lib.dll", EntryPoint = "get_response_string", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr get_response_string();
-
-        [DllImport("rpkg-lib.dll", EntryPoint = "get_temp_version", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int get_temp_version(UInt32 temps_index);
 
         [DllImport("rpkg-lib.dll", EntryPoint = "get_temp_subentity_count", CallingConvention = CallingConvention.Cdecl)]
         public static extern int get_temp_subentity_count(UInt32 temps_index);
@@ -3283,9 +3080,6 @@ namespace rpkg
 
         [DllImport("rpkg-lib.dll", EntryPoint = "get_entry_name", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr get_entry_name(UInt32 temp_index, int entry_index);
-
-        [DllImport("rpkg-lib.dll", EntryPoint = "generate_json_files_from_data", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int generate_json_files_from_data(string temp_path);
 
         #endregion
 
