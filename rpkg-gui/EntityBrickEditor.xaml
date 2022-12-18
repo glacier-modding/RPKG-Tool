@@ -21,9 +21,6 @@
         </Grid.ColumnDefinitions>
         <DockPanel Grid.Row="0" Grid.ColumnSpan="3">
             <Menu DockPanel.Dock="Top">
-                <MenuItem Click="GenerateTEMPFile_Click" Header="Save Binary TEMP File"/>
-                <MenuItem Click="GenerateRPKGFile_Click" Header="Pack To RPKG File"/>
-                <MenuItem Click="GenerateTEMPJSONFiles_Click" Header="Save RT JSON Files"/>
                 <MenuItem Click="Exit_Click" Header="Exit"/>
             </Menu>
         </DockPanel>
