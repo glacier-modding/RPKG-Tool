@@ -2,32 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using MahApps.Metro.Controls;
 using ControlzEx.Theming;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using Ookii.Dialogs.Wpf;
-using System.Net.Http;
 using System.Diagnostics;
 using System.Security;
 using NAudio.Wave;
 using HelixToolkit.Wpf;
-using HelixToolkit;
 using System.ComponentModel;
-using System.Drawing;
-using System.Runtime.CompilerServices;
 using DiscordRPC;
 using Button = System.Windows.Controls.Button;
 using ICSharpCode.AvalonEdit.Highlighting;
@@ -67,7 +57,7 @@ namespace rpkg
 					{
 						new DiscordRPC.Button() { Label = "Download RPKG Tool", Url = "https://glaciermodding.org" }
 					}
-				}); ;
+				});
 			}
 		}
 
@@ -123,7 +113,7 @@ namespace rpkg
 		{
 			InitializeComponent();
 
-			ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.DodgerBlue)));
+			ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.DodgerBlue)));
 
 			timestamp = Timestamps.Now;
 		}
@@ -155,8 +145,8 @@ namespace rpkg
 				userSettings = new UserSettings();
 
 				userSettings.ColorTheme = "Dark/Red";
-				userSettings.InputFolder = System.IO.Directory.GetCurrentDirectory();
-				userSettings.OutputFolder = System.IO.Directory.GetCurrentDirectory();
+				userSettings.InputFolder = Directory.GetCurrentDirectory();
+				userSettings.OutputFolder = Directory.GetCurrentDirectory();
 
 				string jsonString = JsonSerializer.Serialize(userSettings, options);
 
@@ -181,8 +171,6 @@ namespace rpkg
 				MessageQuestion messageBox = new MessageQuestion();
 				messageBox.message.Content = "Error: The hash list file (hash__list.txt) is missing.\n\nIt's necessary for several functions.\n\nClick OK to automatically download it.\n\nYou can also download it manually from https://hitmandb.glaciermodding.org/latest-hashes.7z and extract it to the same directory as this program.";
 				messageBox.ShowDialog();
-
-				//MessageBoxShow(messageBox.buttonPressed);
 
 				if (messageBox.buttonPressed == "OKButton")
 				{
@@ -365,8 +353,6 @@ namespace rpkg
 					string itemName = item.Name;
 
 					currentNodeText = item.Text;
-
-					//MessageBoxShow(itemHeader);
 
 					rpkgFilePath = GetRootTreeNode(e.Node).Text;
 
@@ -601,8 +587,6 @@ namespace rpkg
 						//HexViewerTextBox.Text += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgFilePath, hash));
 						//HexViewerTextBoxTextString += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgFilePath, hash));
 
-						string currentRPKGFilePath = rpkgFilePath;
-
 						currentHash = header[0];
 
 						if (RightTabControl.SelectedIndex == 2)
@@ -806,7 +790,7 @@ namespace rpkg
 
 							return_value = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hash, 0, 0);
 
-							string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+							string currentDirectory = Directory.GetCurrentDirectory();
 
 							string inputOGGFile = currentDirectory + "\\" + hash + ".ogg";
 
@@ -836,7 +820,7 @@ namespace rpkg
 
 								waveFormat = new WaveFormat(pcmSampleRate, 16, pcmChannels);
 
-								pcmSource = new NAudio.Wave.RawSourceWaveStream(pcmMemoryStream, waveFormat);
+								pcmSource = new RawSourceWaveStream(pcmMemoryStream, waveFormat);
 
 								oggPlayerState = (int)OggPlayerState.READY;
 							}
@@ -886,7 +870,7 @@ namespace rpkg
 
 								return_value = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hash, 1, 0);
 
-								string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+								string currentDirectory = Directory.GetCurrentDirectory();
 
 								string inputOGGFile = currentDirectory + "\\" + hash + ".ogg";
 
@@ -918,7 +902,7 @@ namespace rpkg
 
 										waveFormat = new WaveFormat(pcmSampleRate, 16, pcmChannels);
 
-										pcmSource = new NAudio.Wave.RawSourceWaveStream(pcmMemoryStream, waveFormat);
+										pcmSource = new RawSourceWaveStream(pcmMemoryStream, waveFormat);
 
 										oggPlayerState = (int)OggPlayerState.READY;
 									}
@@ -1479,7 +1463,7 @@ namespace rpkg
 						}
 						else if (hashType == "TEMP")
 						{
-							string[] buttons = { "Extract " + hashName, "Extract to QN (QuickEntity v2.1) JSON", "Edit " + hashName + " in Brick/Entity Editor (Recursive)", "Edit " + hashName + " in Brick/Entity Editor (Non-Recursive)", "Extract PRIM Models linked to " + hashName + " To GLB/TGA File(s)", "Extract PRIMs linked to " + hashName + " To GLB File(s)", "Cancel" };
+							string[] buttons = { "Extract " + hashName, "Extract to QN (QuickEntity v2.1) JSON", "View " + hashName + " in Brick/Entity Viewer (Recursive)", "View " + hashName + " in Brick/Entity Viewer (Non-Recursive)", "Extract PRIM Models linked to " + hashName + " To GLB/TGA File(s)", "Extract PRIMs linked to " + hashName + " To GLB File(s)", "Cancel" };
 
 							buttonCount = 7;
 
@@ -1762,7 +1746,7 @@ namespace rpkg
 								}
 								else
 								{
-									initialFolder = System.IO.Directory.GetCurrentDirectory();
+									initialFolder = Directory.GetCurrentDirectory();
 								}
 
 								fileDialog.InitialDirectory = initialFolder;
@@ -2024,7 +2008,7 @@ namespace rpkg
 										{
 											string rpkgBaseName = rpkgFile.Substring(0, rpkgUpperName.IndexOf("PATCH")) + ".rpkg";
 
-											MessageBoxShow("Error: TBLU file linked to " + hashName + " file is missing.\n\nMake sure you you import the base archives if you are trying to edit a TEMP file residing in a patch RPKG.\n\nTry importing " + rpkgBaseName + " and trying to edit " + hashName + " again.\n\nThis should be done before trying to launch the Brick/Entity Editor.");
+											MessageBoxShow("Error: TBLU file linked to " + hashName + " file is missing.\n\nMake sure you you import the base archives if you are trying to edit a TEMP file residing in a patch RPKG.\n\nTry importing " + rpkgBaseName + " and trying to view " + hashName + " again.\n\nThis should be done before trying to launch the Brick/Entity Viewer.");
 										}
 										else
 										{
@@ -2052,13 +2036,13 @@ namespace rpkg
 										MessageBoxShow("Error: " + hashName + " file's TBLU file's version is unknown.");
 									}
 
-									temp_return_value = clear_temp_tblu_data();
+									clear_temp_tblu_data();
 								}
 								else
 								{
-									if (entityBrickEditor == null)
+									if (EntityBrickViewer == null)
 									{
-										entityBrickEditor = new EntityBrickEditor();
+										EntityBrickViewer = new EntityBrickViewer();
 									}
 
 									string initialFolder = "";
@@ -2069,10 +2053,10 @@ namespace rpkg
 									}
 									else
 									{
-										initialFolder = System.IO.Directory.GetCurrentDirectory();
+										initialFolder = Directory.GetCurrentDirectory();
 									}
 
-									entityBrickEditor.inputFolder = initialFolder;
+									EntityBrickViewer.inputFolder = initialFolder;
 
 
 									if (File.Exists(userSettings.OutputFolder))
@@ -2081,25 +2065,22 @@ namespace rpkg
 									}
 									else
 									{
-										initialFolder = System.IO.Directory.GetCurrentDirectory();
+										initialFolder = Directory.GetCurrentDirectory();
 									}
 
-									entityBrickEditor.outputFolder = initialFolder;
-
-									entityBrickEditor.temps_index = (UInt32)temp_index;
-									entityBrickEditor.temp_file_version = temp_file_version;
-									entityBrickEditor.tempFileName = hashName;
-									entityBrickEditor.rpkgFilePath = rpkgFilePath;
-									entityBrickEditor.tempFileNameFull = header;
+									EntityBrickViewer.temps_index = (UInt32)temp_index;
+									EntityBrickViewer.temp_file_version = temp_file_version;
+									EntityBrickViewer.tempFileName = hashName;
+									EntityBrickViewer.rpkgFilePath = rpkgFilePath;
+									EntityBrickViewer.tempFileNameFull = header;
 
 									string[] theme = userSettings.ColorTheme.Split('/');
 
-									entityBrickEditor.currentThemeBrightness = theme[0];
-									string color = theme[1];
+									EntityBrickViewer.currentThemeBrightness = theme[0];
 
-									SetDiscordStatus("Brick Editor", hashName);
+									SetDiscordStatus("Brick Viewer", hashName);
 
-									entityBrickEditor.ShowDialog();
+									EntityBrickViewer.ShowDialog();
 
 									if (LeftTabControl.SelectedIndex == 0)
 									{
@@ -2268,7 +2249,7 @@ namespace rpkg
 										{
 											string rpkgBaseName = rpkgFile.Substring(0, rpkgUpperName.IndexOf("PATCH")) + ".rpkg";
 
-											MessageBoxShow("Error: TBLU file linked to " + hashName + " file is missing.\n\nMake sure you you import the base archives if you are trying to edit a TEMP file residing in a patch RPKG.\n\nTry importing " + rpkgBaseName + " and trying to edit " + hashName + " again.\n\nThis should be done before trying to launch the Brick/Entity Editor.");
+											MessageBoxShow("Error: TBLU file linked to " + hashName + " file is missing.\n\nMake sure you you import the base archives if you are trying to edit a TEMP file residing in a patch RPKG.\n\nTry importing " + rpkgBaseName + " and trying to view " + hashName + " again.\n\nThis should be done before trying to launch the Brick/Entity Viewer.");
 										}
 										else
 										{
@@ -2300,9 +2281,9 @@ namespace rpkg
 								}
 								else
 								{
-									if (entityBrickEditor == null)
+									if (EntityBrickViewer == null)
 									{
-										entityBrickEditor = new EntityBrickEditor();
+										EntityBrickViewer = new EntityBrickViewer();
 									}
 
 									string initialFolder = "";
@@ -2313,10 +2294,10 @@ namespace rpkg
 									}
 									else
 									{
-										initialFolder = System.IO.Directory.GetCurrentDirectory();
+										initialFolder = Directory.GetCurrentDirectory();
 									}
 
-									entityBrickEditor.inputFolder = initialFolder;
+									EntityBrickViewer.inputFolder = initialFolder;
 
 
 									if (File.Exists(userSettings.OutputFolder))
@@ -2325,25 +2306,22 @@ namespace rpkg
 									}
 									else
 									{
-										initialFolder = System.IO.Directory.GetCurrentDirectory();
+										initialFolder = Directory.GetCurrentDirectory();
 									}
 
-									entityBrickEditor.outputFolder = initialFolder;
-
-									entityBrickEditor.temps_index = (UInt32)temp_index;
-									entityBrickEditor.temp_file_version = temp_file_version;
-									entityBrickEditor.tempFileName = hashName;
-									entityBrickEditor.rpkgFilePath = rpkgFilePath;
-									entityBrickEditor.tempFileNameFull = header;
+									EntityBrickViewer.temps_index = (UInt32)temp_index;
+									EntityBrickViewer.temp_file_version = temp_file_version;
+									EntityBrickViewer.tempFileName = hashName;
+									EntityBrickViewer.rpkgFilePath = rpkgFilePath;
+									EntityBrickViewer.tempFileNameFull = header;
 
 									string[] theme = userSettings.ColorTheme.Split('/');
 
-									entityBrickEditor.currentThemeBrightness = theme[0];
-									string color = theme[1];
+									EntityBrickViewer.currentThemeBrightness = theme[0];
 
-									SetDiscordStatus("Brick Editor", hashName);
+									SetDiscordStatus("Brick Viewer", hashName);
 
-									entityBrickEditor.ShowDialog();
+									EntityBrickViewer.ShowDialog();
 
 									if (LeftTabControl.SelectedIndex == 0)
 									{
@@ -2580,8 +2558,6 @@ namespace rpkg
 
 							//HexViewerTextBox.Text += Marshal.PtrToStringAnsi(get_hash_in_rpkg_data_in_hex_view(rpkgHashFilePath, hash));
 
-							string currentRPKGFilePath = rpkgHashFilePath;
-
 							currentHash = header[0];
 
 							if (RightTabControl.SelectedIndex == 2)
@@ -2753,19 +2729,15 @@ namespace rpkg
 
 					foreach (System.Windows.Forms.TreeNode resourceItems in mainTreeNode.Nodes)
 					{
-						string resourceType = resourceItems.Text.ToString();
+						string resourceType = resourceItems.Text;
 
 						if (resourceTypeFilter == resourceType || !resourceTypeFilterEnabled)
 						{
 							if (rpkgResultsCount <= maxSearchResults)
 							{
 								bool resourceTypeItemAdded = false;
-
-								//MessageBoxShow(resourceType);
-
-								int return_value = search_imported_hashes(SearchRPKGsTextBox.Text, rpkgPath, resourceType, maxSearchResults);
-
-								//MessageBoxShow(Marshal.PtrToStringAnsi(get_search_imported_hashes()));
+								
+								search_imported_hashes(SearchRPKGsTextBox.Text, rpkgPath, resourceType, maxSearchResults);
 
 								string searchResultsString = Marshal.PtrToStringAnsi(get_search_imported_hashes());
 
@@ -2779,7 +2751,7 @@ namespace rpkg
 								}
 								else
 								{
-									item = (SearchRPKGsTreeView.Nodes[rpkgItemIndex] as System.Windows.Forms.TreeNode);
+									item = SearchRPKGsTreeView.Nodes[rpkgItemIndex];
 								}
 
 								item.Text = rpkgPath;
@@ -2800,18 +2772,11 @@ namespace rpkg
 
 										System.Windows.Forms.TreeNode item2;
 
-										if (!resourceTypeItemAdded)
-										{
-											item2 = new System.Windows.Forms.TreeNode();
+										item2 = new System.Windows.Forms.TreeNode();
 
-											item2.Text = resourceType;
+										item2.Text = resourceType;
 
-											item2.Expand();
-										}
-										else
-										{
-											item2 = (item.Nodes[resourceTypeItemIndex] as System.Windows.Forms.TreeNode);
-										}
+										item2.Expand();
 
 										foreach (string searchResult in searchResults)
 										{
@@ -2819,37 +2784,22 @@ namespace rpkg
 
 											rpkgResultsCount++;
 
-											//MessageBoxShow(searchResult);
-
-											//var item3 = new System.Windows.Forms.TreeNode();
-
 											string[] temp_test = searchResult.Split('.');
 
 											string ioiString = Marshal.PtrToStringAnsi(get_hash_list_string(temp_test[0]));
 
-											//item3.Header = searchResult + " (" + rpkgFile + ") " + ioiString;
-
-											//item2.Nodes.Add(searchResult + " (" + rpkgFile + ") " + ioiString);
-
 											nodes[nodeCount] = new System.Windows.Forms.TreeNode();
 
 											nodes[nodeCount].Text = searchResult + " (" + rpkgFile + ") " + ioiString;
-
-											//item3.Expanded += Item_Expanded;
-
-											//item2.Items.Add(item3);
 
 											nodeCount++;
 										}
 
 										item2.Nodes.AddRange(nodes);
 
-										if (!resourceTypeItemAdded)
-										{
-											item.Nodes.Add(item2);
+										item.Nodes.Add(item2);
 
-											resourceTypeItemAdded = true;
-										}
+										resourceTypeItemAdded = true;
 
 										if (!rpkgItemAdded && found)
 										{
@@ -2920,7 +2870,7 @@ namespace rpkg
 					maxSearchResults = 100;
 				}
 
-				int return_value = search_hash_list(SearchHashListTextBox.Text, maxSearchResults);
+				search_hash_list(SearchHashListTextBox.Text, maxSearchResults);
 
 				string searchResultsString = Marshal.PtrToStringAnsi(get_search_hash_list());
 
@@ -3101,7 +3051,7 @@ namespace rpkg
 
 				bitmapImage.BeginInit();
 
-				string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+				string currentDirectory = Directory.GetCurrentDirectory();
 
 				string png_file_name = currentDirectory + "\\" + hashFile + ".png";
 
@@ -3140,7 +3090,7 @@ namespace rpkg
 					}
 				}
 
-				int return_value_clear = clear_hash_data_vector();
+				clear_hash_data_vector();
 			}
 			catch
 			{
@@ -3188,7 +3138,7 @@ namespace rpkg
 					}
 				}
 
-				int return_value_clear = clear_hash_data_vector();
+				clear_hash_data_vector();
 			}
 			catch
 			{
@@ -3205,14 +3155,13 @@ namespace rpkg
 			string search_type = "";
 			string output_path = "";
 
-			int return_value = reset_task_status();
+			reset_task_status();
 
-			return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+			task_execute(command, input_path, filter, search, search_type, output_path);
 
-			string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+			string currentDirectory = Directory.GetCurrentDirectory();
 
 			List<string> objFileNames = new List<string>();
-			List<int> objFileSizes = new List<int>();
 
 			int fileSizeMax = 0;
 
@@ -3246,7 +3195,7 @@ namespace rpkg
 
 				ModelImporter import = new ModelImporter();
 				System.Windows.Media.Media3D.Model3DGroup model1 = import.Load(objFileNames[objIndex]);
-				System.Windows.Media.Media3D.Material mat = MaterialHelper.CreateMaterial(new SolidColorBrush(System.Windows.Media.Color.FromRgb(200, 200, 200)));
+				System.Windows.Media.Media3D.Material mat = MaterialHelper.CreateMaterial(new SolidColorBrush(Color.FromRgb(200, 200, 200)));
 				foreach (System.Windows.Media.Media3D.GeometryModel3D geometryModel in model1.Children)
 				{
 					geometryModel.Material = mat;
@@ -3273,12 +3222,12 @@ namespace rpkg
 
 		public static void TEXTToPNGThread(string rpkgFilePathLocal, string hash, string png_file_name)
 		{
-			int return_value = generate_png_from_text(rpkgFilePathLocal, hash, png_file_name);
+			generate_png_from_text(rpkgFilePathLocal, hash, png_file_name);
 		}
 
 		public static void MassExtractTEXTThread(string command, string input_path, string filter, string search, string search_type, string output_path)
 		{
-			int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+			task_execute(command, input_path, filter, search, search_type, output_path);
 		}
 
 		public int MassExtractTEXT(string command, string input_path, string filter, string search, string search_type, string output_path)
@@ -3294,7 +3243,7 @@ namespace rpkg
 
 		public static void RebuildTEXTThread(string command, string input_path, string filter, string search, string search_type, string output_path)
 		{
-			int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+			task_execute(command, input_path, filter, search, search_type, output_path);
 		}
 
 		public int RebuildTEXT(string command, string input_path, string filter, string search, string search_type, string output_path)
@@ -3310,7 +3259,7 @@ namespace rpkg
 
 		public static void ExtractTEXTThread(string command, string input_path, string filter, string search, string search_type, string output_path)
 		{
-			int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+			task_execute(command, input_path, filter, search, search_type, output_path);
 		}
 
 		public int ExtractTEXT(string command, string input_path, string filter, string search, string search_type, string output_path)
@@ -3326,7 +3275,7 @@ namespace rpkg
 
 		public static void ExtractMODELThread(string command, string input_path, string filter, string search, string search_type, string output_path)
 		{
-			int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+			task_execute(command, input_path, filter, search, search_type, output_path);
 		}
 
 		public int ExtractMODEL(string command, string input_path, string filter, string search, string search_type, string output_path)
@@ -3342,7 +3291,7 @@ namespace rpkg
 
 		public static void RebuildMODELThread(string command, string input_path, string filter, string search, string search_type, string output_path)
 		{
-			int return_value = task_execute(command, input_path, filter, search, search_type, output_path);
+			task_execute(command, input_path, filter, search, search_type, output_path);
 		}
 
 		public int RebuildMODEL(string command, string input_path, string filter, string search, string search_type, string output_path)
@@ -3417,7 +3366,7 @@ namespace rpkg
 
 			if (MainTreeView.Nodes.Count > 0)
 			{
-				if ((MainTreeView.Nodes[0] as System.Windows.Forms.TreeNode).Text.ToString() == "Click")
+				if (MainTreeView.Nodes[0].Text == "Click")
 				{
 					MainTreeView.Nodes.Clear();
 				}
@@ -3520,7 +3469,7 @@ namespace rpkg
 				}
 			}
 
-			int return_value = reset_task_status();
+			reset_task_status();
 
 			execute_import_rpkgs temp_rpkgExecute = import_rpkgs;
 
@@ -3536,8 +3485,6 @@ namespace rpkg
 
 			if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
 			{
-				//MessageBoxShow(progress.task_status_string);
-
 				return;
 			}
 
@@ -3549,7 +3496,7 @@ namespace rpkg
 				{
 					if (MainTreeView.Nodes.Count > 0)
 					{
-						if ((MainTreeView.Nodes[0] as System.Windows.Forms.TreeNode).Text.ToString() == "Click")
+						if (MainTreeView.Nodes[0].Text.ToString() == "Click")
 						{
 							MainTreeView.Nodes.Clear();
 						}
@@ -3646,7 +3593,7 @@ namespace rpkg
 			}
 			else
 			{
-				initialFolder = System.IO.Directory.GetCurrentDirectory();
+				initialFolder = Directory.GetCurrentDirectory();
 			}
 
 			fileDialog.InitialDirectory = initialFolder;
@@ -3690,20 +3637,13 @@ namespace rpkg
 
 			filter = filterDialog.filterString;
 
-			int return_value = reset_task_status();
+			reset_task_status();
 
 			execute_task rpkgExecute = task_execute;
 
 			IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
 			progress.ShowDialog();
-
-			if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
-			{
-				//MessageBoxShow(progress.task_status_string);
-
-				return;
-			}
 		}
 
 		private void MassExtract_Click(object sender, RoutedEventArgs e)
@@ -3825,13 +3765,6 @@ namespace rpkg
 				IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
 				progress.ShowDialog();
-
-				if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
-				{
-					//MessageBoxShow(progress.task_status_string);
-
-					return;
-				}
 			}
 			else
 			{
@@ -3915,13 +3848,6 @@ namespace rpkg
 				IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
 
 				progress.ShowDialog();
-
-				if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
-				{
-					//MessageBoxShow(progress.task_status_string);
-
-					return;
-				}
 			}
 		}
 
@@ -3987,7 +3913,7 @@ namespace rpkg
 
 					progress.message.Content = "Rebuilding All PRIM Models in " + input_path + "...";
 
-					int return_value = reset_task_status();
+					reset_task_status();
 
 					execute_task rpkgExecute = RebuildMODEL;
 
@@ -4058,7 +3984,7 @@ namespace rpkg
 							MessageBoxShow("Error: PRIM has too many primary object headers.");
 						}*/
 
-						return_value = clear_temp_tblu_data();
+						clear_temp_tblu_data();
 
 						return;
 					}
@@ -4073,7 +3999,7 @@ namespace rpkg
 
 					progress.message.Content = "Rebuilding All TEXT/TEXD in " + input_path + "...";
 
-					int return_value = reset_task_status();
+					reset_task_status();
 
 					execute_task rpkgExecute = RebuildTEXT;
 
@@ -4094,7 +4020,7 @@ namespace rpkg
 
 					progress.message.Content = "Rebuilding All PRIM in " + input_path + "...";
 
-					int return_value = reset_task_status();
+					reset_task_status();
 
 					execute_task rpkgExecute = RebuildMODEL;
 
@@ -4165,7 +4091,7 @@ namespace rpkg
 							MessageBoxShow("Error: PRIM has too many primary object headers.");
 						}*/
 
-						return_value = clear_temp_tblu_data();
+						clear_temp_tblu_data();
 
 						return;
 					}
@@ -4207,7 +4133,7 @@ namespace rpkg
 						progress.message.Content = "Rebuilding All WWEV in " + input_path + "...";
 					}
 
-					int return_value = reset_task_status();
+					reset_task_status();
 
 					execute_task rpkgExecute = task_execute;
 
@@ -4218,8 +4144,6 @@ namespace rpkg
 					if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
 					{
 						MessageBoxShow(progress.task_status_string);
-
-						return;
 					}
 				}
 			}
@@ -4371,7 +4295,7 @@ namespace rpkg
 				}
 				else
 				{
-					initialFolder = System.IO.Directory.GetCurrentDirectory();
+					initialFolder = Directory.GetCurrentDirectory();
 				}
 
 				fileDialog.InitialDirectory = initialFolder;
@@ -4399,7 +4323,7 @@ namespace rpkg
 				}
 				else
 				{
-					initialFolder = System.IO.Directory.GetCurrentDirectory();
+					initialFolder = Directory.GetCurrentDirectory();
 				}
 
 				fileDialog.InitialDirectory = initialFolder;
@@ -4449,37 +4373,37 @@ namespace rpkg
 		private void SetColorTheme(string brightness, string color)
 		{
 			if (brightness == "Light" && color == "Blue")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.DodgerBlue)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.DodgerBlue)));
 			if (brightness == "Light" && color == "Brown")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.BurlyWood)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.BurlyWood)));
 			if (brightness == "Light" && color == "Green")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.Green)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.Green)));
 			if (brightness == "Light" && color == "Orange")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.Orange)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.Orange)));
 			if (brightness == "Light" && color == "Purple")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.Purple)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.Purple)));
 			if (brightness == "Light" && color == "Red")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.Red)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.Red)));
 			if (brightness == "Light" && color == "Yellow")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.Yellow)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.Yellow)));
 			if (brightness == "Light" && color == "White")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.White)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.White)));
 			if (brightness == "Dark" && color == "Blue")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.DodgerBlue)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.DodgerBlue)));
 			if (brightness == "Dark" && color == "Brown")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.BurlyWood)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.BurlyWood)));
 			if (brightness == "Dark" && color == "Green")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.Green)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.Green)));
 			if (brightness == "Dark" && color == "Orange")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.Orange)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.Orange)));
 			if (brightness == "Dark" && color == "Purple")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.Purple)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.Purple)));
 			if (brightness == "Dark" && color == "Red")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.Red)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.Red)));
 			if (brightness == "Dark" && color == "Yellow")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.Yellow)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.Yellow)));
 			if (brightness == "Dark" && color == "White")
-				ThemeManager.Current.ChangeTheme(rpkg.App.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.White)));
+				ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Dark", Colors.White)));
 
 			if (brightness == "Dark")
 			{
@@ -4497,8 +4421,8 @@ namespace rpkg
 				SearchHashListTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#252525");
 				xshdJSONDark = XmlReader.Create(new MemoryStream(Properties.Resources.JSON_Dark));
 				REPOJSONTextEditor.SyntaxHighlighting = HighlightingLoader.Load(xshdJSONDark, HighlightingManager.Instance);
-				REPOJSONTextEditor.Foreground = System.Windows.Media.Brushes.White;
-				HexViewerTextBox.Foreground = System.Windows.Media.Brushes.White;
+				REPOJSONTextEditor.Foreground = Brushes.White;
+				HexViewerTextBox.Foreground = Brushes.White;
 			}
 			else if (brightness == "Light")
 			{
@@ -4516,8 +4440,8 @@ namespace rpkg
 				SearchHashListTreeView.BackColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
 				xshdJSONLight = XmlReader.Create(new MemoryStream(Properties.Resources.JSON_Light));
 				REPOJSONTextEditor.SyntaxHighlighting = HighlightingLoader.Load(xshdJSONLight, HighlightingManager.Instance);
-				REPOJSONTextEditor.Foreground = System.Windows.Media.Brushes.Black;
-				HexViewerTextBox.Foreground = System.Windows.Media.Brushes.Black;
+				REPOJSONTextEditor.Foreground = Brushes.Black;
+				HexViewerTextBox.Foreground = Brushes.Black;
 			}
 		}
 
@@ -4548,12 +4472,12 @@ namespace rpkg
 		private System.Windows.Threading.DispatcherTimer searchRPKGsInputTimer;
 		private System.Windows.Threading.DispatcherTimer searchHashListInputTimer;
 		private System.Windows.Threading.DispatcherTimer OGGPlayerTimer;
-		private NAudio.Wave.WaveOut waveOut;
+		private WaveOut waveOut;
 		private MemoryStream pcmMemoryStream;
 		private int pcmSampleSize;
 		private int pcmSampleRate;
 		private int pcmChannels;
-		public EntityBrickEditor entityBrickEditor;
+		public EntityBrickViewer EntityBrickViewer;
 		public List<string> patchHashOriginalList;
 		public List<string> patchHashList;
 		public List<string> patchHashNamesList;
@@ -4563,7 +4487,7 @@ namespace rpkg
 		public List<string> hashDependsFlagsList;
 		public int hashDependsPage;
 		public bool discordOn = false;
-		public DiscordRPC.Timestamps timestamp;
+		public Timestamps timestamp;
 		public bool runtimeDirLoaded = false;
 		BackgroundWorker deepSearchEntitiesWorker;
 		BackgroundWorker deepSearchLocalizationWorker;
@@ -4577,7 +4501,7 @@ namespace rpkg
 		JsonDocument visualEditorJSON;
 		bool loadingVisualEditor = false;
 
-private enum OggPlayerState
+		private enum OggPlayerState
 		{
 			NULL,
 			READY,
@@ -4585,20 +4509,6 @@ private enum OggPlayerState
 			PAUSED,
 			RESET
 		}
-
-		public enum Operation
-		{
-			IMPORT,
-			GENERAL,
-			MASS_EXTRACT,
-			DOWNLOAD,
-			TEMP_TBLU,
-			PRIM,
-			PRIM_REBUILD,
-			PRIM_MODEL_REBUILD,
-			PRIM_MODEL_EXTRACT,
-			DEEP_SEARCH
-		};
 
 		public enum RPKGStatus
 		{
@@ -4691,7 +4601,7 @@ private enum OggPlayerState
 		FileInfo file;
 		FileStream stream;
 		WaveFormat waveFormat;
-		NAudio.Wave.RawSourceWaveStream pcmSource;
+		RawSourceWaveStream pcmSource;
 
 		public delegate int execute_import_rpkgs(string rpkgs_path, string rpkgs_list);
 		public delegate int execute_load_recursive_temps(string temp_hash, string rpkg_file_path, UInt32 temp_version);
@@ -4710,10 +4620,6 @@ private enum OggPlayerState
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "reset_task_status", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int reset_task_status();
-
-		[DllImport("rpkg-lib.dll", EntryPoint = "reset_task_single_status",
-			CallingConvention = CallingConvention.Cdecl)]
-		public static extern int reset_task_single_status();
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "get_resource_types_count",
 			CallingConvention = CallingConvention.Cdecl)]
@@ -4782,30 +4688,11 @@ private enum OggPlayerState
 		[DllImport("rpkg-lib.dll", EntryPoint = "get_json_string", CallingConvention = CallingConvention.Cdecl)]
 		public static extern IntPtr get_json_string();
 
-		[DllImport("rpkg-lib.dll", EntryPoint = "get_hashes_with_no_reverse_depends",
-			CallingConvention = CallingConvention.Cdecl)]
-		public static extern IntPtr get_hashes_with_no_reverse_depends();
-
 		[DllImport("rpkg-lib.dll", EntryPoint = "load_hash_list", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int load_hash_list(string path);
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "get_hash_list_string", CallingConvention = CallingConvention.Cdecl)]
 		public static extern IntPtr get_hash_list_string(string hash_string);
-
-		[DllImport("rpkg-lib.dll", EntryPoint = "get_hashes_with_no_reverse_depends",
-			CallingConvention = CallingConvention.Cdecl)]
-		public static extern int get_hashes_with_no_reverse_depends(string rpkg_file);
-
-		[DllImport("rpkg-lib.dll", EntryPoint = "get_hashes_with_no_reverse_depends_string",
-			CallingConvention = CallingConvention.Cdecl)]
-		public static extern IntPtr get_hashes_with_no_reverse_depends_string();
-
-		[DllImport("rpkg-lib.dll", EntryPoint = "get_direct_hash_depends", CallingConvention = CallingConvention.Cdecl)]
-		public static extern int get_direct_hash_depends(string rpkg_file, string hash_string);
-
-		[DllImport("rpkg-lib.dll", EntryPoint = "get_direct_hash_depends_string",
-			CallingConvention = CallingConvention.Cdecl)]
-		public static extern IntPtr get_direct_hash_depends_string();
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "get_patch_deletion_list", CallingConvention = CallingConvention.Cdecl)]
 		public static extern IntPtr get_patch_deletion_list(string rpkg_file);
@@ -4848,10 +4735,6 @@ private enum OggPlayerState
 		[DllImport("rpkg-lib.dll", EntryPoint = "clear_temp_tblu_data", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int clear_temp_tblu_data();
 
-		[DllImport("rpkg-lib.dll", EntryPoint = "get_matrix_data_from_godot_scene",
-			CallingConvention = CallingConvention.Cdecl)]
-		public static extern IntPtr get_matrix_data_from_godot_scene(string input_path);
-
 		[DllImport("rpkg-lib.dll", EntryPoint = "load_recursive_temps", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int load_recursive_temps(string temp_hash, string rpkg_file_path, UInt32 temp_version);
 
@@ -4880,9 +4763,6 @@ private enum OggPlayerState
 		[DllImport("rpkg-lib.dll", EntryPoint = "get_temp_version", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int get_temp_version(string temp_hash, string rpkg_file_path);
 
-		[DllImport("rpkg-lib.dll", EntryPoint = "set_temp_version", CallingConvention = CallingConvention.Cdecl)]
-		public static extern int set_temp_version(UInt32 temps_index, UInt32 temp_version);
-
 		[DllImport("rpkg-lib.dll", EntryPoint = "import_rpkgs", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int import_rpkgs(string rpkgs_path, string rpkgs_list);
 
@@ -4899,21 +4779,8 @@ private enum OggPlayerState
 			CallingConvention = CallingConvention.Cdecl)]
 		public static extern int get_task_multiple_status();
 
-		[DllImport("rpkg-lib.dll", EntryPoint = "reset_task_multiple_status",
-			CallingConvention = CallingConvention.Cdecl)]
-		public static extern int reset_task_multiple_status();
-
 		[DllImport("rpkg-lib.dll", EntryPoint = "set_gui_control", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int set_gui_control(int gui_control_value);
-
-		[DllImport("rpkg-lib.dll", EntryPoint = "get_gui_control", CallingConvention = CallingConvention.Cdecl)]
-		public static extern int get_gui_control();
-
-		[DllImport("rpkg-lib.dll", EntryPoint = "get_timing_string", CallingConvention = CallingConvention.Cdecl)]
-		public static extern IntPtr get_timing_string();
-
-		[DllImport("rpkg-lib.dll", EntryPoint = "get_task_status_string", CallingConvention = CallingConvention.Cdecl)]
-		public static extern IntPtr get_task_status_string();
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "deep_search_localization", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int deep_search_localization(string input_path, string search_value, int search_dlge,
@@ -4948,9 +4815,6 @@ private enum OggPlayerState
 		[DllImport("rpkg-lib.dll", EntryPoint = "load_repo", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int load_repo();
 
-		[DllImport("rpkg-lib.dll", EntryPoint = "reset_repos", CallingConvention = CallingConvention.Cdecl)]
-		public static extern int reset_repos();
-
 		[DllImport("rpkg-lib.dll", EntryPoint = "get_repo_response_data_size",
 			CallingConvention = CallingConvention.Cdecl)]
 		public static extern UInt32 get_repo_response_data_size();
@@ -4973,9 +4837,6 @@ private enum OggPlayerState
 		[DllImport("rpkg-lib.dll", EntryPoint = "get_latest_hash_rpkg_path",
 			CallingConvention = CallingConvention.Cdecl)]
 		public static extern IntPtr get_latest_hash_rpkg_path(string hash);
-
-		[DllImport("rpkg-lib.dll", EntryPoint = "is_valid_json", CallingConvention = CallingConvention.Cdecl)]
-		public static extern int is_valid_json(string json);
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "check_json", CallingConvention = CallingConvention.Cdecl)]
 		public static extern IntPtr check_json(string json);
@@ -5003,9 +4864,6 @@ private enum OggPlayerState
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "update_json_at_pointer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int update_json_at_pointer(string id, string json_pointer, string value);
-
-		[DllImport("resourcetool.dll", EntryPoint = "convert_temp_to_json", CallingConvention = CallingConvention.Cdecl)]
-		public static extern int convert_temp_to_json(string input_path, string output_path, string operating_mode);
 
 		private void LoadResources()
 		{
@@ -5068,14 +4926,6 @@ private enum OggPlayerState
 			}
 		}
 
-		public sealed class NaturalFileInfoNameComparer : IComparer<FileInfo>
-		{
-			public int Compare(FileInfo a, FileInfo b)
-			{
-				return SafeNativeMethods.StrCmpLogicalW(a.Name, b.Name);
-			}
-		}
-
 		protected override void OnClosed(EventArgs e)
 		{
 			base.OnClosed(e);
@@ -5085,8 +4935,7 @@ private enum OggPlayerState
 
 		private void OGGPlayerTimer_Tick(object sender, EventArgs e)
 		{
-			//MessageBoxShow((((double)waveStream.Position / (double)waveStream.Length) * 100.0).ToString());
-			OGGPlayer.Value = ((double)pcmSource.Position / (double)pcmSource.Length) * 100.0;
+			OGGPlayer.Value = (pcmSource.Position / (double)pcmSource.Length) * 100.0;
 			OGGPlayerLabel.Content = pcmSource.CurrentTime.ToString() + " / " + pcmSource.TotalTime.ToString();
 
 			if (pcmSource.Position == pcmSource.Length)
@@ -5099,8 +4948,6 @@ private enum OggPlayerState
 				OGGPlayerTimer.Stop();
 
 				waveOut.Stop();
-
-				//MessageBoxShow(waveStream.CurrentTime.ToString());
 
 				OGGPlayer.Value = 0;
 
@@ -5127,15 +4974,15 @@ private enum OggPlayerState
 
 					string[] hashData = OGGPlayerLabelHashFileName.Content.ToString().Split('.');
 
-					int return_value = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hashData[0], 1, newIndex);
+					create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hashData[0], 1, newIndex);
 
-					string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+					string currentDirectory = Directory.GetCurrentDirectory();
 
 					string inputOGGFile = currentDirectory + "\\" + hashData[0] + ".ogg";
 
 					string outputPCMFile = currentDirectory + "\\" + hashData[0] + ".pcm";
 
-					return_value = convert_ogg_to_pcm(inputOGGFile, outputPCMFile);
+					int return_value = convert_ogg_to_pcm(inputOGGFile, outputPCMFile);
 
 					if (return_value == 1)
 					{
@@ -5160,7 +5007,6 @@ private enum OggPlayerState
 
 							pcmMemoryStream = new MemoryStream(File.ReadAllBytes(outputPCMFile));
 
-							int pcmSampleSize = get_pcm_sample_size();
 							int pcmSampleRate = get_pcm_sample_rate();
 							int pcmChannels = get_pcm_channels();
 
@@ -5173,7 +5019,7 @@ private enum OggPlayerState
 
 							waveFormat = new WaveFormat(pcmSampleRate, 16, pcmChannels);
 
-							pcmSource = new NAudio.Wave.RawSourceWaveStream(pcmMemoryStream, waveFormat);
+							pcmSource = new RawSourceWaveStream(pcmMemoryStream, waveFormat);
 
 							oggPlayerState = (int)OggPlayerState.READY;
 						}
@@ -5194,18 +5040,11 @@ private enum OggPlayerState
 					oggPlayerState = (int)OggPlayerState.RESET;
 				}
 			}
-
-			//MessageBoxShow(pcmSource.Position.ToString() + "," + pcmSource.Length.ToString());
-			//MessageBoxShow(pcmSource.CurrentTime.ToString() + " / " + pcmSource.TotalTime.ToString());
 		}
 
 		private void OGGPlayer_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
 		{
-			//MessageBoxShow(waveStream.Length.ToString() + "," + ((double)waveStream.Length * (OGGPlayer.Value / 100.0)).ToString() + "," + OGGPlayer.Value.ToString());
-
-			//MessageBoxShow(waveStream.CurrentTime.ToString());
-
-			pcmSource.Position = (long)((double)pcmSource.Length * (OGGPlayer.Value / 100.0));
+			pcmSource.Position = (long)(pcmSource.Length * (OGGPlayer.Value / 100.0));
 
 			OGGPlayerTimer.Start();
 		}
@@ -5218,22 +5057,6 @@ private enum OggPlayerState
 			}
 
 			OGGPlayerTimer.Stop();
-		}
-
-		private void OGGPlayer_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-		{
-			if (OGGPlayerTimer == null)
-			{
-				return;
-			}
-
-			OGGPlayerTimer.Stop();
-
-			//MessageBoxShow(waveStream.CurrentTime.ToString());
-
-			pcmSource.Position = (long)((double)pcmSource.Length * (OGGPlayer.Value / 100.0));
-
-			OGGPlayerTimer.Start();
 		}
 
 		private void AddHandlers()
@@ -5302,11 +5125,11 @@ private enum OggPlayerState
 					oggPlayerStoppedNew = false;
 
 					waveOut = new WaveOut();
-					NAudio.Wave.MultiplexingWaveProvider multiplexingWaveProvider;
+					MultiplexingWaveProvider multiplexingWaveProvider;
 					multiplexingWaveProvider = new MultiplexingWaveProvider(new IWaveProvider[] { pcmSource }, 2);
 					multiplexingWaveProvider.ConnectInputToOutput(0, 0);
 					multiplexingWaveProvider.ConnectInputToOutput(0, 1);
-					var wait = new System.Threading.ManualResetEventSlim(false);
+					var wait = new ManualResetEventSlim(false);
 					waveOut.PlaybackStopped += (s, ee) => wait.Set();
 
 					try
@@ -5370,15 +5193,15 @@ private enum OggPlayerState
 
 				string[] hashData = OGGPlayerLabelHashFileName.Content.ToString().Split('.');
 
-				int return_value = create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hashData[0], 1, OGGPlayerComboBox.SelectedIndex);
+				create_ogg_file_from_hash_in_rpkg(rpkgFilePath, hashData[0], 1, OGGPlayerComboBox.SelectedIndex);
 
-				string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+				string currentDirectory = Directory.GetCurrentDirectory();
 
 				string inputOGGFile = currentDirectory + "\\" + hashData[0] + ".ogg";
 
 				string outputPCMFile = currentDirectory + "\\" + hashData[0] + ".pcm";
 
-				return_value = convert_ogg_to_pcm(inputOGGFile, outputPCMFile);
+				int return_value = convert_ogg_to_pcm(inputOGGFile, outputPCMFile);
 
 				if (return_value == 1)
 				{
@@ -5405,7 +5228,6 @@ private enum OggPlayerState
 
 						pcmMemoryStream = new MemoryStream(File.ReadAllBytes(outputPCMFile));
 
-						int pcmSampleSize = get_pcm_sample_size();
 						int pcmSampleRate = get_pcm_sample_rate();
 						int pcmChannels = get_pcm_channels();
 
@@ -5418,7 +5240,7 @@ private enum OggPlayerState
 
 						waveFormat = new WaveFormat(pcmSampleRate, 16, pcmChannels);
 
-						pcmSource = new NAudio.Wave.RawSourceWaveStream(pcmMemoryStream, waveFormat);
+						pcmSource = new RawSourceWaveStream(pcmMemoryStream, waveFormat);
 
 						oggPlayerState = (int)OggPlayerState.RESET;
 					}
@@ -5434,26 +5256,6 @@ private enum OggPlayerState
 					FirstTabRight.IsSelected = true;
 				}
 			}
-		}
-
-		private void EntityBrickEditor_Click(object sender, RoutedEventArgs e)
-		{
-			if (entityBrickEditor == null)
-			{
-				entityBrickEditor = new EntityBrickEditor();
-			}
-
-			entityBrickEditor.inputFolder = userSettings.InputFolder;
-			entityBrickEditor.outputFolder = userSettings.OutputFolder;
-
-			entityBrickEditor.tempFileName = "00E9F09C3B030590.TEMP";
-			entityBrickEditor.rpkgFilePath = "C:\\Program Files\\Epic Games\\HITMAN3\\Runtime\\chunk26patch1.rpkg";
-
-			entityBrickEditor.ShowDialog();
-
-			//GC.Collect();
-			GC.WaitForPendingFinalizers();
-			//GC.Collect();
 		}
 
 		private void DetailsTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -5711,8 +5513,6 @@ private enum OggPlayerState
 
 		private bool IsLegalHashName(string hashName)
 		{
-			hashName.ToUpper();
-
 			if (hashName.Length != 16)
 			{
 				return false;
@@ -5743,8 +5543,6 @@ private enum OggPlayerState
 
 		private bool IsLegalHashFlag(string hashFlag)
 		{
-			hashFlag.ToUpper();
-
 			if (hashFlag.Length != 2)
 			{
 				return false;
@@ -5860,7 +5658,7 @@ private enum OggPlayerState
 				{
 					MessageBoxShow("Patch deletion list has been successfully updated for RPKG: " + rpkgFilePath);
 
-					return_value = unload_rpkg(rpkgFilePath);
+					unload_rpkg(rpkgFilePath);
 
 					SearchRPKGsTreeView.Nodes.Clear();
 
@@ -6606,8 +6404,6 @@ private enum OggPlayerState
 			else
 			{
 				MessageBoxShow("Error: Invalid jump to value.");
-
-				return;
 			}
 		}
 
@@ -6890,7 +6686,7 @@ private enum OggPlayerState
 				{
 					MessageBoxShow("Hash Depends has been successfully updated for RPKG: " + hashDependsRPKGFilePath);
 
-					return_value = unload_rpkg(hashDependsRPKGFilePath);
+					unload_rpkg(hashDependsRPKGFilePath);
 
 					SearchRPKGsTreeView.Nodes.Clear();
 
@@ -6955,10 +6751,6 @@ private enum OggPlayerState
 				{
 					MessageBoxShow("Error: Could not delete the existing RPKG file: " + hashDependsRPKGFilePath);
 				}
-			}
-			else if (messageBox.buttonPressed == "CancelButton")
-			{
-				return;
 			}
 		}
 
@@ -7104,7 +6896,7 @@ private enum OggPlayerState
 
 					output_path = temp_outputFolder;
 
-					int temp_return_value = reset_task_status();
+					reset_task_status();
 
 					execute_task temp_rpkgExecute = task_execute;
 
@@ -7138,7 +6930,7 @@ private enum OggPlayerState
 
 					output_path = temp_outputFolder;
 
-					int temp_return_value = reset_task_status();
+					reset_task_status();
 
 					execute_task temp_rpkgExecute = ExtractMODEL;
 
@@ -7172,7 +6964,7 @@ private enum OggPlayerState
 
 					output_path = temp_outputFolder;
 
-					int temp_return_value = reset_task_status();
+					reset_task_status();
 
 					execute_task temp_rpkgExecute = task_execute;
 
@@ -7206,7 +6998,7 @@ private enum OggPlayerState
 
 					output_path = temp_outputFolder;
 
-					int temp_return_value = reset_task_status();
+					reset_task_status();
 
 					execute_task temp_rpkgExecute = ExtractMODEL;
 
@@ -7240,7 +7032,7 @@ private enum OggPlayerState
 
 					output_path = temp_outputFolder;
 
-					int temp_return_value = reset_task_status();
+					reset_task_status();
 
 					execute_task temp_rpkgExecute = task_execute;
 
@@ -7296,9 +7088,9 @@ private enum OggPlayerState
 
 			fileDialog.Filter = "meta file|*.meta|All files|*.*";
 
-			if (!System.IO.Directory.Exists(userSettings.InputFolder))
+			if (!Directory.Exists(userSettings.InputFolder))
 			{
-				userSettings.InputFolder = System.IO.Directory.GetCurrentDirectory();
+				userSettings.InputFolder = Directory.GetCurrentDirectory();
 
 				var options = new JsonSerializerOptions { WriteIndented = true };
 
@@ -7334,7 +7126,7 @@ private enum OggPlayerState
 
 					progress.ProgressBar.IsIndeterminate = true;
 
-					int return_value = reset_task_status();
+					reset_task_status();
 
 					execute_task rpkgExecute = task_execute;
 
@@ -7370,9 +7162,9 @@ private enum OggPlayerState
 
 			fileDialog.Filter = "meta.JSON file|*.meta.JSON|All files|*.*";
 
-			if (!System.IO.Directory.Exists(userSettings.InputFolder))
+			if (!Directory.Exists(userSettings.InputFolder))
 			{
-				userSettings.InputFolder = System.IO.Directory.GetCurrentDirectory();
+				userSettings.InputFolder = Directory.GetCurrentDirectory();
 
 				var options = new JsonSerializerOptions { WriteIndented = true };
 
@@ -7408,7 +7200,7 @@ private enum OggPlayerState
 
 					progress.ProgressBar.IsIndeterminate = true;
 
-					int return_value = reset_task_status();
+					reset_task_status();
 
 					execute_task rpkgExecute = task_execute;
 
@@ -7523,7 +7315,7 @@ private enum OggPlayerState
 
 						MapExportProgress progress = new MapExportProgress();
 
-						int return_value = reset_task_status();
+						reset_task_status();
 
 						execute_task rpkgExecute = task_execute;
 
@@ -7586,7 +7378,7 @@ private enum OggPlayerState
 
 			MapImportProgress progress = new MapImportProgress();
 
-			int return_value = reset_task_status();
+			reset_task_status();
 
 			execute_task rpkgExecute = task_execute;
 
@@ -7644,7 +7436,7 @@ private enum OggPlayerState
 
 			MapExportProgress progress = new MapExportProgress();
 
-			int return_value = reset_task_status();
+			reset_task_status();
 
 			execute_task rpkgExecute = task_execute;
 
@@ -7717,7 +7509,7 @@ private enum OggPlayerState
 				y += 212.0;
 			}
 
-			System.Windows.Point point = new System.Windows.Point(x, y);
+			Point point = new Point(x, y);
 
 			rightClickMenu.Left = PointToScreen(point).X;
 			rightClickMenu.Top = PointToScreen(point).Y;
@@ -8004,7 +7796,7 @@ private enum OggPlayerState
 			{
 				int gui_control_value = (int)RPKGStatus.ABORT_CURRENT_TASK;
 
-				int return_value = set_gui_control(gui_control_value);
+				set_gui_control(gui_control_value);
 
 				DeepSearchLocalizationButton.Content = "Start Search";
 			}
@@ -8908,7 +8700,7 @@ private enum OggPlayerState
 						}
 						else
 						{
-							initialFolder = System.IO.Directory.GetCurrentDirectory();
+							initialFolder = Directory.GetCurrentDirectory();
 						}
 
 						fileDialog.InitialDirectory = initialFolder;
@@ -8983,7 +8775,7 @@ private enum OggPlayerState
 					{
 						//MessageBoxShow(e.Node.Name);
 
-						int response = erase_repo_entry(e.Node.Name);
+						erase_repo_entry(e.Node.Name);
 
 						e.Node.Remove();
 					}
@@ -9043,7 +8835,7 @@ private enum OggPlayerState
 					REPOHashTextBox.Text += Marshal.PtrToStringAnsi(get_hash_details(rpkg_file_path, (node.Tag as string)));
 				}
 
-				int response = get_repo_json(node.Name);
+				get_repo_json(node.Name);
 
 				UInt32 repo_data_size = get_repo_response_data_size();
 
@@ -9090,7 +8882,7 @@ private enum OggPlayerState
 
 									REPOImageViewer.Source = bitmapImage;
 
-									int return_value_clear = clear_hash_data_vector();
+									clear_hash_data_vector();
 
 									imageFound = true;
 								}
@@ -9144,7 +8936,7 @@ private enum OggPlayerState
 				return;
 			}
 
-			int response = load_repo();
+			load_repo();
 
 			UInt32 repo_data_size = get_repo_response_data_size();
 
@@ -9284,7 +9076,7 @@ private enum OggPlayerState
 					//MessageBoxShow("Valid!");
 
 					REPOJSONStatus.Visibility = Visibility.Visible;
-					REPOJSONStatus.Foreground = System.Windows.Media.Brushes.PaleGreen;
+					REPOJSONStatus.Foreground = Brushes.PaleGreen;
 					REPOJSONStatus.Content = "JSON: Valid";
 				}
 				else
@@ -9292,7 +9084,7 @@ private enum OggPlayerState
 					//MessageBoxShow("Not Valid!");
 
 					REPOJSONStatus.Visibility = Visibility.Visible;
-					REPOJSONStatus.Foreground = System.Windows.Media.Brushes.OrangeRed;
+					REPOJSONStatus.Foreground = Brushes.OrangeRed;
 					REPOJSONStatus.Content = "JSON: " + response;
 				}
 			}
@@ -9304,7 +9096,7 @@ private enum OggPlayerState
 
 			if (repoJSONTextEditorID != "")
 			{
-				int response = save_json(repoJSONTextEditorID, REPOJSONTextEditor.Text);
+				save_json(repoJSONTextEditorID, REPOJSONTextEditor.Text);
 
 				repoJSONTextEditorID = Marshal.PtrToStringAnsi(get_repo_response_data());
 
@@ -9462,7 +9254,7 @@ private enum OggPlayerState
 			public void Restore()
 			{
 				Children.Clear();
-				this.ForEach(clone => clone.Restore());
+				ForEach(clone => clone.Restore());
 				Children.AddRange(this.Select(n => n.Parent).ToArray());
 			}
 		}
@@ -9479,22 +9271,6 @@ private enum OggPlayerState
 			REPOVisualEditorTabControl.Visibility = Visibility.Visible;
 
 			LoadREPOVisualEditor();
-		}
-
-		Grid CreateInput(string labelText, int labelFontSize, FontWeight labelFontWeight, string textBoxName, string textBoxText, Thickness textBoxMargin, TextChangedEventHandler textChangedEventHandler)
-		{
-			Grid grid = new Grid();
-			RowDefinition rowDefinition = new RowDefinition();
-			ColumnDefinition columnDefinition = new ColumnDefinition();
-			rowDefinition.Height = GridLength.Auto;
-			grid.RowDefinitions.Add(rowDefinition);
-			columnDefinition.Width = GridLength.Auto;
-			grid.ColumnDefinitions.Add(columnDefinition);
-			columnDefinition = new ColumnDefinition();
-			columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-			grid.ColumnDefinitions.Add(columnDefinition);
-			
-			return grid;
 		}
 
 		TextBox CreateTextBox(string name, string text, Thickness margin, KeyboardFocusChangedEventHandler keyboardFocusChangedEventHandler)
@@ -9657,10 +9433,10 @@ private enum OggPlayerState
 			textBlock.FontWeight = FontWeights.Bold;
 			textBlock.HorizontalAlignment = HorizontalAlignment.Stretch;
 			textBlock.VerticalAlignment = VerticalAlignment.Center;
-			System.Windows.Media.BrushConverter brushConverter = new BrushConverter();
-			textBlock.Background = (System.Windows.Media.Brush)brushConverter.ConvertFromString("#2e2e2e");
+			BrushConverter brushConverter = new BrushConverter();
+			textBlock.Background = (Brush)brushConverter.ConvertFromString("#2e2e2e");
 			Border border = new Border();
-			border.BorderBrush = System.Windows.Media.Brushes.White;
+			border.BorderBrush = Brushes.White;
 
 			if (top)
 				border.BorderThickness = new Thickness(1, 1, 0, 1);
@@ -9673,7 +9449,7 @@ private enum OggPlayerState
 			Grid.SetRow(border, index);
 			Grid.SetColumn(border, 0);
 			border = new Border();
-			border.BorderBrush = System.Windows.Media.Brushes.White;
+			border.BorderBrush = Brushes.White;
 
 			if (top)
 				border.BorderThickness = new Thickness(0, 1, 0, 1);
@@ -9684,8 +9460,8 @@ private enum OggPlayerState
 			Grid.SetRow(border, index);
 			Grid.SetColumn(border, 1);
 			border = new Border();
-			border.BorderBrush = System.Windows.Media.Brushes.White;
-			border.Background = (System.Windows.Media.Brush)brushConverter.ConvertFromString("#434343");
+			border.BorderBrush = Brushes.White;
+			border.Background = (Brush)brushConverter.ConvertFromString("#434343");
 
 			if (top)
 				border.BorderThickness = new Thickness(1, 1, 0, 1);
@@ -9700,7 +9476,7 @@ private enum OggPlayerState
 			{
 				ComboBox comboBox = new ComboBox();
 				comboBox.ItemsSource = enumDictionary[name];
-				comboBox.Background = (System.Windows.Media.Brush)brushConverter.ConvertFromString("#434343");
+				comboBox.Background = (Brush)brushConverter.ConvertFromString("#434343");
 				comboBox.BorderThickness = new Thickness(0);
 				comboBox.Tag = jsonPointer;
 				comboBox.SelectionChanged += ComboBox_SelectionChanged;
@@ -9712,8 +9488,8 @@ private enum OggPlayerState
 
 				comboBox.SelectedValue = element.ToString();
 				border = new Border();
-				border.BorderBrush = System.Windows.Media.Brushes.White;
-				border.Background = (System.Windows.Media.Brush)brushConverter.ConvertFromString("#434343");
+				border.BorderBrush = Brushes.White;
+				border.Background = (Brush)brushConverter.ConvertFromString("#434343");
 
 				if (top)
 					border.BorderThickness = new Thickness(0, 1, 1, 1);
@@ -9730,7 +9506,7 @@ private enum OggPlayerState
 			{
 				CheckBox checkBox = new CheckBox();
 				checkBox.Content = name;
-				checkBox.Background = (System.Windows.Media.Brush)brushConverter.ConvertFromString("#434343");
+				checkBox.Background = (Brush)brushConverter.ConvertFromString("#434343");
 				checkBox.BorderThickness = new Thickness(0);
 				checkBox.Tag = jsonPointer;
 				checkBox.Checked += CheckBox_Changed;
@@ -9743,8 +9519,8 @@ private enum OggPlayerState
 
 				border = new Border();
 				border.Height = 28;
-				border.BorderBrush = System.Windows.Media.Brushes.White;
-				border.Background = (System.Windows.Media.Brush)brushConverter.ConvertFromString("#434343");
+				border.BorderBrush = Brushes.White;
+				border.Background = (Brush)brushConverter.ConvertFromString("#434343");
 
 				if (top)
 					border.BorderThickness = new Thickness(0, 1, 1, 1);
@@ -9763,12 +9539,12 @@ private enum OggPlayerState
 				textBox.TextAlignment = TextAlignment.Left;
 				textBox.FontWeight = FontWeights.Regular;
 				textBox.HorizontalAlignment = HorizontalAlignment.Stretch;
-				textBox.Background = (System.Windows.Media.Brush)brushConverter.ConvertFromString("#434343");
+				textBox.Background = (Brush)brushConverter.ConvertFromString("#434343");
 				textBox.BorderThickness = new Thickness(0);
 				textBox.Tag = jsonPointer;
 				border = new Border();
-				border.BorderBrush = System.Windows.Media.Brushes.White;
-				border.Background = (System.Windows.Media.Brush)brushConverter.ConvertFromString("#434343");
+				border.BorderBrush = Brushes.White;
+				border.Background = (Brush)brushConverter.ConvertFromString("#434343");
 
 				if (top)
 					border.BorderThickness = new Thickness(0, 1, 1, 1);
@@ -9967,8 +9743,6 @@ private enum OggPlayerState
 			{
 				if (comboBoxText != GetJSONValueByPointer(pointer))
 				{
-					//MessageBoxShow(repoJSONTextEditorID + ", " + pointer + ", " + comboBoxText);
-
 					update_json_at_pointer(repoJSONTextEditorID, pointer, comboBoxText);
 
 					System.Windows.Forms.TreeNode node = REPOTreeView.Nodes[repoJSONTextEditorParentNodeIndex].Nodes[repoJSONTextEditorNodeIndex];
@@ -10074,7 +9848,6 @@ private enum OggPlayerState
 
 		private void REPOJSONTextEditor_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
 		{
-
 			bool controlKey = Keyboard.Modifiers == ModifierKeys.Control;
 
 			if (controlKey)

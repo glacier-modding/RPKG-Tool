@@ -102,8 +102,8 @@
     <Compile Include="DownloadExtractionProgress.xaml.cs">
       <DependentUpon>DownloadExtractionProgress.xaml</DependentUpon>
     </Compile>
-    <Compile Include="EntityBrickEditor.xaml.cs">
-      <DependentUpon>EntityBrickEditor.xaml</DependentUpon>
+    <Compile Include="EntityBrickViewer.xaml.cs">
+      <DependentUpon>EntityBrickViewer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Filter.xaml.cs">
       <DependentUpon>Filter.xaml</DependentUpon>
@@ -149,7 +149,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="EntityBrickEditor.xaml">
+    <Page Include="EntityBrickViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
