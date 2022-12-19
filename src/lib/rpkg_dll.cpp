@@ -1193,11 +1193,6 @@ int get_hashes_with_no_reverse_depends(char* rpkg_file)
     return 0;
 }
 
-char* get_hashes_with_no_reverse_depends_string()
-{
-    return &hashes_with_no_reverse_depends[0];
-}
-
 int get_direct_hash_depends(char* rpkg_file, char* hash_string)
 {
     task_single_status = TASK_EXECUTING;
@@ -1258,11 +1253,6 @@ int get_direct_hash_depends(char* rpkg_file, char* hash_string)
     task_multiple_status = TASK_SUCCESSFUL;
 
     return 0;
-}
-
-char* get_direct_hash_depends_string()
-{
-    return &hash_direct_depends[0];
 }
 
 char* get_patch_deletion_list(char* rpkg_file)
@@ -1742,147 +1732,6 @@ int load_non_recursive_temps(char* temp_hash, char* rpkg_file_path, uint32_t tem
     return -1;
 }
 
-int get_number_of_changed_temps()
-{
-    int changed_count = 0;
-
-    for (uint64_t i = 0; i < temps.size(); i++)
-    {
-        if (temps.at(i).file_has_been_changed)
-        {
-            changed_count++;
-        }
-    }
-
-    return changed_count;
-}
-
-char* get_changed_temp_data(uint32_t temp_changed_index)
-{
-    response_string = "";
-
-    int changed_count = 0;
-
-    for (uint64_t i = 0; i < temps.size(); i++)
-    {
-        if (temps.at(i).file_has_been_changed)
-        {
-            if (changed_count == temp_changed_index)
-            {
-                response_string.append(temps.at(i).temp_file_name);
-                response_string.push_back(',');
-                response_string.append(util::uint32_t_to_string(temps.at(i).temp_rpkg_index));
-                response_string.push_back(',');
-                response_string.append(util::uint32_t_to_string(temps.at(i).temp_hash_index));
-
-                return &response_string[0];
-            }
-
-            changed_count++;
-        }
-    }
-
-    return &response_string[0];
-}
-
-int generate_temp_files_from_data(char* temp_path)
-{
-    for (uint64_t i = 0; i < temps.size(); i++)
-    {
-        if (temps.at(i).file_has_been_changed)
-        {
-            std::string temp_path_string = std::string(temp_path);
-
-            std::string rpkg_base_file_name = file::get_root_file_name(
-                    rpkgs.at(temps.at(i).temp_rpkg_index).rpkg_file_name);
-
-            rpkg_base_file_name = util::to_lower_case(rpkg_base_file_name);
-
-            size_t pos = rpkg_base_file_name.find("patch");
-
-            if (pos != std::string::npos)
-            {
-                rpkg_base_file_name = rpkg_base_file_name.substr(0, pos);
-            }
-
-            temp_path_string.append(rpkg_base_file_name);
-
-            file::create_directories(temp_path_string);
-
-            temp_path_string.push_back('\\');
-
-            temp_path_string.append(util::uint64_t_to_hex_string(
-                    rpkgs.at(temps.at(i).temp_rpkg_index).hash.at(temps.at(i).temp_hash_index).hash_value) + "." +
-                                    rpkgs.at(temps.at(i).temp_rpkg_index).hash.at(
-                                            temps.at(i).temp_hash_index).hash_resource_type);
-
-            temps.at(i).generate_temp_file_from_data(temp_path_string);
-        }
-    }
-
-    return 0;
-}
-
-int get_total_numer_of_temps()
-{
-    int total_count = temps.size();
-
-    return total_count;
-}
-
-int generate_rpkg_files_from_data(char* temp_path)
-{
-    std::set<std::string> directory_set;
-
-    for (auto & temp : temps)
-    {
-        if (temp.file_has_been_changed)
-        {
-            std::string temp_path_string = std::string(temp_path);
-
-            std::string rpkg_base_file_name = file::get_root_file_name(
-                    rpkgs.at(temp.temp_rpkg_index).rpkg_file_name);
-
-            rpkg_base_file_name = util::to_lower_case(rpkg_base_file_name);
-
-            size_t pos = rpkg_base_file_name.find("patch");
-
-            if (pos != std::string::npos)
-            {
-                rpkg_base_file_name = rpkg_base_file_name.substr(0, pos);
-            }
-
-            temp_path_string.append(rpkg_base_file_name);
-
-            directory_set.insert(temp_path_string);
-
-            file::create_directories(temp_path_string);
-
-            temp_path_string.push_back('\\');
-            temp_path_string.append(util::uint64_t_to_hex_string(
-                    rpkgs.at(temp.temp_rpkg_index).hash.at(temp.temp_hash_index).hash_value) + "." +
-                                    rpkgs.at(temp.temp_rpkg_index).hash.at(
-                                            temp.temp_hash_index).hash_resource_type);
-
-            temp.generate_temp_file_from_data(temp_path_string);
-        }
-    }
-
-    for (auto it = directory_set.begin(); it != directory_set.end(); it++)
-    {
-        std::string input_path = *it;
-        std::string filter = "";
-        std::string output_path = std::string(temp_path);
-
-        std::cout << *it << std::endl;
-        std::cout << std::string(temp_path) << std::endl;
-
-        rpkg_function::generate_rpkg_from(input_path, output_path, true);
-    }
-
-    return 0;
-}
-
 char* get_top_level_logical_parents(uint32_t temps_index)
 {
     response_string = "";
@@ -1962,11 +1811,6 @@ int get_entries(uint32_t temps_index, uint32_t entry_index, char* value_type)
     return response_data.size();
 }
 
-char* get_entries_data()
-{
-    return &response_data[0];
-}
-
 char* get_enum_values(uint32_t temps_index, char* property_type)
 {
     response_string = "";
@@ -1979,20 +1823,6 @@ char* get_enum_values(uint32_t temps_index, char* property_type)
     }
 
     return &response_string[0];
-}
-
-int update_temp_file(uint32_t temps_index, uint32_t entry_index, char* update_data, uint32_t update_data_size)
-{
-    response_string = "";
-
-    int return_value = 0;
-
-    if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND)
-    {
-        temps.at(temps_index).update_temp_file(entry_index, update_data, update_data_size);
-    }
-
-    return return_value;
 }
 
 char* get_response_string()
@@ -2009,42 +1839,6 @@ char* get_all_bricks(uint32_t temps_index)
     return &response_string[0];
 }
 
-int get_temp_version(char* temp_hash, char* rpkg_file_path)
-{
-    std::string temp_hash_string = std::string(temp_hash);
-    std::string rpkg_file_path_string = std::string(rpkg_file_path);
-
-    uint64_t temp_hash_value = std::strtoull(temp_hash_string.c_str(), nullptr, 16);
-
-    for (uint64_t i = 0; i < rpkgs.size(); i++)
-    {
-        uint32_t rpkg_index = i;
-
-        if (rpkgs.at(i).rpkg_file_path == rpkg_file_path_string)
-        {
-            auto it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
-
-            if (it != rpkgs.at(rpkg_index).hash_map.end())
-            {
-                temp temp_temp(rpkg_index, it->second);
-
-                temp_temp.temp_version_check();
-
-                return temp_temp.temp_file_version;
-            }
-        }
-    }
-
-    return 0;
-}
-
-int set_temp_version(uint32_t temps_index, uint32_t temp_version)
-{
-    temps.at(temps_index).temp_file_version = temp_version;
-
-    return temps.at(temps_index).temp_file_version;
-}
-
 int generate_png_from_text(char* rpkg_file, char* hash_string, char* png_path)
 {
     for (uint64_t i = 0; i < rpkgs.size(); i++)
@@ -2053,7 +1847,7 @@ int generate_png_from_text(char* rpkg_file, char* hash_string, char* png_path)
         {
             uint64_t hash_value = std::strtoull(hash_string, nullptr, 16);
 
-            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(hash_value);
+            auto it = rpkgs.at(i).hash_map.find(hash_value);
 
             if (it != rpkgs.at(i).hash_map.end())
             {
@@ -2546,13 +2340,6 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
     return 0;
 }
 
-char* get_prim_from_temp(uint32_t temps_index, uint32_t entry_index)
-{
-    temps.at(temps_index).get_prim_from_temp(entry_index);
-
-    return &response_string[0];
-}
-
 int import_rpkgs(char* rpkgs_path, char* rpkgs_list)
 {
     task_single_status = TASK_EXECUTING;
@@ -2570,7 +2357,7 @@ int import_rpkgs(char* rpkgs_path, char* rpkgs_list)
 
     while (pos2 != std::string::npos)
     {
-        rpkg_files.push_back(std::string(rpkgs_list_string_string_view.substr(pos1, pos2)));
+        rpkg_files.emplace_back(rpkgs_list_string_string_view.substr(pos1, pos2));
 
         if (pos2 + 1 >= rpkgs_list_string.length())
         {
@@ -2630,38 +2417,6 @@ int is_rpkg_valid(char* rpkg_file_path)
     return 0;
 }
 
-int search_hash_list_by_hash_value(char* hash_value)
-{
-    std::string hash_value_string = std::string(hash_value);
-
-    uint64_t temp_hash_value = std::strtoull(hash_value_string.c_str(), nullptr, 16);
-
-    auto it = hash_list_hash_map.find(temp_hash_value);
-
-    if (it != hash_list_hash_map.end())
-    {
-        return 1;
-    }
-
-    return 0;
-}
-
-char* search_hash_name_by_hash_value(char* hash_value)
-{
-    std::string hash_value_string = std::string(hash_value);
-    std::string hash_name = "";
-
-    for (auto &hash_list_hash_file_name : hash_list_hash_file_names)
-    {
-        if (hash_list_hash_file_name._Starts_with((std::string(hash_value))))
-        {
-            hash_name = hash_list_hash_file_name;
-            return _strdup(hash_name.c_str());
-        }
-    }
-    return hash_value;
-}
-
 int get_hash_name_from_hash_value(uint64_t hash_value, char* hash_name)
 {
     if (!hash_name)
@@ -2696,38 +2451,6 @@ char* get_entry_name(uint32_t temp_index, int entry_index)
     temps.at(temp_index).get_entry_name_string(entry_index);
 
     return &response_string[0];
-}
-
-int generate_json_files_from_data(char* temp_path)
-{
-    for (auto &temp : temps)
-    {
-        if (temp.file_has_been_changed)
-        {
-            std::string temp_path_string = std::string(temp_path);
-
-            std::string rpkg_base_file_name = file::get_root_file_name(rpkgs.at(temp.temp_rpkg_index).rpkg_file_name);
-
-            rpkg_base_file_name = util::to_lower_case(rpkg_base_file_name);
-
-            size_t pos = rpkg_base_file_name.find("patch");
-
-            if (pos != std::string::npos)
-            {
-                rpkg_base_file_name = rpkg_base_file_name.substr(0, pos);
-            }
-
-            temp_path_string.append(rpkg_base_file_name);
-
-            file::create_directories(temp_path_string);
-
-            temp_path_string.push_back('\\');
-
-            temp.export_json_files(temp_path_string);
-        }
-    }
-
-    return 0;
 }
 
 int deep_search_localization(char* input_path, char* search_value, int search_dlge, int search_locr, int search_rtlv,

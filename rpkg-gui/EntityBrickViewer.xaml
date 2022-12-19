@@ -1,4 +1,4 @@
-﻿<mah:MetroWindow x:Class="rpkg.EntityBrickEditor"
+﻿<mah:MetroWindow x:Class="rpkg.EntityBrickViewer"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
@@ -7,8 +7,8 @@
         xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
         xmlns:local="clr-namespace:rpkg"
         mc:Ignorable="d"
-        Loaded="Window_Loaded" Activated="MetroWindow_Activated" Name="EditorWindow"
-        Title="Entity/Brick (TEMP) Editor" Height="800" Width="1280" WindowStartupLocation="CenterScreen" FontFamily="Consolas">
+        Loaded="Window_Loaded" Activated="MetroWindow_Activated" Name="ViewerWindow"
+        Title="Entity/Brick (TEMP) Viewer" Height="800" Width="1280" WindowStartupLocation="CenterScreen" FontFamily="Consolas">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -21,9 +21,6 @@
         </Grid.ColumnDefinitions>
         <DockPanel Grid.Row="0" Grid.ColumnSpan="3">
             <Menu DockPanel.Dock="Top">
-                <MenuItem Click="GenerateTEMPFile_Click" Header="Save Binary TEMP File"/>
-                <MenuItem Click="GenerateRPKGFile_Click" Header="Pack To RPKG File"/>
-                <MenuItem Click="GenerateTEMPJSONFiles_Click" Header="Save RT JSON Files"/>
                 <MenuItem Click="Exit_Click" Header="Exit"/>
             </Menu>
         </DockPanel>
