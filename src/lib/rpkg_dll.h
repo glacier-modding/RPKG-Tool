@@ -88,11 +88,7 @@ RPKG_EXPORT char* get_json_string();
 
 RPKG_EXPORT int get_hashes_with_no_reverse_depends(char* rpkg_file);
 
-RPKG_EXPORT char* get_hashes_with_no_reverse_depends_string();
-
 RPKG_EXPORT int get_direct_hash_depends(char* rpkg_file, char* hash_string);
-
-RPKG_EXPORT char* get_direct_hash_depends_string();
 
 RPKG_EXPORT char* get_patch_deletion_list(char* rpkg_file);
 
@@ -126,19 +122,11 @@ RPKG_EXPORT int get_temp_entries(uint32_t temps_index, char* value_string, char*
 
 RPKG_EXPORT int get_entries(uint32_t temps_index, uint32_t entry_index, char* value_type);
 
-RPKG_EXPORT char* get_entries_data();
-
 RPKG_EXPORT char* get_entries_hash_reference_data(uint32_t temps_index, uint32_t entry_index);
 
 RPKG_EXPORT char* get_entries_hash_references(uint32_t temps_index, uint32_t entry_index);
 
-RPKG_EXPORT int update_temp_file(uint32_t temps_index, uint32_t entry_index, char* update_data, uint32_t update_data_size);
-
-RPKG_EXPORT int generate_temp_file_from_data(uint32_t temps_index, char* temp_file_path);
-
 RPKG_EXPORT char* get_enum_values(uint32_t temps_index, char* property_type);
-
-RPKG_EXPORT char* get_prim_from_temp(uint32_t temps_index, uint32_t entry_index);
 
 RPKG_EXPORT int get_temp_index(char* temp_hash_string);
 
@@ -146,23 +134,9 @@ RPKG_EXPORT int load_recursive_temps(char* temp_hash, char* rpkg_file_path, uint
 
 RPKG_EXPORT int load_non_recursive_temps(char* temp_hash, char* rpkg_file_path, uint32_t temp_version);
 
-RPKG_EXPORT int get_number_of_changed_temps();
-
-RPKG_EXPORT char* get_changed_temp_data(uint32_t temp_changed_index);
-
-RPKG_EXPORT int generate_temp_files_from_data(char* temp_path);
-
-RPKG_EXPORT int get_total_numer_of_temps();
-
-RPKG_EXPORT int generate_rpkg_files_from_data(char* temp_path);
-
 RPKG_EXPORT char* get_top_level_logical_parents(uint32_t temps_index);
 
 RPKG_EXPORT char* get_all_bricks(uint32_t temps_index);
-
-RPKG_EXPORT int search_temp_files(uint32_t temps_index, char* search_str, int max_results);
-
-RPKG_EXPORT char* get_search_temp_files();
 
 RPKG_EXPORT int generate_png_from_text(char* rpkg_file, char* hash_string, char* png_path);
 
@@ -174,17 +148,9 @@ RPKG_EXPORT int modify_hash_depends(char* rpkg_file, char* hash_string, char* ha
 
 RPKG_EXPORT char* get_response_string();
 
-RPKG_EXPORT int get_temp_version(char* temp_hash, char* rpkg_file_path);
-
-RPKG_EXPORT int set_temp_version(uint32_t temps_index, uint32_t temp_version);
-
 RPKG_EXPORT int import_rpkgs(char* rpkgs_path, char* rpkgs_list);
 
 RPKG_EXPORT int is_rpkg_valid(char* rpkg_file_path);
-
-RPKG_EXPORT int search_hash_list_by_hash_value(char* hash_value);
-
-RPKG_EXPORT char* search_hash_name_by_hash_value(char* hash_value);
 
 RPKG_EXPORT int get_hash_name_from_hash_value(uint64_t hash_value, char *hash_name);
 
@@ -193,8 +159,6 @@ RPKG_EXPORT int get_temp_subentity_count(uint32_t temps_index);
 RPKG_EXPORT int get_tblu_subentity_count(uint32_t temps_index);
 
 RPKG_EXPORT char* get_entry_name(uint32_t temp_index, int entry_index);
-
-RPKG_EXPORT int generate_json_files_from_data(char* temp_path);
 
 RPKG_EXPORT int deep_search_localization(char* input_path, char* search_value, int search_dlge, int search_locr, int search_rtlv, int max_results);
 

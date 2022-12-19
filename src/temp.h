@@ -21,10 +21,7 @@ public:
     void load_hash_depends();
     void load_temp_data();
     void load_tblu_data();
-    void get_prim_from_temp(uint32_t entry_index);
-    void temp_version_check();
-    void set_temp_version(uint32_t temp_version);
-    void get_top_level_logical_parents();
+    void get_top_level_logical_parents() const;
     void get_entries_with_logical_parent(uint32_t logical_parent);
     void get_entries_hash_references(uint32_t entry_index);
     void get_entries_hash_reference_data(uint32_t entry_index);
@@ -32,10 +29,7 @@ public:
     void json_temp_node_scan(const rapidjson::Value& node, std::string& propertyValues_string, std::string& nPropertyID_string, std::string& type_string, std::string json_pointer, std::string json_type);
     void get_entries_data(uint32_t entry_index, std::string value_type);
     void json_node_scan(const rapidjson::Value& node, std::string& propertyValues_string, std::string& nPropertyID_string, std::string& type_string, std::string json_pointer, std::string json_type);
-    void get_enum_values(std::string& property_type_string);
-    void update_temp_file(uint32_t entry_index, char* update_data, uint32_t update_data_size);
-    void export_json_files(std::string& json_file_path);
-    int generate_temp_file_from_data(std::string temp_path);
+    void get_enum_values(std::string& property_type_string) const;
     void get_all_bricks() const;
     void get_entry_name_string(int entry_index);
     bool rt_json_to_qn_json();
@@ -57,7 +51,6 @@ public:
     uint32_t parent = 0;
     std::vector<uint32_t> parents;
     std::vector<uint32_t> children;
-    bool file_has_been_changed = false;
     std::vector<char> temp_input_data;
     std::vector<char> temp_output_data;
     std::vector<char> temp_data;

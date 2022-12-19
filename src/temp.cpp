@@ -1,5 +1,4 @@
 #include "temp.h"
-#include "rpkg_function.h"
 #include "file.h"
 #include "global.h"
 #include "crypto.h"
@@ -86,7 +85,7 @@ void temp::load_data()
             }
         }
 
-        tblu_entityName.push_back("");
+        tblu_entityName.emplace_back("");
 
         tblu_entityId.push_back(0);
 
@@ -107,9 +106,6 @@ void temp::load_data()
         temp_externalSceneTypeIndicesInResourceHeader.push_back(temp_json_externalSceneTypeIndicesInResourceHeader[e].GetInt());
 
         temp_externalSceneHashes.push_back(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(temp_externalSceneTypeIndicesInResourceHeader.back()));
-
-        //std::cout << "temp_externalSceneTypeIndicesInResourceHeader: " << temp_externalSceneTypeIndicesInResourceHeader.back() << std::endl;
-        //std::cout << "temp_externalSceneHashes: " << temp_externalSceneHashes.back() << std::endl;
     }
 
     if (tblu_return_value == TEMP_TBLU_FOUND)
@@ -221,10 +217,6 @@ void temp::load_temp_data()
 
     temp_json_input = resource_tool_converter->FromMemoryToJsonString((const void*)temp_data.data(), temp_data.size());
 
-    //resource_tool_ConvertMemoryResourceToJson(&type[0], (void*)temp_data.data(), (uint64_t)temp_data.size());
-
-    //temp_json_input = resource_tool_GetJsonFromMemory();
-
     rapidjson::StringStream ss(temp_json_input->JsonData);
 
     temp_json_document.ParseStream(ss);
@@ -261,7 +253,7 @@ void temp::load_tblu_data()
         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(tblu_rpkg_index).rpkg_file_path + " could not be read.");
     }
 
-    file2.seekg(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).data.header.data_offset, file2.beg);
+    file2.seekg(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).data.header.data_offset, std::ifstream::beg);
     file2.read(tblu_input_data.data(), tblu_hash_size);
     file2.close();
 
@@ -301,10 +293,6 @@ void temp::load_tblu_data()
 
     tblu_json_input = resource_tool_converter->FromMemoryToJsonString((const void*)tblu_data.data(), tblu_data.size());
 
-    //resource_tool_ConvertMemoryResourceToJson(&type[0], (void*)tblu_data.data(), (uint64_t)tblu_data.size());
-
-    //tblu_json_input = resource_tool_GetJsonFromMemory();
-
     rapidjson::StringStream ss(tblu_json_input->JsonData);
 
     tblu_json_document.ParseStream(ss);
@@ -340,7 +328,7 @@ void temp::load_hash_depends()
 
             for (uint64_t j = 0; j < rpkgs.size(); j++)
             {
-                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(j).hash_map.find(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(i));
+                auto it = rpkgs.at(j).hash_map.find(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(i));
 
                 if (it != rpkgs.at(j).hash_map.end())
                 {
@@ -458,7 +446,7 @@ void temp::load_hash_depends()
 
             std::string hash_value_string = util::uint64_t_to_hex_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(i));
 
-            std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(i));
+            auto it2 = hash_list_hash_map.find(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(i));
 
             if (it2 != hash_list_hash_map.end())
             {
@@ -498,7 +486,7 @@ void temp::load_hash_depends()
 
             if (pos1 != std::string::npos)
             {
-                size_t pos2 = temp_depends_in_rpkgs_string_view.substr(pos1).find(".");
+                size_t pos2 = temp_depends_in_rpkgs_string_view.substr(pos1).find('.');
 
                 if (pos2 != std::string::npos)
                 {
@@ -525,21 +513,13 @@ void temp::load_hash_depends()
                     temp_depends_hash_index_index.at(k) = d;
                 }
             }
-
-            //LOG("  - TEMP File Name In RPKG: " + temp_depends_in_rpkgs.at(k).at(d));
         }
-
-        //LOG("  - TEMP File Name In RPKG Used: " + temp_depends_in_rpkgs.at(k).at(temp_depends_rpkg_index_index.at(k)));
     }
 
     if (tblu_return_value == TEMP_TBLU_FOUND)
     {
-        //LOG("  - TBLU Return Value: TEMP_TBLU_FOUND");
-
         for (uint64_t k = 0; k < tblu_depends_file_name.size(); k++)
         {
-            //LOG("  - TBLU File Name: " + tblu_depends_file_name.at(k));
-
             bool tblu_patch_name_found = false;
 
             long patch_level = 0;
@@ -554,7 +534,7 @@ void temp::load_hash_depends()
 
                 if (pos1 != std::string::npos)
                 {
-                    size_t pos2 = tblu_depends_in_rpkgs_string_view.substr(pos1).find(".");
+                    size_t pos2 = tblu_depends_in_rpkgs_string_view.substr(pos1).find('.');
 
                     if (pos2 != std::string::npos)
                     {
@@ -581,11 +561,7 @@ void temp::load_hash_depends()
                         tblu_depends_hash_index_index.at(k) = d;
                     }
                 }
-
-                //LOG("  - TBLU File Name In RPKG: " + tblu_depends_in_rpkgs.at(k).at(d));
             }
-
-            //LOG("  - TBLU File Name In RPKG Used: " + tblu_depends_in_rpkgs.at(k).at(tblu_depends_rpkg_index_index.at(k)));
 
             tblu_rpkg_index = tblu_depends_rpkg_index.at(k).at(tblu_depends_rpkg_index_index.at(k));
             tblu_hash_index = tblu_depends_hash_index.at(k).at(tblu_depends_hash_index_index.at(k));
@@ -594,8 +570,6 @@ void temp::load_hash_depends()
 
     for (uint64_t k = 0; k < prim_depends_file_name.size(); k++)
     {
-        //LOG("  - PRIM File Name: " + prim_depends_file_name.at(k));
-
         bool prim_patch_name_found = false;
 
         long patch_level = 0;
@@ -610,7 +584,7 @@ void temp::load_hash_depends()
 
             if (pos1 != std::string::npos)
             {
-                size_t pos2 = prim_depends_in_rpkgs_string_view.substr(pos1).find(".");
+                size_t pos2 = prim_depends_in_rpkgs_string_view.substr(pos1).find('.');
 
                 if (pos2 != std::string::npos)
                 {
@@ -637,18 +611,12 @@ void temp::load_hash_depends()
                     prim_depends_hash_index_index.at(k) = d;
                 }
             }
-
-            //LOG("  - PRIM File Name In RPKG: " + prim_depends_in_rpkgs.at(k).at(d));
         }
-
-        //LOG("  - PRIM File Name In RPKG Used: " + prim_depends_in_rpkgs.at(k).at(prim_depends_rpkg_index_index.at(k)));
     }
 
     if (tblu_return_value == TEMP_TBLU_FOUND)
     {
         uint32_t tblu_hash_reference_count = rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
-
-        //LOG(util::uint64_t_to_hex_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value) + "." + rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type + " has " + util::uint32_t_to_string(temp_hash_reference_count) + " dependencies in " + rpkgs.at(temp_rpkg_index).rpkg_file_path);
 
         if (tblu_hash_reference_count > 0)
         {
@@ -656,7 +624,7 @@ void temp::load_hash_depends()
             {
                 std::string hash_value_string = util::uint64_t_to_hex_string(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_reference_data.hash_reference.at(k));
 
-                std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_reference_data.hash_reference.at(k));
+                auto it2 = hash_list_hash_map.find(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_reference_data.hash_reference.at(k));
 
                 if (it2 != hash_list_hash_map.end())
                 {
@@ -680,171 +648,19 @@ void temp::load_hash_depends()
     }
 }
 
-void temp::get_prim_from_temp(uint32_t entry_index)
-{
-    response_string = "";
-
-    std::unordered_map<uint64_t, uint32_t>::iterator it = temps_map.find(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(temp_entityTypeResourceIndex.at(entry_index)));
-
-    if (it != temps_map.end())
-    {
-        for (uint64_t k = 0; k < temps.at(it->second).prim_depends_file_name.size(); k++)
-        {
-            if (temps.at(it->second).prim_depends_in_rpkgs.at(k).size() > 0)
-            {
-                response_string.append(temps.at(it->second).prim_depends_file_name.at(k));
-                response_string.push_back('|');
-                response_string.append(temps.at(it->second).prim_depends_in_rpkgs.at(k).at(temps.at(it->second).prim_depends_in_rpkgs_index.at(k)));
-                response_string.push_back(',');
-            }
-        }
-    }
-}
-
-void temp::temp_version_check()
-{
-    uint64_t temp_hash_size;
-
-    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.lz4ed)
-    {
-        temp_hash_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.header.data_size;
-
-        if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.xored)
-        {
-            temp_hash_size &= 0x3FFFFFFF;
-        }
-    }
-    else
-    {
-        temp_hash_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.resource.size_final;
-    }
-
-    temp_input_data = std::vector<char>(temp_hash_size, 0);
-
-    std::ifstream file = std::ifstream(rpkgs.at(temp_rpkg_index).rpkg_file_path, std::ifstream::binary);
-
-    if (!file.good())
-    {
-        LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(temp_rpkg_index).rpkg_file_path + " could not be read.");
-    }
-
-    file.seekg(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.header.data_offset, file.beg);
-    file.read(temp_input_data.data(), temp_hash_size);
-    file.close();
-
-    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.xored)
-    {
-        crypto::xor_data(temp_input_data.data(), (uint32_t)temp_hash_size);
-    }
-
-    uint32_t temp_decompressed_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.resource.size_final;
-
-    temp_output_data = std::vector<char>(temp_decompressed_size, 0);
-
-    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.lz4ed)
-    {
-        LZ4_decompress_safe(temp_input_data.data(), temp_output_data.data(), (int)temp_hash_size, temp_decompressed_size);
-
-        temp_data = temp_output_data;
-    }
-    else
-    {
-        temp_data = temp_input_data;
-    }
-
-    std::vector<char>().swap(temp_output_data);
-    std::vector<char>().swap(temp_input_data);
-
-    uint64_t temp_position = 0;
-
-    uint32_t temp_sub_entity_table_offset = 0;
-    uint32_t temp_after_sub_entity_table_offset = 0;
-    uint32_t entity_count = 0;
-
-    temp_position = 0x20;
-
-    std::memcpy(&temp_sub_entity_table_offset, &temp_data.data()[temp_position], 0x4);
-
-    temp_position = 0x28;
-
-    std::memcpy(&temp_after_sub_entity_table_offset, &temp_data.data()[temp_position], 0x4);
-
-    temp_position = 0x6C;
-
-    std::memcpy(&entity_count, &temp_data.data()[temp_position], 0x4);
-
-    if (temp_sub_entity_table_offset == 0x60 && entity_count != 0xFFFFFFFF)
-    {
-        uint32_t temp_version_check = temp_after_sub_entity_table_offset - temp_sub_entity_table_offset;
-
-        if (temp_version_check == 0x58 * entity_count)
-        {
-            temp_file_version = 2;
-
-            LOG("TEMP version: H1/H2");
-        }
-        else if (temp_version_check == 0x70 * entity_count)
-        {
-            temp_file_version = 3;
-
-            LOG("TEMP version: H3");
-        }
-        else
-        {
-            temp_file_version = 4;
-
-            LOG("TEMP version: Entry count found by still unknown");
-        }
-    }
-    else if (temp_sub_entity_table_offset == 0x58)
-    {
-        uint32_t temp_version_check = temp_after_sub_entity_table_offset - temp_sub_entity_table_offset;
-
-        if ((temp_version_check % 0x58 == 0) && (temp_version_check % 0x70 == 0))
-        {
-            temp_file_version = 5;
-
-            LOG("TEMP version: Entry count not found and still Unknown");
-        }
-        else if (temp_version_check % 0x58 == 0)
-        {
-            temp_file_version = 2;
-
-            LOG("TEMP version: H1/H2");
-        }
-        else if (temp_version_check % 0x70 == 0)
-        {
-            temp_file_version = 3;
-
-            LOG("TEMP version: H3");
-        }
-    }
-    else
-    {
-        temp_file_version = 6;
-
-        LOG("TEMP version: Unknown");
-    }
-}
-
-void temp::set_temp_version(uint32_t temp_version)
-{
-    temp_file_version = temp_version;
-}
-
-void temp::get_top_level_logical_parents()
+void temp::get_top_level_logical_parents() const
 {
     std::set<std::string> logical_parents_set;
 
-    for (uint32_t e = 0; e < temp_logicalParent.size(); e++)
+    for (unsigned int e : temp_logicalParent)
     {
-        if (temp_logicalParent.at(e) >= temp_logicalParent.size())
+        if (e >= temp_logicalParent.size())
         {
-            logical_parents_set.insert(util::uint32_t_to_string(temp_logicalParent.at(e)));
+            logical_parents_set.insert(util::uint32_t_to_string(e));
         }
     }
 
-    for (std::set<std::string>::iterator it = logical_parents_set.begin(); it != logical_parents_set.end(); it++)
+    for (auto it = logical_parents_set.begin(); it != logical_parents_set.end(); it++)
     {
         response_string.append(*it);
         response_string.push_back(',');
@@ -861,18 +677,18 @@ void temp::get_entries_with_logical_parent(uint32_t logical_parent)
 
             std::memcpy(&char4, &e, 0x4);
 
-            for (uint32_t i = 0; i < 0x4; i++)
+            for (char i : char4)
             {
-                response_data.push_back(char4[i]);
+                response_data.push_back(i);
             }
 
             uint32_t entityName_string_length = tblu_entityName.at(e).length();
 
             std::memcpy(&char4, &entityName_string_length, 0x4);
 
-            for (uint32_t i = 0; i < 0x4; i++)
+            for (char i : char4)
             {
-                response_data.push_back(char4[i]);
+                response_data.push_back(i);
             }
 
             for (uint32_t i = 0; i < entityName_string_length; i++)
@@ -891,7 +707,7 @@ void temp::get_entries_hash_references(uint32_t entry_index)
     {
         if (e == entry_index)
         {
-            std::unordered_map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(temp_entityTypeResourceIndex.at(e)));
+            auto it = hash_list_hash_map.find(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(temp_entityTypeResourceIndex.at(e)));
 
             if (it != hash_list_hash_map.end())
             {
@@ -929,7 +745,7 @@ void temp::get_entries_hash_reference_data(uint32_t entry_index)
         {
             response_string.append("  - ");
 
-            std::unordered_map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(temp_entityTypeResourceIndex.at(e)));
+            auto it = hash_list_hash_map.find(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_reference_data.hash_reference.at(temp_entityTypeResourceIndex.at(e)));
 
             if (it != hash_list_hash_map.end())
             {
@@ -956,7 +772,6 @@ void temp::get_entries_hash_reference_data(uint32_t entry_index)
             {
                 response_string.append(util::uint64_t_to_hex_string(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_reference_data.hash_reference.at(tblu_entityTypeResourceIndex.at(e))));
             }
-
         }
     }
 }
@@ -983,8 +798,6 @@ void temp::get_temp_entries_data(std::string value_type, std::string type_string
 
             std::string json_pointer = "/" + value_type;
 
-            //std::cout << it4->value.GetString() << std::endl;
-
             std::unordered_map<std::string, uint32_t>::iterator it;
 
             if (temp_file_version == 2)
@@ -993,8 +806,6 @@ void temp::get_temp_entries_data(std::string value_type, std::string type_string
 
                 if (it != type_map_h2->end())
                 {
-                    //std::cout << "Type: " << it->second << std::endl;
-
                     if (it->second == TYPE_INT8)
                     {
                         ss << json_pointer << " int8 " << it1->value.GetInt();
@@ -1114,8 +925,6 @@ void temp::get_temp_entries_data(std::string value_type, std::string type_string
 
                 if (it != type_map_h3->end())
                 {
-                    //std::cout << "Type: " << it->second << std::endl;
-
                     if (it->second == TYPE_INT8)
                     {
                         ss << json_pointer << " int8 " << it1->value.GetInt();
@@ -1323,8 +1132,6 @@ void temp::json_temp_node_scan(const rapidjson::Value& node, std::string& proper
     }
     else
     {
-        //std::cout << json_type << "/" << last_name << std::endl;
-
         std::unordered_map<std::string, uint32_t>::iterator it;
 
         if (temp_file_version == 2)
@@ -2063,8 +1870,6 @@ void temp::json_node_scan(const rapidjson::Value& node, std::string& propertyVal
     }
     else
     {
-        //std::cout << json_type << "/" << last_name << std::endl;
-
         std::unordered_map<std::string, uint32_t>::iterator it;
 
         if (temp_file_version == 2)
@@ -2073,8 +1878,6 @@ void temp::json_node_scan(const rapidjson::Value& node, std::string& propertyVal
 
             if (it != type_map_h2->end())
             {
-                //std::cout << "Type: " << it->second << std::endl;
-
                 if (it->second == TYPE_INT8)
                 {
                     ss << json_pointer << " int8 " << node.GetInt();
@@ -2375,7 +2178,7 @@ void temp::json_node_scan(const rapidjson::Value& node, std::string& propertyVal
     }
 }
 
-void temp::get_enum_values(std::string& property_type_string)
+void temp::get_enum_values(std::string& property_type_string) const
 {
     response_string = "";
 
@@ -2387,7 +2190,7 @@ void temp::get_enum_values(std::string& property_type_string)
 
         if (it != enum_map_h2->end())
         {
-            for (std::unordered_map<int32_t, std::string>::iterator it2 = it->second.begin(); it2 != it->second.end(); it2++)
+            for (auto it2 = it->second.begin(); it2 != it->second.end(); it2++)
             {
                 response_string.append(it2->second);
                 response_string.push_back(',');
@@ -2400,226 +2203,13 @@ void temp::get_enum_values(std::string& property_type_string)
 
         if (it != enum_map_h3->end())
         {
-            for (std::unordered_map<int32_t, std::string>::iterator it2 = it->second.begin(); it2 != it->second.end(); it2++)
+            for (auto it2 = it->second.begin(); it2 != it->second.end(); it2++)
             {
                 response_string.append(it2->second);
                 response_string.push_back(',');
             }
         }
     }
-}
-
-void temp::update_temp_file(uint32_t entry_index, char* update_data, uint32_t update_data_size)
-{
-    //std::ofstream file = std::ofstream("R:\\outputdata.txt", std::ofstream::binary);
-
-    file_has_been_changed = true;
-
-    char input[1024];
-
-    uint32_t pointer = 0;
-
-    while (pointer < update_data_size)
-    {
-        uint32_t string_length = 0;
-
-        std::string json_pointer = "";
-        std::string json_data_type = "";
-        std::string json_data = "";
-
-        std::memcpy(&string_length, &update_data[pointer], 0x4);
-        pointer += 0x4;
-
-        std::memcpy(&input, &update_data[pointer], string_length);
-        input[string_length] = 0;
-        pointer += string_length;
-
-        json_pointer = std::string(input);
-
-        //file.write(json_pointer.c_str(), json_pointer.length());
-
-        std::memcpy(&string_length, &update_data[pointer], 0x4);
-        pointer += 0x4;
-
-        std::memcpy(&input, &update_data[pointer], string_length);
-        input[string_length] = 0;
-        pointer += string_length;
-
-        json_data_type = std::string(input);
-
-        //file.write(json_data_type.c_str(), json_data_type.length());
-
-        std::memcpy(&string_length, &update_data[pointer], 0x4);
-        pointer += 0x4;
-
-        std::memcpy(&input, &update_data[pointer], string_length);
-        input[string_length] = 0;
-        pointer += string_length;
-
-        json_data = std::string(input);
-
-        //file.write(json_data.c_str(), json_data.length());
-
-        if (json_data_type == "int8")
-        {
-            int32_t temp_int32_t = std::strtol(json_data.c_str(), nullptr, 10);
-
-            rapidjson::SetValueByPointer(temp_json_document, rapidjson::Pointer(json_pointer.c_str()), temp_int32_t);
-        }
-        else if (json_data_type == "uint8")
-        {
-            uint32_t temp_uint32_t = std::strtoul(json_data.c_str(), nullptr, 10);
-
-            rapidjson::SetValueByPointer(temp_json_document, rapidjson::Pointer(json_pointer.c_str()), temp_uint32_t);
-        }
-        else if (json_data_type == "int16")
-        {
-            int32_t temp_int32_t = std::strtol(json_data.c_str(), nullptr, 10);
-
-            rapidjson::SetValueByPointer(temp_json_document, rapidjson::Pointer(json_pointer.c_str()), temp_int32_t);
-        }
-        else if (json_data_type == "uint16")
-        {
-            uint32_t temp_uint32_t = std::strtoul(json_data.c_str(), nullptr, 10);
-
-            rapidjson::SetValueByPointer(temp_json_document, rapidjson::Pointer(json_pointer.c_str()), temp_uint32_t);
-        }
-        else if (json_data_type == "int32")
-        {
-            int32_t temp_int32_t = std::strtol(json_data.c_str(), nullptr, 10);
-
-            rapidjson::SetValueByPointer(temp_json_document, rapidjson::Pointer(json_pointer.c_str()), temp_int32_t);
-        }
-        else if (json_data_type == "uint32")
-        {
-            uint32_t temp_uint32_t = std::strtoul(json_data.c_str(), nullptr, 10);
-
-            rapidjson::SetValueByPointer(temp_json_document, rapidjson::Pointer(json_pointer.c_str()), temp_uint32_t);
-        }
-        else if (json_data_type == "int64")
-        {
-            int64_t temp_int64_t = std::strtoll(json_data.c_str(), nullptr, 10);
-
-            rapidjson::SetValueByPointer(temp_json_document, rapidjson::Pointer(json_pointer.c_str()), temp_int64_t);
-        }
-        else if (json_data_type == "uint64")
-        {
-            uint64_t temp_uint64_t = std::strtoull(json_data.c_str(), nullptr, 10);
-
-            rapidjson::SetValueByPointer(temp_json_document, rapidjson::Pointer(json_pointer.c_str()), temp_uint64_t);
-        }
-        else if (json_data_type == "float32")
-        {
-            float temp_float = std::strtof(json_data.c_str(), nullptr);
-
-            rapidjson::SetValueByPointer(temp_json_document, rapidjson::Pointer(json_pointer.c_str()), temp_float);
-        }
-        else if (json_data_type == "float64")
-        {
-            double temp_double = std::strtod(json_data.c_str(), nullptr);
-
-            rapidjson::SetValueByPointer(temp_json_document, rapidjson::Pointer(json_pointer.c_str()), temp_double);
-        }
-        else if (json_data_type == "bool")
-        {
-            uint32_t bool_value = std::strtoul(json_data.c_str(), nullptr, 10);
-
-            if (json_data == "True" || bool_value == 1)
-            {
-                rapidjson::SetValueByPointer(temp_json_document, rapidjson::Pointer(json_pointer.c_str()), true);
-            }
-            else if (json_data == "False" || bool_value == 0)
-            {
-                rapidjson::SetValueByPointer(temp_json_document, rapidjson::Pointer(json_pointer.c_str()), false);
-            }
-            else
-            {
-                response_string += "Error: The bool value for " + json_pointer + " could not be determined.\n";
-            }
-        }
-        else if (json_data_type == "ZString")
-        {
-            rapidjson::SetValueByPointer(temp_json_document, rapidjson::Pointer(json_pointer.c_str()), json_data.c_str());
-        }
-        else if (json_data_type == "enum")
-        {
-            rapidjson::SetValueByPointer(temp_json_document, rapidjson::Pointer(json_pointer.c_str()), json_data.c_str());
-        }
-        else
-        {
-            response_string += "Error: The type for " + json_pointer + " could not be determined.\n";
-        }
-    }
-
-    //rapidjson::StringBuffer buffer;
-    //rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
-    //temp_json_document.Accept(writer);
-
-    //std::cout << buffer.GetString() << std::endl;
-
-    //file.write(buffer.GetString(), buffer.GetSize());
-
-    //file.close();
-}
-
-void temp::export_json_files(std::string& json_file_path)
-{
-    std::ofstream file_temp = std::ofstream(json_file_path + util::uint64_t_to_hex_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value) + "." + rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type + ".JSON", std::ofstream::binary);
-
-    rapidjson::StringBuffer buffer_temp;
-    rapidjson::Writer<rapidjson::StringBuffer> writer_temp(buffer_temp);
-    temp_json_document.Accept(writer_temp);
-
-    //std::cout << buffer.GetString() << std::endl;
-
-    file_temp.write(buffer_temp.GetString(), buffer_temp.GetSize());
-
-    file_temp.close();
-
-    std::ofstream file_tblu = std::ofstream(json_file_path + util::uint64_t_to_hex_string(rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_value) + "." + rpkgs.at(tblu_rpkg_index).hash.at(tblu_hash_index).hash_resource_type + ".JSON", std::ofstream::binary);
-
-    rapidjson::StringBuffer buffer_tblu;
-    rapidjson::Writer<rapidjson::StringBuffer> writer_tblu(buffer_tblu);
-    tblu_json_document.Accept(writer_tblu);
-
-    //std::cout << buffer.GetString() << std::endl;
-
-    file_tblu.write(buffer_tblu.GetString(), buffer_tblu.GetSize());
-
-    file_tblu.close();
-}
-
-int temp::generate_temp_file_from_data(std::string temp_path)
-{
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    temp_json_document.Accept(writer);
-
-    //std::cout << buffer.GetString() << std::endl;
-
-    std::string type = "TEMP";
-
-    //if (temp_file_version == 2)
-    //{
-    //type = "TEMPH2";
-    //}
-
-    if (temp_file_version == 2)
-    {
-        resource_tool_generator = HM2_GetGeneratorForResource("TEMP");
-    }
-    else
-    {
-        resource_tool_generator = HM3_GetGeneratorForResource("TEMP");
-    }
-
-    resource_tool_generator->FromJsonStringToResourceFile(buffer.GetString(), buffer.GetSize(), &temp_path[0], true);
-
-    //resource_tool_ConvertMemoryJsonToResource(&type[0], buffer.GetString(), buffer.GetSize(), &temp_path[0]);
-
-    rpkg_function::extract_hash_meta(temp_rpkg_index, temp_hash_index, temp_path);
-
-    return 0;
 }
 
 void temp::get_all_bricks() const
@@ -2777,10 +2367,6 @@ bool temp::rt_json_to_qn_json()
                         rapidjson::Pointer("/onEntity").Set(json_object, util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(tblu_json_subEntity2->GetObject()["entityID"].GetInt())).c_str());
                         rapidjson::Pointer("/asProperty").Set(json_object, tblu_json_subEntity2->GetObject()["sPropertyName"].GetString());
 
-                        //std::cout << "propertyAliases sAliasName: " << tblu_json_subEntity2->GetObject()["sAliasName"].GetString() << std::endl;
-                        //std::cout << "propertyAliases entityID: " << tblu_json_subEntity2->GetObject()["entityID"].GetInt() << std::endl;
-                        //std::cout << "propertyAliases sPropertyName: " << tblu_json_subEntity2->GetObject()["sPropertyName"].GetString() << std::endl;
-
                         rapidjson::Pointer(json_pointer.c_str()).Set(tblu_json_document, json_object);
                     }
                 }
@@ -2833,9 +2419,6 @@ bool temp::rt_json_to_qn_json()
                             }
                         }
 
-                        //std::cout << "exposedEntities name: " << tblu_json_subEntity2->GetObject()["sName"].GetString() << std::endl;
-                        //std::cout << "exposedEntities isArray: " << tblu_json_subEntity2->GetObject()["bIsArray"].GetBool() << std::endl;
-
                         json_pointer = "/subEntities/" + util::uint32_t_to_string(s) + "/exposedEntities/" + util::uint32_t_to_string(a);
 
                         rapidjson::Pointer(json_pointer.c_str()).Set(tblu_json_document, json_object);
@@ -2865,9 +2448,6 @@ bool temp::rt_json_to_qn_json()
                     {
                         rapidjson::Document json_object(&subEntity_json.GetAllocator());
 
-                        //std::cout << "exposedInterfaces 0: " << tblu_json_subEntity2->GetArray()[0].GetString() << std::endl;
-                        //std::cout << "exposedInterfaces 1: " << tblu_json_subEntity2->GetArray()[1].GetInt() << std::endl;
-
                         json_pointer = "/subEntities/" + util::uint32_t_to_string(s) + "/exposedInterfaces/" + util::uint32_t_to_string(a) + "/1";
 
                         rapidjson::Pointer(json_pointer.c_str()).Set(tblu_json_document, util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(tblu_json_subEntity2->GetArray()[1].GetInt())).c_str());
@@ -2891,8 +2471,6 @@ bool temp::rt_json_to_qn_json()
             {
                 for (uint64_t a = 0; a < it->value[e][1]["entities"].Size(); a++)
                 {
-                    //std::cout << it->value[e][1]["entities"][a].GetInt() << std::endl;
-
                     std::string entityId_string = util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(it->value[e][1]["entities"][a].GetInt()));
 
                     it->value[e][1]["entities"][a].SetString(entityId_string.c_str(), entityId_string.length(), qn_json_document.GetAllocator());
@@ -2991,14 +2569,6 @@ bool temp::rt_json_to_qn_json()
         {
             for (uint32_t a = 0; a < temp_json_value->GetArray().Size(); a++)
             {
-                //std::cout << "fromID: " << temp_json_value->GetArray()[a]["fromID"].GetInt() << std::endl;
-                //std::cout << "toID: " << temp_json_value->GetArray()[a]["toID"].GetInt() << std::endl;
-                //std::cout << "fromPinName: " << temp_json_value->GetArray()[a]["fromPinName"].GetString() << std::endl;
-                //std::cout << "toPinName: " << temp_json_value->GetArray()[a]["toPinName"].GetString() << std::endl;
-                //std::cout << "constantPinValue: " << temp_json_value->GetArray()[a].HasMember("constantPinValue") << std::endl;
-                //std::cout << "constantPinValue $type: " << temp_json_value->GetArray()[a]["constantPinValue"]["$type"].GetString() << std::endl;
-                //std::cout << "constantPinValue $val: " << temp_json_value->GetArray()[a]["constantPinValue"]["$val"].GetString() << std::endl;
-
                 rapidjson::Document json_object(&qn_json_document.GetAllocator());
 
                 json_pointer = "/entities/" + util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(temp_json_value->GetArray()[a]["fromID"].GetInt()));
@@ -3025,11 +2595,7 @@ bool temp::rt_json_to_qn_json()
 
                 json_pointer = "/entities/" + util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(temp_json_value->GetArray()[a]["fromID"].GetInt())) + "/events/-";
 
-                //std::cout << "json_pointer: " << json_pointer << std::endl;
-
                 rapidjson::Pointer(json_pointer.c_str()).Set(qn_json_document, json_object);
-
-                //property["value"]["$val"].Swap(json_object);
             }
         }
     }
@@ -3042,14 +2608,6 @@ bool temp::rt_json_to_qn_json()
         {
             for (uint32_t a = 0; a < temp_json_value->GetArray().Size(); a++)
             {
-                //std::cout << "fromID: " << temp_json_value->GetArray()[a]["fromID"].GetInt() << std::endl;
-                //std::cout << "toID: " << temp_json_value->GetArray()[a]["toID"].GetInt() << std::endl;
-                //std::cout << "fromPinName: " << temp_json_value->GetArray()[a]["fromPinName"].GetString() << std::endl;
-                //std::cout << "toPinName: " << temp_json_value->GetArray()[a]["toPinName"].GetString() << std::endl;
-                //std::cout << "constantPinValue: " << temp_json_value->GetArray()[a].HasMember("constantPinValue") << std::endl;
-                //std::cout << "constantPinValue $type: " << temp_json_value->GetArray()[a]["constantPinValue"]["$type"].GetString() << std::endl;
-                //std::cout << "constantPinValue $val: " << temp_json_value->GetArray()[a]["constantPinValue"]["$val"].GetString() << std::endl;
-
                 rapidjson::Document json_object(&qn_json_document.GetAllocator());
 
                 json_pointer = "/entities/" + util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(temp_json_value->GetArray()[a]["fromID"].GetInt()));
@@ -3076,11 +2634,7 @@ bool temp::rt_json_to_qn_json()
 
                 json_pointer = "/entities/" + util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(temp_json_value->GetArray()[a]["fromID"].GetInt())) + "/inputCopying/-";
 
-                //std::cout << "json_pointer: " << json_pointer << std::endl;
-
                 rapidjson::Pointer(json_pointer.c_str()).Set(qn_json_document, json_object);
-
-                //property["value"]["$val"].Swap(json_object);
             }
         }
     }
@@ -3093,14 +2647,6 @@ bool temp::rt_json_to_qn_json()
         {
             for (uint32_t a = 0; a < temp_json_value->GetArray().Size(); a++)
             {
-                //std::cout << "fromID: " << temp_json_value->GetArray()[a]["fromID"].GetInt() << std::endl;
-                //std::cout << "toID: " << temp_json_value->GetArray()[a]["toID"].GetInt() << std::endl;
-                //std::cout << "fromPinName: " << temp_json_value->GetArray()[a]["fromPinName"].GetString() << std::endl;
-                //std::cout << "toPinName: " << temp_json_value->GetArray()[a]["toPinName"].GetString() << std::endl;
-                //std::cout << "constantPinValue: " << temp_json_value->GetArray()[a].HasMember("constantPinValue") << std::endl;
-                //std::cout << "constantPinValue $type: " << temp_json_value->GetArray()[a]["constantPinValue"]["$type"].GetString() << std::endl;
-                //std::cout << "constantPinValue $val: " << temp_json_value->GetArray()[a]["constantPinValue"]["$val"].GetString() << std::endl;
-
                 rapidjson::Document json_object(&qn_json_document.GetAllocator());
 
                 json_pointer = "/entities/" + util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(temp_json_value->GetArray()[a]["fromID"].GetInt()));
@@ -3127,11 +2673,7 @@ bool temp::rt_json_to_qn_json()
 
                 json_pointer = "/entities/" + util::uint64_t_to_hex_string_for_qn(tblu_entityId.at(temp_json_value->GetArray()[a]["fromID"].GetInt())) + "/outputCopying/-";
 
-                //std::cout << "json_pointer: " << json_pointer << std::endl;
-
                 rapidjson::Pointer(json_pointer.c_str()).Set(qn_json_document, json_object);
-
-                //property["value"]["$val"].Swap(json_object);
             }
         }
     }
@@ -3183,10 +2725,10 @@ bool temp::rt_json_to_qn_json()
         }
     }
 
-    if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(temp_json_document, rapidjson::Pointer("/propertyOverrides")))
-    {
+//    if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(temp_json_document, rapidjson::Pointer("/propertyOverrides")))
+//    {
         //rapidjson::Pointer("/propertyOverrides").Set(qn_json_document, temp_json_value->GetArray());
-    }
+//    }
 
     if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(tblu_json_document, rapidjson::Pointer("/overrideDeletes")))
     {
@@ -3245,8 +2787,6 @@ bool temp::rt_json_to_qn_json()
 
                     if (!in_entities)
                     {
-                        //std::cout << temp_json_value->GetArray()[a].GetObject()["entities"]["ref"].GetString() << std::endl;
-
                         uint32_t array_index = entities_json_value->GetArray().Size();
 
                         json_pointer = "/" + util::uint32_t_to_string(array_index) + "/entities";
@@ -3377,11 +2917,6 @@ void temp::convert_to_qn_reference(rapidjson::Document& json_document, rapidjson
     int32_t entityIndex = reference["entityIndex"].GetInt();
     std::string exposedEntity = reference["exposedEntity"].GetString();
 
-    //std::cout << "entityID: " << entityID << std::endl;
-    //std::cout << "externalSceneIndex: " << externalSceneIndex << std::endl;
-    //std::cout << "entityIndex: " << entityIndex << std::endl;
-    //std::cout << "exposedEntity: " << exposedEntity << std::endl;
-
     if (externalSceneIndex != -1 || exposedEntity.length() > 0)
     {
         rapidjson::Document json_object(&json_document.GetAllocator());
@@ -3433,9 +2968,6 @@ void temp::convert_to_qn_property(rapidjson::Document& json_document, rapidjson:
 {
     if (property["nPropertyID"].IsString())
     {
-        //std::cout << property["nPropertyID"].GetString() << std::endl;
-        //std::cout << property["value"]["$type"].GetString() << std::endl;
-
         std::string nPropertyID = property["nPropertyID"].GetString();
         std::string type = property["value"]["$type"].GetString();
 
@@ -3534,10 +3066,6 @@ void temp::convert_to_qn_property(rapidjson::Document& json_document, rapidjson:
             if (euler_angles.z == 0.0f && std::signbit(euler_angles.z))
                 euler_angles.z = 0.0f;
 
-            //std::cout << "euler_angles.x: " << euler_angles.x * radians_to_degrees << std::endl;
-            //std::cout << "euler_angles.y: " << euler_angles.y * radians_to_degrees << std::endl;
-            //std::cout << "euler_angles.z: " << euler_angles.z * radians_to_degrees << std::endl;
-
             rapidjson::Document json_object(&json_document.GetAllocator());
 
             rapidjson::Pointer("/rotation/x").Set(json_object, (euler_angles.x * radians_to_degrees));
@@ -3604,8 +3132,6 @@ void temp::convert_to_qn_property(rapidjson::Document& json_document, rapidjson:
     }
     else if (property["nPropertyID"].IsUint())
     {
-        //std::cout << property["nPropertyID"].GetUint() << std::endl;
-
         std::string type = property["value"]["$type"].GetString();
 
         if (type.length() > 8)
@@ -3703,10 +3229,6 @@ void temp::convert_to_qn_property(rapidjson::Document& json_document, rapidjson:
             if (euler_angles.z == 0.0f && std::signbit(euler_angles.z))
                 euler_angles.z = 0.0f;
 
-            //std::cout << "euler_angles.x: " << euler_angles.x * radians_to_degrees << std::endl;
-            //std::cout << "euler_angles.y: " << euler_angles.y * radians_to_degrees << std::endl;
-            //std::cout << "euler_angles.z: " << euler_angles.z * radians_to_degrees << std::endl;
-
             rapidjson::Document json_object(&json_document.GetAllocator());
 
             rapidjson::Pointer("/rotation/x").Set(json_object, (euler_angles.x * radians_to_degrees));
@@ -3780,8 +3302,6 @@ void temp::write_qn_json_to_file(std::string output_path)
     rapidjson::StringBuffer buffer_qn;
     rapidjson::Writer<rapidjson::StringBuffer> writer_qn(buffer_qn);
     qn_json_document.Accept(writer_qn);
-
-    //std::cout << buffer.GetString() << std::endl;
 
     file_qn.write(buffer_qn.GetString(), buffer_qn.GetSize());
 
