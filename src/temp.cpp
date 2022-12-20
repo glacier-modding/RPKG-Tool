@@ -648,6 +648,132 @@ void temp::load_hash_depends()
     }
 }
 
+void temp::temp_version_check()
+{
+    uint64_t temp_hash_size;
+
+    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.lz4ed)
+    {
+        temp_hash_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.header.data_size;
+
+        if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.xored)
+        {
+            temp_hash_size &= 0x3FFFFFFF;
+        }
+    }
+    else
+    {
+        temp_hash_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.resource.size_final;
+    }
+
+    temp_input_data = std::vector<char>(temp_hash_size, 0);
+
+    std::ifstream file = std::ifstream(rpkgs.at(temp_rpkg_index).rpkg_file_path, std::ifstream::binary);
+
+    if (!file.good())
+    {
+        LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(temp_rpkg_index).rpkg_file_path + " could not be read.");
+    }
+
+    file.seekg(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.header.data_offset, file.beg);
+    file.read(temp_input_data.data(), temp_hash_size);
+    file.close();
+
+    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.xored)
+    {
+        crypto::xor_data(temp_input_data.data(), (uint32_t)temp_hash_size);
+    }
+
+    uint32_t temp_decompressed_size = rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.resource.size_final;
+
+    temp_output_data = std::vector<char>(temp_decompressed_size, 0);
+
+    if (rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.lz4ed)
+    {
+        LZ4_decompress_safe(temp_input_data.data(), temp_output_data.data(), (int)temp_hash_size, temp_decompressed_size);
+
+        temp_data = temp_output_data;
+    }
+    else
+    {
+        temp_data = temp_input_data;
+    }
+
+    std::vector<char>().swap(temp_output_data);
+    std::vector<char>().swap(temp_input_data);
+
+    uint64_t temp_position = 0;
+
+    uint32_t temp_sub_entity_table_offset = 0;
+    uint32_t temp_after_sub_entity_table_offset = 0;
+    uint32_t entity_count = 0;
+
+    temp_position = 0x20;
+
+    std::memcpy(&temp_sub_entity_table_offset, &temp_data.data()[temp_position], 0x4);
+
+    temp_position = 0x28;
+
+    std::memcpy(&temp_after_sub_entity_table_offset, &temp_data.data()[temp_position], 0x4);
+
+    temp_position = 0x6C;
+
+    std::memcpy(&entity_count, &temp_data.data()[temp_position], 0x4);
+
+    if (temp_sub_entity_table_offset == 0x60 && entity_count != 0xFFFFFFFF)
+    {
+        uint32_t temp_version_check = temp_after_sub_entity_table_offset - temp_sub_entity_table_offset;
+
+        if (temp_version_check == 0x58 * entity_count)
+        {
+            temp_file_version = 2;
+
+            LOG("TEMP version: H1/H2");
+        }
+        else if (temp_version_check == 0x70 * entity_count)
+        {
+            temp_file_version = 3;
+
+            LOG("TEMP version: H3");
+        }
+        else
+        {
+            temp_file_version = 4;
+
+            LOG("TEMP version: Entry count found by still unknown");
+        }
+    }
+    else if (temp_sub_entity_table_offset == 0x58)
+    {
+        uint32_t temp_version_check = temp_after_sub_entity_table_offset - temp_sub_entity_table_offset;
+
+        if ((temp_version_check % 0x58 == 0) && (temp_version_check % 0x70 == 0))
+        {
+            temp_file_version = 5;
+
+            LOG("TEMP version: Entry count not found and still Unknown");
+        }
+        else if (temp_version_check % 0x58 == 0)
+        {
+            temp_file_version = 2;
+
+            LOG("TEMP version: H1/H2");
+        }
+        else if (temp_version_check % 0x70 == 0)
+        {
+            temp_file_version = 3;
+
+            LOG("TEMP version: H3");
+        }
+    }
+    else
+    {
+        temp_file_version = 6;
+
+        LOG("TEMP version: Unknown");
+    }
+}
+
 void temp::get_top_level_logical_parents() const
 {
     std::set<std::string> logical_parents_set;

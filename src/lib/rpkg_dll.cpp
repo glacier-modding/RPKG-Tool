@@ -878,7 +878,7 @@ char* get_hash_in_rpkg_data_in_hex_view(char* rpkg_file, char* hash_string)
                     return &response_string[0];
                 }
 
-                file.seekg(rpkg.hash.at(it->second).data.header.data_offset, file.beg);
+                file.seekg(rpkg.hash.at(it->second).data.header.data_offset, std::ifstream::beg);
                 file.read(input_data.data(), hash_size);
                 file.close();
 
@@ -1830,6 +1830,35 @@ char* get_response_string()
     return &response_string[0];
 }
 
+int get_temp_version(char* temp_hash, char* rpkg_file_path)
+{
+    std::string temp_hash_string = std::string(temp_hash);
+    std::string rpkg_file_path_string = std::string(rpkg_file_path);
+
+    uint64_t temp_hash_value = std::strtoull(temp_hash_string.c_str(), nullptr, 16);
+
+    for (uint64_t i = 0; i < rpkgs.size(); i++)
+    {
+        uint32_t rpkg_index = i;
+
+        if (rpkgs.at(i).rpkg_file_path == rpkg_file_path_string)
+        {
+            auto it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+
+            if (it != rpkgs.at(rpkg_index).hash_map.end())
+            {
+                temp temp_temp(rpkg_index, it->second);
+
+                temp_temp.temp_version_check();
+
+                return temp_temp.temp_file_version;
+            }
+        }
+    }
+
+    return 0;
+}
+
 char* get_all_bricks(uint32_t temps_index)
 {
     response_string = "";
@@ -1897,23 +1926,23 @@ int modify_patch_deletion_list(char* rpkg_file, char* patch_list, uint32_t patch
 
     std::string_view patch_list_string_view(patch_list_string);
 
-    for (uint64_t i = 0; i < rpkgs.size(); i++)
+    for (auto & rpkg : rpkgs)
     {
-        if (rpkgs.at(i).rpkg_file_path == rpkg_file_string)
+        if (rpkg.rpkg_file_path == rpkg_file_string)
         {
-            int patch_offset = (int) ((int) patch_count - (int) rpkgs.at(i).header.patch_count) * (int) 0x8;
+            int patch_offset = (int) ((int) patch_count - (int) rpkg.header.patch_count) * (int) 0x8;
 
-            if (!rpkgs.at(i).is_patch_file)
+            if (!rpkg.is_patch_file)
             {
                 return 2;
             }
 
             uint32_t header_size = 0;
 
-            if (rpkgs.at(i).rpkg_file_version == 1)
+            if (rpkg.rpkg_file_version == 1)
             {
                 header_size = 0x10;
-            } else if (rpkgs.at(i).rpkg_file_version == 2)
+            } else if (rpkg.rpkg_file_version == 2)
             {
                 header_size = 0x19;
             } else
@@ -1959,24 +1988,24 @@ int modify_patch_deletion_list(char* rpkg_file, char* patch_list, uint32_t patch
                 temp_file_output.write(char8, sizeof(uint64_t));
             }
 
-            for (uint64_t j = 0; j < rpkgs.at(i).hash.size(); j++)
+            for (uint64_t j = 0; j < rpkg.hash.size(); j++)
             {
-                std::memcpy(&char8, &rpkgs.at(i).hash.at(j).hash_value, sizeof(uint64_t));
+                std::memcpy(&char8, &rpkg.hash.at(j).hash_value, sizeof(uint64_t));
                 temp_file_output.write(char8, sizeof(uint64_t));
 
-                uint64_t new_hash_offset = rpkgs.at(i).hash.at(j).data.header.data_offset + patch_offset;
+                uint64_t new_hash_offset = rpkg.hash.at(j).data.header.data_offset + patch_offset;
 
                 std::memcpy(&char8, &new_hash_offset, sizeof(uint64_t));
                 temp_file_output.write(char8, sizeof(uint64_t));
 
-                std::memcpy(&char4, &rpkgs.at(i).hash.at(j).data.header.data_size, sizeof(uint32_t));
+                std::memcpy(&char4, &rpkg.hash.at(j).data.header.data_size, sizeof(uint32_t));
                 temp_file_output.write(char4, sizeof(uint32_t));
             }
 
             uint64_t read_offset =
-                    header_size + 0x4 + rpkgs.at(i).header.patch_count * 0x8 + rpkgs.at(i).hash.size() * 0x14;
+                    header_size + 0x4 + rpkg.header.patch_count * 0x8 + rpkg.hash.size() * 0x14;
 
-            rpkg_file_file.seekg(read_offset, rpkg_file_file.beg);
+            rpkg_file_file.seekg(read_offset, std::ifstream::beg);
 
             temp_file_output << rpkg_file_file.rdbuf();
 
@@ -2022,19 +2051,19 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
     std::string_view hash_list_string_view(hash_list_string);
     std::string_view hash_flag_list_string_view(hash_flag_list_string);
 
-    for (uint64_t i = 0; i < rpkgs.size(); i++)
+    for (auto & rpkg : rpkgs)
     {
-        if (rpkgs.at(i).rpkg_file_path == rpkg_file_string)
+        if (rpkg.rpkg_file_path == rpkg_file_string)
         {
-            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(hash_value);
+            auto it = rpkg.hash_map.find(hash_value);
 
-            if (it == rpkgs.at(i).hash_map.end())
+            if (it == rpkg.hash_map.end())
             {
                 return 2;
             }
 
             uint32_t hash_reference_count =
-                    rpkgs.at(i).hash.at(it->second).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+                    rpkg.hash.at(it->second).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
             int hash_depends_offset = 0;
 
@@ -2057,10 +2086,10 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
 
             uint32_t header_size = 0;
 
-            if (rpkgs.at(i).rpkg_file_version == 1)
+            if (rpkg.rpkg_file_version == 1)
             {
                 header_size = 0xC;
-            } else if (rpkgs.at(i).rpkg_file_version == 2)
+            } else if (rpkg.rpkg_file_version == 2)
             {
                 header_size = 0x15;
             } else
@@ -2094,24 +2123,24 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
             char char4[4];
             char char8[8];
 
-            uint32_t new_table_size = rpkgs.at(i).header.hash_resource_table_size + hash_depends_offset;
+            uint32_t new_table_size = rpkg.header.hash_resource_table_size + hash_depends_offset;
 
             std::memcpy(&char4, &new_table_size, sizeof(uint32_t));
             temp_file_output.write(char4, sizeof(uint32_t));
 
-            if (rpkgs.at(i).is_patch_file)
+            if (rpkg.is_patch_file)
             {
-                std::memcpy(&char4, &rpkgs.at(i).header.patch_count, sizeof(uint32_t));
+                std::memcpy(&char4, &rpkg.header.patch_count, sizeof(uint32_t));
                 temp_file_output.write(char4, sizeof(uint32_t));
 
-                for (uint64_t a = 0; a < rpkgs.at(i).header.patch_count; a++)
+                for (uint64_t a = 0; a < rpkg.header.patch_count; a++)
                 {
-                    std::memcpy(&char8, &rpkgs.at(i).patch_entry_list.at(a), sizeof(uint64_t));
+                    std::memcpy(&char8, &rpkg.patch_entry_list.at(a), sizeof(uint64_t));
                     temp_file_output.write(char8, sizeof(uint64_t));
                 }
             }
 
-            for (uint64_t j = 0; j < rpkgs.at(i).hash.size(); j++)
+            for (uint64_t j = 0; j < rpkg.hash.size(); j++)
             {
                 /*if (j < it->second)
                 {
@@ -2126,45 +2155,45 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
                 }
                 else
                 {*/
-                std::memcpy(&char8, &rpkgs.at(i).hash.at(j).hash_value, sizeof(uint64_t));
+                std::memcpy(&char8, &rpkg.hash.at(j).hash_value, sizeof(uint64_t));
                 temp_file_output.write(char8, sizeof(uint64_t));
 
-                uint64_t new_hash_offset = rpkgs.at(i).hash.at(j).data.header.data_offset + hash_depends_offset;
+                uint64_t new_hash_offset = rpkg.hash.at(j).data.header.data_offset + hash_depends_offset;
 
                 std::memcpy(&char8, &new_hash_offset, sizeof(uint64_t));
                 temp_file_output.write(char8, sizeof(uint64_t));
 
-                std::memcpy(&char4, &rpkgs.at(i).hash.at(j).data.header.data_size, sizeof(uint32_t));
+                std::memcpy(&char4, &rpkg.hash.at(j).data.header.data_size, sizeof(uint32_t));
                 temp_file_output.write(char4, sizeof(uint32_t));
                 //}
             }
 
-            for (uint64_t j = 0; j < rpkgs.at(i).hash.size(); j++)
+            for (uint64_t j = 0; j < rpkg.hash.size(); j++)
             {
                 if (j < it->second)
                 {
-                    temp_file_output.write(&rpkgs.at(i).hash.at(j).hash_resource_type[3], 0x1);
-                    temp_file_output.write(&rpkgs.at(i).hash.at(j).hash_resource_type[2], 0x1);
-                    temp_file_output.write(&rpkgs.at(i).hash.at(j).hash_resource_type[1], 0x1);
-                    temp_file_output.write(&rpkgs.at(i).hash.at(j).hash_resource_type[0], 0x1);
+                    temp_file_output.write(&rpkg.hash.at(j).hash_resource_type[3], 0x1);
+                    temp_file_output.write(&rpkg.hash.at(j).hash_resource_type[2], 0x1);
+                    temp_file_output.write(&rpkg.hash.at(j).hash_resource_type[1], 0x1);
+                    temp_file_output.write(&rpkg.hash.at(j).hash_resource_type[0], 0x1);
 
-                    std::memcpy(&char4, &rpkgs.at(i).hash.at(j).data.resource.reference_table_size, sizeof(uint32_t));
+                    std::memcpy(&char4, &rpkg.hash.at(j).data.resource.reference_table_size, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
-                    std::memcpy(&char4, &rpkgs.at(i).hash.at(j).data.resource.reference_table_dummy, sizeof(uint32_t));
+                    std::memcpy(&char4, &rpkg.hash.at(j).data.resource.reference_table_dummy, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
-                    std::memcpy(&char4, &rpkgs.at(i).hash.at(j).data.resource.size_final, sizeof(uint32_t));
+                    std::memcpy(&char4, &rpkg.hash.at(j).data.resource.size_final, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
-                    std::memcpy(&char4, &rpkgs.at(i).hash.at(j).data.resource.size_in_memory, sizeof(uint32_t));
+                    std::memcpy(&char4, &rpkg.hash.at(j).data.resource.size_in_memory, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
-                    std::memcpy(&char4, &rpkgs.at(i).hash.at(j).data.resource.size_in_video_memory, sizeof(uint32_t));
+                    std::memcpy(&char4, &rpkg.hash.at(j).data.resource.size_in_video_memory, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
 
                     uint32_t temp_hash_reference_count =
-                            rpkgs.at(i).hash.at(j).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+                            rpkg.hash.at(j).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
-                    if (rpkgs.at(i).hash.at(j).data.resource.reference_table_size > 0)
+                    if (rpkg.hash.at(j).data.resource.reference_table_size > 0)
                     {
-                        std::memcpy(&char4, &rpkgs.at(i).hash.at(j).hash_reference_data.hash_reference_count,
+                        std::memcpy(&char4, &rpkg.hash.at(j).hash_reference_data.hash_reference_count,
                                     sizeof(uint32_t));
                         temp_file_output.write(char4, sizeof(uint32_t));
                     }
@@ -2173,24 +2202,24 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
                     {
                         for (uint64_t a = 0; a < temp_hash_reference_count; a++)
                         {
-                            std::memcpy(&char1, &rpkgs.at(i).hash.at(j).hash_reference_data.hash_reference_type.at(a),
+                            std::memcpy(&char1, &rpkg.hash.at(j).hash_reference_data.hash_reference_type.at(a),
                                         sizeof(uint8_t));
                             temp_file_output.write(char1, sizeof(uint8_t));
                         }
 
                         for (uint64_t a = 0; a < temp_hash_reference_count; a++)
                         {
-                            std::memcpy(&char8, &rpkgs.at(i).hash.at(j).hash_reference_data.hash_reference.at(a),
+                            std::memcpy(&char8, &rpkg.hash.at(j).hash_reference_data.hash_reference.at(a),
                                         sizeof(uint64_t));
                             temp_file_output.write(char8, sizeof(uint64_t));
                         }
                     }
                 } else if (j == it->second)
                 {
-                    temp_file_output.write(&rpkgs.at(i).hash.at(j).hash_resource_type[3], 0x1);
-                    temp_file_output.write(&rpkgs.at(i).hash.at(j).hash_resource_type[2], 0x1);
-                    temp_file_output.write(&rpkgs.at(i).hash.at(j).hash_resource_type[1], 0x1);
-                    temp_file_output.write(&rpkgs.at(i).hash.at(j).hash_resource_type[0], 0x1);
+                    temp_file_output.write(&rpkg.hash.at(j).hash_resource_type[3], 0x1);
+                    temp_file_output.write(&rpkg.hash.at(j).hash_resource_type[2], 0x1);
+                    temp_file_output.write(&rpkg.hash.at(j).hash_resource_type[1], 0x1);
+                    temp_file_output.write(&rpkg.hash.at(j).hash_resource_type[0], 0x1);
 
                     uint64_t temp_hash_reference_table_size = 0;
 
@@ -2201,13 +2230,13 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
 
                     std::memcpy(&char4, &temp_hash_reference_table_size, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
-                    std::memcpy(&char4, &rpkgs.at(i).hash.at(j).data.resource.reference_table_dummy, sizeof(uint32_t));
+                    std::memcpy(&char4, &rpkg.hash.at(j).data.resource.reference_table_dummy, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
-                    std::memcpy(&char4, &rpkgs.at(i).hash.at(j).data.resource.size_final, sizeof(uint32_t));
+                    std::memcpy(&char4, &rpkg.hash.at(j).data.resource.size_final, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
-                    std::memcpy(&char4, &rpkgs.at(i).hash.at(j).data.resource.size_in_memory, sizeof(uint32_t));
+                    std::memcpy(&char4, &rpkg.hash.at(j).data.resource.size_in_memory, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
-                    std::memcpy(&char4, &rpkgs.at(i).hash.at(j).data.resource.size_in_video_memory, sizeof(uint32_t));
+                    std::memcpy(&char4, &rpkg.hash.at(j).data.resource.size_in_video_memory, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
 
                     uint32_t temp_hash_reference_count = hash_count | (uint32_t) 0xC0000000;
@@ -2241,28 +2270,28 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
                     }
                 } else if (j > it->second)
                 {
-                    temp_file_output.write(&rpkgs.at(i).hash.at(j).hash_resource_type[3], 0x1);
-                    temp_file_output.write(&rpkgs.at(i).hash.at(j).hash_resource_type[2], 0x1);
-                    temp_file_output.write(&rpkgs.at(i).hash.at(j).hash_resource_type[1], 0x1);
-                    temp_file_output.write(&rpkgs.at(i).hash.at(j).hash_resource_type[0], 0x1);
+                    temp_file_output.write(&rpkg.hash.at(j).hash_resource_type[3], 0x1);
+                    temp_file_output.write(&rpkg.hash.at(j).hash_resource_type[2], 0x1);
+                    temp_file_output.write(&rpkg.hash.at(j).hash_resource_type[1], 0x1);
+                    temp_file_output.write(&rpkg.hash.at(j).hash_resource_type[0], 0x1);
 
-                    std::memcpy(&char4, &rpkgs.at(i).hash.at(j).data.resource.reference_table_size, sizeof(uint32_t));
+                    std::memcpy(&char4, &rpkg.hash.at(j).data.resource.reference_table_size, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
-                    std::memcpy(&char4, &rpkgs.at(i).hash.at(j).data.resource.reference_table_dummy, sizeof(uint32_t));
+                    std::memcpy(&char4, &rpkg.hash.at(j).data.resource.reference_table_dummy, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
-                    std::memcpy(&char4, &rpkgs.at(i).hash.at(j).data.resource.size_final, sizeof(uint32_t));
+                    std::memcpy(&char4, &rpkg.hash.at(j).data.resource.size_final, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
-                    std::memcpy(&char4, &rpkgs.at(i).hash.at(j).data.resource.size_in_memory, sizeof(uint32_t));
+                    std::memcpy(&char4, &rpkg.hash.at(j).data.resource.size_in_memory, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
-                    std::memcpy(&char4, &rpkgs.at(i).hash.at(j).data.resource.size_in_video_memory, sizeof(uint32_t));
+                    std::memcpy(&char4, &rpkg.hash.at(j).data.resource.size_in_video_memory, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
 
                     uint32_t temp_hash_reference_count =
-                            rpkgs.at(i).hash.at(j).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+                            rpkg.hash.at(j).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
-                    if (rpkgs.at(i).hash.at(j).data.resource.reference_table_size > 0)
+                    if (rpkg.hash.at(j).data.resource.reference_table_size > 0)
                     {
-                        std::memcpy(&char4, &rpkgs.at(i).hash.at(j).hash_reference_data.hash_reference_count,
+                        std::memcpy(&char4, &rpkg.hash.at(j).hash_reference_data.hash_reference_count,
                                     sizeof(uint32_t));
                         temp_file_output.write(char4, sizeof(uint32_t));
                     }
@@ -2271,14 +2300,14 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
                     {
                         for (uint64_t a = 0; a < temp_hash_reference_count; a++)
                         {
-                            std::memcpy(&char1, &rpkgs.at(i).hash.at(j).hash_reference_data.hash_reference_type.at(a),
+                            std::memcpy(&char1, &rpkg.hash.at(j).hash_reference_data.hash_reference_type.at(a),
                                         sizeof(uint8_t));
                             temp_file_output.write(char1, sizeof(uint8_t));
                         }
 
                         for (uint64_t a = 0; a < temp_hash_reference_count; a++)
                         {
-                            std::memcpy(&char8, &rpkgs.at(i).hash.at(j).hash_reference_data.hash_reference.at(a),
+                            std::memcpy(&char8, &rpkg.hash.at(j).hash_reference_data.hash_reference.at(a),
                                         sizeof(uint64_t));
                             temp_file_output.write(char8, sizeof(uint64_t));
                         }
@@ -2288,29 +2317,29 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
 
             uint64_t read_offset = 0;
 
-            if (rpkgs.at(i).rpkg_file_version == 1)
+            if (rpkg.rpkg_file_version == 1)
             {
-                if (rpkgs.at(i).is_patch_file)
+                if (rpkg.is_patch_file)
                 {
                     read_offset =
-                            0x14 + rpkgs.at(i).header.patch_count * 0x8 + rpkgs.at(i).header.hash_header_table_size +
-                            rpkgs.at(i).header.hash_resource_table_size;
+                            0x14 + rpkg.header.patch_count * 0x8 + rpkg.header.hash_header_table_size +
+                            rpkg.header.hash_resource_table_size;
                 } else
                 {
-                    read_offset = 0x10 + rpkgs.at(i).header.hash_header_table_size +
-                                  rpkgs.at(i).header.hash_resource_table_size;
+                    read_offset = 0x10 + rpkg.header.hash_header_table_size +
+                                  rpkg.header.hash_resource_table_size;
                 }
-            } else if (rpkgs.at(i).rpkg_file_version == 2)
+            } else if (rpkg.rpkg_file_version == 2)
             {
-                if (rpkgs.at(i).is_patch_file)
+                if (rpkg.is_patch_file)
                 {
                     read_offset =
-                            0x1D + rpkgs.at(i).header.patch_count * 0x8 + rpkgs.at(i).header.hash_header_table_size +
-                            rpkgs.at(i).header.hash_resource_table_size;
+                            0x1D + rpkg.header.patch_count * 0x8 + rpkg.header.hash_header_table_size +
+                            rpkg.header.hash_resource_table_size;
                 } else
                 {
-                    read_offset = 0x19 + rpkgs.at(i).header.hash_header_table_size +
-                                  rpkgs.at(i).header.hash_resource_table_size;
+                    read_offset = 0x19 + rpkg.header.hash_header_table_size +
+                                  rpkg.header.hash_resource_table_size;
                 }
             }
 
@@ -2549,7 +2578,7 @@ uint32_t is_repo_loaded()
 
     if (rpkg_index != UINT32_MAX)
     {
-        std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(repo_hash_value);
+        auto it = rpkgs.at(rpkg_index).hash_map.find(repo_hash_value);
 
         if (it != rpkgs.at(rpkg_index).hash_map.end())
         {
@@ -2724,7 +2753,7 @@ char* check_json(const char* json)
 
 int create_patch(const char* patch_path)
 {
-    if (repos.size() > 0)
+    if (!repos.empty())
     {
         repos[0].create_patch(patch_path);
     }

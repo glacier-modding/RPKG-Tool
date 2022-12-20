@@ -138,6 +138,8 @@ RPKG_EXPORT char* get_top_level_logical_parents(uint32_t temps_index);
 
 RPKG_EXPORT char* get_all_bricks(uint32_t temps_index);
 
+RPKG_EXPORT int get_temp_version(char* temp_hash, char* rpkg_file_path);
+
 RPKG_EXPORT int generate_png_from_text(char* rpkg_file, char* hash_string, char* png_path);
 
 RPKG_EXPORT int unload_rpkg(char* rpkg_file);
