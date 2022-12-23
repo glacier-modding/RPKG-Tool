@@ -125,7 +125,7 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     }
     else if (command == "-extract_locr_to_json_from")
     {
-        rpkg_function::extract_locr_to_json_from(input_path, filter, output_path, false);
+        rpkg_function::extract_locr_to_json_from(input_path, output_path, false);
     }
     else if (command == "-extract_rtlv_to_json_from")
     {

@@ -979,7 +979,7 @@ uint32_t generate_localization_string(char* rpkg_file, char* hash_string, char* 
         rpkg_function::extract_dlge_to_json_from(input_path, filter, output_path, true);
     } else if (resource == "LOCR")
     {
-        rpkg_function::extract_locr_to_json_from(input_path, filter, output_path, true);
+        rpkg_function::extract_locr_to_json_from(input_path, output_path, true);
     } else if (resource == "RTLV")
     {
         rpkg_function::extract_rtlv_to_json_from(input_path, filter, output_path, true);

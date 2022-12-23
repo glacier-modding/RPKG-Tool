@@ -133,7 +133,7 @@ void rpkg_function::get_line_string(std::string& input_path, std::string& filter
 
             if (it6 != rpkgs.at(rpkg_index2).hash_map.end())
             {
-                rpkg_function::extract_locr_to_json_from(rpkgs.at(rpkg_index2).rpkg_file_path, hash_string, output_path, true);
+                rpkg_function::extract_locr_to_json_from(rpkgs.at(rpkg_index2).rpkg_file_path, output_path, true);
 
                 for (const auto& it : localization_json.items())
                 {

@@ -186,7 +186,7 @@ void rpkg_function::search_localization(std::string& input_path, std::string& se
                                 localization_hash_size_current += rpkg.hash.at(hash_index).data.resource.size_final;
                                 localization_hash_count_current++;
 
-                                rpkg_function::extract_locr_to_json_from(rpkg.rpkg_file_path, temp_hash_string, output_path, true);
+                                rpkg_function::extract_locr_to_json_from(rpkg.rpkg_file_path, output_path, true);
 
                                 try
                                 {
