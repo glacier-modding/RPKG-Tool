@@ -10,7 +10,10 @@ The RPKG tool allows for easy (un)packing of files from the Glacier Engine RPKG 
 	<img src="https://img.shields.io/badge/discord-join-7289DA.svg?logo=discord&longCache=true&style=flat" />
 </a>
 
-Welcome to the new RPKG repository! The code for the GUI has moved to the [glacier-modding/RPKG-GUI](https://github.com/glacier-modding/RPKG-GUI).
+Welcome to the new RPKG repository! The code for the GUI is now in [this folder](rpkg-gui), inside of this repository.
 
-This repository contains 2 components - the CLI and the DLL.
-The CLI allows you to perform simple operations from a terminal, and the DLL allows you to embed RPKG into your own apps.
+This repository contains 3 components - [the CLI](src/cli), [the GUI](rpkg-gui) & [the DLL](src/lib).
+
+[The CLI](src/cli) allows you to perform simple operations from a terminal. </br>
+[The GUI](rpkg-gui) allows you to easily perform operations with a user interface. </br>
+And [the DLL](src/lib) allows you to embed RPKG into your own apps. </br>
