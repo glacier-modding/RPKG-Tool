@@ -2450,17 +2450,34 @@ int get_hash_name_from_hash_value(uint64_t hash_value, char* hash_name)
 {
     if (!hash_name)
     {
-        return false;
+        return 0;
     }
+
+    // search hash list
     auto it2 = hash_list_hash_map.find(hash_value);
 
     if (it2 != hash_list_hash_map.end())
     {
         // 16 hex chars, 1 period, 4 extension chars, 1 null-ternimator
         strncpy(hash_name, hash_list_hash_file_names.at(it2->second).c_str(), 22);
-        return true;
+        return 1;
     }
-    return false;
+
+    // search loaded rpkgs
+    for (auto &rpkg : rpkgs)
+    {
+        std::unordered_map<uint64_t, uint64_t>::iterator it = rpkg.hash_map.find(hash_value);
+
+        if (it != rpkg.hash_map.end())
+        {
+            // 16 hex chars, 1 period, 4 extension chars, 1 null-ternimator
+            std::string hash_string = util::uint64_t_to_hex_string(rpkg.hash.at(it->second).hash_value) + "." + rpkg.hash.at(it->second).hash_resource_type;
+            strncpy(hash_name, hash_string.c_str(), 22);
+            return 2;
+        }
+    }
+
+    return 0;
 }
 
 int get_temp_subentity_count(uint32_t temps_index)

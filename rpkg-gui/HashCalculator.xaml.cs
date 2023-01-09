@@ -105,7 +105,7 @@ namespace rpkg
 
                     // 16 hex chars + 1 period + 4 extension chars + 1 null-ternimator = 22 chars
                     char[] charbuffer = ArrayPool<char>.Shared.Rent(22);
-                    bool found = false;
+                    int found = 0;
                     string hash_name = "";
                     try
                     {
@@ -117,10 +117,15 @@ namespace rpkg
                         ArrayPool<char>.Shared.Return(charbuffer);
                     }
 
-                    if (found)
+                    if (found == 1)
                     {
                         newlyFoundHashes.Add($"{hash_name.ToUpper()},{lineString}");
                         outputTextBuilder.AppendLine($"{ioiHash} - Found in hash list");
+                    }
+                    else if (found == 2)
+                    {
+                        newlyFoundHashes.Add($"{hash_name.ToUpper()},{lineString}");
+                        outputTextBuilder.AppendLine($"{ioiHash} - (NEW) Found in game, not in hash list");
                     }
                     else
                     {
@@ -154,7 +159,7 @@ namespace rpkg
 
 
         [DllImport("rpkg-lib.dll", EntryPoint = "get_hash_name_from_hash_value", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool get_hash_name_from_hash_value(UInt64 hash_value, [Out, MarshalAs(UnmanagedType.LPArray, SizeConst = 22)] char[] hash_name);
+        public static extern int get_hash_name_from_hash_value(UInt64 hash_value, [Out, MarshalAs(UnmanagedType.LPArray, SizeConst = 22)] char[] hash_name);
 
     }
 
