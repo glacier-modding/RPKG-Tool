@@ -5,6 +5,7 @@ task:
   Prepare_Ninja_script: choco install -y ninja
 
   Configure_script: |
+    "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
     mkdir cmake-build-release
     cd cmake-build-release
     cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_COMPILER=cl -DCMAKE_C_COMPILER=cl ..
