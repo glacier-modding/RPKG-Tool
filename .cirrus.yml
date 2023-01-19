@@ -7,11 +7,7 @@ task:
   Configure_script: |
     mkdir cmake-build-release
     cd cmake-build-release
-    cmake -G Ninja `
-      -DCMAKE_BUILD_TYPE=RelWithDebInfo `
-      -DCMAKE_CXX_COMPILER=cl `
-      -DCMAKE_C_COMPILER=cl `
-      ..
+    cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_COMPILER=cl -DCMAKE_C_COMPILER=cl ..
 
   Build_script: cmake --build cmake-build-release --target ${{ matrix.target }}
 
