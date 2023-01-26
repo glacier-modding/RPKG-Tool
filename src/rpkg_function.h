@@ -21,6 +21,8 @@ struct rpkg_extraction_vars
 class rpkg_function
 {
 public:
+    static void json_to_material(const std::string& input_path, const std::string& output_path);
+    static void extract_material_to_json(std::string& input_path, std::string& filter, std::string& output_path);
     static void mrtr_to_json(std::string& input_path, std::string& filter, std::string& output_path);
     static void json_to_mrtr(std::string& input_path, std::string& output_path);
     static void extract_mrtr_to_json(std::string& input_path, const std::string& filter, const std::string& output_path);

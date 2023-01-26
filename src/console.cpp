@@ -91,6 +91,11 @@ void console::display_usage_info()
     LOG("        scans all available RPKG files and their patch deletion lists for the existence");
     LOG("        of the hash file/resource, specified by -filter, and extracts and converts a given");
     LOG("        entity (TEMP/TBLU) to a QN (QuickEntity v2.1) JSON.");
+    LOG("    -extract_material_to_json <path to folder containing RPKG files>");
+    LOG("        Scans a directory, commonly Hitman's Runtime dir, and imports and");
+    LOG("        scans all available RPKG files and for the existence of MATI hash files/resources,");
+    LOG("        specified by -filter, and converts them to MATERIAL JSON(s) that encapsulate");
+    LOG("        MATI/MATT/MATB files all in one.");
     LOG("    -extract_mati_to_json <path to RPKG file>");
     LOG("        Extracts one or more hash file/resources, specified by -filter, from the input RPKG file");
     LOG("        and converts them to MATI JSON(s).");
@@ -219,6 +224,10 @@ void console::display_usage_info()
     LOG("        map are then written to a QN (QuickEntity v2.1) JSON, in the format specified by -qn_format.");
     LOG("    -json_to_hash_meta <path to hash *.meta.JSON file>");
     LOG("        Converts a Hash meta JSON file (*.meta.JSON) into a Hash *.meta file.");
+    LOG("    -json_to_material <path to MATERIAL.JSON file(s) / folder>");
+    LOG("        Converts MATERIAL JSON file(s) into MATI/MATT/MATB file(s) (plus .meta file(s)).");
+    LOG("        When a folder is passed to the function it is recursively scanned for all available.");
+    LOG("        MATERIAL.JSON files and converts them all to MATI/MATT/MATB file(s) (plus .meta file(s)).");
     LOG("    -json_to_mati <path to MATI.JSON file(s) / folder>");
     LOG("        Converts MATI JSON file(s) into MATI file(s) (along with .meta file(s)).");
     LOG("        When a folder is passed to the function it is recursively scanned for all available.");

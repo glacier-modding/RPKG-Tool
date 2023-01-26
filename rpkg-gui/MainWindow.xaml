@@ -58,6 +58,7 @@
                         <MenuItem Click="MassExtract_Click" Header="Extract Scaleform GFX/DDS/TGA (GFXF) From RPKGs In Folder"/>
                     </MenuItem>
                     <MenuItem Header="Rebuild">
+						<MenuItem Click="MaterialUtilities_Click" Header="Rebuild Material JSON File(s) To MATI/MATT/MATB Files"/>
                         <MenuItem Click="Rebuild_Click" Header="Rebuild Primitive Models (PRIM/TEXT/TEXD) From Folder"/>
                         <MenuItem Click="Rebuild_Click" Header="Rebuild Mesh Primitives (PRIM) From Folder"/>
                         <MenuItem Click="Rebuild_Click" Header="Rebuild Textures (TEXT/TEXD) From Folder"/>
@@ -68,12 +69,6 @@
                         <MenuItem Click="Rebuild_Click" Header="Rebuild Sound Events (WWEV) From Folder"/>
                     </MenuItem>
                     <MenuItem Header="Resource Utilities">
-                        <MenuItem Header="Material (MATI)">
-                            <MenuItem Click="MaterialMATIUtilities_Click" Header="Convert Single MATI (+.MATI.meta) File To MATI JSON File" Tag="MATI"/>
-                            <MenuItem Click="MaterialMATIUtilities_Click" Header="Convert Single MATI JSON File To MATI (+.MATI.meta) File" Tag="JSON"/>
-                            <MenuItem Click="MaterialMATIUtilities_Click" Header="Mass Convert MATI (+.MATI.meta) Files To MATI JSON Files" Tag="MATIS"/>
-                            <MenuItem Click="MaterialMATIUtilities_Click" Header="Mass Convert MATI JSON Files To MATI (+.MATI.meta) Files" Tag="JSONS"/>
-                        </MenuItem>
                         <MenuItem Header="Dialogue (SDEF)">
                             <MenuItem Click="DialogueSDEFUtilities_Click" Header="Convert Single SDEF (+.SDEF.meta) File To SDEF JSON File" Tag="SDEF"/>
                             <MenuItem Click="DialogueSDEFUtilities_Click" Header="Convert Single SDEF JSON File To SDEF (+.SDEF.meta) File" Tag="JSON"/>

@@ -1549,7 +1549,7 @@ namespace rpkg
 						}
 						else if (hashType == "MATI")
 						{
-							string[] buttons = { "Extract " + hashName, "Extract " + hashName + " To MATI JSON", "Cancel" };
+							string[] buttons = { "Extract " + hashName, "Extract " + hashName + " To MATERIAL JSON", "Cancel" };
 
 							buttonCount = 3;
 
@@ -1840,12 +1840,57 @@ namespace rpkg
 							}
 							else if (hashType == "MATI")
 							{
-								command = "-extract_mati_to_json";
+                                string runtimeDirectory = rpkgFilePath.Substring(0, rpkgFilePath.LastIndexOf("\\"));
 
-								filter = hashValue;
+                                if (!runtimeDirectory.EndsWith("runtime", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    MessageBoxShow("The current RPKG does not exist in the Hitman runtime directory, can not perform MATERIAL JSON extraction.");
 
-								progress.message.Content = "Extracting " + hashName + " MATI to MATI JSON...";
-							}
+                                    return;
+                                }
+
+                                ImportRPKGFileFolder(runtimeDirectory);
+
+								input_path = runtimeDirectory;
+
+                                command = "-extract_material_to_json";
+
+                                filter = hashValue;
+
+                                progress.message.Content = "Extracting " + hashName + " To MATERIAL JSON...";
+
+                                var fileDialog = new Ookii.Dialogs.Wpf.VistaSaveFileDialog();
+
+                                fileDialog.Title = "Select file to save extracted MATERIAL JSON to:";
+
+                                fileDialog.Filter = "JSON file|*.json";
+
+                                string initialFolder = "";
+
+                                if (File.Exists(userSettings.InputFolder))
+                                {
+                                    initialFolder = userSettings.InputFolder;
+                                }
+                                else
+                                {
+                                    initialFolder = Directory.GetCurrentDirectory();
+                                }
+
+                                fileDialog.InitialDirectory = initialFolder;
+
+                                fileDialog.FileName = hashName.Split('.')[0] + ".material.json";
+
+                                var fileDialogResult = fileDialog.ShowDialog();
+
+                                if (fileDialogResult == true)
+                                {
+                                    output_path = fileDialog.FileName;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
 							else if (hashType == "SDEF")
 							{
 								command = "-extract_sdef_to_json";
@@ -1863,7 +1908,7 @@ namespace rpkg
 								progress.message.Content = "Extracting " + hashName + " MRTR to MRTR JSON...";
 							}
 
-							if (hashType != "TEMP")
+							if (hashType != "TEMP" && hashType != "MATI")
 							{
 								string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:", "");
 
@@ -7532,90 +7577,53 @@ namespace rpkg
 			}
 		}
 
-		private void MaterialMATIUtilities_Click(object sender, RoutedEventArgs e)
+		private void MaterialUtilities_Click(object sender, RoutedEventArgs e)
 		{
-			string materialUtilitiesButton = (sender as MenuItem).Tag.ToString();
-
 			string inputPath = "";
 			string outputPath = "";
 
-			if (materialUtilitiesButton == "MATI" || materialUtilitiesButton == "JSON")
-			{
-				if (materialUtilitiesButton == "MATI")
-				{
-					inputPath = SelectFile("input", "Select MATI File To Convert To MATI JSON:", "MATI file|*.MATI", "");
+            MessageQuestion messageBox = new MessageQuestion();
+            messageBox.message.Content = "Rebuild single Material JSON or all Material JSONs in a folder (recursive)?";
+            messageBox.OKButton.Content = "Single";
+            messageBox.CancelButton.Content = "All In Folder";
+            messageBox.ShowDialog();
 
-					if (inputPath != "")
-					{
-						//DirectoryInfo directoryInfo = new DirectoryInfo(inputPath).Parent;
+            if (messageBox.buttonPressed == "OKButton")
+            {
+                inputPath = SelectFile("input", "Select MATERIAL JSON To Convert To MATI/MATT/MATB Files:", "JSON file|*.JSON", "");
 
-						outputPath = SelectFolder("output", "Select MATI JSON File Output Folder:", "");
-					}
-				}
-				else if (materialUtilitiesButton == "JSON")
-				{
-					inputPath = SelectFile("input", "Select MATI JSON To Convert To MATI File:", "JSON file|*.JSON", "");
+                if (inputPath != "")
+                {
+                    //DirectoryInfo directoryInfo = new DirectoryInfo(inputPath).Parent;
 
-					if (inputPath != "")
-					{
-						//DirectoryInfo directoryInfo = new DirectoryInfo(inputPath).Parent;
+                    outputPath = SelectFolder("output", "Select MATERIAL File Output Folder:", "");
+                }
+            }
+            else if (messageBox.buttonPressed == "CancelButton")
+            {
+                inputPath = SelectFolder("input", "Select MATERIAL JSON Files Input Folder (Recursive):", "");
 
-						outputPath = SelectFolder("output", "Select MATI File Output Folder:", "");
-					}
-				}
-			}
-			else if (materialUtilitiesButton == "MATIS" || materialUtilitiesButton == "JSONS")
-			{
-				if (materialUtilitiesButton == "MATIS")
-				{
-					inputPath = SelectFolder("input", "Select MATI Files Input Folder (Recursive):", "");
+                if (inputPath != "")
+                {
 
-					if (inputPath != "")
-					{
-						MessageQuestion messageBox = new MessageQuestion();
-						messageBox.message.Content = "Output MATI JSON Files To A Single Directory Or Into The Same Directory They Reside?";
-						messageBox.OKButton.Content = "Single Directory";
-						messageBox.CancelButton.Content = "Where They Reside";
-						messageBox.ShowDialog();
+                    messageBox = new MessageQuestion();
+                    messageBox.message.Content = "Output MATI/MATT/MATB Files To A Single Directory Or Into The Same Directory?";
+                    messageBox.OKButton.Content = "Single Directory";
+                    messageBox.CancelButton.Content = "Where They Reside";
+                    messageBox.ShowDialog();
 
-						if (messageBox.buttonPressed == "OKButton")
-						{
-							//DirectoryInfo directoryInfo = new DirectoryInfo(inputPath).Parent;
+                    if (messageBox.buttonPressed == "OKButton")
+                    {
+                        //DirectoryInfo directoryInfo = new DirectoryInfo(inputPath).Parent;
 
-							outputPath = SelectFolder("output", "Select MATI JSON Files Output Folder:", "");
-						}
-						else if (messageBox.buttonPressed == "CancelButton")
-						{
-							outputPath = "";
-						}
-					}
-				}
-				else if (materialUtilitiesButton == "JSONS")
-				{
-					inputPath = SelectFolder("input", "Select MATI JSON Files Input Folder (Recursive):", "");
-
-					if (inputPath != "")
-					{
-
-						MessageQuestion messageBox = new MessageQuestion();
-						messageBox.message.Content = "Output MATI Files To A Single Directory Or Into The Same Directory They Reside?";
-						messageBox.OKButton.Content = "Single Directory";
-						messageBox.CancelButton.Content = "Where They Reside";
-						messageBox.ShowDialog();
-
-						if (messageBox.buttonPressed == "OKButton")
-						{
-							//DirectoryInfo directoryInfo = new DirectoryInfo(inputPath).Parent;
-
-							outputPath = SelectFolder("output", "Select MATI Files Output Folder:", "");
-						}
-						else if (messageBox.buttonPressed == "CancelButton")
-						{
-							outputPath = "";
-						}
-					}
-				}
-			}
+                        outputPath = SelectFolder("output", "Select MATI/MATT/MATB Files Output Folder:", "");
+                    }
+                    else if (messageBox.buttonPressed == "CancelButton")
+                    {
+                        outputPath = "";
+                    }
+                }
+            }
 
 			if (inputPath != "")
 			{
@@ -7632,30 +7640,9 @@ namespace rpkg
 
 				progress.ProgressBar.IsIndeterminate = true;
 
-				if (materialUtilitiesButton == "MATI")
-				{
-					command = "-mati_to_json";
+				command = "-json_to_material";
 
-					progress.message.Content = "Converting MATI File To MATI JSON...";
-				}
-				else if (materialUtilitiesButton == "JSON")
-				{
-					command = "-json_to_mati";
-
-					progress.message.Content = "Converting MATI JSON To MATI File...";
-				}
-				else if (materialUtilitiesButton == "MATIS")
-				{
-					command = "-mati_to_json";
-
-					progress.message.Content = "Converting MATI Files To MATI JSONs...";
-				}
-				else if (materialUtilitiesButton == "JSONS")
-				{
-					command = "-json_to_mati";
-
-					progress.message.Content = "Converting MATI JSONs To MATI Files...";
-				}
+				progress.message.Content = "Converting MATERIAL JSON(s) To MATI/MATT/MATB Files...";
 
 				int return_value = reset_task_status();
 

@@ -158,17 +158,10 @@ void file::parse_input_file_name(const std::string& input, const std::string& en
     }
 }
 
-bool file::is_json_file(const std::string& input)
+bool file::has_extension(const std::string& input, const std::string& extension)
 {
-    return input.length() > 6 && util::to_upper_case(input.substr(input.length() - 5, 5)) == ".JSON";
-}
+    if (input.length() < (extension.length() + 1))
+        return false;
 
-bool file::is_rpkg_file(const std::string& input)
-{
-    return input.length() > 6 && util::to_upper_case(input.substr(input.length() - 5, 5)) == ".RPKG";
-}
-
-bool file::is_supermeta_file(const std::string& input)
-{
-    return input.length() > 11 && util::to_upper_case(input.substr(input.length() - 10, 10)) == ".SUPERMETA";
+    return util::to_upper_case(input.substr(input.length() - extension.length(), extension.length())) == util::to_upper_case(extension);
 }

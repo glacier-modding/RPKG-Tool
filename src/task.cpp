@@ -340,13 +340,21 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     {
         rpkg_function::mrtr_to_json(input_path, filter, output_path);
     }
+    else if (command == "-extract_material_to_json")
+    {
+        rpkg_function::extract_material_to_json(input_path, filter, output_path);
+    }
+    else if (command == "-json_to_material")
+    {
+        rpkg_function::json_to_material(input_path, output_path);
+    }
 }
 
 void task::process_and_execute_files_draged_and_dropped(std::vector<std::string> &dragged_and_dropped_files)
 {
     for (std::string& dragged_and_dropped_file : dragged_and_dropped_files)
     {
-        if (file::is_rpkg_file(dragged_and_dropped_file))
+        if (file::has_extension(dragged_and_dropped_file, ".rpkg"))
         {
             std::string command = "-extract_from_rpkg";
             std::string empty = "";
@@ -403,6 +411,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-extract_mati_to_json",
                                                     "-extract_sdef_to_json",
                                                     "-extract_mrtr_to_json",
+                                                    "-extract_material_to_json",
                                                     "-export_map",
                                                     "-export_map_textured",
                                                     "-import_map",
@@ -413,6 +422,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-latest_hash",
                                                     "-hash_meta_to_json",
                                                     "-json_to_hash_meta",
+                                                    "-json_to_material",
                                                     "-json_to_mati",
                                                     "-mati_to_json",
                                                     "-json_to_sdef",

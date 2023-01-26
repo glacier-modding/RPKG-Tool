@@ -12,3 +12,5 @@ _deps
 .idea/workspace.xml
 cmake-build-*
 _build
+.vscode/*
+.vs/*

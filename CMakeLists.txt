@@ -202,6 +202,7 @@ set(RPKG_COMMON_SOURCES
         src/extract_gfxf_from.cpp
         src/extract_hash_meta.cpp
         src/extract_locr_to_json_from.cpp
+        src/extract_material_to_json.cpp
         src/extract_mati_to_json.cpp
         src/extract_mrtr_to_json.cpp
         src/extract_ores_from.cpp
@@ -238,6 +239,7 @@ set(RPKG_COMMON_SOURCES
         src/import_rpkg_files_in_folder.cpp
         src/import_rpkg_meta.cpp
         src/json_to_hash_meta.cpp
+        src/json_to_material.cpp
         src/json_to_mati.cpp
         src/json_to_mrtr.cpp
         src/json_to_sdef.cpp
@@ -246,6 +248,8 @@ set(RPKG_COMMON_SOURCES
         src/load_temp_tblu_hash_depends.cpp
         src/map.cpp
         src/map.h
+        src/material.cpp
+        src/material.h
         src/mati.cpp
         src/mati.h
         src/mati_to_json.cpp

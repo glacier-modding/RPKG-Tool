@@ -24,7 +24,7 @@ void rpkg_function::import_rpkg_files_in_folder(const std::string& input_rpkg_fo
             rpkg_file_name = entry.path().string();
         }
 
-        if (!file::is_rpkg_file(rpkg_file_name))
+        if (!file::has_extension(rpkg_file_name, ".rpkg"))
             continue;
 
         std::string rpkg_to_import = entry.path().string();

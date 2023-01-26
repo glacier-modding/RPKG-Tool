@@ -16,7 +16,5 @@ public:
     static std::string get_root_file_name(const std::string& input);
     static std::string parse_input_folder_path(std::string input);
     static void parse_input_file_name(const std::string& input, const std::string& ends_with);
-    static bool is_json_file(const std::string& input);
-    static bool is_rpkg_file(const std::string& input);
-    static bool is_supermeta_file(const std::string& input);
+    static bool has_extension(const std::string& input, const std::string& extension);
 };
