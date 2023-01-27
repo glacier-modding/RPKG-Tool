@@ -228,21 +228,17 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     {
         dev_function::dev_extract_rpkg_supermetas(input_path, output_path);
     }
-    else if (command == "-dev_extract_all_strings")
-    {
-        dev_function::dev_extract_all_strings(input_path, output_path);
-    }
     else if (command == "-dev_extract_wwem_strings")
     {
-        dev_function::dev_extract_wwem_strings(output_path);
+        dev_function::dev_extract_wwem_strings(input_path, output_path);
     }
     else if (command == "-dev_extract_wwes_strings")
     {
-        dev_function::dev_extract_wwes_strings(output_path);
+        dev_function::dev_extract_wwes_strings(input_path, output_path);
     }
     else if (command == "-dev_extract_wwev_strings")
     {
-        dev_function::dev_extract_wwev_strings(output_path);
+        dev_function::dev_extract_wwev_strings(input_path, output_path);
     }
     else if (command == "-dev_extract_wwise_ids")
     {
@@ -378,7 +374,6 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-dev_diff_rpkg_supermetas",
                                                     "-dev_dlge_names",
                                                     "-dev_extract_rpkg_supermetas",
-                                                    "-dev_extract_all_strings",
                                                     "-dev_extract_wwem_strings",
                                                     "-dev_extract_wwes_strings",
                                                     "-dev_extract_wwev_strings",

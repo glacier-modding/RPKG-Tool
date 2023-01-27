@@ -1,5 +1,8 @@
 #include "dev_function.h"
 #include "file.h"
+#include "rpkg_function.h"
+#include "dev_function.h"
+#include "generic_function.h"
 #include "global.h"
 #include "crypto.h"
 #include "util.h"
@@ -10,8 +13,19 @@
 #include <regex>
 #include <filesystem>
 
-void dev_function::dev_extract_wwes_strings(std::string& output_path)
+void dev_function::dev_extract_wwes_strings(std::string &input_path, std::string& output_path)
 {
+    input_path = file::parse_input_folder_path(input_path);
+
+	rpkg_function::import_rpkg_files_in_folder(input_path);
+
+    if (!hash_list_loaded)
+    {
+        LOG("Loading Hash List...");
+        generic_function::load_hash_list(false);
+        LOG("Loading Hash List: Done");
+    }
+
     std::unordered_map<std::string, uint64_t> fxas_to_wwes_ioi_path_map;
     std::vector<std::string> fxas_wwes_ioi_path;
     std::vector<std::string> fxas_file_name;
@@ -384,7 +398,7 @@ void dev_function::dev_extract_wwes_strings(std::string& output_path)
                         wwes_name_map[wem_base_name] = wwes_name_map.size();
                     }
 
-                    wem_file_name = wem_base_name + ".wav].pc_wem";
+                    wem_file_name = wem_base_name + ".wav].pc_wes";
 
                     wwes_meta_data_file_name = wem_base_name + "_" + hash_file_name;
 
@@ -438,7 +452,7 @@ void dev_function::dev_extract_wwes_strings(std::string& output_path)
                         wwes_name_map[wem_base_name] = wwes_name_map.size();
                     }
 
-                    wem_file_name = wem_base_name + ".wav].pc_wem";
+                    wem_file_name = wem_base_name + ".wav].pc_wes";
 
                     wwes_meta_data_file_name = wem_base_name + "_" + hash_file_name;
 

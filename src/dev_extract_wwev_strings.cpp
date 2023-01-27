@@ -1,3 +1,5 @@
+#include "rpkg_function.h"
+#include "generic_function.h"
 #include "dev_function.h"
 #include "file.h"
 #include "global.h"
@@ -7,8 +9,19 @@
 #include <iostream>
 #include <fstream>
 
-void dev_function::dev_extract_wwev_strings(std::string& output_path)
+void dev_function::dev_extract_wwev_strings(std::string &input_path, std::string& output_path)
 {
+    input_path = file::parse_input_folder_path(input_path);
+
+	rpkg_function::import_rpkg_files_in_folder(input_path);
+
+    if (!hash_list_loaded)
+    {
+        LOG("Loading Hash List...");
+        generic_function::load_hash_list(false);
+        LOG("Loading Hash List: Done");
+    }
+
     for (auto& rpkg : rpkgs)
     {
         for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++)
@@ -128,7 +141,7 @@ void dev_function::dev_extract_wwev_strings(std::string& output_path)
                 std::string final_path = current_path + "\\" + util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
                     rpkg.hash.at(hash_index).hash_resource_type;
 
-                std::cout << hash_file_name << "," << "[assembly:/sound/wwise/exportedwwisedata/events/unknown/" << wwev_file_name.data() << ".wwiseevent].pc_wwisebank" << std::endl;
+                std::cout << hash_file_name << "," << "[unknown:/sound/wwise/exportedwwisedata/events/unknown/" << wwev_file_name.data() << ".wwiseevent].pc_wwisebank" << std::endl;
             }
         }
     }

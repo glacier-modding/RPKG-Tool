@@ -176,7 +176,6 @@ set(RPKG_COMMON_SOURCES
         src/decrypt_packagedefinition_thumbs.cpp
         src/dev_diff_rpkg_supermetas.cpp
         src/dev_dlge_names.cpp
-        src/dev_extract_all_strings.cpp
         src/dev_extract_rpkg_supermetas.cpp
         src/dev_extract_wwem_strings.cpp
         src/dev_extract_wwes_strings.cpp
