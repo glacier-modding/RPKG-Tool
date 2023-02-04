@@ -8,6 +8,7 @@ class file
 public:
     static uint64_t get_hash_value_from_path(const std::filesystem::path& path, const std::string& extension);
     static std::vector<std::filesystem::path> get_recursive_file_list(std::string path);
+    static bool write_to_file(const std::string& file_name, const std::vector<char>& data);
     static bool write_to_file(const std::string& file_name, const std::string& data);
     static bool path_exists(const std::string& path);
     static void create_directories(const std::string& path);

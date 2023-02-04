@@ -455,3 +455,15 @@ bool util::lz4_compress_hc(const char* source, std::vector<char>& destination, i
 
     return compressed_size != 0;
 }
+
+uint32_t util::uint32_t_byteswap(uint32_t input)
+{
+#if _MSC_VER
+    return _byteswap_ulong(input);
+#else
+    return ((input & 0x000000FF) << 24) |
+            ((input & 0x0000FF00) << 8) |
+            ((input & 0x00FF0000) >> 8) |
+            ((input & 0xFF000000) >> 24);
+#endif
+}

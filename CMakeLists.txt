@@ -166,6 +166,8 @@ set(thirdparty
 configure_file(src/version.h.in src/version.h)
 
 set(RPKG_COMMON_SOURCES
+        src/asva.cpp
+        src/asva.h
         src/borg.cpp
         src/borg.h
         src/compute_ioi_hash.cpp
@@ -192,6 +194,7 @@ set(RPKG_COMMON_SOURCES
         src/extract_all_prim_model_of_temp_from.cpp
         src/extract_all_prim_of_temp_from.cpp
         src/extract_all_text_from.cpp
+        src/extract_asva_to_json.cpp
         src/extract_direct_hash_depends_from.cpp
         src/extract_dlge_to_json_from.cpp
         src/extract_entity_to_qn.cpp
@@ -237,6 +240,7 @@ set(RPKG_COMMON_SOURCES
         src/import_rpkg.cpp
         src/import_rpkg_files_in_folder.cpp
         src/import_rpkg_meta.cpp
+        src/json_to_asva.cpp
         src/json_to_hash_meta.cpp
         src/json_to_material.cpp
         src/json_to_mati.cpp
@@ -282,6 +286,7 @@ set(RPKG_COMMON_SOURCES
         src/search_localization.cpp
         src/search_repo.cpp
         src/stream_reader.hpp
+        src/stream_writer.hpp
         src/task.cpp
         src/temp.cpp
         src/texd.cpp

@@ -3,12 +3,12 @@
 #include "file.h"
 #include "global.h"
 #include "util.h"
-#include "material.h"
+#include "asva.h"
 #include <chrono>
 #include <filesystem>
 #include <iostream>
 
-void rpkg_function::extract_material_to_json(std::string& input_path, std::string& filter, std::string& output_path)
+void rpkg_function::extract_asva_to_json(std::string& input_path, std::string& filter, std::string& output_path)
 {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
@@ -42,9 +42,9 @@ void rpkg_function::extract_material_to_json(std::string& input_path, std::strin
 
                 if (it != rpkgs.at(rpkg_index).hash_map.end())
                 {
-                    timing_string = "Converting: " + util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + " to Material Entity (MATI/MATT/MATB) JSON";
+                    timing_string = "Converting: " + util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + " to ASVA JSON";
 
-                    material temp_material(rpkg_index, it->second);
+                    asva temp_material(rpkg_index, it->second);
 
                     std::string temp_output_path = "";
                     bool output_path_is_dir = false;
@@ -72,7 +72,7 @@ void rpkg_function::extract_material_to_json(std::string& input_path, std::strin
                             file::create_directories(output_path);
                         }
 
-                        temp_output_path = file::output_path_append(filters.at(f) + ".material.json", output_path);
+                        temp_output_path = file::output_path_append(filters.at(f) + ".asva.json", output_path);
                     }
 
                     temp_material.generate_json();

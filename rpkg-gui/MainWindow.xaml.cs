@@ -1554,8 +1554,16 @@ namespace rpkg
 							buttonCount = 3;
 
 							rightClickMenu = new RightClickMenu(buttons);
-						}
-						else if (hashType == "SDEF")
+                        }
+                        else if (hashType == "ASVA")
+                        {
+                            string[] buttons = { "Extract " + hashName, "Extract " + hashName + " To ASVA JSON", "Cancel" };
+
+                            buttonCount = 3;
+
+                            rightClickMenu = new RightClickMenu(buttons);
+                        }
+                        else if (hashType == "SDEF")
 						{
 							string[] buttons = { "Extract " + hashName, "Extract " + hashName + " To SDEF JSON", "Cancel" };
 
@@ -1891,7 +1899,60 @@ namespace rpkg
                                     return;
                                 }
                             }
-							else if (hashType == "SDEF")
+                            else if (hashType == "ASVA")
+                            {
+                                string runtimeDirectory = rpkgFilePath.Substring(0, rpkgFilePath.LastIndexOf("\\"));
+
+                                if (!runtimeDirectory.EndsWith("runtime", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    MessageBoxShow("The current RPKG does not exist in the Hitman runtime directory, can not perform ASVA JSON extraction.");
+
+                                    return;
+                                }
+
+                                ImportRPKGFileFolder(runtimeDirectory);
+
+                                input_path = runtimeDirectory;
+
+                                command = "-extract_asva_to_json";
+
+                                filter = hashValue;
+
+                                progress.message.Content = "Extracting " + hashName + " To ASVA JSON...";
+
+                                var fileDialog = new Ookii.Dialogs.Wpf.VistaSaveFileDialog();
+
+                                fileDialog.Title = "Select file to save extracted ASVA JSON to:";
+
+                                fileDialog.Filter = "JSON file|*.json";
+
+                                string initialFolder = "";
+
+                                if (File.Exists(userSettings.InputFolder))
+                                {
+                                    initialFolder = userSettings.InputFolder;
+                                }
+                                else
+                                {
+                                    initialFolder = Directory.GetCurrentDirectory();
+                                }
+
+                                fileDialog.InitialDirectory = initialFolder;
+
+                                fileDialog.FileName = hashName.Split('.')[0] + ".asva.json";
+
+                                var fileDialogResult = fileDialog.ShowDialog();
+
+                                if (fileDialogResult == true)
+                                {
+                                    output_path = fileDialog.FileName;
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+                            else if (hashType == "SDEF")
 							{
 								command = "-extract_sdef_to_json";
 
@@ -1908,7 +1969,7 @@ namespace rpkg
 								progress.message.Content = "Extracting " + hashName + " MRTR to MRTR JSON...";
 							}
 
-							if (hashType != "TEMP" && hashType != "MATI")
+							if (hashType != "TEMP" && hashType != "MATI" && hashType != "ASVA")
 							{
 								string outputFolder = SelectFolder("output", "Select Output Folder To Extract " + hashName + " To:", "");
 
@@ -7659,9 +7720,93 @@ namespace rpkg
 					return;
 				}
 			}
-		}
+        }
 
-		private void DeepSearchEntitiesButton_Click(object sender, RoutedEventArgs e)
+        private void ASVA_Click(object sender, RoutedEventArgs e)
+        {
+            string inputPath = "";
+            string outputPath = "";
+
+            MessageQuestion messageBox = new MessageQuestion();
+            messageBox.message.Content = "Rebuild single ASVA JSON or all ASVA JSONs in a folder (recursive)?";
+            messageBox.OKButton.Content = "Single";
+            messageBox.CancelButton.Content = "All In Folder";
+            messageBox.ShowDialog();
+
+            if (messageBox.buttonPressed == "OKButton")
+            {
+                inputPath = SelectFile("input", "Select ASVA JSON To Convert To ASVA (+.ASVA.meta) File:", "JSON file|*.JSON", "");
+
+                if (inputPath != "")
+                {
+                    //DirectoryInfo directoryInfo = new DirectoryInfo(inputPath).Parent;
+
+                    outputPath = SelectFolder("output", "Select ASVA File Output Folder:", "");
+                }
+            }
+            else if (messageBox.buttonPressed == "CancelButton")
+            {
+                inputPath = SelectFolder("input", "Select ASVA JSON Files Input Folder (Recursive):", "");
+
+                if (inputPath != "")
+                {
+
+                    messageBox = new MessageQuestion();
+                    messageBox.message.Content = "Output ASVA (+.ASVA.meta) Files To A Single Directory Or Into The Same Directory?";
+                    messageBox.OKButton.Content = "Single Directory";
+                    messageBox.CancelButton.Content = "Where They Reside";
+                    messageBox.ShowDialog();
+
+                    if (messageBox.buttonPressed == "OKButton")
+                    {
+                        //DirectoryInfo directoryInfo = new DirectoryInfo(inputPath).Parent;
+
+                        outputPath = SelectFolder("output", "Select ASVA Files Output Folder:", "");
+                    }
+                    else if (messageBox.buttonPressed == "CancelButton")
+                    {
+                        outputPath = "";
+                    }
+                }
+            }
+
+            if (inputPath != "")
+            {
+                string command = "";
+                string input_path = inputPath;
+                string filter = "";
+                string search = "";
+                string search_type = "";
+                string output_path = outputPath;
+
+                Progress progress = new Progress();
+
+                progress.operation = (int)Progress.Operation.MASS_EXTRACT;
+
+                progress.ProgressBar.IsIndeterminate = true;
+
+                command = "-json_to_asva";
+
+                progress.message.Content = "Converting ASVA JSON(s) To ASVA (+.ASVA.meta) File(s)...";
+
+                int return_value = reset_task_status();
+
+                execute_task rpkgExecute = task_execute;
+
+                IAsyncResult ar = rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
+
+                progress.ShowDialog();
+
+                if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
+                {
+                    //MessageBoxShow(progress.task_status_string);
+
+                    return;
+                }
+            }
+        }
+
+        private void DeepSearchEntitiesButton_Click(object sender, RoutedEventArgs e)
 		{
 			/*if (MainTreeView.Nodes.Count > 0)
 			{

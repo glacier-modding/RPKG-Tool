@@ -344,6 +344,14 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     {
         rpkg_function::json_to_material(input_path, output_path);
     }
+    else if (command == "-extract_asva_to_json")
+    {
+        rpkg_function::extract_asva_to_json(input_path, filter, output_path);
+    }
+    else if (command == "-json_to_asva")
+    {
+        rpkg_function::json_to_asva(input_path, output_path);
+    }
 }
 
 void task::process_and_execute_files_draged_and_dropped(std::vector<std::string> &dragged_and_dropped_files)
@@ -407,6 +415,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-extract_sdef_to_json",
                                                     "-extract_mrtr_to_json",
                                                     "-extract_material_to_json",
+                                                    "-extract_asva_to_json",
                                                     "-export_map",
                                                     "-export_map_textured",
                                                     "-import_map",
@@ -416,6 +425,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-hash_depends",
                                                     "-latest_hash",
                                                     "-hash_meta_to_json",
+                                                    "-json_to_asva",
                                                     "-json_to_hash_meta",
                                                     "-json_to_material",
                                                     "-json_to_mati",

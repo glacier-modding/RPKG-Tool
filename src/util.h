@@ -5,6 +5,7 @@
 class util
 {
 public:
+    static uint32_t uint32_t_byteswap(uint32_t input);
     static std::string generate_guid();
     static bool is_valid_hash(std::string hash);
     static std::string hash_type(uint64_t hash_value);
