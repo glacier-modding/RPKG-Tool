@@ -127,6 +127,11 @@ void console::display_usage_info()
     LOG("        Extracts all hash linked files/resources from an RPKG file.");
 	LOG("    -extract_from_rpkgs <path to folder containing RPKGs>");
 	LOG("        Extracts all hash linked files/resources from a folder of RPKG files.");
+    LOG("    -extract_latest_hash <path to folder containing RPKG files>");
+    LOG("        Scans a directory, commonly Hitman's Runtime dir, and imports and");
+    LOG("        scans all available RPKG files and their patch deletion lists for the existence");
+    LOG("        of the hash file(s)/resource(s), specified by -filter, and determines the RPKG file that");
+    LOG("        contains the 'latest' (game used) version of that hash file/resource and extracts it.");
     LOG("    -extract_gfxf_from <path to folder containing RPKG files>");
     LOG("        Extracts all hash linked files/resources located in the GFXF files");
     LOG("        and unpacks them to GFX and if available DDS/TGA files from all");

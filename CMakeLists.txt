@@ -203,6 +203,7 @@ set(RPKG_COMMON_SOURCES
         src/extract_from_rpkgs.cpp
         src/extract_gfxf_from.cpp
         src/extract_hash_meta.cpp
+        src/extract_latest_hash.cpp
         src/extract_locr_to_json_from.cpp
         src/extract_material_to_json.cpp
         src/extract_mati_to_json.cpp

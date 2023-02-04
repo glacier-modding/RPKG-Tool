@@ -89,6 +89,6 @@ void rpkg_function::extract_material_to_json(std::string& input_path, std::strin
     }
     else
     {
-        LOG_AND_EXIT("Error: The RPKG file " + input_path + " does not exist.");
+        LOG_AND_EXIT("Error: The RPKG folder " + input_path + " does not exist.");
     }
 }

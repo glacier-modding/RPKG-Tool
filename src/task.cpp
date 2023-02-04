@@ -352,6 +352,10 @@ void task::execute(std::string &command, std::string &input_path, std::string &f
     {
         rpkg_function::json_to_asva(input_path, output_path);
     }
+    else if (command == "-extract_latest_hash")
+    {
+        rpkg_function::extract_latest_hash(input_path, filter, output_path);
+    }
 }
 
 void task::process_and_execute_files_draged_and_dropped(std::vector<std::string> &dragged_and_dropped_files)
@@ -416,6 +420,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-extract_mrtr_to_json",
                                                     "-extract_material_to_json",
                                                     "-extract_asva_to_json",
+                                                    "-extract_latest_hash",
                                                     "-export_map",
                                                     "-export_map_textured",
                                                     "-import_map",
