@@ -114,20 +114,16 @@ void asva::generate_json()
 
     json["ASVA"] = util::hash_to_ioi_string(rpkgs.at(asva_rpkg_index).hash.at(asva_hash_index).hash_value, true);
 
-    json["Variations"] = nlohmann::ordered_json::array();
+    json["Variations"] = nlohmann::ordered_json::object();
 
     for (auto& t : table)
     {
-        nlohmann::ordered_json temp_json = nlohmann::ordered_json::object();
-
         uint32_t depends_index = 0xFFFFFFFF - t.depends_index;
 
         if (depends_index < rpkgs.at(asva_rpkg_index).hash.at(asva_hash_index).hash_reference_data.hash_reference.size())
         {
-            temp_json[std::string(&asva_data[t.string_offset + 0x10])] = util::hash_to_ioi_string(rpkgs.at(asva_rpkg_index).hash.at(asva_hash_index).hash_reference_data.hash_reference.at(depends_index), true);
+            json["Variations"][std::string(&asva_data[t.string_offset + 0x10])] = util::hash_to_ioi_string(rpkgs.at(asva_rpkg_index).hash.at(asva_hash_index).hash_reference_data.hash_reference.at(depends_index), true);
         }
-
-        json["Variations"].push_back(temp_json);
     }
 }
 
@@ -174,29 +170,26 @@ asva::asva(std::string json_path, std::string output_path)
         else
             asva_hash_value = std::strtoull(temp_string.c_str(), nullptr, 16);
 
-        for (auto& variation : json["Variations"])
+        for (auto& variation : json["Variations"].items())
         {
-            for (auto& v : variation.items())
+            temp_string = variation.value();
+
+            if (temp_string.length() > 0)
             {
-                temp_string = v.value();
+                uint64_t temp_hash = 0;
 
-                if (temp_string.length() > 0)
+                if (temp_string.find("[") != std::string::npos)
+                    temp_hash = util::ioi_string_to_hash(temp_string);
+                else
+                    temp_hash = std::strtoull(temp_string.c_str(), nullptr, 16);
+
+                if (temp_hash && depends_map.find(temp_hash) == depends_map.end())
                 {
-                    uint64_t temp_hash = 0;
-
-                    if (temp_string.find("[") != std::string::npos)
-                        temp_hash = util::ioi_string_to_hash(temp_string);
-                    else
-                        temp_hash = std::strtoull(temp_string.c_str(), nullptr, 16);
-
-                    if (temp_hash && depends_map.find(temp_hash) == depends_map.end())
-                    {
-                        depends_map[temp_hash] = depends_map.size();
-                        depends.push_back(temp_hash);
-                    }
-
-                    variation_depends[std::string(v.key())] = depends_map[temp_hash];
+                    depends_map[temp_hash] = depends_map.size();
+                    depends.push_back(temp_hash);
                 }
+
+                variation_depends[std::string(variation.key())] = depends_map[temp_hash];
             }
         }
 
@@ -250,32 +243,29 @@ asva::asva(std::string json_path, std::string output_path)
 
         uint32_t last_string_offset = 0;
 
-        for (auto& variation : json["Variations"])
+        for (auto& variation : json["Variations"].items())
         {
-            for (auto& v : variation.items())
+            std::string variation_string = variation.key();
+            asva_data_writer.Write<uint64_t>(variation_string.length() | 0x40000000);
+            size_t data_offset = asva_data_writer.GetPosition();
+            asva_data_writer.SeekToEnd();
+            asva_data_writer.Write<uint32_t>(variation_string.length() + 1);
+            asva_data_writer.Write(variation_string);
+            asva_data_writer.Write<uint8_t>(0);
+            strings_offset += 4;
+            uint32_t string_offset_addition = variation_string.length() + 1;
+            last_string_offset = asva_data_writer.GetPosition();
+            while (asva_data_writer.GetPosition() % 4 != 0)
             {
-                std::string variation_string = v.key();
-                asva_data_writer.Write<uint64_t>(variation_string.length() | 0x40000000);
-                size_t data_offset = asva_data_writer.GetPosition();
-                asva_data_writer.SeekToEnd();
-                asva_data_writer.Write<uint32_t>(variation_string.length() + 1);
-                asva_data_writer.Write(variation_string);
                 asva_data_writer.Write<uint8_t>(0);
-                strings_offset += 4;
-                uint32_t string_offset_addition = variation_string.length() + 1;
-                last_string_offset = asva_data_writer.GetPosition();
-                while (asva_data_writer.GetPosition() % 4 != 0)
-                {
-                    asva_data_writer.Write<uint8_t>(0);
-                    string_offset_addition++;
-                }
-                asva_data_writer.SeekTo(data_offset);
-                asva_data_writer.Write<uint64_t>(strings_offset);
-                strings_offset += string_offset_addition;
-                asva_data_writer.Write<uint32_t>(0xFFFFFFFF);
-                asva_data_writer.Write<uint32_t>(0xFFFFFFFF - variation_depends[std::string(v.key())]);
-                asva_data_writer.Write<uint64_t>(0x0000000080000000);
+                string_offset_addition++;
             }
+            asva_data_writer.SeekTo(data_offset);
+            asva_data_writer.Write<uint64_t>(strings_offset);
+            strings_offset += string_offset_addition;
+            asva_data_writer.Write<uint32_t>(0xFFFFFFFF);
+            asva_data_writer.Write<uint32_t>(0xFFFFFFFF - variation_depends[std::string(variation.key())]);
+            asva_data_writer.Write<uint64_t>(0x0000000080000000);
         }
 
         asva_data_writer.SeekToEnd();
