@@ -1,15 +1,14 @@
 #pragma once
+
 #include "hash.h"
 #include <string>
 #include <vector>
 #include <unordered_map>
 
-class rpkg
-{
+class rpkg {
 public:
 #pragma pack(push, 1)
-    struct Header
-    {
+    struct Header {
         uint32_t hash_count = 0;
         uint32_t hash_header_table_size = 0;
         uint32_t hash_resource_table_size = 0;
@@ -17,7 +16,7 @@ public:
     };
 #pragma pack(pop)
 
-	rpkg();
+    rpkg();
 
     Header header;
     std::string rpkg_file_path = "";

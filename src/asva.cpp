@@ -1,11 +1,9 @@
 #include "asva.h"
 #include "rpkg_function.h"
-#include "file_reader.hpp"
 #include "stream_reader.hpp"
 #include "stream_writer.hpp"
 #include "global.h"
 #include "crypto.h"
-#include "console.h"
 #include "util.h"
 #include "file.h"
 #include "thirdparty/lz4/lz4.h"
@@ -13,32 +11,27 @@
 #include <map>
 #include <fstream>
 #include <sstream>
-#include <set>
 #include <filesystem>
 #include <typeinfo>
 
 asva::asva() = default;
 
-asva::asva(uint64_t rpkgs_index, uint64_t hash_index)
-{
+asva::asva(uint64_t rpkgs_index, uint64_t hash_index) {
     asva_rpkg_index = rpkgs_index;
     asva_hash_index = hash_index;
 
-    asva_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value) + "." + rpkgs.at(rpkgs_index).hash.at(hash_index).hash_resource_type;
+    asva_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value) + "." +
+                     rpkgs.at(rpkgs_index).hash.at(hash_index).hash_resource_type;
 
     uint64_t asva_hash_size;
 
-    if (rpkgs.at(asva_rpkg_index).hash.at(asva_hash_index).data.lz4ed)
-    {
+    if (rpkgs.at(asva_rpkg_index).hash.at(asva_hash_index).data.lz4ed) {
         asva_hash_size = rpkgs.at(asva_rpkg_index).hash.at(asva_hash_index).data.header.data_size;
 
-        if (rpkgs.at(asva_rpkg_index).hash.at(asva_hash_index).data.xored)
-        {
+        if (rpkgs.at(asva_rpkg_index).hash.at(asva_hash_index).data.xored) {
             asva_hash_size &= 0x3FFFFFFF;
         }
-    }
-    else
-    {
+    } else {
         asva_hash_size = rpkgs.at(asva_rpkg_index).hash.at(asva_hash_index).data.resource.size_final;
     }
 
@@ -46,38 +39,34 @@ asva::asva(uint64_t rpkgs_index, uint64_t hash_index)
 
     std::ifstream file = std::ifstream(rpkgs.at(asva_rpkg_index).rpkg_file_path, std::ifstream::binary);
 
-    if (!file.good())
-    {
+    if (!file.good()) {
         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(asva_rpkg_index).rpkg_file_path + " could not be read.");
     }
 
-    file.seekg(rpkgs.at(asva_rpkg_index).hash.at(asva_hash_index).data.header.data_offset, file.beg);
+    file.seekg(rpkgs.at(asva_rpkg_index).hash.at(asva_hash_index).data.header.data_offset, std::ifstream::beg);
     file.read(asva_input_data.data(), asva_hash_size);
     file.close();
 
-    if (rpkgs.at(asva_rpkg_index).hash.at(asva_hash_index).data.xored)
-    {
-        crypto::xor_data(asva_input_data.data(), (uint32_t)asva_hash_size);
+    if (rpkgs.at(asva_rpkg_index).hash.at(asva_hash_index).data.xored) {
+        crypto::xor_data(asva_input_data.data(), (uint32_t) asva_hash_size);
     }
 
     const uint32_t asva_decompressed_size = rpkgs.at(asva_rpkg_index).hash.at(asva_hash_index).data.resource.size_final;
 
     asva_output_data = std::vector<char>(asva_decompressed_size, 0);
 
-    if (rpkgs.at(asva_rpkg_index).hash.at(asva_hash_index).data.lz4ed)
-    {
-        LZ4_decompress_safe(asva_input_data.data(), asva_output_data.data(), (int)asva_hash_size, asva_decompressed_size);
+    if (rpkgs.at(asva_rpkg_index).hash.at(asva_hash_index).data.lz4ed) {
+        LZ4_decompress_safe(asva_input_data.data(), asva_output_data.data(), (int) asva_hash_size,
+                            asva_decompressed_size);
 
         asva_data = asva_output_data;
-    }
-    else
-    {
+    } else {
         asva_data = asva_input_data;
     }
 
     std::vector<char>().swap(asva_output_data);
     std::vector<char>().swap(asva_input_data);
-    
+
     // Load ASVA data in StreamReader
     StreamReader asva_reader(asva_data.data(), asva_data.size());
 
@@ -87,8 +76,7 @@ asva::asva(uint64_t rpkgs_index, uint64_t hash_index)
     table.resize(header.entry_count);
     asva_reader.Read<asva::Table>(table.data(), header.entry_count);
 
-    if (log_output)
-    {
+    if (log_output) {
         std::cout << header.bin1 << std::endl;
         std::cout << util::uint32_t_to_hex_string(header.data_size) << std::endl;
         std::cout << util::uint8_t_to_hex_string(header.type1) << std::endl;
@@ -98,8 +86,7 @@ asva::asva(uint64_t rpkgs_index, uint64_t hash_index)
         std::cout << util::uint32_t_to_hex_string(header.strings_offset2) << std::endl;
         std::cout << util::uint32_t_to_hex_string(header.entry_count) << std::endl;
 
-        for (auto& t : table)
-        {
+        for (auto& t : table) {
             std::cout << util::uint32_t_to_hex_string(t.string_length) << std::endl;
             std::cout << util::uint32_t_to_hex_string(t.string_offset) << std::endl;
             std::cout << util::uint32_t_to_hex_string(0xFFFFFFFF - t.depends_index) << std::endl;
@@ -108,27 +95,26 @@ asva::asva(uint64_t rpkgs_index, uint64_t hash_index)
     }
 }
 
-void asva::generate_json()
-{
+void asva::generate_json() {
     json = nlohmann::ordered_json::object();
 
     json["ASVA"] = util::hash_to_ioi_string(rpkgs.at(asva_rpkg_index).hash.at(asva_hash_index).hash_value, true);
 
     json["Variations"] = nlohmann::ordered_json::object();
 
-    for (auto& t : table)
-    {
+    for (auto& t : table) {
         uint32_t depends_index = 0xFFFFFFFF - t.depends_index;
 
-        if (depends_index < rpkgs.at(asva_rpkg_index).hash.at(asva_hash_index).hash_reference_data.hash_reference.size())
-        {
-            json["Variations"][std::string(&asva_data[t.string_offset + 0x10])] = util::hash_to_ioi_string(rpkgs.at(asva_rpkg_index).hash.at(asva_hash_index).hash_reference_data.hash_reference.at(depends_index), true);
+        if (depends_index <
+            rpkgs.at(asva_rpkg_index).hash.at(asva_hash_index).hash_reference_data.hash_reference.size()) {
+            json["Variations"][std::string(&asva_data[t.string_offset + 0x10])] = util::hash_to_ioi_string(
+                    rpkgs.at(asva_rpkg_index).hash.at(asva_hash_index).hash_reference_data.hash_reference.at(
+                            depends_index), true);
         }
     }
 }
 
-void asva::write_json_to_file(std::string output_path)
-{
+void asva::write_json_to_file(const std::string& output_path) const {
     std::ofstream json_file = std::ofstream(output_path, std::ofstream::binary);
 
     json_file << std::setw(4) << json << std::endl;
@@ -136,28 +122,24 @@ void asva::write_json_to_file(std::string output_path)
     json_file.close();
 }
 
-asva::asva(std::string json_path, std::string output_path)
-{
+asva::asva(const std::string& json_path, const std::string& output_path) {
     std::ifstream input_json_file(json_path);
 
-    try
-    {
+    try {
         input_json_file >> json;
     }
-    catch (json::parse_error& e)
-    {
+    catch (const json::parse_error& e) {
         std::stringstream ss;
         ss << "Error: " << json_path << "\n"
-            << "Error message: " << e.what() << '\n'
-            << "Error exception id: " << e.id << '\n'
-            << "Error byte position of error: " << e.byte;
+           << "Error message: " << e.what() << '\n'
+           << "Error exception id: " << e.id << '\n'
+           << "Error byte position of error: " << e.byte;
         json_error = ss.str();
     }
 
     input_json_file.close();
 
-    try
-    {
+    try {
         uint64_t asva_hash_value = 0;
         std::vector<uint64_t> depends;
         std::unordered_map<uint64_t, uint32_t> depends_map;
@@ -165,26 +147,23 @@ asva::asva(std::string json_path, std::string output_path)
 
         std::string temp_string = json["ASVA"];
 
-        if (temp_string.find("[") != std::string::npos)
+        if (temp_string.find('[') != std::string::npos)
             asva_hash_value = util::ioi_string_to_hash(temp_string);
         else
             asva_hash_value = std::strtoull(temp_string.c_str(), nullptr, 16);
 
-        for (auto& variation : json["Variations"].items())
-        {
+        for (auto& variation : json["Variations"].items()) {
             temp_string = variation.value();
 
-            if (temp_string.length() > 0)
-            {
+            if (temp_string.length() > 0) {
                 uint64_t temp_hash = 0;
 
-                if (temp_string.find("[") != std::string::npos)
+                if (temp_string.find('[') != std::string::npos)
                     temp_hash = util::ioi_string_to_hash(temp_string);
                 else
                     temp_hash = std::strtoull(temp_string.c_str(), nullptr, 16);
 
-                if (temp_hash && depends_map.find(temp_hash) == depends_map.end())
-                {
+                if (temp_hash && depends_map.find(temp_hash) == depends_map.end()) {
                     depends_map[temp_hash] = depends_map.size();
                     depends.push_back(temp_hash);
                 }
@@ -193,7 +172,7 @@ asva::asva(std::string json_path, std::string output_path)
             }
         }
 
-        if (!depends_map.size())
+        if (depends_map.empty())
             return;
 
         std::vector<char> asva_meta_data;
@@ -221,8 +200,7 @@ asva::asva(std::string json_path, std::string output_path)
         asva_meta_writer.Write<uint32_t>(depends_count2);
         asva_meta_writer.Write<uint8_t>(0x1F, depends_count);
 
-        for (auto& depend : depends)
-        {
+        for (auto& depend : depends) {
             asva_meta_writer.Write<uint64_t>(depend);
         }
 
@@ -243,8 +221,7 @@ asva::asva(std::string json_path, std::string output_path)
 
         uint32_t last_string_offset = 0;
 
-        for (auto& variation : json["Variations"].items())
-        {
+        for (auto& variation : json["Variations"].items()) {
             std::string variation_string = variation.key();
             asva_data_writer.Write<uint64_t>(variation_string.length() | 0x40000000);
             size_t data_offset = asva_data_writer.GetPosition();
@@ -255,8 +232,7 @@ asva::asva(std::string json_path, std::string output_path)
             strings_offset += 4;
             uint32_t string_offset_addition = variation_string.length() + 1;
             last_string_offset = asva_data_writer.GetPosition();
-            while (asva_data_writer.GetPosition() % 4 != 0)
-            {
+            while (asva_data_writer.GetPosition() % 4 != 0) {
                 asva_data_writer.Write<uint8_t>(0);
                 string_offset_addition++;
             }
@@ -282,8 +258,7 @@ asva::asva(std::string json_path, std::string output_path)
         asva_data_writer.Write<uint32_t>(8);
         asva_data_writer.Write<uint32_t>(0x10);
 
-        for (uint32_t v = 0; v < variations_count; v++)
-        {
+        for (uint32_t v = 0; v < variations_count; v++) {
             asva_data_writer.Write<uint32_t>(v * 0x20 + 0x28);
         }
 
@@ -291,8 +266,7 @@ asva::asva(std::string json_path, std::string output_path)
         asva_data_writer.Write<uint32_t>(variations_count * 8 + 4);
         asva_data_writer.Write<uint32_t>(variations_count * 2);
 
-        for (uint32_t v = 0; v < variations_count; v++)
-        {
+        for (uint32_t v = 0; v < variations_count; v++) {
             asva_data_writer.Write<uint32_t>(v * 0x20 + 0x30);
             asva_data_writer.Write<uint32_t>(v * 0x20 + 0x38);
         }
@@ -301,23 +275,26 @@ asva::asva(std::string json_path, std::string output_path)
         std::ofstream asva_meta_file;
 
         file::create_directories(output_path);
-        asva_file = std::ofstream(file::output_path_append(util::uint64_t_to_hex_string(asva_hash_value) + ".ASVA", output_path), std::ofstream::binary);
-        asva_meta_file = std::ofstream(file::output_path_append(util::uint64_t_to_hex_string(asva_hash_value) + ".ASVA.meta", output_path), std::ofstream::binary);
+        asva_file = std::ofstream(
+                file::output_path_append(util::uint64_t_to_hex_string(asva_hash_value) + ".ASVA", output_path),
+                std::ofstream::binary);
+        asva_meta_file = std::ofstream(
+                file::output_path_append(util::uint64_t_to_hex_string(asva_hash_value) + ".ASVA.meta", output_path),
+                std::ofstream::binary);
 
         asva_file.write(asva_data.data(), asva_data.size());
         asva_file.close();
         uint32_t asva_data_size = asva_data.size();
-        std::memcpy(&asva_meta_data.data()[asva_size_offset], &asva_data_size, 0x4);
+        std::memcpy(&asva_meta_data[asva_size_offset], &asva_data_size, 0x4);
         asva_meta_file.write(asva_meta_data.data(), asva_meta_data.size());
         asva_meta_file.close();
     }
-    catch (json::parse_error& e)
-    {
+    catch (json::parse_error& e) {
         std::stringstream ss;
         ss << "Error: " << json_path << "\n"
-            << "Error message: " << e.what() << '\n'
-            << "Error exception id: " << e.id << '\n'
-            << "Error byte position of error: " << e.byte;
+           << "Error message: " << e.what() << '\n'
+           << "Error exception id: " << e.id << '\n'
+           << "Error byte position of error: " << e.byte;
         json_error = ss.str();
     }
 }

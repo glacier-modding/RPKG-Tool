@@ -8,24 +8,20 @@
 #include "thirdparty/rapidjson/prettywriter.h"
 #include "thirdparty/rapidjson/stringbuffer.h"
 
-void rpkg_function::hash_meta_to_json(std::string& input_path)
-{
+void rpkg_function::hash_meta_to_json(std::string& input_path) {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
-    if (!hash_list_loaded)
-    {
+    if (!hash_list_loaded) {
         LOG("Loading Hash List...");
         generic_function::load_hash_list(false);
         LOG("Loading Hash List: Done");
     }
 
-    if (file::path_exists(input_path))
-    {
+    if (file::path_exists(input_path)) {
         std::ifstream meta_file = std::ifstream(input_path, std::ifstream::binary);
 
-        if (!meta_file.good())
-        {
+        if (!meta_file.good()) {
             LOG_AND_EXIT("Error: Hash meta file " + input_path + " could not be read.");
         }
 
@@ -55,21 +51,15 @@ void rpkg_function::hash_meta_to_json(std::string& input_path)
         meta_data.data.header.data_size = bytes4;
         json_string += "\"hash_size\":" + util::uint32_t_to_string(meta_data.data.header.data_size) + ",";
 
-        if ((meta_data.data.header.data_size & 0x3FFFFFFF) != 0)
-        {
+        if ((meta_data.data.header.data_size & 0x3FFFFFFF) != 0) {
             meta_data.data.lz4ed = true;
-        }
-        else
-        {
+        } else {
             meta_data.data.lz4ed = false;
         }
 
-        if ((meta_data.data.header.data_size & 0x80000000) == 0x80000000)
-        {
+        if ((meta_data.data.header.data_size & 0x80000000) == 0x80000000) {
             meta_data.data.xored = true;
-        }
-        else
-        {
+        } else {
             meta_data.data.xored = false;
         }
 
@@ -81,12 +71,14 @@ void rpkg_function::hash_meta_to_json(std::string& input_path)
         meta_file.read(input, sizeof(bytes4));
         std::memcpy(&bytes4, input, sizeof(bytes4));
         meta_data.data.resource.reference_table_size = bytes4;
-        json_string += "\"hash_reference_table_size\":" + util::uint32_t_to_string(meta_data.data.resource.reference_table_size) + ",";
+        json_string += "\"hash_reference_table_size\":" +
+                       util::uint32_t_to_string(meta_data.data.resource.reference_table_size) + ",";
 
         meta_file.read(input, sizeof(bytes4));
         std::memcpy(&bytes4, input, sizeof(bytes4));
         meta_data.data.resource.reference_table_dummy = bytes4;
-        json_string += "\"hash_reference_table_dummy\":" + util::uint32_t_to_string(meta_data.data.resource.reference_table_dummy) + ",";
+        json_string += "\"hash_reference_table_dummy\":" +
+                       util::uint32_t_to_string(meta_data.data.resource.reference_table_dummy) + ",";
 
         meta_file.read(input, sizeof(bytes4));
         std::memcpy(&bytes4, input, sizeof(bytes4));
@@ -96,19 +88,20 @@ void rpkg_function::hash_meta_to_json(std::string& input_path)
         meta_file.read(input, sizeof(bytes4));
         std::memcpy(&bytes4, input, sizeof(bytes4));
         meta_data.data.resource.size_in_memory = bytes4;
-        json_string += "\"hash_size_in_memory\":" + util::uint32_t_to_string(meta_data.data.resource.size_in_memory) + ",";
+        json_string +=
+                "\"hash_size_in_memory\":" + util::uint32_t_to_string(meta_data.data.resource.size_in_memory) + ",";
 
         meta_file.read(input, sizeof(bytes4));
         std::memcpy(&bytes4, input, sizeof(bytes4));
         meta_data.data.resource.size_in_video_memory = bytes4;
-        json_string += "\"hash_size_in_video_memory\":" + util::uint32_t_to_string(meta_data.data.resource.size_in_video_memory) + ",";
+        json_string += "\"hash_size_in_video_memory\":" +
+                       util::uint32_t_to_string(meta_data.data.resource.size_in_video_memory) + ",";
 
         json_string += "\"hash_reference_data\":[";
 
         hash_reference_variables temp_hash_reference_data;
 
-        if (meta_data.data.resource.reference_table_size != 0x0)
-        {
+        if (meta_data.data.resource.reference_table_size != 0x0) {
             temp_hash_reference_data.hash_value = meta_data.hash_value;
 
             meta_file.read(input, sizeof(bytes4));
@@ -117,15 +110,13 @@ void rpkg_function::hash_meta_to_json(std::string& input_path)
 
             uint32_t temp_hash_reference_count = temp_hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
-            for (uint64_t j = 0; j < temp_hash_reference_count; j++)
-            {
+            for (uint64_t j = 0; j < temp_hash_reference_count; j++) {
                 meta_file.read(input, sizeof(bytes1));
                 std::memcpy(&bytes1, input, sizeof(bytes1));
                 temp_hash_reference_data.hash_reference_type.push_back(bytes1);
             }
 
-            for (uint64_t j = 0; j < temp_hash_reference_count; j++)
-            {
+            for (uint64_t j = 0; j < temp_hash_reference_count; j++) {
                 meta_file.read(input, sizeof(bytes8));
                 std::memcpy(&bytes8, input, sizeof(bytes8));
                 temp_hash_reference_data.hash_reference.push_back(bytes8);
@@ -134,32 +125,25 @@ void rpkg_function::hash_meta_to_json(std::string& input_path)
 
                 auto it2 = hash_list_hash_map.find(bytes8);
 
-                if (it2 != hash_list_hash_map.end())
-                {
-                    if (hash_value_string == generic_function::compute_ioi_hash(hash_list_hash_strings.at(it2->second)))
-                    {
+                if (it2 != hash_list_hash_map.end()) {
+                    if (hash_value_string ==
+                        generic_function::compute_ioi_hash(hash_list_hash_strings.at(it2->second))) {
                         json_string += R"({"hash":")" + hash_list_hash_strings.at(it2->second) + "\",";
-                    }
-                    else
-                    {
+                    } else {
                         json_string += R"({"hash":")" + util::uint64_t_to_hex_string(bytes8) + "\",";
                     }
-                }
-                else
-                {
+                } else {
                     json_string += R"({"hash":")" + util::uint64_t_to_hex_string(bytes8) + "\",";
                 }
 
-                json_string += R"("flag":")" + util::uint8_t_to_hex_string(temp_hash_reference_data.hash_reference_type.at(j)) + "\"}";
+                json_string += R"("flag":")" +
+                               util::uint8_t_to_hex_string(temp_hash_reference_data.hash_reference_type.at(j)) + "\"}";
 
-                if (j < temp_hash_reference_count - 1)
-                {
+                if (j < temp_hash_reference_count - 1) {
                     json_string += ",";
                 }
             }
-        }
-        else
-        {
+        } else {
             temp_hash_reference_data.hash_reference_count = 0x0;
         }
 

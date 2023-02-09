@@ -184,7 +184,7 @@ set(RPKG_COMMON_SOURCES
         src/dev_extract_wwev_strings.cpp
         src/dev_extract_wwise_ids.cpp
         src/dev_function.h
-        src/dev_hash_list_percent_found.cpp
+        src/hash_list_percent_found.cpp
         src/dev_map_editor.cpp
         src/encrypt_packagedefinition_thumbs.cpp
         src/entity.cpp
@@ -298,13 +298,13 @@ set(RPKG_COMMON_SOURCES
 set(RPKG_LIB_SOURCES
         src/lib/rpkg_dll.cpp
         src/lib/rpkg_dll.h
-)
+        )
 
 set(RPKG_CLI_SOURCES
         src/cli/main.cpp
         src/cli/command_line.cpp
         src/cli/command_line.h
-)
+        )
 
 add_library(rpkg-lib SHARED ${RPKG_LIB_SOURCES} ${RPKG_COMMON_SOURCES} ${thirdparty})
 add_executable(rpkg-cli ${RPKG_CLI_SOURCES} ${RPKG_COMMON_SOURCES} ${thirdparty})

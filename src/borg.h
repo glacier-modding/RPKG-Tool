@@ -1,22 +1,23 @@
 #pragma once
+
 #include "global.h"
 #include "thirdparty/directxmath/DirectXMath.h"
 #include <string>
 #include <vector>
 #include <cstdint>
 
-class borg
-{
+class borg {
 public:
-	borg();
-	borg(uint64_t rpkgs_index, uint64_t hash_index);
+    borg();
 
-	std::string borg_file_name = "";
-	uint32_t borg_rpkg_index = 0;
-	uint32_t borg_hash_index = 0;
-	std::vector<char> borg_input_data;
-	std::vector<char> borg_output_data;
-	std::vector<char> borg_data;
+    borg(uint64_t rpkgs_index, uint64_t hash_index);
+
+    std::string borg_file_name = "";
+    uint32_t borg_rpkg_index = 0;
+    uint32_t borg_hash_index = 0;
+    std::vector<char> borg_input_data;
+    std::vector<char> borg_output_data;
+    std::vector<char> borg_data;
     uint32_t borg_position = 0;
     uint32_t borg_primary_header_offset = 0;
     uint32_t bones_count = 0;

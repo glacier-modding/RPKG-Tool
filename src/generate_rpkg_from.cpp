@@ -16,14 +16,12 @@
 #include <sstream>
 #include <unordered_map>
 
-void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& output_path, bool increased_compression)
-{
+void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& output_path, bool increased_compression) {
     task_single_status = TASK_EXECUTING;
 
     std::string input_rpkg_folder_path = file::parse_input_folder_path(input_path);
 
-    if (!file::path_exists(input_rpkg_folder_path))
-    {
+    if (!file::path_exists(input_rpkg_folder_path)) {
         LOG_AND_EXIT("Error: The folder " + input_rpkg_folder_path + " to generate the RPKG file does not exist.");
     }
 
@@ -36,34 +34,25 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
 
     std::size_t pos = input_rpkg_folder_path.find_last_of("\\/");
 
-    if (pos == (input_rpkg_folder_path.length() - 1))
-    {
+    if (pos == (input_rpkg_folder_path.length() - 1)) {
         input_rpkg_folder_path = input_rpkg_folder_path.substr(0, input_rpkg_folder_path.length() - 1);
 
         pos = input_rpkg_folder_path.find_last_of("\\/");
 
-        if (pos != std::string::npos)
-        {
+        if (pos != std::string::npos) {
             base_folder_name = input_rpkg_folder_path.substr(pos + 1, input_rpkg_folder_path.length() - (pos + 1));
             rpkg_file_name = base_folder_name + ".rpkg";
             rpkg_meta_file_name = base_folder_name + ".meta";
-        }
-        else
-        {
+        } else {
             rpkg_file_name = input_rpkg_folder_path + ".rpkg";
             rpkg_meta_file_name = input_rpkg_folder_path + ".meta";
         }
-    }
-    else
-    {
-        if (pos != std::string::npos)
-        {
+    } else {
+        if (pos != std::string::npos) {
             base_folder_name = input_rpkg_folder_path.substr(pos + 1, input_rpkg_folder_path.length() - (pos + 1));
             rpkg_file_name = base_folder_name + ".rpkg";
             rpkg_meta_file_name = base_folder_name + ".meta";
-        }
-        else
-        {
+        } else {
             rpkg_file_name = input_rpkg_folder_path + ".rpkg";
             rpkg_meta_file_name = input_rpkg_folder_path + ".meta";
         }
@@ -73,7 +62,8 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
 
     std::string rpkg_meta_file_path = input_rpkg_folder_path + "\\" + rpkg_meta_file_name;
 
-    bool use_rpkg_file_meta_data = rpkg_function::import_rpkg_meta(rpkg_meta_data, rpkg_meta_file_path, input_rpkg_folder_path);
+    bool use_rpkg_file_meta_data = rpkg_function::import_rpkg_meta(rpkg_meta_data, rpkg_meta_file_path,
+                                                                   input_rpkg_folder_path);
 
     std::vector<std::string> files;
     std::vector<uint64_t> hashes;
@@ -88,18 +78,16 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
     double console_update_rate = 1.0 / 2.0;
     int period_count = 1;
 
-    for (const auto& entry : std::filesystem::recursive_directory_iterator(input_rpkg_folder_path))
-    {
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(input_rpkg_folder_path)) {
         std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
 
-        double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+        double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(
+                end_time - start_time).count());
 
-        if (time_in_seconds_from_start_time > console_update_rate)
-        {
+        if (time_in_seconds_from_start_time > console_update_rate) {
             start_time = end_time;
 
-            if (period_count > 3)
-            {
+            if (period_count > 3) {
                 period_count = 0;
             }
 
@@ -114,45 +102,37 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
             period_count++;
         }
 
-        if (std::filesystem::is_regular_file(entry.path().string()))
-        {
+        if (std::filesystem::is_regular_file(entry.path().string())) {
             std::size_t pos = entry.path().string().find_last_of("\\/");
 
             std::string hash_file_name = "";
             std::string hash_string = "";
             std::string resource_type = "";
 
-            if (pos != std::string::npos)
-            {
+            if (pos != std::string::npos) {
                 hash_file_name = entry.path().string().substr(pos + 1, entry.path().string().length() - (pos + 1));
-            }
-            else
-            {
+            } else {
                 hash_file_name = entry.path().string();
             }
 
             pos = hash_file_name.find_last_of('.');
 
-            if (pos != std::string::npos)
-            {
+            if (pos != std::string::npos) {
                 hash_string = hash_file_name.substr(0, pos);
                 resource_type = hash_file_name.substr(pos + 1, hash_file_name.length() - (pos + 1));
             }
 
             bool is_hash_file = true;
 
-            if (hash_string.length() != 16)
-            {
+            if (hash_string.length() != 16) {
                 is_hash_file = false;
             }
 
-            if (resource_type.length() != 4)
-            {
+            if (resource_type.length() != 4) {
                 is_hash_file = false;
             }
 
-            if (is_hash_file)
-            {
+            if (is_hash_file) {
                 files.push_back(entry.path().string());
                 hashes.push_back(std::strtoll(hash_string.c_str(), nullptr, 16));
                 hash_map[hashes.back()] = static_cast<int>(hashes.size() - 1);
@@ -179,8 +159,7 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
 
     std::ofstream temp_file_output = std::ofstream(temp_file_name, std::ofstream::binary);
 
-    if (!temp_file_output.good())
-    {
+    if (!temp_file_output.good()) {
         LOG_AND_EXIT("Error: Temporary file " + temp_file_name + " could not be read.");
     }
 
@@ -197,14 +176,11 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
 
     std::vector<uint64_t> files_index;
 
-    if (use_rpkg_file_meta_data)
-    {
-        for (unsigned long long i : rpkg_meta_data.meta_hash_value)
-        {
+    if (use_rpkg_file_meta_data) {
+        for (unsigned long long i : rpkg_meta_data.meta_hash_value) {
             auto it = hash_map.find(i);
 
-            if (it != hash_map.end())
-            {
+            if (it != hash_map.end()) {
                 files_index.push_back(it->second);
 
                 hash_in_rpkg_meta.at(it->second) = true;
@@ -212,32 +188,27 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
         }
     }
 
-    for (uint64_t i = 0; i < hashes.size(); i++)
-    {
-        if (!hash_in_rpkg_meta.at(i))
-        {
+    for (uint64_t i = 0; i < hashes.size(); i++) {
+        if (!hash_in_rpkg_meta.at(i)) {
             files_index.push_back(i);
         }
     }
 
-    for (uint64_t i = 0; i < files_index.size(); i++)
-    {
-        if (gui_control == ABORT_CURRENT_TASK)
-        {
+    for (uint64_t i = 0; i < files_index.size(); i++) {
+        if (gui_control == ABORT_CURRENT_TASK) {
             return;
         }
 
-        if (((i * static_cast<uint64_t>(100000)) / files_index.size()) % static_cast<uint64_t>(100) == 0 && i > 0)
-        {
-            stringstream_length = console::update_console(message, files_index.size(), i, start_time, stringstream_length);
+        if (((i * static_cast<uint64_t>(100000)) / files_index.size()) % static_cast<uint64_t>(100) == 0 && i > 0) {
+            stringstream_length = console::update_console(message, files_index.size(), i, start_time,
+                                                          stringstream_length);
         }
 
         bool use_hash_file_meta_data = false;
 
         std::ifstream file = std::ifstream(files.at(files_index.at(i)), std::ifstream::binary);
 
-        if (!file.good())
-        {
+        if (!file.good()) {
             LOG_AND_EXIT("Error: Hash file " + files.at(files_index.at(i)) + " could not be read.");
         }
 
@@ -258,25 +229,21 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
 
         hash meta_data;
 
-        if (file::path_exists(files.at(files_index.at(i)) + ".meta"))
-        {
+        if (file::path_exists(files.at(files_index.at(i)) + ".meta")) {
             use_hash_file_meta_data = true;
 
             std::string hash_file_name = files.at(files_index.at(i)) + ".meta";
-                
+
             rpkg_function::import_hash_meta(meta_data, hash_file_name);
-                                
+
             uint64_t test_hash_value = std::strtoll(hash_strings.at(files_index.at(i)).c_str(), nullptr, 16);
 
-            if (meta_data.hash_value != test_hash_value && test_hash_value > 0x0)
-            {
+            if (meta_data.hash_value != test_hash_value && test_hash_value > 0x0) {
                 meta_data.hash_value = test_hash_value;
             }
 
             temp_hash_data.hash_reference_data = meta_data.hash_reference_data;
-        }
-        else
-        {
+        } else {
             found_all_meta_files = false;
 
             meta_data.data.lz4ed = true;
@@ -287,8 +254,7 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
             temp_hash_data.hash_reference_data = temp_hash_reference_data;
         }
 
-        if (meta_data.data.lz4ed)
-        {
+        if (meta_data.data.lz4ed) {
             temp_hash_data.data.lz4ed = true;
 
             uint32_t compressed_size = LZ4_compressBound(static_cast<int>(input_file_size));
@@ -297,31 +263,29 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
 
             uint64_t compressed_size_final;
 
-            if (increased_compression)
-            {
-                compressed_size_final = LZ4_compress_HC(input_file_data.data(), output_file_data.data(), static_cast<int>(input_file_size), compressed_size, LZ4HC_CLEVEL_MAX);
-            } else
-            {
-                compressed_size_final = LZ4_compress_fast(input_file_data.data(), output_file_data.data(), static_cast<int>(input_file_size), compressed_size, 15);
+            if (increased_compression) {
+                compressed_size_final = LZ4_compress_HC(input_file_data.data(), output_file_data.data(),
+                                                        static_cast<int>(input_file_size), compressed_size,
+                                                        LZ4HC_CLEVEL_MAX);
+            } else {
+                compressed_size_final = LZ4_compress_fast(input_file_data.data(), output_file_data.data(),
+                                                          static_cast<int>(input_file_size), compressed_size, 15);
             }
 
             output_data_length.push_back(compressed_size_final);
 
-            if (meta_data.data.xored)
-            {
+            if (meta_data.data.xored) {
                 crypto::xor_data(output_file_data.data(), static_cast<uint32_t>(compressed_size_final));
 
                 temp_hash_data.data.xored = true;
-                temp_hash_data.data.header.data_size = static_cast<uint32_t>(compressed_size_final) | (uint32_t)0x80000000;
-            }
-            else
-            {
+                temp_hash_data.data.header.data_size =
+                        static_cast<uint32_t>(compressed_size_final) | (uint32_t) 0x80000000;
+            } else {
                 temp_hash_data.data.xored = false;
                 temp_hash_data.data.header.data_size = static_cast<uint32_t>(compressed_size_final);
             }
 
-            if (use_hash_file_meta_data)
-            {
+            if (use_hash_file_meta_data) {
                 temp_hash_data.hash_value = meta_data.hash_value;
                 //temp_hash_data.hash_string = util::uint64_t_to_hex_string(meta_data.hash_value);
                 temp_hash_data.hash_resource_type = meta_data.hash_resource_type;
@@ -329,26 +293,25 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
                 temp_hash_data.data.resource.reference_table_dummy = meta_data.data.resource.reference_table_dummy;
                 temp_hash_data.data.resource.size_final = static_cast<uint32_t>(input_file_size);
 
-                if (meta_data.data.resource.size_in_memory == 0xFFFFFFFF)
-                {
+                if (meta_data.data.resource.size_in_memory == 0xFFFFFFFF) {
                     temp_hash_data.data.resource.size_in_memory = meta_data.data.resource.size_in_memory;
                     temp_hash_data.data.resource.size_in_video_memory = meta_data.data.resource.size_in_video_memory;
-                }
-                else
-                {
-                    uint32_t resized_size_in_memory = static_cast<uint32_t>((double)input_file_size * ((double)meta_data.data.resource.size_in_memory / (double)meta_data.data
-                        .resource.size_final));
-                    uint32_t resized_difference_value = meta_data.data.resource.size_in_memory - static_cast<uint32_t>((double)meta_data.data.resource.size_final * ((double)meta_data.data.resource.size_in_memory / (
-                        double)meta_data.data.resource.size_final));
+                } else {
+                    uint32_t resized_size_in_memory = static_cast<uint32_t>((double) input_file_size *
+                                                                            ((double) meta_data.data.resource.size_in_memory /
+                                                                             (double) meta_data.data
+                                                                                     .resource.size_final));
+                    uint32_t resized_difference_value = meta_data.data.resource.size_in_memory - static_cast<uint32_t>(
+                            (double) meta_data.data.resource.size_final *
+                            ((double) meta_data.data.resource.size_in_memory / (
+                                    double) meta_data.data.resource.size_final));
 
                     resized_size_in_memory += resized_difference_value;
 
                     temp_hash_data.data.resource.size_in_memory = resized_size_in_memory;
                     temp_hash_data.data.resource.size_in_video_memory = meta_data.data.resource.size_in_video_memory;
                 }
-            }
-            else
-            {
+            } else {
                 uint64_t hash_value = std::strtoll(hash_strings.at(files_index.at(i)).c_str(), nullptr, 16);
                 temp_hash_data.hash_value = hash_value;
                 //temp_hash_data.hash_string = hash_strings.at(files_index.at(i));
@@ -359,9 +322,7 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
                 temp_hash_data.data.resource.size_in_memory = static_cast<uint32_t>(compressed_size_final);
                 temp_hash_data.data.resource.size_in_video_memory = 0x0;
             }
-        }
-        else
-        {
+        } else {
             temp_hash_data.data.lz4ed = false;
 
             output_file_data = std::vector<char>(input_file_size, 0);
@@ -370,21 +331,17 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
 
             std::memcpy(output_file_data.data(), input_file_data.data(), input_file_size);
 
-            if (meta_data.data.xored)
-            {
+            if (meta_data.data.xored) {
                 crypto::xor_data(output_file_data.data(), static_cast<uint32_t>(input_file_size));
 
                 temp_hash_data.data.xored = true;
                 temp_hash_data.data.header.data_size = 0x80000000;
-            }
-            else
-            {
+            } else {
                 temp_hash_data.data.xored = false;
                 temp_hash_data.data.header.data_size = 0x0;
             }
 
-            if (use_hash_file_meta_data)
-            {
+            if (use_hash_file_meta_data) {
                 temp_hash_data.hash_value = meta_data.hash_value;
                 //temp_hash_data.hash_string = util::uint64_t_to_hex_string(meta_data.hash_value);
                 temp_hash_data.hash_resource_type = meta_data.hash_resource_type;
@@ -392,26 +349,25 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
                 temp_hash_data.data.resource.reference_table_dummy = meta_data.data.resource.reference_table_dummy;
                 temp_hash_data.data.resource.size_final = static_cast<uint32_t>(input_file_size);
 
-                if (meta_data.data.resource.size_in_memory == 0xFFFFFFFF)
-                {
+                if (meta_data.data.resource.size_in_memory == 0xFFFFFFFF) {
                     temp_hash_data.data.resource.size_in_memory = meta_data.data.resource.size_in_memory;
                     temp_hash_data.data.resource.size_in_video_memory = meta_data.data.resource.size_in_video_memory;
-                }
-                else
-                {
-                    uint32_t resized_size_in_memory = static_cast<uint32_t>((double)input_file_size * ((double)meta_data.data.resource.size_in_memory / (double)meta_data.data
-                        .resource.size_final));
-                    uint32_t resized_difference_value = meta_data.data.resource.size_in_memory - static_cast<uint32_t>((double)meta_data.data.resource.size_final * ((double)meta_data.data.resource.size_in_memory / (
-                        double)meta_data.data.resource.size_final));
+                } else {
+                    uint32_t resized_size_in_memory = static_cast<uint32_t>((double) input_file_size *
+                                                                            ((double) meta_data.data.resource.size_in_memory /
+                                                                             (double) meta_data.data
+                                                                                     .resource.size_final));
+                    uint32_t resized_difference_value = meta_data.data.resource.size_in_memory - static_cast<uint32_t>(
+                            (double) meta_data.data.resource.size_final *
+                            ((double) meta_data.data.resource.size_in_memory / (
+                                    double) meta_data.data.resource.size_final));
 
                     resized_size_in_memory += resized_difference_value;
 
                     temp_hash_data.data.resource.size_in_memory = resized_size_in_memory;
                     temp_hash_data.data.resource.size_in_video_memory = meta_data.data.resource.size_in_video_memory;
                 }
-            }
-            else
-            {
+            } else {
                 uint64_t hash_value = std::strtoll(hash_strings.at(files_index.at(i)).c_str(), nullptr, 16);
                 temp_hash_data.hash_value = hash_value;
                 //temp_hash_data.hash_string = hash_strings.at(files_index.at(i));
@@ -433,14 +389,14 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
 
     ss.str(std::string());
 
-    ss << message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
+    ss << message << "100% Done in "
+       << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
 
     LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
 
     percent_progress = static_cast<uint32_t>(100);
 
-    if (!found_all_meta_files)
-    {
+    if (!found_all_meta_files) {
         LOG("Some hash files did not have meta files.");
         LOG("When a hash file does not have a meta file the defaults used are:");
         LOG("  - The hash file is XORed and LZ4ed");
@@ -457,39 +413,34 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
 
     table_size = 0x0;
 
-    for (auto & j : temp_rpkg_data.hash)
-    {
+    for (auto& j : temp_rpkg_data.hash) {
         table_size += 0x18;
         table_size += j.data.resource.reference_table_size;
     }
 
-    if (rpkg_meta_data.is_patch_file)
-    {
-        if (rpkg_meta_data.rpkg_file_version == 1)
-        {
-            hash_offset = static_cast<uint64_t>(table_offset) + static_cast<uint64_t>(table_size) + static_cast<uint64_t>(rpkg_meta_data.header.patch_count) * static_cast<uint64_t>(0x8) + static_cast<uint64_t>(0x14);
+    if (rpkg_meta_data.is_patch_file) {
+        if (rpkg_meta_data.rpkg_file_version == 1) {
+            hash_offset = static_cast<uint64_t>(table_offset) + static_cast<uint64_t>(table_size) +
+                          static_cast<uint64_t>(rpkg_meta_data.header.patch_count) * static_cast<uint64_t>(0x8) +
+                          static_cast<uint64_t>(0x14);
+        } else {
+            hash_offset = static_cast<uint64_t>(table_offset) + static_cast<uint64_t>(table_size) +
+                          static_cast<uint64_t>(rpkg_meta_data.header.patch_count) * static_cast<uint64_t>(0x8) +
+                          static_cast<uint64_t>(0x1D);
         }
-        else
-        {
-            hash_offset = static_cast<uint64_t>(table_offset) + static_cast<uint64_t>(table_size) + static_cast<uint64_t>(rpkg_meta_data.header.patch_count) * static_cast<uint64_t>(0x8) + static_cast<uint64_t>(0x1D);
-        }
-    }
-    else
-    {
-        if (rpkg_meta_data.rpkg_file_version == 1)
-        {
-            hash_offset = static_cast<uint64_t>(table_offset) + static_cast<uint64_t>(table_size) + static_cast<uint64_t>(0x10);
-        }
-        else
-        {
-            hash_offset = static_cast<uint64_t>(table_offset) + static_cast<uint64_t>(table_size) + static_cast<uint64_t>(0x19);
+    } else {
+        if (rpkg_meta_data.rpkg_file_version == 1) {
+            hash_offset = static_cast<uint64_t>(table_offset) + static_cast<uint64_t>(table_size) +
+                          static_cast<uint64_t>(0x10);
+        } else {
+            hash_offset = static_cast<uint64_t>(table_offset) + static_cast<uint64_t>(table_size) +
+                          static_cast<uint64_t>(0x19);
         }
     }
 
     std::ofstream file = std::ofstream(file::output_path_append(rpkg_file_name, output_path), std::ofstream::binary);
 
-    if (!file.good())
-    {
+    if (!file.good()) {
         LOG_AND_EXIT("Error: RPKG file " + rpkg_file_name + " could not be created.");
     }
 
@@ -497,25 +448,20 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
     char char4[4];
     char char8[8];
 
-    if (rpkg_meta_data.rpkg_file_version == 1)
-    {
+    if (rpkg_meta_data.rpkg_file_version == 1) {
         file.write("G", 0x1);
         file.write("K", 0x1);
         file.write("P", 0x1);
         file.write("R", 0x1);
-    }
-    else
-    {
+    } else {
         file.write("2", 0x1);
         file.write("K", 0x1);
         file.write("P", 0x1);
         file.write("R", 0x1);
     }
 
-    if (rpkg_meta_data.rpkg_file_version == 2)
-    {
-        for (char & j : rpkg_meta_data.rpkgv2_header)
-        {
+    if (rpkg_meta_data.rpkg_file_version == 2) {
+        for (char& j : rpkg_meta_data.rpkgv2_header) {
             std::memcpy(&char1, &j, sizeof(uint8_t));
 
             file.write(char1, 0x1);
@@ -529,35 +475,30 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
     std::memcpy(&char4, &table_size, sizeof(uint32_t));
     file.write(char4, sizeof(uint32_t));
 
-    if (rpkg_meta_data.is_patch_file)
-    {
+    if (rpkg_meta_data.is_patch_file) {
         std::memcpy(&char4, &rpkg_meta_data.header.patch_count, sizeof(uint32_t));
         file.write(char4, sizeof(uint32_t));
 
-        for (uint64_t i = 0; i < rpkg_meta_data.header.patch_count; i++)
-        {
+        for (uint64_t i = 0; i < rpkg_meta_data.header.patch_count; i++) {
             std::memcpy(&char8, &rpkg_meta_data.patch_entry_list.at(i), sizeof(uint64_t));
             file.write(char8, sizeof(uint64_t));
         }
     }
 
-    if (rpkg_meta_data.rpkg_file_version == 1)
-    {
+    if (rpkg_meta_data.rpkg_file_version == 1) {
         message = "Writing RPKGv1 offset index: ";
-    }
-    else
-    {
+    } else {
         message = "Writing RPKGv2 offset index: ";
     }
 
     start_time = std::chrono::high_resolution_clock::now();
     stringstream_length = 80;
 
-    for (uint64_t i = 0; i < temp_rpkg_data.hash.size(); i++)
-    {
-        if (((i * static_cast<uint64_t>(100000)) / (uint64_t)temp_rpkg_data.hash.size()) % static_cast<uint64_t>(100) == 0 && i > 0)
-        {
-            stringstream_length = console::update_console(message, temp_rpkg_data.hash.size(), i, start_time, stringstream_length);
+    for (uint64_t i = 0; i < temp_rpkg_data.hash.size(); i++) {
+        if (((i * static_cast<uint64_t>(100000)) / (uint64_t) temp_rpkg_data.hash.size()) %
+            static_cast<uint64_t>(100) == 0 && i > 0) {
+            stringstream_length = console::update_console(message, temp_rpkg_data.hash.size(), i, start_time,
+                                                          stringstream_length);
         }
 
         std::memcpy(&char8, &temp_rpkg_data.hash.at(i).hash_value, sizeof(uint64_t));
@@ -568,12 +509,9 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
         std::memcpy(&char4, &temp_rpkg_data.hash.at(i).data.header.data_size, sizeof(uint32_t));
         file.write(char4, sizeof(uint32_t));
 
-        if (temp_rpkg_data.hash.at(i).data.lz4ed)
-        {
+        if (temp_rpkg_data.hash.at(i).data.lz4ed) {
             hash_offset += temp_rpkg_data.hash.at(i).data.header.data_size & 0x3FFFFFFF;
-        }
-        else
-        {
+        } else {
             hash_offset += temp_rpkg_data.hash.at(i).data.resource.size_final;
         }
     }
@@ -582,7 +520,8 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
 
     ss.str(std::string());
 
-    ss << message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
+    ss << message << "100% Done in "
+       << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
 
     timing_string = ss.str();
 
@@ -590,23 +529,20 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
 
     percent_progress = static_cast<uint32_t>(100);
 
-    if (rpkg_meta_data.rpkg_file_version == 1)
-    {
+    if (rpkg_meta_data.rpkg_file_version == 1) {
         message = "Writing RPKGv1 info index: ";
-    }
-    else
-    {
+    } else {
         message = "Writing RPKGv2 info index: ";
     }
 
     start_time = std::chrono::high_resolution_clock::now();
     stringstream_length = 80;
 
-    for (uint64_t i = 0; i < temp_rpkg_data.hash.size(); i++)
-    {
-        if (((i * static_cast<uint64_t>(100000)) / temp_rpkg_data.hash.size()) % static_cast<uint64_t>(100) == 0 && i > 0)
-        {
-            stringstream_length = console::update_console(message, temp_rpkg_data.hash.size(), i, start_time, stringstream_length);
+    for (uint64_t i = 0; i < temp_rpkg_data.hash.size(); i++) {
+        if (((i * static_cast<uint64_t>(100000)) / temp_rpkg_data.hash.size()) % static_cast<uint64_t>(100) == 0 &&
+            i > 0) {
+            stringstream_length = console::update_console(message, temp_rpkg_data.hash.size(), i, start_time,
+                                                          stringstream_length);
         }
 
         file.write(&temp_rpkg_data.hash.at(i).hash_resource_type[3], 0x1);
@@ -625,25 +561,24 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
         std::memcpy(&char4, &temp_rpkg_data.hash.at(i).data.resource.size_in_video_memory, sizeof(uint32_t));
         file.write(char4, sizeof(uint32_t));
 
-        uint32_t temp_hash_reference_count = temp_rpkg_data.hash.at(i).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+        uint32_t temp_hash_reference_count =
+                temp_rpkg_data.hash.at(i).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
-        if (temp_rpkg_data.hash.at(i).data.resource.reference_table_size > 0)
-        {
+        if (temp_rpkg_data.hash.at(i).data.resource.reference_table_size > 0) {
             std::memcpy(&char4, &temp_rpkg_data.hash.at(i).hash_reference_data.hash_reference_count, sizeof(uint32_t));
             file.write(char4, sizeof(uint32_t));
         }
 
-        if (temp_hash_reference_count > 0)
-        {
-            for (uint64_t j = 0; j < temp_hash_reference_count; j++)
-            {
-                std::memcpy(&char1, &temp_rpkg_data.hash.at(i).hash_reference_data.hash_reference_type.at(j), sizeof(uint8_t));
+        if (temp_hash_reference_count > 0) {
+            for (uint64_t j = 0; j < temp_hash_reference_count; j++) {
+                std::memcpy(&char1, &temp_rpkg_data.hash.at(i).hash_reference_data.hash_reference_type.at(j),
+                            sizeof(uint8_t));
                 file.write(char1, sizeof(uint8_t));
             }
 
-            for (uint64_t j = 0; j < temp_hash_reference_count; j++)
-            {
-                std::memcpy(&char8, &temp_rpkg_data.hash.at(i).hash_reference_data.hash_reference.at(j), sizeof(uint64_t));
+            for (uint64_t j = 0; j < temp_hash_reference_count; j++) {
+                std::memcpy(&char8, &temp_rpkg_data.hash.at(i).hash_reference_data.hash_reference.at(j),
+                            sizeof(uint64_t));
                 file.write(char8, sizeof(uint64_t));
             }
         }
@@ -653,7 +588,8 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
 
     ss.str(std::string());
 
-    ss << message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
+    ss << message << "100% Done in "
+       << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
 
     timing_string = ss.str();
 
@@ -661,17 +597,13 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
 
     std::ifstream temp_file_input = std::ifstream(temp_file_name, std::ifstream::binary);
 
-    if (!temp_file_input.good())
-    {
+    if (!temp_file_input.good()) {
         LOG_AND_EXIT("Error: Temporary file " + temp_file_name + " could not be read.");
     }
 
-    if (rpkg_meta_data.rpkg_file_version == 1)
-    {
+    if (rpkg_meta_data.rpkg_file_version == 1) {
         LOG("Merging RPKGv1 file and temporary RPKG files...");
-    }
-    else
-    {
+    } else {
         LOG("Merging RPKGv2 file and temporary RPKG files...");
     }
 
@@ -681,13 +613,14 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
 
     end_time = std::chrono::high_resolution_clock::now();
 
-    if (rpkg_meta_data.rpkg_file_version == 1)
-    {
-        LOG("Merged RPKGv1 file and temporary RPKGv1 file in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s");
-    }
-    else
-    {
-        LOG("Merged RPKGv2 file and temporary RPKGv2 file in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s");
+    if (rpkg_meta_data.rpkg_file_version == 1) {
+        LOG("Merged RPKGv1 file and temporary RPKGv1 file in " << (0.000000001 *
+                                                                   std::chrono::duration_cast<std::chrono::nanoseconds>(
+                                                                           end_time - start_time).count()) << "s");
+    } else {
+        LOG("Merged RPKGv2 file and temporary RPKGv2 file in " << (0.000000001 *
+                                                                   std::chrono::duration_cast<std::chrono::nanoseconds>(
+                                                                           end_time - start_time).count()) << "s");
     }
 
     temp_file_input.close();
@@ -696,12 +629,9 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
 
     file.close();
 
-    if (rpkg_meta_data.rpkg_file_version == 1)
-    {
+    if (rpkg_meta_data.rpkg_file_version == 1) {
         LOG("Successfully generated RPKGv1 file: " << rpkg_file_name);
-    }
-    else
-    {
+    } else {
         LOG("Successfully generated RPKGv2 file: " << rpkg_file_name);
     }
 

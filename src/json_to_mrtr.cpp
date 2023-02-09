@@ -5,10 +5,8 @@
 #include <iostream>
 #include <filesystem>
 
-void rpkg_function::json_to_mrtr(std::string& input_path, std::string& output_path)
-{
-    if (!file::path_exists(input_path))
-    {
+void rpkg_function::json_to_mrtr(std::string& input_path, std::string& output_path) {
+    if (!file::path_exists(input_path)) {
         task_single_status = TASK_SUCCESSFUL;
         task_multiple_status = TASK_SUCCESSFUL;
         return;
@@ -21,46 +19,33 @@ void rpkg_function::json_to_mrtr(std::string& input_path, std::string& output_pa
 
     std::vector<std::filesystem::path> files;
 
-    if (std::filesystem::is_regular_file(input_path))
-    {
+    if (std::filesystem::is_regular_file(input_path)) {
         files.push_back(std::filesystem::path(input_path));
 
-        if (!output_path.empty())
-        {
-            if (std::filesystem::exists(output_path))
-            {
-                if (std::filesystem::is_regular_file(output_path))
-                {
+        if (!output_path.empty()) {
+            if (std::filesystem::exists(output_path)) {
+                if (std::filesystem::is_regular_file(output_path)) {
                     output_path_is_file = true;
                 }
-            }
-            else
-            {
+            } else {
                 output_path_is_file = true;
             }
         }
-    }
-    else
-    {
+    } else {
         files = file::get_recursive_file_list(input_path);
     }
 
-    for (std::filesystem::path& file : files)
-    {
+    for (std::filesystem::path& file : files) {
         uint64_t hash_value = file::get_hash_value_from_path(file, ".MRTR.JSON");
 
-        if (hash_value)
-        {
+        if (hash_value) {
             timing_string = "Converting: " + file.filename().string() + " to MRTR";
 
             LOG(timing_string);
 
-            if (output_path.empty())
-            {
+            if (output_path.empty()) {
                 mrtr temp_mrtr(file.string(), hash_value, file.parent_path().string(), output_path_is_file);
-            }
-            else
-            {
+            } else {
                 mrtr temp_mrtr(file.string(), hash_value, output_path, output_path_is_file);
             }
         }

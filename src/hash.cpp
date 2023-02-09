@@ -1,6 +1,5 @@
 #include "hash.h"
 
-hash::hash()
-{
+hash::hash() {
 
 }

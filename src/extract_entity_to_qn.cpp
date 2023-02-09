@@ -9,33 +9,25 @@
 #include <sstream>
 #include <filesystem>
 
-void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& filter, std::string& output_path)
-{
+void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& filter, std::string& output_path) {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
     bool input_path_is_rpkg_file = false;
 
-    if (std::filesystem::is_regular_file(input_path))
-    {
+    if (std::filesystem::is_regular_file(input_path)) {
         input_path_is_rpkg_file = true;
-    }
-    else
-    {
+    } else {
         input_path = file::parse_input_folder_path(input_path);
     }
 
-    if (!file::path_exists(input_path))
-    {
+    if (!file::path_exists(input_path)) {
         LOG_AND_EXIT("Error: The folder " + input_path + " to with the input RPKGs does not exist.");
     }
 
-    if (!input_path_is_rpkg_file)
-    {
+    if (!input_path_is_rpkg_file) {
         rpkg_function::import_rpkg_files_in_folder(input_path);
-    }
-    else
-    {
+    } else {
         rpkg_function::import_rpkg(input_path, false);
     }
 
@@ -53,8 +45,7 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
 
     //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
 
-    if (!hash_list_loaded)
-    {
+    if (!hash_list_loaded) {
         LOG("Loading Hash List...");
         generic_function::load_hash_list(true);
         LOG("Loading Hash List: Done");
@@ -62,8 +53,7 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
 
     std::vector<std::string> filters = util::parse_input_filter(filter);
 
-    for (auto& filter : filters)
-    {
+    for (auto& filter : filters) {
         uint64_t temp_hash_value = std::strtoull(filter.c_str(), nullptr, 16);
 
         uint32_t rpkg_index = rpkg_function::get_latest_hash(temp_hash_value);
@@ -88,7 +78,9 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
 
         std::stringstream ss;
 
-        ss << message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
+        ss << message << "100% Done in "
+           << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count())
+           << "s";
 
         LOG(ss.str());
 
@@ -96,26 +88,18 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
 
         bool output_path_is_dir = false;
 
-        if (output_path.length() > 5)
-        {
-            if (util::to_lower_case(output_path).substr(output_path.length() - 5) == ".json")
-            {
+        if (output_path.length() > 5) {
+            if (util::to_lower_case(output_path).substr(output_path.length() - 5) == ".json") {
                 temp_output_path = output_path;
-            }
-            else
-            {
+            } else {
                 output_path_is_dir = true;
             }
-        }
-        else
-        {
+        } else {
             output_path_is_dir = true;
         }
 
-        if (output_path_is_dir)
-        {
-            if (output_path != "")
-            {
+        if (output_path_is_dir) {
+            if (output_path != "") {
                 file::create_directories(output_path);
             }
 
@@ -132,14 +116,16 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
 
         ss.str(std::string());
 
-        ss << message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
+        ss << message << "100% Done in "
+           << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count())
+           << "s";
 
         LOG(ss.str());
 
         temp_temp.write_qn_json_to_file(temp_output_path);
     }
 
-    percent_progress = (uint32_t)100;
+    percent_progress = (uint32_t) 100;
 
     task_single_status = TASK_SUCCESSFUL;
     task_multiple_status = TASK_SUCCESSFUL;

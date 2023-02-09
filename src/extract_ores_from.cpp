@@ -9,36 +9,29 @@
 #include <sstream>
 #include <regex>
 
-void rpkg_function::extract_ores_from(std::string& input_path, std::string& filter, std::string& output_path)
-{
+void rpkg_function::extract_ores_from(std::string& input_path, std::string& filter, std::string& output_path) {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
     bool input_path_is_rpkg_file = false;
 
-    if (std::filesystem::is_regular_file(input_path))
-    {
+    if (std::filesystem::is_regular_file(input_path)) {
         input_path_is_rpkg_file = true;
-    }
-    else
-    {
+    } else {
         input_path = file::parse_input_folder_path(input_path);
     }
 
-    if (!file::path_exists(input_path))
-    {
+    if (!file::path_exists(input_path)) {
         LOG_AND_EXIT("Error: The folder " + input_path + " to with the input RPKGs does not exist.");
     }
 
-    if (!hash_list_loaded)
-    {
+    if (!hash_list_loaded) {
         LOG("Loading Hash List...");
         generic_function::load_hash_list(false);
         LOG("Loading Hash List: Done");
     }
 
-    if (!input_path_is_rpkg_file)
-    {
+    if (!input_path_is_rpkg_file) {
         rpkg_function::import_rpkg_files_in_folder(input_path);
     }
 
@@ -56,10 +49,8 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
 
     bool extract_single_hash = false;
 
-    if (filters.size() == 1)
-    {
-        if (util::is_valid_hash(filters.at(0)))
-        {
+    if (filters.size() == 1) {
+        if (util::is_valid_hash(filters.at(0))) {
             extract_single_hash = true;
         }
     }
@@ -75,36 +66,34 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
 
     uint32_t rpkg_index = rpkg_function::get_latest_hash(temp_hash_value);
 
-    if (rpkg_index != UINT32_MAX)
-    {
+    if (rpkg_index != UINT32_MAX) {
         auto it6 = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
-        if (it6 != rpkgs.at(rpkg_index).hash_map.end())
-        {
+        if (it6 != rpkgs.at(rpkg_index).hash_map.end()) {
             int period_count = 1;
             uint64_t hash_index = it6->second;
 
-            std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(hash_index).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(hash_index).hash_resource_type;
+            std::string hash_file_name =
+                    util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(hash_index).hash_value) + "." +
+                    rpkgs.at(rpkg_index).hash.at(hash_index).hash_resource_type;
 
             ores temp_ores(rpkg_index, hash_index);
 
-            for (auto& ores_entry : temp_ores.ores_entries)
-            {
-                if (gui_control == ABORT_CURRENT_TASK)
-                {
+            for (auto& ores_entry : temp_ores.ores_entries) {
+                if (gui_control == ABORT_CURRENT_TASK) {
                     return;
                 }
 
                 std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
 
-                double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+                double time_in_seconds_from_start_time = (0.000000001 *
+                                                          std::chrono::duration_cast<std::chrono::nanoseconds>(
+                                                                  end_time - start_time).count());
 
-                if (time_in_seconds_from_start_time > console_update_rate)
-                {
+                if (time_in_seconds_from_start_time > console_update_rate) {
                     start_time = end_time;
 
-                    if (period_count > 3)
-                    {
+                    if (period_count > 3) {
                         period_count = 0;
                     }
 
@@ -121,23 +110,21 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
 
                 std::string hash_string = util::uint64_t_to_hex_string(ores_entry.second);
 
-                if (!extract_single_hash || (extract_single_hash && filter == hash_string))
-                {
-                    for (uint64_t i = 0; i < rpkgs.size(); i++)
-                    {
+                if (!extract_single_hash || (extract_single_hash && filter == hash_string)) {
+                    for (uint64_t i = 0; i < rpkgs.size(); i++) {
                         uint64_t rpkg_index2 = i;
 
                         auto it = rpkgs.at(i).hash_map.find(ores_entry.second);
 
-                        if (it != rpkgs.at(i).hash_map.end())
-                        {
+                        if (it != rpkgs.at(i).hash_map.end()) {
                             uint64_t hash_index2 = it->second;
 
                             std::string ores_ioi_path = "";
                             std::string ores_ioi_directory = "";
                             // std::string ores_base_name = "";
 
-                            ores_ioi_path = file::output_path_append("ORES\\" + rpkgs.at(rpkg_index2).rpkg_file_name, output_path);
+                            ores_ioi_path = file::output_path_append("ORES\\" + rpkgs.at(rpkg_index2).rpkg_file_name,
+                                                                     output_path);
 
                             ores_ioi_path += "/" + ores_entry.first;
 
@@ -151,22 +138,24 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
 
                             bool found = false;
 
-                            for (const auto & filter : filters)
-                            {
-                                std::size_t found_position_hash = std::string(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index2).hash.at(hash_index2).hash_value) + "." + rpkgs.at(rpkg_index2).hash.at(hash_index2).hash_resource_type).find(filter);
+                            for (const auto& filter : filters) {
+                                std::size_t found_position_hash = std::string(util::uint64_t_to_hex_string(
+                                        rpkgs.at(rpkg_index2).hash.at(hash_index2).hash_value) + "." +
+                                                                              rpkgs.at(rpkg_index2).hash.at(
+                                                                                      hash_index2).hash_resource_type).find(
+                                        filter);
 
                                 std::size_t found_position_ores = util::to_upper_case(ores_ioi_path).find(filter);
 
-                                if ((found_position_hash != std::string::npos && !filter.empty()) || (found_position_ores != std::string::npos && !filter.empty()))
-                                {
+                                if ((found_position_hash != std::string::npos && !filter.empty()) ||
+                                    (found_position_ores != std::string::npos && !filter.empty())) {
                                     found = true;
 
                                     break;
                                 }
                             }
 
-                            if (found || filter.empty())
-                            {
+                            if (found || filter.empty()) {
                                 file::create_directories(ores_ioi_directory);
 
                                 rpkg_extraction_vars rpkg_vars;
@@ -191,7 +180,7 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
 
     LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
 
-    percent_progress = (uint32_t)100;
+    percent_progress = (uint32_t) 100;
 
     task_single_status = TASK_SUCCESSFUL;
     task_multiple_status = TASK_SUCCESSFUL;

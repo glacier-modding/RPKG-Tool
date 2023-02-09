@@ -10,34 +10,61 @@
 
 using json = nlohmann::ordered_json;
 
-class temp
-{
+class temp {
 public:
     temp();
+
     temp(uint64_t rpkgs_index, uint64_t hash_index);
+
     temp(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version);
 
     void load_data();
+
     void load_hash_depends();
+
     void load_temp_data();
+
     void load_tblu_data();
+
     void temp_version_check();
+
     void get_top_level_logical_parents() const;
+
     void get_entries_with_logical_parent(uint32_t logical_parent);
+
     void get_entries_hash_references(uint32_t entry_index);
+
     void get_entries_hash_reference_data(uint32_t entry_index);
+
     void get_temp_entries_data(std::string value_type, std::string type_string);
-    void json_temp_node_scan(const rapidjson::Value& node, std::string& propertyValues_string, std::string& nPropertyID_string, std::string& type_string, std::string json_pointer, std::string json_type);
+
+    void json_temp_node_scan(const rapidjson::Value& node, std::string& propertyValues_string,
+                             std::string& nPropertyID_string, std::string& type_string, std::string json_pointer,
+                             std::string json_type);
+
     void get_entries_data(uint32_t entry_index, std::string value_type);
-    void json_node_scan(const rapidjson::Value& node, std::string& propertyValues_string, std::string& nPropertyID_string, std::string& type_string, std::string json_pointer, std::string json_type);
+
+    void
+    json_node_scan(const rapidjson::Value& node, std::string& propertyValues_string, std::string& nPropertyID_string,
+                   std::string& type_string, std::string json_pointer, std::string json_type);
+
     void get_enum_values(std::string& property_type_string) const;
+
     void get_all_bricks() const;
+
     void get_entry_name_string(int entry_index);
+
     bool rt_json_to_qn_json();
-    void convert_to_qn_reference(rapidjson::Document& json_document, rapidjson::Value& reference, std::string pointer_string);
+
+    void convert_to_qn_reference(rapidjson::Document& json_document, rapidjson::Value& reference,
+                                 std::string pointer_string);
+
     void convert_to_qn_property(rapidjson::Document& json_document, rapidjson::Value& property);
+
     void write_qn_json_to_file(std::string output_path);
+
     void generate_qn_patch_json();
+
     void write_qn_patch_json_to_file(std::string output_path);
 
     std::string temp_file_name = "";

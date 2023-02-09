@@ -15,26 +15,22 @@
 
 sdef::sdef() = default;
 
-sdef::sdef(uint64_t rpkgs_index, uint64_t hash_index)
-{
+sdef::sdef(uint64_t rpkgs_index, uint64_t hash_index) {
     sdef_rpkg_index = rpkgs_index;
     sdef_hash_index = hash_index;
 
-    sdef_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value) + "." + rpkgs.at(rpkgs_index).hash.at(hash_index).hash_resource_type;
+    sdef_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value) + "." +
+                     rpkgs.at(rpkgs_index).hash.at(hash_index).hash_resource_type;
 
     uint64_t sdef_hash_size;
 
-    if (rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).data.lz4ed)
-    {
+    if (rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).data.lz4ed) {
         sdef_hash_size = rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).data.header.data_size;
 
-        if (rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).data.xored)
-        {
+        if (rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).data.xored) {
             sdef_hash_size &= 0x3FFFFFFF;
         }
-    }
-    else
-    {
+    } else {
         sdef_hash_size = rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).data.resource.size_final;
     }
 
@@ -42,8 +38,7 @@ sdef::sdef(uint64_t rpkgs_index, uint64_t hash_index)
 
     std::ifstream file = std::ifstream(rpkgs.at(sdef_rpkg_index).rpkg_file_path, std::ifstream::binary);
 
-    if (!file.good())
-    {
+    if (!file.good()) {
         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(sdef_rpkg_index).rpkg_file_path + " could not be read.");
     }
 
@@ -51,23 +46,20 @@ sdef::sdef(uint64_t rpkgs_index, uint64_t hash_index)
     file.read(sdef_input_data.data(), sdef_hash_size);
     file.close();
 
-    if (rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).data.xored)
-    {
-        crypto::xor_data(sdef_input_data.data(), (uint32_t)sdef_hash_size);
+    if (rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).data.xored) {
+        crypto::xor_data(sdef_input_data.data(), (uint32_t) sdef_hash_size);
     }
 
     const uint32_t sdef_decompressed_size = rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).data.resource.size_final;
 
     sdef_output_data = std::vector<char>(sdef_decompressed_size, 0);
 
-    if (rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).data.lz4ed)
-    {
-        LZ4_decompress_safe(sdef_input_data.data(), sdef_output_data.data(), (int)sdef_hash_size, sdef_decompressed_size);
+    if (rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).data.lz4ed) {
+        LZ4_decompress_safe(sdef_input_data.data(), sdef_output_data.data(), (int) sdef_hash_size,
+                            sdef_decompressed_size);
 
         sdef_data = sdef_output_data;
-    }
-    else
-    {
+    } else {
         sdef_data = sdef_input_data;
     }
 
@@ -75,8 +67,7 @@ sdef::sdef(uint64_t rpkgs_index, uint64_t hash_index)
     std::vector<char>().swap(sdef_input_data);
 }
 
-void sdef::generate_json(std::string output_path)
-{
+void sdef::generate_json(std::string output_path) {
     uint32_t position = 0;
     uint32_t sdef_index = 0;
     uint32_t dlge_bytes = 0;
@@ -86,8 +77,7 @@ void sdef::generate_json(std::string output_path)
 
     json["$schema"] = "https://wiki.glaciermodding.org/schemas/sdef.schema.json";
 
-    for (uint32_t i = 0; i < sdef_entry_count; i++)
-    {
+    for (uint32_t i = 0; i < sdef_entry_count; i++) {
         std::memcpy(&sdef_index, &sdef_data.data()[position], 0x4);
         position += 0x4;
 
@@ -96,15 +86,12 @@ void sdef::generate_json(std::string output_path)
 
         nlohmann::ordered_json temp_json;
 
-        if (dlge_bytes == 0xFFFFFFFF)
-        {
+        if (dlge_bytes == 0xFFFFFFFF) {
             //temp_json["Index"] = sdef_index;
             temp_json["DLGE"] = "";
             temp_json["_Path_Hint"] = "";
             temp_json["_Slot_Hint"] = slots[sdef_index];
-        }
-        else
-        {
+        } else {
             //temp_json["Index"] = sdef_index;
             //temp_json["DLGE"] = util::hash_to_ioi_string(rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).hash_reference_data.hash_reference.at(dlge_bytes), true);
             //temp_json["Path"] = util::hash_to_hash_list_string(rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).hash_reference_data.hash_reference.at(dlge_bytes));
@@ -112,14 +99,19 @@ void sdef::generate_json(std::string output_path)
 
             //temp_json["Index"] = sdef_index;
 
-            std::string dlge_hash_value = util::uint64_t_to_hex_string(rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).hash_reference_data.hash_reference.at(dlge_bytes));
-            std::string dlge_path = util::hash_to_ioi_string(rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).hash_reference_data.hash_reference.at(dlge_bytes), true);
+            std::string dlge_hash_value = util::uint64_t_to_hex_string(
+                    rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).hash_reference_data.hash_reference.at(
+                            dlge_bytes));
+            std::string dlge_path = util::hash_to_ioi_string(
+                    rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).hash_reference_data.hash_reference.at(
+                            dlge_bytes), true);
 
             temp_json["DLGE"] = dlge_path;
 
-            if (dlge_hash_value == dlge_path)
-            {
-                temp_json["_Path_Hint"] = util::hash_to_hash_list_string(rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).hash_reference_data.hash_reference.at(dlge_bytes));
+            if (dlge_hash_value == dlge_path) {
+                temp_json["_Path_Hint"] = util::hash_to_hash_list_string(
+                        rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).hash_reference_data.hash_reference.at(
+                                dlge_bytes));
             }
 
             temp_json["_Slot_Hint"] = slots[sdef_index];
@@ -129,16 +121,19 @@ void sdef::generate_json(std::string output_path)
     }
 
     file::create_directories(output_path);
-    
-    std::ofstream json_file = std::ofstream(file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).hash_value) + "." + rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).hash_resource_type + ".JSON", output_path), std::ofstream::binary);
+
+    std::ofstream json_file = std::ofstream(file::output_path_append(
+                                                    util::uint64_t_to_hex_string(rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).hash_value) + "." +
+                                                    rpkgs.at(sdef_rpkg_index).hash.at(sdef_hash_index).hash_resource_type + ".JSON", output_path),
+                                            std::ofstream::binary);
 
     json_file << std::setw(4) << json << std::endl;
 
     json_file.close();
 }
 
-sdef::sdef(std::string sdef_path, std::string sdef_meta_path, uint64_t hash_value, std::string output_path, bool output_path_is_file)
-{
+sdef::sdef(std::string sdef_path, std::string sdef_meta_path, uint64_t hash_value, std::string output_path,
+           bool output_path_is_file) {
     std::ifstream sdef_file(sdef_path, std::ifstream::binary);
 
     sdef_file.seekg(0, sdef_file.end);
@@ -174,21 +169,15 @@ sdef::sdef(std::string sdef_path, std::string sdef_meta_path, uint64_t hash_valu
     std::memcpy(&bytes4, input, sizeof(bytes4));
     meta_data.data.header.data_size = bytes4;
 
-    if ((meta_data.data.header.data_size & 0x3FFFFFFF) != 0)
-    {
+    if ((meta_data.data.header.data_size & 0x3FFFFFFF) != 0) {
         meta_data.data.lz4ed = true;
-    }
-    else
-    {
+    } else {
         meta_data.data.lz4ed = false;
     }
 
-    if ((meta_data.data.header.data_size & 0x80000000) == 0x80000000)
-    {
+    if ((meta_data.data.header.data_size & 0x80000000) == 0x80000000) {
         meta_data.data.xored = true;
-    }
-    else
-    {
+    } else {
         meta_data.data.xored = false;
     }
 
@@ -218,8 +207,7 @@ sdef::sdef(std::string sdef_path, std::string sdef_meta_path, uint64_t hash_valu
 
     hash_reference_variables temp_hash_reference_data;
 
-    if (meta_data.data.resource.reference_table_size != 0x0)
-    {
+    if (meta_data.data.resource.reference_table_size != 0x0) {
         temp_hash_reference_data.hash_value = meta_data.hash_value;
 
         sdef_meta_file.read(input, sizeof(bytes4));
@@ -228,22 +216,18 @@ sdef::sdef(std::string sdef_path, std::string sdef_meta_path, uint64_t hash_valu
 
         uint32_t temp_hash_reference_count = temp_hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
-        for (uint64_t j = 0; j < temp_hash_reference_count; j++)
-        {
+        for (uint64_t j = 0; j < temp_hash_reference_count; j++) {
             sdef_meta_file.read(input, sizeof(bytes1));
             std::memcpy(&bytes1, input, sizeof(bytes1));
             temp_hash_reference_data.hash_reference_type.push_back(bytes1);
         }
 
-        for (uint64_t j = 0; j < temp_hash_reference_count; j++)
-        {
+        for (uint64_t j = 0; j < temp_hash_reference_count; j++) {
             sdef_meta_file.read(input, sizeof(bytes8));
             std::memcpy(&bytes8, input, sizeof(bytes8));
             temp_hash_reference_data.hash_reference.push_back(bytes8);
         }
-    }
-    else
-    {
+    } else {
         temp_hash_reference_data.hash_reference_count = 0x0;
     }
 
@@ -260,8 +244,7 @@ sdef::sdef(std::string sdef_path, std::string sdef_meta_path, uint64_t hash_valu
 
     json["$schema"] = "https://wiki.glaciermodding.org/schemas/sdef.schema.json";
 
-    for (uint32_t i = 0; i < sdef_entry_count; i++)
-    {
+    for (uint32_t i = 0; i < sdef_entry_count; i++) {
         std::memcpy(&sdef_index, &sdef_data.data()[position], 0x4);
         position += 0x4;
 
@@ -270,15 +253,12 @@ sdef::sdef(std::string sdef_path, std::string sdef_meta_path, uint64_t hash_valu
 
         nlohmann::ordered_json temp_json;
 
-        if (dlge_bytes == 0xFFFFFFFF)
-        {
+        if (dlge_bytes == 0xFFFFFFFF) {
             //temp_json["Index"] = sdef_index;
             temp_json["DLGE"] = "";
             temp_json["_Path_Hint"] = "";
             temp_json["_Slot_Hint"] = slots[sdef_index];
-        }
-        else
-        {
+        } else {
             //temp_json["Index"] = sdef_index;
             //temp_json["DLGE"] = util::hash_to_ioi_string(meta_data.hash_reference_data.hash_reference.at(dlge_bytes), true);
             //temp_json["Path"] = util::hash_to_hash_list_string(meta_data.hash_reference_data.hash_reference.at(dlge_bytes));
@@ -286,14 +266,16 @@ sdef::sdef(std::string sdef_path, std::string sdef_meta_path, uint64_t hash_valu
 
             //temp_json["Index"] = sdef_index;
 
-            std::string dlge_hash_value = util::uint64_t_to_hex_string(meta_data.hash_reference_data.hash_reference.at(dlge_bytes));
-            std::string dlge_path = util::hash_to_ioi_string(meta_data.hash_reference_data.hash_reference.at(dlge_bytes), true);
+            std::string dlge_hash_value = util::uint64_t_to_hex_string(
+                    meta_data.hash_reference_data.hash_reference.at(dlge_bytes));
+            std::string dlge_path = util::hash_to_ioi_string(
+                    meta_data.hash_reference_data.hash_reference.at(dlge_bytes), true);
 
             temp_json["DLGE"] = dlge_path;
 
-            if (dlge_hash_value == dlge_path)
-            {
-                temp_json["_Path_Hint"] = util::hash_to_hash_list_string(meta_data.hash_reference_data.hash_reference.at(dlge_bytes));
+            if (dlge_hash_value == dlge_path) {
+                temp_json["_Path_Hint"] = util::hash_to_hash_list_string(
+                        meta_data.hash_reference_data.hash_reference.at(dlge_bytes));
             }
 
             temp_json["_Slot_Hint"] = slots[sdef_index];
@@ -304,14 +286,13 @@ sdef::sdef(std::string sdef_path, std::string sdef_meta_path, uint64_t hash_valu
 
     std::ofstream json_file;
 
-    if (output_path_is_file)
-    {
+    if (output_path_is_file) {
         json_file = std::ofstream(output_path, std::ofstream::binary);
-    }
-    else
-    {
+    } else {
         file::create_directories(output_path);
-        json_file = std::ofstream(file::output_path_append(util::uint64_t_to_hex_string(hash_value) + ".SDEF.JSON", output_path), std::ofstream::binary);
+        json_file = std::ofstream(
+                file::output_path_append(util::uint64_t_to_hex_string(hash_value) + ".SDEF.JSON", output_path),
+                std::ofstream::binary);
     }
 
     json_file << std::setw(4) << json << std::endl;
@@ -319,33 +300,29 @@ sdef::sdef(std::string sdef_path, std::string sdef_meta_path, uint64_t hash_valu
     json_file.close();
 }
 
-sdef::sdef(std::string json_path, uint64_t hash_value, std::string output_path, bool output_path_is_file)
-{
+sdef::sdef(std::string json_path, uint64_t hash_value, std::string output_path, bool output_path_is_file) {
     std::ifstream input_json_file(json_path);
 
-    try
-    {
+    try {
         input_json_file >> json;
     }
-    catch (json::parse_error& e)
-    {
+    catch (json::parse_error& e) {
         std::stringstream ss;
         ss << "Error: " << json_path << "\n"
-            << "Error message: " << e.what() << '\n'
-            << "Error exception id: " << e.id << '\n'
-            << "Error byte position of error: " << e.byte;
+           << "Error message: " << e.what() << '\n'
+           << "Error exception id: " << e.id << '\n'
+           << "Error byte position of error: " << e.byte;
         json_error = ss.str();
     }
 
     input_json_file.close();
 
-    try
-    {
+    try {
         std::vector<uint64_t> dlge_hash_depends;
 
         dlge_hash_depends.resize(json["SDEF"].size());
 
-        uint32_t sdef_size = (uint32_t)json["SDEF"].size() * 0x8 + 0x4;
+        uint32_t sdef_size = (uint32_t) json["SDEF"].size() * 0x8 + 0x4;
 
         sdef_data = std::vector<char>(sdef_size, 0);
 
@@ -358,8 +335,7 @@ sdef::sdef(std::string json_path, uint64_t hash_value, std::string output_path, 
 
         uint32_t dlge_hash_depends_count = 0;
 
-        for (uint32_t i = 0; i < json["SDEF"].size(); i++)
-        {
+        for (uint32_t i = 0; i < json["SDEF"].size(); i++) {
             //uint32_t sdef_index = json["SDEF"][i]["Index"];
             uint32_t sdef_index = i;
 
@@ -372,24 +348,19 @@ sdef::sdef(std::string json_path, uint64_t hash_value, std::string output_path, 
 
             uint64_t dlge_hash_value = 0;
 
-            if (dlge_hash == "")
-            {
+            if (dlge_hash == "") {
                 dlge_hash_value = 0xFFFFFFFFFFFFFFFF;
 
                 uint32_t dlge_missing = 0xFFFFFFFF;
 
                 std::memcpy(&sdef_data[position], &dlge_missing, 0x4);
-            }
-            else if (dlge_hash.find("[") != std::string::npos)
-            {
+            } else if (dlge_hash.find("[") != std::string::npos) {
                 dlge_hash_value = util::ioi_string_to_hash(dlge_hash);
 
                 std::memcpy(&sdef_data[position], &dlge_hash_depends_count, 0x4);
 
                 dlge_hash_depends_count++;
-            }
-            else
-            {
+            } else {
                 dlge_hash_value = std::strtoull(dlge_hash.c_str(), nullptr, 16);
 
                 std::memcpy(&sdef_data[position], &dlge_hash_depends_count, 0x4);
@@ -402,9 +373,8 @@ sdef::sdef(std::string json_path, uint64_t hash_value, std::string output_path, 
 
         std::vector<char> meta_data;
 
-        for (uint32_t k = 0; k < sizeof(hash_value); k++)
-        {
-            meta_data.push_back(*((char*)&hash_value + k));
+        for (uint32_t k = 0; k < sizeof(hash_value); k++) {
+            meta_data.push_back(*((char*) &hash_value + k));
         }
 
         meta_data.push_back(0x0);
@@ -428,9 +398,8 @@ sdef::sdef(std::string json_path, uint64_t hash_value, std::string output_path, 
 
         dlge_hash_depends_count = dlge_hash_depends_count | 0xC0000000;
 
-        for (uint32_t k = 0; k < sizeof(hash_reference_table_size); k++)
-        {
-            meta_data.push_back(*((char*)&hash_reference_table_size + k));
+        for (uint32_t k = 0; k < sizeof(hash_reference_table_size); k++) {
+            meta_data.push_back(*((char*) &hash_reference_table_size + k));
         }
 
         meta_data.push_back(0x0);
@@ -453,26 +422,20 @@ sdef::sdef(std::string json_path, uint64_t hash_value, std::string output_path, 
         meta_data.push_back(0xFF);
         meta_data.push_back(0xFF);
 
-        for (uint32_t k = 0; k < sizeof(dlge_hash_depends_count); k++)
-        {
-            meta_data.push_back(*((char*)&dlge_hash_depends_count + k));
+        for (uint32_t k = 0; k < sizeof(dlge_hash_depends_count); k++) {
+            meta_data.push_back(*((char*) &dlge_hash_depends_count + k));
         }
 
-        for (uint32_t k = 0; k < dlge_hash_depends.size(); k++)
-        {
-            if (dlge_hash_depends[k] != 0xFFFFFFFFFFFFFFFF)
-            {
+        for (uint32_t k = 0; k < dlge_hash_depends.size(); k++) {
+            if (dlge_hash_depends[k] != 0xFFFFFFFFFFFFFFFF) {
                 meta_data.push_back(0x5F);
             }
         }
 
-        for (uint32_t i = 0; i < dlge_hash_depends.size(); i++)
-        {
-            if (dlge_hash_depends[i] != 0xFFFFFFFFFFFFFFFF)
-            {
-                for (uint32_t k = 0; k < sizeof(dlge_hash_depends.at(i)); k++)
-                {
-                    meta_data.push_back(*((char*)&dlge_hash_depends.at(i) + k));
+        for (uint32_t i = 0; i < dlge_hash_depends.size(); i++) {
+            if (dlge_hash_depends[i] != 0xFFFFFFFFFFFFFFFF) {
+                for (uint32_t k = 0; k < sizeof(dlge_hash_depends.at(i)); k++) {
+                    meta_data.push_back(*((char*) &dlge_hash_depends.at(i) + k));
                 }
             }
         }
@@ -480,16 +443,17 @@ sdef::sdef(std::string json_path, uint64_t hash_value, std::string output_path, 
         std::ofstream sdef_file;
         std::ofstream meta_file;
 
-        if (output_path_is_file)
-        {
+        if (output_path_is_file) {
             sdef_file = std::ofstream(output_path, std::ofstream::binary);
             meta_file = std::ofstream(output_path + ".meta", std::ofstream::binary);
-        }
-        else
-        {
+        } else {
             file::create_directories(output_path);
-            sdef_file = std::ofstream(file::output_path_append(util::uint64_t_to_hex_string(hash_value) + ".SDEF", output_path), std::ofstream::binary);
-            meta_file = std::ofstream(file::output_path_append(util::uint64_t_to_hex_string(hash_value) + ".SDEF.meta", output_path), std::ofstream::binary);
+            sdef_file = std::ofstream(
+                    file::output_path_append(util::uint64_t_to_hex_string(hash_value) + ".SDEF", output_path),
+                    std::ofstream::binary);
+            meta_file = std::ofstream(
+                    file::output_path_append(util::uint64_t_to_hex_string(hash_value) + ".SDEF.meta", output_path),
+                    std::ofstream::binary);
         }
 
         sdef_file.write(sdef_data.data(), sdef_data.size());
@@ -504,13 +468,12 @@ sdef::sdef(std::string json_path, uint64_t hash_value, std::string output_path, 
 
         meta_file.close();
     }
-    catch (json::parse_error& e)
-    {
+    catch (json::parse_error& e) {
         std::stringstream ss;
         ss << "Error: " << json_path << "\n"
-            << "Error message: " << e.what() << '\n'
-            << "Error exception id: " << e.id << '\n'
-            << "Error byte position of error: " << e.byte;
+           << "Error message: " << e.what() << '\n'
+           << "Error exception id: " << e.id << '\n'
+           << "Error byte position of error: " << e.byte;
         json_error = ss.str();
     }
 }

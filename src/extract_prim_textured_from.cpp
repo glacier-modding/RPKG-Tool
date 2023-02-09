@@ -12,28 +12,22 @@
 #include <sstream>
 #include <filesystem>
 
-void rpkg_function::extract_prim_textured_from(std::string& input_path, std::string& filter, std::string& output_path)
-{
+void rpkg_function::extract_prim_textured_from(std::string& input_path, std::string& filter, std::string& output_path) {
     task_single_status = TASK_EXECUTING;
 
     bool input_path_is_rpkg_file = false;
 
-    if (std::filesystem::is_regular_file(input_path))
-    {
+    if (std::filesystem::is_regular_file(input_path)) {
         input_path_is_rpkg_file = true;
     }
 
-    if (!file::path_exists(input_path))
-    {
+    if (!file::path_exists(input_path)) {
         LOG_AND_EXIT("Error: The folder " + input_path + " to with the input RPKGs does not exist.");
     }
 
-    if (!input_path_is_rpkg_file)
-    {
+    if (!input_path_is_rpkg_file) {
         rpkg_function::import_rpkg_files_in_folder(input_path);
-    }
-    else
-    {
+    } else {
         rpkg_function::import_rpkg(input_path, false);
 
         std::filesystem::path base_folder_path = input_path;
@@ -51,8 +45,7 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
 
     //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
 
-    if (!hash_list_loaded)
-    {
+    if (!hash_list_loaded) {
         LOG("Loading Hash List...");
         generic_function::load_hash_list(true);
         LOG("Loading Hash List: Done");
@@ -62,14 +55,12 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
 
     std::vector<std::string> filters = util::parse_input_filter(filter);
 
-    for (const auto & filter : filters)
-    {
+    for (const auto& filter : filters) {
         uint64_t temp_hash_value = std::strtoull(filter.c_str(), nullptr, 16);
 
         uint32_t rpkg_index = rpkg_function::get_latest_hash(temp_hash_value);
 
-        if (rpkg_index == UINT32_MAX)
-        {
+        if (rpkg_index == UINT32_MAX) {
             return;
         }
 
@@ -78,8 +69,7 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
         if (it == rpkgs.at(rpkg_index).hash_map.end())
             continue;
 
-        if (gui_control == ABORT_CURRENT_TASK)
-        {
+        if (gui_control == ABORT_CURRENT_TASK) {
             return;
         }
 
@@ -88,20 +78,20 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
         if (temp_prim.asset3ds_data.vertexes.size() <= 0 || !temp_prim.success)
             continue;
 
-        for (auto & color : temp_prim.asset3ds_data.colors)
-        {
+        for (auto& color : temp_prim.asset3ds_data.colors) {
             std::fill(color.begin(), color.end(), 0);
         }
 
         std::string asset_file_name = "";
 
-        if (output_path.empty())
-        {
-            asset_file_name = std::filesystem::current_path().generic_string() + "/" + util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".glb";
-        }
-        else
-        {
-            asset_file_name = file::output_path_append(util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".glb", output_path);
+        if (output_path.empty()) {
+            asset_file_name = std::filesystem::current_path().generic_string() + "/" +
+                              util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." +
+                              rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".glb";
+        } else {
+            asset_file_name = file::output_path_append(
+                    util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." +
+                    rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".glb", output_path);
 
             file::create_directories(output_path);
         }
@@ -120,20 +110,22 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
 
         std::vector<jpg_textures> all_jpg_textures;
 
-        uint32_t temp_hash_reference_count = rpkgs.at(temp_prim.prim_rpkg_index).hash.at(temp_prim.prim_hash_index).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+        uint32_t temp_hash_reference_count = rpkgs.at(temp_prim.prim_rpkg_index).hash.at(
+                temp_prim.prim_hash_index).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
-        for (uint32_t d = 0; d < temp_hash_reference_count; d++)
-        {
-            uint32_t temp_rpkg_index = rpkg_function::get_latest_hash(rpkgs.at(temp_prim.prim_rpkg_index).hash.at(temp_prim.prim_hash_index).hash_reference_data.hash_reference.at(d));
+        for (uint32_t d = 0; d < temp_hash_reference_count; d++) {
+            uint32_t temp_rpkg_index = rpkg_function::get_latest_hash(rpkgs.at(temp_prim.prim_rpkg_index).hash.at(
+                    temp_prim.prim_hash_index).hash_reference_data.hash_reference.at(d));
 
-            if (temp_rpkg_index == UINT32_MAX)
-            {
+            if (temp_rpkg_index == UINT32_MAX) {
                 return;
             }
 
-            auto it2 = rpkgs.at(temp_rpkg_index).hash_map.find(rpkgs.at(temp_prim.prim_rpkg_index).hash.at(temp_prim.prim_hash_index).hash_reference_data.hash_reference.at(d));
+            auto it2 = rpkgs.at(temp_rpkg_index).hash_map.find(rpkgs.at(temp_prim.prim_rpkg_index).hash.at(
+                    temp_prim.prim_hash_index).hash_reference_data.hash_reference.at(d));
 
-            if (it2 == rpkgs.at(temp_rpkg_index).hash_map.end() || rpkgs.at(temp_rpkg_index).hash.at(it2->second).hash_resource_type != "MATI")
+            if (it2 == rpkgs.at(temp_rpkg_index).hash_map.end() ||
+                rpkgs.at(temp_rpkg_index).hash.at(it2->second).hash_resource_type != "MATI")
                 continue;
 
             jpg_textures temp_jpg_textures;
@@ -146,33 +138,25 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
 
             std::unordered_map<uint64_t, uint64_t>::iterator it3;
 
-            if (temp_mati.has_diffuse_texture)
-            {
+            if (temp_mati.has_diffuse_texture) {
                 uint32_t temp_rpkg_index2 = rpkg_function::get_latest_hash(temp_mati.diffuse_texture_hash);
 
-                if (temp_rpkg_index2 == UINT32_MAX)
-                {
+                if (temp_rpkg_index2 == UINT32_MAX) {
                     return;
                 }
 
                 auto it3 = rpkgs.at(temp_rpkg_index2).hash_map.find(temp_mati.diffuse_texture_hash);
 
-                if (it3 != rpkgs.at(temp_rpkg_index2).hash_map.end())
-                {
+                if (it3 != rpkgs.at(temp_rpkg_index2).hash_map.end()) {
                     text temp_text(temp_rpkg_index2, it3->second);
 
-                    if (temp_text.texd_found)
-                    {
-                        if (temp_text.save_texd_to_jpg(""))
-                        {
+                    if (temp_text.texd_found) {
+                        if (temp_text.save_texd_to_jpg("")) {
                             temp_jpg_textures.has_diffuse_texture = true;
                             temp_jpg_textures.texture_diffuse_jpg = temp_text.texd_data_jpg;
                         }
-                    }
-                    else
-                    {
-                        if (temp_text.save_text_to_jpg(""))
-                        {
+                    } else {
+                        if (temp_text.save_text_to_jpg("")) {
                             temp_jpg_textures.has_diffuse_texture = true;
                             temp_jpg_textures.texture_diffuse_jpg = temp_text.text_data_jpg;
                         }
@@ -180,33 +164,25 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
                 }
             }
 
-            if (temp_mati.has_normal_texture)
-            {
+            if (temp_mati.has_normal_texture) {
                 uint32_t temp_rpkg_index2 = rpkg_function::get_latest_hash(temp_mati.normal_texture_hash);
 
-                if (temp_rpkg_index2 == UINT32_MAX)
-                {
+                if (temp_rpkg_index2 == UINT32_MAX) {
                     return;
                 }
 
                 auto it3 = rpkgs.at(temp_rpkg_index2).hash_map.find(temp_mati.normal_texture_hash);
 
-                if (it3 != rpkgs.at(temp_rpkg_index2).hash_map.end())
-                {
+                if (it3 != rpkgs.at(temp_rpkg_index2).hash_map.end()) {
                     text temp_text(temp_rpkg_index2, it3->second);
 
-                    if (temp_text.texd_found)
-                    {
-                        if (temp_text.save_texd_to_jpg(""))
-                        {
+                    if (temp_text.texd_found) {
+                        if (temp_text.save_texd_to_jpg("")) {
                             temp_jpg_textures.has_normal_texture = true;
                             temp_jpg_textures.texture_normal_jpg = temp_text.texd_data_jpg;
                         }
-                    }
-                    else
-                    {
-                        if (temp_text.save_text_to_jpg(""))
-                        {
+                    } else {
+                        if (temp_text.save_text_to_jpg("")) {
                             temp_jpg_textures.has_normal_texture = true;
                             temp_jpg_textures.texture_normal_jpg = temp_text.text_data_jpg;
                         }
@@ -251,7 +227,8 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
             all_jpg_textures.push_back(temp_jpg_textures);
         }
 
-        gltf::output_to_single_file_with_textures(temp_prim.asset3ds_data, asset_file_name, GLB_SINGLE, false, all_jpg_textures);
+        gltf::output_to_single_file_with_textures(temp_prim.asset3ds_data, asset_file_name, GLB_SINGLE, false,
+                                                  all_jpg_textures);
     }
 
     task_single_status = TASK_SUCCESSFUL;

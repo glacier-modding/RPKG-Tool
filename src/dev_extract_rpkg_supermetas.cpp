@@ -9,8 +9,7 @@
 //#include <sstream>
 //#include <filesystem>
 
-void dev_function::dev_extract_rpkg_supermetas(std::string& input_path, std::string& output_path)
-{
+void dev_function::dev_extract_rpkg_supermetas(std::string& input_path, std::string& output_path) {
     /*input_path = file::parse_input_folder_path(input_path);
 
     std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();

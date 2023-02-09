@@ -15,29 +15,23 @@
 #include <regex>
 #include <filesystem>
 
-void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::string& filter, std::string& output_path)
-{
+void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::string& filter, std::string& output_path) {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
     bool input_path_is_rpkg_file = false;
 
-    if (std::filesystem::is_regular_file(input_path))
-    {
+    if (std::filesystem::is_regular_file(input_path)) {
         input_path_is_rpkg_file = true;
-    }
-    else
-    {
+    } else {
         input_path = file::parse_input_folder_path(input_path);
     }
 
-    if (!file::path_exists(input_path))
-    {
+    if (!file::path_exists(input_path)) {
         LOG_AND_EXIT("Error: The folder " + input_path + " to with the input RPKGs does not exist.");
     }
 
-    if (!input_path_is_rpkg_file)
-    {
+    if (!input_path_is_rpkg_file) {
         rpkg_function::import_rpkg_files_in_folder(input_path);
     }
 
@@ -55,10 +49,8 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
     bool extract_single_hash = false;
 
-    if (filters.size() == 1)
-    {
-        if (util::is_valid_hash(filters.at(0)))
-        {
+    if (filters.size() == 1) {
+        if (util::is_valid_hash(filters.at(0))) {
             extract_single_hash = true;
         }
     }
@@ -70,35 +62,31 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
     double console_update_rate = 1.0 / 2.0;
     int period_count = 1;
 
-    for (auto& rpkg : rpkgs)
-    {
-        for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++)
-        {
+    for (auto& rpkg : rpkgs) {
+        for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++) {
             if (rpkg.hash_resource_types.at(r) != "WWEV")
                 continue;
 
-            for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++)
-            {
+            for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++) {
                 uint64_t hash_index = rpkg.hashes_indexes_based_on_resource_types.at(r).at(j);
 
-                if (gui_control == ABORT_CURRENT_TASK)
-                {
+                if (gui_control == ABORT_CURRENT_TASK) {
                     return;
                 }
 
                 std::string hash_file_name = util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
-                    rpkg.hash.at(hash_index).hash_resource_type;
+                                             rpkg.hash.at(hash_index).hash_resource_type;
 
                 std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
 
-                double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+                double time_in_seconds_from_start_time = (0.000000001 *
+                                                          std::chrono::duration_cast<std::chrono::nanoseconds>(
+                                                                  end_time - start_time).count());
 
-                if (time_in_seconds_from_start_time > console_update_rate)
-                {
+                if (time_in_seconds_from_start_time > console_update_rate) {
                     start_time = end_time;
 
-                    if (period_count > 3)
-                    {
+                    if (period_count > 3) {
                         period_count = 0;
                     }
 
@@ -131,80 +119,74 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
     std::string message = "Extracting WWEV files: ";
 
-    if (filter != "")
-    {
+    if (filter != "") {
         LOG("Extracting WWEV to *.wem/*.ogg files with filter \"" << filter << "\"");
     }
-        
+
     uint64_t wwev_count_current = 0;
     uint64_t wwev_hash_size_current = 0;
 
     std::vector<std::string> found_in;
     std::vector<std::string> not_found_in;
 
-    for (uint64_t z = 0; z < filters.size(); z++)
-    {
+    for (uint64_t z = 0; z < filters.size(); z++) {
         found_in.push_back("");
 
         not_found_in.push_back("");
     }
 
-    for (uint64_t i = 0; i < rpkgs.size(); i++)
-    {
+    for (uint64_t i = 0; i < rpkgs.size(); i++) {
         bool archive_folder_created = false;
 
         std::vector<bool> extracted;
 
-        for (uint64_t z = 0; z < filters.size(); z++)
-        {
+        for (uint64_t z = 0; z < filters.size(); z++) {
             extracted.push_back(false);
         }
 
-        if (rpkgs.at(i).rpkg_file_path == input_path || !input_path_is_rpkg_file)
-        {
-            for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++)
-            {
+        if (rpkgs.at(i).rpkg_file_path == input_path || !input_path_is_rpkg_file) {
+            for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++) {
                 if (rpkgs.at(i).hash_resource_types.at(r) != "WWEV")
                     continue;
 
-                for (uint64_t j = 0; j < rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).size(); j++)
-                {
+                for (uint64_t j = 0; j < rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).size(); j++) {
                     uint64_t hash_index = rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).at(j);
 
-                    if (gui_control == ABORT_CURRENT_TASK)
-                    {
+                    if (gui_control == ABORT_CURRENT_TASK) {
                         return;
                     }
 
-                    std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
+                    std::string hash_file_name =
+                            util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." +
+                            rpkgs.at(i).hash.at(hash_index).hash_resource_type;
 
-                    if (((wwev_count_current * static_cast<uint64_t>(100000)) / (uint64_t)wwev_count) % static_cast<uint64_t>(10) == 0 && wwev_count_current > 0)
-                    {
-                        stringstream_length = console::update_console(message, wwev_hash_size_total, wwev_hash_size_current, start_time, stringstream_length);
+                    if (((wwev_count_current * static_cast<uint64_t>(100000)) / (uint64_t) wwev_count) %
+                        static_cast<uint64_t>(10) == 0 && wwev_count_current > 0) {
+                        stringstream_length = console::update_console(message, wwev_hash_size_total,
+                                                                      wwev_hash_size_current, start_time,
+                                                                      stringstream_length);
                     }
 
                     wwev_hash_size_current += rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
 
                     wwev_count_current++;
 
-                    if (extract_single_hash && (!extract_single_hash || filter != util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value)))
+                    if (extract_single_hash && (!extract_single_hash || filter != util::uint64_t_to_hex_string(
+                            rpkgs.at(i).hash.at(hash_index).hash_value)))
                         continue;
 
-                    std::string current_path = file::output_path_append("WWEV\\" + rpkgs.at(i).rpkg_file_name, output_path);
+                    std::string current_path = file::output_path_append("WWEV\\" + rpkgs.at(i).rpkg_file_name,
+                                                                        output_path);
 
                     uint64_t hash_size;
 
-                    if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
-                    {
+                    if (rpkgs.at(i).hash.at(hash_index).data.lz4ed) {
                         hash_size = rpkgs.at(i).hash.at(hash_index).data.header.data_size;
 
-                        if (rpkgs.at(i).hash.at(hash_index).data.xored)
-                        {
+                        if (rpkgs.at(i).hash.at(hash_index).data.xored) {
                             hash_size &= 0x3FFFFFFF;
                         }
-                    }
-                    else
-                    {
+                    } else {
                         hash_size = rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
                     }
 
@@ -212,8 +194,7 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
                     std::ifstream file = std::ifstream(rpkgs.at(i).rpkg_file_path, std::ifstream::binary);
 
-                    if (!file.good())
-                    {
+                    if (!file.good()) {
                         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(i).rpkg_file_path + " could not be read.");
                     }
 
@@ -221,8 +202,7 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
                     file.read(input_data.data(), hash_size);
                     file.close();
 
-                    if (rpkgs.at(i).hash.at(hash_index).data.xored)
-                    {
+                    if (rpkgs.at(i).hash.at(hash_index).data.xored) {
                         crypto::xor_data(input_data.data(), static_cast<uint32_t>(hash_size));
                     }
 
@@ -232,14 +212,12 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
                     std::vector<char>* wwev_data;
 
-                    if (rpkgs.at(i).hash.at(hash_index).data.lz4ed)
-                    {
-                        LZ4_decompress_safe(input_data.data(), output_data.data(), static_cast<int>(hash_size), decompressed_size);
+                    if (rpkgs.at(i).hash.at(hash_index).data.lz4ed) {
+                        LZ4_decompress_safe(input_data.data(), output_data.data(), static_cast<int>(hash_size),
+                                            decompressed_size);
 
                         wwev_data = &output_data;
-                    }
-                    else
-                    {
+                    } else {
                         wwev_data = &input_data;
                     }
 
@@ -262,20 +240,20 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
                     std::memcpy(&hash, &rpkgs.at(i).hash.at(hash_index).hash_value, 0x8);
 
-                    for (char& k : hash)
-                    {
+                    for (char& k : hash) {
                         wwev_meta_data.push_back(k);
                     }
 
-                    std::memcpy(&input, &wwev_data->data()[position], (wwev_file_name_length + static_cast<uint64_t>(0xC)));
-                    for (uint64_t k = 0; k < (wwev_file_name_length + static_cast<uint64_t>(0xC)); k++)
-                    {
+                    std::memcpy(&input, &wwev_data->data()[position],
+                                (wwev_file_name_length + static_cast<uint64_t>(0xC)));
+                    for (uint64_t k = 0; k < (wwev_file_name_length + static_cast<uint64_t>(0xC)); k++) {
                         wwev_meta_data.push_back(input[k]);
                     }
 
                     position += 0x4;
 
-                    std::vector<char> wwev_file_name(static_cast<uint64_t>(wwev_file_name_length) + static_cast<uint64_t>(1), 0);
+                    std::vector<char> wwev_file_name(
+                            static_cast<uint64_t>(wwev_file_name_length) + static_cast<uint64_t>(1), 0);
                     wwev_file_name[wwev_file_name_length] = 0;
 
                     std::memcpy(wwev_file_name.data(), &wwev_data->data()[position], wwev_file_name_length);
@@ -291,14 +269,14 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
                     uint64_t input_filter_index = 0;
 
-                    for (uint64_t z = 0; z < filters.size(); z++)
-                    {
+                    for (uint64_t z = 0; z < filters.size(); z++) {
                         std::size_t found_position_hash = hash_file_name.find(filters.at(z));
 
-                        std::size_t found_position_wwev = util::to_upper_case(std::string(wwev_file_name.data())).find(filters.at(z));
+                        std::size_t found_position_wwev = util::to_upper_case(std::string(wwev_file_name.data())).find(
+                                filters.at(z));
 
-                        if ((found_position_hash != std::string::npos && !filters.at(z).empty()) || (found_position_wwev != std::string::npos && !filters.at(z).empty()))
-                        {
+                        if ((found_position_hash != std::string::npos && !filters.at(z).empty()) ||
+                            (found_position_wwev != std::string::npos && !filters.at(z).empty())) {
                             found = true;
 
                             input_filter_index = z;
@@ -310,13 +288,11 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
                     if (!found && !filter.empty())
                         continue;
 
-                    if (!filters.empty())
-                    {
+                    if (!filters.empty()) {
                         extracted.at(input_filter_index) = true;
                     }
 
-                    if (!archive_folder_created)
-                    {
+                    if (!archive_folder_created) {
                         file::create_directories(current_path);
 
                         archive_folder_created = true;
@@ -335,20 +311,17 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
                     file::create_directories(ogg_path);
 
-                    std::ofstream wwev_meta_data_file = std::ofstream(current_path + "\\" + "meta", std::ofstream::binary);
+                    std::ofstream wwev_meta_data_file = std::ofstream(current_path + "\\" + "meta",
+                                                                      std::ofstream::binary);
 
-                    if (!wwev_meta_data_file.good())
-                    {
+                    if (!wwev_meta_data_file.good()) {
                         LOG_AND_EXIT("Error: meta file " + current_path + "\\" + "meta" + " could not be created.");
                     }
 
-                    if (wwev_file_count > 0)
-                    {
-                        for (uint64_t k = 0; k < wwev_file_count; k++)
-                        {
+                    if (wwev_file_count > 0) {
+                        for (uint64_t k = 0; k < wwev_file_count; k++) {
                             std::memcpy(&input, &wwev_data->data()[position], 0x8);
-                            for (uint64_t l = 0; l < 0x8; l++)
-                            {
+                            for (uint64_t l = 0; l < 0x8; l++) {
                                 wwev_meta_data.push_back(input[l]);
                             }
 
@@ -368,8 +341,7 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
                             std::ofstream output_file = std::ofstream(wem_file, std::ofstream::binary);
 
-                            if (!output_file.good())
-                            {
+                            if (!output_file.good()) {
                                 LOG_AND_EXIT("Error: wem file " + wem_file + " could not be created.");
                             }
 
@@ -377,39 +349,37 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
                             output_file.close();
 
-                            if (!file::path_exists("packed_codebooks_aoTuV_603.bin"))
-                            {
+                            if (!file::path_exists("packed_codebooks_aoTuV_603.bin")) {
                                 LOG("Error: Missing packed_codebooks_aoTuV_603.bin file.");
                                 LOG("       Attempting to create the packed_codebooks_aoTuV_603.bin file.");
 
                                 output_file = std::ofstream("packed_codebooks_aoTuV_603.bin", std::ofstream::binary);
 
-                                if (!output_file.good())
-                                {
-                                    LOG_AND_EXIT("Error: packed_codebooks_aoTuV_603.bin file packed_codebooks_aoTuV_603.bin could not be created.");
+                                if (!output_file.good()) {
+                                    LOG_AND_EXIT(
+                                            "Error: packed_codebooks_aoTuV_603.bin file packed_codebooks_aoTuV_603.bin could not be created.");
                                 }
 
-                                output_file.write((const char*)codebook, sizeof(codebook));
+                                output_file.write((const char*) codebook, sizeof(codebook));
                             }
 
                             std::string ogg_file = ogg_path + "\\" + std::to_string(k) + ".ogg";
 
                             output_file = std::ofstream(ogg_file, std::ofstream::binary);
 
-                            if (!output_file.good())
-                            {
+                            if (!output_file.good()) {
                                 LOG_AND_EXIT("Error: ogg file " + ogg_file + " could not be created.");
                             }
 
-                            try
-                            {
-                                Wwise_RIFF_Vorbis ww(wem_file, "packed_codebooks_aoTuV_603.bin", false, false, kNoForcePacketFormat);
+                            try {
+                                Wwise_RIFF_Vorbis ww(wem_file, "packed_codebooks_aoTuV_603.bin", false, false,
+                                                     kNoForcePacketFormat);
 
                                 ww.generate_ogg(output_file);
                             }
-                            catch (const Parse_error& pe)
-                            {
-                                LOG("WWEV resource found: " << hash_file_name << " in RPKG file: " << rpkgs.at(i).rpkg_file_name);
+                            catch (const Parse_error& pe) {
+                                LOG("WWEV resource found: " << hash_file_name << " in RPKG file: "
+                                                            << rpkgs.at(i).rpkg_file_name);
                                 LOG("Error parsing ogg file " << wem_file << " could not be created.");
                                 LOG("Error: " << pe);
                             }
@@ -418,24 +388,17 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
                             revorb(ogg_file);
                         }
-                    }
-                    else
-                    {
+                    } else {
                         std::memcpy(&bytes4, &wwev_data->data()[position], 0x4);
 
-                        if (bytes4 == 0)
-                        {
+                        if (bytes4 == 0) {
                             std::memcpy(&input, &wwev_data->data()[position], 0x4);
-                            for (uint64_t k = 0; k < 0x4; k++)
-                            {
+                            for (uint64_t k = 0; k < 0x4; k++) {
                                 wwev_meta_data.push_back(input[k]);
                             }
-                        }
-                        else
-                        {
+                        } else {
                             std::memcpy(&input, &wwev_data->data()[position], 0x4);
-                            for (uint64_t k = 0; k < 0x4; k++)
-                            {
+                            for (uint64_t k = 0; k < 0x4; k++) {
                                 wwev_meta_data.push_back(input[k]);
                             }
 
@@ -443,19 +406,16 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
                             position += 0x4;
 
-                            for (uint64_t k = 0; k < bytes4; k++)
-                            {
+                            for (uint64_t k = 0; k < bytes4; k++) {
                                 std::memcpy(&input, &wwev_data->data()[position], 0x4);
-                                for (uint64_t l = 0; l < 0x4; l++)
-                                {
+                                for (uint64_t l = 0; l < 0x4; l++) {
                                     wwev_meta_data.push_back(input[l]);
                                 }
 
                                 position += 0x4;
 
                                 std::memcpy(&input, &wwev_data->data()[position], 0x4);
-                                for (uint64_t l = 0; l < 0x4; l++)
-                                {
+                                for (uint64_t l = 0; l < 0x4; l++) {
                                     wwev_meta_data.push_back(input[l]);
                                 }
 
@@ -466,8 +426,7 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
                                 std::memcpy(&wem_size, &wwev_data->data()[position], sizeof(bytes4));
 
                                 std::memcpy(&input, &wwev_data->data()[position], 0x4);
-                                for (uint64_t l = 0; l < 0x4; l++)
-                                {
+                                for (uint64_t l = 0; l < 0x4; l++) {
                                     wwev_meta_data.push_back(input[l]);
                                 }
 
@@ -478,23 +437,17 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
                         }
                     }
 
-                    if ((position + 0x4) <= decompressed_size)
-                    {
+                    if ((position + 0x4) <= decompressed_size) {
                         std::memcpy(&bytes4, &wwev_data->data()[position], 0x4);
 
-                        if (bytes4 == 0)
-                        {
+                        if (bytes4 == 0) {
                             std::memcpy(&input, &wwev_data->data()[position], 0x4);
-                            for (uint64_t k = 0; k < 0x4; k++)
-                            {
+                            for (uint64_t k = 0; k < 0x4; k++) {
                                 wwev_meta_data.push_back(input[k]);
                             }
-                        }
-                        else
-                        {
+                        } else {
                             std::memcpy(&input, &wwev_data->data()[position], 0x4);
-                            for (uint64_t k = 0; k < 0x4; k++)
-                            {
+                            for (uint64_t k = 0; k < 0x4; k++) {
                                 wwev_meta_data.push_back(input[k]);
                             }
 
@@ -502,19 +455,16 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
                             position += 0x4;
 
-                            for (uint64_t k = 0; k < bytes4; k++)
-                            {
+                            for (uint64_t k = 0; k < bytes4; k++) {
                                 std::memcpy(&input, &wwev_data->data()[position], 0x4);
-                                for (uint64_t l = 0; l < 0x4; l++)
-                                {
+                                for (uint64_t l = 0; l < 0x4; l++) {
                                     wwev_meta_data.push_back(input[l]);
                                 }
 
                                 position += 0x4;
 
                                 std::memcpy(&input, &wwev_data->data()[position], 0x4);
-                                for (uint64_t l = 0; l < 0x4; l++)
-                                {
+                                for (uint64_t l = 0; l < 0x4; l++) {
                                     wwev_meta_data.push_back(input[l]);
                                 }
 
@@ -525,8 +475,7 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
                                 std::memcpy(&wem_size, &wwev_data->data()[position], sizeof(bytes4));
 
                                 std::memcpy(&input, &wwev_data->data()[position], 0x4);
-                                for (uint64_t l = 0; l < 0x4; l++)
-                                {
+                                for (uint64_t l = 0; l < 0x4; l++) {
                                     wwev_meta_data.push_back(input[l]);
                                 }
 
@@ -541,7 +490,9 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
                     wwev_meta_data_file.close();
 
-                    std::string final_path = current_path + "\\" + util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
+                    std::string final_path = current_path + "\\" +
+                                             util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) +
+                                             "." + rpkgs.at(i).hash.at(hash_index).hash_resource_type;
 
                     rpkg_function::extract_hash_meta(i, hash_index, final_path);
                 }
@@ -551,27 +502,17 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
         if (filter.empty())
             continue;
 
-        for (uint64_t z = 0; z < filters.size(); z++)
-        {
-            if (extracted.at(z))
-            {
-                if (found_in.at(z) == "")
-                {
+        for (uint64_t z = 0; z < filters.size(); z++) {
+            if (extracted.at(z)) {
+                if (found_in.at(z) == "") {
                     found_in.at(z).append(rpkgs.at(i).rpkg_file_name);
-                }
-                else
-                {
+                } else {
                     found_in.at(z).append(", " + rpkgs.at(i).rpkg_file_name);
                 }
-            }
-            else
-            {
-                if (not_found_in.at(z).empty())
-                {
+            } else {
+                if (not_found_in.at(z).empty()) {
                     not_found_in.at(z).append(rpkgs.at(i).rpkg_file_name);
-                }
-                else
-                {
+                } else {
                     not_found_in.at(z).append(", " + rpkgs.at(i).rpkg_file_name);
                 }
             }
@@ -582,16 +523,15 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
     ss.str(std::string());
 
-    ss << message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
+    ss << message << "100% Done in "
+       << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
 
     LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
 
     percent_progress = static_cast<uint32_t>(100);
 
-    if (!filter.empty())
-    {
-        for (uint64_t z = 0; z < filters.size(); z++)
-        {
+    if (!filter.empty()) {
+        for (uint64_t z = 0; z < filters.size(); z++) {
             LOG(std::endl << "\"" << filters.at(z) << "\" was found in and extracted from: " << found_in.at(z));
 
             LOG(std::endl << "\"" << filters.at(z) << "\" was not found in RPKG file(s): " << not_found_in.at(z));

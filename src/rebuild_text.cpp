@@ -8,14 +8,14 @@
 #include <fstream>
 #include <filesystem>
 
-bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file_path, std::string& text_file_name, std::string& meta_file_path, std::string& rpkg_output_file, std::string& rpkgs_path, bool generate_rpkgs)
-{
+bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file_path, std::string& text_file_name,
+                                 std::string& meta_file_path, std::string& rpkg_output_file, std::string& rpkgs_path,
+                                 bool generate_rpkgs) {
     gpudevice gpu;
 
     std::ifstream meta_file = std::ifstream(meta_file_path, std::ifstream::binary);
 
-    if (!meta_file.good())
-    {
+    if (!meta_file.good()) {
         LOG("Error: TEXT PNG Meta file " + meta_file_path + " could not be opened.");
 
         return false;
@@ -101,8 +101,7 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
     std::string rpkg_output_file_name = rpkg_output_file;
 
-    if (generate_rpkgs)
-    {
+    if (generate_rpkgs) {
         file::create_directories(rpkg_output_dir);
     }
 
@@ -115,14 +114,11 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
     LOG("  - TEXT meta TEXD hash value: " + util::uint64_t_to_hex_string(texd_hash_value));
 
-    if (texd_hash_value == 0x0)
-    {
+    if (texd_hash_value == 0x0) {
         texd_found = false;
 
         LOG("  - TEXT meta TEXD found: False");
-    }
-    else
-    {
+    } else {
         texd_found = true;
 
         LOG("  - TEXT meta TEXD found: True");
@@ -138,28 +134,17 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
     LOG("  - TEXT meta texture type: " + util::uint16_t_to_hex_string(text_type));
 
-    if (text_type == 0x0)
-    {
+    if (text_type == 0x0) {
         LOG("  - TEXT meta texture type: Color");
-    }
-    else if (text_type == 0x1)
-    {
+    } else if (text_type == 0x1) {
         LOG("  - TEXT meta texture type: Normal");
-    }
-    else if (text_type == 0x2)
-    {
+    } else if (text_type == 0x2) {
         LOG("  - TEXT meta texture type: Height");
-    }
-    else if (text_type == 0x3)
-    {
+    } else if (text_type == 0x3) {
         LOG("  - TEXT meta texture type: Compound Normal");
-    }
-    else if (text_type == 0x4)
-    {
+    } else if (text_type == 0x4) {
         LOG("  - TEXT meta texture type: Billboard");
-    }
-    else
-    {
+    } else {
         LOG("  - TEXT meta texture type: Unknown");
     }
 
@@ -188,12 +173,9 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
     LOG("  - TEXT meta DirectX format: " + util::uint32_t_to_hex_string(text_directx_format));
 
-    if (text_directx_format < 123)
-    {
+    if (text_directx_format < 123) {
         LOG("  - TEXT meta DirectX format: " + DirectXFormatsStrings[text_directx_format]);
-    }
-    else
-    {
+    } else {
         LOG("  - TEXT meta DirectX format: Unknown");
     }
 
@@ -222,26 +204,22 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
     LOG("  - TEXT meta mips mode: " + util::uint32_t_to_hex_string(text_mips_mode));
 
-    for (uint32_t m = 0; m < 0xE; m++)
-    {
+    for (uint32_t m = 0; m < 0xE; m++) {
         std::memcpy(&bytes4, &meta_data.data()[position], sizeof(bytes4));
         position += 0x4;
 
-        if (m < text_mips_count)
-        {
+        if (m < text_mips_count) {
             LOG("  - TEXT meta mips data 1 (" + std::to_string(m) + "): " + util::uint32_t_to_hex_string(bytes4));
 
             text_mips_data_1.push_back(bytes4);
         }
     }
 
-    for (uint32_t m = 0; m < 0xE; m++)
-    {
+    for (uint32_t m = 0; m < 0xE; m++) {
         std::memcpy(&bytes4, &meta_data.data()[position], sizeof(bytes4));
         position += 0x4;
 
-        if (m < text_mips_count)
-        {
+        if (m < text_mips_count) {
             LOG("  - TEXT meta mips data 2 (" + std::to_string(m) + "): " + util::uint32_t_to_hex_string(bytes4));
 
             text_mips_data_2.push_back(bytes4);
@@ -273,14 +251,11 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
     LOG("  - TEXT meta scaling height (2^): " + util::uint32_t_to_string(text_scaling_height));
 
-    if (text_scaling_width == 0 && text_scaling_height == 0)
-    {
+    if (text_scaling_width == 0 && text_scaling_height == 0) {
         text_texd_scale = 1;
         text_width = texd_width;
         text_height = texd_height;
-    }
-    else
-    {
+    } else {
         text_texd_scale_width = (2 << (text_scaling_width - 1));
         text_texd_scale_height = (2 << (text_scaling_height - 1));
         text_texd_scale = text_texd_scale_width * text_texd_scale_height;
@@ -304,14 +279,11 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
     //text_texture_data_size = text_data.size();
     //text_texture_data_size -= text_texture_data_offset;
 
-    if (text_mips_data_1.at(0) != text_mips_data_2.at(0))
-    {
+    if (text_mips_data_1.at(0) != text_mips_data_2.at(0)) {
         text_is_lz4ed = true;
 
         LOG("  - TEXT data is LZ4ed: True");
-    }
-    else
-    {
+    } else {
         LOG("  - TEXT data is LZ4ed: False");
     }
 
@@ -335,8 +307,7 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
     HRESULT hresult = CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
 
-    if (FAILED(hresult))
-    {
+    if (FAILED(hresult)) {
         LOG("Failed to initilize COM.");
 
         return false;
@@ -346,13 +317,12 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
     uint16_t header_texd_height = 0;
     uint8_t header_mipmaps_count = 0;
 
-    if (texd_found)
-    {
+    if (texd_found) {
         //hresult = DirectX::LoadFromWICFile(texture_file_path.generic_wstring().c_str(), DirectX::WIC_FLAGS_NONE, &texture_meta_data, texd_tga);
-        hresult = DirectX::LoadFromTGAFile(texture_file_path.generic_wstring().c_str(), DirectX::TGA_FLAGS_NONE, &texture_meta_data, texd_tga);
+        hresult = DirectX::LoadFromTGAFile(texture_file_path.generic_wstring().c_str(), DirectX::TGA_FLAGS_NONE,
+                                           &texture_meta_data, texd_tga);
 
-        if (FAILED(hresult))
-        {
+        if (FAILED(hresult)) {
             LOG("Error: TGA file " + texture_file_path.generic_string() + " importing failed.");
 
             return false;
@@ -383,30 +353,28 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
         //}
         //}
 
-        hresult = DirectX::Resize(*texd_tga.GetImage(0, 0, 0), text_width, text_height, DirectX::TEX_FILTER_DEFAULT, text_tga);
+        hresult = DirectX::Resize(*texd_tga.GetImage(0, 0, 0), text_width, text_height, DirectX::TEX_FILTER_DEFAULT,
+                                  text_tga);
 
-        if (FAILED(hresult))
-        {
+        if (FAILED(hresult)) {
             LOG("Error: TGA resizing of " + texture_file_path.generic_string() + " for TEXT failed.");
 
             return false;
         }
-    }
-    else
-    {
+    } else {
         //hresult = DirectX::LoadFromWICFile(texture_file_path.generic_wstring().c_str(), DirectX::WIC_FLAGS_NONE, &texture_meta_data, text_tga);
-        hresult = DirectX::LoadFromTGAFile(texture_file_path.generic_wstring().c_str(), DirectX::TGA_FLAGS_NONE, &texture_meta_data, text_tga);
+        hresult = DirectX::LoadFromTGAFile(texture_file_path.generic_wstring().c_str(), DirectX::TGA_FLAGS_NONE,
+                                           &texture_meta_data, text_tga);
 
-        if (FAILED(hresult))
-        {
+        if (FAILED(hresult)) {
             LOG("Error: TGA file " + texture_file_path.generic_string() + " importing failed.");
 
             return false;
         }
 
-        if (text_tga.GetImage(0, 0, 0)->width != text_width || text_tga.GetImage(0, 0, 0)->height != text_height)
-        {
-            LOG("Error: Dimensions of imported TGA file " + texture_file_path.generic_string() + " do not match original TEXT's dimentions.");
+        if (text_tga.GetImage(0, 0, 0)->width != text_width || text_tga.GetImage(0, 0, 0)->height != text_height) {
+            LOG("Error: Dimensions of imported TGA file " + texture_file_path.generic_string() +
+                " do not match original TEXT's dimentions.");
 
             LOG("TEXT width original: " + util::uint16_t_to_string(text_width));
             LOG("TEXT height original: " + util::uint16_t_to_string(text_height));
@@ -421,26 +389,22 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
             //if (FAILED(hresult))
             //{
-                //LOG_AND_EXIT("Error: TGA resizing of " + texture_file_path.generic_string() + " for TEXD failed.");
+            //LOG_AND_EXIT("Error: TGA resizing of " + texture_file_path.generic_string() + " for TEXD failed.");
             //}
         }
     }
 
-    if (texd_found)
-    {
+    if (texd_found) {
         uint32_t mips_count = 1;
         uint32_t temp_text_width = header_texd_width;
         uint32_t temp_text_height = header_texd_height;
 
-        while (temp_text_width > 1 || temp_text_height > 1)
-        {
-            if (temp_text_width > 1)
-            {
+        while (temp_text_width > 1 || temp_text_height > 1) {
+            if (temp_text_width > 1) {
                 temp_text_width >>= 1;
             }
 
-            if (temp_text_height > 1)
-            {
+            if (temp_text_height > 1) {
                 temp_text_height >>= 1;
             }
 
@@ -450,50 +414,44 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
         header_mipmaps_count = mips_count;
 
         //hresult = DirectX::GenerateMipMaps(*texd_tga.GetImage(0, 0, 0), DirectX::TEX_FILTER_FLAGS::TEX_FILTER_DEFAULT, text_mips_count, texd_mipmaps);
-        hresult = DirectX::GenerateMipMaps(*texd_tga.GetImage(0, 0, 0), DirectX::TEX_FILTER_FLAGS::TEX_FILTER_DEFAULT, mips_count, texd_mipmaps);
+        hresult = DirectX::GenerateMipMaps(*texd_tga.GetImage(0, 0, 0), DirectX::TEX_FILTER_FLAGS::TEX_FILTER_DEFAULT,
+                                           mips_count, texd_mipmaps);
 
-        if (FAILED(hresult))
-        {
+        if (FAILED(hresult)) {
             LOG("Error: Couldn't generate mipmaps for TGA file " + texture_file_path.generic_string() + ".");
 
             return false;
         }
-    }
-    else
-    {
-        if (text_mips_count > 1)
-        {
+    } else {
+        if (text_mips_count > 1) {
             uint32_t mips_count = 1;
             uint32_t temp_text_width = text_width;
             uint32_t temp_text_height = text_height;
 
-            while (temp_text_width > 1 || temp_text_height > 1)
-            {
-                if (temp_text_width > 1)
-                {
+            while (temp_text_width > 1 || temp_text_height > 1) {
+                if (temp_text_width > 1) {
                     temp_text_width >>= 1;
                 }
 
-                if (temp_text_height > 1)
-                {
+                if (temp_text_height > 1) {
                     temp_text_height >>= 1;
                 }
 
                 mips_count++;
             }
 
-            if (text_mips_count != mips_count)
-            {
+            if (text_mips_count != mips_count) {
                 LOG("Error: TEXD header mipmap count and calculated mipmap count mismatch.");
 
                 return false;
             }
 
-            hresult = DirectX::GenerateMipMaps(*text_tga.GetImage(0, 0, 0), DirectX::TEX_FILTER_FLAGS::TEX_FILTER_DEFAULT, mips_count, text_mipmaps);
+            hresult = DirectX::GenerateMipMaps(*text_tga.GetImage(0, 0, 0),
+                                               DirectX::TEX_FILTER_FLAGS::TEX_FILTER_DEFAULT, mips_count, text_mipmaps);
 
-            if (FAILED(hresult))
-            {
-                LOG("Error: Couldn't generate resized mipmaps for TGA file " + texture_file_path.generic_string() + ".");
+            if (FAILED(hresult)) {
+                LOG("Error: Couldn't generate resized mipmaps for TGA file " + texture_file_path.generic_string() +
+                    ".");
 
                 return false;
             }
@@ -530,61 +488,45 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
     if (text_directx_format == 0x1C) //R8G8B8A8
     {
         directx_compression_format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    }
-    else if (text_directx_format == 0x34) //R8G8
+    } else if (text_directx_format == 0x34) //R8G8
     {
         directx_compression_format = DXGI_FORMAT_R8G8_UNORM;
-    }
-    else if (text_directx_format == 0x42) //A8
+    } else if (text_directx_format == 0x42) //A8
     {
         directx_compression_format = DXGI_FORMAT_A8_UNORM;
-    }
-    else if (text_directx_format == 0x49) //DXT1
+    } else if (text_directx_format == 0x49) //DXT1
     {
         directx_compression_format = DXGI_FORMAT_BC1_UNORM;
-    }
-    else if (text_directx_format == 0x4F) //DXT5
+    } else if (text_directx_format == 0x4F) //DXT5
     {
         directx_compression_format = DXGI_FORMAT_BC3_UNORM;
-    }
-    else if (text_directx_format == 0x52) //BC4
+    } else if (text_directx_format == 0x52) //BC4
     {
         directx_compression_format = DXGI_FORMAT_BC4_UNORM;
-    }
-    else if (text_directx_format == 0x55) //BC5
+    } else if (text_directx_format == 0x55) //BC5
     {
         directx_compression_format = DXGI_FORMAT_BC5_UNORM;
 
-        if (texd_found)
-        {
-            for (uint32_t d = 2; d < texd_mipmaps.GetPixelsSize(); d += 4)
-            {
+        if (texd_found) {
+            for (uint32_t d = 2; d < texd_mipmaps.GetPixelsSize(); d += 4) {
                 texd_mipmaps.GetPixels()[d] = 0xFF;
             }
         }
 
-        if (text_mips_count > 1)
-        {
-            for (uint32_t d = 2; d < text_mipmaps.GetPixelsSize(); d += 4)
-            {
+        if (text_mips_count > 1) {
+            for (uint32_t d = 2; d < text_mipmaps.GetPixelsSize(); d += 4) {
                 text_mipmaps.GetPixels()[d] = 0xFF;
             }
-        }
-        else
-        {
-            for (uint32_t d = 2; d < text_tga.GetPixelsSize(); d += 4)
-            {
+        } else {
+            for (uint32_t d = 2; d < text_tga.GetPixelsSize(); d += 4) {
                 text_tga.GetPixels()[d] = 0xFF;
             }
         }
-    }
-    else if (text_directx_format == 0x5A) //BC7
+    } else if (text_directx_format == 0x5A) //BC7
     {
         //directx_compression_format = DXGI_FORMAT_BC7_UNORM_SRGB;
         directx_compression_format = DXGI_FORMAT_BC7_UNORM;
-    }
-    else
-    {
+    } else {
         LOG("Error: DirectX format (" + util::uint16_t_to_hex_string(text_directx_format) + ") unsupported.");
 
         return false;
@@ -593,33 +535,37 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
     uint32_t mipmap_count_1 = 0;
     uint32_t mipmap_count_2 = 0;
 
-    if (texd_found)
-    {
-        for (uint32_t m = 0; m < texd_mipmaps.GetImageCount(); m++)
-        {
-            hresult = DirectX::Compress(gpu.get_device_d3d11(), *texd_mipmaps.GetImage(m, 0, 0), directx_compression_format, DirectX::TEX_COMPRESS_PARALLEL, DirectX::TEX_THRESHOLD_DEFAULT, texd_mipmaps_compressed);
+    if (texd_found) {
+        for (uint32_t m = 0; m < texd_mipmaps.GetImageCount(); m++) {
+            hresult = DirectX::Compress(gpu.get_device_d3d11(), *texd_mipmaps.GetImage(m, 0, 0),
+                                        directx_compression_format, DirectX::TEX_COMPRESS_PARALLEL,
+                                        DirectX::TEX_THRESHOLD_DEFAULT, texd_mipmaps_compressed);
             //hresult = DirectX::Compress(texd_mipmaps.GetImages(), texd_mipmaps.GetImageCount(), texd_mipmaps.GetMetadata(), directx_compression_format, DirectX::TEX_COMPRESS_DEFAULT, DirectX::TEX_THRESHOLD_DEFAULT, texd_mipmaps_compressed);
 
-            if (FAILED(hresult))
-            {
-                hresult = DirectX::Compress(*texd_mipmaps.GetImage(m, 0, 0), directx_compression_format, DirectX::TEX_COMPRESS_DEFAULT, DirectX::TEX_THRESHOLD_DEFAULT, texd_mipmaps_compressed);
+            if (FAILED(hresult)) {
+                hresult = DirectX::Compress(*texd_mipmaps.GetImage(m, 0, 0), directx_compression_format,
+                                            DirectX::TEX_COMPRESS_DEFAULT, DirectX::TEX_THRESHOLD_DEFAULT,
+                                            texd_mipmaps_compressed);
                 //hresult = DirectX::Compress(texd_mipmaps.GetImages(), texd_mipmaps.GetImageCount(), texd_mipmaps.GetMetadata(), directx_compression_format, DirectX::TEX_COMPRESS_DEFAULT, DirectX::TEX_THRESHOLD_DEFAULT, texd_mipmaps_compressed);
 
-                if (FAILED(hresult))
-                {
+                if (FAILED(hresult)) {
                     LOG("Error: DDS conversion failed.");
 
                     return false;
                 }
             }
 
-            std::cout << "TEXD compressed mipmaps in texd_mipmaps_compressed ScratchImage: " << texd_mipmaps_compressed.GetImageCount() << std::endl;
+            std::cout << "TEXD compressed mipmaps in texd_mipmaps_compressed ScratchImage: "
+                      << texd_mipmaps_compressed.GetImageCount() << std::endl;
 
-            std::cout << "TEXD pixels size of compressed mipmaps in texd_mipmaps_compressed ScratchImage: " << texd_mipmaps_compressed.GetPixelsSize() << std::endl;
+            std::cout << "TEXD pixels size of compressed mipmaps in texd_mipmaps_compressed ScratchImage: "
+                      << texd_mipmaps_compressed.GetPixelsSize() << std::endl;
 
-            std::cout << "  - TEXD compressed mipmaps (" << m << ") width: " << texd_mipmaps_compressed.GetImage(0, 0, 0)->width << std::endl;
+            std::cout << "  - TEXD compressed mipmaps (" << m << ") width: "
+                      << texd_mipmaps_compressed.GetImage(0, 0, 0)->width << std::endl;
 
-            std::cout << "  - TEXD compressed mipmaps (" << m << ") height: " << texd_mipmaps_compressed.GetImage(0, 0, 0)->height << std::endl;
+            std::cout << "  - TEXD compressed mipmaps (" << m << ") height: "
+                      << texd_mipmaps_compressed.GetImage(0, 0, 0)->height << std::endl;
 
             mipmap_count_1 += static_cast<uint32_t>(texd_mipmaps_compressed.GetPixelsSize());
 
@@ -627,20 +573,18 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
             texd_images.emplace_back();
 
-            if (text_is_lz4ed)
-            {
+            if (text_is_lz4ed) {
                 int texd_image_size = 0;
 
-                bool result = util::lz4_compress_hc((const char*)texd_mipmaps_compressed.GetImage(0, 0, 0)->pixels, texd_images.back(), texd_mipmaps_compressed.GetPixelsSize(), texd_image_size);
+                bool result = util::lz4_compress_hc((const char*) texd_mipmaps_compressed.GetImage(0, 0, 0)->pixels,
+                                                    texd_images.back(), texd_mipmaps_compressed.GetPixelsSize(),
+                                                    texd_image_size);
 
-                if (result != 0)
-                {
+                if (result != 0) {
                     std::cout << "TEXD LZ4 compressed bound: " << texd_images.back().size() << std::endl;
 
                     std::cout << "TEXD LZ4 compressed size: " << texd_image_size << std::endl;
-                }
-                else
-                {
+                } else {
                     LOG("TEXD LZ4 compressed failed.");
 
                     return false;
@@ -651,12 +595,11 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
                 mipmap_count_2 += static_cast<uint32_t>(texd_image_size);
 
                 mipmaps_table_2.push_back(mipmap_count_2);
-            }
-            else
-            {
+            } else {
                 texd_images.back() = std::vector<char>(texd_mipmaps_compressed.GetPixelsSize(), 0);
 
-                std::memcpy(texd_images.back().data(), texd_mipmaps_compressed.GetImage(0, 0, 0)->pixels, texd_mipmaps_compressed.GetPixelsSize());
+                std::memcpy(texd_images.back().data(), texd_mipmaps_compressed.GetImage(0, 0, 0)->pixels,
+                            texd_mipmaps_compressed.GetPixelsSize());
 
                 texd_images_sizes.push_back(static_cast<uint32_t>(texd_mipmaps_compressed.GetPixelsSize()));
 
@@ -666,87 +609,90 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
             }
         }
 
-        hresult = DirectX::Compress(gpu.get_device_d3d11(), *text_tga.GetImage(0, 0, 0), directx_compression_format, DirectX::TEX_COMPRESS_PARALLEL, DirectX::TEX_THRESHOLD_DEFAULT, text_tga_compressed);
+        hresult = DirectX::Compress(gpu.get_device_d3d11(), *text_tga.GetImage(0, 0, 0), directx_compression_format,
+                                    DirectX::TEX_COMPRESS_PARALLEL, DirectX::TEX_THRESHOLD_DEFAULT,
+                                    text_tga_compressed);
         //hresult = DirectX::Compress(text_mipmaps.GetImages(), text_mipmaps.GetImageCount(), text_mipmaps.GetMetadata(), directx_compression_format, DirectX::TEX_COMPRESS_DEFAULT, DirectX::TEX_THRESHOLD_DEFAULT, text_mipmaps_compressed);
 
-        if (FAILED(hresult))
-        {
-            hresult = DirectX::Compress(*text_tga.GetImage(0, 0, 0), directx_compression_format, DirectX::TEX_COMPRESS_DEFAULT, DirectX::TEX_THRESHOLD_DEFAULT, text_tga_compressed);
+        if (FAILED(hresult)) {
+            hresult = DirectX::Compress(*text_tga.GetImage(0, 0, 0), directx_compression_format,
+                                        DirectX::TEX_COMPRESS_DEFAULT, DirectX::TEX_THRESHOLD_DEFAULT,
+                                        text_tga_compressed);
             //hresult = DirectX::Compress(text_mipmaps.GetImages(), text_mipmaps.GetImageCount(), text_mipmaps.GetMetadata(), directx_compression_format, DirectX::TEX_COMPRESS_DEFAULT, DirectX::TEX_THRESHOLD_DEFAULT, text_mipmaps_compressed);
 
-            if (FAILED(hresult))
-            {
+            if (FAILED(hresult)) {
                 LOG("Error: DDS compression failed.");
 
                 return false;
             }
         }
 
-        std::cout << "TEXT compressed mipmaps in text_mipmaps_compressed ScratchImage: " << text_tga_compressed.GetImageCount() << std::endl;
+        std::cout << "TEXT compressed mipmaps in text_mipmaps_compressed ScratchImage: "
+                  << text_tga_compressed.GetImageCount() << std::endl;
 
-        std::cout << "TEXT pixels size of compressed mipmaps in text_mipmaps_compressed ScratchImage: " << text_tga_compressed.GetPixelsSize() << std::endl;
+        std::cout << "TEXT pixels size of compressed mipmaps in text_mipmaps_compressed ScratchImage: "
+                  << text_tga_compressed.GetPixelsSize() << std::endl;
 
         text_images.emplace_back();
 
-        if (text_is_lz4ed)
-        {
+        if (text_is_lz4ed) {
             int text_image_size = 0;
 
-            bool result = util::lz4_compress_hc(reinterpret_cast<const char*>(text_tga_compressed.GetImage(0, 0, 0)->pixels), text_images.back(), text_tga_compressed.GetPixelsSize(), text_image_size);
+            bool result = util::lz4_compress_hc(
+                    reinterpret_cast<const char*>(text_tga_compressed.GetImage(0, 0, 0)->pixels), text_images.back(),
+                    text_tga_compressed.GetPixelsSize(), text_image_size);
 
-            if (result != 0)
-            {
+            if (result != 0) {
                 std::cout << "TEXT LZ4 compressed bound: " << text_images.back().size() << std::endl;
 
                 std::cout << "TEXT LZ4 compressed size: " << text_image_size << std::endl;
-            }
-            else
-            {
+            } else {
                 LOG("TEXT LZ4 compressed failed.");
 
                 return false;
             }
 
             text_images_sizes.push_back(static_cast<uint32_t>(text_image_size));
-        }
-        else
-        {
+        } else {
             text_images.back() = std::vector<char>(text_tga_compressed.GetPixelsSize(), 0);
 
-            std::memcpy(text_images.back().data(), text_tga_compressed.GetImage(0, 0, 0)->pixels, text_tga_compressed.GetPixelsSize());
+            std::memcpy(text_images.back().data(), text_tga_compressed.GetImage(0, 0, 0)->pixels,
+                        text_tga_compressed.GetPixelsSize());
 
             text_images_sizes.push_back(static_cast<uint32_t>(text_tga_compressed.GetPixelsSize()));
         }
-    }
-    else
-    {
-        if (text_mips_count > 1)
-        {
-            for (uint32_t m = 0; m < text_mipmaps.GetImageCount(); m++)
-            {
-                hresult = DirectX::Compress(gpu.get_device_d3d11(), *text_mipmaps.GetImage(m, 0, 0), directx_compression_format, DirectX::TEX_COMPRESS_PARALLEL, DirectX::TEX_THRESHOLD_DEFAULT, text_mipmaps_compressed);
+    } else {
+        if (text_mips_count > 1) {
+            for (uint32_t m = 0; m < text_mipmaps.GetImageCount(); m++) {
+                hresult = DirectX::Compress(gpu.get_device_d3d11(), *text_mipmaps.GetImage(m, 0, 0),
+                                            directx_compression_format, DirectX::TEX_COMPRESS_PARALLEL,
+                                            DirectX::TEX_THRESHOLD_DEFAULT, text_mipmaps_compressed);
                 //hresult = DirectX::Compress(texd_mipmaps.GetImages(), texd_mipmaps.GetImageCount(), texd_mipmaps.GetMetadata(), directx_compression_format, DirectX::TEX_COMPRESS_DEFAULT, DirectX::TEX_THRESHOLD_DEFAULT, texd_mipmaps_compressed);
 
-                if (FAILED(hresult))
-                {
-                    hresult = DirectX::Compress(*text_mipmaps.GetImage(m, 0, 0), directx_compression_format, DirectX::TEX_COMPRESS_DEFAULT, DirectX::TEX_THRESHOLD_DEFAULT, text_mipmaps_compressed);
+                if (FAILED(hresult)) {
+                    hresult = DirectX::Compress(*text_mipmaps.GetImage(m, 0, 0), directx_compression_format,
+                                                DirectX::TEX_COMPRESS_DEFAULT, DirectX::TEX_THRESHOLD_DEFAULT,
+                                                text_mipmaps_compressed);
                     //hresult = DirectX::Compress(texd_mipmaps.GetImages(), texd_mipmaps.GetImageCount(), texd_mipmaps.GetMetadata(), directx_compression_format, DirectX::TEX_COMPRESS_DEFAULT, DirectX::TEX_THRESHOLD_DEFAULT, texd_mipmaps_compressed);
 
-                    if (FAILED(hresult))
-                    {
+                    if (FAILED(hresult)) {
                         LOG("Error: DDS conversion failed.");
 
                         return false;
                     }
                 }
 
-                std::cout << "TEXT compressed mipmaps in texd_mipmaps_compressed ScratchImage: " << text_mipmaps_compressed.GetImageCount() << std::endl;
+                std::cout << "TEXT compressed mipmaps in texd_mipmaps_compressed ScratchImage: "
+                          << text_mipmaps_compressed.GetImageCount() << std::endl;
 
-                std::cout << "TEXT pixels size of compressed mipmaps in texd_mipmaps_compressed ScratchImage: " << text_mipmaps_compressed.GetPixelsSize() << std::endl;
+                std::cout << "TEXT pixels size of compressed mipmaps in texd_mipmaps_compressed ScratchImage: "
+                          << text_mipmaps_compressed.GetPixelsSize() << std::endl;
 
-                std::cout << "  - TEXT compressed mipmaps (" << m << ") width: " << text_mipmaps_compressed.GetImage(0, 0, 0)->width << std::endl;
+                std::cout << "  - TEXT compressed mipmaps (" << m << ") width: "
+                          << text_mipmaps_compressed.GetImage(0, 0, 0)->width << std::endl;
 
-                std::cout << "  - TEXT compressed mipmaps (" << m << ") height: " << text_mipmaps_compressed.GetImage(0, 0, 0)->height << std::endl;
+                std::cout << "  - TEXT compressed mipmaps (" << m << ") height: "
+                          << text_mipmaps_compressed.GetImage(0, 0, 0)->height << std::endl;
 
                 mipmap_count_1 += static_cast<uint32_t>(text_mipmaps_compressed.GetPixelsSize());
 
@@ -754,20 +700,18 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
                 text_images.emplace_back();
 
-                if (text_is_lz4ed)
-                {
+                if (text_is_lz4ed) {
                     int text_image_size = 0;
 
-                    bool result = util::lz4_compress_hc(reinterpret_cast<const char*>(text_mipmaps_compressed.GetImage(0, 0, 0)->pixels), text_images.back(), text_mipmaps_compressed.GetPixelsSize(), text_image_size);
+                    bool result = util::lz4_compress_hc(
+                            reinterpret_cast<const char*>(text_mipmaps_compressed.GetImage(0, 0, 0)->pixels),
+                            text_images.back(), text_mipmaps_compressed.GetPixelsSize(), text_image_size);
 
-                    if (result != 0)
-                    {
+                    if (result != 0) {
                         std::cout << "TEXT LZ4 compressed bound: " << text_images.back().size() << std::endl;
 
                         std::cout << "TEXT LZ4 compressed size: " << text_image_size << std::endl;
-                    }
-                    else
-                    {
+                    } else {
                         LOG("TEXT LZ4 compressed failed.");
 
                         return false;
@@ -778,12 +722,11 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
                     mipmaps_table_2.push_back(mipmap_count_2);
 
                     text_images_sizes.push_back(static_cast<uint32_t>(text_image_size));
-                }
-                else
-                {
+                } else {
                     text_images.back() = std::vector<char>(text_mipmaps_compressed.GetPixelsSize(), 0);
 
-                    std::memcpy(text_images.back().data(), text_mipmaps_compressed.GetImage(0, 0, 0)->pixels, text_mipmaps_compressed.GetPixelsSize());
+                    std::memcpy(text_images.back().data(), text_mipmaps_compressed.GetImage(0, 0, 0)->pixels,
+                                text_mipmaps_compressed.GetPixelsSize());
 
                     mipmap_count_2 += static_cast<uint32_t>(text_mipmaps_compressed.GetPixelsSize());
 
@@ -792,32 +735,36 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
                     text_images_sizes.push_back(static_cast<uint32_t>(text_mipmaps_compressed.GetPixelsSize()));
                 }
             }
-        }
-        else
-        {
-            hresult = DirectX::Compress(gpu.get_device_d3d11(), *text_tga.GetImage(0, 0, 0), directx_compression_format, DirectX::TEX_COMPRESS_PARALLEL, DirectX::TEX_THRESHOLD_DEFAULT, text_tga_compressed);
+        } else {
+            hresult = DirectX::Compress(gpu.get_device_d3d11(), *text_tga.GetImage(0, 0, 0), directx_compression_format,
+                                        DirectX::TEX_COMPRESS_PARALLEL, DirectX::TEX_THRESHOLD_DEFAULT,
+                                        text_tga_compressed);
             //hresult = DirectX::Compress(texd_mipmaps.GetImages(), texd_mipmaps.GetImageCount(), texd_mipmaps.GetMetadata(), directx_compression_format, DirectX::TEX_COMPRESS_DEFAULT, DirectX::TEX_THRESHOLD_DEFAULT, texd_mipmaps_compressed);
 
-            if (FAILED(hresult))
-            {
-                hresult = DirectX::Compress(*text_tga.GetImage(0, 0, 0), directx_compression_format, DirectX::TEX_COMPRESS_DEFAULT, DirectX::TEX_THRESHOLD_DEFAULT, text_tga_compressed);
+            if (FAILED(hresult)) {
+                hresult = DirectX::Compress(*text_tga.GetImage(0, 0, 0), directx_compression_format,
+                                            DirectX::TEX_COMPRESS_DEFAULT, DirectX::TEX_THRESHOLD_DEFAULT,
+                                            text_tga_compressed);
                 //hresult = DirectX::Compress(texd_mipmaps.GetImages(), texd_mipmaps.GetImageCount(), texd_mipmaps.GetMetadata(), directx_compression_format, DirectX::TEX_COMPRESS_DEFAULT, DirectX::TEX_THRESHOLD_DEFAULT, texd_mipmaps_compressed);
 
-                if (FAILED(hresult))
-                {
+                if (FAILED(hresult)) {
                     LOG("Error: DDS conversion failed.");
 
                     return false;
                 }
             }
 
-            std::cout << "TEXT compressed mipmaps in texd_mipmaps_compressed ScratchImage: " << text_tga_compressed.GetImageCount() << std::endl;
+            std::cout << "TEXT compressed mipmaps in texd_mipmaps_compressed ScratchImage: "
+                      << text_tga_compressed.GetImageCount() << std::endl;
 
-            std::cout << "TEXT pixels size of compressed mipmaps in texd_mipmaps_compressed ScratchImage: " << text_tga_compressed.GetPixelsSize() << std::endl;
+            std::cout << "TEXT pixels size of compressed mipmaps in texd_mipmaps_compressed ScratchImage: "
+                      << text_tga_compressed.GetPixelsSize() << std::endl;
 
-            std::cout << "  - TEXT compressed mipmaps (0) width: " << text_tga_compressed.GetImage(0, 0, 0)->width << std::endl;
+            std::cout << "  - TEXT compressed mipmaps (0) width: " << text_tga_compressed.GetImage(0, 0, 0)->width
+                      << std::endl;
 
-            std::cout << "  - TEXT compressed mipmaps (0) height: " << text_tga_compressed.GetImage(0, 0, 0)->height << std::endl;
+            std::cout << "  - TEXT compressed mipmaps (0) height: " << text_tga_compressed.GetImage(0, 0, 0)->height
+                      << std::endl;
 
             mipmap_count_1 += static_cast<uint32_t>(text_tga_compressed.GetPixelsSize());
 
@@ -825,20 +772,18 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
             text_images.emplace_back();
 
-            if (text_is_lz4ed)
-            {
+            if (text_is_lz4ed) {
                 int text_image_size = 0;
 
-                bool result = util::lz4_compress_hc((const char*)text_tga_compressed.GetImage(0, 0, 0)->pixels, text_images.back(), text_tga_compressed.GetPixelsSize(), text_image_size);
+                bool result = util::lz4_compress_hc((const char*) text_tga_compressed.GetImage(0, 0, 0)->pixels,
+                                                    text_images.back(), text_tga_compressed.GetPixelsSize(),
+                                                    text_image_size);
 
-                if (result != 0)
-                {
+                if (result != 0) {
                     std::cout << "TEXT LZ4 compressed bound: " << text_images.back().size() << std::endl;
 
                     std::cout << "TEXT LZ4 compressed size: " << text_image_size << std::endl;
-                }
-                else
-                {
+                } else {
                     LOG("TEXT LZ4 compressed failed.");
 
                     return false;
@@ -849,12 +794,11 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
                 mipmaps_table_2.push_back(mipmap_count_2);
 
                 text_images_sizes.push_back(static_cast<uint32_t>(text_image_size));
-            }
-            else
-            {
+            } else {
                 text_images.back() = std::vector<char>(text_tga_compressed.GetPixelsSize(), 0);
 
-                std::memcpy(text_images.back().data(), text_tga_compressed.GetImage(0, 0, 0)->pixels, text_tga_compressed.GetPixelsSize());
+                std::memcpy(text_images.back().data(), text_tga_compressed.GetImage(0, 0, 0)->pixels,
+                            text_tga_compressed.GetPixelsSize());
 
                 mipmap_count_2 += static_cast<uint32_t>(text_tga_compressed.GetPixelsSize());
 
@@ -862,7 +806,7 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
                 text_images_sizes.push_back(static_cast<uint32_t>(text_tga_compressed.GetPixelsSize()));
             }
-        }        
+        }
     }
 
     std::vector<char> text_file_data;
@@ -870,32 +814,27 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
     //for (uint64_t m = 0; m < 0x18; m++)
     //{
-        //text_file_data.push_back(meta_data.data()[meta_position + m]);
+    //text_file_data.push_back(meta_data.data()[meta_position + m]);
     //}
 
-    if (texd_found)
-    {
-        for (uint64_t m = 0; m < 0xC; m++)
-        {
+    if (texd_found) {
+        for (uint64_t m = 0; m < 0xC; m++) {
             text_file_data.push_back(meta_data.data()[meta_position + m]);
         }
 
         std::memcpy(&char2, &header_texd_width, 0x2);
 
-        for (char n : char2)
-        {
+        for (char n : char2) {
             text_file_data.push_back(n);
         }
 
         std::memcpy(&char2, &header_texd_height, 0x2);
 
-        for (char n : char2)
-        {
+        for (char n : char2) {
             text_file_data.push_back(n);
         }
 
-        for (uint64_t m = 0; m < 0x2; m++)
-        {
+        for (uint64_t m = 0; m < 0x2; m++) {
             text_file_data.push_back(meta_data.data()[meta_position + 0x10 + m]);
         }
 
@@ -903,54 +842,38 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
         text_file_data.push_back(char1);
 
-        for (uint64_t m = 0; m < 0x5; m++)
-        {
+        for (uint64_t m = 0; m < 0x5; m++) {
             text_file_data.push_back(meta_data.data()[meta_position + 0x13 + m]);
         }
-    }
-    else
-    {
-        for (uint64_t m = 0; m < 0x18; m++)
-        {
+    } else {
+        for (uint64_t m = 0; m < 0x18; m++) {
             text_file_data.push_back(meta_data.data()[meta_position + m]);
         }
     }
 
-    for (uint32_t m = 0; m < 0xE; m++)
-    {
-        if (m < mipmaps_table_1.size())
-        {
+    for (uint32_t m = 0; m < 0xE; m++) {
+        if (m < mipmaps_table_1.size()) {
             std::memcpy(&char4, &mipmaps_table_1.at(m), 0x4);
 
-            for (char n : char4)
-            {
+            for (char n : char4) {
                 text_file_data.push_back(n);
             }
-        }
-        else
-        {
-            for (uint64_t n = 0; n < 0x4; n++)
-            {
+        } else {
+            for (uint64_t n = 0; n < 0x4; n++) {
                 text_file_data.push_back(0x0);
             }
         }
     }
 
-    for (uint32_t m = 0; m < 0xE; m++)
-    {
-        if (m < mipmaps_table_2.size())
-        {
+    for (uint32_t m = 0; m < 0xE; m++) {
+        if (m < mipmaps_table_2.size()) {
             std::memcpy(&char4, &mipmaps_table_2.at(m), 0x4);
 
-            for (char n : char4)
-            {
+            for (char n : char4) {
                 text_file_data.push_back(n);
             }
-        }
-        else
-        {
-            for (uint64_t n = 0; n < 0x4; n++)
-            {
+        } else {
+            for (uint64_t n = 0; n < 0x4; n++) {
                 text_file_data.push_back(0x0);
             }
         }
@@ -958,23 +881,19 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
     uint32_t meta_offset = meta_position + 0x88;
 
-    for (uint64_t m = 0; m < (meta_data.size() - meta_offset); m++)
-    {
+    for (uint64_t m = 0; m < (meta_data.size() - meta_offset); m++) {
         text_file_data.push_back(meta_data.data()[meta_offset + m]);
     }
 
-    for (uint64_t m = 0; m < text_images.size(); m++)
-    {
-        for (uint64_t n = 0; n < text_images_sizes.at(m); n++)
-        {
+    for (uint64_t m = 0; m < text_images.size(); m++) {
+        for (uint64_t n = 0; n < text_images_sizes.at(m); n++) {
             text_file_data.push_back(text_images.at(m).at(n));
         }
     }
 
     std::ofstream text_file = std::ofstream(current_path + "\\" + text_file_name, std::ofstream::binary);
 
-    if (!text_file.good())
-    {
+    if (!text_file.good()) {
         LOG("Error: TEXT file " + current_path + "\\" + text_file_name + " could not be created.");
 
         return false;
@@ -984,26 +903,26 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
     text_file.close();
 
-    if (generate_rpkgs)
-    {
-        std::filesystem::copy(current_path + "\\" + text_file_name, rpkg_output_dir + "\\" + text_file_name, std::filesystem::copy_options::overwrite_existing);
+    if (generate_rpkgs) {
+        std::filesystem::copy(current_path + "\\" + text_file_name, rpkg_output_dir + "\\" + text_file_name,
+                              std::filesystem::copy_options::overwrite_existing);
     }
 
-    std::filesystem::copy(text_folder + "\\metas\\" + text_file_name + ".meta", current_path + "\\" + text_file_name + ".meta", std::filesystem::copy_options::overwrite_existing);
+    std::filesystem::copy(text_folder + "\\metas\\" + text_file_name + ".meta",
+                          current_path + "\\" + text_file_name + ".meta",
+                          std::filesystem::copy_options::overwrite_existing);
 
     //std::filesystem::copy(text_folder + "\\metas\\" + text_file_name + ".tga.meta", rpkg_output_dir + "\\" + text_file_name + ".tga.meta", std::filesystem::copy_options::overwrite_existing);
 
-    if (generate_rpkgs)
-    {
-        std::filesystem::copy(text_folder + "\\metas\\" + text_file_name + ".meta", rpkg_output_dir + "\\" + text_file_name + ".meta", std::filesystem::copy_options::overwrite_existing);
+    if (generate_rpkgs) {
+        std::filesystem::copy(text_folder + "\\metas\\" + text_file_name + ".meta",
+                              rpkg_output_dir + "\\" + text_file_name + ".meta",
+                              std::filesystem::copy_options::overwrite_existing);
     }
 
-    if (texd_found)
-    {
-        for (uint64_t m = 0; m < texd_images.size(); m++)
-        {
-            for (uint64_t n = 0; n < texd_images_sizes.at(m); n++)
-            {
+    if (texd_found) {
+        for (uint64_t m = 0; m < texd_images.size(); m++) {
+            for (uint64_t n = 0; n < texd_images_sizes.at(m); n++) {
                 texd_file_data.push_back(texd_images.at(m).at(n));
             }
         }
@@ -1012,8 +931,7 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
         std::ofstream texd_file = std::ofstream(current_path + "\\" + texd_file_name, std::ofstream::binary);
 
-        if (!texd_file.good())
-        {
+        if (!texd_file.good()) {
             LOG("Error: TEXT file " + current_path + "\\" + texd_file_name + " could not be created.");
 
             return false;
@@ -1023,23 +941,25 @@ bool rpkg_function::rebuild_text(std::string& text_folder, std::string& tga_file
 
         texd_file.close();
 
-        if (generate_rpkgs)
-        {
-            std::filesystem::copy(current_path + "\\" + texd_file_name, rpkg_output_dir + "\\" + texd_file_name, std::filesystem::copy_options::overwrite_existing);
+        if (generate_rpkgs) {
+            std::filesystem::copy(current_path + "\\" + texd_file_name, rpkg_output_dir + "\\" + texd_file_name,
+                                  std::filesystem::copy_options::overwrite_existing);
         }
 
-        std::filesystem::copy(text_folder + "\\metas\\" + texd_file_name + ".meta", current_path + "\\" + texd_file_name + ".meta", std::filesystem::copy_options::overwrite_existing);
+        std::filesystem::copy(text_folder + "\\metas\\" + texd_file_name + ".meta",
+                              current_path + "\\" + texd_file_name + ".meta",
+                              std::filesystem::copy_options::overwrite_existing);
 
-        if (generate_rpkgs)
-        {
-            std::filesystem::copy(text_folder + "\\metas\\" + texd_file_name + ".meta", rpkg_output_dir + "\\" + texd_file_name + ".meta", std::filesystem::copy_options::overwrite_existing);
+        if (generate_rpkgs) {
+            std::filesystem::copy(text_folder + "\\metas\\" + texd_file_name + ".meta",
+                                  rpkg_output_dir + "\\" + texd_file_name + ".meta",
+                                  std::filesystem::copy_options::overwrite_existing);
         }
     }
 
     std::ofstream rpkg_file_name_file = std::ofstream(current_path + "\\rpkgfilename.txt", std::ofstream::binary);
 
-    if (!rpkg_file_name_file.good())
-    {
+    if (!rpkg_file_name_file.good()) {
         LOG("Error: RPKG file name file " + current_path + "\\rpkgfilename.txt" + " could not be created.");
 
         return false;
