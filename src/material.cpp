@@ -313,7 +313,7 @@ void material::generate_json()
         std::cout << "MATI instance_offset: " << util::uint32_t_to_hex_string(instance_offset) << std::endl;
     }
 
-    json["$schema"] = "https://wiki.notex.app/schemas/material.schema.json";
+    json["$schema"] = "https://wiki.glaciermodding.org/schemas/material.schema.json";
 
     json["MATI"] = util::hash_to_ioi_string(rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).hash_value, true);
 
