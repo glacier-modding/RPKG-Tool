@@ -9,14 +9,12 @@
 #include <fstream>
 #include <filesystem>
 
-void rpkg_function::rebuild_gfxf_in(std::string& input_path)
-{
+void rpkg_function::rebuild_gfxf_in(std::string& input_path) {
     task_single_status = TASK_EXECUTING;
 
     std::string input_rpkg_folder_path = file::parse_input_folder_path(input_path);
 
-    if (!file::path_exists(input_rpkg_folder_path))
-    {
+    if (!file::path_exists(input_rpkg_folder_path)) {
         LOG_AND_EXIT("Error: The folder " + input_rpkg_folder_path + " to rebuild the GFXFs does not exist.");
     }
 
@@ -29,23 +27,20 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
     std::string input_folder = input_rpkg_folder_path;
 
-    if (input_folder.substr(input_folder.length() - 1, 1) == "\\")
-    {
+    if (input_folder.substr(input_folder.length() - 1, 1) == "\\") {
         input_folder = input_folder.substr(0, input_folder.length() - 1);
     }
 
-    for (const auto& entry : std::filesystem::recursive_directory_iterator(input_rpkg_folder_path))
-    {
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(input_rpkg_folder_path)) {
         std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
 
-        double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+        double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(
+                end_time - start_time).count());
 
-        if (time_in_seconds_from_start_time > console_update_rate)
-        {
+        if (time_in_seconds_from_start_time > console_update_rate) {
             start_time = end_time;
 
-            if (period_count > 3)
-            {
+            if (period_count > 3) {
                 period_count = 0;
             }
 
@@ -65,23 +60,19 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
         input_folder = entry.path().string();
 
-        if (input_folder.substr(input_folder.length() - 1, 1) == "\\")
-        {
+        if (input_folder.substr(input_folder.length() - 1, 1) == "\\") {
             input_folder = input_folder.substr(0, input_folder.length() - 1);
         }
 
         bool gfxf_folder_found = false;
 
-        for (auto& gfxf_folder : gfxf_folders)
-        {
-            if (input_folder == gfxf_folder)
-            {
+        for (auto& gfxf_folder : gfxf_folders) {
+            if (input_folder == gfxf_folder) {
                 gfxf_folder_found = true;
             }
         }
 
-        if (!gfxf_folder_found)
-        {
+        if (!gfxf_folder_found) {
             gfxf_folders.push_back(input_folder);
         }
     }
@@ -101,16 +92,14 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
     timing_string = message;
 
-    for (uint64_t i = 0; i < gfxf_folders.size(); i++)
-    {
-        if (gui_control == ABORT_CURRENT_TASK)
-        {
+    for (uint64_t i = 0; i < gfxf_folders.size(); i++) {
+        if (gui_control == ABORT_CURRENT_TASK) {
             return;
         }
 
-        if (((i * static_cast<uint64_t>(100000)) / gfxf_folders.size()) % static_cast<uint64_t>(10) == 0 && i > 0)
-        {
-            stringstream_length = console::update_console(message, gfxf_folders.size(), i, start_time, stringstream_length);
+        if (((i * static_cast<uint64_t>(100000)) / gfxf_folders.size()) % static_cast<uint64_t>(10) == 0 && i > 0) {
+            stringstream_length = console::update_console(message, gfxf_folders.size(), i, start_time,
+                                                          stringstream_length);
         }
 
         std::vector<std::string> gfx_file_names;
@@ -121,8 +110,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
         std::vector<std::string> gfxf_hash_strings;
         std::vector<std::string> gfxf_file_names;
 
-        for (const auto& entry : std::filesystem::directory_iterator(gfxf_folders.at(i)))
-        {
+        for (const auto& entry : std::filesystem::directory_iterator(gfxf_folders.at(i))) {
             if (!std::filesystem::is_regular_file(entry.path().string()))
                 continue;
 
@@ -133,26 +121,21 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
             std::string hash_string = "";
             std::string resource_type = "";
 
-            if (pos != std::string::npos)
-            {
+            if (pos != std::string::npos) {
                 file_name = entry.path().string().substr(pos + 1, entry.path().string().length() - (pos + 1));
-            }
-            else
-            {
+            } else {
                 file_name = entry.path().string();
             }
 
             if (file_name.length() <= 4)
                 continue;
 
-            if (util::to_upper_case(file_name.substr((file_name.length() - 4), 4)) == ".GFX")
-            {
+            if (util::to_upper_case(file_name.substr((file_name.length() - 4), 4)) == ".GFX") {
                 hash_file_name = util::to_upper_case(file_name.substr(0, (file_name.length() - 4)));
 
                 pos = hash_file_name.find_last_of('.');
 
-                if (pos != std::string::npos)
-                {
+                if (pos != std::string::npos) {
                     hash_string = hash_file_name.substr(0, pos);
                     resource_type = hash_file_name.substr(pos + 1, hash_file_name.length() - (pos + 1));
                 }
@@ -160,50 +143,40 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
                 bool is_gfx_hash_file = true;
                 bool gfx_hash_meta = true;
 
-                if (hash_string.length() != 16)
-                {
+                if (hash_string.length() != 16) {
                     is_gfx_hash_file = false;
                 }
 
-                if (resource_type != "GFXF")
-                {
+                if (resource_type != "GFXF") {
                     is_gfx_hash_file = false;
                 }
 
-                if (!file::path_exists(gfxf_folders.at(i) + "\\meta"))
-                {
+                if (!file::path_exists(gfxf_folders.at(i) + "\\meta")) {
                     gfx_hash_meta = false;
 
                     LOG("GFX file " + entry.path().string() + " found but meta file is missing, can't rebuild.");
                 }
 
-                if (is_gfx_hash_file && gfx_hash_meta)
-                {
+                if (is_gfx_hash_file && gfx_hash_meta) {
                     gfx_file_paths.push_back(entry.path().string());
                     gfx_file_names.push_back(file_name);
                     gfxf_hashes.push_back(std::strtoll(hash_string.c_str(), nullptr, 16));
                     gfxf_file_names.push_back(util::to_upper_case(hash_file_name));
                     gfxf_hash_strings.push_back(util::to_upper_case(hash_string));
                 }
-            }
-            else if (util::to_upper_case(file_name.substr((file_name.length() - 4), 4)) == ".DDS")
-            {
+            } else if (util::to_upper_case(file_name.substr((file_name.length() - 4), 4)) == ".DDS") {
                 dds_tga_file_paths.push_back(entry.path().string());
                 dds_tga_file_names.push_back(file_name);
-            }
-            else if (util::to_upper_case(file_name.substr((file_name.length() - 4), 4)) == ".TGA")
-            {
+            } else if (util::to_upper_case(file_name.substr((file_name.length() - 4), 4)) == ".TGA") {
                 dds_tga_file_paths.push_back(entry.path().string());
                 dds_tga_file_names.push_back(file_name);
             }
         }
 
-        if (gfx_file_paths.size() == 1)
-        {
+        if (gfx_file_paths.size() == 1) {
             std::ifstream meta_file = std::ifstream(gfxf_folders.at(i) + "\\meta", std::ifstream::binary);
 
-            if (!meta_file.good())
-            {
+            if (!meta_file.good()) {
                 LOG_AND_EXIT("Error: meta file " + gfxf_folders.at(i) + "\\meta" + " could not be opened.");
             }
 
@@ -236,8 +209,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
             std::memcpy(&gfxf_dds_tga_file_count, &meta_data.data()[position], sizeof(uint32_t));
             position += sizeof(uint32_t);
 
-            for (uint64_t j = 0; j < gfxf_dds_tga_file_count; j++)
-            {
+            for (uint64_t j = 0; j < gfxf_dds_tga_file_count; j++) {
                 std::memcpy(&bytes4, &meta_data.data()[position], sizeof(uint32_t));
                 position += sizeof(uint32_t);
 
@@ -260,18 +232,15 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
             bool all_dds_tga_exist = true;
 
-            for (auto& meta_dds_tga_file_name : meta_dds_tga_file_names)
-            {
+            for (auto& meta_dds_tga_file_name : meta_dds_tga_file_names) {
                 //std::cout << gfxf_folders.at(i) + "\\" + meta_dds_tga_file_names.at(j) << std::endl;
 
-                if (!file::path_exists(gfxf_folders.at(i) + "\\" + meta_dds_tga_file_name))
-                {
+                if (!file::path_exists(gfxf_folders.at(i) + "\\" + meta_dds_tga_file_name)) {
                     all_dds_tga_exist = false;
                 }
             }
 
-            if (!all_dds_tga_exist || (gfxf_dds_tga_file_count != meta_dds_tga_file_names.size()))
-            {
+            if (!all_dds_tga_exist || (gfxf_dds_tga_file_count != meta_dds_tga_file_names.size())) {
                 LOG("GFXF file " + gfxf_file_names.back() + " has a dds/tga file mismatch.");
             }
 
@@ -279,8 +248,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
             std::ifstream gfx_file = std::ifstream(gfx_file_paths.back(), std::ifstream::binary);
 
-            if (!gfx_file.good())
-            {
+            if (!gfx_file.good()) {
                 LOG_AND_EXIT("Error: GFX file " + gfx_file_paths.back() + " could not be created.");
             }
 
@@ -301,8 +269,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
             gfxf_file_header_data.push_back(0x1);
             gfxf_file_header_data.push_back(0x0);
 
-            if (dds_tga_file_paths.empty())
-            {
+            if (dds_tga_file_paths.empty()) {
                 uint32_t header_value = gfx_file_size + 0x44;
 
                 std::memcpy(&char4, &header_value, sizeof(uint32_t));
@@ -326,8 +293,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                 std::memcpy(&input, &gfx_file_size, sizeof(uint32_t));
 
-                for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                {
+                for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                     gfxf_file_header_data.push_back(input[k]);
                 }
 
@@ -336,43 +302,41 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
                 gfxf_file_header_data.push_back(0x0);
                 gfxf_file_header_data.push_back(0x0);
 
-                for (uint64_t k = 0; k < 0x30; k++)
-                {
+                for (uint64_t k = 0; k < 0x30; k++) {
                     gfxf_file_header_data.push_back(static_cast<char>(0xFF));
                 }
 
-                for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                {
+                for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                     gfxf_file_header_data.push_back(input[k]);
                 }
 
-                constexpr unsigned char footer_header[] = { 0xED, 0xA5, 0xEB, 0x12 };
-                constexpr unsigned char footer_serial_data[] = { 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x28, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x38, 0x00, 0x00, 0x00 };
+                constexpr unsigned char footer_header[] = {0xED, 0xA5, 0xEB, 0x12};
+                constexpr unsigned char footer_serial_data[] = {0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x18,
+                                                                0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x28, 0x00,
+                                                                0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x38, 0x00, 0x00,
+                                                                0x00};
                 uint32_t footer_serial_data_count = 7;
 
-                uint32_t footer_total_size = footer_serial_data_count * static_cast<uint32_t>(0x4) + static_cast<uint32_t>(0x4);
+                uint32_t footer_total_size =
+                        footer_serial_data_count * static_cast<uint32_t>(0x4) + static_cast<uint32_t>(0x4);
 
-                for (unsigned char k : footer_header)
-                {
+                for (unsigned char k : footer_header) {
                     meta_data_footer.push_back(k);
                 }
 
                 std::memcpy(&input, &footer_total_size, sizeof(uint32_t));
 
-                for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                {
+                for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                     meta_data_footer.push_back(input[k]);
                 }
 
                 std::memcpy(&input, &footer_serial_data_count, sizeof(uint32_t));
 
-                for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                {
+                for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                     meta_data_footer.push_back(input[k]);
                 }
 
-                for (unsigned char k : footer_serial_data)
-                {
+                for (unsigned char k : footer_serial_data) {
                     meta_data_footer.push_back(k);
                 }
 
@@ -380,11 +344,12 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                 file::create_directories(current_path);
 
-                std::ofstream gfxf_file = std::ofstream(current_path + "\\" + gfxf_hash_file_name, std::ofstream::binary);
+                std::ofstream gfxf_file = std::ofstream(current_path + "\\" + gfxf_hash_file_name,
+                                                        std::ofstream::binary);
 
-                if (!gfxf_file.good())
-                {
-                    LOG_AND_EXIT("Error: GFXF file " + current_path + "\\" + gfxf_hash_file_name + " could not be created.");
+                if (!gfxf_file.good()) {
+                    LOG_AND_EXIT(
+                            "Error: GFXF file " + current_path + "\\" + gfxf_hash_file_name + " could not be created.");
                 }
 
                 gfxf_file.write(gfxf_file_header_data.data(), gfxf_file_header_data.size());
@@ -392,9 +357,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
                 gfxf_file.write(gfx_file_data.data(), gfx_file_data.size());
 
                 gfxf_file.write(meta_data_footer.data(), meta_data_footer.size());
-            }
-            else
-            {
+            } else {
                 position = 0;
                 uint32_t dds_tga_names_offset_start = 0;
                 uint32_t dds_tga_names_offset_end = 0;
@@ -405,12 +368,10 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
                 std::vector<uint32_t> dds_tga_data_2_offsets;
                 std::vector<uint32_t> dds_tga_data_3_offsets;
 
-                if (all_dds_tga_exist && (gfxf_dds_tga_file_count == meta_dds_tga_file_names.size()))
-                {
+                if (all_dds_tga_exist && (gfxf_dds_tga_file_count == meta_dds_tga_file_names.size())) {
                     position = gfx_file_size + 0x44;
 
-                    while (((position & 0xF) != 0x4) && ((position & 0xF) != 0xC))
-                    {
+                    while (((position & 0xF) != 0x4) && ((position & 0xF) != 0xC)) {
                         gfxf_file_data.push_back(0x0);
                         position++;
                     }
@@ -419,17 +380,17 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     std::memcpy(&input, &gfxf_dds_tga_file_count, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         gfxf_file_data.push_back(input[k]);
                     }
 
                     position += 0x4;
 
-                    uint32_t offset = static_cast<uint64_t>(dds_tga_names_offset_start) + (static_cast<uint64_t>(gfxf_dds_tga_file_count) * static_cast<uint64_t>(0x10)) + static_cast<uint64_t>(0x8);
+                    uint32_t offset = static_cast<uint64_t>(dds_tga_names_offset_start) +
+                                      (static_cast<uint64_t>(gfxf_dds_tga_file_count) * static_cast<uint64_t>(0x10)) +
+                                      static_cast<uint64_t>(0x8);
 
-                    for (auto& meta_dds_tga_file_name : meta_dds_tga_file_names)
-                    {
+                    for (auto& meta_dds_tga_file_name : meta_dds_tga_file_names) {
                         uint32_t dds_tga_file_length1 = meta_dds_tga_file_name.length();
                         uint32_t dds_tga_file_length2 = meta_dds_tga_file_name.length();
 
@@ -437,8 +398,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                         std::memcpy(&input, &dds_tga_file_length1, sizeof(uint32_t));
 
-                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                        {
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                             gfxf_file_data.push_back(input[k]);
                         }
 
@@ -455,8 +415,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                         std::memcpy(&input, &offset, sizeof(uint32_t));
 
-                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                        {
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                             gfxf_file_data.push_back(input[k]);
                         }
 
@@ -475,30 +434,27 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                         offset += dds_tga_file_length2;
 
-                        while (offset % 4 != 0)
-                        {
+                        while (offset % 4 != 0) {
                             offset++;
                         }
                     }
 
-                    dds_tga_names_offset_end = static_cast<uint32_t>(gfx_file_size) + static_cast<uint32_t>(0x44) + static_cast<uint32_t>(gfxf_file_data.size());
+                    dds_tga_names_offset_end = static_cast<uint32_t>(gfx_file_size) + static_cast<uint32_t>(0x44) +
+                                               static_cast<uint32_t>(gfxf_file_data.size());
 
-                    for (auto& meta_dds_tga_file_name : meta_dds_tga_file_names)
-                    {
+                    for (auto& meta_dds_tga_file_name : meta_dds_tga_file_names) {
                         uint32_t dds_tga_file_length1 = meta_dds_tga_file_name.length();
                         dds_tga_file_length1++;
 
                         std::memcpy(&input, &dds_tga_file_length1, sizeof(uint32_t));
 
-                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                        {
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                             gfxf_file_data.push_back(input[k]);
                         }
 
                         position += 0x4;
 
-                        for (char& k : meta_dds_tga_file_name)
-                        {
+                        for (char& k : meta_dds_tga_file_name) {
                             gfxf_file_data.push_back(k);
                         }
 
@@ -508,8 +464,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                         position++;
 
-                        while (dds_tga_file_length1 % 4 != 0)
-                        {
+                        while (dds_tga_file_length1 % 4 != 0) {
                             gfxf_file_data.push_back(0x0);
                             dds_tga_file_length1++;
                             position++;
@@ -518,15 +473,15 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     std::vector<std::vector<char>> dds_tga_file_data;
 
-                    for (auto& meta_dds_tga_file_name : meta_dds_tga_file_names)
-                    {
+                    for (auto& meta_dds_tga_file_name : meta_dds_tga_file_names) {
                         uint32_t dds_tga_file_size = 0;
 
-                        std::ifstream dds_tga_file = std::ifstream(gfxf_folders.at(i) + "\\" + meta_dds_tga_file_name, std::ifstream::binary);
+                        std::ifstream dds_tga_file = std::ifstream(gfxf_folders.at(i) + "\\" + meta_dds_tga_file_name,
+                                                                   std::ifstream::binary);
 
-                        if (!dds_tga_file.good())
-                        {
-                            LOG_AND_EXIT("Error: dds/tga file " + gfxf_folders.at(i) + "\\" + meta_dds_tga_file_name + " could not be created.");
+                        if (!dds_tga_file.good()) {
+                            LOG_AND_EXIT("Error: dds/tga file " + gfxf_folders.at(i) + "\\" + meta_dds_tga_file_name +
+                                         " could not be created.");
                         }
 
                         dds_tga_file.seekg(0, dds_tga_file.end);
@@ -544,27 +499,28 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     std::memcpy(&input, &gfxf_dds_tga_file_count, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         gfxf_file_data.push_back(input[k]);
                     }
 
                     position += 0x4;
 
-                    dds_tga_data_offset_start = static_cast<uint32_t>(gfx_file_size) + static_cast<uint32_t>(0x44) + static_cast<uint32_t>(gfxf_file_data.size());
+                    dds_tga_data_offset_start = static_cast<uint32_t>(gfx_file_size) + static_cast<uint32_t>(0x44) +
+                                                static_cast<uint32_t>(gfxf_file_data.size());
 
-                    offset = static_cast<uint32_t>(gfx_file_size) + static_cast<uint32_t>(0x44) + static_cast<uint32_t>(gfxf_file_data.size()) + (static_cast<uint64_t>(gfxf_dds_tga_file_count) * static_cast<uint64_t>(0x18)) + static_cast<uint64_t>(0x4);
+                    offset = static_cast<uint32_t>(gfx_file_size) + static_cast<uint32_t>(0x44) +
+                             static_cast<uint32_t>(gfxf_file_data.size()) +
+                             (static_cast<uint64_t>(gfxf_dds_tga_file_count) * static_cast<uint64_t>(0x18)) +
+                             static_cast<uint64_t>(0x4);
 
-                    for (auto& j : dds_tga_file_data)
-                    {
+                    for (auto& j : dds_tga_file_data) {
                         uint32_t dds_tga_file_length = j.size();
 
                         dds_tga_data_1_offsets.push_back(static_cast<uint32_t>(position));
 
                         std::memcpy(&input, &offset, sizeof(uint32_t));
 
-                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                        {
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                             gfxf_file_data.push_back(input[k]);
                         }
 
@@ -583,8 +539,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                         std::memcpy(&input, &offset, sizeof(uint32_t));
 
-                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                        {
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                             gfxf_file_data.push_back(input[k]);
                         }
 
@@ -601,8 +556,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                         std::memcpy(&input, &offset, sizeof(uint32_t));
 
-                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                        {
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                             gfxf_file_data.push_back(input[k]);
                         }
 
@@ -618,26 +572,25 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
                         offset += 0x4;
                     }
 
-                    dds_tga_data_offset_end = static_cast<uint32_t>(gfx_file_size) + static_cast<uint32_t>(0x44) + static_cast<uint32_t>(gfxf_file_data.size());
+                    dds_tga_data_offset_end = static_cast<uint32_t>(gfx_file_size) + static_cast<uint32_t>(0x44) +
+                                              static_cast<uint32_t>(gfxf_file_data.size());
 
-                    for (auto& j : dds_tga_file_data)
-                    {
+                    for (auto& j : dds_tga_file_data) {
                         uint32_t dds_tga_file_length = j.size();
 
                         std::memcpy(&input, &dds_tga_file_length, sizeof(uint32_t));
 
-                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                        {
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                             gfxf_file_data.push_back(input[k]);
                         }
 
-                        for (uint64_t k = 0; k < dds_tga_file_length; k++)
-                        {
+                        for (uint64_t k = 0; k < dds_tga_file_length; k++) {
                             gfxf_file_data.push_back(j[k]);
                         }
                     }
 
-                    uint32_t header_value = static_cast<uint32_t>(gfx_file_size) + static_cast<uint32_t>(0x44) + static_cast<uint32_t>(gfxf_file_data.size());
+                    uint32_t header_value = static_cast<uint32_t>(gfx_file_size) + static_cast<uint32_t>(0x44) +
+                                            static_cast<uint32_t>(gfxf_file_data.size());
 
                     std::memcpy(&input, &header_value, sizeof(uint32_t));
 
@@ -660,8 +613,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     std::memcpy(&input, &gfx_file_size, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         gfxf_file_header_data.push_back(input[k]);
                     }
 
@@ -674,8 +626,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     std::memcpy(&input, &dds_tga_names_offset_start, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         gfxf_file_header_data.push_back(input[k]);
                     }
 
@@ -686,8 +637,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     std::memcpy(&input, &dds_tga_names_offset_end, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         gfxf_file_header_data.push_back(input[k]);
                     }
 
@@ -698,8 +648,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     std::memcpy(&input, &dds_tga_names_offset_end, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         gfxf_file_header_data.push_back(input[k]);
                     }
 
@@ -710,8 +659,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     std::memcpy(&input, &dds_tga_data_offset_start, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         gfxf_file_header_data.push_back(input[k]);
                     }
 
@@ -722,8 +670,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     std::memcpy(&input, &dds_tga_data_offset_end, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         gfxf_file_header_data.push_back(input[k]);
                     }
 
@@ -734,8 +681,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     std::memcpy(&input, &dds_tga_data_offset_end, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         gfxf_file_header_data.push_back(input[k]);
                     }
 
@@ -746,73 +692,68 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     std::memcpy(&input, &gfx_file_size, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         gfxf_file_header_data.push_back(input[k]);
                     }
 
-                    constexpr unsigned char footer_header[] = { 0xED, 0xA5, 0xEB, 0x12 };
-                    constexpr unsigned char footer_serial_data[] = { 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x28, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x38, 0x00, 0x00, 0x00 };
+                    constexpr unsigned char footer_header[] = {0xED, 0xA5, 0xEB, 0x12};
+                    constexpr unsigned char footer_serial_data[] = {0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00,
+                                                                    0x18, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00,
+                                                                    0x28, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00,
+                                                                    0x38, 0x00, 0x00, 0x00};
                     uint32_t footer_serial_data_count = 7;
 
-                    uint32_t footer_data_count = static_cast<uint32_t>(meta_dds_tga_file_names.size()) * static_cast<uint32_t>(0x4) + footer_serial_data_count;
+                    uint32_t footer_data_count =
+                            static_cast<uint32_t>(meta_dds_tga_file_names.size()) * static_cast<uint32_t>(0x4) +
+                            footer_serial_data_count;
 
-                    uint32_t footer_total_size = footer_data_count * static_cast<uint32_t>(0x4) + static_cast<uint32_t>(0x4);
+                    uint32_t footer_total_size =
+                            footer_data_count * static_cast<uint32_t>(0x4) + static_cast<uint32_t>(0x4);
 
-                    for (unsigned char k : footer_header)
-                    {
+                    for (unsigned char k : footer_header) {
                         meta_data_footer.push_back(k);
                     }
 
                     std::memcpy(&input, &footer_total_size, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         meta_data_footer.push_back(input[k]);
                     }
 
                     std::memcpy(&input, &footer_data_count, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         meta_data_footer.push_back(input[k]);
                     }
 
-                    for (unsigned char k : footer_serial_data)
-                    {
+                    for (unsigned char k : footer_serial_data) {
                         meta_data_footer.push_back(k);
                     }
 
-                    for (unsigned int& dds_tga_name_offset : dds_tga_name_offsets)
-                    {
+                    for (unsigned int& dds_tga_name_offset : dds_tga_name_offsets) {
                         std::memcpy(&input, &dds_tga_name_offset, sizeof(uint32_t));
 
-                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                        {
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                             meta_data_footer.push_back(input[k]);
                         }
                     }
 
-                    for (uint64_t d = 0; d < dds_tga_data_1_offsets.size(); d++)
-                    {
+                    for (uint64_t d = 0; d < dds_tga_data_1_offsets.size(); d++) {
                         std::memcpy(&input, &dds_tga_data_1_offsets.at(d), sizeof(uint32_t));
 
-                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                        {
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                             meta_data_footer.push_back(input[k]);
                         }
 
                         std::memcpy(&input, &dds_tga_data_2_offsets.at(d), sizeof(uint32_t));
 
-                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                        {
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                             meta_data_footer.push_back(input[k]);
                         }
 
                         std::memcpy(&input, &dds_tga_data_3_offsets.at(d), sizeof(uint32_t));
 
-                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                        {
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                             meta_data_footer.push_back(input[k]);
                         }
                     }
@@ -821,11 +762,12 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     file::create_directories(current_path);
 
-                    std::ofstream gfxf_file = std::ofstream(current_path + "\\" + gfxf_hash_file_name, std::ofstream::binary);
+                    std::ofstream gfxf_file = std::ofstream(current_path + "\\" + gfxf_hash_file_name,
+                                                            std::ofstream::binary);
 
-                    if (!gfxf_file.good())
-                    {
-                        LOG_AND_EXIT("Error: GFXF file " + current_path + "\\" + gfxf_hash_file_name + " could not be created.");
+                    if (!gfxf_file.good()) {
+                        LOG_AND_EXIT("Error: GFXF file " + current_path + "\\" + gfxf_hash_file_name +
+                                     " could not be created.");
                     }
 
                     gfxf_file.write(gfxf_file_header_data.data(), gfxf_file_header_data.size());
@@ -835,15 +777,12 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
                     gfxf_file.write(gfxf_file_data.data(), gfxf_file_data.size());
 
                     gfxf_file.write(meta_data_footer.data(), meta_data_footer.size());
-                }
-                else
-                {
+                } else {
                     position = gfx_file_size + 0x44;
 
                     gfxf_dds_tga_file_count = dds_tga_file_names.size();
 
-                    while (((position & 0xF) != 0x4) && ((position & 0xF) != 0xC))
-                    {
+                    while (((position & 0xF) != 0x4) && ((position & 0xF) != 0xC)) {
                         gfxf_file_data.push_back(0x0);
                         position++;
                     }
@@ -852,17 +791,17 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     std::memcpy(&input, &gfxf_dds_tga_file_count, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         gfxf_file_data.push_back(input[k]);
                     }
 
                     position += 0x4;
 
-                    uint32_t offset = static_cast<uint64_t>(dds_tga_names_offset_start) + (static_cast<uint64_t>(gfxf_dds_tga_file_count) * static_cast<uint64_t>(0x10)) + static_cast<uint64_t>(0x8);
+                    uint32_t offset = static_cast<uint64_t>(dds_tga_names_offset_start) +
+                                      (static_cast<uint64_t>(gfxf_dds_tga_file_count) * static_cast<uint64_t>(0x10)) +
+                                      static_cast<uint64_t>(0x8);
 
-                    for (auto& dds_tga_file_name : dds_tga_file_names)
-                    {
+                    for (auto& dds_tga_file_name : dds_tga_file_names) {
                         uint32_t dds_tga_file_length1 = dds_tga_file_name.length();
                         uint32_t dds_tga_file_length2 = dds_tga_file_name.length();
 
@@ -870,8 +809,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                         std::memcpy(&input, &dds_tga_file_length1, sizeof(uint32_t));
 
-                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                        {
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                             gfxf_file_data.push_back(input[k]);
                         }
 
@@ -883,13 +821,12 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
                         gfxf_file_data.push_back(0x0);
 
                         position += 0x4;
-                            
+
                         dds_tga_name_offsets.push_back(static_cast<uint32_t>(position));
 
                         std::memcpy(&input, &offset, sizeof(uint32_t));
 
-                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                        {
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                             gfxf_file_data.push_back(input[k]);
                         }
 
@@ -908,30 +845,27 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                         offset += dds_tga_file_length2;
 
-                        while (offset % 4 != 0)
-                        {
+                        while (offset % 4 != 0) {
                             offset++;
                         }
                     }
 
-                    dds_tga_names_offset_end = static_cast<uint32_t>(gfx_file_size) + static_cast<uint32_t>(0x44) + static_cast<uint32_t>(gfxf_file_data.size());
+                    dds_tga_names_offset_end = static_cast<uint32_t>(gfx_file_size) + static_cast<uint32_t>(0x44) +
+                                               static_cast<uint32_t>(gfxf_file_data.size());
 
-                    for (auto& dds_tga_file_name : dds_tga_file_names)
-                    {
+                    for (auto& dds_tga_file_name : dds_tga_file_names) {
                         uint32_t dds_tga_file_length1 = dds_tga_file_name.length();
                         dds_tga_file_length1++;
 
                         std::memcpy(&input, &dds_tga_file_length1, sizeof(uint32_t));
 
-                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                        {
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                             gfxf_file_data.push_back(input[k]);
                         }
 
                         position += 0x4;
 
-                        for (char& k : dds_tga_file_name)
-                        {
+                        for (char& k : dds_tga_file_name) {
                             gfxf_file_data.push_back(k);
                         }
 
@@ -941,8 +875,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                         position++;
 
-                        while (dds_tga_file_length1 % 4 != 0)
-                        {
+                        while (dds_tga_file_length1 % 4 != 0) {
                             gfxf_file_data.push_back(0x0);
                             dds_tga_file_length1++;
                             position++;
@@ -951,14 +884,12 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     std::vector<std::vector<char>> dds_tga_file_data;
 
-                    for (auto& dds_tga_file_path : dds_tga_file_paths)
-                    {
+                    for (auto& dds_tga_file_path : dds_tga_file_paths) {
                         uint32_t dds_tga_file_size = 0;
 
                         std::ifstream dds_tga_file = std::ifstream(dds_tga_file_path, std::ifstream::binary);
 
-                        if (!dds_tga_file.good())
-                        {
+                        if (!dds_tga_file.good()) {
                             LOG_AND_EXIT("Error: dds/tga file " + dds_tga_file_path + " could not be created.");
                         }
 
@@ -977,27 +908,28 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     std::memcpy(&input, &gfxf_dds_tga_file_count, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         gfxf_file_data.push_back(input[k]);
                     }
 
                     position += 0x4;
 
-                    dds_tga_data_offset_start = static_cast<uint32_t>(gfx_file_size) + static_cast<uint32_t>(0x44) + static_cast<uint32_t>(gfxf_file_data.size());
+                    dds_tga_data_offset_start = static_cast<uint32_t>(gfx_file_size) + static_cast<uint32_t>(0x44) +
+                                                static_cast<uint32_t>(gfxf_file_data.size());
 
-                    offset = static_cast<uint32_t>(gfx_file_size) + static_cast<uint32_t>(0x44) + static_cast<uint32_t>(gfxf_file_data.size()) + (static_cast<uint64_t>(gfxf_dds_tga_file_count) * static_cast<uint64_t>(0x18)) + static_cast<uint64_t>(0x4);
+                    offset = static_cast<uint32_t>(gfx_file_size) + static_cast<uint32_t>(0x44) +
+                             static_cast<uint32_t>(gfxf_file_data.size()) +
+                             (static_cast<uint64_t>(gfxf_dds_tga_file_count) * static_cast<uint64_t>(0x18)) +
+                             static_cast<uint64_t>(0x4);
 
-                    for (auto& j : dds_tga_file_data)
-                    {
+                    for (auto& j : dds_tga_file_data) {
                         uint32_t dds_tga_file_length = j.size();
 
                         dds_tga_data_1_offsets.push_back(static_cast<uint32_t>(position));
 
                         std::memcpy(&input, &offset, sizeof(uint32_t));
 
-                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                        {
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                             gfxf_file_data.push_back(input[k]);
                         }
 
@@ -1016,8 +948,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                         std::memcpy(&input, &offset, sizeof(uint32_t));
 
-                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                        {
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                             gfxf_file_data.push_back(input[k]);
                         }
 
@@ -1034,8 +965,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                         std::memcpy(&input, &offset, sizeof(uint32_t));
 
-                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                        {
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                             gfxf_file_data.push_back(input[k]);
                         }
 
@@ -1051,26 +981,25 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
                         offset += 0x4;
                     }
 
-                    dds_tga_data_offset_end = static_cast<uint32_t>(gfx_file_size) + static_cast<uint32_t>(0x44) + static_cast<uint32_t>(gfxf_file_data.size());
+                    dds_tga_data_offset_end = static_cast<uint32_t>(gfx_file_size) + static_cast<uint32_t>(0x44) +
+                                              static_cast<uint32_t>(gfxf_file_data.size());
 
-                    for (auto& j : dds_tga_file_data)
-                    {
+                    for (auto& j : dds_tga_file_data) {
                         uint32_t dds_tga_file_length = j.size();
 
                         std::memcpy(&input, &dds_tga_file_length, sizeof(uint32_t));
 
-                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                        {
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                             gfxf_file_data.push_back(input[k]);
                         }
 
-                        for (uint64_t k = 0; k < dds_tga_file_length; k++)
-                        {
+                        for (uint64_t k = 0; k < dds_tga_file_length; k++) {
                             gfxf_file_data.push_back(j[k]);
                         }
                     }
 
-                    uint32_t header_value = static_cast<uint32_t>(gfx_file_size) + static_cast<uint32_t>(0x44) + static_cast<uint32_t>(gfxf_file_data.size());
+                    uint32_t header_value = static_cast<uint32_t>(gfx_file_size) + static_cast<uint32_t>(0x44) +
+                                            static_cast<uint32_t>(gfxf_file_data.size());
 
                     std::memcpy(&input, &header_value, sizeof(uint32_t));
 
@@ -1093,8 +1022,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     std::memcpy(&input, &gfx_file_size, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         gfxf_file_header_data.push_back(input[k]);
                     }
 
@@ -1107,8 +1035,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     std::memcpy(&input, &dds_tga_names_offset_start, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         gfxf_file_header_data.push_back(input[k]);
                     }
 
@@ -1119,8 +1046,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     std::memcpy(&input, &dds_tga_names_offset_end, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         gfxf_file_header_data.push_back(input[k]);
                     }
 
@@ -1131,8 +1057,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     std::memcpy(&input, &dds_tga_names_offset_end, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         gfxf_file_header_data.push_back(input[k]);
                     }
 
@@ -1143,8 +1068,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     std::memcpy(&input, &dds_tga_data_offset_start, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         gfxf_file_header_data.push_back(input[k]);
                     }
 
@@ -1155,8 +1079,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     std::memcpy(&input, &dds_tga_data_offset_end, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         gfxf_file_header_data.push_back(input[k]);
                     }
 
@@ -1167,8 +1090,7 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     std::memcpy(&input, &dds_tga_data_offset_end, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         gfxf_file_header_data.push_back(input[k]);
                     }
 
@@ -1179,73 +1101,68 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     std::memcpy(&input, &gfx_file_size, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         gfxf_file_header_data.push_back(input[k]);
                     }
 
-                    constexpr unsigned char footer_header[] = { 0xED, 0xA5, 0xEB, 0x12 };
-                    constexpr unsigned char footer_serial_data[] = { 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x28, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x38, 0x00, 0x00, 0x00 };
+                    constexpr unsigned char footer_header[] = {0xED, 0xA5, 0xEB, 0x12};
+                    constexpr unsigned char footer_serial_data[] = {0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00,
+                                                                    0x18, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00,
+                                                                    0x28, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00,
+                                                                    0x38, 0x00, 0x00, 0x00};
                     uint32_t footer_serial_data_count = 7;
 
-                    uint32_t footer_data_count = static_cast<uint32_t>(dds_tga_file_names.size()) * static_cast<uint32_t>(0x4) + footer_serial_data_count;
+                    uint32_t footer_data_count =
+                            static_cast<uint32_t>(dds_tga_file_names.size()) * static_cast<uint32_t>(0x4) +
+                            footer_serial_data_count;
 
-                    uint32_t footer_total_size = footer_data_count * static_cast<uint32_t>(0x4) + static_cast<uint32_t>(0x4);
+                    uint32_t footer_total_size =
+                            footer_data_count * static_cast<uint32_t>(0x4) + static_cast<uint32_t>(0x4);
 
-                    for (unsigned char k : footer_header)
-                    {
+                    for (unsigned char k : footer_header) {
                         meta_data_footer.push_back(k);
                     }
 
                     std::memcpy(&input, &footer_total_size, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         meta_data_footer.push_back(input[k]);
                     }
 
                     std::memcpy(&input, &footer_data_count, sizeof(uint32_t));
 
-                    for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                    {
+                    for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                         meta_data_footer.push_back(input[k]);
                     }
 
-                    for (unsigned char k : footer_serial_data)
-                    {
+                    for (unsigned char k : footer_serial_data) {
                         meta_data_footer.push_back(k);
                     }
 
-                    for (unsigned int& dds_tga_name_offset : dds_tga_name_offsets)
-                    {
+                    for (unsigned int& dds_tga_name_offset : dds_tga_name_offsets) {
                         std::memcpy(&input, &dds_tga_name_offset, sizeof(uint32_t));
 
-                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                        {
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                             meta_data_footer.push_back(input[k]);
                         }
                     }
 
-                    for (uint64_t d = 0; d < dds_tga_data_1_offsets.size(); d++)
-                    {
+                    for (uint64_t d = 0; d < dds_tga_data_1_offsets.size(); d++) {
                         std::memcpy(&input, &dds_tga_data_1_offsets.at(d), sizeof(uint32_t));
 
-                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                        {
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                             meta_data_footer.push_back(input[k]);
                         }
 
                         std::memcpy(&input, &dds_tga_data_2_offsets.at(d), sizeof(uint32_t));
 
-                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                        {
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                             meta_data_footer.push_back(input[k]);
                         }
 
                         std::memcpy(&input, &dds_tga_data_3_offsets.at(d), sizeof(uint32_t));
 
-                        for (uint64_t k = 0; k < sizeof(uint32_t); k++)
-                        {
+                        for (uint64_t k = 0; k < sizeof(uint32_t); k++) {
                             meta_data_footer.push_back(input[k]);
                         }
                     }
@@ -1254,11 +1171,12 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
                     file::create_directories(current_path);
 
-                    std::ofstream gfxf_file = std::ofstream(current_path + "\\" + gfxf_hash_file_name, std::ofstream::binary);
+                    std::ofstream gfxf_file = std::ofstream(current_path + "\\" + gfxf_hash_file_name,
+                                                            std::ofstream::binary);
 
-                    if (!gfxf_file.good())
-                    {
-                        LOG_AND_EXIT("Error: GFXF file " + current_path + "\\" + gfxf_hash_file_name + " could not be created.");
+                    if (!gfxf_file.good()) {
+                        LOG_AND_EXIT("Error: GFXF file " + current_path + "\\" + gfxf_hash_file_name +
+                                     " could not be created.");
                     }
 
                     gfxf_file.write(gfxf_file_header_data.data(), gfxf_file_header_data.size());
@@ -1277,7 +1195,8 @@ void rpkg_function::rebuild_gfxf_in(std::string& input_path)
 
     ss.str(std::string());
 
-    ss << message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
+    ss << message << "100% Done in "
+       << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
 
     LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
 

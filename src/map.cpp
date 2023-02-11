@@ -18,21 +18,18 @@
 
 map::map() = default;
 
-map::map(uint64_t hash_value)
-{
+map::map(uint64_t hash_value) {
 
 }
 
-void map::export_map(std::string& input_path, std::string& filter, std::string& map_filters, std::string& output_path, bool textured)
-{
+void map::export_map(std::string& input_path, std::string& filter, std::string& map_filters, std::string& output_path,
+                     bool textured) {
     log_output = false;
 
     std::string input_rpkg_folder_path = file::parse_input_folder_path(input_path);
 
-    if (file::path_exists(input_rpkg_folder_path))
-    {
-        if (!hash_list_loaded)
-        {
+    if (file::path_exists(input_rpkg_folder_path)) {
+        if (!hash_list_loaded) {
             LOG("Loading Hash List...");
             generic_function::load_hash_list(false);
             LOG("Loading Hash List: Done");
@@ -42,8 +39,7 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
 
         std::vector<std::string> filters = util::parse_input_filter(filter);
 
-        if (filters.size() != 1)
-        {
+        if (filters.size() != 1) {
             task_status_string = "Error: This function only takes one hash filter value, and it should be the root map entity TEMP hash value.";
 
             task_map_status = MAP_ERROR;
@@ -55,9 +51,9 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
 
         uint32_t rpkg_index = rpkg_function::get_latest_hash(hash_value);
 
-        if (rpkg_index == UINT32_MAX)
-        {
-            task_status_string = "Error: The input entity (TEMP) hash " + filters.at(0) + " could not be found in any RPKGs.";
+        if (rpkg_index == UINT32_MAX) {
+            task_status_string =
+                    "Error: The input entity (TEMP) hash " + filters.at(0) + " could not be found in any RPKGs.";
 
             task_map_status = MAP_ERROR;
 
@@ -68,13 +64,13 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
 
         std::string map_hash_file_name = "";
 
-        if (ith != rpkgs.at(rpkg_index).hash_map.end())
-        {
-            map_hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(ith->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(ith->second).hash_resource_type;
-        }
-        else
-        {
-            task_status_string = "Error: The input entity (TEMP) hash " + filters.at(0) + " could not be found in any RPKGs.";
+        if (ith != rpkgs.at(rpkg_index).hash_map.end()) {
+            map_hash_file_name =
+                    util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(ith->second).hash_value) + "." +
+                    rpkgs.at(rpkg_index).hash.at(ith->second).hash_resource_type;
+        } else {
+            task_status_string =
+                    "Error: The input entity (TEMP) hash " + filters.at(0) + " could not be found in any RPKGs.";
 
             task_map_status = MAP_ERROR;
 
@@ -93,113 +89,80 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
         std::regex re("^([^, ]+)[, ]+");
         std::regex_search(map_filters, m, re);
 
-        if (!m.empty())
-        {
+        if (!m.empty()) {
             map_filters_values.push_back(util::to_upper_case(m[1].str()));
 
             std::smatch m2;
             re.assign("[, ]+([^, ]+)");
 
-            while (std::regex_search(map_filters, m2, re))
-            {
+            while (std::regex_search(map_filters, m2, re)) {
                 map_filters_values.push_back(util::to_upper_case(m2[1].str()));
 
                 map_filters = m2.suffix().str();
             }
-        }
-        else
-        {
-            if (!map_filters.empty())
-            {
+        } else {
+            if (!map_filters.empty()) {
                 map_filters_values.push_back(util::to_upper_case(map_filters));
             }
         }
 
-        if (map_filters_values.empty())
-        {
+        if (map_filters_values.empty()) {
             LOG("No value for -map_filter specified, using the defaults:");
             LOG("Nodes With Volume Boxes: " + util::bool_to_string(temp_map.map_filter_volume_boxes));
             LOG("Nodes With Volume Spheres: " + util::bool_to_string(temp_map.map_filter_volume_spheres));
             LOG("Hide Nodes With m__bVisible==False In Godot: " + util::bool_to_string(temp_map.map_filter_visible));
-        }
-        else
-        {
+        } else {
             bool map_filter_volume_boxes_found = false;
             bool map_filter_volume_spheres_found = false;
             bool map_filter_visible_found = false;
 
-            for (const auto & map_filters_value : map_filters_values)
-            {
+            for (const auto& map_filters_value : map_filters_values) {
                 bool filters_malformed = false;
 
                 size_t pos = map_filters_value.find('=');
 
-                if (pos != std::string::npos)
-                {
+                if (pos != std::string::npos) {
                     std::string temp_map_filter = util::to_upper_case(map_filters_value.substr(0, pos));
                     std::string temp_map_filter_value = util::to_upper_case(map_filters_value.substr(pos + 1));
 
-                    if (temp_map_filter.empty() || temp_map_filter_value.empty())
-                    {
+                    if (temp_map_filter.empty() || temp_map_filter_value.empty()) {
                         filters_malformed = true;
-                    }
-                    else
-                    {
-                        if (temp_map_filter_value == "TRUE" || temp_map_filter_value == "FALSE")
-                        {
-                            if (temp_map_filter == "BOXES")
-                            {
+                    } else {
+                        if (temp_map_filter_value == "TRUE" || temp_map_filter_value == "FALSE") {
+                            if (temp_map_filter == "BOXES") {
                                 map_filter_volume_boxes_found = true;
 
-                                if (temp_map_filter_value == "TRUE")
-                                {
+                                if (temp_map_filter_value == "TRUE") {
                                     temp_map.map_filter_volume_boxes = true;
-                                }
-                                else if (temp_map_filter_value == "FALSE")
-                                {
+                                } else if (temp_map_filter_value == "FALSE") {
                                     temp_map.map_filter_volume_boxes = false;
                                 }
-                            }
-                            else if (temp_map_filter == "SPHERES")
-                            {
+                            } else if (temp_map_filter == "SPHERES") {
                                 map_filter_volume_spheres_found = true;
 
-                                if (temp_map_filter_value == "TRUE")
-                                {
+                                if (temp_map_filter_value == "TRUE") {
                                     temp_map.map_filter_volume_spheres = true;
-                                }
-                                else if (temp_map_filter_value == "FALSE")
-                                {
+                                } else if (temp_map_filter_value == "FALSE") {
                                     temp_map.map_filter_volume_spheres = false;
                                 }
-                            }
-                            else if (temp_map_filter == "VISIBLE")
-                            {
+                            } else if (temp_map_filter == "VISIBLE") {
                                 map_filter_visible_found = true;
 
-                                if (temp_map_filter_value == "TRUE")
-                                {
+                                if (temp_map_filter_value == "TRUE") {
                                     temp_map.map_filter_visible = true;
-                                }
-                                else if (temp_map_filter_value == "FALSE")
-                                {
+                                } else if (temp_map_filter_value == "FALSE") {
                                     temp_map.map_filter_visible = false;
                                 }
                             }
-                        }
-                        else
-                        {
+                        } else {
                             filters_malformed = true;
                         }
                     }
-                }
-                else
-                {
+                } else {
                     filters_malformed = true;
                 }
 
-                if (filters_malformed)
-                {
+                if (filters_malformed) {
                     task_status_string = "Error: The input value for -map_filters is malformed.";
 
                     task_map_status = MAP_ERROR;
@@ -208,43 +171,37 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
                 }
             }
 
-            if (map_filter_volume_boxes_found || map_filter_volume_spheres_found || map_filter_visible_found)
-            {
+            if (map_filter_volume_boxes_found || map_filter_volume_spheres_found || map_filter_visible_found) {
                 LOG("Filters set via -map_filter:");
 
-                if (map_filter_volume_boxes_found)
-                {
+                if (map_filter_volume_boxes_found) {
                     LOG("Nodes With Volume Boxes: " + util::bool_to_string(temp_map.map_filter_volume_boxes));
                 }
 
-                if (map_filter_volume_spheres_found)
-                {
+                if (map_filter_volume_spheres_found) {
                     LOG("Nodes With Volume Spheres: " + util::bool_to_string(temp_map.map_filter_volume_spheres));
                 }
 
-                if (map_filter_visible_found)
-                {
-                    LOG("Hide Nodes With m__bVisible==False In Godot: " + util::bool_to_string(temp_map.map_filter_visible));
+                if (map_filter_visible_found) {
+                    LOG("Hide Nodes With m__bVisible==False In Godot: " +
+                        util::bool_to_string(temp_map.map_filter_visible));
                 }
             }
 
-            if (!map_filter_volume_boxes_found || !map_filter_volume_spheres_found || !map_filter_visible_found)
-            {
+            if (!map_filter_volume_boxes_found || !map_filter_volume_spheres_found || !map_filter_visible_found) {
                 LOG("Using default map filter values for:");
 
-                if (!map_filter_volume_boxes_found)
-                {
+                if (!map_filter_volume_boxes_found) {
                     LOG("Nodes With Volume Boxes: " + util::bool_to_string(temp_map.map_filter_volume_boxes));
                 }
 
-                if (!map_filter_volume_spheres_found)
-                {
+                if (!map_filter_volume_spheres_found) {
                     LOG("Nodes With Volume Spheres: " + util::bool_to_string(temp_map.map_filter_volume_spheres));
                 }
 
-                if (!map_filter_visible_found)
-                {
-                    LOG("Hide Nodes With m_bVisible==False In Godot: " + util::bool_to_string(temp_map.map_filter_visible));
+                if (!map_filter_visible_found) {
+                    LOG("Hide Nodes With m_bVisible==False In Godot: " +
+                        util::bool_to_string(temp_map.map_filter_visible));
                 }
             }
         }
@@ -257,35 +214,36 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
         temp_map.map_recursive_temp_loader(rpkg_index, hash_value);
 
         LOG("Number of recursive entities (TEMP/TBLU) found: " + util::uint32_t_to_string(temp_map.map_temps.size()));
-        timing_string = "Number of recursive entities (TEMP/TBLU) found: " + util::uint32_t_to_string(temp_map.map_temps.size());
+        timing_string = "Number of recursive entities (TEMP/TBLU) found: " +
+                        util::uint32_t_to_string(temp_map.map_temps.size());
         temp_map.start_time = std::chrono::high_resolution_clock::now();
         temp_map.stringstream_length = 80;
         temp_map.message = "Loading recursive TEMP/TBLU entities: ";
         timing_string = temp_map.message + "0% done";
 
-        for (uint64_t t = 0; t < temp_map.map_temps.size(); t++)
-        {
-            if (gui_control == ABORT_CURRENT_TASK)
-            {
+        for (uint64_t t = 0; t < temp_map.map_temps.size(); t++) {
+            if (gui_control == ABORT_CURRENT_TASK) {
                 return;
             }
 
-            if (((t * (uint64_t)10000) / (uint64_t)temp_map.map_temps.size()) % (uint64_t)10 == 0 && t > 0)
-            {
-                temp_map.stringstream_length = console::update_console(temp_map.message, temp_map.map_temps.size(), t, temp_map.start_time, temp_map.stringstream_length);
+            if (((t * (uint64_t) 10000) / (uint64_t) temp_map.map_temps.size()) % (uint64_t) 10 == 0 && t > 0) {
+                temp_map.stringstream_length = console::update_console(temp_map.message, temp_map.map_temps.size(), t,
+                                                                       temp_map.start_time,
+                                                                       temp_map.stringstream_length);
             }
 
             map_percent_progress_recursive_temp = percent_progress;
 
-            if (temp_map.map_temps.at(t).tblu_return_value == TEMP_TBLU_FOUND)
-            {
+            if (temp_map.map_temps.at(t).tblu_return_value == TEMP_TBLU_FOUND) {
                 temp_map.map_temps.at(t).load_data();
             }
         }
 
         temp_map.end_time = std::chrono::high_resolution_clock::now();
         std::stringstream ss;
-        ss << temp_map.message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(temp_map.end_time - temp_map.start_time).count()) << "s";
+        ss << temp_map.message << "100% Done in " << (0.000000001 *
+                                                      std::chrono::duration_cast<std::chrono::nanoseconds>(
+                                                              temp_map.end_time - temp_map.start_time).count()) << "s";
         LOG("\r" << ss.str() << std::string((temp_map.stringstream_length - ss.str().length()), ' '));
         timing_string = ss.str();
 
@@ -306,8 +264,7 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
         timing_string = "Calculating number of map node...";
         temp_map.map_node_count = 0;
 
-        for (uint64_t t = 0; t < temp_map.map_temps.size(); t++)
-        {
+        for (uint64_t t = 0; t < temp_map.map_temps.size(); t++) {
             const rapidjson::Value& temp_json_subEntities = temp_map.map_temps.at(t).temp_json_document["subEntities"];
 
             temp_map.map_node_count += temp_json_subEntities.Size();
@@ -321,14 +278,15 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
         timing_string = temp_map.message + "0% done";
         temp_map.map_node_count_current = 0;
 
-        for (uint64_t t = 0; t < temp_map.map_temps.size(); t++)
-        {
+        for (uint64_t t = 0; t < temp_map.map_temps.size(); t++) {
             temp_map.get_map_node(temp_map.map_temps.at(t));
         }
 
         temp_map.end_time = std::chrono::high_resolution_clock::now();
         ss.str(std::string(""));
-        ss << temp_map.message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(temp_map.end_time - temp_map.start_time).count()) << "s";
+        ss << temp_map.message << "100% Done in " << (0.000000001 *
+                                                      std::chrono::duration_cast<std::chrono::nanoseconds>(
+                                                              temp_map.end_time - temp_map.start_time).count()) << "s";
         LOG("\r" << ss.str() << std::string((temp_map.stringstream_length - ss.str().length()), ' '));
         timing_string = ss.str();
 
@@ -338,16 +296,15 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
         timing_string = "Calculating number of map node with PRIMs...";
         temp_map.map_node_prim_count = 0;
 
-        for (uint64_t m = 0; m < temp_map.map_nodes.size(); m++)
-        {
-            if (temp_map.map_nodes.at(m).has_prim_resource)
-            {
+        for (uint64_t m = 0; m < temp_map.map_nodes.size(); m++) {
+            if (temp_map.map_nodes.at(m).has_prim_resource) {
                 temp_map.map_node_prim_count++;
             }
         }
 
         LOG("Number of map nodes with PRIMs found: " + util::uint32_t_to_string(temp_map.map_node_prim_count));
-        timing_string = "Number of map nodes with PRIMs found: " + util::uint32_t_to_string(temp_map.map_node_prim_count);
+        timing_string =
+                "Number of map nodes with PRIMs found: " + util::uint32_t_to_string(temp_map.map_node_prim_count);
         temp_map.start_time = std::chrono::high_resolution_clock::now();
         temp_map.stringstream_length = 80;
         temp_map.message = "Extracting all map's PRIMs as GLBs: ";
@@ -358,7 +315,9 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
 
         temp_map.end_time = std::chrono::high_resolution_clock::now();
         ss.str(std::string(""));
-        ss << temp_map.message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(temp_map.end_time - temp_map.start_time).count()) << "s";
+        ss << temp_map.message << "100% Done in " << (0.000000001 *
+                                                      std::chrono::duration_cast<std::chrono::nanoseconds>(
+                                                              temp_map.end_time - temp_map.start_time).count()) << "s";
         LOG("\r" << ss.str() << std::string((temp_map.stringstream_length - ss.str().length()), ' '));
         timing_string = ss.str();
 
@@ -427,26 +386,21 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
             }
         }*/
 
-        for (uint64_t m = 0; m < temp_map.map_nodes.size(); m++)
-        {
+        for (uint64_t m = 0; m < temp_map.map_nodes.size(); m++) {
             bool is_parent_node_local = false;
             bool temp_has_m_eidParents = false;
             uint32_t local_temp_entity_count = 0;
 
             auto it = temp_map.temp_hash_map_node_map.find(temp_map.map_nodes.at(m).temp_hash);
 
-            if (it != temp_map.temp_hash_map_node_map.end())
-            {
-                for (unsigned int n : it->second)
-                {
-                    if (temp_map.map_nodes.at(n).has_m_eidParent_local)
-                    {
+            if (it != temp_map.temp_hash_map_node_map.end()) {
+                for (unsigned int n : it->second) {
+                    if (temp_map.map_nodes.at(n).has_m_eidParent_local) {
                         local_temp_entity_count++;
 
                         temp_has_m_eidParents = true;
 
-                        if (temp_map.map_nodes.at(m).subEntity == temp_map.map_nodes.at(n).entityIndex)
-                        {
+                        if (temp_map.map_nodes.at(m).subEntity == temp_map.map_nodes.at(n).entityIndex) {
                             //std::cout << temp_map.map_nodes.at(m).entryName << "(" << util::uint64_t_to_hex_string(temp_map.map_nodes.at(m).temp_hash) << ")" << " is an m_eidParent to " << temp_map.map_nodes.at(n).entryName << std::endl;
 
                             is_parent_node_local = true;
@@ -455,46 +409,37 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
                 }
             }
 
-            if (local_temp_entity_count == 0 || (!temp_has_m_eidParents && local_temp_entity_count > 0))
-            {
+            if (local_temp_entity_count == 0 || (!temp_has_m_eidParents && local_temp_entity_count > 0)) {
                 is_parent_node_local = true;
             }
 
             bool in_root_scene = false;
 
-            for (auto it2 = temp_map.root_scenes.begin(); it2 != temp_map.root_scenes.end(); ++it2)
-            {
-                if (temp_map.map_nodes.at(m).temp_hash == it2->first)
-                {
+            for (auto it2 = temp_map.root_scenes.begin(); it2 != temp_map.root_scenes.end(); ++it2) {
+                if (temp_map.map_nodes.at(m).temp_hash == it2->first) {
                     //std::cout << temp_map.map_nodes.at(m).entryName << "(" << util::uint64_t_to_hex_string(temp_map.map_nodes.at(m).temp_hash) << ")" << " is in root scene " << util::uint64_t_to_hex_string(it->first) << std::endl;
 
                     in_root_scene = true;
                 }
             }
 
-            if (!temp_map.map_nodes.at(m).has_m_eidParent && is_parent_node_local && in_root_scene)
-            {
+            if (!temp_map.map_nodes.at(m).has_m_eidParent && is_parent_node_local && in_root_scene) {
                 //std::cout << temp_map.map_nodes.at(m).entryName << "(" << util::uint64_t_to_hex_string(temp_map.map_nodes.at(m).temp_hash) << ")" << " is a root scene top level map node!" << std::endl;
 
                 temp_map.map_nodes.at(m).is_top_level_root_node = true;
 
                 bool map_root_node_found = false;
 
-                for (unsigned int map_root_node : temp_map.map_root_nodes)
-                {
-                    if (m == map_root_node)
-                    {
+                for (unsigned int map_root_node : temp_map.map_root_nodes) {
+                    if (m == map_root_node) {
                         map_root_node_found = true;
                     }
                 }
 
-                if (!map_root_node_found)
-                {
+                if (!map_root_node_found) {
                     temp_map.map_root_nodes.push_back(m);
                 }
-            }
-            else if (!temp_map.map_nodes.at(m).has_m_eidParent && is_parent_node_local)
-            {
+            } else if (!temp_map.map_nodes.at(m).has_m_eidParent && is_parent_node_local) {
                 //std::cout << temp_map.map_nodes.at(m).entryName << "(" << util::uint64_t_to_hex_string(temp_map.map_nodes.at(m).temp_hash) << ")" << " is a local top level map node!" << std::endl;
 
                 temp_map.map_nodes.at(m).is_top_level_Local_node = true;
@@ -503,13 +448,15 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
             }
         }
 
-        temp_map.godot_tscn_file = "[gd_scene load_steps=" + util::uint32_t_to_string(temp_map.map_prims.size() + 2) + " format=3]\n\n";
+        temp_map.godot_tscn_file =
+                "[gd_scene load_steps=" + util::uint32_t_to_string(temp_map.map_prims.size() + 2) + " format=3]\n\n";
 
-        for (uint64_t p = 0; p < temp_map.map_prims.size(); p++)
-        {
+        for (uint64_t p = 0; p < temp_map.map_prims.size(); p++) {
             std::string prim_hash_string = util::uint64_t_to_hex_string(temp_map.map_prims.at(p));
 
-            temp_map.godot_tscn_file += R"([ext_resource type="PackedScene" path="res://)" + prim_hash_string + ".PRIM.glb\" id=" + util::uint32_t_to_string(p) + "]\n";
+            temp_map.godot_tscn_file +=
+                    R"([ext_resource type="PackedScene" path="res://)" + prim_hash_string + ".PRIM.glb\" id=" +
+                    util::uint32_t_to_string(p) + "]\n";
         }
 
         temp_map.godot_tscn_file += "[node name=\"Node3D\" type=\"Node3D\"]\n";
@@ -523,8 +470,7 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
         timing_string = temp_map.message + "0% done";
         temp_map.map_node_count_current = 0;
 
-        for (uint32_t m = 0; m < temp_map.map_root_nodes.size(); m++)
-        {
+        for (uint32_t m = 0; m < temp_map.map_root_nodes.size(); m++) {
             temp_map.generate_map_node_strings(temp_map.map_root_nodes.at(m), 0, "", 0);
         }
 
@@ -602,18 +548,19 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
         godot_godot_file += "[memory]\n";
         godot_godot_file += "limits/message_queue/max_size_kb = 2048000\n";
 
-        if (!file::write_to_file(file::output_path_append(map_hash_file_name + ".tscn", output_path), temp_map.godot_tscn_file))
-        {
-            task_status_string = "Error: File " + file::output_path_append(map_hash_file_name + ".tscn", output_path) + " could not be created.";
+        if (!file::write_to_file(file::output_path_append(map_hash_file_name + ".tscn", output_path),
+                                 temp_map.godot_tscn_file)) {
+            task_status_string = "Error: File " + file::output_path_append(map_hash_file_name + ".tscn", output_path) +
+                                 " could not be created.";
 
             task_map_status = MAP_ERROR;
 
             LOG_AND_RETURN(task_status_string);
         }
 
-        if (!file::write_to_file(file::output_path_append("project.godot", output_path), godot_godot_file))
-        {
-            task_status_string = "Error: File " + file::output_path_append("project.godot", output_path) + " could not be created.";
+        if (!file::write_to_file(file::output_path_append("project.godot", output_path), godot_godot_file)) {
+            task_status_string =
+                    "Error: File " + file::output_path_append("project.godot", output_path) + " could not be created.";
 
             task_map_status = MAP_ERROR;
 
@@ -622,15 +569,16 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
 
         temp_map.end_time = std::chrono::high_resolution_clock::now();
         ss.str(std::string(""));
-        ss << temp_map.message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(temp_map.end_time - temp_map.start_time).count()) << "s";
+        ss << temp_map.message << "100% Done in " << (0.000000001 *
+                                                      std::chrono::duration_cast<std::chrono::nanoseconds>(
+                                                              temp_map.end_time - temp_map.start_time).count()) << "s";
         LOG("\r" << ss.str() << std::string((temp_map.stringstream_length - ss.str().length()), ' '));
         timing_string = ss.str();
 
         task_map_status = MAP_EXPORT_SUCCESSFUL;
-    }
-    else
-    {
-        task_status_string = "Error: The folder " + input_rpkg_folder_path + " to search for RPKG files for map editor mode does not exist.";
+    } else {
+        task_status_string = "Error: The folder " + input_rpkg_folder_path +
+                             " to search for RPKG files for map editor mode does not exist.";
 
         task_map_status = MAP_ERROR;
 
@@ -640,12 +588,10 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
     log_output = true;
 }
 
-void map::import_map(std::string& input_path, std::string& map_path, std::string& qn_format, std::string& output_path)
-{
+void map::import_map(std::string& input_path, std::string& map_path, std::string& qn_format, std::string& output_path) {
     log_output = false;
 
-    if (input_path.empty())
-    {
+    if (input_path.empty()) {
         task_status_string = "Error: The input_path folder does not exist.";
 
         task_map_status = MAP_ERROR;
@@ -653,9 +599,9 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
         LOG_AND_RETURN(task_status_string);
     }
 
-    if (map_path.empty())
-    {
-        task_status_string = "Error: The map_path folder " + map_path + " does not exist, missing -map_path in the command line?";
+    if (map_path.empty()) {
+        task_status_string =
+                "Error: The map_path folder " + map_path + " does not exist, missing -map_path in the command line?";
 
         task_map_status = MAP_ERROR;
 
@@ -663,27 +609,20 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
     }
 
     bool input_path_is_rpkg_file = false;
-    if (std::filesystem::is_regular_file(input_path))
-    {
+    if (std::filesystem::is_regular_file(input_path)) {
         input_path_is_rpkg_file = true;
-    }
-    else
-    {
+    } else {
         input_path = file::parse_input_folder_path(input_path);
     }
 
     bool map_path_is_file = false;
-    if (std::filesystem::is_regular_file(map_path))
-    {
+    if (std::filesystem::is_regular_file(map_path)) {
         map_path_is_file = true;
-    }
-    else
-    {
+    } else {
         map_path = file::parse_input_folder_path(map_path);
     }
 
-    if (!file::path_exists(input_path))
-    {
+    if (!file::path_exists(input_path)) {
         task_status_string = "Error: The input_path folder " + input_path + " does not exist.";
 
         task_map_status = MAP_ERROR;
@@ -691,8 +630,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
         LOG_AND_RETURN(task_status_string);
     }
 
-    if (!file::path_exists(map_path))
-    {
+    if (!file::path_exists(map_path)) {
         task_status_string = "Error: The map_path folder " + map_path + " does not exist.";
 
         task_map_status = MAP_ERROR;
@@ -700,8 +638,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
         LOG_AND_RETURN(task_status_string);
     }
 
-    if (map_path_is_file)
-    {
+    if (map_path_is_file) {
         task_status_string = "Error: The map_path needs to be the path to the root map's folder and not a file.";
 
         task_map_status = MAP_ERROR;
@@ -709,12 +646,9 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
         LOG_AND_RETURN(task_status_string);
     }
 
-    if (!input_path_is_rpkg_file)
-    {
+    if (!input_path_is_rpkg_file) {
         rpkg_function::import_rpkg_files_in_folder(input_path);
-    }
-    else
-    {
+    } else {
         rpkg_function::import_rpkg(input_path, false);
     }
 
@@ -724,14 +658,11 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
     std::string map_root_hash_string = "";
     uint64_t map_root_hash_value = 0;
 
-    for (const auto& entry : std::filesystem::directory_iterator(map_path))
-    {
-        if (map_root_hash_string.empty())
-        {
+    for (const auto& entry : std::filesystem::directory_iterator(map_path)) {
+        if (map_root_hash_string.empty()) {
             std::cout << entry.path().string() << std::endl;
 
-            if (std::filesystem::is_regular_file(entry.path().string()))
-            {
+            if (std::filesystem::is_regular_file(entry.path().string())) {
                 std::cout << entry.path().string() << std::endl;
 
                 std::size_t pos = entry.path().string().find_last_of("\\/");
@@ -741,25 +672,19 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
                 std::string hash_string = "";
                 std::string resource_type = "";
 
-                if (pos != std::string::npos)
-                {
+                if (pos != std::string::npos) {
                     file_name = entry.path().string().substr(pos + 1, entry.path().string().length() - (pos + 1));
-                }
-                else
-                {
+                } else {
                     file_name = entry.path().string();
                 }
 
-                if (file_name.length() > 5)
-                {
-                    if (util::to_upper_case(file_name.substr((file_name.length() - 5), 5)) == ".TSCN")
-                    {
+                if (file_name.length() > 5) {
+                    if (util::to_upper_case(file_name.substr((file_name.length() - 5), 5)) == ".TSCN") {
                         hash_file_name = util::to_upper_case(file_name.substr(0, (file_name.length() - 5)));
 
                         pos = hash_file_name.find_last_of('.');
 
-                        if (pos != std::string::npos)
-                        {
+                        if (pos != std::string::npos) {
                             hash_string = hash_file_name.substr(0, pos);
                             resource_type = hash_file_name.substr(pos + 1, hash_file_name.length() - (pos + 1));
                         }
@@ -767,18 +692,15 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
                         bool is_temp_hash_file = true;
                         bool temp_hash_meta = true;
 
-                        if (hash_string.length() != 16)
-                        {
+                        if (hash_string.length() != 16) {
                             is_temp_hash_file = false;
                         }
 
-                        if (resource_type != "TEMP")
-                        {
+                        if (resource_type != "TEMP") {
                             is_temp_hash_file = false;
                         }
 
-                        if (is_temp_hash_file && temp_hash_meta)
-                        {
+                        if (is_temp_hash_file && temp_hash_meta) {
                             map_file_path = entry.path().string();
                             map_root_tscn_file_name = file_name;
                             map_root_hash_file_name = hash_file_name;
@@ -791,8 +713,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
         }
     }
 
-    if (map_root_hash_string.empty())
-    {
+    if (map_root_hash_string.empty()) {
         task_status_string = "Error: The map_path folder does not contain a Godot scene file of the format: 0000000000000000.TEMP.TSCN\nwhere 0000000000000000 is the hash value for the map's main entity (TEMP) file/resource.";
 
         task_map_status = MAP_ERROR;
@@ -806,8 +727,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
     rpkg_function::import_rpkg_files_in_folder(parent_path);
 
-    if (!hash_list_loaded)
-    {
+    if (!hash_list_loaded) {
         LOG("Loading Hash List...");
         generic_function::load_hash_list(true);
         LOG("Loading Hash List: Done");
@@ -815,9 +735,9 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
     uint32_t rpkg_index = rpkg_function::get_latest_hash(map_root_hash_value);
 
-    if (rpkg_index == UINT32_MAX)
-    {
-        task_status_string = "Error: The input entity hash " + util::uint64_t_to_hex_string(map_root_hash_value) + " could not be found in any RPKGs.";
+    if (rpkg_index == UINT32_MAX) {
+        task_status_string = "Error: The input entity hash " + util::uint64_t_to_hex_string(map_root_hash_value) +
+                             " could not be found in any RPKGs.";
 
         task_map_status = MAP_ERROR;
 
@@ -826,8 +746,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
     auto it6 = rpkgs.at(rpkg_index).hash_map.find(map_root_hash_value);
 
-    if (it6 != rpkgs.at(rpkg_index).hash_map.end())
-    {
+    if (it6 != rpkgs.at(rpkg_index).hash_map.end()) {
         temp temp_temp(rpkg_index, it6->second, 3);
 
         temp_temp.load_data();
@@ -837,8 +756,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
     std::ifstream input_file = std::ifstream(map_file_path);
 
-    if (!input_file.good())
-    {
+    if (!input_file.good()) {
         task_status_string = "Error: Godot tscn file " + map_file_path + " could not be read.";
 
         task_map_status = MAP_ERROR;
@@ -847,7 +765,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
     }
 
     input_file.seekg(0, std::ifstream::end);
-    uint64_t input_file_size = (uint64_t)input_file.tellg();
+    uint64_t input_file_size = (uint64_t) input_file.tellg();
     input_file.seekg(0, std::ifstream::beg);
     std::string godot_scene_file(input_file_size, '\0');
     input_file.read(&godot_scene_file[0], input_file_size);
@@ -862,9 +780,9 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
     uint32_t godot_version = std::strtoul(godot_version_test.c_str(), nullptr, 10);
     godot_version++;
 
-    if (godot_version < 3 || godot_version > 4)
-    {
-        task_status_string = "Error: Godot version could not be determined from the scene file " + map_root_tscn_file_name;
+    if (godot_version < 3 || godot_version > 4) {
+        task_status_string =
+                "Error: Godot version could not be determined from the scene file " + map_root_tscn_file_name;
 
         task_map_status = MAP_ERROR;
 
@@ -873,24 +791,18 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
     map temp_map;
 
-    if (qn_format.empty())
-    {
+    if (qn_format.empty()) {
         task_status_string = "No -qn_format parameter specified, using the default: " + temp_map.qn_format;
 
         task_map_status = MAP_ERROR;
 
         LOG_AND_RETURN(task_status_string);
-    }
-    else
-    {
+    } else {
         qn_format = util::to_lower_case(qn_format);
 
-        if (qn_format == "entity" || qn_format == "patch")
-        {
+        if (qn_format == "entity" || qn_format == "patch") {
             temp_map.qn_format = qn_format;
-        }
-        else
-        {
+        } else {
             task_status_string = "Error: The -qn_format parameter must either be 'entity' or 'patch' (without the quotes).";
 
             task_map_status = MAP_ERROR;
@@ -910,22 +822,21 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
     util::split_string_view(godot_scene_file_string_view, "[node", map_node_node_positions);
 
     LOG("Number of map nodes in Godot scene file found: " + util::uint32_t_to_string(map_node_node_positions.size()));
-    timing_string = "Number of map nodes in Godot scene file found: " + util::uint32_t_to_string(map_node_node_positions.size());
+    timing_string = "Number of map nodes in Godot scene file found: " +
+                    util::uint32_t_to_string(map_node_node_positions.size());
     temp_map.start_time = std::chrono::high_resolution_clock::now();
     temp_map.stringstream_length = 80;
     temp_map.message = "Importing map node data from Godot scene file: ";
     timing_string = temp_map.message + "0% done";
 
-    for (uint64_t p = 1; p < map_node_node_positions.size(); p++)
-    {
-        if (gui_control == ABORT_CURRENT_TASK)
-        {
+    for (uint64_t p = 1; p < map_node_node_positions.size(); p++) {
+        if (gui_control == ABORT_CURRENT_TASK) {
             return;
         }
 
-        if (((p * (uint64_t)10000) / (uint64_t)map_node_node_positions.size()) % (uint64_t)10 == 0 && p > 0)
-        {
-            temp_map.stringstream_length = console::update_console(temp_map.message, map_node_node_positions.size(), p, temp_map.start_time, temp_map.stringstream_length);
+        if (((p * (uint64_t) 10000) / (uint64_t) map_node_node_positions.size()) % (uint64_t) 10 == 0 && p > 0) {
+            temp_map.stringstream_length = console::update_console(temp_map.message, map_node_node_positions.size(), p,
+                                                                   temp_map.start_time, temp_map.stringstream_length);
         }
 
         map_percent_progress_godot_map_nodes = percent_progress;
@@ -938,24 +849,21 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
         std::string_view temp_string_view;
 
-        if (p == (map_node_node_positions.size() - 1))
-        {
+        if (p == (map_node_node_positions.size() - 1)) {
             temp_string_view = godot_scene_file_string_view.substr(map_node_node_positions.at(p));
-        }
-        else
-        {
-            temp_string_view = godot_scene_file_string_view.substr(map_node_node_positions.at(p), (map_node_node_positions.at(p + 1) - map_node_node_positions.at(p)));
+        } else {
+            temp_string_view = godot_scene_file_string_view.substr(map_node_node_positions.at(p),
+                                                                   (map_node_node_positions.at(p + 1) -
+                                                                    map_node_node_positions.at(p)));
         }
 
         temp_map_node.entryName = util::find_string_between_strings(temp_string_view, "name=\"", "\"");
 
-        if (temp_string_view.find("CSGBox") != std::string::npos)
-        {
+        if (temp_string_view.find("CSGBox") != std::string::npos) {
             temp_map_node.is_volume_box = true;
         }
 
-        if (temp_string_view.find("CSGSphere") != std::string::npos)
-        {
+        if (temp_string_view.find("CSGSphere") != std::string::npos) {
             temp_map_node.is_volume_sphere = true;
         }
 
@@ -963,18 +871,15 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
         size_t pos1 = meta_data.find(',');
 
-        if (pos1 != std::string::npos)
-        {
+        if (pos1 != std::string::npos) {
             size_t pos2 = meta_data.substr(pos1 + 1).find(',');
 
-            if (pos2 != std::string::npos)
-            {
+            if (pos2 != std::string::npos) {
                 std::string temp_hash = meta_data.substr(0, pos1);
                 std::string entityId = meta_data.substr((pos1 + 1), pos2);
                 std::string use_transform = meta_data.substr(pos1 + pos2 + 2);
 
-                if (!temp_hash.empty() && !entityId.empty())
-                {
+                if (!temp_hash.empty() && !entityId.empty()) {
                     temp_map_node.temp_hash_string = temp_hash;
 
                     temp_map_node.temp_hash = strtoull(temp_map_node.temp_hash_string.c_str(), nullptr, 16);
@@ -983,35 +888,26 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
                     temp_map_node.entityId = strtoull(entityId.c_str(), nullptr, 16);
 
-                    if (use_transform == "0")
-                    {
+                    if (use_transform == "0") {
                         temp_map_node.use_m_mTransform = false;
-                    }
-                    else if (use_transform == "1")
-                    {
+                    } else if (use_transform == "1") {
                         temp_map_node.use_m_mTransform = true;
                     }
-                }
-                else
-                {
+                } else {
                     task_status_string = "Error: The Godot scene file " + map_root_tscn_file_name + " is corrupt.";
 
                     task_map_status = MAP_ERROR;
 
                     LOG_AND_RETURN(task_status_string);
                 }
-            }
-            else
-            {
+            } else {
                 task_status_string = "Error: The Godot scene file " + map_root_tscn_file_name + " is corrupt.";
 
                 task_map_status = MAP_ERROR;
 
                 LOG_AND_RETURN(task_status_string);
             }
-        }
-        else
-        {
+        } else {
             task_status_string = "Error: The Godot scene file " + map_root_tscn_file_name + " is corrupt.";
 
             task_map_status = MAP_ERROR;
@@ -1023,12 +919,9 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
         std::string temp_map_node_transform = "";
 
-        if (godot_version == 3)
-        {
+        if (godot_version == 3) {
             temp_map_node_transform = util::find_string_between_strings(temp_string_view, "Transform(", ")");
-        }
-        else
-        {
+        } else {
             temp_map_node_transform = util::find_string_between_strings(temp_string_view, "Transform3D(", ")");
         }
 
@@ -1040,8 +933,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
         util::split_string_view(temp_string_view, ",", transform_comma_positions);
 
-        if (!transform_comma_positions.empty() && transform_comma_positions.size() != 11)
-        {
+        if (!transform_comma_positions.empty() && transform_comma_positions.size() != 11) {
             task_status_string = "Error: The Godot scene file " + map_root_tscn_file_name + " is corrupt.";
 
             task_map_status = MAP_ERROR;
@@ -1049,29 +941,27 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
             LOG_AND_RETURN(task_status_string);
         }
 
-        float matrix_values[12] = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f };
+        float matrix_values[12] = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f};
 
-        if (!transform_comma_positions.empty())
-        {
-            for (uint64_t c = 0; c < (transform_comma_positions.size() + 1); c++)
-            {
-                if (c == 0)
-                {
+        if (!transform_comma_positions.empty()) {
+            for (uint64_t c = 0; c < (transform_comma_positions.size() + 1); c++) {
+                if (c == 0) {
                     //std::cout << std::strtof(std::string(temp_string_view.substr(0, transform_comma_positions.at(c))).c_str(), nullptr) << std::endl;
 
-                    matrix_values[c] = std::strtof(std::string(temp_string_view.substr(0, transform_comma_positions.at(c))).c_str(), nullptr);
-                }
-                else if (c == transform_comma_positions.size())
-                {
+                    matrix_values[c] = std::strtof(
+                            std::string(temp_string_view.substr(0, transform_comma_positions.at(c))).c_str(), nullptr);
+                } else if (c == transform_comma_positions.size()) {
                     //std::cout << std::strtof(std::string(temp_string_view.substr(transform_comma_positions.at(c - 1) + 1)).c_str(), nullptr) << std::endl;
 
-                    matrix_values[c] = std::strtof(std::string(temp_string_view.substr(transform_comma_positions.at(c - 1) + 1)).c_str(), nullptr);
-                }
-                else
-                {
+                    matrix_values[c] = std::strtof(
+                            std::string(temp_string_view.substr(transform_comma_positions.at(c - 1) + 1)).c_str(),
+                            nullptr);
+                } else {
                     //std::cout << std::strtof(std::string(temp_string_view.substr(transform_comma_positions.at(c - 1) + 1, transform_comma_positions.at(c))).c_str(), nullptr) << std::endl;
 
-                    matrix_values[c] = std::strtof(std::string(temp_string_view.substr(transform_comma_positions.at(c - 1) + 1, transform_comma_positions.at(c))).c_str(), nullptr);
+                    matrix_values[c] = std::strtof(std::string(
+                            temp_string_view.substr(transform_comma_positions.at(c - 1) + 1,
+                                                    transform_comma_positions.at(c))).c_str(), nullptr);
                 }
             }
         }
@@ -1092,8 +982,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
         matrix43 matrix = temp_map_node.m_mTransform;
         vector3 scale;
 
-        if (temp_map.extract_scale_from_transform(temp_map_node.m_mTransform, scale))
-        {
+        if (temp_map.extract_scale_from_transform(temp_map_node.m_mTransform, scale)) {
             temp_map_node.scaled_on_import = true;
         }
 
@@ -1105,14 +994,16 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
     temp_map.end_time = std::chrono::high_resolution_clock::now();
     std::stringstream ss;
-    ss << temp_map.message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(temp_map.end_time - temp_map.start_time).count()) << "s";
+    ss << temp_map.message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(
+            temp_map.end_time - temp_map.start_time).count()) << "s";
     LOG("\r" << ss.str() << std::string((temp_map.stringstream_length - ss.str().length()), ' '));
     timing_string = ss.str();
 
     task_map_status = MAP_NODE_TEMP_LOADING;
 
     LOG("Number of map node unique entities (TEMP/TBLU) found: " + util::uint32_t_to_string(map_temp_hashes.size()));
-    timing_string = "Number of map node unique entities (TEMP/TBLU) found: " + util::uint32_t_to_string(map_temp_hashes.size());
+    timing_string =
+            "Number of map node unique entities (TEMP/TBLU) found: " + util::uint32_t_to_string(map_temp_hashes.size());
     temp_map.start_time = std::chrono::high_resolution_clock::now();
     temp_map.stringstream_length = 80;
     temp_map.message = "Loading map node unique entities (TEMP/TBLU): ";
@@ -1120,16 +1011,16 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
     uint32_t map_node_temp_load_count = 0;
 
-    for (const uint64_t& temp_hash : map_temp_hashes)
-    {
-        if (gui_control == ABORT_CURRENT_TASK)
-        {
+    for (const uint64_t& temp_hash : map_temp_hashes) {
+        if (gui_control == ABORT_CURRENT_TASK) {
             return;
         }
 
-        if (((map_node_temp_load_count * (uint64_t)10000) / (uint64_t)map_temp_hashes.size()) % (uint64_t)10 == 0 && map_node_temp_load_count > 0)
-        {
-            temp_map.stringstream_length = console::update_console(temp_map.message, map_temp_hashes.size(), map_node_temp_load_count, temp_map.start_time, temp_map.stringstream_length);
+        if (((map_node_temp_load_count * (uint64_t) 10000) / (uint64_t) map_temp_hashes.size()) % (uint64_t) 10 == 0 &&
+            map_node_temp_load_count > 0) {
+            temp_map.stringstream_length = console::update_console(temp_map.message, map_temp_hashes.size(),
+                                                                   map_node_temp_load_count, temp_map.start_time,
+                                                                   temp_map.stringstream_length);
         }
 
         map_node_temp_load_count++;
@@ -1140,12 +1031,10 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
         uint32_t rpkg_index = rpkg_function::get_latest_hash(temp_hash);
 
-        if (rpkg_index != UINT32_MAX)
-        {
+        if (rpkg_index != UINT32_MAX) {
             auto it = rpkgs.at(rpkg_index).hash_map.find(temp_hash);
 
-            if (it != rpkgs.at(rpkg_index).hash_map.end())
-            {
+            if (it != rpkgs.at(rpkg_index).hash_map.end()) {
                 temp_map.map_temps.emplace_back(temp(rpkg_index, it->second, 3));
 
                 uint32_t temp_index = temp_map.map_temps.size() - 1;
@@ -1159,7 +1048,8 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
     temp_map.end_time = std::chrono::high_resolution_clock::now();
     ss.str(std::string(""));
-    ss << temp_map.message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(temp_map.end_time - temp_map.start_time).count()) << "s";
+    ss << temp_map.message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(
+            temp_map.end_time - temp_map.start_time).count()) << "s";
     LOG("\r" << ss.str() << std::string((temp_map.stringstream_length - ss.str().length()), ' '));
     timing_string = ss.str();
 
@@ -1172,30 +1062,25 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
     temp_map.message = "Checking map nodes for changes: ";
     timing_string = temp_map.message + "0% done";
 
-    for (uint64_t m = 0; m < temp_map.map_nodes.size(); m++)
-    {
-        if (gui_control == ABORT_CURRENT_TASK)
-        {
+    for (uint64_t m = 0; m < temp_map.map_nodes.size(); m++) {
+        if (gui_control == ABORT_CURRENT_TASK) {
             return;
         }
 
-        if (((m * (uint64_t)10000) / (uint64_t)temp_map.map_nodes.size()) % (uint64_t)10 == 0 && m > 0)
-        {
-            temp_map.stringstream_length = console::update_console(temp_map.message, temp_map.map_nodes.size(), m, temp_map.start_time, temp_map.stringstream_length);
+        if (((m * (uint64_t) 10000) / (uint64_t) temp_map.map_nodes.size()) % (uint64_t) 10 == 0 && m > 0) {
+            temp_map.stringstream_length = console::update_console(temp_map.message, temp_map.map_nodes.size(), m,
+                                                                   temp_map.start_time, temp_map.stringstream_length);
         }
 
         map_percent_progress_map_node_changes_check = percent_progress;
 
-        if (temp_map.map_nodes.at(m).use_m_mTransform)
-        {
+        if (temp_map.map_nodes.at(m).use_m_mTransform) {
             auto it = temp_map.map_temps_map.find(temp_map.map_nodes.at(m).temp_hash);
 
-            if (it != temp_map.map_temps_map.end())
-            {
+            if (it != temp_map.map_temps_map.end()) {
                 auto it2 = temp_map.map_temps.at(it->second).tblu_entityId_map.find(temp_map.map_nodes.at(m).entityId);
 
-                if (it2 != temp_map.map_temps.at(it->second).tblu_entityId_map.end())
-                {
+                if (it2 != temp_map.map_temps.at(it->second).tblu_entityId_map.end()) {
                     bool has_transform = false;
                     bool has_primitive_scale = false;
                     bool has_global_size = false;
@@ -1213,29 +1098,32 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
                     uint32_t propertyValues_count = 0;
                     uint32_t postInitPropertyValues_count = 0;
 
-                    std::string json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) + "/propertyValues";
-                    if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(temp_map.map_temps.at(it->second).temp_json_document, rapidjson::Pointer(json_pointer.c_str())))
-                    {
+                    std::string json_pointer =
+                            "/subEntities/" + util::uint32_t_to_string(it2->second) + "/propertyValues";
+                    if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(
+                            temp_map.map_temps.at(it->second).temp_json_document,
+                            rapidjson::Pointer(json_pointer.c_str()))) {
                         propertyValues_count = temp_json_value->GetArray().Size();
                     }
 
-                    for (uint32_t p = 0; p < propertyValues_count; p++)
-                    {
-                        json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) + "/propertyValues/" + util::uint32_t_to_string(p) + "/nPropertyID";
-                        if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(temp_map.map_temps.at(it->second).temp_json_document, rapidjson::Pointer(json_pointer.c_str())))
-                        {
-                            if (temp_json_value->IsString())
-                            {
-                                if (std::strcmp(temp_json_value->GetString(), "m_mTransform") == 0)
-                                {
+                    for (uint32_t p = 0; p < propertyValues_count; p++) {
+                        json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) + "/propertyValues/" +
+                                       util::uint32_t_to_string(p) + "/nPropertyID";
+                        if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(
+                                temp_map.map_temps.at(it->second).temp_json_document,
+                                rapidjson::Pointer(json_pointer.c_str()))) {
+                            if (temp_json_value->IsString()) {
+                                if (std::strcmp(temp_json_value->GetString(), "m_mTransform") == 0) {
                                     has_transform = true;
 
-                                    json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) + "/propertyValues/" + util::uint32_t_to_string(p) + "/value/$val";
+                                    json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) +
+                                                   "/propertyValues/" + util::uint32_t_to_string(p) + "/value/$val";
 
                                     transform_property_pointer = json_pointer;
 
-                                    if (rapidjson::Value* temp_json_value2 = rapidjson::GetValueByPointer(temp_map.map_temps.at(it->second).temp_json_document, rapidjson::Pointer(json_pointer.c_str())))
-                                    {
+                                    if (rapidjson::Value* temp_json_value2 = rapidjson::GetValueByPointer(
+                                            temp_map.map_temps.at(it->second).temp_json_document,
+                                            rapidjson::Pointer(json_pointer.c_str()))) {
                                         m_mTransform.x_axis.x = temp_json_value2->GetObject()["XAxis"]["x"].GetFloat();
                                         m_mTransform.y_axis.x = temp_json_value2->GetObject()["YAxis"]["x"].GetFloat();
                                         m_mTransform.z_axis.x = temp_json_value2->GetObject()["ZAxis"]["x"].GetFloat();
@@ -1249,51 +1137,57 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
                                         m_mTransform.transform.y = temp_json_value2->GetObject()["Trans"]["y"].GetFloat();
                                         m_mTransform.transform.z = temp_json_value2->GetObject()["Trans"]["z"].GetFloat();
                                     }
-                                }
-                                else if (std::strcmp(temp_json_value->GetString(), "m_PrimitiveScale") == 0)
-                                {
-                                    json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) + "/propertyValues/" + util::uint32_t_to_string(p) + "/value/$type";
-                                    if (rapidjson::Value* temp_json_value2 = rapidjson::GetValueByPointer(temp_map.map_temps.at(it->second).temp_json_document, rapidjson::Pointer(json_pointer.c_str())))
-                                    {
-                                        if (std::strcmp(temp_json_value2->GetString(), "SVector3") == 0)
-                                        {
-                                            json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) + "/propertyValues/" + util::uint32_t_to_string(p) + "/value/$val";
+                                } else if (std::strcmp(temp_json_value->GetString(), "m_PrimitiveScale") == 0) {
+                                    json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) +
+                                                   "/propertyValues/" + util::uint32_t_to_string(p) + "/value/$type";
+                                    if (rapidjson::Value* temp_json_value2 = rapidjson::GetValueByPointer(
+                                            temp_map.map_temps.at(it->second).temp_json_document,
+                                            rapidjson::Pointer(json_pointer.c_str()))) {
+                                        if (std::strcmp(temp_json_value2->GetString(), "SVector3") == 0) {
+                                            json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) +
+                                                           "/propertyValues/" + util::uint32_t_to_string(p) +
+                                                           "/value/$val";
 
                                             primitive_scale_property_pointer = json_pointer;
 
-                                            if (rapidjson::Value* temp_json_value3 = rapidjson::GetValueByPointer(temp_map.map_temps.at(it->second).temp_json_document, rapidjson::Pointer(json_pointer.c_str())))
-                                            {
+                                            if (rapidjson::Value* temp_json_value3 = rapidjson::GetValueByPointer(
+                                                    temp_map.map_temps.at(it->second).temp_json_document,
+                                                    rapidjson::Pointer(json_pointer.c_str()))) {
                                                 primitive_scale.x = temp_json_value3->GetObject()["x"].GetFloat();
                                                 primitive_scale.y = temp_json_value3->GetObject()["y"].GetFloat();
                                                 primitive_scale.z = temp_json_value3->GetObject()["z"].GetFloat();
 
-                                                if (!util::floats_equal(primitive_scale.x, 0.0f) && !util::floats_equal(primitive_scale.y, 0.0f) && !util::floats_equal(primitive_scale.z, 0.0f))
-                                                {
+                                                if (!util::floats_equal(primitive_scale.x, 0.0f) &&
+                                                    !util::floats_equal(primitive_scale.y, 0.0f) &&
+                                                    !util::floats_equal(primitive_scale.z, 0.0f)) {
                                                     has_primitive_scale = true;
                                                 }
                                             }
                                         }
                                     }
-                                }
-                                else if (std::strcmp(temp_json_value->GetString(), "m_vGlobalSize") == 0)
-                                {
-                                    json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) + "/propertyValues/" + util::uint32_t_to_string(p) + "/value/$type";
-                                    if (rapidjson::Value* temp_json_value2 = rapidjson::GetValueByPointer(temp_map.map_temps.at(it->second).temp_json_document, rapidjson::Pointer(json_pointer.c_str())))
-                                    {
-                                        if (std::strcmp(temp_json_value2->GetString(), "SVector3") == 0)
-                                        {
-                                            json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) + "/propertyValues/" + util::uint32_t_to_string(p) + "/value/$val";
+                                } else if (std::strcmp(temp_json_value->GetString(), "m_vGlobalSize") == 0) {
+                                    json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) +
+                                                   "/propertyValues/" + util::uint32_t_to_string(p) + "/value/$type";
+                                    if (rapidjson::Value* temp_json_value2 = rapidjson::GetValueByPointer(
+                                            temp_map.map_temps.at(it->second).temp_json_document,
+                                            rapidjson::Pointer(json_pointer.c_str()))) {
+                                        if (std::strcmp(temp_json_value2->GetString(), "SVector3") == 0) {
+                                            json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) +
+                                                           "/propertyValues/" + util::uint32_t_to_string(p) +
+                                                           "/value/$val";
 
                                             global_size_property_pointer = json_pointer;
 
-                                            if (rapidjson::Value* temp_json_value3 = rapidjson::GetValueByPointer(temp_map.map_temps.at(it->second).temp_json_document, rapidjson::Pointer(json_pointer.c_str())))
-                                            {
+                                            if (rapidjson::Value* temp_json_value3 = rapidjson::GetValueByPointer(
+                                                    temp_map.map_temps.at(it->second).temp_json_document,
+                                                    rapidjson::Pointer(json_pointer.c_str()))) {
                                                 global_size.x = temp_json_value3->GetObject()["x"].GetFloat();
                                                 global_size.y = temp_json_value3->GetObject()["y"].GetFloat();
                                                 global_size.z = temp_json_value3->GetObject()["z"].GetFloat();
 
-                                                if (!util::floats_equal(global_size.x, 0.0f) && !util::floats_equal(global_size.y, 0.0f) && !util::floats_equal(global_size.z, 0.0f))
-                                                {
+                                                if (!util::floats_equal(global_size.x, 0.0f) &&
+                                                    !util::floats_equal(global_size.y, 0.0f) &&
+                                                    !util::floats_equal(global_size.z, 0.0f)) {
                                                     has_global_size = true;
                                                 }
                                             }
@@ -1305,28 +1199,32 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
                     }
 
                     json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) + "/postInitPropertyValues";
-                    if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(temp_map.map_temps.at(it->second).temp_json_document, rapidjson::Pointer(json_pointer.c_str())))
-                    {
+                    if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(
+                            temp_map.map_temps.at(it->second).temp_json_document,
+                            rapidjson::Pointer(json_pointer.c_str()))) {
                         postInitPropertyValues_count = temp_json_value->GetArray().Size();
                     }
 
-                    for (uint32_t p = 0; p < propertyValues_count; p++)
-                    {
-                        json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) + "/postInitPropertyValues/" + util::uint32_t_to_string(p) + "/nPropertyID";
-                        if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(temp_map.map_temps.at(it->second).temp_json_document, rapidjson::Pointer(json_pointer.c_str())))
-                        {
-                            if (temp_json_value->IsString())
-                            {
-                                if (std::strcmp(temp_json_value->GetString(), "m_mTransform") == 0)
-                                {
+                    for (uint32_t p = 0; p < propertyValues_count; p++) {
+                        json_pointer =
+                                "/subEntities/" + util::uint32_t_to_string(it2->second) + "/postInitPropertyValues/" +
+                                util::uint32_t_to_string(p) + "/nPropertyID";
+                        if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(
+                                temp_map.map_temps.at(it->second).temp_json_document,
+                                rapidjson::Pointer(json_pointer.c_str()))) {
+                            if (temp_json_value->IsString()) {
+                                if (std::strcmp(temp_json_value->GetString(), "m_mTransform") == 0) {
                                     has_transform = true;
 
-                                    json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) + "/postInitPropertyValues/" + util::uint32_t_to_string(p) + "/value/$val";
+                                    json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) +
+                                                   "/postInitPropertyValues/" + util::uint32_t_to_string(p) +
+                                                   "/value/$val";
 
                                     transform_post_init_property_pointer = json_pointer;
 
-                                    if (rapidjson::Value* temp_json_value2 = rapidjson::GetValueByPointer(temp_map.map_temps.at(it->second).temp_json_document, rapidjson::Pointer(json_pointer.c_str())))
-                                    {
+                                    if (rapidjson::Value* temp_json_value2 = rapidjson::GetValueByPointer(
+                                            temp_map.map_temps.at(it->second).temp_json_document,
+                                            rapidjson::Pointer(json_pointer.c_str()))) {
                                         m_mTransform.x_axis.x = temp_json_value2->GetObject()["XAxis"]["x"].GetFloat();
                                         m_mTransform.y_axis.x = temp_json_value2->GetObject()["YAxis"]["x"].GetFloat();
                                         m_mTransform.z_axis.x = temp_json_value2->GetObject()["ZAxis"]["x"].GetFloat();
@@ -1340,51 +1238,59 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
                                         m_mTransform.transform.y = temp_json_value2->GetObject()["Trans"]["y"].GetFloat();
                                         m_mTransform.transform.z = temp_json_value2->GetObject()["Trans"]["z"].GetFloat();
                                     }
-                                }
-                                else if (std::strcmp(temp_json_value->GetString(), "m_PrimitiveScale") == 0)
-                                {
-                                    json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) + "/postInitPropertyValues/" + util::uint32_t_to_string(p) + "/value/$type";
-                                    if (rapidjson::Value* temp_json_value2 = rapidjson::GetValueByPointer(temp_map.map_temps.at(it->second).temp_json_document, rapidjson::Pointer(json_pointer.c_str())))
-                                    {
-                                        if (std::strcmp(temp_json_value2->GetString(), "SVector3") == 0)
-                                        {
-                                            json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) + "/postInitPropertyValues/" + util::uint32_t_to_string(p) + "/value/$val";
+                                } else if (std::strcmp(temp_json_value->GetString(), "m_PrimitiveScale") == 0) {
+                                    json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) +
+                                                   "/postInitPropertyValues/" + util::uint32_t_to_string(p) +
+                                                   "/value/$type";
+                                    if (rapidjson::Value* temp_json_value2 = rapidjson::GetValueByPointer(
+                                            temp_map.map_temps.at(it->second).temp_json_document,
+                                            rapidjson::Pointer(json_pointer.c_str()))) {
+                                        if (std::strcmp(temp_json_value2->GetString(), "SVector3") == 0) {
+                                            json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) +
+                                                           "/postInitPropertyValues/" + util::uint32_t_to_string(p) +
+                                                           "/value/$val";
 
                                             primitive_scale_post_init_property_pointer = json_pointer;
 
-                                            if (rapidjson::Value* temp_json_value3 = rapidjson::GetValueByPointer(temp_map.map_temps.at(it->second).temp_json_document, rapidjson::Pointer(json_pointer.c_str())))
-                                            {
+                                            if (rapidjson::Value* temp_json_value3 = rapidjson::GetValueByPointer(
+                                                    temp_map.map_temps.at(it->second).temp_json_document,
+                                                    rapidjson::Pointer(json_pointer.c_str()))) {
                                                 primitive_scale.x = temp_json_value3->GetObject()["x"].GetFloat();
                                                 primitive_scale.y = temp_json_value3->GetObject()["y"].GetFloat();
                                                 primitive_scale.z = temp_json_value3->GetObject()["z"].GetFloat();
 
-                                                if (!util::floats_equal(primitive_scale.x, 0.0f) && !util::floats_equal(primitive_scale.y, 0.0f) && !util::floats_equal(primitive_scale.z, 0.0f))
-                                                {
+                                                if (!util::floats_equal(primitive_scale.x, 0.0f) &&
+                                                    !util::floats_equal(primitive_scale.y, 0.0f) &&
+                                                    !util::floats_equal(primitive_scale.z, 0.0f)) {
                                                     has_primitive_scale = true;
                                                 }
                                             }
                                         }
                                     }
-                                }
-                                else if (std::strcmp(temp_json_value->GetString(), "m_vGlobalSize") == 0)
-                                {
-                                    json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) + "/postInitPropertyValues/" + util::uint32_t_to_string(p) + "/value/$type";
-                                    if (rapidjson::Value* temp_json_value2 = rapidjson::GetValueByPointer(temp_map.map_temps.at(it->second).temp_json_document, rapidjson::Pointer(json_pointer.c_str())))
-                                    {
-                                        if (std::strcmp(temp_json_value2->GetString(), "SVector3") == 0)
-                                        {
-                                            json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) + "/postInitPropertyValues/" + util::uint32_t_to_string(p) + "/value/$val";
+                                } else if (std::strcmp(temp_json_value->GetString(), "m_vGlobalSize") == 0) {
+                                    json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) +
+                                                   "/postInitPropertyValues/" + util::uint32_t_to_string(p) +
+                                                   "/value/$type";
+                                    if (rapidjson::Value* temp_json_value2 = rapidjson::GetValueByPointer(
+                                            temp_map.map_temps.at(it->second).temp_json_document,
+                                            rapidjson::Pointer(json_pointer.c_str()))) {
+                                        if (std::strcmp(temp_json_value2->GetString(), "SVector3") == 0) {
+                                            json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) +
+                                                           "/postInitPropertyValues/" + util::uint32_t_to_string(p) +
+                                                           "/value/$val";
 
                                             global_size_post_init_property_pointer = json_pointer;
 
-                                            if (rapidjson::Value* temp_json_value3 = rapidjson::GetValueByPointer(temp_map.map_temps.at(it->second).temp_json_document, rapidjson::Pointer(json_pointer.c_str())))
-                                            {
+                                            if (rapidjson::Value* temp_json_value3 = rapidjson::GetValueByPointer(
+                                                    temp_map.map_temps.at(it->second).temp_json_document,
+                                                    rapidjson::Pointer(json_pointer.c_str()))) {
                                                 global_size.x = temp_json_value3->GetObject()["x"].GetFloat();
                                                 global_size.y = temp_json_value3->GetObject()["y"].GetFloat();
                                                 global_size.z = temp_json_value3->GetObject()["z"].GetFloat();
 
-                                                if (!util::floats_equal(global_size.x, 0.0f) && !util::floats_equal(global_size.y, 0.0f) && !util::floats_equal(global_size.z, 0.0f))
-                                                {
+                                                if (!util::floats_equal(global_size.x, 0.0f) &&
+                                                    !util::floats_equal(global_size.y, 0.0f) &&
+                                                    !util::floats_equal(global_size.z, 0.0f)) {
                                                     has_global_size = true;
                                                 }
                                             }
@@ -1395,313 +1301,422 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
                         }
                     }
 
-                    if (has_transform && has_primitive_scale)
-                    {
+                    if (has_transform && has_primitive_scale) {
                         temp_map.scale_transform(m_mTransform, primitive_scale.x, primitive_scale.y, primitive_scale.z);
 
                         matrix43 node_m_mTransform = temp_map.map_nodes.at(m).m_mTransform;
 
-                        temp_map.scale_transform(node_m_mTransform, primitive_scale.x, primitive_scale.y, primitive_scale.z);
+                        temp_map.scale_transform(node_m_mTransform, primitive_scale.x, primitive_scale.y,
+                                                 primitive_scale.z);
 
-                        if (!temp_map.matrixes_equal(node_m_mTransform, m_mTransform))
-                        {
+                        if (!temp_map.matrixes_equal(node_m_mTransform, m_mTransform)) {
                             auto temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
 
-                            if (temps_modified_map_it == temps_modified_map.end())
-                            {
+                            if (temps_modified_map_it == temps_modified_map.end()) {
                                 temps_modified_map[temp_map.map_nodes.at(m).temp_hash] = true;
 
-                                if (temp_map.qn_format == "patch")
-                                {
-                                    temp_map.map_temps.at(it->second).temp_json_document_original.CopyFrom(temp_map.map_temps.at(it->second).temp_json_document, temp_map.map_temps.at(it->second).temp_json_document_original.GetAllocator());
-                                    temp_map.map_temps.at(it->second).tblu_json_document_original.CopyFrom(temp_map.map_temps.at(it->second).tblu_json_document, temp_map.map_temps.at(it->second).tblu_json_document_original.GetAllocator());
+                                if (temp_map.qn_format == "patch") {
+                                    temp_map.map_temps.at(it->second).temp_json_document_original.CopyFrom(
+                                            temp_map.map_temps.at(it->second).temp_json_document, temp_map.map_temps.at(
+                                                    it->second).temp_json_document_original.GetAllocator());
+                                    temp_map.map_temps.at(it->second).tblu_json_document_original.CopyFrom(
+                                            temp_map.map_temps.at(it->second).tblu_json_document, temp_map.map_temps.at(
+                                                    it->second).tblu_json_document_original.GetAllocator());
 
                                     temp_map.map_temps.at(it->second).rt_json_to_qn_json();
 
-                                    temp_map.map_temps.at(it->second).qn_json_document_original.CopyFrom(temp_map.map_temps.at(it->second).qn_json_document, temp_map.map_temps.at(it->second).qn_json_document_original.GetAllocator());
+                                    temp_map.map_temps.at(it->second).qn_json_document_original.CopyFrom(
+                                            temp_map.map_temps.at(it->second).qn_json_document,
+                                            temp_map.map_temps.at(it->second).qn_json_document_original.GetAllocator());
 
                                     temp_map.map_temps.at(it->second).temp_json_document = rapidjson::Document();
                                     temp_map.map_temps.at(it->second).tblu_json_document = rapidjson::Document();
                                     temp_map.map_temps.at(it->second).qn_json_document = rapidjson::Document();
 
-                                    temp_map.map_temps.at(it->second).temp_json_document.CopyFrom(temp_map.map_temps.at(it->second).temp_json_document_original, temp_map.map_temps.at(it->second).temp_json_document.GetAllocator());
-                                    temp_map.map_temps.at(it->second).tblu_json_document.CopyFrom(temp_map.map_temps.at(it->second).tblu_json_document_original, temp_map.map_temps.at(it->second).tblu_json_document.GetAllocator());
+                                    temp_map.map_temps.at(it->second).temp_json_document.CopyFrom(
+                                            temp_map.map_temps.at(it->second).temp_json_document_original,
+                                            temp_map.map_temps.at(it->second).temp_json_document.GetAllocator());
+                                    temp_map.map_temps.at(it->second).tblu_json_document.CopyFrom(
+                                            temp_map.map_temps.at(it->second).tblu_json_document_original,
+                                            temp_map.map_temps.at(it->second).tblu_json_document.GetAllocator());
                                 }
                             }
 
-                            if (transform_property_pointer.empty())
-                            {
+                            if (transform_property_pointer.empty()) {
                                 transform_property_pointer = transform_post_init_property_pointer;
                             }
 
-                            if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(temp_map.map_temps.at(it->second).temp_json_document, rapidjson::Pointer(transform_property_pointer.c_str())))
-                            {
-                                temp_json_value->GetObject()["XAxis"]["x"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.x_axis.x);
-                                temp_json_value->GetObject()["YAxis"]["x"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.y_axis.x);
-                                temp_json_value->GetObject()["ZAxis"]["x"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.z_axis.x);
-                                temp_json_value->GetObject()["XAxis"]["y"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.x_axis.y);
-                                temp_json_value->GetObject()["YAxis"]["y"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.y_axis.y);
-                                temp_json_value->GetObject()["ZAxis"]["y"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.z_axis.y);
-                                temp_json_value->GetObject()["XAxis"]["z"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.x_axis.z);
-                                temp_json_value->GetObject()["YAxis"]["z"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.y_axis.z);
-                                temp_json_value->GetObject()["ZAxis"]["z"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.z_axis.z);
-                                temp_json_value->GetObject()["Trans"]["x"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.transform.x);
-                                temp_json_value->GetObject()["Trans"]["y"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.transform.y);
-                                temp_json_value->GetObject()["Trans"]["z"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.transform.z);
+                            if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(
+                                    temp_map.map_temps.at(it->second).temp_json_document,
+                                    rapidjson::Pointer(transform_property_pointer.c_str()))) {
+                                temp_json_value->GetObject()["XAxis"]["x"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.x_axis.x);
+                                temp_json_value->GetObject()["YAxis"]["x"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.y_axis.x);
+                                temp_json_value->GetObject()["ZAxis"]["x"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.z_axis.x);
+                                temp_json_value->GetObject()["XAxis"]["y"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.x_axis.y);
+                                temp_json_value->GetObject()["YAxis"]["y"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.y_axis.y);
+                                temp_json_value->GetObject()["ZAxis"]["y"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.z_axis.y);
+                                temp_json_value->GetObject()["XAxis"]["z"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.x_axis.z);
+                                temp_json_value->GetObject()["YAxis"]["z"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.y_axis.z);
+                                temp_json_value->GetObject()["ZAxis"]["z"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.z_axis.z);
+                                temp_json_value->GetObject()["Trans"]["x"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.transform.x);
+                                temp_json_value->GetObject()["Trans"]["y"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.transform.y);
+                                temp_json_value->GetObject()["Trans"]["z"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.transform.z);
                             }
 
-                            if (primitive_scale_property_pointer.empty())
-                            {
+                            if (primitive_scale_property_pointer.empty()) {
                                 primitive_scale_property_pointer = primitive_scale_post_init_property_pointer;
                             }
 
-                            if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(temp_map.map_temps.at(it->second).temp_json_document, rapidjson::Pointer(primitive_scale_property_pointer.c_str())))
-                            {
+                            if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(
+                                    temp_map.map_temps.at(it->second).temp_json_document,
+                                    rapidjson::Pointer(primitive_scale_property_pointer.c_str()))) {
                                 temp_json_value->GetObject()["x"].SetFloat(temp_map.map_nodes.at(m).m_PrimitiveScale.x);
                                 temp_json_value->GetObject()["y"].SetFloat(temp_map.map_nodes.at(m).m_PrimitiveScale.y);
                                 temp_json_value->GetObject()["z"].SetFloat(temp_map.map_nodes.at(m).m_PrimitiveScale.z);
                             }
                         }
-                    }
-                    else if (has_transform && has_global_size)
-                    {
+                    } else if (has_transform && has_global_size) {
                         temp_map.scale_transform(m_mTransform, global_size.x, global_size.y, global_size.z);
 
                         matrix43 node_m_mTransform = temp_map.map_nodes.at(m).m_mTransform;
 
                         temp_map.scale_transform(node_m_mTransform, global_size.x, global_size.y, global_size.z);
 
-                        if (!temp_map.matrixes_equal(node_m_mTransform, m_mTransform))
-                        {
+                        if (!temp_map.matrixes_equal(node_m_mTransform, m_mTransform)) {
                             auto temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
 
-                            if (temps_modified_map_it == temps_modified_map.end())
-                            {
+                            if (temps_modified_map_it == temps_modified_map.end()) {
                                 temps_modified_map[temp_map.map_nodes.at(m).temp_hash] = true;
 
-                                if (temp_map.qn_format == "patch")
-                                {
-                                    temp_map.map_temps.at(it->second).temp_json_document_original.CopyFrom(temp_map.map_temps.at(it->second).temp_json_document, temp_map.map_temps.at(it->second).temp_json_document_original.GetAllocator());
-                                    temp_map.map_temps.at(it->second).tblu_json_document_original.CopyFrom(temp_map.map_temps.at(it->second).tblu_json_document, temp_map.map_temps.at(it->second).tblu_json_document_original.GetAllocator());
+                                if (temp_map.qn_format == "patch") {
+                                    temp_map.map_temps.at(it->second).temp_json_document_original.CopyFrom(
+                                            temp_map.map_temps.at(it->second).temp_json_document, temp_map.map_temps.at(
+                                                    it->second).temp_json_document_original.GetAllocator());
+                                    temp_map.map_temps.at(it->second).tblu_json_document_original.CopyFrom(
+                                            temp_map.map_temps.at(it->second).tblu_json_document, temp_map.map_temps.at(
+                                                    it->second).tblu_json_document_original.GetAllocator());
 
                                     temp_map.map_temps.at(it->second).rt_json_to_qn_json();
 
-                                    temp_map.map_temps.at(it->second).qn_json_document_original.CopyFrom(temp_map.map_temps.at(it->second).qn_json_document, temp_map.map_temps.at(it->second).qn_json_document_original.GetAllocator());
+                                    temp_map.map_temps.at(it->second).qn_json_document_original.CopyFrom(
+                                            temp_map.map_temps.at(it->second).qn_json_document,
+                                            temp_map.map_temps.at(it->second).qn_json_document_original.GetAllocator());
 
                                     temp_map.map_temps.at(it->second).temp_json_document = rapidjson::Document();
                                     temp_map.map_temps.at(it->second).tblu_json_document = rapidjson::Document();
                                     temp_map.map_temps.at(it->second).qn_json_document = rapidjson::Document();
 
-                                    temp_map.map_temps.at(it->second).temp_json_document.CopyFrom(temp_map.map_temps.at(it->second).temp_json_document_original, temp_map.map_temps.at(it->second).temp_json_document.GetAllocator());
-                                    temp_map.map_temps.at(it->second).tblu_json_document.CopyFrom(temp_map.map_temps.at(it->second).tblu_json_document_original, temp_map.map_temps.at(it->second).tblu_json_document.GetAllocator());
+                                    temp_map.map_temps.at(it->second).temp_json_document.CopyFrom(
+                                            temp_map.map_temps.at(it->second).temp_json_document_original,
+                                            temp_map.map_temps.at(it->second).temp_json_document.GetAllocator());
+                                    temp_map.map_temps.at(it->second).tblu_json_document.CopyFrom(
+                                            temp_map.map_temps.at(it->second).tblu_json_document_original,
+                                            temp_map.map_temps.at(it->second).tblu_json_document.GetAllocator());
                                 }
                             }
 
-                            if (transform_property_pointer.empty())
-                            {
+                            if (transform_property_pointer.empty()) {
                                 transform_property_pointer = transform_post_init_property_pointer;
                             }
 
-                            if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(temp_map.map_temps.at(it->second).temp_json_document, rapidjson::Pointer(transform_property_pointer.c_str())))
-                            {
-                                temp_json_value->GetObject()["XAxis"]["x"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.x_axis.x);
-                                temp_json_value->GetObject()["YAxis"]["x"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.y_axis.x);
-                                temp_json_value->GetObject()["ZAxis"]["x"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.z_axis.x);
-                                temp_json_value->GetObject()["XAxis"]["y"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.x_axis.y);
-                                temp_json_value->GetObject()["YAxis"]["y"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.y_axis.y);
-                                temp_json_value->GetObject()["ZAxis"]["y"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.z_axis.y);
-                                temp_json_value->GetObject()["XAxis"]["z"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.x_axis.z);
-                                temp_json_value->GetObject()["YAxis"]["z"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.y_axis.z);
-                                temp_json_value->GetObject()["ZAxis"]["z"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.z_axis.z);
-                                temp_json_value->GetObject()["Trans"]["x"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.transform.x);
-                                temp_json_value->GetObject()["Trans"]["y"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.transform.y);
-                                temp_json_value->GetObject()["Trans"]["z"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.transform.z);
+                            if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(
+                                    temp_map.map_temps.at(it->second).temp_json_document,
+                                    rapidjson::Pointer(transform_property_pointer.c_str()))) {
+                                temp_json_value->GetObject()["XAxis"]["x"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.x_axis.x);
+                                temp_json_value->GetObject()["YAxis"]["x"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.y_axis.x);
+                                temp_json_value->GetObject()["ZAxis"]["x"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.z_axis.x);
+                                temp_json_value->GetObject()["XAxis"]["y"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.x_axis.y);
+                                temp_json_value->GetObject()["YAxis"]["y"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.y_axis.y);
+                                temp_json_value->GetObject()["ZAxis"]["y"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.z_axis.y);
+                                temp_json_value->GetObject()["XAxis"]["z"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.x_axis.z);
+                                temp_json_value->GetObject()["YAxis"]["z"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.y_axis.z);
+                                temp_json_value->GetObject()["ZAxis"]["z"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.z_axis.z);
+                                temp_json_value->GetObject()["Trans"]["x"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.transform.x);
+                                temp_json_value->GetObject()["Trans"]["y"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.transform.y);
+                                temp_json_value->GetObject()["Trans"]["z"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.transform.z);
                             }
 
-                            if (global_size_property_pointer.empty())
-                            {
+                            if (global_size_property_pointer.empty()) {
                                 global_size_property_pointer = global_size_post_init_property_pointer;
                             }
 
-                            if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(temp_map.map_temps.at(it->second).temp_json_document, rapidjson::Pointer(global_size_property_pointer.c_str())))
-                            {
+                            if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(
+                                    temp_map.map_temps.at(it->second).temp_json_document,
+                                    rapidjson::Pointer(global_size_property_pointer.c_str()))) {
                                 temp_json_value->GetObject()["x"].SetFloat(temp_map.map_nodes.at(m).m_vGlobalSize.x);
                                 temp_json_value->GetObject()["y"].SetFloat(temp_map.map_nodes.at(m).m_vGlobalSize.y);
                                 temp_json_value->GetObject()["z"].SetFloat(temp_map.map_nodes.at(m).m_vGlobalSize.z);
                             }
                         }
-                    }
-                    else if (has_transform && !has_primitive_scale && !has_global_size && temp_map.map_nodes.at(m).scaled_on_import && !temp_map.map_nodes.at(m).is_volume_box)
-                    {
-                        if (!temp_map.matrixes_equal(temp_map.map_nodes.at(m).m_mTransform, m_mTransform))
-                        {
+                    } else if (has_transform && !has_primitive_scale && !has_global_size &&
+                               temp_map.map_nodes.at(m).scaled_on_import && !temp_map.map_nodes.at(m).is_volume_box) {
+                        if (!temp_map.matrixes_equal(temp_map.map_nodes.at(m).m_mTransform, m_mTransform)) {
                             auto temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
 
-                            if (temps_modified_map_it == temps_modified_map.end())
-                            {
+                            if (temps_modified_map_it == temps_modified_map.end()) {
                                 temps_modified_map[temp_map.map_nodes.at(m).temp_hash] = true;
 
-                                if (temp_map.qn_format == "patch")
-                                {
-                                    temp_map.map_temps.at(it->second).temp_json_document_original.CopyFrom(temp_map.map_temps.at(it->second).temp_json_document, temp_map.map_temps.at(it->second).temp_json_document_original.GetAllocator());
-                                    temp_map.map_temps.at(it->second).tblu_json_document_original.CopyFrom(temp_map.map_temps.at(it->second).tblu_json_document, temp_map.map_temps.at(it->second).tblu_json_document_original.GetAllocator());
+                                if (temp_map.qn_format == "patch") {
+                                    temp_map.map_temps.at(it->second).temp_json_document_original.CopyFrom(
+                                            temp_map.map_temps.at(it->second).temp_json_document, temp_map.map_temps.at(
+                                                    it->second).temp_json_document_original.GetAllocator());
+                                    temp_map.map_temps.at(it->second).tblu_json_document_original.CopyFrom(
+                                            temp_map.map_temps.at(it->second).tblu_json_document, temp_map.map_temps.at(
+                                                    it->second).tblu_json_document_original.GetAllocator());
 
                                     temp_map.map_temps.at(it->second).rt_json_to_qn_json();
 
-                                    temp_map.map_temps.at(it->second).qn_json_document_original.CopyFrom(temp_map.map_temps.at(it->second).qn_json_document, temp_map.map_temps.at(it->second).qn_json_document_original.GetAllocator());
+                                    temp_map.map_temps.at(it->second).qn_json_document_original.CopyFrom(
+                                            temp_map.map_temps.at(it->second).qn_json_document,
+                                            temp_map.map_temps.at(it->second).qn_json_document_original.GetAllocator());
 
                                     temp_map.map_temps.at(it->second).temp_json_document = rapidjson::Document();
                                     temp_map.map_temps.at(it->second).tblu_json_document = rapidjson::Document();
                                     temp_map.map_temps.at(it->second).qn_json_document = rapidjson::Document();
 
-                                    temp_map.map_temps.at(it->second).temp_json_document.CopyFrom(temp_map.map_temps.at(it->second).temp_json_document_original, temp_map.map_temps.at(it->second).temp_json_document.GetAllocator());
-                                    temp_map.map_temps.at(it->second).tblu_json_document.CopyFrom(temp_map.map_temps.at(it->second).tblu_json_document_original, temp_map.map_temps.at(it->second).tblu_json_document.GetAllocator());
+                                    temp_map.map_temps.at(it->second).temp_json_document.CopyFrom(
+                                            temp_map.map_temps.at(it->second).temp_json_document_original,
+                                            temp_map.map_temps.at(it->second).temp_json_document.GetAllocator());
+                                    temp_map.map_temps.at(it->second).tblu_json_document.CopyFrom(
+                                            temp_map.map_temps.at(it->second).tblu_json_document_original,
+                                            temp_map.map_temps.at(it->second).tblu_json_document.GetAllocator());
                                 }
                             }
 
-                            if (transform_property_pointer.empty())
-                            {
+                            if (transform_property_pointer.empty()) {
                                 transform_property_pointer = transform_post_init_property_pointer;
                             }
 
-                            if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(temp_map.map_temps.at(it->second).temp_json_document, rapidjson::Pointer(transform_property_pointer.c_str())))
-                            {
-                                temp_json_value->GetObject()["XAxis"]["x"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.x_axis.x);
-                                temp_json_value->GetObject()["YAxis"]["x"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.y_axis.x);
-                                temp_json_value->GetObject()["ZAxis"]["x"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.z_axis.x);
-                                temp_json_value->GetObject()["XAxis"]["y"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.x_axis.y);
-                                temp_json_value->GetObject()["YAxis"]["y"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.y_axis.y);
-                                temp_json_value->GetObject()["ZAxis"]["y"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.z_axis.y);
-                                temp_json_value->GetObject()["XAxis"]["z"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.x_axis.z);
-                                temp_json_value->GetObject()["YAxis"]["z"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.y_axis.z);
-                                temp_json_value->GetObject()["ZAxis"]["z"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.z_axis.z);
-                                temp_json_value->GetObject()["Trans"]["x"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.transform.x);
-                                temp_json_value->GetObject()["Trans"]["y"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.transform.y);
-                                temp_json_value->GetObject()["Trans"]["z"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.transform.z);
+                            if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(
+                                    temp_map.map_temps.at(it->second).temp_json_document,
+                                    rapidjson::Pointer(transform_property_pointer.c_str()))) {
+                                temp_json_value->GetObject()["XAxis"]["x"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.x_axis.x);
+                                temp_json_value->GetObject()["YAxis"]["x"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.y_axis.x);
+                                temp_json_value->GetObject()["ZAxis"]["x"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.z_axis.x);
+                                temp_json_value->GetObject()["XAxis"]["y"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.x_axis.y);
+                                temp_json_value->GetObject()["YAxis"]["y"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.y_axis.y);
+                                temp_json_value->GetObject()["ZAxis"]["y"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.z_axis.y);
+                                temp_json_value->GetObject()["XAxis"]["z"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.x_axis.z);
+                                temp_json_value->GetObject()["YAxis"]["z"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.y_axis.z);
+                                temp_json_value->GetObject()["ZAxis"]["z"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.z_axis.z);
+                                temp_json_value->GetObject()["Trans"]["x"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.transform.x);
+                                temp_json_value->GetObject()["Trans"]["y"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.transform.y);
+                                temp_json_value->GetObject()["Trans"]["z"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.transform.z);
                             }
 
-                            json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) + "/propertyValues/" + util::uint32_t_to_string(propertyValues_count);
+                            json_pointer =
+                                    "/subEntities/" + util::uint32_t_to_string(it2->second) + "/propertyValues/" +
+                                    util::uint32_t_to_string(propertyValues_count);
                             std::string json_pointer_value = json_pointer + "/nPropertyID";
-                            rapidjson::Pointer(json_pointer_value.c_str()).Set(temp_map.map_temps.at(it->second).temp_json_document, "m_PrimitiveScale");
+                            rapidjson::Pointer(json_pointer_value.c_str()).Set(
+                                    temp_map.map_temps.at(it->second).temp_json_document, "m_PrimitiveScale");
                             json_pointer_value = json_pointer + "/value/$type";
-                            rapidjson::Pointer(json_pointer_value.c_str()).Set(temp_map.map_temps.at(it->second).temp_json_document, "SVector3");
+                            rapidjson::Pointer(json_pointer_value.c_str()).Set(
+                                    temp_map.map_temps.at(it->second).temp_json_document, "SVector3");
                             json_pointer_value = json_pointer + "/value/$val/x";
-                            rapidjson::Pointer(json_pointer_value.c_str()).Set(temp_map.map_temps.at(it->second).temp_json_document, temp_map.map_nodes.at(m).m_PrimitiveScale.x);
+                            rapidjson::Pointer(json_pointer_value.c_str()).Set(
+                                    temp_map.map_temps.at(it->second).temp_json_document,
+                                    temp_map.map_nodes.at(m).m_PrimitiveScale.x);
                             json_pointer_value = json_pointer + "/value/$val/y";
-                            rapidjson::Pointer(json_pointer_value.c_str()).Set(temp_map.map_temps.at(it->second).temp_json_document, temp_map.map_nodes.at(m).m_PrimitiveScale.y);
+                            rapidjson::Pointer(json_pointer_value.c_str()).Set(
+                                    temp_map.map_temps.at(it->second).temp_json_document,
+                                    temp_map.map_nodes.at(m).m_PrimitiveScale.y);
                             json_pointer_value = json_pointer + "/value/$val/z";
-                            rapidjson::Pointer(json_pointer_value.c_str()).Set(temp_map.map_temps.at(it->second).temp_json_document, temp_map.map_nodes.at(m).m_PrimitiveScale.z);
+                            rapidjson::Pointer(json_pointer_value.c_str()).Set(
+                                    temp_map.map_temps.at(it->second).temp_json_document,
+                                    temp_map.map_nodes.at(m).m_PrimitiveScale.z);
                         }
-                    }
-                    else if (has_transform && !has_primitive_scale && !has_global_size && temp_map.map_nodes.at(m).scaled_on_import && temp_map.map_nodes.at(m).is_volume_box)
-                    {
-                        if (!temp_map.matrixes_equal(temp_map.map_nodes.at(m).m_mTransform, m_mTransform))
-                        {
+                    } else if (has_transform && !has_primitive_scale && !has_global_size &&
+                               temp_map.map_nodes.at(m).scaled_on_import && temp_map.map_nodes.at(m).is_volume_box) {
+                        if (!temp_map.matrixes_equal(temp_map.map_nodes.at(m).m_mTransform, m_mTransform)) {
                             auto temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
 
-                            if (temps_modified_map_it == temps_modified_map.end())
-                            {
+                            if (temps_modified_map_it == temps_modified_map.end()) {
                                 temps_modified_map[temp_map.map_nodes.at(m).temp_hash] = true;
 
-                                if (temp_map.qn_format == "patch")
-                                {
-                                    temp_map.map_temps.at(it->second).temp_json_document_original.CopyFrom(temp_map.map_temps.at(it->second).temp_json_document, temp_map.map_temps.at(it->second).temp_json_document_original.GetAllocator());
-                                    temp_map.map_temps.at(it->second).tblu_json_document_original.CopyFrom(temp_map.map_temps.at(it->second).tblu_json_document, temp_map.map_temps.at(it->second).tblu_json_document_original.GetAllocator());
+                                if (temp_map.qn_format == "patch") {
+                                    temp_map.map_temps.at(it->second).temp_json_document_original.CopyFrom(
+                                            temp_map.map_temps.at(it->second).temp_json_document, temp_map.map_temps.at(
+                                                    it->second).temp_json_document_original.GetAllocator());
+                                    temp_map.map_temps.at(it->second).tblu_json_document_original.CopyFrom(
+                                            temp_map.map_temps.at(it->second).tblu_json_document, temp_map.map_temps.at(
+                                                    it->second).tblu_json_document_original.GetAllocator());
 
                                     temp_map.map_temps.at(it->second).rt_json_to_qn_json();
 
-                                    temp_map.map_temps.at(it->second).qn_json_document_original.CopyFrom(temp_map.map_temps.at(it->second).qn_json_document, temp_map.map_temps.at(it->second).qn_json_document_original.GetAllocator());
+                                    temp_map.map_temps.at(it->second).qn_json_document_original.CopyFrom(
+                                            temp_map.map_temps.at(it->second).qn_json_document,
+                                            temp_map.map_temps.at(it->second).qn_json_document_original.GetAllocator());
 
                                     temp_map.map_temps.at(it->second).temp_json_document = rapidjson::Document();
                                     temp_map.map_temps.at(it->second).tblu_json_document = rapidjson::Document();
                                     temp_map.map_temps.at(it->second).qn_json_document = rapidjson::Document();
 
-                                    temp_map.map_temps.at(it->second).temp_json_document.CopyFrom(temp_map.map_temps.at(it->second).temp_json_document_original, temp_map.map_temps.at(it->second).temp_json_document.GetAllocator());
-                                    temp_map.map_temps.at(it->second).tblu_json_document.CopyFrom(temp_map.map_temps.at(it->second).tblu_json_document_original, temp_map.map_temps.at(it->second).tblu_json_document.GetAllocator());
+                                    temp_map.map_temps.at(it->second).temp_json_document.CopyFrom(
+                                            temp_map.map_temps.at(it->second).temp_json_document_original,
+                                            temp_map.map_temps.at(it->second).temp_json_document.GetAllocator());
+                                    temp_map.map_temps.at(it->second).tblu_json_document.CopyFrom(
+                                            temp_map.map_temps.at(it->second).tblu_json_document_original,
+                                            temp_map.map_temps.at(it->second).tblu_json_document.GetAllocator());
                                 }
                             }
 
-                            if (transform_property_pointer.empty())
-                            {
+                            if (transform_property_pointer.empty()) {
                                 transform_property_pointer = transform_post_init_property_pointer;
                             }
 
-                            if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(temp_map.map_temps.at(it->second).temp_json_document, rapidjson::Pointer(transform_property_pointer.c_str())))
-                            {
-                                temp_json_value->GetObject()["XAxis"]["x"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.x_axis.x);
-                                temp_json_value->GetObject()["YAxis"]["x"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.y_axis.x);
-                                temp_json_value->GetObject()["ZAxis"]["x"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.z_axis.x);
-                                temp_json_value->GetObject()["XAxis"]["y"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.x_axis.y);
-                                temp_json_value->GetObject()["YAxis"]["y"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.y_axis.y);
-                                temp_json_value->GetObject()["ZAxis"]["y"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.z_axis.y);
-                                temp_json_value->GetObject()["XAxis"]["z"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.x_axis.z);
-                                temp_json_value->GetObject()["YAxis"]["z"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.y_axis.z);
-                                temp_json_value->GetObject()["ZAxis"]["z"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.z_axis.z);
-                                temp_json_value->GetObject()["Trans"]["x"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.transform.x);
-                                temp_json_value->GetObject()["Trans"]["y"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.transform.y);
-                                temp_json_value->GetObject()["Trans"]["z"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.transform.z);
+                            if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(
+                                    temp_map.map_temps.at(it->second).temp_json_document,
+                                    rapidjson::Pointer(transform_property_pointer.c_str()))) {
+                                temp_json_value->GetObject()["XAxis"]["x"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.x_axis.x);
+                                temp_json_value->GetObject()["YAxis"]["x"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.y_axis.x);
+                                temp_json_value->GetObject()["ZAxis"]["x"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.z_axis.x);
+                                temp_json_value->GetObject()["XAxis"]["y"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.x_axis.y);
+                                temp_json_value->GetObject()["YAxis"]["y"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.y_axis.y);
+                                temp_json_value->GetObject()["ZAxis"]["y"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.z_axis.y);
+                                temp_json_value->GetObject()["XAxis"]["z"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.x_axis.z);
+                                temp_json_value->GetObject()["YAxis"]["z"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.y_axis.z);
+                                temp_json_value->GetObject()["ZAxis"]["z"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.z_axis.z);
+                                temp_json_value->GetObject()["Trans"]["x"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.transform.x);
+                                temp_json_value->GetObject()["Trans"]["y"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.transform.y);
+                                temp_json_value->GetObject()["Trans"]["z"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.transform.z);
                             }
 
-                            json_pointer = "/subEntities/" + util::uint32_t_to_string(it2->second) + "/propertyValues/" + util::uint32_t_to_string(propertyValues_count);
+                            json_pointer =
+                                    "/subEntities/" + util::uint32_t_to_string(it2->second) + "/propertyValues/" +
+                                    util::uint32_t_to_string(propertyValues_count);
                             std::string json_pointer_value = json_pointer + "/nPropertyID";
-                            rapidjson::Pointer(json_pointer_value.c_str()).Set(temp_map.map_temps.at(it->second).temp_json_document, "m_vGlobalSize");
+                            rapidjson::Pointer(json_pointer_value.c_str()).Set(
+                                    temp_map.map_temps.at(it->second).temp_json_document, "m_vGlobalSize");
                             json_pointer_value = json_pointer + "/value/$type";
-                            rapidjson::Pointer(json_pointer_value.c_str()).Set(temp_map.map_temps.at(it->second).temp_json_document, "SVector3");
+                            rapidjson::Pointer(json_pointer_value.c_str()).Set(
+                                    temp_map.map_temps.at(it->second).temp_json_document, "SVector3");
                             json_pointer_value = json_pointer + "/value/$val/x";
-                            rapidjson::Pointer(json_pointer_value.c_str()).Set(temp_map.map_temps.at(it->second).temp_json_document, temp_map.map_nodes.at(m).m_vGlobalSize.x);
+                            rapidjson::Pointer(json_pointer_value.c_str()).Set(
+                                    temp_map.map_temps.at(it->second).temp_json_document,
+                                    temp_map.map_nodes.at(m).m_vGlobalSize.x);
                             json_pointer_value = json_pointer + "/value/$val/y";
-                            rapidjson::Pointer(json_pointer_value.c_str()).Set(temp_map.map_temps.at(it->second).temp_json_document, temp_map.map_nodes.at(m).m_vGlobalSize.y);
+                            rapidjson::Pointer(json_pointer_value.c_str()).Set(
+                                    temp_map.map_temps.at(it->second).temp_json_document,
+                                    temp_map.map_nodes.at(m).m_vGlobalSize.y);
                             json_pointer_value = json_pointer + "/value/$val/z";
-                            rapidjson::Pointer(json_pointer_value.c_str()).Set(temp_map.map_temps.at(it->second).temp_json_document, temp_map.map_nodes.at(m).m_vGlobalSize.z);
+                            rapidjson::Pointer(json_pointer_value.c_str()).Set(
+                                    temp_map.map_temps.at(it->second).temp_json_document,
+                                    temp_map.map_nodes.at(m).m_vGlobalSize.z);
                         }
-                    }
-                    else if (has_transform)
-                    {
-                        if (!temp_map.matrixes_equal(temp_map.map_nodes.at(m).m_mTransform, m_mTransform))
-                        {
+                    } else if (has_transform) {
+                        if (!temp_map.matrixes_equal(temp_map.map_nodes.at(m).m_mTransform, m_mTransform)) {
                             auto temps_modified_map_it = temps_modified_map.find(temp_map.map_nodes.at(m).temp_hash);
 
-                            if (temps_modified_map_it == temps_modified_map.end())
-                            {
+                            if (temps_modified_map_it == temps_modified_map.end()) {
                                 temps_modified_map[temp_map.map_nodes.at(m).temp_hash] = true;
 
-                                if (temp_map.qn_format == "patch")
-                                {
-                                    temp_map.map_temps.at(it->second).temp_json_document_original.CopyFrom(temp_map.map_temps.at(it->second).temp_json_document, temp_map.map_temps.at(it->second).temp_json_document_original.GetAllocator());
-                                    temp_map.map_temps.at(it->second).tblu_json_document_original.CopyFrom(temp_map.map_temps.at(it->second).tblu_json_document, temp_map.map_temps.at(it->second).tblu_json_document_original.GetAllocator());
+                                if (temp_map.qn_format == "patch") {
+                                    temp_map.map_temps.at(it->second).temp_json_document_original.CopyFrom(
+                                            temp_map.map_temps.at(it->second).temp_json_document, temp_map.map_temps.at(
+                                                    it->second).temp_json_document_original.GetAllocator());
+                                    temp_map.map_temps.at(it->second).tblu_json_document_original.CopyFrom(
+                                            temp_map.map_temps.at(it->second).tblu_json_document, temp_map.map_temps.at(
+                                                    it->second).tblu_json_document_original.GetAllocator());
 
                                     temp_map.map_temps.at(it->second).rt_json_to_qn_json();
 
-                                    temp_map.map_temps.at(it->second).qn_json_document_original.CopyFrom(temp_map.map_temps.at(it->second).qn_json_document, temp_map.map_temps.at(it->second).qn_json_document_original.GetAllocator());
+                                    temp_map.map_temps.at(it->second).qn_json_document_original.CopyFrom(
+                                            temp_map.map_temps.at(it->second).qn_json_document,
+                                            temp_map.map_temps.at(it->second).qn_json_document_original.GetAllocator());
 
                                     temp_map.map_temps.at(it->second).temp_json_document = rapidjson::Document();
                                     temp_map.map_temps.at(it->second).tblu_json_document = rapidjson::Document();
                                     temp_map.map_temps.at(it->second).qn_json_document = rapidjson::Document();
 
-                                    temp_map.map_temps.at(it->second).temp_json_document.CopyFrom(temp_map.map_temps.at(it->second).temp_json_document_original, temp_map.map_temps.at(it->second).temp_json_document.GetAllocator());
-                                    temp_map.map_temps.at(it->second).tblu_json_document.CopyFrom(temp_map.map_temps.at(it->second).tblu_json_document_original, temp_map.map_temps.at(it->second).tblu_json_document.GetAllocator());
+                                    temp_map.map_temps.at(it->second).temp_json_document.CopyFrom(
+                                            temp_map.map_temps.at(it->second).temp_json_document_original,
+                                            temp_map.map_temps.at(it->second).temp_json_document.GetAllocator());
+                                    temp_map.map_temps.at(it->second).tblu_json_document.CopyFrom(
+                                            temp_map.map_temps.at(it->second).tblu_json_document_original,
+                                            temp_map.map_temps.at(it->second).tblu_json_document.GetAllocator());
                                 }
                             }
 
-                            if (transform_property_pointer.empty())
-                            {
+                            if (transform_property_pointer.empty()) {
                                 transform_property_pointer = transform_post_init_property_pointer;
                             }
 
-                            if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(temp_map.map_temps.at(it->second).temp_json_document, rapidjson::Pointer(transform_property_pointer.c_str())))
-                            {
-                                temp_json_value->GetObject()["XAxis"]["x"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.x_axis.x);
-                                temp_json_value->GetObject()["YAxis"]["x"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.y_axis.x);
-                                temp_json_value->GetObject()["ZAxis"]["x"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.z_axis.x);
-                                temp_json_value->GetObject()["XAxis"]["y"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.x_axis.y);
-                                temp_json_value->GetObject()["YAxis"]["y"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.y_axis.y);
-                                temp_json_value->GetObject()["ZAxis"]["y"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.z_axis.y);
-                                temp_json_value->GetObject()["XAxis"]["z"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.x_axis.z);
-                                temp_json_value->GetObject()["YAxis"]["z"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.y_axis.z);
-                                temp_json_value->GetObject()["ZAxis"]["z"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.z_axis.z);
-                                temp_json_value->GetObject()["Trans"]["x"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.transform.x);
-                                temp_json_value->GetObject()["Trans"]["y"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.transform.y);
-                                temp_json_value->GetObject()["Trans"]["z"].SetFloat(temp_map.map_nodes.at(m).m_mTransform.transform.z);
+                            if (rapidjson::Value* temp_json_value = rapidjson::GetValueByPointer(
+                                    temp_map.map_temps.at(it->second).temp_json_document,
+                                    rapidjson::Pointer(transform_property_pointer.c_str()))) {
+                                temp_json_value->GetObject()["XAxis"]["x"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.x_axis.x);
+                                temp_json_value->GetObject()["YAxis"]["x"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.y_axis.x);
+                                temp_json_value->GetObject()["ZAxis"]["x"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.z_axis.x);
+                                temp_json_value->GetObject()["XAxis"]["y"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.x_axis.y);
+                                temp_json_value->GetObject()["YAxis"]["y"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.y_axis.y);
+                                temp_json_value->GetObject()["ZAxis"]["y"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.z_axis.y);
+                                temp_json_value->GetObject()["XAxis"]["z"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.x_axis.z);
+                                temp_json_value->GetObject()["YAxis"]["z"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.y_axis.z);
+                                temp_json_value->GetObject()["ZAxis"]["z"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.z_axis.z);
+                                temp_json_value->GetObject()["Trans"]["x"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.transform.x);
+                                temp_json_value->GetObject()["Trans"]["y"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.transform.y);
+                                temp_json_value->GetObject()["Trans"]["z"].SetFloat(
+                                        temp_map.map_nodes.at(m).m_mTransform.transform.z);
                             }
                         }
                     }
@@ -1712,7 +1727,8 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
     temp_map.end_time = std::chrono::high_resolution_clock::now();
     ss.str(std::string(""));
-    ss << temp_map.message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(temp_map.end_time - temp_map.start_time).count()) << "s";
+    ss << temp_map.message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(
+            temp_map.end_time - temp_map.start_time).count()) << "s";
     LOG("\r" << ss.str() << std::string((temp_map.stringstream_length - ss.str().length()), ' '));
     timing_string = ss.str();
 
@@ -1727,16 +1743,16 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
     uint32_t map_node_jsons_count = 0;
 
-    for (temps_modified_map_it = temps_modified_map.begin(); temps_modified_map_it != temps_modified_map.end(); ++temps_modified_map_it)
-    {
-        if (gui_control == ABORT_CURRENT_TASK)
-        {
+    for (temps_modified_map_it = temps_modified_map.begin();
+         temps_modified_map_it != temps_modified_map.end(); ++temps_modified_map_it) {
+        if (gui_control == ABORT_CURRENT_TASK) {
             return;
         }
 
-        if (map_node_jsons_count > 0)
-        {
-            temp_map.stringstream_length = console::update_console(temp_map.message, temps_modified_map.size(), map_node_jsons_count, temp_map.start_time, temp_map.stringstream_length);
+        if (map_node_jsons_count > 0) {
+            temp_map.stringstream_length = console::update_console(temp_map.message, temps_modified_map.size(),
+                                                                   map_node_jsons_count, temp_map.start_time,
+                                                                   temp_map.stringstream_length);
         }
 
         map_node_jsons_count++;
@@ -1747,24 +1763,20 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
         auto it_temp = temp_map.map_temps_map.find(temps_modified_map_it->first);
 
-        if (it_temp != temp_map.map_temps_map.end())
-        {
+        if (it_temp != temp_map.map_temps_map.end()) {
             temp_map.map_temps.at(it_temp->second).rt_json_to_qn_json();
 
-            std::string rpkg_file_short_name = util::to_lower_case(rpkgs.at(temp_map.map_temps.at(it_temp->second).temp_rpkg_index).rpkg_file_name);
+            std::string rpkg_file_short_name = util::to_lower_case(
+                    rpkgs.at(temp_map.map_temps.at(it_temp->second).temp_rpkg_index).rpkg_file_name);
 
             size_t pos = rpkg_file_short_name.find("patch");
 
-            if (pos != std::string::npos)
-            {
+            if (pos != std::string::npos) {
                 rpkg_file_short_name = rpkg_file_short_name.substr(0, pos);
-            }
-            else
-            {
+            } else {
                 pos = rpkg_file_short_name.find('.');
 
-                if (pos != std::string::npos)
-                {
+                if (pos != std::string::npos) {
                     rpkg_file_short_name = rpkg_file_short_name.substr(0, pos);
                 }
             }
@@ -1773,28 +1785,29 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
             file::create_directories(output_rpkg_json_path);
 
-            std::string json_base_file_name = output_rpkg_json_path + "\\" + util::uint64_t_to_hex_string(rpkgs.at(temp_map.map_temps.at(it_temp->second).temp_rpkg_index).hash.at(temp_map.map_temps.at(it_temp->second).temp_hash_index).hash_value);
+            std::string json_base_file_name = output_rpkg_json_path + "\\" + util::uint64_t_to_hex_string(
+                    rpkgs.at(temp_map.map_temps.at(it_temp->second).temp_rpkg_index).hash.at(
+                            temp_map.map_temps.at(it_temp->second).temp_hash_index).hash_value);
 
             //std::cout << file::output_path_append(json_base_file_name + ".entity.json", map_path) << std::endl;
 
-            if (temp_map.qn_format == "entity")
-            {
+            if (temp_map.qn_format == "entity") {
                 temp_map.map_temps.at(it_temp->second).write_qn_json_to_file(json_base_file_name + ".entity.json");
-            }
-            else if (temp_map.qn_format == "patch")
-            {
+            } else if (temp_map.qn_format == "patch") {
                 temp_map.map_temps.at(it_temp->second).generate_qn_patch_json();
 
                 //std::cout << file::output_path_append(json_base_file_name + ".entity.patch.json", map_path) << std::endl;
 
-                temp_map.map_temps.at(it_temp->second).write_qn_patch_json_to_file(json_base_file_name + ".entity.patch.json");
+                temp_map.map_temps.at(it_temp->second).write_qn_patch_json_to_file(
+                        json_base_file_name + ".entity.patch.json");
             }
         }
     }
 
     temp_map.end_time = std::chrono::high_resolution_clock::now();
     ss.str(std::string(""));
-    ss << temp_map.message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(temp_map.end_time - temp_map.start_time).count()) << "s";
+    ss << temp_map.message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(
+            temp_map.end_time - temp_map.start_time).count()) << "s";
     LOG("\r" << ss.str() << std::string((temp_map.stringstream_length - ss.str().length()), ' '));
     timing_string = ss.str();
 
@@ -1803,16 +1816,12 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
     log_output = true;
 }
 
-void map::add_to_temp_hash_map_node_map(uint32_t map_node, uint64_t temp_hash)
-{
+void map::add_to_temp_hash_map_node_map(uint32_t map_node, uint64_t temp_hash) {
     auto it = temp_hash_map_node_map.find(temp_hash);
 
-    if (it != temp_hash_map_node_map.end())
-    {
+    if (it != temp_hash_map_node_map.end()) {
         it->second.push_back(map_node);
-    }
-    else
-    {
+    } else {
         std::vector<uint32_t> temp_map_node_vector;
 
         temp_map_node_vector.push_back(map_node);
@@ -1821,29 +1830,23 @@ void map::add_to_temp_hash_map_node_map(uint32_t map_node, uint64_t temp_hash)
     }
 }
 
-void map::add_to_m_eidParent_local_temp_hash_entityIndex_map(uint32_t map_node, uint64_t temp_hash, uint32_t entityIndex)
-{
+void
+map::add_to_m_eidParent_local_temp_hash_entityIndex_map(uint32_t map_node, uint64_t temp_hash, uint32_t entityIndex) {
     auto it = m_eidParent_local_temp_hash_entityIndex_map.find(temp_hash);
 
-    if (it != m_eidParent_local_temp_hash_entityIndex_map.end())
-    {
+    if (it != m_eidParent_local_temp_hash_entityIndex_map.end()) {
         auto it2 = it->second.find(entityIndex);
 
-        if (it2 != it->second.end())
-        {
+        if (it2 != it->second.end()) {
             it2->second.push_back(map_node);
-        }
-        else
-        {
+        } else {
             std::vector<uint32_t> temp_map_node_vector;
 
             temp_map_node_vector.push_back(map_node);
 
             it->second[entityIndex] = temp_map_node_vector;
         }
-    }
-    else
-    {
+    } else {
         std::unordered_map<uint32_t, std::vector<uint32_t>> temp_temp_hash_entityIndex_map;
 
         std::vector<uint32_t> temp_map_node_vector;
@@ -1856,29 +1859,24 @@ void map::add_to_m_eidParent_local_temp_hash_entityIndex_map(uint32_t map_node, 
     }
 }
 
-void map::add_to_m_eidParent_external_externalSceneIndex_hash_entityID_map(uint32_t map_node, uint64_t externalSceneIndex_hash, uint64_t entityID)
-{
+void map::add_to_m_eidParent_external_externalSceneIndex_hash_entityID_map(uint32_t map_node,
+                                                                           uint64_t externalSceneIndex_hash,
+                                                                           uint64_t entityID) {
     auto it = m_eidParent_external_externalSceneIndex_hash_entityID_map.find(externalSceneIndex_hash);
 
-    if (it != m_eidParent_external_externalSceneIndex_hash_entityID_map.end())
-    {
+    if (it != m_eidParent_external_externalSceneIndex_hash_entityID_map.end()) {
         auto it2 = it->second.find(entityID);
 
-        if (it2 != it->second.end())
-        {
+        if (it2 != it->second.end()) {
             it2->second.push_back(map_node);
-        }
-        else
-        {
+        } else {
             std::vector<uint32_t> temp_map_node_vector;
 
             temp_map_node_vector.push_back(map_node);
 
             it->second[entityID] = temp_map_node_vector;
         }
-    }
-    else
-    {
+    } else {
         std::unordered_map<uint64_t, std::vector<uint32_t>> temp_externalSceneIndex_hash_entityID_map;
 
         std::vector<uint32_t> temp_map_node_vector;
@@ -1891,16 +1889,12 @@ void map::add_to_m_eidParent_external_externalSceneIndex_hash_entityID_map(uint3
     }
 }
 
-void map::add_to_temp_hash_is_top_level_Local_node_map(uint32_t map_node, uint64_t temp_hash)
-{
+void map::add_to_temp_hash_is_top_level_Local_node_map(uint32_t map_node, uint64_t temp_hash) {
     auto it = temp_hash_is_top_level_Local_node_map.find(temp_hash);
 
-    if (it != temp_hash_is_top_level_Local_node_map.end())
-    {
+    if (it != temp_hash_is_top_level_Local_node_map.end()) {
         it->second.push_back(map_node);
-    }
-    else
-    {
+    } else {
         std::vector<uint32_t> temp_map_node_vector;
 
         temp_map_node_vector.push_back(map_node);
@@ -1909,20 +1903,17 @@ void map::add_to_temp_hash_is_top_level_Local_node_map(uint32_t map_node, uint64
     }
 }
 
-void map::extract_map_prims(std::string output_path, bool textured)
-{
-    for (auto & map_node : map_nodes)
-    {
-        if (map_node.has_prim_resource)
-        {
-            if (gui_control == ABORT_CURRENT_TASK)
-            {
+void map::extract_map_prims(std::string output_path, bool textured) {
+    for (auto& map_node : map_nodes) {
+        if (map_node.has_prim_resource) {
+            if (gui_control == ABORT_CURRENT_TASK) {
                 return;
             }
 
-            if (((map_node_prim_count_current * (uint64_t)10000) / (uint64_t)map_node_prim_count) % (uint64_t)10 == 0 && map_node_prim_count_current > 0)
-            {
-                stringstream_length = console::update_console(message, map_node_prim_count, map_node_prim_count_current, start_time, stringstream_length);
+            if (((map_node_prim_count_current * (uint64_t) 10000) / (uint64_t) map_node_prim_count) % (uint64_t) 10 ==
+                0 && map_node_prim_count_current > 0) {
+                stringstream_length = console::update_console(message, map_node_prim_count, map_node_prim_count_current,
+                                                              start_time, stringstream_length);
             }
 
             map_node_prim_count_current++;
@@ -1931,42 +1922,33 @@ void map::extract_map_prims(std::string output_path, bool textured)
 
             auto it = map_prims_map.find(map_node.prim_hash);
 
-            if (it != map_prims_map.end())
-            {
+            if (it != map_prims_map.end()) {
                 //std::cout << map_nodes.at(m).prim_hash << " was already found/added." << std::endl;
-            }
-            else
-            {
+            } else {
                 uint32_t rpkg_index = rpkg_function::get_latest_hash(map_node.prim_hash);
 
-                if (rpkg_index != UINT32_MAX)
-                {
+                if (rpkg_index != UINT32_MAX) {
                     auto it2 = rpkgs.at(rpkg_index).hash_map.find(map_node.prim_hash);
 
                     std::string prim_hash_string = util::uint64_t_to_hex_string(map_node.prim_hash);
 
-                    if (it2 != rpkgs.at(rpkg_index).hash_map.end())
-                    {
-                        if (textured)
-                        {
-                            rpkg_function::extract_prim_textured_from(rpkgs.at(rpkg_index).rpkg_file_path, prim_hash_string, output_path);
-                        }
-                        else
-                        {
-                            rpkg_function::extract_prim_from(rpkgs.at(rpkg_index).rpkg_file_path, prim_hash_string, output_path, GLB_SINGLE, false);
+                    if (it2 != rpkgs.at(rpkg_index).hash_map.end()) {
+                        if (textured) {
+                            rpkg_function::extract_prim_textured_from(rpkgs.at(rpkg_index).rpkg_file_path,
+                                                                      prim_hash_string, output_path);
+                        } else {
+                            rpkg_function::extract_prim_from(rpkgs.at(rpkg_index).rpkg_file_path, prim_hash_string,
+                                                             output_path, GLB_SINGLE, false);
                         }
                     }
 
-                    if (file::path_exists(file::output_path_append(prim_hash_string + ".PRIM.glb", output_path)))
-                    {
+                    if (file::path_exists(file::output_path_append(prim_hash_string + ".PRIM.glb", output_path))) {
                         map_prims_map[map_node.prim_hash] = map_prims_map.size();
 
                         map_prims.push_back(map_node.prim_hash);
 
                         map_node.map_prims_index = map_prims.size() - 1;
-                    }
-                    else
-                    {
+                    } else {
                         map_node.has_prim_resource = false;
                     }
                 }
@@ -1975,8 +1957,7 @@ void map::extract_map_prims(std::string output_path, bool textured)
     }
 }
 
-void map::scale_transform(matrix43& transform, float x, float y, float z)
-{
+void map::scale_transform(matrix43& transform, float x, float y, float z) {
     transform.x_axis.x *= x;
     transform.x_axis.y *= x;
     transform.x_axis.z *= x;
@@ -1988,8 +1969,7 @@ void map::scale_transform(matrix43& transform, float x, float y, float z)
     transform.z_axis.z *= z;
 }
 
-bool map::extract_scale_from_transform(matrix43& transform, vector3& scale)
-{
+bool map::extract_scale_from_transform(matrix43& transform, vector3& scale) {
     bool scaled = false;
 
     DirectX::XMMATRIX matrix = DirectX::XMMatrixIdentity();
@@ -2044,7 +2024,9 @@ bool map::extract_scale_from_transform(matrix43& transform, vector3& scale)
     scale_vector.m128_f32[2] = 1.0f;
     scale_vector.m128_f32[3] = 0.0f;
 
-    matrix = DirectX::XMMatrixIdentity() * DirectX::XMMatrixScalingFromVector(scale_vector) * DirectX::XMMatrixRotationQuaternion(rotation_vector) * DirectX::XMMatrixTranslationFromVector(transform_vector);
+    matrix = DirectX::XMMatrixIdentity() * DirectX::XMMatrixScalingFromVector(scale_vector) *
+             DirectX::XMMatrixRotationQuaternion(rotation_vector) *
+             DirectX::XMMatrixTranslationFromVector(transform_vector);
 
     /*std::cout << "matrix.r[0].m128_f32[0]: " << matrix.r[0].m128_f32[0] << std::endl;
     std::cout << "matrix.r[0].m128_f32[1]: " << matrix.r[0].m128_f32[1] << std::endl;
@@ -2061,18 +2043,21 @@ bool map::extract_scale_from_transform(matrix43& transform, vector3& scale)
 
     vector3 new_scale;
 
-    new_scale.x = std::sqrt(transform.x_axis.x * transform.x_axis.x + transform.x_axis.y * transform.x_axis.y + transform.x_axis.z * transform.x_axis.z);
-    new_scale.y = std::sqrt(transform.y_axis.x * transform.y_axis.x + transform.y_axis.y * transform.y_axis.y + transform.y_axis.z * transform.y_axis.z);
-    new_scale.z = std::sqrt(transform.z_axis.x * transform.z_axis.x + transform.z_axis.y * transform.z_axis.y + transform.z_axis.z * transform.z_axis.z);
+    new_scale.x = std::sqrt(transform.x_axis.x * transform.x_axis.x + transform.x_axis.y * transform.x_axis.y +
+                            transform.x_axis.z * transform.x_axis.z);
+    new_scale.y = std::sqrt(transform.y_axis.x * transform.y_axis.x + transform.y_axis.y * transform.y_axis.y +
+                            transform.y_axis.z * transform.y_axis.z);
+    new_scale.z = std::sqrt(transform.z_axis.x * transform.z_axis.x + transform.z_axis.y * transform.z_axis.y +
+                            transform.z_axis.z * transform.z_axis.z);
 
     scale.x = new_scale.x;
     scale.y = new_scale.y;
     scale.z = new_scale.z;
 
-    if (!util::floats_equal(1.0f, scale.x) || !util::floats_equal(1.0f, scale.y) || !util::floats_equal(1.0f, scale.z))
-    {
-        if (!util::floats_equal(0.0f, scale.x) && !util::floats_equal(0.0f, scale.y) && !util::floats_equal(0.0f, scale.z))
-        {
+    if (!util::floats_equal(1.0f, scale.x) || !util::floats_equal(1.0f, scale.y) ||
+        !util::floats_equal(1.0f, scale.z)) {
+        if (!util::floats_equal(0.0f, scale.x) && !util::floats_equal(0.0f, scale.y) &&
+            !util::floats_equal(0.0f, scale.z)) {
             scaled = true;
         }
     }
@@ -2094,8 +2079,7 @@ bool map::extract_scale_from_transform(matrix43& transform, vector3& scale)
     std::cout << "transform.y: " << transform.transform.y << std::endl;
     std::cout << "transform.z: " << transform.transform.z << std::endl;*/
 
-    if (scaled)
-    {
+    if (scaled) {
         transform.x_axis.x /= new_scale.x;
         transform.y_axis.x /= new_scale.y;
         transform.z_axis.x /= new_scale.z;
@@ -2123,18 +2107,18 @@ bool map::extract_scale_from_transform(matrix43& transform, vector3& scale)
     return scaled;
 }
 
-void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_node, const std::string& map_node_string, uint32_t level)
-{
-    if (gui_control == ABORT_CURRENT_TASK)
-    {
+void
+map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_node, const std::string& map_node_string,
+                               uint32_t level) {
+    if (gui_control == ABORT_CURRENT_TASK) {
         return;
     }
 
-    if (((map_node_count_current * (uint64_t)10000) / (uint64_t)map_node_count) % (uint64_t)10 == 0 && map_node_count_current > 0)
-    {
-        if (map_node_count_current <= map_node_count)
-        {
-            stringstream_length = console::update_console(message, map_node_count, map_node_count_current, start_time, stringstream_length);
+    if (((map_node_count_current * (uint64_t) 10000) / (uint64_t) map_node_count) % (uint64_t) 10 == 0 &&
+        map_node_count_current > 0) {
+        if (map_node_count_current <= map_node_count) {
+            stringstream_length = console::update_console(message, map_node_count, map_node_count_current, start_time,
+                                                          stringstream_length);
         }
     }
 
@@ -2142,24 +2126,18 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
     map_percent_progress_godot_files = percent_progress;
 
-    if (level == 0)
-    {
+    if (level == 0) {
         map_nodes.at(root_map_node).type = "empty";
-    }
-    else
-    {
+    } else {
         bool in_parent_node = false;
 
-        for (unsigned int p : map_nodes.at(root_map_node).parent_map_nodes)
-        {
-            if (parent_map_node == p)
-            {
+        for (unsigned int p : map_nodes.at(root_map_node).parent_map_nodes) {
+            if (parent_map_node == p) {
                 in_parent_node = true;
             }
         }
 
-        if (!in_parent_node)
-        {
+        if (!in_parent_node) {
             map_nodes.at(root_map_node).parent_map_nodes.push_back(parent_map_node);
 
             map_nodes.at(root_map_node).has_parent_map_node = true;
@@ -2172,35 +2150,31 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
     std::vector<uint64_t> aset_temp_hashes;
 
-    if (map_nodes.at(root_map_node).entityTypeResourceIndex_hash_type == "ASET")
-    {
+    if (map_nodes.at(root_map_node).entityTypeResourceIndex_hash_type == "ASET") {
         uint32_t rpkg_index = rpkg_function::get_latest_hash(map_nodes.at(root_map_node).entityTypeResourceIndex_hash);
 
-        if (rpkg_index != UINT32_MAX)
-        {
+        if (rpkg_index != UINT32_MAX) {
             auto it = rpkgs.at(rpkg_index).hash_map.find(map_nodes.at(root_map_node).entityTypeResourceIndex_hash);
 
-            if (it != rpkgs.at(rpkg_index).hash_map.end())
-            {
-                uint32_t temp_hash_reference_count = rpkgs.at(rpkg_index).hash.at(it->second).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+            if (it != rpkgs.at(rpkg_index).hash_map.end()) {
+                uint32_t temp_hash_reference_count =
+                        rpkgs.at(rpkg_index).hash.at(it->second).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
-                for (uint64_t a = 0; a < temp_hash_reference_count; a++)
-                {
-                    uint64_t hash_reference_value = rpkgs.at(rpkg_index).hash.at(it->second).hash_reference_data.hash_reference.at(a);
+                for (uint64_t a = 0; a < temp_hash_reference_count; a++) {
+                    uint64_t hash_reference_value = rpkgs.at(rpkg_index).hash.at(
+                            it->second).hash_reference_data.hash_reference.at(a);
 
                     uint32_t rpkg_index2 = rpkg_function::get_latest_hash(hash_reference_value);
 
-                    if (rpkg_index2 != UINT32_MAX)
-                    {
+                    if (rpkg_index2 != UINT32_MAX) {
                         auto it2 = rpkgs.at(rpkg_index2).hash_map.find(hash_reference_value);
 
-                        if (it2 != rpkgs.at(rpkg_index2).hash_map.end())
-                        {
-                            if (rpkgs.at(rpkg_index2).hash.at(it2->second).hash_resource_type == "TEMP")
-                            {
+                        if (it2 != rpkgs.at(rpkg_index2).hash_map.end()) {
+                            if (rpkgs.at(rpkg_index2).hash.at(it2->second).hash_resource_type == "TEMP") {
                                 //std::cout << util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type << " has TEMP reference file: " << rpkgs.at(rpkg_index2).hash.at(it2->second).hash_file_name << std::endl;
 
-                                temp_entityTypeResourceIndex_hash = rpkgs.at(rpkg_index2).hash.at(it2->second).hash_value;
+                                temp_entityTypeResourceIndex_hash = rpkgs.at(rpkg_index2).hash.at(
+                                        it2->second).hash_value;
 
                                 aset_temp_hashes.push_back(rpkgs.at(rpkg_index2).hash.at(it2->second).hash_value);
 
@@ -2216,14 +2190,11 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
     {
         auto it = m_eidParent_local_temp_hash_entityIndex_map.find(map_nodes.at(root_map_node).temp_hash);
 
-        if (it != m_eidParent_local_temp_hash_entityIndex_map.end())
-        {
+        if (it != m_eidParent_local_temp_hash_entityIndex_map.end()) {
             auto it2 = it->second.find(map_nodes.at(root_map_node).subEntity);
 
-            if (it2 != it->second.end())
-            {
-                for (unsigned int n : it2->second)
-                {
+            if (it2 != it->second.end()) {
+                for (unsigned int n : it2->second) {
                     //std::cout << map_nodes.at(root_map_node).entryName << "(" << util::uint64_t_to_hex_string(map_nodes.at(root_map_node).temp_hash) << ")" << " is an m_eidParent_local to " << map_nodes.at(n).entryName << std::endl;
 
                     //std::string node_string = map_nodes.at(n).entryName + " (" + util::uint32_t_to_string(map_nodes.at(n).subEntity) + ")";
@@ -2233,23 +2204,20 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
                     std::string transform_string = "";
 
-                    if (map_nodes.at(n).has_m_mTransform)
-                    {
+                    if (map_nodes.at(n).has_m_mTransform) {
                         transform_string = "";
 
                         matrix43 transform = map_nodes.at(n).m_mTransform;
 
-                        if (map_nodes.at(n).has_m_PrimitiveScale && map_nodes.at(n).has_m_vGlobalSize)
-                        {
-                            scale_transform(transform, map_nodes.at(n).m_PrimitiveScale.x, map_nodes.at(n).m_PrimitiveScale.y, map_nodes.at(n).m_PrimitiveScale.z);
-                        }
-                        else if (map_nodes.at(n).has_m_PrimitiveScale)
-                        {
-                            scale_transform(transform, map_nodes.at(n).m_PrimitiveScale.x, map_nodes.at(n).m_PrimitiveScale.y, map_nodes.at(n).m_PrimitiveScale.z);
-                        }
-                        else if (map_nodes.at(n).has_m_vGlobalSize)
-                        {
-                            scale_transform(transform, map_nodes.at(n).m_vGlobalSize.x, map_nodes.at(n).m_vGlobalSize.y, map_nodes.at(n).m_vGlobalSize.z);
+                        if (map_nodes.at(n).has_m_PrimitiveScale && map_nodes.at(n).has_m_vGlobalSize) {
+                            scale_transform(transform, map_nodes.at(n).m_PrimitiveScale.x,
+                                            map_nodes.at(n).m_PrimitiveScale.y, map_nodes.at(n).m_PrimitiveScale.z);
+                        } else if (map_nodes.at(n).has_m_PrimitiveScale) {
+                            scale_transform(transform, map_nodes.at(n).m_PrimitiveScale.x,
+                                            map_nodes.at(n).m_PrimitiveScale.y, map_nodes.at(n).m_PrimitiveScale.z);
+                        } else if (map_nodes.at(n).has_m_vGlobalSize) {
+                            scale_transform(transform, map_nodes.at(n).m_vGlobalSize.x, map_nodes.at(n).m_vGlobalSize.y,
+                                            map_nodes.at(n).m_vGlobalSize.z);
                         }
 
                         transform_string += util::float_to_string(transform.x_axis.x) + ",";
@@ -2264,72 +2232,61 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
                         transform_string += util::float_to_string(transform.transform.x) + ",";
                         transform_string += util::float_to_string(transform.transform.y) + ",";
                         transform_string += util::float_to_string(transform.transform.z);
-                    }
-                    else
-                    {
+                    } else {
                         transform_string = "1,0,0,0,1,0,0,0,1,0,0,0";
                     }
 
                     //std::cout << transform_string << std::endl;
 
-                    if (map_nodes.at(n).has_prim_resource)
-                    {
+                    if (map_nodes.at(n).has_prim_resource) {
                         auto it3 = map_prims_map.find(map_nodes.at(n).prim_hash);
 
-                        if (it3 != map_prims_map.end())
-                        {
-                            if (level == 0)
-                            {
-                                godot_tscn_file += "[node name=\"" + node_string + R"(" parent="." instance=ExtResource( )" + util::uint32_t_to_string(it3->second) + " )]\n";
-                            }
-                            else
-                            {
-                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string + "\" instance=ExtResource( " + util::uint32_t_to_string(it3->second) + " )]\n";
+                        if (it3 != map_prims_map.end()) {
+                            if (level == 0) {
+                                godot_tscn_file +=
+                                        "[node name=\"" + node_string + R"(" parent="." instance=ExtResource( )" +
+                                        util::uint32_t_to_string(it3->second) + " )]\n";
+                            } else {
+                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string +
+                                                   "\" instance=ExtResource( " + util::uint32_t_to_string(it3->second) +
+                                                   " )]\n";
                             }
 
                             godot_tscn_file += "transform = Transform3D(" + transform_string + ")\n";
 
-                            if (map_filter_visible)
-                            {
-                                if (map_nodes.at(root_map_node).has_m_bVisible)
-                                {
-                                    if (!map_nodes.at(root_map_node).m_bVisible)
-                                    {
+                            if (map_filter_visible) {
+                                if (map_nodes.at(root_map_node).has_m_bVisible) {
+                                    if (!map_nodes.at(root_map_node).m_bVisible) {
                                         godot_tscn_file += "visible = false\n";
                                     }
                                 }
                             }
 
-                            godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," + util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",1\"\n";
+                            godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," +
+                                               util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",1\"\n";
 
                             map_nodes.at(n).type = "glb";
 
                             map_nodes.at(n).m_mTransform_string = transform_string;
 
-                            if (level == 0)
-                            {
+                            if (level == 0) {
                                 generate_map_node_strings(n, root_map_node, node_string, level + 1);
-                            }
-                            else
-                            {
-                                generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string, level + 1);
+                            } else {
+                                generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string,
+                                                          level + 1);
                             }
                         }
-                    }
-                    else if (map_nodes.at(n).is_volume_box)
-                    {
-                        if (map_filter_volume_boxes)
-                        {
-                            if (level == 0)
-                            {
-                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\".\" type=\"CSGBox3D\"]\n";
+                    } else if (map_nodes.at(n).is_volume_box) {
+                        if (map_filter_volume_boxes) {
+                            if (level == 0) {
+                                godot_tscn_file +=
+                                        "[node name=\"" + node_string + "\" parent=\".\" type=\"CSGBox3D\"]\n";
                                 godot_tscn_file += "transparency = 0.98\n";
                                 godot_tscn_file += "cast_shadow = 0\n";
                                 godot_tscn_file += "size = Vector3(1, 1, 1)\n";
-                            }
-                            else
-                            {
-                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string + "\" type=\"CSGBox3D\"]\n";
+                            } else {
+                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string +
+                                                   "\" type=\"CSGBox3D\"]\n";
                                 godot_tscn_file += "transparency = 0.98\n";
                                 godot_tscn_file += "cast_shadow = 0\n";
                                 godot_tscn_file += "size = Vector3(1, 1, 1)\n";
@@ -2337,47 +2294,39 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
                             godot_tscn_file += "transform = Transform3D(" + transform_string + ")\n";
 
-                            if (map_filter_visible)
-                            {
-                                if (map_nodes.at(root_map_node).has_m_bVisible)
-                                {
-                                    if (!map_nodes.at(root_map_node).m_bVisible)
-                                    {
+                            if (map_filter_visible) {
+                                if (map_nodes.at(root_map_node).has_m_bVisible) {
+                                    if (!map_nodes.at(root_map_node).m_bVisible) {
                                         godot_tscn_file += "visible = false\n";
                                     }
                                 }
                             }
 
-                            godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," + util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",1\"\n";
+                            godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," +
+                                               util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",1\"\n";
 
                             map_nodes.at(n).type = "box";
 
                             map_nodes.at(n).m_mTransform_string = transform_string;
 
-                            if (level == 0)
-                            {
+                            if (level == 0) {
                                 generate_map_node_strings(n, root_map_node, node_string, level + 1);
-                            }
-                            else
-                            {
-                                generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string, level + 1);
+                            } else {
+                                generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string,
+                                                          level + 1);
                             }
                         }
-                    }
-                    else if (map_nodes.at(n).is_volume_sphere)
-                    {
-                        if (map_filter_volume_spheres)
-                        {
-                            if (level == 0)
-                            {
-                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\".\" type=\"CSGSphere3D\"]\n";
+                    } else if (map_nodes.at(n).is_volume_sphere) {
+                        if (map_filter_volume_spheres) {
+                            if (level == 0) {
+                                godot_tscn_file +=
+                                        "[node name=\"" + node_string + "\" parent=\".\" type=\"CSGSphere3D\"]\n";
                                 godot_tscn_file += "transparency = 0.98\n";
                                 godot_tscn_file += "cast_shadow = 0\n";
                                 godot_tscn_file += "size = Vector3(1, 1, 1)\n";
-                            }
-                            else
-                            {
-                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string + "\" type=\"CSGSphere3D\"]\n";
+                            } else {
+                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string +
+                                                   "\" type=\"CSGSphere3D\"]\n";
                                 godot_tscn_file += "transparency = 0.98\n";
                                 godot_tscn_file += "cast_shadow = 0\n";
                                 godot_tscn_file += "size = Vector3(1, 1, 1)\n";
@@ -2385,69 +2334,57 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
                             godot_tscn_file += "transform = Transform3D(" + transform_string + ")\n";
 
-                            if (map_filter_visible)
-                            {
-                                if (map_nodes.at(root_map_node).has_m_bVisible)
-                                {
-                                    if (!map_nodes.at(root_map_node).m_bVisible)
-                                    {
+                            if (map_filter_visible) {
+                                if (map_nodes.at(root_map_node).has_m_bVisible) {
+                                    if (!map_nodes.at(root_map_node).m_bVisible) {
                                         godot_tscn_file += "visible = false\n";
                                     }
                                 }
                             }
 
-                            godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," + util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",1\"\n";
+                            godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," +
+                                               util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",1\"\n";
 
                             map_nodes.at(n).type = "sphere";
 
                             map_nodes.at(n).m_mTransform_string = transform_string;
 
-                            if (level == 0)
-                            {
+                            if (level == 0) {
                                 generate_map_node_strings(n, root_map_node, node_string, level + 1);
-                            }
-                            else
-                            {
-                                generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string, level + 1);
+                            } else {
+                                generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string,
+                                                          level + 1);
                             }
                         }
-                    }
-                    else
-                    {
-                        if (level == 0)
-                        {
+                    } else {
+                        if (level == 0) {
                             godot_tscn_file += "[node name=\"" + node_string + "\" type=\"Node3D\" parent=\".\"]\n";
-                        }
-                        else
-                        {
-                            godot_tscn_file += "[node name=\"" + node_string + R"(" type="Node3D" parent=")" + map_node_string + "\"]\n";
+                        } else {
+                            godot_tscn_file +=
+                                    "[node name=\"" + node_string + R"(" type="Node3D" parent=")" + map_node_string +
+                                    "\"]\n";
                         }
 
                         godot_tscn_file += "transform = Transform3D(" + transform_string + ")\n";
 
-                        if (map_filter_visible)
-                        {
-                            if (map_nodes.at(root_map_node).has_m_bVisible)
-                            {
-                                if (!map_nodes.at(root_map_node).m_bVisible)
-                                {
+                        if (map_filter_visible) {
+                            if (map_nodes.at(root_map_node).has_m_bVisible) {
+                                if (!map_nodes.at(root_map_node).m_bVisible) {
                                     godot_tscn_file += "visible = false\n";
                                 }
                             }
                         }
 
-                        godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," + util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",1\"\n";
+                        godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," +
+                                           util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",1\"\n";
 
                         map_nodes.at(n).type = "empty";
 
                         map_nodes.at(n).m_mTransform_string = transform_string;
 
-                        if (level == 0)
-                        {
+                        if (level == 0) {
                             generate_map_node_strings(n, root_map_node, node_string, level + 1);
-                        }
-                        else
-                        {
+                        } else {
                             generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string, level + 1);
                         }
                     }
@@ -2459,14 +2396,11 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
     {
         auto it = m_eidParent_external_externalSceneIndex_hash_entityID_map.find(map_nodes.at(root_map_node).temp_hash);
 
-        if (it != m_eidParent_external_externalSceneIndex_hash_entityID_map.end())
-        {
+        if (it != m_eidParent_external_externalSceneIndex_hash_entityID_map.end()) {
             auto it2 = it->second.find(map_nodes.at(root_map_node).entityId);
 
-            if (it2 != it->second.end())
-            {
-                for (unsigned int n : it2->second)
-                {
+            if (it2 != it->second.end()) {
+                for (unsigned int n : it2->second) {
                     //std::cout << map_nodes.at(root_map_node).entryName << "(" << util::uint64_t_to_hex_string(map_nodes.at(root_map_node).temp_hash) << ")" << " is an m_eidParent_external to " << map_nodes.at(n).entryName << std::endl;
 
                     //std::string node_string = map_nodes.at(n).entryName + " (" + util::uint32_t_to_string(map_nodes.at(n).subEntity) + ")";
@@ -2475,23 +2409,20 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
                     std::string transform_string = "";
 
-                    if (map_nodes.at(n).has_m_mTransform)
-                    {
+                    if (map_nodes.at(n).has_m_mTransform) {
                         transform_string = "";
 
                         matrix43 transform = map_nodes.at(n).m_mTransform;
 
-                        if (map_nodes.at(n).has_m_PrimitiveScale && map_nodes.at(n).has_m_vGlobalSize)
-                        {
-                            scale_transform(transform, map_nodes.at(n).m_PrimitiveScale.x, map_nodes.at(n).m_PrimitiveScale.y, map_nodes.at(n).m_PrimitiveScale.z);
-                        }
-                        else if (map_nodes.at(n).has_m_PrimitiveScale)
-                        {
-                            scale_transform(transform, map_nodes.at(n).m_PrimitiveScale.x, map_nodes.at(n).m_PrimitiveScale.y, map_nodes.at(n).m_PrimitiveScale.z);
-                        }
-                        else if (map_nodes.at(n).has_m_vGlobalSize)
-                        {
-                            scale_transform(transform, map_nodes.at(n).m_vGlobalSize.x, map_nodes.at(n).m_vGlobalSize.y, map_nodes.at(n).m_vGlobalSize.z);
+                        if (map_nodes.at(n).has_m_PrimitiveScale && map_nodes.at(n).has_m_vGlobalSize) {
+                            scale_transform(transform, map_nodes.at(n).m_PrimitiveScale.x,
+                                            map_nodes.at(n).m_PrimitiveScale.y, map_nodes.at(n).m_PrimitiveScale.z);
+                        } else if (map_nodes.at(n).has_m_PrimitiveScale) {
+                            scale_transform(transform, map_nodes.at(n).m_PrimitiveScale.x,
+                                            map_nodes.at(n).m_PrimitiveScale.y, map_nodes.at(n).m_PrimitiveScale.z);
+                        } else if (map_nodes.at(n).has_m_vGlobalSize) {
+                            scale_transform(transform, map_nodes.at(n).m_vGlobalSize.x, map_nodes.at(n).m_vGlobalSize.y,
+                                            map_nodes.at(n).m_vGlobalSize.z);
                         }
 
                         transform_string += util::float_to_string(transform.x_axis.x) + ",";
@@ -2506,72 +2437,61 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
                         transform_string += util::float_to_string(transform.transform.x) + ",";
                         transform_string += util::float_to_string(transform.transform.y) + ",";
                         transform_string += util::float_to_string(transform.transform.z);
-                    }
-                    else
-                    {
+                    } else {
                         transform_string = "1,0,0,0,1,0,0,0,1,0,0,0";
                     }
 
                     //std::cout << transform_string << std::endl;
 
-                    if (map_nodes.at(n).has_prim_resource)
-                    {
+                    if (map_nodes.at(n).has_prim_resource) {
                         auto it3 = map_prims_map.find(map_nodes.at(n).prim_hash);
 
-                        if (it3 != map_prims_map.end())
-                        {
-                            if (level == 0)
-                            {
-                                godot_tscn_file += "[node name=\"" + node_string + R"(" parent="." instance=ExtResource( )" + util::uint32_t_to_string(it3->second) + " )]\n";
-                            }
-                            else
-                            {
-                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string + "\" instance=ExtResource( " + util::uint32_t_to_string(it3->second) + " )]\n";
+                        if (it3 != map_prims_map.end()) {
+                            if (level == 0) {
+                                godot_tscn_file +=
+                                        "[node name=\"" + node_string + R"(" parent="." instance=ExtResource( )" +
+                                        util::uint32_t_to_string(it3->second) + " )]\n";
+                            } else {
+                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string +
+                                                   "\" instance=ExtResource( " + util::uint32_t_to_string(it3->second) +
+                                                   " )]\n";
                             }
 
                             godot_tscn_file += "transform = Transform3D(" + transform_string + ")\n";
 
-                            if (map_filter_visible)
-                            {
-                                if (map_nodes.at(root_map_node).has_m_bVisible)
-                                {
-                                    if (!map_nodes.at(root_map_node).m_bVisible)
-                                    {
+                            if (map_filter_visible) {
+                                if (map_nodes.at(root_map_node).has_m_bVisible) {
+                                    if (!map_nodes.at(root_map_node).m_bVisible) {
                                         godot_tscn_file += "visible = false\n";
                                     }
                                 }
                             }
 
-                            godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," + util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",1\"\n";
+                            godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," +
+                                               util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",1\"\n";
 
                             map_nodes.at(n).type = "glb";
 
                             map_nodes.at(n).m_mTransform_string = transform_string;
 
-                            if (level == 0)
-                            {
+                            if (level == 0) {
                                 generate_map_node_strings(n, root_map_node, node_string, level + 1);
-                            }
-                            else
-                            {
-                                generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string, level + 1);
+                            } else {
+                                generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string,
+                                                          level + 1);
                             }
                         }
-                    }
-                    else if (map_nodes.at(n).is_volume_box)
-                    {
-                        if (map_filter_volume_boxes)
-                        {
-                            if (level == 0)
-                            {
-                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\".\" type=\"CSGBox3D\"]\n";
+                    } else if (map_nodes.at(n).is_volume_box) {
+                        if (map_filter_volume_boxes) {
+                            if (level == 0) {
+                                godot_tscn_file +=
+                                        "[node name=\"" + node_string + "\" parent=\".\" type=\"CSGBox3D\"]\n";
                                 godot_tscn_file += "transparency = 0.98\n";
                                 godot_tscn_file += "cast_shadow = 0\n";
                                 godot_tscn_file += "size = Vector3(1, 1, 1)\n";
-                            }
-                            else
-                            {
-                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string + "\" type=\"CSGBox3D\"]\n";
+                            } else {
+                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string +
+                                                   "\" type=\"CSGBox3D\"]\n";
                                 godot_tscn_file += "transparency = 0.98\n";
                                 godot_tscn_file += "cast_shadow = 0\n";
                                 godot_tscn_file += "size = Vector3(1, 1, 1)\n";
@@ -2579,47 +2499,39 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
                             godot_tscn_file += "transform = Transform3D(" + transform_string + ")\n";
 
-                            if (map_filter_visible)
-                            {
-                                if (map_nodes.at(root_map_node).has_m_bVisible)
-                                {
-                                    if (!map_nodes.at(root_map_node).m_bVisible)
-                                    {
+                            if (map_filter_visible) {
+                                if (map_nodes.at(root_map_node).has_m_bVisible) {
+                                    if (!map_nodes.at(root_map_node).m_bVisible) {
                                         godot_tscn_file += "visible = false\n";
                                     }
                                 }
                             }
 
-                            godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," + util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",1\"\n";
+                            godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," +
+                                               util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",1\"\n";
 
                             map_nodes.at(n).type = "box";
 
                             map_nodes.at(n).m_mTransform_string = transform_string;
 
-                            if (level == 0)
-                            {
+                            if (level == 0) {
                                 generate_map_node_strings(n, root_map_node, node_string, level + 1);
-                            }
-                            else
-                            {
-                                generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string, level + 1);
+                            } else {
+                                generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string,
+                                                          level + 1);
                             }
                         }
-                    }
-                    else if (map_nodes.at(n).is_volume_sphere)
-                    {
-                        if (map_filter_volume_spheres)
-                        {
-                            if (level == 0)
-                            {
-                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\".\" type=\"CSGSphere3D\"]\n";
+                    } else if (map_nodes.at(n).is_volume_sphere) {
+                        if (map_filter_volume_spheres) {
+                            if (level == 0) {
+                                godot_tscn_file +=
+                                        "[node name=\"" + node_string + "\" parent=\".\" type=\"CSGSphere3D\"]\n";
                                 godot_tscn_file += "transparency = 0.98\n";
                                 godot_tscn_file += "cast_shadow = 0\n";
                                 godot_tscn_file += "size = Vector3(1, 1, 1)\n";
-                            }
-                            else
-                            {
-                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string + "\" type=\"CSGSphere3D\"]\n";
+                            } else {
+                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string +
+                                                   "\" type=\"CSGSphere3D\"]\n";
                                 godot_tscn_file += "transparency = 0.98\n";
                                 godot_tscn_file += "cast_shadow = 0\n";
                                 godot_tscn_file += "size = Vector3(1, 1, 1)\n";
@@ -2627,69 +2539,57 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
                             godot_tscn_file += "transform = Transform3D(" + transform_string + ")\n";
 
-                            if (map_filter_visible)
-                            {
-                                if (map_nodes.at(root_map_node).has_m_bVisible)
-                                {
-                                    if (!map_nodes.at(root_map_node).m_bVisible)
-                                    {
+                            if (map_filter_visible) {
+                                if (map_nodes.at(root_map_node).has_m_bVisible) {
+                                    if (!map_nodes.at(root_map_node).m_bVisible) {
                                         godot_tscn_file += "visible = false\n";
                                     }
                                 }
                             }
 
-                            godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," + util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",1\"\n";
+                            godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," +
+                                               util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",1\"\n";
 
                             map_nodes.at(n).type = "sphere";
 
                             map_nodes.at(n).m_mTransform_string = transform_string;
 
-                            if (level == 0)
-                            {
+                            if (level == 0) {
                                 generate_map_node_strings(n, root_map_node, node_string, level + 1);
-                            }
-                            else
-                            {
-                                generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string, level + 1);
+                            } else {
+                                generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string,
+                                                          level + 1);
                             }
                         }
-                    }
-                    else
-                    {
-                        if (level == 0)
-                        {
+                    } else {
+                        if (level == 0) {
                             godot_tscn_file += "[node name=\"" + node_string + "\" type=\"Node3D\" parent=\".\"]\n";
-                        }
-                        else
-                        {
-                            godot_tscn_file += "[node name=\"" + node_string + R"(" type="Node3D" parent=")" + map_node_string + "\"]\n";
+                        } else {
+                            godot_tscn_file +=
+                                    "[node name=\"" + node_string + R"(" type="Node3D" parent=")" + map_node_string +
+                                    "\"]\n";
                         }
 
                         godot_tscn_file += "transform = Transform3D(" + transform_string + ")\n";
 
-                        if (map_filter_visible)
-                        {
-                            if (map_nodes.at(root_map_node).has_m_bVisible)
-                            {
-                                if (!map_nodes.at(root_map_node).m_bVisible)
-                                {
+                        if (map_filter_visible) {
+                            if (map_nodes.at(root_map_node).has_m_bVisible) {
+                                if (!map_nodes.at(root_map_node).m_bVisible) {
                                     godot_tscn_file += "visible = false\n";
                                 }
                             }
                         }
 
-                        godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," + util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",1\"\n";
+                        godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," +
+                                           util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",1\"\n";
 
                         map_nodes.at(n).type = "empty";
 
                         map_nodes.at(n).m_mTransform_string = transform_string;
 
-                        if (level == 0)
-                        {
+                        if (level == 0) {
                             generate_map_node_strings(n, root_map_node, node_string, level + 1);
-                        }
-                        else
-                        {
+                        } else {
                             generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string, level + 1);
                         }
                     }
@@ -2698,18 +2598,16 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
         }
     }
 
-    if (map_nodes.at(root_map_node).entityTypeResourceIndex_hash_type == "TEMP")
-    {
+    if (map_nodes.at(root_map_node).entityTypeResourceIndex_hash_type == "TEMP") {
         auto it = temp_hash_is_top_level_Local_node_map.find(map_nodes.at(root_map_node).entityTypeResourceIndex_hash);
 
-        if (it != temp_hash_is_top_level_Local_node_map.end())
-        {
-            for (unsigned int n : it->second)
-            {
+        if (it != temp_hash_is_top_level_Local_node_map.end()) {
+            for (unsigned int n : it->second) {
                 //std::cout << map_nodes.at(root_map_node).entryName << "(" << util::uint64_t_to_hex_string(map_nodes.at(root_map_node).temp_hash) << ")" << " is an m_eidParent_local to " << map_nodes.at(n).entryName << std::endl;
 
                 //std::string node_string = map_nodes.at(n).entryName + " (" + util::uint32_t_to_string(map_nodes.at(n).subEntity) + ")";
-                std::string node_string = "*DONTUSE* " + map_nodes.at(n).entryName + " (" + util::uint32_t_to_string(n) + ")";
+                std::string node_string =
+                        "*DONTUSE* " + map_nodes.at(n).entryName + " (" + util::uint32_t_to_string(n) + ")";
                 //std::cout << node_string << std::endl;
 
                 std::string transform_string = "";
@@ -2753,64 +2651,53 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
                 //std::cout << transform_string << std::endl;
 
-                if (map_nodes.at(n).has_prim_resource)
-                {
+                if (map_nodes.at(n).has_prim_resource) {
                     auto it3 = map_prims_map.find(map_nodes.at(n).prim_hash);
 
-                    if (it3 != map_prims_map.end())
-                    {
-                        if (level == 0)
-                        {
-                            godot_tscn_file += "[node name=\"" + node_string + R"(" parent="." instance=ExtResource( )" + util::uint32_t_to_string(it3->second) + " )]\n";
-                        }
-                        else
-                        {
-                            godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string + "\" instance=ExtResource( " + util::uint32_t_to_string(it3->second) + " )]\n";
+                    if (it3 != map_prims_map.end()) {
+                        if (level == 0) {
+                            godot_tscn_file +=
+                                    "[node name=\"" + node_string + R"(" parent="." instance=ExtResource( )" +
+                                    util::uint32_t_to_string(it3->second) + " )]\n";
+                        } else {
+                            godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string +
+                                               "\" instance=ExtResource( " + util::uint32_t_to_string(it3->second) +
+                                               " )]\n";
                         }
 
                         godot_tscn_file += "transform = Transform3D(" + transform_string + ")\n";
 
-                        if (map_filter_visible)
-                        {
-                            if (map_nodes.at(root_map_node).has_m_bVisible)
-                            {
-                                if (!map_nodes.at(root_map_node).m_bVisible)
-                                {
+                        if (map_filter_visible) {
+                            if (map_nodes.at(root_map_node).has_m_bVisible) {
+                                if (!map_nodes.at(root_map_node).m_bVisible) {
                                     godot_tscn_file += "visible = false\n";
                                 }
                             }
                         }
 
-                        godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," + util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",0\"\n";
+                        godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," +
+                                           util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",0\"\n";
 
                         map_nodes.at(n).type = "glb";
 
                         map_nodes.at(n).m_mTransform_string = transform_string;
 
-                        if (level == 0)
-                        {
+                        if (level == 0) {
                             generate_map_node_strings(n, root_map_node, node_string, level + 1);
-                        }
-                        else
-                        {
+                        } else {
                             generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string, level + 1);
                         }
                     }
-                }
-                else if (map_nodes.at(n).is_volume_box)
-                {
-                    if (map_filter_volume_boxes)
-                    {
-                        if (level == 0)
-                        {
+                } else if (map_nodes.at(n).is_volume_box) {
+                    if (map_filter_volume_boxes) {
+                        if (level == 0) {
                             godot_tscn_file += "[node name=\"" + node_string + "\" parent=\".\" type=\"CSGBox3D\"]\n";
                             godot_tscn_file += "transparency = 0.98\n";
                             godot_tscn_file += "cast_shadow = 0\n";
                             godot_tscn_file += "size = Vector3(1, 1, 1)\n";
-                        }
-                        else
-                        {
-                            godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string + "\" type=\"CSGBox3D\"]\n";
+                        } else {
+                            godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string +
+                                               "\" type=\"CSGBox3D\"]\n";
                             godot_tscn_file += "transparency = 0.98\n";
                             godot_tscn_file += "cast_shadow = 0\n";
                             godot_tscn_file += "size = Vector3(1, 1, 1)\n";
@@ -2818,47 +2705,38 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
                         godot_tscn_file += "transform = Transform3D(" + transform_string + ")\n";
 
-                        if (map_filter_visible)
-                        {
-                            if (map_nodes.at(root_map_node).has_m_bVisible)
-                            {
-                                if (!map_nodes.at(root_map_node).m_bVisible)
-                                {
+                        if (map_filter_visible) {
+                            if (map_nodes.at(root_map_node).has_m_bVisible) {
+                                if (!map_nodes.at(root_map_node).m_bVisible) {
                                     godot_tscn_file += "visible = false\n";
                                 }
                             }
                         }
 
-                        godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," + util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",0\"\n";
+                        godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," +
+                                           util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",0\"\n";
 
                         map_nodes.at(n).type = "box";
 
                         map_nodes.at(n).m_mTransform_string = transform_string;
 
-                        if (level == 0)
-                        {
+                        if (level == 0) {
                             generate_map_node_strings(n, root_map_node, node_string, level + 1);
-                        }
-                        else
-                        {
+                        } else {
                             generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string, level + 1);
                         }
                     }
-                }
-                else if (map_nodes.at(n).is_volume_sphere)
-                {
-                    if (map_filter_volume_spheres)
-                    {
-                        if (level == 0)
-                        {
-                            godot_tscn_file += "[node name=\"" + node_string + "\" parent=\".\" type=\"CSGSphere3D\"]\n";
+                } else if (map_nodes.at(n).is_volume_sphere) {
+                    if (map_filter_volume_spheres) {
+                        if (level == 0) {
+                            godot_tscn_file +=
+                                    "[node name=\"" + node_string + "\" parent=\".\" type=\"CSGSphere3D\"]\n";
                             godot_tscn_file += "transparency = 0.98\n";
                             godot_tscn_file += "cast_shadow = 0\n";
                             godot_tscn_file += "size = Vector3(1, 1, 1)\n";
-                        }
-                        else
-                        {
-                            godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string + "\" type=\"CSGSphere3D\"]\n";
+                        } else {
+                            godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string +
+                                               "\" type=\"CSGSphere3D\"]\n";
                             godot_tscn_file += "transparency = 0.98\n";
                             godot_tscn_file += "cast_shadow = 0\n";
                             godot_tscn_file += "size = Vector3(1, 1, 1)\n";
@@ -2866,41 +2744,31 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
                         godot_tscn_file += "transform = Transform3D(" + transform_string + ")\n";
 
-                        if (map_filter_visible)
-                        {
-                            if (map_nodes.at(root_map_node).has_m_bVisible)
-                            {
-                                if (!map_nodes.at(root_map_node).m_bVisible)
-                                {
+                        if (map_filter_visible) {
+                            if (map_nodes.at(root_map_node).has_m_bVisible) {
+                                if (!map_nodes.at(root_map_node).m_bVisible) {
                                     godot_tscn_file += "visible = false\n";
                                 }
                             }
                         }
 
-                        godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," + util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",0\"\n";
+                        godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," +
+                                           util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",0\"\n";
 
                         map_nodes.at(n).type = "sphere";
 
                         map_nodes.at(n).m_mTransform_string = transform_string;
 
-                        if (level == 0)
-                        {
+                        if (level == 0) {
                             generate_map_node_strings(n, root_map_node, node_string, level + 1);
-                        }
-                        else
-                        {
+                        } else {
                             generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string, level + 1);
                         }
                     }
-                }
-                else
-                {
-                    if (level == 0)
-                    {
+                } else {
+                    if (level == 0) {
                         generate_map_node_strings(n, root_map_node, ".", level + 1);
-                    }
-                    else
-                    {
+                    } else {
                         generate_map_node_strings(n, root_map_node, map_node_string, level + 1);
                     }
                 }
@@ -2908,20 +2776,17 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
         }
     }
 
-    if (has_aset_with_temp_resource)
-    {
-        for (unsigned long long aset_temp_hashe : aset_temp_hashes)
-        {
+    if (has_aset_with_temp_resource) {
+        for (unsigned long long aset_temp_hashe : aset_temp_hashes) {
             auto it = temp_hash_is_top_level_Local_node_map.find(aset_temp_hashe);
 
-            if (it != temp_hash_is_top_level_Local_node_map.end())
-            {
-                for (unsigned int n : it->second)
-                {
+            if (it != temp_hash_is_top_level_Local_node_map.end()) {
+                for (unsigned int n : it->second) {
                     //std::cout << map_nodes.at(root_map_node).entryName << "(" << util::uint64_t_to_hex_string(map_nodes.at(root_map_node).temp_hash) << ")" << " is an m_eidParent_local to " << map_nodes.at(n).entryName << std::endl;
 
                     //std::string node_string = map_nodes.at(n).entryName + " (" + util::uint32_t_to_string(map_nodes.at(n).subEntity) + ")";
-                    std::string node_string = "*DONTUSE* " + map_nodes.at(n).entryName + " (" + util::uint32_t_to_string(n) + ")";
+                    std::string node_string =
+                            "*DONTUSE* " + map_nodes.at(n).entryName + " (" + util::uint32_t_to_string(n) + ")";
                     //std::cout << node_string << std::endl;
 
                     std::string transform_string = "";
@@ -2965,64 +2830,55 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
                     //std::cout << transform_string << std::endl;
 
-                    if (map_nodes.at(n).has_prim_resource)
-                    {
+                    if (map_nodes.at(n).has_prim_resource) {
                         auto it3 = map_prims_map.find(map_nodes.at(n).prim_hash);
 
-                        if (it3 != map_prims_map.end())
-                        {
-                            if (level == 0)
-                            {
-                                godot_tscn_file += "[node name=\"" + node_string + R"(" parent="." instance=ExtResource( )" + util::uint32_t_to_string(it3->second) + " )]\n";
-                            }
-                            else
-                            {
-                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string + "\" instance=ExtResource( " + util::uint32_t_to_string(it3->second) + " )]\n";
+                        if (it3 != map_prims_map.end()) {
+                            if (level == 0) {
+                                godot_tscn_file +=
+                                        "[node name=\"" + node_string + R"(" parent="." instance=ExtResource( )" +
+                                        util::uint32_t_to_string(it3->second) + " )]\n";
+                            } else {
+                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string +
+                                                   "\" instance=ExtResource( " + util::uint32_t_to_string(it3->second) +
+                                                   " )]\n";
                             }
 
                             godot_tscn_file += "transform = Transform3D(" + transform_string + ")\n";
 
-                            if (map_filter_visible)
-                            {
-                                if (map_nodes.at(root_map_node).has_m_bVisible)
-                                {
-                                    if (!map_nodes.at(root_map_node).m_bVisible)
-                                    {
+                            if (map_filter_visible) {
+                                if (map_nodes.at(root_map_node).has_m_bVisible) {
+                                    if (!map_nodes.at(root_map_node).m_bVisible) {
                                         godot_tscn_file += "visible = false\n";
                                     }
                                 }
                             }
 
-                            godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," + util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",0\"\n";
+                            godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," +
+                                               util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",0\"\n";
 
                             map_nodes.at(n).type = "glb";
 
                             map_nodes.at(n).m_mTransform_string = transform_string;
 
-                            if (level == 0)
-                            {
+                            if (level == 0) {
                                 generate_map_node_strings(n, root_map_node, node_string, level + 1);
-                            }
-                            else
-                            {
-                                generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string, level + 1);
+                            } else {
+                                generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string,
+                                                          level + 1);
                             }
                         }
-                    }
-                    else if (map_nodes.at(n).is_volume_box)
-                    {
-                        if (map_filter_volume_boxes)
-                        {
-                            if (level == 0)
-                            {
-                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\".\" type=\"CSGBox3D\"]\n";
+                    } else if (map_nodes.at(n).is_volume_box) {
+                        if (map_filter_volume_boxes) {
+                            if (level == 0) {
+                                godot_tscn_file +=
+                                        "[node name=\"" + node_string + "\" parent=\".\" type=\"CSGBox3D\"]\n";
                                 godot_tscn_file += "transparency = 0.98\n";
                                 godot_tscn_file += "cast_shadow = 0\n";
                                 godot_tscn_file += "size = Vector3(1, 1, 1)\n";
-                            }
-                            else
-                            {
-                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string + "\" type=\"CSGBox3D\"]\n";
+                            } else {
+                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string +
+                                                   "\" type=\"CSGBox3D\"]\n";
                                 godot_tscn_file += "transparency = 0.98\n";
                                 godot_tscn_file += "cast_shadow = 0\n";
                                 godot_tscn_file += "size = Vector3(1, 1, 1)\n";
@@ -3030,47 +2886,39 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
                             godot_tscn_file += "transform = Transform3D(" + transform_string + ")\n";
 
-                            if (map_filter_visible)
-                            {
-                                if (map_nodes.at(root_map_node).has_m_bVisible)
-                                {
-                                    if (!map_nodes.at(root_map_node).m_bVisible)
-                                    {
+                            if (map_filter_visible) {
+                                if (map_nodes.at(root_map_node).has_m_bVisible) {
+                                    if (!map_nodes.at(root_map_node).m_bVisible) {
                                         godot_tscn_file += "visible = false\n";
                                     }
                                 }
                             }
 
-                            godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," + util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",0\"\n";
+                            godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," +
+                                               util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",0\"\n";
 
                             map_nodes.at(n).type = "box";
 
                             map_nodes.at(n).m_mTransform_string = transform_string;
 
-                            if (level == 0)
-                            {
+                            if (level == 0) {
                                 generate_map_node_strings(n, root_map_node, node_string, level + 1);
-                            }
-                            else
-                            {
-                                generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string, level + 1);
+                            } else {
+                                generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string,
+                                                          level + 1);
                             }
                         }
-                    }
-                    else if (map_nodes.at(n).is_volume_sphere)
-                    {
-                        if (map_filter_volume_spheres)
-                        {
-                            if (level == 0)
-                            {
-                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\".\" type=\"CSGSphere3D\"]\n";
+                    } else if (map_nodes.at(n).is_volume_sphere) {
+                        if (map_filter_volume_spheres) {
+                            if (level == 0) {
+                                godot_tscn_file +=
+                                        "[node name=\"" + node_string + "\" parent=\".\" type=\"CSGSphere3D\"]\n";
                                 godot_tscn_file += "transparency = 0.98\n";
                                 godot_tscn_file += "cast_shadow = 0\n";
                                 godot_tscn_file += "size = Vector3(1, 1, 1)\n";
-                            }
-                            else
-                            {
-                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string + "\" type=\"CSGSphere3D\"]\n";
+                            } else {
+                                godot_tscn_file += "[node name=\"" + node_string + "\" parent=\"" + map_node_string +
+                                                   "\" type=\"CSGSphere3D\"]\n";
                                 godot_tscn_file += "transparency = 0.98\n";
                                 godot_tscn_file += "cast_shadow = 0\n";
                                 godot_tscn_file += "size = Vector3(1, 1, 1)\n";
@@ -3078,41 +2926,32 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
 
                             godot_tscn_file += "transform = Transform3D(" + transform_string + ")\n";
 
-                            if (map_filter_visible)
-                            {
-                                if (map_nodes.at(root_map_node).has_m_bVisible)
-                                {
-                                    if (!map_nodes.at(root_map_node).m_bVisible)
-                                    {
+                            if (map_filter_visible) {
+                                if (map_nodes.at(root_map_node).has_m_bVisible) {
+                                    if (!map_nodes.at(root_map_node).m_bVisible) {
                                         godot_tscn_file += "visible = false\n";
                                     }
                                 }
                             }
 
-                            godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," + util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",0\"\n";
+                            godot_tscn_file += "editor_description = \"" + map_nodes.at(n).temp_hash_string + "," +
+                                               util::uint64_t_to_hex_string(map_nodes.at(n).entityId) + ",0\"\n";
 
                             map_nodes.at(n).type = "sphere";
 
                             map_nodes.at(n).m_mTransform_string = transform_string;
 
-                            if (level == 0)
-                            {
+                            if (level == 0) {
                                 generate_map_node_strings(n, root_map_node, node_string, level + 1);
-                            }
-                            else
-                            {
-                                generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string, level + 1);
+                            } else {
+                                generate_map_node_strings(n, root_map_node, map_node_string + "/" + node_string,
+                                                          level + 1);
                             }
                         }
-                    }
-                    else
-                    {
-                        if (level == 0)
-                        {
+                    } else {
+                        if (level == 0) {
                             generate_map_node_strings(n, root_map_node, ".", level + 1);
-                        }
-                        else
-                        {
+                        } else {
                             generate_map_node_strings(n, root_map_node, map_node_string, level + 1);
                         }
                     }
@@ -3122,20 +2961,18 @@ void map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_
     }
 }
 
-void map::get_map_node(temp& temp_temp)
-{
+void map::get_map_node(temp& temp_temp) {
     const rapidjson::Value& temp_json_subEntities = temp_temp.temp_json_document["subEntities"];
 
-    for (uint64_t s = 0; s < temp_json_subEntities.Size(); s++)
-    {
-        if (gui_control == ABORT_CURRENT_TASK)
-        {
+    for (uint64_t s = 0; s < temp_json_subEntities.Size(); s++) {
+        if (gui_control == ABORT_CURRENT_TASK) {
             return;
         }
 
-        if (((map_node_count_current * (uint64_t)10000) / (uint64_t)map_node_count) % (uint64_t)10 == 0 && map_node_count_current > 0)
-        {
-            stringstream_length = console::update_console(message, map_node_count, map_node_count_current, start_time, stringstream_length);
+        if (((map_node_count_current * (uint64_t) 10000) / (uint64_t) map_node_count) % (uint64_t) 10 == 0 &&
+            map_node_count_current > 0) {
+            stringstream_length = console::update_console(message, map_node_count, map_node_count_current, start_time,
+                                                          stringstream_length);
         }
 
         map_node_count_current++;
@@ -3156,33 +2993,30 @@ void map::get_map_node(temp& temp_temp)
 
         rapidjson::Value::ConstMemberIterator it2 = temp_json_subEntities[s].FindMember("entityTypeResourceIndex");
 
-        if (it2 != temp_json_subEntities[s].MemberEnd())
-        {
+        if (it2 != temp_json_subEntities[s].MemberEnd()) {
             temp_map_node.entityTypeResourceIndex = it2->value.GetInt();
 
-            uint32_t temp_hash_reference_count = rpkgs.at(temp_temp.temp_rpkg_index).hash.at(temp_temp.temp_hash_index).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+            uint32_t temp_hash_reference_count = rpkgs.at(temp_temp.temp_rpkg_index).hash.at(
+                    temp_temp.temp_hash_index).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
-            if (temp_map_node.entityTypeResourceIndex < temp_hash_reference_count)
-            {
-                temp_map_node.entityTypeResourceIndex_hash = rpkgs.at(temp_temp.temp_rpkg_index).hash.at(temp_temp.temp_hash_index).hash_reference_data.hash_reference.at(temp_map_node.entityTypeResourceIndex);
+            if (temp_map_node.entityTypeResourceIndex < temp_hash_reference_count) {
+                temp_map_node.entityTypeResourceIndex_hash = rpkgs.at(temp_temp.temp_rpkg_index).hash.at(
+                        temp_temp.temp_hash_index).hash_reference_data.hash_reference.at(
+                        temp_map_node.entityTypeResourceIndex);
 
                 uint32_t rpkg_index = rpkg_function::get_latest_hash(temp_map_node.entityTypeResourceIndex_hash);
 
-                if (rpkg_index != UINT32_MAX)
-                {
+                if (rpkg_index != UINT32_MAX) {
                     auto it3 = rpkgs.at(rpkg_index).hash_map.find(temp_map_node.entityTypeResourceIndex_hash);
 
-                    if (it3 != rpkgs.at(rpkg_index).hash_map.end())
-                    {
-                        temp_map_node.entityTypeResourceIndex_hash_type = rpkgs.at(rpkg_index).hash.at(it3->second).hash_resource_type;
+                    if (it3 != rpkgs.at(rpkg_index).hash_map.end()) {
+                        temp_map_node.entityTypeResourceIndex_hash_type = rpkgs.at(rpkg_index).hash.at(
+                                it3->second).hash_resource_type;
                     }
 
-                    if (temp_map_node.entityTypeResourceIndex_hash == 0x0054667393764C74)
-                    {
+                    if (temp_map_node.entityTypeResourceIndex_hash == 0x0054667393764C74) {
                         temp_map_node.is_volume_box = true;
-                    }
-                    else if (temp_map_node.entityTypeResourceIndex_hash == 0x00B86A9EE991EFB2)
-                    {
+                    } else if (temp_map_node.entityTypeResourceIndex_hash == 0x00B86A9EE991EFB2) {
                         temp_map_node.is_volume_sphere = true;
                     }
                 }
@@ -3191,45 +3025,35 @@ void map::get_map_node(temp& temp_temp)
 
         it2 = temp_json_subEntities[s].FindMember("propertyValues");
 
-        if (it2 != temp_json_subEntities[s].MemberEnd())
-        {
-            for (uint64_t p = 0; p < it2->value.Size(); p++)
-            {
+        if (it2 != temp_json_subEntities[s].MemberEnd()) {
+            for (uint64_t p = 0; p < it2->value.Size(); p++) {
                 rapidjson::Value::ConstMemberIterator it3 = it2->value[p].FindMember("nPropertyID");
 
-                if (it3 != it2->value[p].MemberEnd())
-                {
-                    if (it3->value.IsString())
-                    {
-                        if (std::strcmp(it3->value.GetString(), "m_ResourceID") == 0)
-                        {
+                if (it3 != it2->value[p].MemberEnd()) {
+                    if (it3->value.IsString()) {
+                        if (std::strcmp(it3->value.GetString(), "m_ResourceID") == 0) {
                             //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " has a m_ResourceID in propertyValues" << std::endl;
 
                             rapidjson::Value::ConstMemberIterator it4 = it2->value[p].FindMember("value");
 
-                            if (it4 != it2->value[p].MemberEnd())
-                            {
+                            if (it4 != it2->value[p].MemberEnd()) {
                                 rapidjson::Value::ConstMemberIterator it5 = it4->value.FindMember("$type");
 
-                                if (it5 != it4->value.MemberEnd())
-                                {
-                                    if (it5->value.IsString())
-                                    {
-                                        if (std::strcmp(it5->value.GetString(), "ZRuntimeResourceID") == 0)
-                                        {
+                                if (it5 != it4->value.MemberEnd()) {
+                                    if (it5->value.IsString()) {
+                                        if (std::strcmp(it5->value.GetString(), "ZRuntimeResourceID") == 0) {
                                             //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " m_ResourceID ZRuntimeResourceID" << std::endl;
 
                                             rapidjson::Value::ConstMemberIterator it6 = it4->value.FindMember("$val");
 
-                                            if (it6 != it4->value.MemberEnd())
-                                            {
+                                            if (it6 != it4->value.MemberEnd()) {
                                                 uint32_t resource_id_low = 999999;
                                                 uint32_t resource_id_high = 999999;
 
-                                                rapidjson::Value::ConstMemberIterator it7 = it6->value.FindMember("m_IDHigh");
+                                                rapidjson::Value::ConstMemberIterator it7 = it6->value.FindMember(
+                                                        "m_IDHigh");
 
-                                                if (it7 != it6->value.MemberEnd())
-                                                {
+                                                if (it7 != it6->value.MemberEnd()) {
                                                     //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " ZRuntimeResourceID m_IDHigh is " << it7->value.GetUint() << std::endl;
 
                                                     resource_id_high = it7->value.GetUint();
@@ -3237,8 +3061,7 @@ void map::get_map_node(temp& temp_temp)
 
                                                 it7 = it6->value.FindMember("m_IDLow");
 
-                                                if (it7 != it6->value.MemberEnd())
-                                                {
+                                                if (it7 != it6->value.MemberEnd()) {
                                                     //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " ZRuntimeResourceID m_IDLow is " << it7->value.GetUint() << std::endl;
 
                                                     resource_id_low = it7->value.GetUint();
@@ -3247,13 +3070,19 @@ void map::get_map_node(temp& temp_temp)
                                                 temp_map_node.m_IDHigh = resource_id_high;
                                                 temp_map_node.m_IDLow = resource_id_low;
 
-                                                uint32_t temp_hash_reference_count = rpkgs.at(temp_temp.temp_rpkg_index).hash.at(temp_temp.temp_hash_index).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+                                                uint32_t temp_hash_reference_count =
+                                                        rpkgs.at(temp_temp.temp_rpkg_index).hash.at(
+                                                                temp_temp.temp_hash_index).hash_reference_data.hash_reference_count &
+                                                        0x3FFFFFFF;
 
-                                                if (temp_map_node.m_IDHigh == 0 && temp_map_node.m_IDLow < temp_hash_reference_count)
-                                                {
+                                                if (temp_map_node.m_IDHigh == 0 &&
+                                                    temp_map_node.m_IDLow < temp_hash_reference_count) {
                                                     //std::cout << "PRIM file: " << util::uint64_t_to_hex_string(rpkgs.at(temp_temp.temp_rpkg_index).hash.at(temp_temp.temp_hash_index).hash_reference_data.hash_reference.at(temp_map_node.m_IDLow)) << std::endl;
 
-                                                    temp_map_node.prim_hash = rpkgs.at(temp_temp.temp_rpkg_index).hash.at(temp_temp.temp_hash_index).hash_reference_data.hash_reference.at(temp_map_node.m_IDLow);
+                                                    temp_map_node.prim_hash = rpkgs.at(
+                                                            temp_temp.temp_rpkg_index).hash.at(
+                                                            temp_temp.temp_hash_index).hash_reference_data.hash_reference.at(
+                                                            temp_map_node.m_IDLow);
 
                                                     temp_map_node.has_prim_resource = true;
                                                 }
@@ -3262,21 +3091,17 @@ void map::get_map_node(temp& temp_temp)
                                     }
                                 }
                             }
-                        }
-                        else if (std::strcmp(it3->value.GetString(), "m_mTransform") == 0)
-                        {
+                        } else if (std::strcmp(it3->value.GetString(), "m_mTransform") == 0) {
                             //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " has a m_mTransform in propertyValues" << std::endl;
 
                             temp_map_node.has_m_mTransform = true;
 
                             const rapidjson::Value& value = it2->value[p]["value"];
 
-                            if (!value.IsNull())
-                            {
+                            if (!value.IsNull()) {
                                 const rapidjson::Value& val = value["$val"];
 
-                                if (!val.IsNull())
-                                {
+                                if (!val.IsNull()) {
                                     ////std::cout << val["XAxis"]["x"].GetFloat() << std::endl;
                                     ////std::cout << val["XAxis"]["y"].GetFloat() << std::endl;
                                     ////std::cout << val["XAxis"]["z"].GetFloat() << std::endl;
@@ -3304,50 +3129,41 @@ void map::get_map_node(temp& temp_temp)
                                     temp_map_node.m_mTransform.transform.z = val["Trans"]["z"].GetFloat();
                                 }
                             }
-                        }
-                        else if (std::strcmp(it3->value.GetString(), "m_PrimitiveScale") == 0)
-                        {
+                        } else if (std::strcmp(it3->value.GetString(), "m_PrimitiveScale") == 0) {
                             //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " has a m_PrimitiveScale in propertyValues" << std::endl;
 
                             rapidjson::Value::ConstMemberIterator it4 = it2->value[p].FindMember("value");
 
-                            if (it4 != it2->value[p].MemberEnd())
-                            {
+                            if (it4 != it2->value[p].MemberEnd()) {
                                 rapidjson::Value::ConstMemberIterator it5 = it4->value.FindMember("$type");
 
-                                if (it5 != it4->value.MemberEnd())
-                                {
-                                    if (it5->value.IsString())
-                                    {
-                                        if (std::strcmp(it5->value.GetString(), "SVector3") == 0)
-                                        {
+                                if (it5 != it4->value.MemberEnd()) {
+                                    if (it5->value.IsString()) {
+                                        if (std::strcmp(it5->value.GetString(), "SVector3") == 0) {
                                             rapidjson::Value::ConstMemberIterator it6 = it4->value.FindMember("$val");
 
-                                            if (it6 != it4->value.MemberEnd())
-                                            {
+                                            if (it6 != it4->value.MemberEnd()) {
                                                 rapidjson::Value::ConstMemberIterator it7 = it6->value.FindMember("x");
 
-                                                if (it7 != it6->value.MemberEnd())
-                                                {
+                                                if (it7 != it6->value.MemberEnd()) {
                                                     temp_map_node.m_PrimitiveScale.x = it7->value.GetFloat();
                                                 }
 
                                                 it7 = it6->value.FindMember("y");
 
-                                                if (it7 != it6->value.MemberEnd())
-                                                {
+                                                if (it7 != it6->value.MemberEnd()) {
                                                     temp_map_node.m_PrimitiveScale.y = it7->value.GetFloat();
                                                 }
 
                                                 it7 = it6->value.FindMember("z");
 
-                                                if (it7 != it6->value.MemberEnd())
-                                                {
+                                                if (it7 != it6->value.MemberEnd()) {
                                                     temp_map_node.m_PrimitiveScale.z = it7->value.GetFloat();
                                                 }
 
-                                                if (!util::floats_equal(temp_map_node.m_PrimitiveScale.x, 0.0f) && !util::floats_equal(temp_map_node.m_PrimitiveScale.y, 0.0f) && !util::floats_equal(temp_map_node.m_PrimitiveScale.z, 0.0f))
-                                                {
+                                                if (!util::floats_equal(temp_map_node.m_PrimitiveScale.x, 0.0f) &&
+                                                    !util::floats_equal(temp_map_node.m_PrimitiveScale.y, 0.0f) &&
+                                                    !util::floats_equal(temp_map_node.m_PrimitiveScale.z, 0.0f)) {
                                                     temp_map_node.has_m_PrimitiveScale = true;
                                                 }
                                             }
@@ -3355,50 +3171,41 @@ void map::get_map_node(temp& temp_temp)
                                     }
                                 }
                             }
-                        }
-                        else if (std::strcmp(it3->value.GetString(), "m_vGlobalSize") == 0)
-                        {
+                        } else if (std::strcmp(it3->value.GetString(), "m_vGlobalSize") == 0) {
                             //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " has a m_vGlobalSize in propertyValues" << std::endl;
 
                             rapidjson::Value::ConstMemberIterator it4 = it2->value[p].FindMember("value");
 
-                            if (it4 != it2->value[p].MemberEnd())
-                            {
+                            if (it4 != it2->value[p].MemberEnd()) {
                                 rapidjson::Value::ConstMemberIterator it5 = it4->value.FindMember("$type");
 
-                                if (it5 != it4->value.MemberEnd())
-                                {
-                                    if (it5->value.IsString())
-                                    {
-                                        if (std::strcmp(it5->value.GetString(), "SVector3") == 0)
-                                        {
+                                if (it5 != it4->value.MemberEnd()) {
+                                    if (it5->value.IsString()) {
+                                        if (std::strcmp(it5->value.GetString(), "SVector3") == 0) {
                                             rapidjson::Value::ConstMemberIterator it6 = it4->value.FindMember("$val");
 
-                                            if (it6 != it4->value.MemberEnd())
-                                            {
+                                            if (it6 != it4->value.MemberEnd()) {
                                                 rapidjson::Value::ConstMemberIterator it7 = it6->value.FindMember("x");
 
-                                                if (it7 != it6->value.MemberEnd())
-                                                {
+                                                if (it7 != it6->value.MemberEnd()) {
                                                     temp_map_node.m_vGlobalSize.x = it7->value.GetFloat();
                                                 }
 
                                                 it7 = it6->value.FindMember("y");
 
-                                                if (it7 != it6->value.MemberEnd())
-                                                {
+                                                if (it7 != it6->value.MemberEnd()) {
                                                     temp_map_node.m_vGlobalSize.y = it7->value.GetFloat();
                                                 }
 
                                                 it7 = it6->value.FindMember("z");
 
-                                                if (it7 != it6->value.MemberEnd())
-                                                {
+                                                if (it7 != it6->value.MemberEnd()) {
                                                     temp_map_node.m_vGlobalSize.z = it7->value.GetFloat();
                                                 }
 
-                                                if (!util::floats_equal(temp_map_node.m_vGlobalSize.x, 0.0f) && !util::floats_equal(temp_map_node.m_vGlobalSize.y, 0.0f) && !util::floats_equal(temp_map_node.m_vGlobalSize.z, 0.0f))
-                                                {
+                                                if (!util::floats_equal(temp_map_node.m_vGlobalSize.x, 0.0f) &&
+                                                    !util::floats_equal(temp_map_node.m_vGlobalSize.y, 0.0f) &&
+                                                    !util::floats_equal(temp_map_node.m_vGlobalSize.z, 0.0f)) {
                                                     temp_map_node.has_m_vGlobalSize = true;
                                                 }
                                             }
@@ -3406,25 +3213,20 @@ void map::get_map_node(temp& temp_temp)
                                     }
                                 }
                             }
-                        }
-                        else if (std::strcmp(it3->value.GetString(), "m_eidParent") == 0)
-                        {
+                        } else if (std::strcmp(it3->value.GetString(), "m_eidParent") == 0) {
                             temp_map_node.has_m_eidParent = true;
 
                             //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " has a m_eidParent in propertyValues" << std::endl;
 
                             rapidjson::Value::ConstMemberIterator it4 = it2->value[p].FindMember("value");
 
-                            if (it4 != it2->value[p].MemberEnd())
-                            {
+                            if (it4 != it2->value[p].MemberEnd()) {
                                 rapidjson::Value::ConstMemberIterator it5 = it4->value.FindMember("$val");
 
-                                if (it5 != it4->value.MemberEnd())
-                                {
+                                if (it5 != it4->value.MemberEnd()) {
                                     rapidjson::Value::ConstMemberIterator it6 = it5->value.FindMember("entityID");
 
-                                    if (it6 != it5->value.MemberEnd())
-                                    {
+                                    if (it6 != it5->value.MemberEnd()) {
                                         //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " m_eidParent entityID is " << it6->value.GetUint64() << std::endl;
 
                                         temp_map_node.entityID = it6->value.GetUint64();
@@ -3432,8 +3234,7 @@ void map::get_map_node(temp& temp_temp)
 
                                     it6 = it5->value.FindMember("externalSceneIndex");
 
-                                    if (it6 != it5->value.MemberEnd())
-                                    {
+                                    if (it6 != it5->value.MemberEnd()) {
                                         //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " m_eidParent externalSceneIndex is " << it6->value.GetInt() << std::endl;
 
                                         temp_map_node.externalSceneIndex = it6->value.GetInt();
@@ -3441,64 +3242,59 @@ void map::get_map_node(temp& temp_temp)
 
                                     it6 = it5->value.FindMember("entityIndex");
 
-                                    if (it6 != it5->value.MemberEnd())
-                                    {
+                                    if (it6 != it5->value.MemberEnd()) {
                                         //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " m_eidParent entityIndex is " << it6->value.GetInt() << std::endl;
 
                                         temp_map_node.entityIndex = it6->value.GetInt();
                                     }
 
-                                    if (temp_map_node.entityID == 18446744073709551615 && temp_map_node.externalSceneIndex == -1)
-                                    {
+                                    if (temp_map_node.entityID == 18446744073709551615 &&
+                                        temp_map_node.externalSceneIndex == -1) {
                                         //std::cout << "m_eidParent reference is local!" << std::endl;
 
                                         temp_map_node.has_m_eidParent_local = true;
-                                    }
-                                    else if (temp_map_node.entityIndex == -2 && temp_map_node.externalSceneIndex >= 0)
-                                    {
+                                    } else if (temp_map_node.entityIndex == -2 &&
+                                               temp_map_node.externalSceneIndex >= 0) {
                                         //std::cout << "m_eidParent reference is external!" << std::endl;
 
                                         temp_map_node.has_m_eidParent_external = true;
 
-                                        uint32_t temp_hash_reference_count = rpkgs.at(temp_temp.temp_rpkg_index).hash.at(temp_temp.temp_hash_index).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+                                        uint32_t temp_hash_reference_count =
+                                                rpkgs.at(temp_temp.temp_rpkg_index).hash.at(
+                                                        temp_temp.temp_hash_index).hash_reference_data.hash_reference_count &
+                                                0x3FFFFFFF;
 
-                                        if (temp_map_node.externalSceneIndex < temp_temp.temp_externalSceneTypeIndicesInResourceHeader.size())
-                                        {
-                                            int32_t externalScene = temp_temp.temp_externalSceneTypeIndicesInResourceHeader.at(temp_map_node.externalSceneIndex);
+                                        if (temp_map_node.externalSceneIndex <
+                                            temp_temp.temp_externalSceneTypeIndicesInResourceHeader.size()) {
+                                            int32_t externalScene = temp_temp.temp_externalSceneTypeIndicesInResourceHeader.at(
+                                                    temp_map_node.externalSceneIndex);
 
-                                            if (externalScene < temp_hash_reference_count)
-                                            {
-                                                temp_map_node.externalSceneIndex_hash = rpkgs.at(temp_temp.temp_rpkg_index).hash.at(temp_temp.temp_hash_index).hash_reference_data.hash_reference.at(externalScene);
+                                            if (externalScene < temp_hash_reference_count) {
+                                                temp_map_node.externalSceneIndex_hash = rpkgs.at(
+                                                        temp_temp.temp_rpkg_index).hash.at(
+                                                        temp_temp.temp_hash_index).hash_reference_data.hash_reference.at(
+                                                        externalScene);
                                             }
                                         }
-                                    }
-                                    else
-                                    {
+                                    } else {
                                         //std::cout << "m_eidParent reference is unknown!" << std::endl;
                                     }
                                 }
                             }
-                        }
-                        else if (std::strcmp(it3->value.GetString(), "m_bVisible") == 0)
-                        {
+                        } else if (std::strcmp(it3->value.GetString(), "m_bVisible") == 0) {
                             //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " has a m_mTransform in propertyValues" << std::endl;
 
                             temp_map_node.has_m_bVisible = true;
 
                             rapidjson::Value::ConstMemberIterator it4 = it2->value[p].FindMember("value");
 
-                            if (it4 != it2->value[p].MemberEnd())
-                            {
+                            if (it4 != it2->value[p].MemberEnd()) {
                                 rapidjson::Value::ConstMemberIterator it5 = it4->value.FindMember("$val");
 
-                                if (it5 != it4->value.MemberEnd())
-                                {
-                                    if (it5->value.GetBool())
-                                    {
+                                if (it5 != it4->value.MemberEnd()) {
+                                    if (it5->value.GetBool()) {
                                         temp_map_node.m_bVisible = true;
-                                    }
-                                    else
-                                    {
+                                    } else {
                                         temp_map_node.m_bVisible = false;
                                     }
                                 }
@@ -3511,45 +3307,35 @@ void map::get_map_node(temp& temp_temp)
 
         it2 = temp_json_subEntities[s].FindMember("postInitPropertyValues");
 
-        if (it2 != temp_json_subEntities[s].MemberEnd())
-        {
-            for (uint64_t p = 0; p < it2->value.Size(); p++)
-            {
+        if (it2 != temp_json_subEntities[s].MemberEnd()) {
+            for (uint64_t p = 0; p < it2->value.Size(); p++) {
                 rapidjson::Value::ConstMemberIterator it3 = it2->value[p].FindMember("nPropertyID");
 
-                if (it3 != it2->value[p].MemberEnd())
-                {
-                    if (it3->value.IsString())
-                    {
-                        if (std::strcmp(it3->value.GetString(), "m_ResourceID") == 0)
-                        {
+                if (it3 != it2->value[p].MemberEnd()) {
+                    if (it3->value.IsString()) {
+                        if (std::strcmp(it3->value.GetString(), "m_ResourceID") == 0) {
                             //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " has a m_ResourceID in propertyValues" << std::endl;
 
                             rapidjson::Value::ConstMemberIterator it4 = it2->value[p].FindMember("value");
 
-                            if (it4 != it2->value[p].MemberEnd())
-                            {
+                            if (it4 != it2->value[p].MemberEnd()) {
                                 rapidjson::Value::ConstMemberIterator it5 = it4->value.FindMember("$type");
 
-                                if (it5 != it4->value.MemberEnd())
-                                {
-                                    if (it5->value.IsString())
-                                    {
-                                        if (std::strcmp(it5->value.GetString(), "ZRuntimeResourceID") == 0)
-                                        {
+                                if (it5 != it4->value.MemberEnd()) {
+                                    if (it5->value.IsString()) {
+                                        if (std::strcmp(it5->value.GetString(), "ZRuntimeResourceID") == 0) {
                                             //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " m_ResourceID ZRuntimeResourceID" << std::endl;
 
                                             rapidjson::Value::ConstMemberIterator it6 = it4->value.FindMember("$val");
 
-                                            if (it6 != it4->value.MemberEnd())
-                                            {
+                                            if (it6 != it4->value.MemberEnd()) {
                                                 uint32_t resource_id_low = 999999;
                                                 uint32_t resource_id_high = 999999;
 
-                                                rapidjson::Value::ConstMemberIterator it7 = it6->value.FindMember("m_IDHigh");
+                                                rapidjson::Value::ConstMemberIterator it7 = it6->value.FindMember(
+                                                        "m_IDHigh");
 
-                                                if (it7 != it6->value.MemberEnd())
-                                                {
+                                                if (it7 != it6->value.MemberEnd()) {
                                                     //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " ZRuntimeResourceID m_IDHigh is " << it7->value.GetUint() << std::endl;
 
                                                     resource_id_high = it7->value.GetUint();
@@ -3557,8 +3343,7 @@ void map::get_map_node(temp& temp_temp)
 
                                                 it7 = it6->value.FindMember("m_IDLow");
 
-                                                if (it7 != it6->value.MemberEnd())
-                                                {
+                                                if (it7 != it6->value.MemberEnd()) {
                                                     //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " ZRuntimeResourceID m_IDLow is " << it7->value.GetUint() << std::endl;
 
                                                     resource_id_low = it7->value.GetUint();
@@ -3567,13 +3352,19 @@ void map::get_map_node(temp& temp_temp)
                                                 temp_map_node.m_IDHigh = resource_id_high;
                                                 temp_map_node.m_IDLow = resource_id_low;
 
-                                                uint32_t temp_hash_reference_count = rpkgs.at(temp_temp.temp_rpkg_index).hash.at(temp_temp.temp_hash_index).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+                                                uint32_t temp_hash_reference_count =
+                                                        rpkgs.at(temp_temp.temp_rpkg_index).hash.at(
+                                                                temp_temp.temp_hash_index).hash_reference_data.hash_reference_count &
+                                                        0x3FFFFFFF;
 
-                                                if (temp_map_node.m_IDHigh == 0 && temp_map_node.m_IDLow < temp_hash_reference_count)
-                                                {
+                                                if (temp_map_node.m_IDHigh == 0 &&
+                                                    temp_map_node.m_IDLow < temp_hash_reference_count) {
                                                     //std::cout << "PRIM file: " << util::uint64_t_to_hex_string(rpkgs.at(temp_temp.temp_rpkg_index).hash.at(temp_temp.temp_hash_index).hash_reference_data.hash_reference.at(temp_map_node.m_IDLow)) << std::endl;
 
-                                                    temp_map_node.prim_hash = rpkgs.at(temp_temp.temp_rpkg_index).hash.at(temp_temp.temp_hash_index).hash_reference_data.hash_reference.at(temp_map_node.m_IDLow);
+                                                    temp_map_node.prim_hash = rpkgs.at(
+                                                            temp_temp.temp_rpkg_index).hash.at(
+                                                            temp_temp.temp_hash_index).hash_reference_data.hash_reference.at(
+                                                            temp_map_node.m_IDLow);
 
                                                     temp_map_node.has_prim_resource = true;
                                                 }
@@ -3582,21 +3373,17 @@ void map::get_map_node(temp& temp_temp)
                                     }
                                 }
                             }
-                        }
-                        else if (std::strcmp(it3->value.GetString(), "m_mTransform") == 0)
-                        {
+                        } else if (std::strcmp(it3->value.GetString(), "m_mTransform") == 0) {
                             //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " has a m_mTransform in propertyValues" << std::endl;
 
                             temp_map_node.has_m_mTransform = true;
 
                             const rapidjson::Value& value = it2->value[p]["value"];
 
-                            if (!value.IsNull())
-                            {
+                            if (!value.IsNull()) {
                                 const rapidjson::Value& val = value["$val"];
 
-                                if (!val.IsNull())
-                                {
+                                if (!val.IsNull()) {
                                     ////std::cout << val["XAxis"]["x"].GetFloat() << std::endl;
                                     ////std::cout << val["XAxis"]["y"].GetFloat() << std::endl;
                                     ////std::cout << val["XAxis"]["z"].GetFloat() << std::endl;
@@ -3624,50 +3411,41 @@ void map::get_map_node(temp& temp_temp)
                                     temp_map_node.m_mTransform.transform.z = val["Trans"]["z"].GetFloat();
                                 }
                             }
-                        }
-                        else if (std::strcmp(it3->value.GetString(), "m_PrimitiveScale") == 0)
-                        {
+                        } else if (std::strcmp(it3->value.GetString(), "m_PrimitiveScale") == 0) {
                             //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " has a m_PrimitiveScale in propertyValues" << std::endl;
 
                             rapidjson::Value::ConstMemberIterator it4 = it2->value[p].FindMember("value");
 
-                            if (it4 != it2->value[p].MemberEnd())
-                            {
+                            if (it4 != it2->value[p].MemberEnd()) {
                                 rapidjson::Value::ConstMemberIterator it5 = it4->value.FindMember("$type");
 
-                                if (it5 != it4->value.MemberEnd())
-                                {
-                                    if (it5->value.IsString())
-                                    {
-                                        if (std::strcmp(it5->value.GetString(), "SVector3") == 0)
-                                        {
+                                if (it5 != it4->value.MemberEnd()) {
+                                    if (it5->value.IsString()) {
+                                        if (std::strcmp(it5->value.GetString(), "SVector3") == 0) {
                                             rapidjson::Value::ConstMemberIterator it6 = it4->value.FindMember("$val");
 
-                                            if (it6 != it4->value.MemberEnd())
-                                            {
+                                            if (it6 != it4->value.MemberEnd()) {
                                                 rapidjson::Value::ConstMemberIterator it7 = it6->value.FindMember("x");
 
-                                                if (it7 != it6->value.MemberEnd())
-                                                {
+                                                if (it7 != it6->value.MemberEnd()) {
                                                     temp_map_node.m_PrimitiveScale.x = it7->value.GetFloat();
                                                 }
 
                                                 it7 = it6->value.FindMember("y");
 
-                                                if (it7 != it6->value.MemberEnd())
-                                                {
+                                                if (it7 != it6->value.MemberEnd()) {
                                                     temp_map_node.m_PrimitiveScale.y = it7->value.GetFloat();
                                                 }
 
                                                 it7 = it6->value.FindMember("z");
 
-                                                if (it7 != it6->value.MemberEnd())
-                                                {
+                                                if (it7 != it6->value.MemberEnd()) {
                                                     temp_map_node.m_PrimitiveScale.z = it7->value.GetFloat();
                                                 }
 
-                                                if (!util::floats_equal(temp_map_node.m_PrimitiveScale.x, 0.0f) && !util::floats_equal(temp_map_node.m_PrimitiveScale.y, 0.0f) && !util::floats_equal(temp_map_node.m_PrimitiveScale.z, 0.0f))
-                                                {
+                                                if (!util::floats_equal(temp_map_node.m_PrimitiveScale.x, 0.0f) &&
+                                                    !util::floats_equal(temp_map_node.m_PrimitiveScale.y, 0.0f) &&
+                                                    !util::floats_equal(temp_map_node.m_PrimitiveScale.z, 0.0f)) {
                                                     temp_map_node.has_m_PrimitiveScale = true;
                                                 }
                                             }
@@ -3675,50 +3453,41 @@ void map::get_map_node(temp& temp_temp)
                                     }
                                 }
                             }
-                        }
-                        else if (std::strcmp(it3->value.GetString(), "m_vGlobalSize") == 0)
-                        {
+                        } else if (std::strcmp(it3->value.GetString(), "m_vGlobalSize") == 0) {
                             //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " has a m_vGlobalSize in propertyValues" << std::endl;
 
                             rapidjson::Value::ConstMemberIterator it4 = it2->value[p].FindMember("value");
 
-                            if (it4 != it2->value[p].MemberEnd())
-                            {
+                            if (it4 != it2->value[p].MemberEnd()) {
                                 rapidjson::Value::ConstMemberIterator it5 = it4->value.FindMember("$type");
 
-                                if (it5 != it4->value.MemberEnd())
-                                {
-                                    if (it5->value.IsString())
-                                    {
-                                        if (std::strcmp(it5->value.GetString(), "SVector3") == 0)
-                                        {
+                                if (it5 != it4->value.MemberEnd()) {
+                                    if (it5->value.IsString()) {
+                                        if (std::strcmp(it5->value.GetString(), "SVector3") == 0) {
                                             rapidjson::Value::ConstMemberIterator it6 = it4->value.FindMember("$val");
 
-                                            if (it6 != it4->value.MemberEnd())
-                                            {
+                                            if (it6 != it4->value.MemberEnd()) {
                                                 rapidjson::Value::ConstMemberIterator it7 = it6->value.FindMember("x");
 
-                                                if (it7 != it6->value.MemberEnd())
-                                                {
+                                                if (it7 != it6->value.MemberEnd()) {
                                                     temp_map_node.m_vGlobalSize.x = it7->value.GetFloat();
                                                 }
 
                                                 it7 = it6->value.FindMember("y");
 
-                                                if (it7 != it6->value.MemberEnd())
-                                                {
+                                                if (it7 != it6->value.MemberEnd()) {
                                                     temp_map_node.m_vGlobalSize.y = it7->value.GetFloat();
                                                 }
 
                                                 it7 = it6->value.FindMember("z");
 
-                                                if (it7 != it6->value.MemberEnd())
-                                                {
+                                                if (it7 != it6->value.MemberEnd()) {
                                                     temp_map_node.m_vGlobalSize.z = it7->value.GetFloat();
                                                 }
 
-                                                if (!util::floats_equal(temp_map_node.m_vGlobalSize.x, 0.0f) && !util::floats_equal(temp_map_node.m_vGlobalSize.y, 0.0f) && !util::floats_equal(temp_map_node.m_vGlobalSize.z, 0.0f))
-                                                {
+                                                if (!util::floats_equal(temp_map_node.m_vGlobalSize.x, 0.0f) &&
+                                                    !util::floats_equal(temp_map_node.m_vGlobalSize.y, 0.0f) &&
+                                                    !util::floats_equal(temp_map_node.m_vGlobalSize.z, 0.0f)) {
                                                     temp_map_node.has_m_vGlobalSize = true;
                                                 }
                                             }
@@ -3726,25 +3495,20 @@ void map::get_map_node(temp& temp_temp)
                                     }
                                 }
                             }
-                        }
-                        else if (std::strcmp(it3->value.GetString(), "m_eidParent") == 0)
-                        {
+                        } else if (std::strcmp(it3->value.GetString(), "m_eidParent") == 0) {
                             temp_map_node.has_m_eidParent = true;
 
                             //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " has a m_eidParent in propertyValues" << std::endl;
 
                             rapidjson::Value::ConstMemberIterator it4 = it2->value[p].FindMember("value");
 
-                            if (it4 != it2->value[p].MemberEnd())
-                            {
+                            if (it4 != it2->value[p].MemberEnd()) {
                                 rapidjson::Value::ConstMemberIterator it5 = it4->value.FindMember("$val");
 
-                                if (it5 != it4->value.MemberEnd())
-                                {
+                                if (it5 != it4->value.MemberEnd()) {
                                     rapidjson::Value::ConstMemberIterator it6 = it5->value.FindMember("entityID");
 
-                                    if (it6 != it5->value.MemberEnd())
-                                    {
+                                    if (it6 != it5->value.MemberEnd()) {
                                         //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " m_eidParent entityID is " << it6->value.GetUint64() << std::endl;
 
                                         temp_map_node.entityID = it6->value.GetUint64();
@@ -3752,8 +3516,7 @@ void map::get_map_node(temp& temp_temp)
 
                                     it6 = it5->value.FindMember("externalSceneIndex");
 
-                                    if (it6 != it5->value.MemberEnd())
-                                    {
+                                    if (it6 != it5->value.MemberEnd()) {
                                         //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " m_eidParent externalSceneIndex is " << it6->value.GetInt() << std::endl;
 
                                         temp_map_node.externalSceneIndex = it6->value.GetInt();
@@ -3761,64 +3524,59 @@ void map::get_map_node(temp& temp_temp)
 
                                     it6 = it5->value.FindMember("entityIndex");
 
-                                    if (it6 != it5->value.MemberEnd())
-                                    {
+                                    if (it6 != it5->value.MemberEnd()) {
                                         //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " m_eidParent entityIndex is " << it6->value.GetInt() << std::endl;
 
                                         temp_map_node.entityIndex = it6->value.GetInt();
                                     }
 
-                                    if (temp_map_node.entityID == 18446744073709551615 && temp_map_node.externalSceneIndex == -1)
-                                    {
+                                    if (temp_map_node.entityID == 18446744073709551615 &&
+                                        temp_map_node.externalSceneIndex == -1) {
                                         //std::cout << "m_eidParent reference is local!" << std::endl;
 
                                         temp_map_node.has_m_eidParent_local = true;
-                                    }
-                                    else if (temp_map_node.entityIndex == -2 && temp_map_node.externalSceneIndex >= 0)
-                                    {
+                                    } else if (temp_map_node.entityIndex == -2 &&
+                                               temp_map_node.externalSceneIndex >= 0) {
                                         //std::cout << "m_eidParent reference is external!" << std::endl;
 
                                         temp_map_node.has_m_eidParent_external = true;
 
-                                        uint32_t temp_hash_reference_count = rpkgs.at(temp_temp.temp_rpkg_index).hash.at(temp_temp.temp_hash_index).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+                                        uint32_t temp_hash_reference_count =
+                                                rpkgs.at(temp_temp.temp_rpkg_index).hash.at(
+                                                        temp_temp.temp_hash_index).hash_reference_data.hash_reference_count &
+                                                0x3FFFFFFF;
 
-                                        if (temp_map_node.externalSceneIndex < temp_temp.temp_externalSceneTypeIndicesInResourceHeader.size())
-                                        {
-                                            int32_t externalScene = temp_temp.temp_externalSceneTypeIndicesInResourceHeader.at(temp_map_node.externalSceneIndex);
+                                        if (temp_map_node.externalSceneIndex <
+                                            temp_temp.temp_externalSceneTypeIndicesInResourceHeader.size()) {
+                                            int32_t externalScene = temp_temp.temp_externalSceneTypeIndicesInResourceHeader.at(
+                                                    temp_map_node.externalSceneIndex);
 
-                                            if (externalScene < temp_hash_reference_count)
-                                            {
-                                                temp_map_node.externalSceneIndex_hash = rpkgs.at(temp_temp.temp_rpkg_index).hash.at(temp_temp.temp_hash_index).hash_reference_data.hash_reference.at(externalScene);
+                                            if (externalScene < temp_hash_reference_count) {
+                                                temp_map_node.externalSceneIndex_hash = rpkgs.at(
+                                                        temp_temp.temp_rpkg_index).hash.at(
+                                                        temp_temp.temp_hash_index).hash_reference_data.hash_reference.at(
+                                                        externalScene);
                                             }
                                         }
-                                    }
-                                    else
-                                    {
+                                    } else {
                                         //std::cout << "m_eidParent reference is unknown!" << std::endl;
                                     }
                                 }
                             }
-                        }
-                        else if (std::strcmp(it3->value.GetString(), "m_bVisible") == 0)
-                        {
+                        } else if (std::strcmp(it3->value.GetString(), "m_bVisible") == 0) {
                             //std::cout << temp_temp.temp_file_name << ": " << temp_temp.tblu_entityName.at(s) << " has a m_mTransform in propertyValues" << std::endl;
 
                             temp_map_node.has_m_bVisible = true;
 
                             rapidjson::Value::ConstMemberIterator it4 = it2->value[p].FindMember("value");
 
-                            if (it4 != it2->value[p].MemberEnd())
-                            {
+                            if (it4 != it2->value[p].MemberEnd()) {
                                 rapidjson::Value::ConstMemberIterator it5 = it4->value.FindMember("$val");
 
-                                if (it5 != it4->value.MemberEnd())
-                                {
-                                    if (it5->value.GetBool())
-                                    {
+                                if (it5 != it4->value.MemberEnd()) {
+                                    if (it5->value.GetBool()) {
                                         temp_map_node.m_bVisible = true;
-                                    }
-                                    else
-                                    {
+                                    } else {
                                         temp_map_node.m_bVisible = false;
                                     }
                                 }
@@ -3829,39 +3587,35 @@ void map::get_map_node(temp& temp_temp)
             }
         }
 
-        if (temp_map_node.has_m_eidParent_local)
-        {
-            add_to_m_eidParent_local_temp_hash_entityIndex_map(map_nodes.size(), temp_map_node.temp_hash, temp_map_node.entityIndex);
+        if (temp_map_node.has_m_eidParent_local) {
+            add_to_m_eidParent_local_temp_hash_entityIndex_map(map_nodes.size(), temp_map_node.temp_hash,
+                                                               temp_map_node.entityIndex);
         }
 
-        if (temp_map_node.has_m_eidParent_external)
-        {
-            add_to_m_eidParent_external_externalSceneIndex_hash_entityID_map(map_nodes.size(), temp_map_node.externalSceneIndex_hash, temp_map_node.entityID);
+        if (temp_map_node.has_m_eidParent_external) {
+            add_to_m_eidParent_external_externalSceneIndex_hash_entityID_map(map_nodes.size(),
+                                                                             temp_map_node.externalSceneIndex_hash,
+                                                                             temp_map_node.entityID);
         }
 
         map_nodes.push_back(temp_map_node);
     }
 }
 
-void map::get_root_scenes()
-{
-    for (auto & map_temp : map_temps)
-    {
+void map::get_root_scenes() {
+    for (auto& map_temp : map_temps) {
         //std::cout << "TEMP file: " << map_temps.at(t).temp_file_name << std::endl;
 
-        for (uint64_t s = 0; s < map_temp.temp_externalSceneTypeIndicesInResourceHeader.size(); s++)
-        {
+        for (uint64_t s = 0; s < map_temp.temp_externalSceneTypeIndicesInResourceHeader.size(); s++) {
             //std::cout << "External scene TEMP file index: " << map_temps.at(t).temp_externalSceneTypeIndicesInResourceHeader.at(s) << std::endl;
         }
 
-        for (uint64_t s = 0; s < map_temp.temp_externalSceneHashes.size(); s++)
-        {
+        for (uint64_t s = 0; s < map_temp.temp_externalSceneHashes.size(); s++) {
             //std::cout << "External scene TEMP file: " << util::uint64_t_to_hex_string(map_temps.at(t).temp_externalSceneHashes.at(s)) << std::endl;
 
             auto it = root_scenes.find(map_temp.temp_externalSceneHashes.at(s));
 
-            if (it == root_scenes.end())
-            {
+            if (it == root_scenes.end()) {
                 root_scenes[map_temp.temp_externalSceneHashes.at(s)] = root_scenes.size();
 
                 get_root_scenes();
@@ -3870,12 +3624,10 @@ void map::get_root_scenes()
     }
 }
 
-void map::map_recursive_temp_loader(uint32_t rpkg_index, uint64_t hash_value)
-{
+void map::map_recursive_temp_loader(uint32_t rpkg_index, uint64_t hash_value) {
     auto it = map_temps_map.find(hash_value);
 
-    if (it != map_temps_map.end())
-    {
+    if (it != map_temps_map.end()) {
         //std::cout << hash_value << " was already found/added." << std::endl;
 
         return;
@@ -3885,62 +3637,56 @@ void map::map_recursive_temp_loader(uint32_t rpkg_index, uint64_t hash_value)
 
     it = rpkgs.at(rpkg_index).hash_map.find(hash_value);
 
-    if (it != rpkgs.at(rpkg_index).hash_map.end())
-    {
+    if (it != rpkgs.at(rpkg_index).hash_map.end()) {
         map_temps.emplace_back(temp(rpkg_index, it->second, 3));
 
         uint32_t temp_index = map_temps.size() - 1;
 
         //map_temps.at(temp_index).load_data();
 
-        if (map_temps.at(temp_index).tblu_return_value == TEMP_TBLU_FOUND)
-        {
+        if (map_temps.at(temp_index).tblu_return_value == TEMP_TBLU_FOUND) {
             //std::cout << std::endl << "Processing TEMP file: " << map_temps.at(temp_index).temp_file_name << std::endl;
 
             std::vector<uint32_t> prims_index_in_hash_depends;
             std::vector<std::string> prims_index_in_hash_depends_file_name;
 
-            uint32_t temp_hash_reference_count = rpkgs.at(rpkg_index).hash.at(it->second).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+            uint32_t temp_hash_reference_count =
+                    rpkgs.at(rpkg_index).hash.at(it->second).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
-            for (uint64_t p = 0; p < temp_hash_reference_count; p++)
-            {
-                uint64_t hash_reference_value = rpkgs.at(rpkg_index).hash.at(it->second).hash_reference_data.hash_reference.at(p);
+            for (uint64_t p = 0; p < temp_hash_reference_count; p++) {
+                uint64_t hash_reference_value = rpkgs.at(rpkg_index).hash.at(
+                        it->second).hash_reference_data.hash_reference.at(p);
 
                 uint32_t rpkg_index2 = rpkg_function::get_latest_hash(hash_reference_value);
 
-                if (rpkg_index2 != UINT32_MAX)
-                {
+                if (rpkg_index2 != UINT32_MAX) {
                     auto it2 = rpkgs.at(rpkg_index2).hash_map.find(hash_reference_value);
 
-                    if (it2 != rpkgs.at(rpkg_index2).hash_map.end())
-                    {
-                        if (rpkgs.at(rpkg_index2).hash.at(it2->second).hash_resource_type == "TEMP")
-                        {
-                            map_recursive_temp_loader(rpkg_index2, rpkgs.at(rpkg_index2).hash.at(it2->second).hash_value);
-                        }
-                        else if (rpkgs.at(rpkg_index2).hash.at(it2->second).hash_resource_type == "ASET")
-                        {
+                    if (it2 != rpkgs.at(rpkg_index2).hash_map.end()) {
+                        if (rpkgs.at(rpkg_index2).hash.at(it2->second).hash_resource_type == "TEMP") {
+                            map_recursive_temp_loader(rpkg_index2,
+                                                      rpkgs.at(rpkg_index2).hash.at(it2->second).hash_value);
+                        } else if (rpkgs.at(rpkg_index2).hash.at(it2->second).hash_resource_type == "ASET") {
                             //std::cout << map_temps.at(temp_index).temp_file_name << " has ASET reference file: " << rpkgs.at(rpkg_index2).hash.at(it2->second).hash_file_name << std::endl;
 
-                            uint32_t temp_hash_reference_count2 = rpkgs.at(rpkg_index2).hash.at(it2->second).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+                            uint32_t temp_hash_reference_count2 = rpkgs.at(rpkg_index2).hash.at(
+                                    it2->second).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
-                            for (uint64_t a = 0; a < temp_hash_reference_count2; a++)
-                            {
-                                uint64_t hash_reference_value2 = rpkgs.at(rpkg_index2).hash.at(it2->second).hash_reference_data.hash_reference.at(a);
+                            for (uint64_t a = 0; a < temp_hash_reference_count2; a++) {
+                                uint64_t hash_reference_value2 = rpkgs.at(rpkg_index2).hash.at(
+                                        it2->second).hash_reference_data.hash_reference.at(a);
 
                                 uint32_t rpkg_index3 = rpkg_function::get_latest_hash(hash_reference_value2);
 
-                                if (rpkg_index3 != UINT32_MAX)
-                                {
+                                if (rpkg_index3 != UINT32_MAX) {
                                     auto it3 = rpkgs.at(rpkg_index3).hash_map.find(hash_reference_value2);
 
-                                    if (it3 != rpkgs.at(rpkg_index3).hash_map.end())
-                                    {
-                                        if (rpkgs.at(rpkg_index3).hash.at(it3->second).hash_resource_type == "TEMP")
-                                        {
+                                    if (it3 != rpkgs.at(rpkg_index3).hash_map.end()) {
+                                        if (rpkgs.at(rpkg_index3).hash.at(it3->second).hash_resource_type == "TEMP") {
                                             //std::cout << rpkgs.at(rpkg_index2).hash.at(it2->second).hash_file_name << " has TEMP reference file: " << rpkgs.at(rpkg_index3).hash.at(it3->second).hash_file_name << std::endl;
 
-                                            map_recursive_temp_loader(rpkg_index3, rpkgs.at(rpkg_index3).hash.at(it3->second).hash_value);
+                                            map_recursive_temp_loader(rpkg_index3, rpkgs.at(rpkg_index3).hash.at(
+                                                    it3->second).hash_value);
                                         }
                                     }
                                 }
@@ -3953,65 +3699,52 @@ void map::map_recursive_temp_loader(uint32_t rpkg_index, uint64_t hash_value)
     }
 }
 
-bool map::matrixes_equal(matrix43& matrix1, matrix43& matrix2)
-{
-    if (!util::floats_equal(matrix1.x_axis.x, matrix2.x_axis.x))
-    {
+bool map::matrixes_equal(matrix43& matrix1, matrix43& matrix2) {
+    if (!util::floats_equal(matrix1.x_axis.x, matrix2.x_axis.x)) {
         std::cout << matrix1.x_axis.x << ", " << matrix2.x_axis.x << std::endl;
         return false;
     }
-    if (!util::floats_equal(matrix1.y_axis.x, matrix2.y_axis.x))
-    {
+    if (!util::floats_equal(matrix1.y_axis.x, matrix2.y_axis.x)) {
         std::cout << matrix1.y_axis.x << ", " << matrix2.y_axis.x << std::endl;
         return false;
     }
-    if (!util::floats_equal(matrix1.z_axis.x, matrix2.z_axis.x))
-    {
+    if (!util::floats_equal(matrix1.z_axis.x, matrix2.z_axis.x)) {
         std::cout << matrix1.z_axis.x << ", " << matrix2.z_axis.x << std::endl;
         return false;
     }
-    if (!util::floats_equal(matrix1.x_axis.y, matrix2.x_axis.y))
-    {
+    if (!util::floats_equal(matrix1.x_axis.y, matrix2.x_axis.y)) {
         std::cout << matrix1.x_axis.y << ", " << matrix2.x_axis.y << std::endl;
         return false;
     }
-    if (!util::floats_equal(matrix1.y_axis.y, matrix2.y_axis.y))
-    {
+    if (!util::floats_equal(matrix1.y_axis.y, matrix2.y_axis.y)) {
         std::cout << matrix1.y_axis.y << ", " << matrix2.y_axis.y << std::endl;
         return false;
     }
-    if (!util::floats_equal(matrix1.z_axis.y, matrix2.z_axis.y))
-    {
+    if (!util::floats_equal(matrix1.z_axis.y, matrix2.z_axis.y)) {
         std::cout << matrix1.z_axis.y << ", " << matrix2.z_axis.y << std::endl;
         return false;
     }
-    if (!util::floats_equal(matrix1.x_axis.z, matrix2.x_axis.z))
-    {
+    if (!util::floats_equal(matrix1.x_axis.z, matrix2.x_axis.z)) {
         std::cout << matrix1.x_axis.z << ", " << matrix2.x_axis.z << std::endl;
         return false;
     }
-    if (!util::floats_equal(matrix1.y_axis.z, matrix2.y_axis.z))
-    {
+    if (!util::floats_equal(matrix1.y_axis.z, matrix2.y_axis.z)) {
         std::cout << matrix1.y_axis.z << ", " << matrix2.y_axis.z << std::endl;
         return false;
     }
-    if (!util::floats_equal(matrix1.z_axis.z, matrix2.z_axis.z))
-    {
+    if (!util::floats_equal(matrix1.z_axis.z, matrix2.z_axis.z)) {
         std::cout << matrix1.z_axis.z << ", " << matrix2.z_axis.z << std::endl;
         return false;
     }
-    if (!util::floats_equal(matrix1.transform.x, matrix2.transform.x))
-    {
+    if (!util::floats_equal(matrix1.transform.x, matrix2.transform.x)) {
         std::cout << matrix1.transform.x << ", " << matrix2.transform.x << std::endl;
         return false;
     }
-    if (!util::floats_equal(matrix1.transform.y, matrix2.transform.y))
-    {
+    if (!util::floats_equal(matrix1.transform.y, matrix2.transform.y)) {
         std::cout << matrix1.transform.y << ", " << matrix2.transform.y << std::endl;
         return false;
     }
-    if (!util::floats_equal(matrix1.transform.z, matrix2.transform.z))
-    {
+    if (!util::floats_equal(matrix1.transform.z, matrix2.transform.z)) {
         std::cout << matrix1.transform.z << ", " << matrix2.transform.z << std::endl;
         return false;
     }

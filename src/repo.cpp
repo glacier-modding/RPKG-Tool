@@ -11,24 +11,19 @@
 
 repo::repo() = default;
 
-repo::repo(uint64_t rpkgs_index, uint64_t hash_index)
-{
+repo::repo(uint64_t rpkgs_index, uint64_t hash_index) {
     repo_rpkg_index = rpkgs_index;
     repo_hash_index = hash_index;
 
     uint64_t repo_hash_size;
 
-    if (rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).data.lz4ed)
-    {
+    if (rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).data.lz4ed) {
         repo_hash_size = rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).data.header.data_size;
 
-        if (rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).data.xored)
-        {
+        if (rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).data.xored) {
             repo_hash_size &= 0x3FFFFFFF;
         }
-    }
-    else
-    {
+    } else {
         repo_hash_size = rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).data.resource.size_final;
     }
 
@@ -38,8 +33,7 @@ repo::repo(uint64_t rpkgs_index, uint64_t hash_index)
 
     std::ifstream file = std::ifstream(rpkgs.at(repo_rpkg_index).rpkg_file_path, std::ifstream::binary);
 
-    if (!file.good())
-    {
+    if (!file.good()) {
         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(repo_rpkg_index).rpkg_file_path + " could not be read.");
     }
 
@@ -47,23 +41,20 @@ repo::repo(uint64_t rpkgs_index, uint64_t hash_index)
     file.read(repo_input_data.data(), repo_hash_size);
     file.close();
 
-    if (rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).data.xored)
-    {
-        crypto::xor_data(repo_input_data.data(), (uint32_t)repo_hash_size);
+    if (rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).data.xored) {
+        crypto::xor_data(repo_input_data.data(), (uint32_t) repo_hash_size);
     }
 
     uint32_t repo_decompressed_size = rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).data.resource.size_final;
 
     std::vector<char> repo_output_data = std::vector<char>(repo_decompressed_size, 0);
 
-    if (rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).data.lz4ed)
-    {
-        LZ4_decompress_safe(repo_input_data.data(), repo_output_data.data(), (int)repo_hash_size, repo_decompressed_size);
+    if (rpkgs.at(repo_rpkg_index).hash.at(repo_hash_index).data.lz4ed) {
+        LZ4_decompress_safe(repo_input_data.data(), repo_output_data.data(), (int) repo_hash_size,
+                            repo_decompressed_size);
 
         repo_data = repo_output_data;
-    }
-    else
-    {
+    } else {
         repo_data = repo_input_data;
     }
 
@@ -72,27 +63,24 @@ repo::repo(uint64_t rpkgs_index, uint64_t hash_index)
 
     repo_response_data = "";
 
-    try
-    {
+    try {
         nlohmann::json repo_json = nlohmann::json::parse(repo_data);
 
         repo_original = nlohmann::json::object();
         repo_modified = nlohmann::json::object();
 
-        for (auto& repo_entry : repo_json)
-        {
+        for (auto& repo_entry : repo_json) {
             repo_original[std::string(repo_entry["ID_"])] = repo_entry;
             repo_modified[std::string(repo_entry["ID_"])] = repo_entry;
         }
     }
-    catch (json::parse_error& e)
-    {
+    catch (json::parse_error& e) {
         std::stringstream ss;
 
         ss << "Error: Loading REPO" << "\n"
-            << "Error message: " << e.what() << '\n'
-            << "Error exception id: " << e.id << '\n'
-            << "Error byte position of error: " << e.byte;
+           << "Error message: " << e.what() << '\n'
+           << "Error exception id: " << e.id << '\n'
+           << "Error byte position of error: " << e.byte;
 
         repo_response_data = ss.str();
     }
@@ -103,8 +91,7 @@ repo::repo(uint64_t rpkgs_index, uint64_t hash_index)
     std::vector<char>().swap(repo_data);
 }
 
-repo::repo(const std::string& repo_path)
-{
+repo::repo(const std::string& repo_path) {
     std::ifstream repo_file(repo_path, std::ifstream::binary);
 
     repo_file.seekg(0, std::ifstream::end);
@@ -119,27 +106,24 @@ repo::repo(const std::string& repo_path)
 
     repo_response_data = "";
 
-    try
-    {
+    try {
         nlohmann::json repo_json = nlohmann::json::parse(repo_data);
 
         repo_original = nlohmann::json::object();
         repo_modified = nlohmann::json::object();
 
-        for (auto& repo_entry : repo_json)
-        {
+        for (auto& repo_entry : repo_json) {
             repo_original[std::string(repo_entry["ID_"])] = repo_entry;
             repo_modified[std::string(repo_entry["ID_"])] = repo_entry;
         }
     }
-    catch (json::parse_error& e)
-    {
+    catch (json::parse_error& e) {
         std::stringstream ss;
 
         ss << "Error: Loading REPO JSON" << "\n"
-            << "Error message: " << e.what() << '\n'
-            << "Error exception id: " << e.id << '\n'
-            << "Error byte position of error: " << e.byte;
+           << "Error message: " << e.what() << '\n'
+           << "Error exception id: " << e.id << '\n'
+           << "Error byte position of error: " << e.byte;
 
         repo_response_data = ss.str();
     }
@@ -150,8 +134,7 @@ repo::repo(const std::string& repo_path)
     std::vector<char>().swap(repo_data);
 }
 
-[[maybe_unused]] std::string repo::pretty_json(const std::string& input_json)
-{
+[[maybe_unused]] std::string repo::pretty_json(const std::string& input_json) {
     yyjson_doc* doc = yyjson_read(input_json.c_str(), input_json.length(), 0);
 
     char* json = yyjson_write(doc, YYJSON_WRITE_PRETTY, nullptr);
@@ -163,12 +146,10 @@ repo::repo(const std::string& repo_path)
     return output_json;
 }
 
-int repo::valid_json(const std::string& input_json)
-{
+int repo::valid_json(const std::string& input_json) {
     yyjson_doc* doc = yyjson_read(input_json.c_str(), input_json.length(), 0);
-    
-    if (doc)
-    {
+
+    if (doc) {
         yyjson_doc_free(doc);
         return 1;
     }
@@ -177,46 +158,37 @@ int repo::valid_json(const std::string& input_json)
     return 0;
 }
 
-void repo::check_json(std::string input_json)
-{
+void repo::check_json(std::string input_json) {
     yyjson_read_err error;
 
     yyjson_read_flag flag = YYJSON_READ_ALLOW_INVALID_UNICODE;
 
-    yyjson_doc* doc = yyjson_read_opts((char*)input_json.c_str(), input_json.length(), flag, nullptr, &error);
+    yyjson_doc* doc = yyjson_read_opts((char*) input_json.c_str(), input_json.length(), flag, nullptr, &error);
 
-    if (doc)
-    {
+    if (doc) {
         yyjson_doc_free(doc);
         check_json_response = "";
-    }
-    else
-    {
+    } else {
         yyjson_doc_free(doc);
 
         int32_t line = 1;
 
         bool first_char_found = false;
 
-        for (int32_t i = error.pos; i >= 0; i--)
-        {
-            if (input_json[i] != ' ')
-            {
-                if (!first_char_found)
-                {
-                    if (input_json[i] != ',')
-                    {
+        for (int32_t i = error.pos; i >= 0; i--) {
+            if (input_json[i] != ' ') {
+                if (!first_char_found) {
+                    if (input_json[i] != ',') {
                         line--;
                     }
                 }
 
-                if (input_json[i] == '\n')
-                {
+                if (input_json[i] == '\n') {
                     line++;
                 }
 
                 first_char_found = true;
-            }            
+            }
         }
 
         check_json_response = error.msg;
@@ -225,13 +197,11 @@ void repo::check_json(std::string input_json)
     }
 }
 
-uint32_t repo::search(const std::string& search_string, uint32_t results_count, uint32_t max_results)
-{
+uint32_t repo::search(const std::string& search_string, uint32_t results_count, uint32_t max_results) {
     return results_count;
 }
 
-void repo::load_repo()
-{
+void repo::load_repo() {
     /*std::ofstream output("r:\\ROFL\\output.txt", std::ofstream::binary);
 
     std::string out = "";
@@ -267,13 +237,11 @@ void repo::load_repo()
     output.close();*/
 }
 
-void repo::get_child_entries(const std::string& id)
-{
-    
+void repo::get_child_entries(const std::string& id) {
+
 }
 
-void repo::get_category(int category)
-{
+void repo::get_category(int category) {
     repo_response_data = "";
 
     if (category == NPCS)
@@ -328,16 +296,12 @@ void repo::get_category(int category)
         get_ammo_configs();
 }
 
-void repo::get_npcs()
-{
+void repo::get_npcs() {
     repo_response_data = "";
 
-    for (auto& repo_entry : repo_modified)
-    {
-        if (repo_entry.contains("Outfit"))
-        {
-            if (repo_entry.contains("Name"))
-            {
+    for (auto& repo_entry : repo_modified) {
+        if (repo_entry.contains("Outfit")) {
+            if (repo_entry.contains("Name")) {
                 repo_response_data += repo_entry["Name"];
                 repo_response_data += "|||| ||||";
                 repo_response_data += repo_entry["ID_"];
@@ -347,16 +311,12 @@ void repo::get_npcs()
     }
 }
 
-void repo::get_outfits()
-{
+void repo::get_outfits() {
     repo_response_data = "";
 
-    for (auto& repo_entry : repo_modified)
-    {
-        if (repo_entry.contains("IsHitmanSuit"))
-        {
-            if (repo_entry.contains("CommonName"))
-            {
+    for (auto& repo_entry : repo_modified) {
+        if (repo_entry.contains("IsHitmanSuit")) {
+            if (repo_entry.contains("CommonName")) {
                 repo_response_data += repo_entry["CommonName"];
                 repo_response_data += "|||| ||||";
                 repo_response_data += repo_entry["ID_"];
@@ -366,8 +326,7 @@ void repo::get_outfits()
     }
 }
 
-void repo::get_runtimes(int category)
-{
+void repo::get_runtimes(int category) {
     repo_response_data = "";
 
     std::unordered_map<std::string, yyjson_mut_val*> repo_runtimes;
@@ -407,19 +366,16 @@ void repo::get_runtimes(int category)
     else if (category == RUNTIME_CONTAINERS)
         inventoryCategoryIcon = "container";
 
-    for (auto& repo_entry : repo_modified)
-    {
-        if (repo_entry.contains("Runtime"))
-        {
-            if (repo_entry.contains("CommonName") && repo_entry.contains("InventoryCategoryIcon"))
-            {
+    for (auto& repo_entry : repo_modified) {
+        if (repo_entry.contains("Runtime")) {
+            if (repo_entry.contains("CommonName") && repo_entry.contains("InventoryCategoryIcon")) {
                 std::string categoryIconName = util::to_lower_case(repo_entry["InventoryCategoryIcon"]);
 
-                if (categoryIconName == inventoryCategoryIcon)
-                {
+                if (categoryIconName == inventoryCategoryIcon) {
                     repo_response_data += repo_entry["CommonName"];
                     repo_response_data += "||||";
-                    repo_response_data += util::uint64_t_to_hex_string(std::strtoull(std::string(repo_entry["Runtime"]).c_str(), nullptr, 10));
+                    repo_response_data += util::uint64_t_to_hex_string(
+                            std::strtoull(std::string(repo_entry["Runtime"]).c_str(), nullptr, 10));
                     repo_response_data += "||||";
                     repo_response_data += repo_entry["ID_"];
                     repo_response_data += "||||||";
@@ -429,16 +385,12 @@ void repo::get_runtimes(int category)
     }
 }
 
-void repo::get_areadiscovereds()
-{
+void repo::get_areadiscovereds() {
     repo_response_data = "";
 
-    for (auto& repo_entry : repo_modified)
-    {
-        if (repo_entry.contains("PersistentBoolId"))
-        {
-            if (repo_entry.contains("Name"))
-            {
+    for (auto& repo_entry : repo_modified) {
+        if (repo_entry.contains("PersistentBoolId")) {
+            if (repo_entry.contains("Name")) {
                 repo_response_data += repo_entry["Name"];
                 repo_response_data += "|||| ||||";
                 repo_response_data += repo_entry["ID_"];
@@ -448,16 +400,12 @@ void repo::get_areadiscovereds()
     }
 }
 
-void repo::get_locations()
-{
+void repo::get_locations() {
     repo_response_data = "";
 
-    for (auto& repo_entry : repo_modified)
-    {
-        if (repo_entry.contains("Name_LOC"))
-        {
-            if (repo_entry.contains("Name"))
-            {
+    for (auto& repo_entry : repo_modified) {
+        if (repo_entry.contains("Name_LOC")) {
+            if (repo_entry.contains("Name")) {
                 repo_response_data += repo_entry["Name"];
                 repo_response_data += "|||| ||||";
                 repo_response_data += repo_entry["ID_"];
@@ -467,14 +415,11 @@ void repo::get_locations()
     }
 }
 
-void repo::get_modifiers()
-{
+void repo::get_modifiers() {
     repo_response_data = "";
 
-    for (auto& repo_entry : repo_modified)
-    {
-        if (repo_entry.contains("ModifierType"))
-        {
+    for (auto& repo_entry : repo_modified) {
+        if (repo_entry.contains("ModifierType")) {
             repo_response_data += repo_entry["ModifierType"];
             repo_response_data += "|||| ||||";
             repo_response_data += repo_entry["ID_"];
@@ -483,14 +428,11 @@ void repo::get_modifiers()
     }
 }
 
-void repo::get_difficulty_parameters()
-{
+void repo::get_difficulty_parameters() {
     repo_response_data = "";
 
-    for (auto& repo_entry : repo_modified)
-    {
-        if (repo_entry.contains("Parameter"))
-        {
+    for (auto& repo_entry : repo_modified) {
+        if (repo_entry.contains("Parameter")) {
             repo_response_data += repo_entry["Parameter"];
             repo_response_data += "|||| ||||";
             repo_response_data += repo_entry["ID_"];
@@ -499,16 +441,12 @@ void repo::get_difficulty_parameters()
     }
 }
 
-void repo::get_ammo_configs()
-{
+void repo::get_ammo_configs() {
     repo_response_data = "";
 
-    for (auto& repo_entry : repo_modified)
-    {
-        if (repo_entry.contains("AmmoImpactEffect"))
-        {
-            if (repo_entry.contains("Name"))
-            {
+    for (auto& repo_entry : repo_modified) {
+        if (repo_entry.contains("AmmoImpactEffect")) {
+            if (repo_entry.contains("Name")) {
                 repo_response_data += repo_entry["Name"];
                 repo_response_data += "|||| ||||";
                 repo_response_data += repo_entry["ID_"];
@@ -518,14 +456,11 @@ void repo::get_ammo_configs()
     }
 }
 
-void repo::get_magazine_configs()
-{
+void repo::get_magazine_configs() {
     repo_response_data = "";
 
-    for (auto& repo_entry : repo_modified)
-    {
-        if (repo_entry.contains("AmmoConfig"))
-        {
+    for (auto& repo_entry : repo_modified) {
+        if (repo_entry.contains("AmmoConfig")) {
             repo_response_data += repo_entry["AmmoConfig"];
             repo_response_data += "|||| ||||";
             repo_response_data += repo_entry["ID_"];
@@ -534,16 +469,12 @@ void repo::get_magazine_configs()
     }
 }
 
-void repo::get_behaviours()
-{
+void repo::get_behaviours() {
     repo_response_data = "";
 
-    for (auto& repo_entry : repo_modified)
-    {
-        if (repo_entry.contains("Type"))
-        {
-            if (repo_entry.contains("Name"))
-            {
+    for (auto& repo_entry : repo_modified) {
+        if (repo_entry.contains("Type")) {
+            if (repo_entry.contains("Name")) {
                 repo_response_data += repo_entry["Name"];
                 repo_response_data += "|||| ||||";
                 repo_response_data += repo_entry["ID_"];
@@ -553,18 +484,14 @@ void repo::get_behaviours()
     }
 }
 
-void repo::get_image_hash(const std::string& id)
-{
+void repo::get_image_hash(const std::string& id) {
     repo_response_data = "";
 
-    if (repo_modified.contains(id))
-    {
-        if (repo_modified[id].contains("Image"))
-        {
+    if (repo_modified.contains(id)) {
+        if (repo_modified[id].contains("Image")) {
             auto it2 = ores_object.ores_entries.find(std::string(repo_modified[id]["Image"]));
 
-            if (it2 != ores_object.ores_entries.end())
-            {
+            if (it2 != ores_object.ores_entries.end()) {
                 //std::cout << "Image found: " << it2->first << " with hash " << util::uint64_t_to_hex_string(it2->second) << std::endl;
 
                 repo_response_data = util::uint64_t_to_hex_string(it2->second);
@@ -573,23 +500,19 @@ void repo::get_image_hash(const std::string& id)
     }
 }
 
-[[maybe_unused]] void repo::unload_repo()
-{
+[[maybe_unused]] void repo::unload_repo() {
     //std::unordered_map<std::string, uint32_t>().swap(repo_entries_original);
     //std::unordered_map<std::string, uint32_t>().swap(repo_entries_modified);
 }
 
-void repo::load_ores(uint64_t rpkgs_index, uint64_t hash_index)
-{
+void repo::load_ores(uint64_t rpkgs_index, uint64_t hash_index) {
     ores_object = ores(rpkgs_index, hash_index);
 }
 
-void repo::get_json(const std::string& id)
-{
+void repo::get_json(const std::string& id) {
     repo_response_data = "";
 
-    if (repo_modified.contains(id))
-    {
+    if (repo_modified.contains(id)) {
         std::stringstream ss;
 
         ss << std::setw(4) << repo_modified[id];
@@ -598,59 +521,48 @@ void repo::get_json(const std::string& id)
     }
 }
 
-void repo::save_json(const std::string& id, const std::string& json)
-{
-    if (repo_modified.contains(id))
-    {
+void repo::save_json(const std::string& id, const std::string& json) {
+    if (repo_modified.contains(id)) {
         repo_response_data = "";
 
-        try
-        {
+        try {
             repo_modified[id] = nlohmann::json::parse(json);
 
             std::string new_id = repo_modified[id]["ID_"];
 
-            if (id != new_id)
-            {
+            if (id != new_id) {
                 repo_modified[new_id] = repo_modified[id];
                 repo_modified.erase(id);
 
                 repo_response_data = new_id;
-            }
-            else
-            {
+            } else {
                 repo_response_data = id;
             }
         }
-        catch (json::parse_error& e)
-        {
+        catch (json::parse_error& e) {
             std::stringstream ss;
 
             ss << "Error: Saving REPO JSON Entry" << "\n"
-                << "Error message: " << e.what() << '\n'
-                << "Error exception id: " << e.id << '\n'
-                << "Error byte position of error: " << e.byte;
+               << "Error message: " << e.what() << '\n'
+               << "Error exception id: " << e.id << '\n'
+               << "Error byte position of error: " << e.byte;
 
             repo_response_data = ss.str();
         }
     }
 }
 
-void repo::create_patch(const std::string& patch_path) const
-{
+void repo::create_patch(const std::string& patch_path) const {
     nlohmann::json repo_patch;
     nlohmann::json smf_json_patch = nlohmann::json::object();
 
     repo_response_data = "";
 
-    try
-    {
+    try {
         repo_patch = nlohmann::json::diff(repo_original, repo_modified);
 
-        for (auto& entry : repo_patch)
-        {
-            if (entry["op"] == "add" || entry["op"] == "replace")
-            {
+        for (auto& entry : repo_patch) {
+            if (entry["op"] == "add" || entry["op"] == "replace") {
                 entry["op"] = "add";
 
                 std::string path = entry["path"];
@@ -658,8 +570,7 @@ void repo::create_patch(const std::string& patch_path) const
                 size_t pos1 = path.find('/');
                 size_t pos2 = path.substr(pos1 + 1).find('/');
 
-                if (pos1 == 0 && pos2 == std::string::npos)
-                {
+                if (pos1 == 0 && pos2 == std::string::npos) {
                     std::string id = path.substr(pos1 + 1);
 
                     //entry["path"] = "/" + std::string(repo_modified[index]["ID_"]);
@@ -667,9 +578,7 @@ void repo::create_patch(const std::string& patch_path) const
                     smf_json_patch[nlohmann::json::json_pointer(entry["path"])] = entry["value"];
 
                     //smf_json_patch[id] = repo_modified[id];
-                }
-                else if (pos1 == 0 && pos2 > 0)
-                {
+                } else if (pos1 == 0 && pos2 > 0) {
                     std::string id = path.substr(pos1 + 1, pos2);
 
                     //entry["path"] = "/" + std::string(repo_modified[index]["ID_"]) + path.substr(pos1 + 1 + pos2);
@@ -693,21 +602,19 @@ void repo::create_patch(const std::string& patch_path) const
 
         //json_file2.close();
     }
-    catch (json::parse_error& e)
-    {
+    catch (json::parse_error& e) {
         std::stringstream ss;
 
         ss << "Error: Creating SMF REPO Patch JSON" << "\n"
-            << "Error message: " << e.what() << '\n'
-            << "Error exception id: " << e.id << '\n'
-            << "Error byte position of error: " << e.byte;
+           << "Error message: " << e.what() << '\n'
+           << "Error exception id: " << e.id << '\n'
+           << "Error byte position of error: " << e.byte;
 
         repo_response_data = ss.str();
     }
 }
 
-void repo::import_patch(const std::string& patch_path)
-{
+void repo::import_patch(const std::string& patch_path) {
     std::ifstream patch_file(patch_path, std::ifstream::binary);
 
     patch_file.seekg(0, std::ifstream::end);
@@ -722,28 +629,25 @@ void repo::import_patch(const std::string& patch_path)
 
     repo_response_data = "";
 
-    try
-    {
+    try {
         nlohmann::json patch_json = nlohmann::json::parse(patch_data);
 
         repo_original.merge_patch(patch_json);
         repo_modified.merge_patch(patch_json);
     }
-    catch (json::parse_error& e)
-    {
+    catch (json::parse_error& e) {
         std::stringstream ss;
 
         ss << "Error: Importing SMF REPO Patch JSON" << "\n"
-            << "Error message: " << e.what() << '\n'
-            << "Error exception id: " << e.id << '\n'
-            << "Error byte position of error: " << e.byte;
+           << "Error message: " << e.what() << '\n'
+           << "Error exception id: " << e.id << '\n'
+           << "Error byte position of error: " << e.byte;
 
         repo_response_data = ss.str();
     }
 }
 
-void repo::duplicate_entry(const std::string& id)
-{
+void repo::duplicate_entry(const std::string& id) {
     std::string guid = util::generate_guid();
 
     nlohmann::json new_json = repo_modified[id];
@@ -755,82 +659,62 @@ void repo::duplicate_entry(const std::string& id)
     get_entry(guid);
 }
 
-void repo::erase_entry(const std::string& id)
-{
+void repo::erase_entry(const std::string& id) {
     repo_modified.erase(id);
 }
 
-void repo::get_entry(const std::string& id)
-{
+void repo::get_entry(const std::string& id) {
     repo_response_data = "";
 
-    if (repo_modified[id].contains("Outfit") && repo_modified[id].contains("Name"))
-    {
+    if (repo_modified[id].contains("Outfit") && repo_modified[id].contains("Name")) {
         repo_response_data = repo_modified[id]["Name"];
         repo_response_data += "|||| ||||";
         repo_response_data += repo_modified[id]["ID_"];
         repo_response_data += "||||||";
-    }
-    else if (repo_modified[id].contains("Runtime") && repo_modified[id].contains("CommonName"))
-    {
+    } else if (repo_modified[id].contains("Runtime") && repo_modified[id].contains("CommonName")) {
         repo_response_data = repo_modified[id]["CommonName"];
         repo_response_data += "||||";
-        repo_response_data += util::uint64_t_to_hex_string(std::strtoull(std::string(repo_modified[id]["Runtime"]).c_str(), nullptr, 10));
+        repo_response_data += util::uint64_t_to_hex_string(
+                std::strtoull(std::string(repo_modified[id]["Runtime"]).c_str(), nullptr, 10));
         repo_response_data += "||||";
         repo_response_data += repo_modified[id]["ID_"];
         repo_response_data += "||||||";
-    }
-    else if (repo_modified[id].contains("IsHitmanSuit") && repo_modified[id].contains("CommonName"))
-    {
+    } else if (repo_modified[id].contains("IsHitmanSuit") && repo_modified[id].contains("CommonName")) {
         repo_response_data = repo_modified[id]["CommonName"];
         repo_response_data += "|||| ||||";
         repo_response_data += repo_modified[id]["ID_"];
         repo_response_data += "||||||";
-    }
-    else if (repo_modified[id].contains("PersistentBoolId") && repo_modified[id].contains("Name"))
-    {
+    } else if (repo_modified[id].contains("PersistentBoolId") && repo_modified[id].contains("Name")) {
         repo_response_data = repo_modified[id]["Name"];
         repo_response_data += "|||| ||||";
         repo_response_data += repo_modified[id]["ID_"];
         repo_response_data += "||||||";
-    }
-    else if (repo_modified[id].contains("Name_LOC") && repo_modified[id].contains("Name"))
-    {
+    } else if (repo_modified[id].contains("Name_LOC") && repo_modified[id].contains("Name")) {
         repo_response_data = repo_modified[id]["Name"];
         repo_response_data += "|||| ||||";
         repo_response_data += repo_modified[id]["ID_"];
         repo_response_data += "||||||";
-    }
-    else if (repo_modified[id].contains("ModifierType"))
-    {
+    } else if (repo_modified[id].contains("ModifierType")) {
         repo_response_data = repo_modified[id]["ModifierType"];
         repo_response_data += "|||| ||||";
         repo_response_data += repo_modified[id]["ID_"];
         repo_response_data += "||||||";
-    }
-    else if (repo_modified[id].contains("Parameter"))
-    {
+    } else if (repo_modified[id].contains("Parameter")) {
         repo_response_data = repo_modified[id]["Parameter"];
         repo_response_data += "|||| ||||";
         repo_response_data += repo_modified[id]["ID_"];
         repo_response_data += "||||||";
-    }
-    else if (repo_modified[id].contains("Type") && repo_modified[id].contains("Name"))
-    {
+    } else if (repo_modified[id].contains("Type") && repo_modified[id].contains("Name")) {
         repo_response_data = repo_modified[id]["Name"];
         repo_response_data += "|||| ||||";
         repo_response_data += repo_modified[id]["ID_"];
         repo_response_data += "||||||";
-    }
-    else if (repo_modified[id].contains("AmmoConfig"))
-    {
+    } else if (repo_modified[id].contains("AmmoConfig")) {
         repo_response_data = repo_modified[id]["AmmoConfig"];
         repo_response_data += "|||| ||||";
         repo_response_data += repo_modified[id]["ID_"];
         repo_response_data += "||||||";
-    }
-    else if (repo_modified[id].contains("AmmoImpactEffect") && repo_modified[id].contains("Name"))
-    {
+    } else if (repo_modified[id].contains("AmmoImpactEffect") && repo_modified[id].contains("Name")) {
         repo_response_data = repo_modified[id]["Name"];
         repo_response_data += "|||| ||||";
         repo_response_data += repo_modified[id]["ID_"];
@@ -838,18 +722,14 @@ void repo::get_entry(const std::string& id)
     }
 }
 
-void repo::update_json_at_pointer(const std::string& id, const std::string& json_pointer, const std::string& value)
-{
-    if (repo_modified.contains(id))
-    {
+void repo::update_json_at_pointer(const std::string& id, const std::string& json_pointer, const std::string& value) {
+    if (repo_modified.contains(id)) {
         repo_response_data = "";
 
-        try
-        {
+        try {
             nlohmann::json json = repo_modified[id][nlohmann::json::json_pointer(json_pointer)];
 
-            if (json.is_number())
-            {
+            if (json.is_number()) {
                 json = std::strtod(value.c_str(), nullptr);
 
                 /*if (json.is_number_float())
@@ -864,20 +744,13 @@ void repo::update_json_at_pointer(const std::string& id, const std::string& json
                 {
                     json = std::strtoull(value.c_str(), nullptr, 10);
                 }*/
-            }
-            else if (json.is_boolean())
-            {
-                if (value == "true")
-                {
+            } else if (json.is_boolean()) {
+                if (value == "true") {
                     json = true;
-                }
-                else
-                {
+                } else {
                     json = false;
                 }
-            }
-            else
-            {
+            } else {
                 json = value;
             }
 
@@ -885,10 +758,8 @@ void repo::update_json_at_pointer(const std::string& id, const std::string& json
 
             repo_response_data = id;
 
-            if (json_pointer == "/ID_")
-            {
-                if (id != value)
-                {
+            if (json_pointer == "/ID_") {
+                if (id != value) {
                     repo_modified[value] = repo_modified[id];
                     repo_modified.erase(id);
 
@@ -896,14 +767,13 @@ void repo::update_json_at_pointer(const std::string& id, const std::string& json
                 }
             }
         }
-        catch (json::parse_error& e)
-        {
+        catch (json::parse_error& e) {
             std::stringstream ss;
 
             ss << "Error: Saving REPO JSON Entry" << "\n"
-                << "Error message: " << e.what() << '\n'
-                << "Error exception id: " << e.id << '\n'
-                << "Error byte position of error: " << e.byte;
+               << "Error message: " << e.what() << '\n'
+               << "Error exception id: " << e.id << '\n'
+               << "Error byte position of error: " << e.byte;
 
             repo_response_data = ss.str();
         }

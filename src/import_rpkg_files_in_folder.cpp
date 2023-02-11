@@ -2,10 +2,8 @@
 #include "file.h"
 #include <filesystem>
 
-void rpkg_function::import_rpkg_files_in_folder(const std::string& input_rpkg_folder_path)
-{
-    for (const auto& entry : std::filesystem::recursive_directory_iterator(input_rpkg_folder_path))
-    {
+void rpkg_function::import_rpkg_files_in_folder(const std::string& input_rpkg_folder_path) {
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(input_rpkg_folder_path)) {
         if (!std::filesystem::is_regular_file(entry.path().string()))
             continue;
 
@@ -15,12 +13,9 @@ void rpkg_function::import_rpkg_files_in_folder(const std::string& input_rpkg_fo
         std::string hash;
         std::string hash_resource_type;
 
-        if (pos != std::string::npos)
-        {
+        if (pos != std::string::npos) {
             rpkg_file_name = entry.path().string().substr(pos + 1, entry.path().string().length() - (pos + 1));
-        }
-        else
-        {
+        } else {
             rpkg_file_name = entry.path().string();
         }
 

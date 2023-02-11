@@ -1,4 +1,5 @@
 #pragma once
+
 #include "rpkg.h"
 #include "temp.h"
 #include "entity.h"
@@ -24,8 +25,7 @@
 #define LOG_AND_EXIT_NOP(x)
 #endif
 
-enum RPKGStatus
-{
+enum RPKGStatus {
     READY,
     TASK_EXECUTING,
     TASK_SUCCESSFUL,
@@ -78,8 +78,7 @@ enum RPKGStatus
     MAP_ERROR
 };
 
-enum FileType3D
-{
+enum FileType3D {
     GLB_MULTIPLE,
     GLB_SINGLE,
     GLTF_MULTIPLE,
@@ -88,8 +87,7 @@ enum FileType3D
     OBJ_SINGLE
 };
 
-enum Types
-{
+enum Types {
     TYPE_INT8,
     TYPE_UINT8,
     TYPE_INT16,
@@ -109,29 +107,25 @@ enum Types
 
 extern std::string DirectXFormatsStrings[116];
 
-struct vector2
-{
+struct vector2 {
     float x = 0;
     float y = 0;
 };
 
-struct vector3
-{
+struct vector3 {
     float x = 0;
     float y = 0;
     float z = 0;
 };
 
-struct vector4
-{
+struct vector4 {
     float x = 0;
     float y = 0;
     float z = 0;
     float w = 0;
 };
 
-struct vector6
-{
+struct vector6 {
     float a = 0;
     float b = 0;
     float c = 0;
@@ -140,16 +134,14 @@ struct vector6
     float f = 0;
 };
 
-struct rgba
-{
+struct rgba {
     uint8_t r = 0;
     uint8_t g = 0;
     uint8_t b = 0;
     uint8_t a = 0;
 };
 
-struct uint8_t_6
-{
+struct uint8_t_6 {
     uint8_t a = 0;
     uint8_t b = 0;
     uint8_t c = 0;
@@ -158,30 +150,26 @@ struct uint8_t_6
     uint8_t f = 0;
 };
 
-struct matrix42
-{
+struct matrix42 {
     vector4 x;
     vector4 y;
 };
 
-struct matrix43
-{
+struct matrix43 {
     vector3 x_axis;
     vector3 y_axis;
     vector3 z_axis;
     vector3 transform;
 };
 
-struct matrix44
-{
+struct matrix44 {
     vector4 x;
     vector4 y;
     vector4 z;
     vector4 w;
 };
 
-struct bone_data
-{
+struct bone_data {
     vector3 position;
     uint32_t parent_id;
     vector3 size;
@@ -189,8 +177,7 @@ struct bone_data
     uint16_t part;
 };
 
-struct asset3d
-{
+struct asset3d {
     std::vector<uint16_t>* indexes;
     std::vector<vector4>* vertexes;
     std::vector<vector4>* normals;
@@ -199,8 +186,7 @@ struct asset3d
     std::vector<rgba>* colors;
 };
 
-struct asset3ds
-{
+struct asset3ds {
     std::string root_name = "";
     std::vector<std::string> names;
     std::vector<std::vector<uint16_t>> indexes;
@@ -225,8 +211,7 @@ struct asset3ds
     std::vector<uint32_t> material_ids;
 };
 
-struct jpg_textures
-{
+struct jpg_textures {
     uint32_t material_id = 0;
     bool has_diffuse_texture = false;
     std::vector<char> texture_diffuse_jpg;
@@ -236,23 +221,20 @@ struct jpg_textures
     std::vector<char> texture_emissive_jpg;
 };
 
-struct doublevector3
-{
+struct doublevector3 {
     double x = 0;
     double y = 0;
     double z = 0;
 };
 
-struct doublevector4
-{
+struct doublevector4 {
     double x = 0;
     double y = 0;
     double z = 0;
     double w = 0;
 };
 
-struct doublematrix43
-{
+struct doublematrix43 {
     doublevector3 x_axis;
     doublevector3 y_axis;
     doublevector3 z_axis;
@@ -301,10 +283,15 @@ extern std::unordered_map<std::string, uint32_t>* type_map_h2;
 extern std::unordered_map<std::string, uint32_t>* type_map_h3;
 extern std::unordered_map<std::string, std::unordered_map<int32_t, std::string>>* enum_map_h2;
 extern std::unordered_map<std::string, std::unordered_map<int32_t, std::string>>* enum_map_h3;
+
 extern void initialize_enum_map_h2();
+
 extern void initialize_enum_map_h3();
+
 extern void initialize_type_map_h2();
+
 extern void initialize_type_map_h3();
+
 extern bool enum_map_h2_initialized;
 extern bool enum_map_h3_initialized;
 extern bool type_map_h2_initialized;
@@ -339,16 +326,22 @@ extern std::vector<uint64_t> entity_id_m_eidParent;
 extern std::vector<bool> entity_id_has_matrix;
 extern bool interative_mode;
 extern void* resource_tool_dll;
+
 typedef int(__cdecl* ConvertMemoryResourceToJson)(char*, void*, uint64_t);
+
 typedef int(__cdecl* ConvertMemoryJsonToResource)(char*, const char*, size_t, char*);
+
 typedef char* (__cdecl* GetJsonFromMemory)();
+
 extern ConvertMemoryResourceToJson resource_tool_ConvertMemoryResourceToJson;
 extern ConvertMemoryJsonToResource resource_tool_ConvertMemoryJsonToResource;
 extern GetJsonFromMemory resource_tool_GetJsonFromMemory;
 extern std::string exe_path;
 extern std::vector<float> prim_float_values;
 extern bool prim_float_values_initialized;
+
 extern void initialize_prim_float_values();
+
 extern bool log_output;
 extern int map_percent_progress_recursive_temp;
 extern int map_percent_progress_map_nodes;

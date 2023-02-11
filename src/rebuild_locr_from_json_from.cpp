@@ -11,14 +11,12 @@
 
 using json = nlohmann::ordered_json;
 
-void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
-{
+void rpkg_function::rebuild_locr_from_json_from(std::string& input_path) {
     task_single_status = TASK_EXECUTING;
 
     std::string input_folder_path = file::parse_input_folder_path(input_path);
 
-    if (!file::path_exists(input_folder_path))
-    {
+    if (!file::path_exists(input_folder_path)) {
         LOG_AND_EXIT("Error: The folder " + input_folder_path + " to rebuild the LOCR files from does not exist.");
     }
 
@@ -34,19 +32,16 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
     double console_update_rate = 1.0 / 2.0;
     int period_count = 1;
 
-    for (const auto& entry : std::filesystem::recursive_directory_iterator(input_folder_path))
-    {
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(input_folder_path)) {
         std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
 
         double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(
                 end_time - start_time).count());
 
-        if (time_in_seconds_from_start_time > console_update_rate)
-        {
+        if (time_in_seconds_from_start_time > console_update_rate) {
             start_time = end_time;
 
-            if (period_count > 3)
-            {
+            if (period_count > 3) {
                 period_count = 0;
             }
 
@@ -72,43 +67,35 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
         std::string hash_string = "";
         std::string resource_type = "";
 
-        if (pos != std::string::npos)
-        {
+        if (pos != std::string::npos) {
             json_file_name = entry.path().string().substr(pos + 1, entry.path().string().length() - (pos + 1));
             json_file_base_path = entry.path().string().substr(0, pos);
-        }
-        else
-        {
+        } else {
             json_file_name = entry.path().string();
         }
 
-        if (util::to_upper_case(json_file_name.substr((json_file_name.length() - 5), 5)) == ".JSON")
-        {
+        if (util::to_upper_case(json_file_name.substr((json_file_name.length() - 5), 5)) == ".JSON") {
             hash_file_name = util::to_upper_case(json_file_name.substr(0, (json_file_name.length() - 5)));
         }
 
         pos = hash_file_name.find_last_of('.');
 
-        if (pos != std::string::npos)
-        {
+        if (pos != std::string::npos) {
             hash_string = hash_file_name.substr(0, pos);
             resource_type = hash_file_name.substr(pos + 1, hash_file_name.length() - (pos + 1));
         }
 
         bool is_locr_hash_file = true;
 
-        if (hash_string.length() != 16)
-        {
+        if (hash_string.length() != 16) {
             is_locr_hash_file = false;
         }
 
-        if (resource_type != "LOCR")
-        {
+        if (resource_type != "LOCR") {
             is_locr_hash_file = false;
         }
 
-        if (is_locr_hash_file)
-        {
+        if (is_locr_hash_file) {
             json_file_paths.push_back(entry.path().string());
             json_file_base_paths.push_back(json_file_base_path);
             json_file_names.push_back(json_file_name);
@@ -131,10 +118,8 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
     console_update_rate = 1.0 / 2.0;
     period_count = 1;
 
-    for (uint64_t p = 0; p < json_file_paths.size(); p++)
-    {
-        if (gui_control == ABORT_CURRENT_TASK)
-        {
+    for (uint64_t p = 0; p < json_file_paths.size(); p++) {
+        if (gui_control == ABORT_CURRENT_TASK) {
             return;
         }
 
@@ -143,12 +128,10 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
         double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(
                 end_time - start_time).count());
 
-        if (time_in_seconds_from_start_time > console_update_rate)
-        {
+        if (time_in_seconds_from_start_time > console_update_rate) {
             start_time = end_time;
 
-            if (period_count > 3)
-            {
+            if (period_count > 3) {
                 period_count = 0;
             }
 
@@ -163,8 +146,7 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
             period_count++;
         }
 
-        if (!file::path_exists(json_file_paths.at(p) + ".meta"))
-        {
+        if (!file::path_exists(json_file_paths.at(p) + ".meta")) {
             LOG("Error: JSON meta file " << json_file_paths.at(p) + ".meta"
                                          << " could not be found.");
             LOG("       Can not rebuild " << locr_file_names.at(p) << " from JSON file " << json_file_paths.at(p));
@@ -172,8 +154,7 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
 
         std::ifstream input_json_meta_file = std::ifstream(json_file_paths.at(p) + ".meta", std::ifstream::binary);
 
-        if (!input_json_meta_file.good())
-        {
+        if (!input_json_meta_file.good()) {
             LOG_AND_EXIT("Error: JSON meta file " + json_file_paths.at(p) + ".meta" + " could not be read.");
         }
 
@@ -181,8 +162,7 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
         bool symKey = false;
         int identifyByte = input_json_meta_file.get();
 
-        if (identifyByte == 0 || identifyByte == 1)
-        {
+        if (identifyByte == 0 || identifyByte == 1) {
             isLOCRv2 = true;
         }
 
@@ -197,8 +177,7 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
         input_json_meta_file.seekg(0, input_json_meta_file.beg);
 
         if ((isLOCRv2 && (input_json_meta_file_size - 1) % 4 != 0) ||
-            (!isLOCRv2 && input_json_meta_file_size % 4 != 0))
-        {
+            (!isLOCRv2 && input_json_meta_file_size % 4 != 0)) {
             LOG_AND_EXIT("Error: JSON meta file " + json_file_paths.at(p) + ".meta" + " is corrupt.");
         }
 
@@ -210,18 +189,15 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
 
         std::ifstream input_json_file(json_file_paths.at(p));
 
-        if (!input_json_file.good())
-        {
+        if (!input_json_file.good()) {
             LOG_AND_EXIT("Error: JSON file " + json_file_paths.at(p) + " could not be read.");
         }
         json input_json;
 
-        try
-        {
+        try {
             input_json_file >> input_json;
         }
-        catch (json::parse_error& e)
-        {
+        catch (json::parse_error& e) {
             std::stringstream ss;
             ss << "Error: " << json_file_paths.at(p) << "\n"
                << "Error message: " << e.what() << '\n'
@@ -234,22 +210,18 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
 
         int language_count = 0;
 
-        for (const auto& it : input_json.items())
-        {
+        for (const auto& it : input_json.items()) {
             bool language_found = false;
 
-            for (const auto& it2 : it.value().items())
-            {
-                if (it2.value().contains("Language"))
-                {
+            for (const auto& it2 : it.value().items()) {
+                if (it2.value().contains("Language")) {
                     language_found = true;
 
                     language_count++;
                 }
             }
 
-            if (!language_found)
-            {
+            if (!language_found) {
                 LOG_AND_EXIT("Error: JSON file " + json_file_paths.at(p) +
                              " is malformed and can not be rebuilt into a LOCR file/resource.");
             }
@@ -259,8 +231,7 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
 
         std::vector<std::string> languages;
 
-        if (input_json_meta_file_size == 0x19)
-        {
+        if (input_json_meta_file_size == 0x19) {
             // Old Hitman 3 LOCR
             languages.push_back("xx");
             languages.push_back("en");
@@ -268,9 +239,7 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
             languages.push_back("it");
             languages.push_back("de");
             languages.push_back("es");
-        }
-        else if (input_json_meta_file_size == 0x25)
-        {
+        } else if (input_json_meta_file_size == 0x25) {
             // New Hitman 3 LOCR
             languages.push_back("xx");
             languages.push_back("en");
@@ -281,9 +250,7 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
             languages.push_back("ru");
             languages.push_back("cn");
             languages.push_back("tc");
-        }
-        else if (input_json_meta_file_size == 0x29)
-        {
+        } else if (input_json_meta_file_size == 0x29) {
             // New Hitman 3 LOCR
             languages.push_back("xx");
             languages.push_back("en");
@@ -295,9 +262,7 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
             languages.push_back("cn");
             languages.push_back("tc");
             languages.push_back("jp");
-        }
-        else if (input_json_meta_file_size == 0x35)
-        {
+        } else if (input_json_meta_file_size == 0x35) {
             // Hitman 2
             languages.push_back("xx");
             languages.push_back("en");
@@ -312,9 +277,7 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
             languages.push_back("cn");
             languages.push_back("jp");
             languages.push_back("tc");
-        }
-        else if (input_json_meta_file_size == 0x30)
-        {
+        } else if (input_json_meta_file_size == 0x30) {
             // Hitman 2016 (post GOTY?)
             languages.push_back("xx");
             languages.push_back("en");
@@ -328,9 +291,7 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
             languages.push_back("pl");
             languages.push_back("cn");
             languages.push_back("jp");
-        }
-        else if (input_json_meta_file_size == 0x28)
-        {
+        } else if (input_json_meta_file_size == 0x28) {
             // Hitman 2016 (pre GOTY?)
             languages.push_back("xx");
             languages.push_back("en");
@@ -349,19 +310,15 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
 
         std::vector<bool> language_in_locr;
 
-        for (uint64_t i = 0; i < languages.size(); i++)
-        {
+        for (uint64_t i = 0; i < languages.size(); i++) {
             uint32_t offset = 0;
 
             std::memcpy(&offset, &input_json_meta_header.data()[isLOCRv2 ? i * 0x4 + 0x1 : i * 0x4],
                         sizeof(uint32_t));
 
-            if (offset != 0xFFFFFFFF)
-            {
+            if (offset != 0xFFFFFFFF) {
                 language_in_locr.push_back(true);
-            }
-            else
-            {
+            } else {
                 language_in_locr.push_back(false);
             }
         }
@@ -377,28 +334,20 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
         std::vector<std::vector<std::string>> locr_language_section_strings;
         std::vector<std::vector<uint32_t>> locr_language_section_string_lengths;
 
-        for (uint64_t i = 0; i < languages.size(); i++)
-        {
-            if (language_in_locr.at(i))
-            {
-                for (const auto& it : input_json.items())
-                {
-                    for (const auto& it2 : it.value().items())
-                    {
-                        if (it2.value().contains("Language"))
-                        {
-                            if (it2.value()["Language"] == languages.at(i) && language_in_locr.at(i))
-                            {
+        for (uint64_t i = 0; i < languages.size(); i++) {
+            if (language_in_locr.at(i)) {
+                for (const auto& it : input_json.items()) {
+                    for (const auto& it2 : it.value().items()) {
+                        if (it2.value().contains("Language")) {
+                            if (it2.value()["Language"] == languages.at(i) && language_in_locr.at(i)) {
                                 std::vector<uint32_t> temp_locr_language_section_string_hashes;
                                 std::vector<std::string> temp_locr_language_section_strings;
                                 std::vector<uint32_t> temp_locr_language_section_string_lengths;
 
                                 uint32_t locr_section_size = 0x4;
 
-                                for (const auto& it3 : it.value().items())
-                                {
-                                    if (!it3.value().contains("Language"))
-                                    {
+                                for (const auto& it3 : it.value().items()) {
+                                    if (!it3.value().contains("Language")) {
                                         temp_locr_language_section_string_hashes.push_back(
                                                 it3.value()["StringHash"]);
 
@@ -406,15 +355,11 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
 
                                         uint32_t string_length = static_cast<uint32_t>(temp_string.length());
 
-                                        if (symKey)
-                                        {
+                                        if (symKey) {
                                             locr_section_size += static_cast<uint32_t>(temp_string.size()) +
                                                                  static_cast<uint32_t>(0x9);
-                                        }
-                                        else
-                                        {
-                                            while (string_length % 8 != 0)
-                                            {
+                                        } else {
+                                            while (string_length % 8 != 0) {
                                                 string_length++;
 
                                                 temp_string.push_back(0x0);
@@ -435,8 +380,7 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
 
                                 std::memcpy(&char4, &prevoffset, sizeof(uint32_t));
 
-                                for (char& j : char4)
-                                {
+                                for (char& j : char4) {
                                     locr_data.push_back(j);
                                 }
 
@@ -445,17 +389,13 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
                                 locr_language_section_strings.push_back(temp_locr_language_section_strings);
                                 locr_language_section_string_lengths.push_back(
                                         temp_locr_language_section_string_lengths);
-                            }
-                            else if (it2.value()["Language"] == languages.at(i) && !language_in_locr.at(i))
-                            {
+                            } else if (it2.value()["Language"] == languages.at(i) && !language_in_locr.at(i)) {
                                 LOG_AND_EXIT("Error: LOCR has language in JSON but not in the meta file.");
                             }
                         }
                     }
                 }
-            }
-            else
-            {
+            } else {
                 std::vector<uint32_t> temp_locr_language_section_string_hashes;
                 std::vector<std::string> temp_locr_language_section_strings;
                 std::vector<uint32_t> temp_locr_language_section_string_lengths;
@@ -471,58 +411,44 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
             }
         }
 
-        for (uint64_t i = 0; i < languages.size(); i++)
-        {
-            for (const auto& it : input_json.items())
-            {
-                for (const auto& it2 : it.value().items())
-                {
-                    if (it2.value().contains("Language"))
-                    {
-                        if (it2.value()["Language"] == languages.at(i))
-                        {
+        for (uint64_t i = 0; i < languages.size(); i++) {
+            for (const auto& it : input_json.items()) {
+                for (const auto& it2 : it.value().items()) {
+                    if (it2.value().contains("Language")) {
+                        if (it2.value()["Language"] == languages.at(i)) {
                             uint32_t section_string_count = static_cast<uint32_t>(locr_language_section_string_hashes.at(
                                     i).size());
 
                             std::memcpy(&char4, &section_string_count, sizeof(uint32_t));
 
-                            for (char& j : char4)
-                            {
+                            for (char& j : char4) {
                                 locr_data.push_back(j);
                             }
 
-                            for (uint64_t j = 0; j < locr_language_section_strings.at(i).size(); j++)
-                            {
+                            for (uint64_t j = 0; j < locr_language_section_strings.at(i).size(); j++) {
                                 std::memcpy(&char4, &locr_language_section_string_hashes.at(i).at(j),
                                             sizeof(uint32_t));
 
-                                for (char& k : char4)
-                                {
+                                for (char& k : char4) {
                                     locr_data.push_back(k);
                                 }
 
                                 std::memcpy(&char4, &locr_language_section_string_lengths.at(i).at(j),
                                             sizeof(uint32_t));
 
-                                for (char& k : char4)
-                                {
+                                for (char& k : char4) {
                                     locr_data.push_back(k);
                                 }
 
-                                if (symKey)
-                                {
-                                    for (uint32_t k = 0; k < locr_language_section_string_lengths.at(i).at(j); k++)
-                                    {
+                                if (symKey) {
+                                    for (uint32_t k = 0; k < locr_language_section_string_lengths.at(i).at(j); k++) {
                                         locr_data.push_back(crypto::symmetric_key_encrypt_localization(
                                                 locr_language_section_strings.at(i).at(
                                                         j)[static_cast<uint64_t>(k)]));
                                     }
-                                }
-                                else
-                                {
+                                } else {
                                     for (uint32_t k = 0;
-                                         k < locr_language_section_string_lengths.at(i).at(j) / 8; k++)
-                                    {
+                                         k < locr_language_section_string_lengths.at(i).at(j) / 8; k++) {
                                         uint32_t data[2];
                                         std::memcpy(data, &locr_language_section_strings.at(i).at(j)[
                                                             static_cast<uint64_t>(k) * static_cast<uint64_t>(8)],
@@ -541,8 +467,7 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
                                                 static_cast<uint64_t>(4)], data + 1, sizeof(uint32_t));
                                     }
 
-                                    for (uint64_t k = 0; k < locr_language_section_string_lengths.at(i).at(j); k++)
-                                    {
+                                    for (uint64_t k = 0; k < locr_language_section_string_lengths.at(i).at(j); k++) {
                                         locr_data.push_back(locr_language_section_strings.at(i).at(j)[k]);
                                     }
                                 }
@@ -562,8 +487,7 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path)
         std::ofstream output_file = std::ofstream(current_path + "\\" + locr_file_names.at(p),
                                                   std::ofstream::binary);
 
-        if (!output_file.good())
-        {
+        if (!output_file.good()) {
             LOG_AND_EXIT("Error: Rebuilt LOCR file " + locr_file_names.at(p) + " could not be created.");
         }
 

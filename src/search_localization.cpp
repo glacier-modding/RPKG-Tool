@@ -7,12 +7,11 @@
 #include <sstream>
 
 void rpkg_function::search_localization(std::string& input_path, std::string& search, std::string& output_path,
-                                        bool search_dlge, bool search_locr, bool search_rtlv, int max_results)
-{
+                                        bool search_dlge, bool search_locr, bool search_rtlv, int max_results) {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
-    percent_progress = (uint32_t)0;
+    percent_progress = (uint32_t) 0;
 
     log_output = false;
 
@@ -32,25 +31,18 @@ void rpkg_function::search_localization(std::string& input_path, std::string& se
     uint64_t localization_hash_count = 0;
     uint64_t localization_hash_size_total = 0;
 
-    for (auto & rpkg : rpkgs)
-    {
+    for (auto& rpkg : rpkgs) {
         std::string message = "Searching " + rpkg.rpkg_file_name + "...";
 
-        if (input_path.empty() || input_path == rpkg.rpkg_file_path)
-        {
-            for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++)
-            {
-                if (gui_control == ABORT_CURRENT_TASK)
-                {
+        if (input_path.empty() || input_path == rpkg.rpkg_file_path) {
+            for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++) {
+                if (gui_control == ABORT_CURRENT_TASK) {
                     return;
                 }
 
-                if (search_dlge)
-                {
-                    if (rpkg.hash_resource_types.at(r) == "DLGE")
-                    {
-                        for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++)
-                        {
+                if (search_dlge) {
+                    if (rpkg.hash_resource_types.at(r) == "DLGE") {
+                        for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++) {
                             uint64_t hash_index = rpkg.hashes_indexes_based_on_resource_types.at(r).at(j);
 
                             localization_hash_size_total += rpkg.hash.at(hash_index).data.resource.size_final;
@@ -59,12 +51,9 @@ void rpkg_function::search_localization(std::string& input_path, std::string& se
                     }
                 }
 
-                if (search_locr)
-                {
-                    if (rpkg.hash_resource_types.at(r) == "LOCR")
-                    {
-                        for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++)
-                        {
+                if (search_locr) {
+                    if (rpkg.hash_resource_types.at(r) == "LOCR") {
+                        for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++) {
                             uint64_t hash_index = rpkg.hashes_indexes_based_on_resource_types.at(r).at(j);
 
                             localization_hash_size_total += rpkg.hash.at(hash_index).data.resource.size_final;
@@ -73,12 +62,9 @@ void rpkg_function::search_localization(std::string& input_path, std::string& se
                     }
                 }
 
-                if (search_rtlv)
-                {
-                    if (rpkg.hash_resource_types.at(r) == "RTLV")
-                    {
-                        for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++)
-                        {
+                if (search_rtlv) {
+                    if (rpkg.hash_resource_types.at(r) == "RTLV") {
+                        for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++) {
                             uint64_t hash_index = rpkg.hashes_indexes_based_on_resource_types.at(r).at(j);
 
                             localization_hash_size_total += rpkg.hash.at(hash_index).data.resource.size_final;
@@ -93,62 +79,68 @@ void rpkg_function::search_localization(std::string& input_path, std::string& se
     uint64_t localization_hash_count_current = 0;
     uint64_t localization_hash_size_current = 0;
 
-    for (auto & rpkg : rpkgs)
-    {
+    for (auto& rpkg : rpkgs) {
         std::string message = "Searching " + rpkg.rpkg_file_name + "...";
 
-        if (input_path.empty() || input_path == rpkg.rpkg_file_path)
-        {
-            for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++)
-            {
-                if (gui_control == ABORT_CURRENT_TASK)
-                {
+        if (input_path.empty() || input_path == rpkg.rpkg_file_path) {
+            for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++) {
+                if (gui_control == ABORT_CURRENT_TASK) {
                     return;
                 }
 
-                if (results_count < max_results)
-                {
-                    if (search_dlge && rpkg.hash_resource_types.at(r) == "DLGE")
-                    {
-                        for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++)
-                        {
-                            if (gui_control == ABORT_CURRENT_TASK)
-                            {
+                if (results_count < max_results) {
+                    if (search_dlge && rpkg.hash_resource_types.at(r) == "DLGE") {
+                        for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++) {
+                            if (gui_control == ABORT_CURRENT_TASK) {
                                 return;
                             }
 
-                            if (results_count < max_results)
-                            {
+                            if (results_count < max_results) {
                                 uint64_t hash_index = rpkg.hashes_indexes_based_on_resource_types.at(r).at(j);
 
-                                std::string temp_hash_string = util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value);
+                                std::string temp_hash_string = util::uint64_t_to_hex_string(
+                                        rpkg.hash.at(hash_index).hash_value);
 
-                                if (((localization_hash_count_current * (uint64_t)100000) / (uint64_t)localization_hash_count) % (uint64_t)10 == 0 && localization_hash_count_current > 0)
-                                {
-                                    stringstream_length = console::update_console(message, localization_hash_size_total, localization_hash_size_current, start_time, stringstream_length);
+                                if (((localization_hash_count_current * (uint64_t) 100000) /
+                                     (uint64_t) localization_hash_count) % (uint64_t) 10 == 0 &&
+                                    localization_hash_count_current > 0) {
+                                    stringstream_length = console::update_console(message, localization_hash_size_total,
+                                                                                  localization_hash_size_current,
+                                                                                  start_time, stringstream_length);
                                 }
 
                                 localization_hash_size_current += rpkg.hash.at(hash_index).data.resource.size_final;
                                 localization_hash_count_current++;
 
-                                rpkg_function::extract_dlge_to_json_from(rpkg.rpkg_file_path, temp_hash_string, output_path, true);
+                                rpkg_function::extract_dlge_to_json_from(rpkg.rpkg_file_path, temp_hash_string,
+                                                                         output_path, true);
 
-                                try
-                                {
-                                    for (const auto& it : localization_json.items())
-                                    {
-                                        for (const auto& it2 : it.value().items())
-                                        {
+                                try {
+                                    for (const auto& it : localization_json.items()) {
+                                        for (const auto& it2 : it.value().items()) {
                                             //std::cout << " RLTV3: " << it.key() << ", " << it.value() << std::endl;
                                             //std::cout << "SEARCHING lol2: " << it.key() << std::endl;
-                                            if (it2.value().is_string())
-                                            {
+                                            if (it2.value().is_string()) {
                                                 //std::cout << "SEARCHING s: " << it.key() << std::endl;
-                                                if (util::to_lower_case(std::string(it2.value())).find(search_lower_case) != std::string::npos)
-                                                {
-                                                    std::cout << "FOUND STRING: " << it2.key() << ", " << it2.value() << " in " << util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." + rpkg.hash.at(hash_index).hash_resource_type << std::endl;
+                                                if (util::to_lower_case(std::string(it2.value())).find(
+                                                        search_lower_case) != std::string::npos) {
+                                                    std::cout << "FOUND STRING: " << it2.key() << ", " << it2.value()
+                                                              << " in " << util::uint64_t_to_hex_string(
+                                                            rpkg.hash.at(hash_index).hash_value) + "." +
+                                                                           rpkg.hash.at(hash_index).hash_resource_type
+                                                              << std::endl;
 
-                                                    localization_search_results += rpkg.rpkg_file_path + "||||" + util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." + rpkg.hash.at(hash_index).hash_resource_type + " " + util::hash_to_ioi_string(rpkg.hash.at(hash_index).hash_value, false) + "||||" + std::string(it2.value()) + "||||||";
+                                                    localization_search_results += rpkg.rpkg_file_path + "||||" +
+                                                                                   util::uint64_t_to_hex_string(
+                                                                                           rpkg.hash.at(
+                                                                                                   hash_index).hash_value) +
+                                                                                   "." + rpkg.hash.at(
+                                                            hash_index).hash_resource_type + " " +
+                                                                                   util::hash_to_ioi_string(
+                                                                                           rpkg.hash.at(
+                                                                                                   hash_index).hash_value,
+                                                                                           false) + "||||" +
+                                                                                   std::string(it2.value()) + "||||||";
 
                                                     results_count++;
                                                 }
@@ -156,71 +148,94 @@ void rpkg_function::search_localization(std::string& input_path, std::string& se
                                         }
                                     }
                                 }
-                                catch (json::parse_error& e)
-                                {
+                                catch (json::parse_error& e) {
                                     std::stringstream ss;
                                     ss << "Error: " << "\n"
-                                        << "Error message: " << e.what() << '\n'
-                                        << "Error exception id: " << e.id << '\n'
-                                        << "Error byte position of error: " << e.byte;
+                                       << "Error message: " << e.what() << '\n'
+                                       << "Error exception id: " << e.id << '\n'
+                                       << "Error byte position of error: " << e.byte;
                                 }
                             }
                         }
                     }
 
-                    if (search_locr && rpkg.hash_resource_types.at(r) == "LOCR")
-                    {
-                        for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++)
-                        {
-                            if (results_count < max_results)
-                            {
+                    if (search_locr && rpkg.hash_resource_types.at(r) == "LOCR") {
+                        for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++) {
+                            if (results_count < max_results) {
                                 uint64_t hash_index = rpkg.hashes_indexes_based_on_resource_types.at(r).at(j);
 
-                                std::string temp_hash_string = util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value);
+                                std::string temp_hash_string = util::uint64_t_to_hex_string(
+                                        rpkg.hash.at(hash_index).hash_value);
 
-                                if (((localization_hash_count_current * (uint64_t)100000) / (uint64_t)localization_hash_count) % (uint64_t)10 == 0 && localization_hash_count_current > 0)
-                                {
-                                    stringstream_length = console::update_console(message, localization_hash_size_total, localization_hash_size_current, start_time, stringstream_length);
+                                if (((localization_hash_count_current * (uint64_t) 100000) /
+                                     (uint64_t) localization_hash_count) % (uint64_t) 10 == 0 &&
+                                    localization_hash_count_current > 0) {
+                                    stringstream_length = console::update_console(message, localization_hash_size_total,
+                                                                                  localization_hash_size_current,
+                                                                                  start_time, stringstream_length);
                                 }
 
                                 localization_hash_size_current += rpkg.hash.at(hash_index).data.resource.size_final;
                                 localization_hash_count_current++;
 
-                                rpkg_function::extract_locr_to_json_from(rpkg.rpkg_file_path, temp_hash_string, output_path, true);
+                                rpkg_function::extract_locr_to_json_from(rpkg.rpkg_file_path, temp_hash_string,
+                                                                         output_path, true);
 
-                                try
-                                {
-                                    for (const auto& it : localization_json.items())
-                                    {
+                                try {
+                                    for (const auto& it : localization_json.items()) {
                                         bool language_found = false;
 
                                         std::string language;
 
-                                        for (const auto& it2 : it.value().items())
-                                        {
-                                            if (it2.value().contains("Language"))
-                                            {
+                                        for (const auto& it2 : it.value().items()) {
+                                            if (it2.value().contains("Language")) {
                                                 language_found = true;
 
                                                 language = it2.value()["Language"];
                                             }
                                         }
 
-                                        if (language_found)
-                                        {
-                                            for (const auto& it2 : it.value().items())
-                                            {
-                                                if (it2.value().contains("StringHash") && it2.value().contains("String"))
-                                                {
-                                                    if ((uint32_t)it2.value()["StringHash"] == search_crc32_dec || (uint32_t)it2.value()["StringHash"] == search_crc32_hex)
-                                                    {
-                                                        localization_search_results += rpkg.rpkg_file_path + "||||" + util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." + rpkg.hash.at(hash_index).hash_resource_type + " " + util::hash_to_ioi_string(rpkg.hash.at(hash_index).hash_value, false) + "||||" + language + ": " + util::uint32_t_to_string(it2.value()["StringHash"]) + ": " + std::string(it2.value()["String"]) + "||||||";
+                                        if (language_found) {
+                                            for (const auto& it2 : it.value().items()) {
+                                                if (it2.value().contains("StringHash") &&
+                                                    it2.value().contains("String")) {
+                                                    if ((uint32_t) it2.value()["StringHash"] == search_crc32_dec ||
+                                                        (uint32_t) it2.value()["StringHash"] == search_crc32_hex) {
+                                                        localization_search_results += rpkg.rpkg_file_path + "||||" +
+                                                                                       util::uint64_t_to_hex_string(
+                                                                                               rpkg.hash.at(
+                                                                                                       hash_index).hash_value) +
+                                                                                       "." + rpkg.hash.at(
+                                                                hash_index).hash_resource_type + " " +
+                                                                                       util::hash_to_ioi_string(
+                                                                                               rpkg.hash.at(
+                                                                                                       hash_index).hash_value,
+                                                                                               false) + "||||" +
+                                                                                       language + ": " +
+                                                                                       util::uint32_t_to_string(
+                                                                                               it2.value()["StringHash"]) +
+                                                                                       ": " + std::string(
+                                                                it2.value()["String"]) + "||||||";
 
                                                         results_count++;
-                                                    }
-                                                    else if (util::to_lower_case(std::string(it2.value()["String"])).find(search_lower_case) != std::string::npos)
-                                                    {
-                                                        localization_search_results += rpkg.rpkg_file_path + "||||" + util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." + rpkg.hash.at(hash_index).hash_resource_type + " " + util::hash_to_ioi_string(rpkg.hash.at(hash_index).hash_value, false) + "||||" + language + ": " + util::uint32_t_to_string(it2.value()["StringHash"]) + ": " + std::string(it2.value()["String"]) + "||||||";
+                                                    } else if (util::to_lower_case(
+                                                            std::string(it2.value()["String"])).find(
+                                                            search_lower_case) != std::string::npos) {
+                                                        localization_search_results += rpkg.rpkg_file_path + "||||" +
+                                                                                       util::uint64_t_to_hex_string(
+                                                                                               rpkg.hash.at(
+                                                                                                       hash_index).hash_value) +
+                                                                                       "." + rpkg.hash.at(
+                                                                hash_index).hash_resource_type + " " +
+                                                                                       util::hash_to_ioi_string(
+                                                                                               rpkg.hash.at(
+                                                                                                       hash_index).hash_value,
+                                                                                               false) + "||||" +
+                                                                                       language + ": " +
+                                                                                       util::uint32_t_to_string(
+                                                                                               it2.value()["StringHash"]) +
+                                                                                       ": " + std::string(
+                                                                it2.value()["String"]) + "||||||";
 
                                                         results_count++;
                                                     }
@@ -229,66 +244,73 @@ void rpkg_function::search_localization(std::string& input_path, std::string& se
                                         }
                                     }
                                 }
-                                catch (json::parse_error& e)
-                                {
+                                catch (json::parse_error& e) {
                                     std::stringstream ss;
                                     ss << "Error: " << "\n"
-                                        << "Error message: " << e.what() << '\n'
-                                        << "Error exception id: " << e.id << '\n'
-                                        << "Error byte position of error: " << e.byte;
+                                       << "Error message: " << e.what() << '\n'
+                                       << "Error exception id: " << e.id << '\n'
+                                       << "Error byte position of error: " << e.byte;
                                 }
                             }
                         }
                     }
 
-                    if (search_rtlv && rpkg.hash_resource_types.at(r) == "RTLV")
-                    {
-                        for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++)
-                        {
-                            if (results_count < max_results)
-                            {
+                    if (search_rtlv && rpkg.hash_resource_types.at(r) == "RTLV") {
+                        for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++) {
+                            if (results_count < max_results) {
                                 uint64_t hash_index = rpkg.hashes_indexes_based_on_resource_types.at(r).at(j);
 
-                                std::string temp_hash_string = util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value);
+                                std::string temp_hash_string = util::uint64_t_to_hex_string(
+                                        rpkg.hash.at(hash_index).hash_value);
 
-                                if (((localization_hash_count_current * (uint64_t)100000) / (uint64_t)localization_hash_count) % (uint64_t)10 == 0 && localization_hash_count_current > 0)
-                                {
-                                    stringstream_length = console::update_console(message, localization_hash_size_total, localization_hash_size_current, start_time, stringstream_length);
+                                if (((localization_hash_count_current * (uint64_t) 100000) /
+                                     (uint64_t) localization_hash_count) % (uint64_t) 10 == 0 &&
+                                    localization_hash_count_current > 0) {
+                                    stringstream_length = console::update_console(message, localization_hash_size_total,
+                                                                                  localization_hash_size_current,
+                                                                                  start_time, stringstream_length);
                                 }
 
                                 localization_hash_size_current += rpkg.hash.at(hash_index).data.resource.size_final;
                                 localization_hash_count_current++;
 
-                                rpkg_function::extract_rtlv_to_json_from(rpkg.rpkg_file_path, temp_hash_string, output_path, true);
+                                rpkg_function::extract_rtlv_to_json_from(rpkg.rpkg_file_path, temp_hash_string,
+                                                                         output_path, true);
 
-                                try
-                                {
-                                    for (const auto& it : localization_json.items())
-                                    {
-                                        for (const auto& it2 : it.value().items())
-                                        {
+                                try {
+                                    for (const auto& it : localization_json.items()) {
+                                        for (const auto& it2 : it.value().items()) {
                                             //std::cout << " RLTV3: " << it.key() << ", " << it.value() << std::endl;
                                             //std::cout << "SEARCHING lol2: " << it.key() << std::endl;
                                             if (it2.value().is_string() &&
                                                 util::to_lower_case(std::string(it2.value())).find(search_lower_case) !=
-                                                std::string::npos)
-                                            {
-                                                std::cout << "FOUND STRING: " << it2.key() << ", " << it2.value() << " in " << util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." + rpkg.hash.at(hash_index).hash_resource_type << std::endl;
+                                                std::string::npos) {
+                                                std::cout << "FOUND STRING: " << it2.key() << ", " << it2.value()
+                                                          << " in " << util::uint64_t_to_hex_string(
+                                                        rpkg.hash.at(hash_index).hash_value) + "." +
+                                                                       rpkg.hash.at(hash_index).hash_resource_type
+                                                          << std::endl;
 
-                                                localization_search_results += rpkg.rpkg_file_path + "||||" + util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." + rpkg.hash.at(hash_index).hash_resource_type + " " + util::hash_to_ioi_string(rpkg.hash.at(hash_index).hash_value, false) + "||||" + std::string(it2.value()) + "||||||";
+                                                localization_search_results += rpkg.rpkg_file_path + "||||" +
+                                                                               util::uint64_t_to_hex_string(
+                                                                                       rpkg.hash.at(
+                                                                                               hash_index).hash_value) +
+                                                                               "." + rpkg.hash.at(
+                                                        hash_index).hash_resource_type + " " + util::hash_to_ioi_string(
+                                                        rpkg.hash.at(hash_index).hash_value, false) + "||||" +
+                                                                               std::string(it2.value()) + "||||||";
 
                                                 results_count++;
                                             }
                                         }
                                     }
                                 }
-                                catch (json::parse_error& e)
-                                {
+                                catch (json::parse_error& e) {
                                     std::stringstream ss;
                                     ss << "Error: " << "\n"
-                                        << "Error message: " << e.what() << '\n'
-                                        << "Error exception id: " << e.id << '\n'
-                                        << "Error byte position of error: " << e.byte;
+                                       << "Error message: " << e.what() << '\n'
+                                       << "Error exception id: " << e.id << '\n'
+                                       << "Error byte position of error: " << e.byte;
                                 }
                             }
                         }
@@ -301,12 +323,14 @@ void rpkg_function::search_localization(std::string& input_path, std::string& se
 
         std::stringstream ss;
 
-        ss << message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
+        ss << message << "100% Done in "
+           << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count())
+           << "s";
 
         LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
     }
 
-    percent_progress = (uint32_t)100;
+    percent_progress = (uint32_t) 100;
 
     log_output = true;
 

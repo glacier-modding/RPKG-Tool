@@ -6,41 +6,43 @@
 #include "version.h"
 
 #ifdef _WIN64
-    #include <io.h>
+
+#include <io.h>
+
 #else
-    #include <unistd.h>
-    #define _isatty isatty
-    #define _fileno fileno
+#include <unistd.h>
+#define _isatty isatty
+#define _fileno fileno
 #endif
 
-int console::update_console(const std::string& message, const uint64_t indexMax, const uint64_t index, const std::chrono::time_point<std::chrono::high_resolution_clock> start_time, int stringstream_length)
-{
+int console::update_console(const std::string& message, const uint64_t indexMax, const uint64_t index,
+                            const std::chrono::time_point<std::chrono::high_resolution_clock> start_time,
+                            int stringstream_length) {
     const std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-    const double secs_since_start = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+    const double secs_since_start = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(
+            end_time - start_time).count());
 
     const double percent = (static_cast<double>(index) / static_cast<double>(indexMax)) * 100.0;
     std::stringstream ss;
-    ss << message << std::fixed << std::setprecision(1) << percent << "% Done" << " in " << secs_since_start << "s, estimated completion in " << (secs_since_start / static_cast<double>(index)) * (indexMax - index) << "s";
+    ss << message << std::fixed << std::setprecision(1) << percent << "% Done" << " in " << secs_since_start
+       << "s, estimated completion in " << (secs_since_start / static_cast<double>(index)) * (indexMax - index) << "s";
 
     percent_progress = static_cast<uint32_t>(percent);
 
-    if (ss.str().length() > stringstream_length)
-    {
+    if (ss.str().length() > stringstream_length) {
         stringstream_length = static_cast<int>(ss.str().length());
     }
 
     timing_string = ss.str();
 
-    if (_isatty(_fileno(stdout)))
-    {
+    if (_isatty(_fileno(stdout))) {
         LOG_NO_ENDL("\r" << ss.str() << std::string((stringstream_length - ss.str().length()), ' ') << std::flush);
     }
 
     return stringstream_length;
 }
 
-void console::display_usage_info()
-{
+void console::display_usage_info() {
     LOG("rpkg-cli " << RPKG_VERSION << " - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files.");
     LOG("--------------------------------------------------------------------------------");
     LOG("Note: All the information used to build this program was gleaned");
@@ -125,8 +127,8 @@ void console::display_usage_info()
     LOG("        scans all available RPKG files for dependency information.");
     LOG("    -extract_from_rpkg <path to RPKG file>");
     LOG("        Extracts all hash linked files/resources from an RPKG file.");
-	LOG("    -extract_from_rpkgs <path to folder containing RPKGs>");
-	LOG("        Extracts all hash linked files/resources from a folder of RPKG files.");
+    LOG("    -extract_from_rpkgs <path to folder containing RPKGs>");
+    LOG("        Extracts all hash linked files/resources from a folder of RPKG files.");
     LOG("    -extract_latest_hash <path to folder containing RPKG files>");
     LOG("        Scans a directory, commonly Hitman's Runtime dir, and imports and");
     LOG("        scans all available RPKG files and their patch deletion lists for the existence");

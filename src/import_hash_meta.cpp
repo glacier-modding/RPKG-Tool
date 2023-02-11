@@ -6,12 +6,10 @@
 #include <fstream>
 #include <string>
 
-void rpkg_function::import_hash_meta(hash& meta_data, const std::string& hash_meta_file_path)
-{
+void rpkg_function::import_hash_meta(hash& meta_data, const std::string& hash_meta_file_path) {
     std::ifstream meta_file = std::ifstream(hash_meta_file_path, std::ifstream::binary);
 
-    if (!meta_file.good())
-    {
+    if (!meta_file.good()) {
         LOG_AND_EXIT("Error: Hash meta file " + hash_meta_file_path + " could not be read.");
     }
 
@@ -34,21 +32,15 @@ void rpkg_function::import_hash_meta(hash& meta_data, const std::string& hash_me
     std::memcpy(&bytes4, input, sizeof(bytes4));
     meta_data.data.header.data_size = bytes4;
 
-    if ((meta_data.data.header.data_size & 0x3FFFFFFF) != 0)
-    {
+    if ((meta_data.data.header.data_size & 0x3FFFFFFF) != 0) {
         meta_data.data.lz4ed = true;
-    }
-    else
-    {
+    } else {
         meta_data.data.lz4ed = false;
     }
 
-    if ((meta_data.data.header.data_size & 0x80000000) == 0x80000000)
-    {
+    if ((meta_data.data.header.data_size & 0x80000000) == 0x80000000) {
         meta_data.data.xored = true;
-    }
-    else
-    {
+    } else {
         meta_data.data.xored = false;
     }
 
@@ -78,8 +70,7 @@ void rpkg_function::import_hash_meta(hash& meta_data, const std::string& hash_me
 
     hash_reference_variables temp_hash_reference_data;
 
-    if (meta_data.data.resource.reference_table_size != 0x0)
-    {
+    if (meta_data.data.resource.reference_table_size != 0x0) {
         temp_hash_reference_data.hash_value = meta_data.hash_value;
 
         meta_file.read(input, sizeof(bytes4));
@@ -88,22 +79,18 @@ void rpkg_function::import_hash_meta(hash& meta_data, const std::string& hash_me
 
         uint32_t temp_hash_reference_count = temp_hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
-        for (uint64_t j = 0; j < temp_hash_reference_count; j++)
-        {
+        for (uint64_t j = 0; j < temp_hash_reference_count; j++) {
             meta_file.read(input, sizeof(bytes1));
             std::memcpy(&bytes1, input, sizeof(bytes1));
             temp_hash_reference_data.hash_reference_type.push_back(bytes1);
         }
 
-        for (uint64_t j = 0; j < temp_hash_reference_count; j++)
-        {
+        for (uint64_t j = 0; j < temp_hash_reference_count; j++) {
             meta_file.read(input, sizeof(bytes8));
             std::memcpy(&bytes8, input, sizeof(bytes8));
             temp_hash_reference_data.hash_reference.push_back(bytes8);
         }
-    }
-    else
-    {
+    } else {
         temp_hash_reference_data.hash_reference_count = 0x0;
     }
 

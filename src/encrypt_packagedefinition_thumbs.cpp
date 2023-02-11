@@ -7,17 +7,16 @@
 #include <vector>
 #include <string>
 
-void generic_function::encrypt_packagedefinition_thumbs(std::string &input_path, std::string &output_path)
-{
+void generic_function::encrypt_packagedefinition_thumbs(std::string& input_path, std::string& output_path) {
     int packagedefinitions_thumbs_header_size = 16;
 
     std::vector<char> packagedefinitions_thumbs_header{
-        0x22, 0x3d, 0x6f, (char)0x9a, (char)0xb3, (char)0xf8, (char)0xfe, (char)0xb6, 0x61, (char)0xd9, (char)0xcc, 0x1c, 0x62, (char)0xde, (char)0x83, 0x41};
+            0x22, 0x3d, 0x6f, (char) 0x9a, (char) 0xb3, (char) 0xf8, (char) 0xfe, (char) 0xb6, 0x61, (char) 0xd9,
+            (char) 0xcc, 0x1c, 0x62, (char) 0xde, (char) 0x83, 0x41};
 
     std::ifstream file = std::ifstream(input_path, std::ifstream::binary);
 
-    if (!file.good())
-    {
+    if (!file.good()) {
         LOG_AND_EXIT("Error: packagedefinitions.txt / thumbs.dat file " + input_path + " could not be read.");
     }
 
@@ -33,8 +32,7 @@ void generic_function::encrypt_packagedefinition_thumbs(std::string &input_path,
 
     file.close();
 
-    while (input_data.size() % 8 != 0)
-    {
+    while (input_data.size() % 8 != 0) {
         input_data.push_back(0x0);
     }
 
@@ -43,30 +41,29 @@ void generic_function::encrypt_packagedefinition_thumbs(std::string &input_path,
     uint32_t crc = crc32::update(table, 0, input_data.data(), packagedefinitions_thumbs_file_size);
 
     std::vector<char> checksum(4, 0);
-    checksum[0] = (char)(crc);
-    checksum[1] = (char)(crc >> 8);
-    checksum[2] = (char)(crc >> 16);
-    checksum[3] = (char)(crc >> 24);
+    checksum[0] = (char) (crc);
+    checksum[1] = (char) (crc >> 8);
+    checksum[2] = (char) (crc >> 16);
+    checksum[3] = (char) (crc >> 24);
 
-    for (uint64_t i = 0; i < input_data.size() / 8; i++)
-    {
+    for (uint64_t i = 0; i < input_data.size() / 8; i++) {
         uint32_t data[2];
-        std::memcpy(data, &input_data[(uint64_t)i * (uint64_t)8], sizeof(uint32_t));
-        std::memcpy(data + 1, &input_data[(uint64_t)i * (uint64_t)8 + (uint64_t)4], sizeof(uint32_t));
+        std::memcpy(data, &input_data[(uint64_t) i * (uint64_t) 8], sizeof(uint32_t));
+        std::memcpy(data + 1, &input_data[(uint64_t) i * (uint64_t) 8 + (uint64_t) 4], sizeof(uint32_t));
 
         crypto::xtea_encrypt_packagedefinition_thumbs(data);
 
-        std::memcpy(&input_data[(uint64_t)i * (uint64_t)8], data, sizeof(uint32_t));
-        std::memcpy(&input_data[(uint64_t)i * (uint64_t)8 + (uint64_t)4], data + 1, sizeof(uint32_t));
+        std::memcpy(&input_data[(uint64_t) i * (uint64_t) 8], data, sizeof(uint32_t));
+        std::memcpy(&input_data[(uint64_t) i * (uint64_t) 8 + (uint64_t) 4], data + 1, sizeof(uint32_t));
     }
 
     std::string output_file_base_name = file::output_path_append(file::get_base_file_name(input_path), output_path);
 
     std::ofstream output_file = std::ofstream(output_file_base_name + ".encrypted", std::ofstream::binary);
 
-    if (!output_file.good())
-    {
-        LOG_AND_EXIT("Error: Output (packagedefinitions.txt / thumbs.dat).encrypted file " + output_file_base_name + ".encrypted" + " could not be created.");
+    if (!output_file.good()) {
+        LOG_AND_EXIT("Error: Output (packagedefinitions.txt / thumbs.dat).encrypted file " + output_file_base_name +
+                     ".encrypted" + " could not be created.");
     }
 
     output_file.write(packagedefinitions_thumbs_header.data(), packagedefinitions_thumbs_header_size);

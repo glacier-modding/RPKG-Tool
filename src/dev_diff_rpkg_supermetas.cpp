@@ -12,8 +12,7 @@
 //#include <filesystem>
 // #include <unordered_map>
 
-void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string& filter, std::string& output_path)
-{
+void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string& filter, std::string& output_path) {
     /*if (!hash_list_loaded)
     {
         LOG("Loading Hash List...");

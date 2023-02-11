@@ -7,12 +7,10 @@
 #include <vector>
 #include <string>
 
-void generic_function::decrypt_packagedefinition_thumbs(std::string &input_path, std::string &output_path)
-{
+void generic_function::decrypt_packagedefinition_thumbs(std::string& input_path, std::string& output_path) {
     std::ifstream file = std::ifstream(input_path, std::ifstream::binary);
 
-    if (!file.good())
-    {
+    if (!file.good()) {
         LOG_AND_EXIT("Error: packagedefinitions.txt / thumbs.dat file " + input_path + " could not be read.");
     }
 
@@ -41,13 +39,11 @@ void generic_function::decrypt_packagedefinition_thumbs(std::string &input_path,
 
     file.close();
 
-    while (input_data.size() % 8 != 0)
-    {
+    while (input_data.size() % 8 != 0) {
         input_data.push_back(0x0);
     }
 
-    for (uint64_t i = 0; i < input_data.size() / 8; i++)
-    {
+    for (uint64_t i = 0; i < input_data.size() / 8; i++) {
         uint32_t data[2];
         std::memcpy(&data[0], &input_data[i * static_cast<uint64_t>(8)], sizeof(uint32_t));
         std::memcpy(&data[1], &input_data[i * static_cast<uint64_t>(8) + static_cast<uint64_t>(4)], sizeof(uint32_t));
@@ -60,12 +56,9 @@ void generic_function::decrypt_packagedefinition_thumbs(std::string &input_path,
 
     uint64_t last_zero_position = input_data.size();
 
-    if (!input_data.empty())
-    {
-        for (uint64_t i = (input_data.size() - 1); i > 0; i--)
-        {
-            if (input_data.at(i) != 0)
-            {
+    if (!input_data.empty()) {
+        for (uint64_t i = (input_data.size() - 1); i > 0; i--) {
+            if (input_data.at(i) != 0) {
                 break;
             }
             last_zero_position--;
@@ -81,19 +74,19 @@ void generic_function::decrypt_packagedefinition_thumbs(std::string &input_path,
 
     std::string output_file_base_name = file::output_path_append(file::get_base_file_name(input_path), output_path);
 
-    if (crc != old_crc)
-    {
+    if (crc != old_crc) {
         LOG_AND_EXIT("Could not decrypt " + output_file_base_name + "!\nReason: Checksum mismatch! Exiting...");
     }
 
     std::ofstream output_file = std::ofstream(output_file_base_name + ".decrypted", std::ofstream::binary);
 
-    if (!output_file.good())
-    {
-        LOG_AND_EXIT("Error: Output (packagedefinitions.txt / thumbs.dat).decrypted file " + output_file_base_name + ".decrypted" + " could not be created.");
+    if (!output_file.good()) {
+        LOG_AND_EXIT("Error: Output (packagedefinitions.txt / thumbs.dat).decrypted file " + output_file_base_name +
+                     ".decrypted" + " could not be created.");
     }
 
     output_file.write(input_data.data(), last_zero_position);
 
-    LOG("Successfully decrypted " << output_file_base_name << " and saved to " << output_file_base_name + ".decrypted" << std::endl);
+    LOG("Successfully decrypted " << output_file_base_name << " and saved to " << output_file_base_name + ".decrypted"
+                                  << std::endl);
 }

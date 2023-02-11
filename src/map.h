@@ -1,12 +1,12 @@
 #pragma once
+
 #include "global.h"
 #include "console.h"
 #include <string>
 #include <vector>
 #include <stdint.h>
 
-struct map_node
-{
+struct map_node {
     uint64_t temp_hash = 0;
     std::string temp_hash_string = "";
     uint64_t entityId = 0;
@@ -48,25 +48,45 @@ struct map_node
     bool m_bVisible = false;
 };
 
-class map
-{
+class map {
 public:
     map();
+
     map(uint64_t hash_value);
 
     void extract_map_prims(std::string output_path, bool textured);
+
     void scale_transform(matrix43& transform, float x, float y, float z);
+
     bool extract_scale_from_transform(matrix43& transform, vector3& scale);
-    void generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_node, const std::string& map_node_string, uint32_t level);
+
+    void generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_node, const std::string& map_node_string,
+                                   uint32_t level);
+
     void get_map_node(temp& temp_temp);
+
     void get_root_scenes();
+
     void map_recursive_temp_loader(uint32_t rpkg_index, uint64_t hash_value);
-	static void import_map(std::string& input_path, std::string& map_path, std::string& qn_format, std::string& output_path);
-	static void export_map(std::string& input_path, std::string& filter, std::string& map_filter, std::string& output_path, bool textured);
+
+    static void
+    import_map(std::string& input_path, std::string& map_path, std::string& qn_format, std::string& output_path);
+
+    static void
+    export_map(std::string& input_path, std::string& filter, std::string& map_filter, std::string& output_path,
+               bool textured);
+
     void add_to_temp_hash_map_node_map(uint32_t map_node, uint64_t temp_hash);
-    void add_to_m_eidParent_local_temp_hash_entityIndex_map(uint32_t map_node, uint64_t temp_hash, uint32_t entityIndex);
-    void add_to_m_eidParent_external_externalSceneIndex_hash_entityID_map(uint32_t map_node, uint64_t externalSceneIndex_hash, uint64_t entityID);
+
+    void
+    add_to_m_eidParent_local_temp_hash_entityIndex_map(uint32_t map_node, uint64_t temp_hash, uint32_t entityIndex);
+
+    void add_to_m_eidParent_external_externalSceneIndex_hash_entityID_map(uint32_t map_node,
+                                                                          uint64_t externalSceneIndex_hash,
+                                                                          uint64_t entityID);
+
     void add_to_temp_hash_is_top_level_Local_node_map(uint32_t map_node, uint64_t temp_hash);
+
     bool matrixes_equal(matrix43& matrix1, matrix43& matrix2);
 
     std::vector<map_node> map_nodes;

@@ -11,10 +11,8 @@
 #pragma ide diagnostic ignored "misc-no-recursion"
 
 void recursive_hash_depends_search(uint64_t hash_value, std::vector<uint64_t>& hashes_to_extract,
-                                   std::unordered_map<uint64_t, uint64_t>& hashes_to_extract_map)
-{
-    for (auto& rpkg : rpkgs)
-    {
+                                   std::unordered_map<uint64_t, uint64_t>& hashes_to_extract_map) {
+    for (auto& rpkg : rpkgs) {
         auto it = rpkg.hash_map.find(hash_value);
 
         if (it == rpkg.hash_map.end())
@@ -23,8 +21,7 @@ void recursive_hash_depends_search(uint64_t hash_value, std::vector<uint64_t>& h
         const uint32_t hash_reference_count =
                 rpkg.hash.at(it->second).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
-        for (uint32_t j = 0; j < hash_reference_count; j++)
-        {
+        for (uint32_t j = 0; j < hash_reference_count; j++) {
             auto it2 = hashes_to_extract_map.find(rpkg.hash.at(it->second).hash_reference_data.hash_reference.at(j));
 
             if (it2 != hashes_to_extract_map.end())
@@ -46,8 +43,7 @@ void recursive_hash_depends_search(uint64_t hash_value, std::vector<uint64_t>& h
 void
 rpkg_function::extract_all_hash_depends_from(std::string& input_path, std::string& unparsed_filters,
                                              std::string& output_path,
-                                             HashExtractionStrategy strategy)
-{
+                                             HashExtractionStrategy strategy) {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
@@ -59,14 +55,12 @@ rpkg_function::extract_all_hash_depends_from(std::string& input_path, std::strin
 
     std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
 
-    for (auto& filter : filters)
-    {
+    for (auto& filter : filters) {
         bool filter_found = false;
 
         std::string filter_hash_file_name;
 
-        for (auto& rpkg : rpkgs)
-        {
+        for (auto& rpkg : rpkgs) {
             auto it = rpkg.hash_map.find(std::strtoull(filter.c_str(), nullptr, 16));
 
             if (it == rpkg.hash_map.end())
@@ -94,43 +88,34 @@ rpkg_function::extract_all_hash_depends_from(std::string& input_path, std::strin
 
         std::string message;
 
-        if (strategy == HashExtractionStrategy::PRIMS_ONLY)
-        {
+        if (strategy == HashExtractionStrategy::PRIMS_ONLY) {
             message = "Extracting all hash depends and PRIM models for " + filter + ": ";
-        }
-        else
-        {
+        } else {
             message = "Extracting all hash depends for " + filter + ": ";
         }
 
         start_time = std::chrono::high_resolution_clock::now();
         int stringstream_length = 80;
 
-        for (uint64_t x = 0; x < hashes_to_extract.size(); x++)
-        {
-            if (gui_control == ABORT_CURRENT_TASK)
-            {
+        for (uint64_t x = 0; x < hashes_to_extract.size(); x++) {
+            if (gui_control == ABORT_CURRENT_TASK) {
                 return;
             }
 
             if (((x * static_cast<uint64_t>(100000)) / hashes_to_extract.size()) % static_cast<uint64_t>(100) == 0 &&
-                x > 0)
-            {
+                x > 0) {
                 stringstream_length = console::update_console(message, hashes_to_extract.size(), x, start_time,
                                                               stringstream_length);
             }
 
-            for (auto& rpkg1 : rpkgs)
-            {
+            for (auto& rpkg1 : rpkgs) {
                 auto it1 = rpkg1.hash_map.find(hashes_to_extract.at(x));
 
                 if (!(it1 != rpkg1.hash_map.end()))
                     continue;
 
-                if (strategy == HashExtractionStrategy::PRIMS_ONLY)
-                {
-                    if (rpkg1.hash.at(it1->second).hash_resource_type == "PRIM")
-                    {
+                if (strategy == HashExtractionStrategy::PRIMS_ONLY) {
+                    if (rpkg1.hash.at(it1->second).hash_resource_type == "PRIM") {
                         std::string prim_output_dir = file::output_path_append(
                                 "ALLDEPENDS\\" + filter_hash_file_name + "\\PRIMMODELS\\", output_path);
 
@@ -150,17 +135,13 @@ rpkg_function::extract_all_hash_depends_from(std::string& input_path, std::strin
                 const bool not_base_chunk = rpkg1.rpkg_file_path.find("chunk1.rpkg") == std::string::npos &&
                                             rpkg1.rpkg_file_path.find("chunk1patch") == std::string::npos;
 
-                if (strategy == HashExtractionStrategy::ALL_NON_BASE)
-                {
+                if (strategy == HashExtractionStrategy::ALL_NON_BASE) {
                     should_extract = not_boot_chunk && not_base_chunk;
-                }
-                else if (strategy == HashExtractionStrategy::ALL_NON_BOOT)
-                {
+                } else if (strategy == HashExtractionStrategy::ALL_NON_BOOT) {
                     should_extract = not_boot_chunk;
                 }
 
-                if (!should_extract)
-                {
+                if (!should_extract) {
                     continue;
                 }
 

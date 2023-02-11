@@ -16,29 +16,23 @@
 using json = nlohmann::ordered_json;
 
 void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::string& filter, std::string& output_path,
-                                              bool output_to_string)
-{
+                                              bool output_to_string) {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
     bool input_path_is_rpkg_file = false;
 
-    if (std::filesystem::is_regular_file(input_path))
-    {
+    if (std::filesystem::is_regular_file(input_path)) {
         input_path_is_rpkg_file = true;
-    }
-    else
-    {
+    } else {
         input_path = file::parse_input_folder_path(input_path);
     }
 
-    if (!file::path_exists(input_path))
-    {
+    if (!file::path_exists(input_path)) {
         LOG_AND_EXIT("Error: The folder " + input_path + " to with the input RPKGs does not exist.");
     }
 
-    if (!input_path_is_rpkg_file)
-    {
+    if (!input_path_is_rpkg_file) {
         rpkg_function::import_rpkg_files_in_folder(input_path);
     }
 
@@ -50,12 +44,9 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
 
     //LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
 
-    if (output_to_string)
-    {
+    if (output_to_string) {
         localization_string = "";
-    }
-    else
-    {
+    } else {
         file::create_directories(file::output_path_append("LOCR", output_path));
     }
 
@@ -64,12 +55,9 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
     uint64_t locr_count = 0;
     uint64_t locr_current_count = 0;
 
-    for (auto& rpkg : rpkgs)
-    {
-        for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++)
-        {
-            if (rpkg.hash_resource_types.at(r) == "LOCR")
-            {
+    for (auto& rpkg : rpkgs) {
+        for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++) {
+            if (rpkg.hash_resource_types.at(r) == "LOCR") {
                 locr_count += rpkg.hashes_indexes_based_on_resource_types.at(r).size();
             }
         }
@@ -78,29 +66,25 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
     timing_string = "Extracting LOCR as JSON...";
 
     if (log_output)
-        LOG("Extracting LOCR as JSON...");
+            LOG("Extracting LOCR as JSON...");
 
     std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
     int stringstream_length = 80;
 
-    for (auto& rpkg : rpkgs)
-    {
+    for (auto& rpkg : rpkgs) {
         if (rpkg.rpkg_file_path != input_path && input_path_is_rpkg_file)
             continue;
 
         bool archive_folder_created = false;
 
-        for (uint64_t r1 = 0; r1 < rpkg.hash_resource_types.size(); r1++)
-        {
+        for (uint64_t r1 = 0; r1 < rpkg.hash_resource_types.size(); r1++) {
             if (rpkg.hash_resource_types.at(r1) != "LOCR")
                 continue;
 
-            for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r1).size(); j++)
-            {
+            for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r1).size(); j++) {
                 uint64_t hash_index = rpkg.hashes_indexes_based_on_resource_types.at(r1).at(j);
 
-                if (gui_control == ABORT_CURRENT_TASK)
-                {
+                if (gui_control == ABORT_CURRENT_TASK) {
                     return;
                 }
 
@@ -112,12 +96,10 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
 
                 uint64_t input_filter_index = 0;
 
-                for (uint64_t z = 0; z < filters.size(); z++)
-                {
+                for (uint64_t z = 0; z < filters.size(); z++) {
                     std::size_t found_position = hash_file_name.find(filters.at(z));
 
-                    if (found_position != std::string::npos && !filters.at(z).empty())
-                    {
+                    if (found_position != std::string::npos && !filters.at(z).empty()) {
                         found = true;
 
                         input_filter_index = z;
@@ -126,13 +108,11 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
                     }
                 }
 
-                if (found || filter.empty())
-                {
+                if (found || filter.empty()) {
                     std::string message = "Extracting LOCR as JSON: ";
 
                     if (((locr_current_count * (uint64_t) 100000) / (uint64_t) locr_count) % (uint64_t) 100 == 0 &&
-                        locr_current_count > 0 && !output_to_string)
-                    {
+                        locr_current_count > 0 && !output_to_string) {
                         stringstream_length = console::update_console(message, locr_count, locr_current_count,
                                                                       start_time, stringstream_length);
                     }
@@ -142,8 +122,7 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
                     std::string current_path = file::output_path_append("LOCR\\" + rpkg.rpkg_file_name,
                                                                         output_path);
 
-                    if (!archive_folder_created && !output_to_string)
-                    {
+                    if (!archive_folder_created && !output_to_string) {
                         file::create_directories(current_path);
 
                         archive_folder_created = true;
@@ -151,17 +130,13 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
 
                     uint64_t hash_size;
 
-                    if (rpkg.hash.at(hash_index).data.lz4ed)
-                    {
+                    if (rpkg.hash.at(hash_index).data.lz4ed) {
                         hash_size = rpkg.hash.at(hash_index).data.header.data_size;
 
-                        if (rpkg.hash.at(hash_index).data.xored)
-                        {
+                        if (rpkg.hash.at(hash_index).data.xored) {
                             hash_size &= 0x3FFFFFFF;
                         }
-                    }
-                    else
-                    {
+                    } else {
                         hash_size = rpkg.hash.at(hash_index).data.resource.size_final;
                     }
 
@@ -169,8 +144,7 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
 
                     std::ifstream file = std::ifstream(rpkg.rpkg_file_path, std::ifstream::binary);
 
-                    if (!file.good())
-                    {
+                    if (!file.good()) {
                         LOG_AND_EXIT("Error: RPKG file " + rpkg.rpkg_file_path + " could not be read.");
                     }
 
@@ -178,8 +152,7 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
                     file.read(input_data.data(), hash_size);
                     file.close();
 
-                    if (rpkg.hash.at(hash_index).data.xored)
-                    {
+                    if (rpkg.hash.at(hash_index).data.xored) {
                         crypto::xor_data(input_data.data(), (uint32_t) hash_size);
                     }
 
@@ -189,15 +162,12 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
 
                     std::vector<char>* locr_data;
 
-                    if (rpkg.hash.at(hash_index).data.lz4ed)
-                    {
+                    if (rpkg.hash.at(hash_index).data.lz4ed) {
                         LZ4_decompress_safe(input_data.data(), output_data.data(), (int) hash_size,
                                             decompressed_size);
 
                         locr_data = &output_data;
-                    }
-                    else
-                    {
+                    } else {
                         locr_data = &input_data;
                     }
 
@@ -222,33 +192,28 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
                     bool isLOCRv2 = false;
                     bool symKey = false;
 
-                    if ((unsigned int) locr_data->data()[0] == 0 || (unsigned int) locr_data->data()[0] == 1)
-                    {
+                    if ((unsigned int) locr_data->data()[0] == 0 || (unsigned int) locr_data->data()[0] == 1) {
                         position += 1;
                         std::memcpy(&number_of_languages, &locr_data->data()[position], sizeof(bytes4));
                         number_of_languages = (number_of_languages - 1) / 4;
                         isLOCRv2 = true;
-                    }
-                    else
-                    {
+                    } else {
                         std::memcpy(&number_of_languages, &locr_data->data()[position], sizeof(bytes4));
                         number_of_languages = (number_of_languages) / 4;
                     }
 
 #ifdef _DEBUG
                     if (log_output)
-                        LOG((isLOCRv2 ? "LOCRv2 identified" : "LOCRv1 identified"));
+                            LOG((isLOCRv2 ? "LOCRv2 identified" : "LOCRv1 identified"));
 #endif
 
-                    if (number_of_languages == 10 && !isLOCRv2)
-                    {
+                    if (number_of_languages == 10 && !isLOCRv2) {
                         LOG("Symmetric key cipher identified");
                         symKey = true;
                     }
 
                     // Quick fix for New Hitman 3 LOCR
-                    if (number_of_languages == 9 && isLOCRv2)
-                    {
+                    if (number_of_languages == 9 && isLOCRv2) {
                         languages.push_back("xx");
                         languages.push_back("en");
                         languages.push_back("fr");
@@ -258,9 +223,7 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
                         languages.push_back("ru");
                         languages.push_back("cn");
                         languages.push_back("tc");
-                    }
-                    else if (number_of_languages == 10 && isLOCRv2)
-                    {
+                    } else if (number_of_languages == 10 && isLOCRv2) {
                         languages.push_back("xx");
                         languages.push_back("en");
                         languages.push_back("fr");
@@ -271,9 +234,7 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
                         languages.push_back("cn");
                         languages.push_back("tc");
                         languages.push_back("jp");
-                    }
-                    else
-                    {
+                    } else {
                         languages.push_back("xx");
                         languages.push_back("en");
                         languages.push_back("fr");
@@ -289,8 +250,7 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
                         languages.push_back("tc");
                     }
 
-                    for (uint64_t k = 0; k < number_of_languages; k++)
-                    {
+                    for (uint64_t k = 0; k < number_of_languages; k++) {
                         std::memcpy(&bytes4, &locr_data->data()[position], sizeof(bytes4));
                         position += 4;
 
@@ -298,13 +258,11 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
                     }
 
                     for (uint64_t k = 0; k < (number_of_languages * (uint64_t) 0x4 +
-                                              (isLOCRv2 ? (uint64_t) 0x1 : (uint64_t) 0x0)); k++)
-                    {
+                                              (isLOCRv2 ? (uint64_t) 0x1 : (uint64_t) 0x0)); k++) {
                         json_meta_data.push_back(locr_data->data()[k]);
                     }
 
-                    for (uint64_t k = 0; k < number_of_languages; k++)
-                    {
+                    for (uint64_t k = 0; k < number_of_languages; k++) {
                         if (language_offsets.at(k) == 0xFFFFFFFF)
                             continue;
 
@@ -325,8 +283,7 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
 
                         temp_language_json_object.push_back(temp_json_object1);
 
-                        for (uint64_t l = 0; l < language_string_count.back(); l++)
-                        {
+                        for (uint64_t l = 0; l < language_string_count.back(); l++) {
                             std::vector<char> temp_string;
 
                             std::memcpy(&bytes4, &locr_data->data()[position], sizeof(bytes4));
@@ -339,18 +296,15 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
 
                             temp_language_string_length.push_back(bytes4);
 
-                            for (uint64_t m = 0; m < temp_language_string_length.back(); m++)
-                            {
+                            for (uint64_t m = 0; m < temp_language_string_length.back(); m++) {
                                 temp_string.push_back(locr_data->data()[position]);
                                 position += 1;
                             }
 
                             position += 1;
 
-                            if (symKey)
-                            {
-                                for (uint32_t m = 0; m < temp_language_string_length.back(); m++)
-                                {
+                            if (symKey) {
+                                for (uint32_t m = 0; m < temp_language_string_length.back(); m++) {
                                     temp_string.at(m) = crypto::symmetric_key_decrypt_localization(
                                             temp_string.at(m));
                                 }
@@ -362,17 +316,13 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
                                                                           temp_string.end());
 
                                 temp_language_json_object.push_back(temp_json_object2);
-                            }
-                            else
-                            {
-                                if (temp_language_string_length.back() % 8 != 0)
-                                {
+                            } else {
+                                if (temp_language_string_length.back() % 8 != 0) {
                                     LOG_AND_EXIT("Error: LOCR file " + hash_file_name + " in " +
                                                  rpkg.rpkg_file_name + " is malformed.");
                                 }
 
-                                for (uint32_t m = 0; m < temp_language_string_length.back() / 8; m++)
-                                {
+                                for (uint32_t m = 0; m < temp_language_string_length.back() / 8; m++) {
                                     uint32_t data[2];
                                     std::memcpy(data, &temp_string[(uint64_t) m * (uint64_t) 8],
                                                 sizeof(uint32_t));
@@ -390,18 +340,13 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
 
                                 uint32_t last_zero_position = (uint32_t) temp_string.size();
 
-                                if (!temp_string.empty())
-                                {
+                                if (!temp_string.empty()) {
                                     uint32_t m = (uint32_t) (temp_string.size() - 1);
 
-                                    while (m >= 0)
-                                    {
-                                        if (temp_string.at(m) != 0)
-                                        {
+                                    while (m >= 0) {
+                                        if (temp_string.at(m) != 0) {
                                             break;
-                                        }
-                                        else
-                                        {
+                                        } else {
                                             last_zero_position--;
                                         }
 
@@ -434,8 +379,7 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
                         json_object.push_back(temp_language_json_object);
                     }
 
-                    if (output_to_string)
-                    {
+                    if (output_to_string) {
                         std::stringstream ss1;
 
                         ss1 << std::setw(4) << json_object << std::endl;
@@ -443,15 +387,12 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
                         localization_string = ss1.str();
 
                         localization_json = json_object;
-                    }
-                    else
-                    {
+                    } else {
                         std::string json_path = current_path + "\\" + hash_file_name + ".JSON";
 
                         std::ofstream json_file = std::ofstream(json_path, std::ofstream::binary);
 
-                        if (!json_file.good())
-                        {
+                        if (!json_file.good()) {
                             LOG_AND_EXIT("Error: JSON file " + json_path + " could not be created.");
                         }
 
@@ -463,8 +404,7 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
 
                         std::ofstream json_meta_file = std::ofstream(json_meta_path, std::ofstream::binary);
 
-                        if (!json_meta_file.good())
-                        {
+                        if (!json_meta_file.good()) {
                             LOG_AND_EXIT("Error: JSON meta file " + json_meta_path + " could not be created.");
                         }
 
@@ -482,10 +422,9 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
     ss << "Extracting LOCR as JSON: Done";
 
     if (log_output)
-        LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+            LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
 
-    if (!output_to_string)
-    {
+    if (!output_to_string) {
         percent_progress = (uint32_t) 100;
 
         task_single_status = TASK_SUCCESSFUL;

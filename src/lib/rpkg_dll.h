@@ -8,7 +8,8 @@ RPKG_EXPORT int load_hash_list(char* path);
 
 RPKG_EXPORT char* get_hash_list_string(char* hash_string);
 
-RPKG_EXPORT int task_execute(char* command, char* input_path, char* filter, char* search, char* search_type, char* output_path);
+RPKG_EXPORT int
+task_execute(char* command, char* input_path, char* filter, char* search, char* search_type, char* output_path);
 
 RPKG_EXPORT int get_current_percent();
 
@@ -144,9 +145,12 @@ RPKG_EXPORT int generate_png_from_text(char* rpkg_file, char* hash_string, char*
 
 RPKG_EXPORT int unload_rpkg(char* rpkg_file);
 
-RPKG_EXPORT int modify_patch_deletion_list(char* rpkg_file, char* patch_list, uint32_t patch_count, uint32_t backup_rpkg);
+RPKG_EXPORT int
+modify_patch_deletion_list(char* rpkg_file, char* patch_list, uint32_t patch_count, uint32_t backup_rpkg);
 
-RPKG_EXPORT int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, char* hash_flag_list, uint32_t hash_count, uint32_t backup_rpkg);
+RPKG_EXPORT int
+modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, char* hash_flag_list, uint32_t hash_count,
+                    uint32_t backup_rpkg);
 
 RPKG_EXPORT char* get_response_string();
 
@@ -154,7 +158,7 @@ RPKG_EXPORT int import_rpkgs(char* rpkgs_path, char* rpkgs_list);
 
 RPKG_EXPORT int is_rpkg_valid(char* rpkg_file_path);
 
-RPKG_EXPORT int get_hash_name_from_hash_value(uint64_t hash_value, char *hash_name);
+RPKG_EXPORT int get_hash_name_from_hash_value(uint64_t hash_value, char* hash_name);
 
 RPKG_EXPORT int get_temp_subentity_count(uint32_t temps_index);
 
@@ -162,13 +166,17 @@ RPKG_EXPORT int get_tblu_subentity_count(uint32_t temps_index);
 
 RPKG_EXPORT char* get_entry_name(uint32_t temp_index, int entry_index);
 
-RPKG_EXPORT int deep_search_localization(char* input_path, char* search_value, int search_dlge, int search_locr, int search_rtlv, int max_results);
+RPKG_EXPORT int
+deep_search_localization(char* input_path, char* search_value, int search_dlge, int search_locr, int search_rtlv,
+                         int max_results);
 
 RPKG_EXPORT uint32_t get_localization_search_results_size();
 
 RPKG_EXPORT char* get_localization_search_results();
 
-RPKG_EXPORT int deep_search_entities(char* input_path, char* search_value, bool search_entity_ids, bool search_entity_names, bool search_property_names, bool search_property_values, int max_results);
+RPKG_EXPORT int
+deep_search_entities(char* input_path, char* search_value, bool search_entity_ids, bool search_entity_names,
+                     bool search_property_names, bool search_property_values, int max_results);
 
 RPKG_EXPORT uint32_t get_entities_search_results_size();
 

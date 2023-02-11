@@ -7,21 +7,17 @@
 #include <regex>
 #include <filesystem>
 
-void rpkg_function::search_repo(std::string& input_path, std::string& search, int max_results)
-{
+void rpkg_function::search_repo(std::string& input_path, std::string& search, int max_results) {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
-    percent_progress = (uint32_t)0;
+    percent_progress = (uint32_t) 0;
 
     log_output = false;
 
-    if (std::filesystem::is_regular_file(input_path))
-    {
+    if (std::filesystem::is_regular_file(input_path)) {
         rpkg_function::import_rpkg(input_path, false);
-    }
-    else
-    {
+    } else {
         rpkg_function::import_rpkg_files_in_folder(input_path);
     }
 
@@ -42,22 +38,18 @@ void rpkg_function::search_repo(std::string& input_path, std::string& search, in
 
     uint32_t repo_rpkg_index = rpkg_function::get_latest_hash(repo_hash_value);
 
-    if (repo_rpkg_index != UINT32_MAX)
-    {
+    if (repo_rpkg_index != UINT32_MAX) {
         const auto it = rpkgs.at(repo_rpkg_index).hash_map.find(repo_hash_value);
 
-        if (it != rpkgs.at(repo_rpkg_index).hash_map.end())
-        {
+        if (it != rpkgs.at(repo_rpkg_index).hash_map.end()) {
             uint64_t ores_hash_value = 0x00858D45F5F9E3CA;
 
             uint32_t ores_rpkg_index = rpkg_function::get_latest_hash(ores_hash_value);
 
-            if (ores_rpkg_index != UINT32_MAX)
-            {
+            if (ores_rpkg_index != UINT32_MAX) {
                 auto it2 = rpkgs.at(ores_rpkg_index).hash_map.find(ores_hash_value);
 
-                if (it2 != rpkgs.at(ores_rpkg_index).hash_map.end())
-                {
+                if (it2 != rpkgs.at(ores_rpkg_index).hash_map.end()) {
                     repos.emplace_back(repo_rpkg_index, it->second);
 
                     repos[0].load_ores(ores_rpkg_index, it2->second);
@@ -86,15 +78,11 @@ void rpkg_function::search_repo(std::string& input_path, std::string& search, in
 
                     std::cout << repo_response_data << std::endl;
                 }
-            }
-            else
-            {
+            } else {
                 LOG_AND_RETURN("ORES hash 00858D45F5F9E3CA does not exist in any loaded RPKG files.");
             }
         }
-    }
-    else
-    {
+    } else {
         LOG_AND_RETURN("REPO hash 00204D1AFD76AB13 does not exist in any loaded RPKG files.");
     }
 
@@ -102,11 +90,12 @@ void rpkg_function::search_repo(std::string& input_path, std::string& search, in
 
     std::stringstream ss;
 
-    ss << message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
+    ss << message << "100% Done in "
+       << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
 
     LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
 
-    percent_progress = (uint32_t)100;
+    percent_progress = (uint32_t) 100;
 
     log_output = true;
 

@@ -8,8 +8,7 @@
 // #include <iostream>
 // #include <unordered_map>
 
-int rpkg_function::load_temp_tblu_hash_depends(uint64_t rpkg_index, uint64_t hash_index)
-{
+int rpkg_function::load_temp_tblu_hash_depends(uint64_t rpkg_index, uint64_t hash_index) {
     /*hash_depends_variables temporary_temp_hash_depends_data;
 
     temporary_temp_hash_depends_data.rpkg_file_name = rpkgs.at(rpkg_index).rpkg_file_name;

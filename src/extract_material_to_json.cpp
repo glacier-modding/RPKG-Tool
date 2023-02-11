@@ -8,19 +8,16 @@
 #include <filesystem>
 #include <iostream>
 
-void rpkg_function::extract_material_to_json(std::string& input_path, std::string& filter, std::string& output_path)
-{
+void rpkg_function::extract_material_to_json(std::string& input_path, std::string& filter, std::string& output_path) {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
     std::string input_rpkg_folder_path = file::parse_input_folder_path(input_path);
 
-    if (file::path_exists(input_rpkg_folder_path))
-    {
+    if (file::path_exists(input_rpkg_folder_path)) {
         log_output = false;
 
-        if (!hash_list_loaded)
-        {
+        if (!hash_list_loaded) {
             LOG("Loading Hash List...");
             generic_function::load_hash_list(false);
             LOG("Loading Hash List: Done");
@@ -30,45 +27,38 @@ void rpkg_function::extract_material_to_json(std::string& input_path, std::strin
 
         std::vector<std::string> filters = util::parse_input_filter(filter);
 
-        for (uint64_t f = 0; f < filters.size(); f++)
-        {
+        for (uint64_t f = 0; f < filters.size(); f++) {
             uint64_t mati_hash_value = std::strtoull(filters.at(f).c_str(), nullptr, 16);
 
             uint32_t rpkg_index = rpkg_function::get_latest_hash(mati_hash_value);
 
-            if (rpkg_index != UINT32_MAX)
-            {
-                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(mati_hash_value);
+            if (rpkg_index != UINT32_MAX) {
+                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(
+                        mati_hash_value);
 
-                if (it != rpkgs.at(rpkg_index).hash_map.end())
-                {
-                    timing_string = "Converting: " + util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + " to Material Entity (MATI/MATT/MATB) JSON";
+                if (it != rpkgs.at(rpkg_index).hash_map.end()) {
+                    timing_string = "Converting: " +
+                                    util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) +
+                                    "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type +
+                                    " to Material Entity (MATI/MATT/MATB) JSON";
 
                     material temp_material(rpkg_index, it->second);
 
                     std::string temp_output_path = "";
                     bool output_path_is_dir = false;
 
-                    if (output_path.length() > 5)
-                    {
-                        if (util::to_lower_case(output_path).substr(output_path.length() - 5) == ".json")
-                        {
+                    if (output_path.length() > 5) {
+                        if (util::to_lower_case(output_path).substr(output_path.length() - 5) == ".json") {
                             temp_output_path = output_path;
-                        }
-                        else
-                        {
+                        } else {
                             output_path_is_dir = true;
                         }
-                    }
-                    else
-                    {
+                    } else {
                         output_path_is_dir = true;
                     }
 
-                    if (output_path_is_dir)
-                    {
-                        if (output_path != "")
-                        {
+                    if (output_path_is_dir) {
+                        if (output_path != "") {
                             file::create_directories(output_path);
                         }
 
@@ -86,9 +76,7 @@ void rpkg_function::extract_material_to_json(std::string& input_path, std::strin
 
         task_single_status = TASK_SUCCESSFUL;
         task_multiple_status = TASK_SUCCESSFUL;
-    }
-    else
-    {
+    } else {
         LOG_AND_EXIT("Error: The RPKG folder " + input_path + " does not exist.");
     }
 }

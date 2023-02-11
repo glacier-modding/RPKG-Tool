@@ -1,27 +1,28 @@
 #pragma once
+
 #include "global.h"
 #include <string>
 #include <vector>
 #include <unordered_map>
 #include <cstdint>
 
-class prim
-{
+class prim {
 public:
-	prim(uint64_t rpkgs_index, uint64_t hash_index);
-	explicit prim(const std::string& prim_file_path);
+    prim(uint64_t rpkgs_index, uint64_t hash_index);
 
-	void load_hash_depends();
+    explicit prim(const std::string& prim_file_path);
+
+    void load_hash_depends();
+
     void extract_meta(std::string output_path);
 
-    class prim_header
-    {
+    class prim_header {
     public:
         prim_header();
+
         prim_header(std::vector<char>& prim_data, uint32_t& prim_position);
 
-        enum class header_type : uint16_t
-        {
+        enum class header_type : uint16_t {
             NONE = 0,
             OBJECT = 1,
             MESH = 2,
@@ -31,17 +32,16 @@ public:
         uint32_t offset = 0;
         uint8_t draw = 0;
         uint8_t pack = 0;
-        uint16_t type = (uint16_t)header_type::NONE;
+        uint16_t type = (uint16_t) header_type::NONE;
     };
 
-    class prim_object_header
-    {
+    class prim_object_header {
     public:
         prim_object_header();
+
         prim_object_header(std::vector<char>& prim_data, uint32_t& prim_position);
 
-        enum class PROPERTY_FLAGS : uint32_t
-        {
+        enum class PROPERTY_FLAGS : uint32_t {
             BONES = 0x01,
             FRAMES = 0x02,
             LINKED = 0x04,
@@ -65,10 +65,10 @@ public:
         vector3 bounding_box_max;
     };
 
-    class prim_object
-    {
+    class prim_object {
     public:
         prim_object();
+
         prim_object(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number);
 
         enum class SUBTYPE : char {
@@ -107,14 +107,13 @@ public:
         vector3 bounding_box_max;
     };
 
-    class prim_mesh
-    {
+    class prim_mesh {
     public:
         prim_mesh();
+
         prim_mesh(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number);
 
-        enum class CLOTH_FLAGS : uint32_t
-        {
+        enum class CLOTH_FLAGS : uint32_t {
             SMALL = 0x80,
         };
 
@@ -128,10 +127,10 @@ public:
         uint32_t cloth_flags = 0;
     };
 
-    class prim_weighted_mesh
-    {
+    class prim_weighted_mesh {
     public:
         prim_weighted_mesh();
+
         prim_weighted_mesh(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number);
 
         prim_mesh prim_mesh_instance;
@@ -141,11 +140,13 @@ public:
         uint32_t bone_info_offset = 0;
     };
 
-    class prim_sub_mesh
-    {
+    class prim_sub_mesh {
     public:
         prim_sub_mesh();
-        prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number, prim_mesh& temp_prim_mesh, std::vector<char>& meta_data, bool flag_high_resolution, bool& success);
+
+        prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number,
+                      prim_mesh& temp_prim_mesh, std::vector<char>& meta_data, bool flag_high_resolution,
+                      bool& success);
 
         prim_object prim_object_instance;
         uint32_t vertex_count = 0;
@@ -176,11 +177,13 @@ public:
         std::vector<uint16_t> bones_indices_data;
     };
 
-    class prim_weighted_sub_mesh
-    {
+    class prim_weighted_sub_mesh {
     public:
         prim_weighted_sub_mesh();
-        prim_weighted_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number, prim_weighted_mesh& temp_prim_mesh, std::vector<char>& meta_data, bool flag_high_resolution, bool& success);
+
+        prim_weighted_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number,
+                               prim_weighted_mesh& temp_prim_mesh, std::vector<char>& meta_data,
+                               bool flag_high_resolution, bool& success);
 
         prim_object prim_object_instance;
         uint32_t vertex_count = 0;
@@ -211,32 +214,32 @@ public:
         std::vector<uint16_t> bones_indices_data;
     };
 
-	std::string prim_file_name = "";
-	uint32_t prim_rpkg_index = 0;
-	uint32_t prim_hash_index = 0;
-	std::vector<char> prim_input_data;
-	std::vector<char> prim_output_data;
-	std::vector<char> prim_data;
-	std::vector<std::string> mati_depends_file_name;
-	std::vector<std::string> mati_depends_hash_string;
-	std::vector<uint64_t> mati_depends_hash_value;
-	std::vector<uint32_t> mati_depends_index;
-	std::vector<std::vector<std::string>> mati_depends_in_rpkgs;
-	std::vector<uint32_t> mati_depends_in_rpkgs_index;
-	std::vector<std::vector<uint32_t>> mati_depends_rpkg_index;
-	std::vector<uint32_t> mati_depends_rpkg_index_index;
-	std::vector<std::vector<uint32_t>> mati_depends_hash_index;
-	std::vector<uint32_t> mati_depends_hash_index_index;
-	std::vector<std::string> borg_depends_file_name;
-	std::vector<std::string> borg_depends_hash_string;
-	std::vector<uint64_t> borg_depends_hash_value;
-	std::vector<uint32_t> borg_depends_index;
-	std::vector<std::vector<std::string>> borg_depends_in_rpkgs;
-	std::vector<uint32_t> borg_depends_in_rpkgs_index;
-	std::vector<std::vector<uint32_t>> borg_depends_rpkg_index;
-	std::vector<uint32_t> borg_depends_rpkg_index_index;
-	std::vector<std::vector<uint32_t>> borg_depends_hash_index;
-	std::vector<uint32_t> borg_depends_hash_index_index;
+    std::string prim_file_name = "";
+    uint32_t prim_rpkg_index = 0;
+    uint32_t prim_hash_index = 0;
+    std::vector<char> prim_input_data;
+    std::vector<char> prim_output_data;
+    std::vector<char> prim_data;
+    std::vector<std::string> mati_depends_file_name;
+    std::vector<std::string> mati_depends_hash_string;
+    std::vector<uint64_t> mati_depends_hash_value;
+    std::vector<uint32_t> mati_depends_index;
+    std::vector<std::vector<std::string>> mati_depends_in_rpkgs;
+    std::vector<uint32_t> mati_depends_in_rpkgs_index;
+    std::vector<std::vector<uint32_t>> mati_depends_rpkg_index;
+    std::vector<uint32_t> mati_depends_rpkg_index_index;
+    std::vector<std::vector<uint32_t>> mati_depends_hash_index;
+    std::vector<uint32_t> mati_depends_hash_index_index;
+    std::vector<std::string> borg_depends_file_name;
+    std::vector<std::string> borg_depends_hash_string;
+    std::vector<uint64_t> borg_depends_hash_value;
+    std::vector<uint32_t> borg_depends_index;
+    std::vector<std::vector<std::string>> borg_depends_in_rpkgs;
+    std::vector<uint32_t> borg_depends_in_rpkgs_index;
+    std::vector<std::vector<uint32_t>> borg_depends_rpkg_index;
+    std::vector<uint32_t> borg_depends_rpkg_index_index;
+    std::vector<std::vector<uint32_t>> borg_depends_hash_index;
+    std::vector<uint32_t> borg_depends_hash_index_index;
     std::unordered_map<std::string, uint32_t> borg_bone_name_map;
     uint32_t prim_primary_header_offset = 0;
     std::vector<uint32_t> prim_object_offsets;

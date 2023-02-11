@@ -8,28 +8,24 @@
 #include "thirdparty/lz4/lz4hc.h"
 #include <fstream>
 
-prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
-{
+prim::prim(uint64_t rpkgs_index, uint64_t hash_index) {
     prim_rpkg_index = rpkgs_index;
     prim_hash_index = hash_index;
 
-    prim_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value) + "." + rpkgs.at(rpkgs_index).hash.at(hash_index).hash_resource_type;
+    prim_file_name = util::uint64_t_to_hex_string(rpkgs.at(rpkgs_index).hash.at(hash_index).hash_value) + "." +
+                     rpkgs.at(rpkgs_index).hash.at(hash_index).hash_resource_type;
 
     load_hash_depends();
 
     uint64_t prim_hash_size;
 
-    if (rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).data.lz4ed)
-    {
+    if (rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).data.lz4ed) {
         prim_hash_size = rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).data.header.data_size;
 
-        if (rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).data.xored)
-        {
+        if (rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).data.xored) {
             prim_hash_size &= 0x3FFFFFFF;
         }
-    }
-    else
-    {
+    } else {
         prim_hash_size = rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).data.resource.size_final;
     }
 
@@ -37,8 +33,7 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
 
     std::ifstream file = std::ifstream(rpkgs.at(prim_rpkg_index).rpkg_file_path, std::ifstream::binary);
 
-    if (!file.good())
-    {
+    if (!file.good()) {
         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(prim_rpkg_index).rpkg_file_path + " could not be read.");
     }
 
@@ -46,23 +41,20 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
     file.read(prim_input_data.data(), prim_hash_size);
     file.close();
 
-    if (rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).data.xored)
-    {
-        crypto::xor_data(prim_input_data.data(), (uint32_t)prim_hash_size);
+    if (rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).data.xored) {
+        crypto::xor_data(prim_input_data.data(), (uint32_t) prim_hash_size);
     }
 
     uint32_t prim_decompressed_size = rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).data.resource.size_final;
 
     prim_output_data = std::vector<char>(prim_decompressed_size, 0);
 
-    if (rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).data.lz4ed)
-    {
-        LZ4_decompress_safe(prim_input_data.data(), prim_output_data.data(), (int)prim_hash_size, prim_decompressed_size);
+    if (rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).data.lz4ed) {
+        LZ4_decompress_safe(prim_input_data.data(), prim_output_data.data(), (int) prim_hash_size,
+                            prim_decompressed_size);
 
         prim_data = prim_output_data;
-    }
-    else
-    {
+    } else {
         prim_data = prim_input_data;
     }
 
@@ -83,12 +75,9 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
 
     auto it2 = hash_list_hash_map.find(rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).hash_value);
 
-    if (it2 != hash_list_hash_map.end())
-    {
+    if (it2 != hash_list_hash_map.end()) {
         //LOG("  - IOI String: " + hash_list_hash_strings.at(it2->second));
-    }
-    else
-    {
+    } else {
         //LOG("  - IOI String: ");
     }
 
@@ -103,20 +92,15 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
 
     prim_object_headers.push_back(primary_prim_object_header);
 
-    if (primary_prim_object_header.prim_header_instance.type == (uint16_t)prim_header::header_type::OBJECT)
-    {
+    if (primary_prim_object_header.prim_header_instance.type == (uint16_t) prim_header::header_type::OBJECT) {
         //LOG("  - PRIM primary header type: Object");
-    }
-    else if (primary_prim_object_header.prim_header_instance.type == (uint16_t)prim_header::header_type::MESH)
-    {
+    } else if (primary_prim_object_header.prim_header_instance.type == (uint16_t) prim_header::header_type::MESH) {
         //LOG("Error: Not supported: PRIM primary header type: Mesh");
 
         success = false;
 
         return;
-    }
-    else
-    {
+    } else {
         //LOG("Error: Not supported: PRIM primary header type: Unknown");
 
         success = false;
@@ -126,8 +110,7 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
 
     prim_position = primary_prim_object_header.object_offset;
 
-    for (uint32_t o = 0; o < primary_prim_object_header.object_count; o++)
-    {
+    for (uint32_t o = 0; o < primary_prim_object_header.object_count; o++) {
         std::memcpy(&bytes4, &prim_data.data()[prim_position], sizeof(bytes4));
         prim_position += 0x4;
 
@@ -136,8 +119,7 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
         //LOG("  - PRIM object (" + std::to_string(o) + ") offset:" + util::uint32_t_to_hex_string(prim_object_offsets.back()));
     }
 
-    for (uint32_t o = 0; o < prim_object_offsets.size(); o++)
-    {
+    for (uint32_t o = 0; o < prim_object_offsets.size(); o++) {
         //LOG("  - PRIM object (" + std::to_string(o) + ") offset:" + util::uint32_t_to_hex_string(prim_object_offsets.at(o)));
 
         prim_position = prim_object_offsets.at(o);
@@ -155,16 +137,11 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
 
         //LOG("      - PRIM object (" + std::to_string(o) + ") header type value: " + util::uint16_t_to_hex_string(header_type_value));
 
-        if (header_type_value == 1)
-        {
+        if (header_type_value == 1) {
             //LOG("      - PRIM object (" + std::to_string(o) + ") header type: Object");
-        }
-        else if (header_type_value == 2)
-        {
+        } else if (header_type_value == 2) {
             //LOG("      - PRIM object (" + std::to_string(o) + ") header type: Mesh");
-        }
-        else
-        {
+        } else {
             //LOG("      - PRIM object (" + std::to_string(o) + ") header type: Unknown");
         }
 
@@ -172,47 +149,33 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
 
         //LOG("      - PRIM object (" + std::to_string(o) + ") header sub type value: " + util::uint8_t_to_hex_string(object_sub_type_value));
 
-        if (object_sub_type_value == 0x0)
-        {
+        if (object_sub_type_value == 0x0) {
             //LOG("      - PRIM object (" + std::to_string(o) + ") header sub type: Standard");
-        }
-        else if (object_sub_type_value == 0x1)
-        {
+        } else if (object_sub_type_value == 0x1) {
             //LOG("      - PRIM object (" + std::to_string(o) + ") header sub type: Linked");
-        }
-        else if (object_sub_type_value == 0x2)
-        {
+        } else if (object_sub_type_value == 0x2) {
             //LOG("      - PRIM object (" + std::to_string(o) + ") header sub type: Weighted");
-        }
-        else if (object_sub_type_value == 0x3)
-        {
+        } else if (object_sub_type_value == 0x3) {
             //LOG("      - PRIM object (" + std::to_string(o) + ") header sub type: StandardUUV2");
-        }
-        else if (object_sub_type_value == 0x4)
-        {
+        } else if (object_sub_type_value == 0x4) {
             //LOG("      - PRIM object (" + std::to_string(o) + ") header sub type: StandardUUV3");
-        }
-        else if (object_sub_type_value == 0x5)
-        {
+        } else if (object_sub_type_value == 0x5) {
             //LOG("      - PRIM object (" + std::to_string(o) + ") header sub type: StandardUUV4");
-        }
-        else if (object_sub_type_value == 0x6)
-        {
+        } else if (object_sub_type_value == 0x6) {
             //LOG("      - PRIM object (" + std::to_string(o) + ") header sub type: SpeedTree");
         }
 
         prim_position = prim_object_offsets.at(o);
 
-        if (header_type_value == (uint16_t)prim_header::header_type::MESH)
-        {
-            if (object_sub_type_value == (uint16_t)prim_object::SUBTYPE::STANDARD)
-            {
+        if (header_type_value == (uint16_t) prim_header::header_type::MESH) {
+            if (object_sub_type_value == (uint16_t) prim_object::SUBTYPE::STANDARD) {
                 prim_mesh temp_prim_mesh(prim_data, prim_position, o);
                 prim_meshes.push_back(temp_prim_mesh);
 
                 prim_position = temp_prim_mesh.sub_mesh_table_offset;
 
-                prim_sub_mesh temp_prim_sub_mesh(prim_data, prim_position, o, temp_prim_mesh, prim_meta_data, primary_prim_object_header.flag_high_resolution, success);
+                prim_sub_mesh temp_prim_sub_mesh(prim_data, prim_position, o, temp_prim_mesh, prim_meta_data,
+                                                 primary_prim_object_header.flag_high_resolution, success);
                 prim_sub_meshes.push_back(temp_prim_sub_mesh);
 
                 asset3ds_data.names.push_back(prim_file_name + "_" + std::to_string(o));
@@ -235,15 +198,17 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
                 prim_weighted_meshes.push_back(temp_prim_weighted_mesh);
 
                 prim_object_is_weighted.push_back(false);
-            }
-            else if (object_sub_type_value == (uint16_t)prim_object::SUBTYPE::WEIGHTED || object_sub_type_value == (uint16_t)prim_object::SUBTYPE::LINKED)
-            {
+            } else if (object_sub_type_value == (uint16_t) prim_object::SUBTYPE::WEIGHTED ||
+                       object_sub_type_value == (uint16_t) prim_object::SUBTYPE::LINKED) {
                 prim_weighted_mesh temp_prim_weighted_mesh(prim_data, prim_position, o);
                 prim_weighted_meshes.push_back(temp_prim_weighted_mesh);
 
                 prim_position = temp_prim_weighted_mesh.prim_mesh_instance.sub_mesh_table_offset;
 
-                prim_weighted_sub_mesh temp_prim_weighted_sub_mesh(prim_data, prim_position, o, temp_prim_weighted_mesh, prim_meta_data, primary_prim_object_header.flag_high_resolution, success);
+                prim_weighted_sub_mesh temp_prim_weighted_sub_mesh(prim_data, prim_position, o, temp_prim_weighted_mesh,
+                                                                   prim_meta_data,
+                                                                   primary_prim_object_header.flag_high_resolution,
+                                                                   success);
                 prim_weighted_sub_meshes.push_back(temp_prim_weighted_sub_mesh);
 
                 asset3ds_data.names.push_back(prim_file_name + "_" + std::to_string(o));
@@ -253,29 +218,29 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
                 asset3ds_data.tangents.push_back(temp_prim_weighted_sub_mesh.vertexes_tangents);
                 asset3ds_data.uvs.push_back(temp_prim_weighted_sub_mesh.vertexes_uvs);
                 asset3ds_data.colors.push_back(temp_prim_weighted_sub_mesh.vertexes_colors);
-                asset3ds_data.vertexes_weighted_bone_ids_0.push_back(temp_prim_weighted_sub_mesh.vertexes_weighted_bone_ids_0);
-                asset3ds_data.vertexes_weighted_bone_ids_1.push_back(temp_prim_weighted_sub_mesh.vertexes_weighted_bone_ids_1);
-                asset3ds_data.vertexes_weighted_weights_0.push_back(temp_prim_weighted_sub_mesh.vertexes_weighted_weights_0);
-                asset3ds_data.vertexes_weighted_weights_1.push_back(temp_prim_weighted_sub_mesh.vertexes_weighted_weights_1);
+                asset3ds_data.vertexes_weighted_bone_ids_0.push_back(
+                        temp_prim_weighted_sub_mesh.vertexes_weighted_bone_ids_0);
+                asset3ds_data.vertexes_weighted_bone_ids_1.push_back(
+                        temp_prim_weighted_sub_mesh.vertexes_weighted_bone_ids_1);
+                asset3ds_data.vertexes_weighted_weights_0.push_back(
+                        temp_prim_weighted_sub_mesh.vertexes_weighted_weights_0);
+                asset3ds_data.vertexes_weighted_weights_1.push_back(
+                        temp_prim_weighted_sub_mesh.vertexes_weighted_weights_1);
                 asset3ds_data.bones_nodes.push_back(temp_prim_weighted_sub_mesh.bones_nodes_data);
                 asset3ds_data.bones_infos.push_back(temp_prim_weighted_sub_mesh.bones_info_data);
                 asset3ds_data.bones_indices.push_back(temp_prim_weighted_sub_mesh.bones_indices_data);
-                asset3ds_data.material_ids.push_back(temp_prim_weighted_mesh.prim_mesh_instance.prim_object_instance.material_id);
+                asset3ds_data.material_ids.push_back(
+                        temp_prim_weighted_mesh.prim_mesh_instance.prim_object_instance.material_id);
 
                 prim_mesh temp_prim_mesh;
                 prim_meshes.push_back(temp_prim_mesh);
 
-                if (object_sub_type_value == (uint16_t)prim_object::SUBTYPE::WEIGHTED)
-                {
+                if (object_sub_type_value == (uint16_t) prim_object::SUBTYPE::WEIGHTED) {
                     prim_object_is_weighted.push_back(true);
-                }
-                else
-                {
+                } else {
                     prim_object_is_weighted.push_back(false);
                 }
-            }
-            else
-            {
+            } else {
                 //LOG("Error: Not supported: PRIM object type: " + util::uint32_t_to_hex_string(object_sub_type_value));
 
                 success = false;
@@ -285,9 +250,9 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
         }
     }
 
-    if (!borg_depends_file_name.empty())
-    {
-        borg temp_borg(borg_depends_rpkg_index.at(0).at(borg_depends_rpkg_index_index.at(0)), borg_depends_hash_index.at(0).at(borg_depends_hash_index_index.at(0)));
+    if (!borg_depends_file_name.empty()) {
+        borg temp_borg(borg_depends_rpkg_index.at(0).at(borg_depends_rpkg_index_index.at(0)),
+                       borg_depends_hash_index.at(0).at(borg_depends_hash_index_index.at(0)));
 
         asset3ds_data.bones_data = temp_borg.bones_data;
         asset3ds_data.bones_positions = temp_borg.bones_positions;
@@ -297,12 +262,10 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index)
     asset3ds_data.weighted = prim_object_is_weighted;
 }
 
-prim::prim(const std::string& prim_file_path)
-{
+prim::prim(const std::string& prim_file_path) {
     std::ifstream file = std::ifstream(prim_file_path, std::ifstream::binary);
 
-    if (!file.good())
-    {
+    if (!file.good()) {
         LOG_AND_EXIT("Error: PRIM file " + prim_file_path + " could not be read.");
     }
 
@@ -340,8 +303,7 @@ prim::prim(const std::string& prim_file_path)
 
     file.read(prim_input_data.data(), prim_hash_size);
 
-    for (uint32_t b = 0; b < bone_name_count; b++)
-    {
+    for (uint32_t b = 0; b < bone_name_count; b++) {
         uint32_t bone_name_length = 0;
 
         file.read(char4, 0x4);
@@ -355,7 +317,7 @@ prim::prim(const std::string& prim_file_path)
 
     prim_output_data = std::vector<char>(prim_decompressed_size, 0);
 
-    LZ4_decompress_safe(prim_input_data.data(), prim_output_data.data(), (int)prim_hash_size, prim_decompressed_size);
+    LZ4_decompress_safe(prim_input_data.data(), prim_output_data.data(), (int) prim_hash_size, prim_decompressed_size);
 
     prim_data = prim_output_data;
 
@@ -386,20 +348,15 @@ prim::prim(const std::string& prim_file_path)
 
     prim_object_headers.push_back(primary_prim_object_header);
 
-    if (primary_prim_object_header.prim_header_instance.type == (uint16_t)prim_header::header_type::OBJECT)
-    {
+    if (primary_prim_object_header.prim_header_instance.type == (uint16_t) prim_header::header_type::OBJECT) {
         //LOG("  - PRIM primary header type: Object");
-    }
-    else if (primary_prim_object_header.prim_header_instance.type == (uint16_t)prim_header::header_type::MESH)
-    {
+    } else if (primary_prim_object_header.prim_header_instance.type == (uint16_t) prim_header::header_type::MESH) {
         //LOG("Error: Not supported: PRIM primary header type: Mesh");
 
         success = false;
 
         return;
-    }
-    else
-    {
+    } else {
         //LOG("Error: Not supported: PRIM primary header type: Unknown");
 
         success = false;
@@ -409,8 +366,7 @@ prim::prim(const std::string& prim_file_path)
 
     prim_position = primary_prim_object_header.object_offset;
 
-    for (uint32_t o = 0; o < primary_prim_object_header.object_count; o++)
-    {
+    for (uint32_t o = 0; o < primary_prim_object_header.object_count; o++) {
         std::memcpy(&bytes4, &prim_data.data()[prim_position], sizeof(bytes4));
         prim_position += 0x4;
 
@@ -419,8 +375,7 @@ prim::prim(const std::string& prim_file_path)
         //LOG("  - PRIM object (" + std::to_string(o) + ") offset:" + util::uint32_t_to_hex_string(prim_object_offsets.back()));
     }
 
-    for (uint32_t o = 0; o < prim_object_offsets.size(); o++)
-    {
+    for (uint32_t o = 0; o < prim_object_offsets.size(); o++) {
         //LOG("  - PRIM object (" + std::to_string(o) + ") offset:" + util::uint32_t_to_hex_string(prim_object_offsets.at(o)));
 
         prim_position = prim_object_offsets.at(o);
@@ -438,16 +393,11 @@ prim::prim(const std::string& prim_file_path)
 
         //LOG("      - PRIM object (" + std::to_string(o) + ") header type value: " + util::uint16_t_to_hex_string(header_type_value));
 
-        if (header_type_value == 1)
-        {
+        if (header_type_value == 1) {
             //LOG("      - PRIM object (" + std::to_string(o) + ") header type: Object");
-        }
-        else if (header_type_value == 2)
-        {
+        } else if (header_type_value == 2) {
             //LOG("      - PRIM object (" + std::to_string(o) + ") header type: Mesh");
-        }
-        else
-        {
+        } else {
             //LOG("      - PRIM object (" + std::to_string(o) + ") header type: Unknown");
         }
 
@@ -455,47 +405,33 @@ prim::prim(const std::string& prim_file_path)
 
         //LOG("      - PRIM object (" + std::to_string(o) + ") header sub type value: " + util::uint8_t_to_hex_string(object_sub_type_value));
 
-        if (object_sub_type_value == 0x0)
-        {
+        if (object_sub_type_value == 0x0) {
             //LOG("      - PRIM object (" + std::to_string(o) + ") header sub type: Standard");
-        }
-        else if (object_sub_type_value == 0x1)
-        {
+        } else if (object_sub_type_value == 0x1) {
             //LOG("      - PRIM object (" + std::to_string(o) + ") header sub type: Linked");
-        }
-        else if (object_sub_type_value == 0x2)
-        {
+        } else if (object_sub_type_value == 0x2) {
             //LOG("      - PRIM object (" + std::to_string(o) + ") header sub type: Weighted");
-        }
-        else if (object_sub_type_value == 0x3)
-        {
+        } else if (object_sub_type_value == 0x3) {
             //LOG("      - PRIM object (" + std::to_string(o) + ") header sub type: StandardUUV2");
-        }
-        else if (object_sub_type_value == 0x4)
-        {
+        } else if (object_sub_type_value == 0x4) {
             //LOG("      - PRIM object (" + std::to_string(o) + ") header sub type: StandardUUV3");
-        }
-        else if (object_sub_type_value == 0x5)
-        {
+        } else if (object_sub_type_value == 0x5) {
             //LOG("      - PRIM object (" + std::to_string(o) + ") header sub type: StandardUUV4");
-        }
-        else if (object_sub_type_value == 0x6)
-        {
+        } else if (object_sub_type_value == 0x6) {
             //LOG("      - PRIM object (" + std::to_string(o) + ") header sub type: SpeedTree");
         }
 
         prim_position = prim_object_offsets.at(o);
 
-        if (header_type_value == (uint16_t)prim_header::header_type::MESH)
-        {
-            if (object_sub_type_value == (uint16_t)prim_object::SUBTYPE::STANDARD)
-            {
+        if (header_type_value == (uint16_t) prim_header::header_type::MESH) {
+            if (object_sub_type_value == (uint16_t) prim_object::SUBTYPE::STANDARD) {
                 prim_mesh temp_prim_mesh(prim_data, prim_position, o);
                 prim_meshes.push_back(temp_prim_mesh);
 
                 prim_position = temp_prim_mesh.sub_mesh_table_offset;
 
-                prim_sub_mesh temp_prim_sub_mesh(prim_data, prim_position, o, temp_prim_mesh, prim_meta_data, primary_prim_object_header.flag_high_resolution, success);
+                prim_sub_mesh temp_prim_sub_mesh(prim_data, prim_position, o, temp_prim_mesh, prim_meta_data,
+                                                 primary_prim_object_header.flag_high_resolution, success);
                 prim_sub_meshes.push_back(temp_prim_sub_mesh);
 
                 asset3ds_data.names.push_back(prim_file_name + "_" + std::to_string(o));
@@ -517,15 +453,17 @@ prim::prim(const std::string& prim_file_path)
                 prim_weighted_meshes.push_back(temp_prim_weighted_mesh);
 
                 prim_object_is_weighted.push_back(false);
-            }
-            else if (object_sub_type_value == (uint16_t)prim_object::SUBTYPE::WEIGHTED || object_sub_type_value == (uint16_t)prim_object::SUBTYPE::LINKED)
-            {
+            } else if (object_sub_type_value == (uint16_t) prim_object::SUBTYPE::WEIGHTED ||
+                       object_sub_type_value == (uint16_t) prim_object::SUBTYPE::LINKED) {
                 prim_weighted_mesh temp_prim_weighted_mesh(prim_data, prim_position, o);
                 prim_weighted_meshes.push_back(temp_prim_weighted_mesh);
 
                 prim_position = temp_prim_weighted_mesh.prim_mesh_instance.sub_mesh_table_offset;
 
-                prim_weighted_sub_mesh temp_prim_weighted_sub_mesh(prim_data, prim_position, o, temp_prim_weighted_mesh, prim_meta_data, primary_prim_object_header.flag_high_resolution, success);
+                prim_weighted_sub_mesh temp_prim_weighted_sub_mesh(prim_data, prim_position, o, temp_prim_weighted_mesh,
+                                                                   prim_meta_data,
+                                                                   primary_prim_object_header.flag_high_resolution,
+                                                                   success);
                 prim_weighted_sub_meshes.push_back(temp_prim_weighted_sub_mesh);
 
                 asset3ds_data.names.push_back(prim_file_name + "_" + std::to_string(o));
@@ -535,10 +473,14 @@ prim::prim(const std::string& prim_file_path)
                 asset3ds_data.tangents.push_back(temp_prim_weighted_sub_mesh.vertexes_tangents);
                 asset3ds_data.uvs.push_back(temp_prim_weighted_sub_mesh.vertexes_uvs);
                 asset3ds_data.colors.push_back(temp_prim_weighted_sub_mesh.vertexes_colors);
-                asset3ds_data.vertexes_weighted_bone_ids_0.push_back(temp_prim_weighted_sub_mesh.vertexes_weighted_bone_ids_0);
-                asset3ds_data.vertexes_weighted_bone_ids_1.push_back(temp_prim_weighted_sub_mesh.vertexes_weighted_bone_ids_1);
-                asset3ds_data.vertexes_weighted_weights_0.push_back(temp_prim_weighted_sub_mesh.vertexes_weighted_weights_0);
-                asset3ds_data.vertexes_weighted_weights_1.push_back(temp_prim_weighted_sub_mesh.vertexes_weighted_weights_1);
+                asset3ds_data.vertexes_weighted_bone_ids_0.push_back(
+                        temp_prim_weighted_sub_mesh.vertexes_weighted_bone_ids_0);
+                asset3ds_data.vertexes_weighted_bone_ids_1.push_back(
+                        temp_prim_weighted_sub_mesh.vertexes_weighted_bone_ids_1);
+                asset3ds_data.vertexes_weighted_weights_0.push_back(
+                        temp_prim_weighted_sub_mesh.vertexes_weighted_weights_0);
+                asset3ds_data.vertexes_weighted_weights_1.push_back(
+                        temp_prim_weighted_sub_mesh.vertexes_weighted_weights_1);
                 asset3ds_data.bones_nodes.push_back(temp_prim_weighted_sub_mesh.bones_nodes_data);
                 asset3ds_data.bones_infos.push_back(temp_prim_weighted_sub_mesh.bones_info_data);
                 asset3ds_data.bones_indices.push_back(temp_prim_weighted_sub_mesh.bones_indices_data);
@@ -546,17 +488,12 @@ prim::prim(const std::string& prim_file_path)
                 prim_mesh temp_prim_mesh;
                 prim_meshes.push_back(temp_prim_mesh);
 
-                if (object_sub_type_value == (uint16_t)prim_object::SUBTYPE::WEIGHTED)
-                {
+                if (object_sub_type_value == (uint16_t) prim_object::SUBTYPE::WEIGHTED) {
                     prim_object_is_weighted.push_back(true);
-                }
-                else
-                {
+                } else {
                     prim_object_is_weighted.push_back(false);
                 }
-            }
-            else
-            {
+            } else {
                 //LOG("Error: Not supported: PRIM object type: " + util::uint32_t_to_hex_string(object_sub_type_value));
 
                 success = false;
@@ -566,8 +503,7 @@ prim::prim(const std::string& prim_file_path)
         }
     }
 
-    if (!borg_depends_file_name.empty())
-    {
+    if (!borg_depends_file_name.empty()) {
         //borg temp_borg(borg_depends_rpkg_index.at(0).at(borg_depends_rpkg_index_index.at(0)), borg_depends_hash_index.at(0).at(borg_depends_hash_index_index.at(0)));
 
         //asset3ds_data.bones_data = temp_borg.bones_data;
@@ -578,14 +514,12 @@ prim::prim(const std::string& prim_file_path)
     asset3ds_data.weighted = prim_object_is_weighted;
 }
 
-void prim::load_hash_depends()
-{
-    const uint32_t prim_hash_reference_count = rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
+void prim::load_hash_depends() {
+    const uint32_t prim_hash_reference_count =
+            rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
-    if (prim_hash_reference_count > 0)
-    {
-        for (uint64_t i = 0; i < prim_hash_reference_count; i++)
-        {
+    if (prim_hash_reference_count > 0) {
+        for (uint64_t i = 0; i < prim_hash_reference_count; i++) {
             std::vector<std::string> prim_mati_depends_in_rpkgs;
             std::vector<uint32_t> prim_mati_depends_rpkg_index;
             std::vector<uint32_t> prim_mati_depends_hash_index;
@@ -597,17 +531,16 @@ void prim::load_hash_depends()
             bool mati_found = false;
             bool borg_found = false;
 
-            for (uint64_t j = 0; j < rpkgs.size(); j++)
-            {
-                auto it = rpkgs.at(j).hash_map.find(rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).hash_reference_data.hash_reference.at(i));
+            for (uint64_t j = 0; j < rpkgs.size(); j++) {
+                auto it = rpkgs.at(j).hash_map.find(
+                        rpkgs.at(prim_rpkg_index).hash.at(prim_hash_index).hash_reference_data.hash_reference.at(i));
 
-                if (it != rpkgs.at(j).hash_map.end())
-                {
-                    if (rpkgs.at(j).hash.at(it->second).hash_resource_type == "MATI")
-                    {
-                        if (!mati_found)
-                        {
-                            mati_depends_file_name.push_back(util::uint64_t_to_hex_string(rpkgs.at(j).hash.at(it->second).hash_value) + "." + rpkgs.at(j).hash.at(it->second).hash_resource_type);
+                if (it != rpkgs.at(j).hash_map.end()) {
+                    if (rpkgs.at(j).hash.at(it->second).hash_resource_type == "MATI") {
+                        if (!mati_found) {
+                            mati_depends_file_name.push_back(
+                                    util::uint64_t_to_hex_string(rpkgs.at(j).hash.at(it->second).hash_value) + "." +
+                                    rpkgs.at(j).hash.at(it->second).hash_resource_type);
 
                             mati_depends_index.push_back(i);
 
@@ -626,11 +559,11 @@ void prim::load_hash_depends()
                         //LOG("  - Hash Index: " + util::uint64_t_to_string(prim_mati_depends_hash_index.back()));
                     }
 
-                    if (rpkgs.at(j).hash.at(it->second).hash_resource_type == "BORG")
-                    {
-                        if (!borg_found)
-                        {
-                            borg_depends_file_name.push_back(util::uint64_t_to_hex_string(rpkgs.at(j).hash.at(it->second).hash_value) + "." + rpkgs.at(j).hash.at(it->second).hash_resource_type);
+                    if (rpkgs.at(j).hash.at(it->second).hash_resource_type == "BORG") {
+                        if (!borg_found) {
+                            borg_depends_file_name.push_back(
+                                    util::uint64_t_to_hex_string(rpkgs.at(j).hash.at(it->second).hash_value) + "." +
+                                    rpkgs.at(j).hash.at(it->second).hash_resource_type);
 
                             borg_depends_index.push_back(i);
 
@@ -653,8 +586,7 @@ void prim::load_hash_depends()
 
             uint32_t mati_value = 0;
 
-            if (mati_found)
-            {
+            if (mati_found) {
                 mati_depends_in_rpkgs.push_back(prim_mati_depends_in_rpkgs);
                 mati_depends_rpkg_index.push_back(prim_mati_depends_rpkg_index);
                 mati_depends_hash_index.push_back(prim_mati_depends_hash_index);
@@ -663,8 +595,7 @@ void prim::load_hash_depends()
                 mati_depends_hash_index_index.push_back(mati_value);
             }
 
-            if (borg_found)
-            {
+            if (borg_found) {
                 borg_depends_in_rpkgs.push_back(prim_borg_depends_in_rpkgs);
                 borg_depends_rpkg_index.push_back(prim_borg_depends_rpkg_index);
                 borg_depends_hash_index.push_back(prim_borg_depends_hash_index);
@@ -675,34 +606,31 @@ void prim::load_hash_depends()
         }
     }
 
-    for (uint64_t k = 0; k < mati_depends_file_name.size(); k++)
-    {
+    for (uint64_t k = 0; k < mati_depends_file_name.size(); k++) {
         //LOG("  - MATI File Name: " + mati_depends_file_name.at(k));
 
         bool mati_patch_name_found = false;
 
         long patch_level = 0;
 
-        for (uint64_t d = 0; d < mati_depends_in_rpkgs.at(k).size(); d++)
-        {
+        for (uint64_t d = 0; d < mati_depends_in_rpkgs.at(k).size(); d++) {
             std::string mati_depends_in_rpkgs_upper_case = util::to_upper_case(mati_depends_in_rpkgs.at(k).at(d));
 
-            std::string_view mati_depends_in_rpkgs_string_view(mati_depends_in_rpkgs_upper_case.c_str(), mati_depends_in_rpkgs_upper_case.length());
+            std::string_view mati_depends_in_rpkgs_string_view(mati_depends_in_rpkgs_upper_case.c_str(),
+                                                               mati_depends_in_rpkgs_upper_case.length());
 
             size_t pos1 = mati_depends_in_rpkgs_string_view.find("PATCH");
 
-            if (pos1 != std::string::npos)
-            {
+            if (pos1 != std::string::npos) {
                 size_t pos2 = mati_depends_in_rpkgs_string_view.substr(pos1).find('.');
 
-                if (pos2 != std::string::npos)
-                {
+                if (pos2 != std::string::npos) {
                     mati_patch_name_found = true;
 
-                    long new_patch_level = std::strtol(std::string(mati_depends_in_rpkgs_string_view.substr(pos1 + 5, pos2)).c_str(), nullptr, 10);
+                    long new_patch_level = std::strtol(
+                            std::string(mati_depends_in_rpkgs_string_view.substr(pos1 + 5, pos2)).c_str(), nullptr, 10);
 
-                    if (new_patch_level > patch_level)
-                    {
+                    if (new_patch_level > patch_level) {
                         patch_level = new_patch_level;
 
                         mati_depends_in_rpkgs_index.at(k) = d;
@@ -710,11 +638,8 @@ void prim::load_hash_depends()
                         mati_depends_hash_index_index.at(k) = d;
                     }
                 }
-            }
-            else
-            {
-                if (!mati_patch_name_found)
-                {
+            } else {
+                if (!mati_patch_name_found) {
                     mati_depends_in_rpkgs_index.at(k) = d;
                     mati_depends_rpkg_index_index.at(k) = d;
                     mati_depends_hash_index_index.at(k) = d;
@@ -727,34 +652,31 @@ void prim::load_hash_depends()
         //LOG("  - MATI File Name In RPKG Used: " + mati_depends_in_rpkgs.at(k).at(mati_depends_rpkg_index_index.at(k)));
     }
 
-    for (uint64_t k = 0; k < borg_depends_file_name.size(); k++)
-    {
+    for (uint64_t k = 0; k < borg_depends_file_name.size(); k++) {
         //LOG("  - BORG File Name: " + borg_depends_file_name.at(k));
 
         bool borg_patch_name_found = false;
 
         long patch_level = 0;
 
-        for (uint64_t d = 0; d < borg_depends_in_rpkgs.at(k).size(); d++)
-        {
+        for (uint64_t d = 0; d < borg_depends_in_rpkgs.at(k).size(); d++) {
             std::string borg_depends_in_rpkgs_upper_case = util::to_upper_case(borg_depends_in_rpkgs.at(k).at(d));
 
-            std::string_view borg_depends_in_rpkgs_string_view(borg_depends_in_rpkgs_upper_case.c_str(), borg_depends_in_rpkgs_upper_case.length());
+            std::string_view borg_depends_in_rpkgs_string_view(borg_depends_in_rpkgs_upper_case.c_str(),
+                                                               borg_depends_in_rpkgs_upper_case.length());
 
             size_t pos1 = borg_depends_in_rpkgs_string_view.find("PATCH");
 
-            if (pos1 != std::string::npos)
-            {
+            if (pos1 != std::string::npos) {
                 size_t pos2 = borg_depends_in_rpkgs_string_view.substr(pos1).find('.');
 
-                if (pos2 != std::string::npos)
-                {
+                if (pos2 != std::string::npos) {
                     borg_patch_name_found = true;
 
-                    long new_patch_level = std::strtol(std::string(borg_depends_in_rpkgs_string_view.substr(pos1 + 5, pos2)).c_str(), nullptr, 10);
+                    long new_patch_level = std::strtol(
+                            std::string(borg_depends_in_rpkgs_string_view.substr(pos1 + 5, pos2)).c_str(), nullptr, 10);
 
-                    if (new_patch_level > patch_level)
-                    {
+                    if (new_patch_level > patch_level) {
                         patch_level = new_patch_level;
 
                         borg_depends_in_rpkgs_index.at(k) = d;
@@ -762,11 +684,8 @@ void prim::load_hash_depends()
                         borg_depends_hash_index_index.at(k) = d;
                     }
                 }
-            }
-            else
-            {
-                if (!borg_patch_name_found)
-                {
+            } else {
+                if (!borg_patch_name_found) {
                     borg_depends_in_rpkgs_index.at(k) = d;
                     borg_depends_rpkg_index_index.at(k) = d;
                     borg_depends_hash_index_index.at(k) = d;
@@ -782,8 +701,7 @@ void prim::load_hash_depends()
 
 prim::prim_header::prim_header() = default;
 
-prim::prim_header::prim_header(std::vector<char>& prim_data, uint32_t& prim_position)
-{
+prim::prim_header::prim_header(std::vector<char>& prim_data, uint32_t& prim_position) {
     uint8_t bytes1 = 0;
     uint16_t bytes2 = 0;
     uint32_t bytes4 = 0;
@@ -809,8 +727,7 @@ prim::prim_header::prim_header(std::vector<char>& prim_data, uint32_t& prim_posi
 
 prim::prim_object_header::prim_object_header() = default;
 
-prim::prim_object_header::prim_object_header(std::vector<char>& prim_data, uint32_t& prim_position)
-{
+prim::prim_object_header::prim_object_header(std::vector<char>& prim_data, uint32_t& prim_position) {
     uint8_t bytes1 = 0;
     uint16_t bytes2 = 0;
     uint32_t bytes4 = 0;
@@ -823,38 +740,32 @@ prim::prim_object_header::prim_object_header(std::vector<char>& prim_data, uint3
 
     //LOG("  - PRIM primary header property flags: " + util::uint32_t_to_hex_string(property_flags));
 
-    if ((property_flags & 0x1) == 0x1)
-    {
+    if ((property_flags & 0x1) == 0x1) {
         flag_bones = true;
 
         //LOG("  - PRIM primary header flag set: Bones");
     }
-    if ((property_flags & 0x2) == 0x2)
-    {
+    if ((property_flags & 0x2) == 0x2) {
         flag_frames = true;
 
         //LOG("  - PRIM primary header flag set: Frames");
     }
-    if ((property_flags & 0x4) == 0x4)
-    {
+    if ((property_flags & 0x4) == 0x4) {
         flag_linked = true;
 
         //LOG("  - PRIM primary header flag set: Linked");
     }
-    if ((property_flags & 0x8) == 0x8)
-    {
+    if ((property_flags & 0x8) == 0x8) {
         flag_weighted = true;
 
         //LOG("  - PRIM primary header flag set: Weighted");
     }
-    if ((property_flags & 0x100) == 0x100)
-    {
+    if ((property_flags & 0x100) == 0x100) {
         flag_bounds = true;
 
         //LOG("  - PRIM primary header flag set: Bounds");
     }
-    if ((property_flags & 0x200) == 0x200)
-    {
+    if ((property_flags & 0x200) == 0x200) {
         flag_high_resolution = true;
 
         //LOG("  - PRIM primary header flag set: High Resolution");
@@ -902,8 +813,7 @@ prim::prim_object_header::prim_object_header(std::vector<char>& prim_data, uint3
 
 prim::prim_object::prim_object() = default;
 
-prim::prim_object::prim_object(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number)
-{
+prim::prim_object::prim_object(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number) {
     uint8_t bytes1 = 0;
     uint16_t bytes2 = 0;
     uint32_t bytes4 = 0;
@@ -920,32 +830,19 @@ prim::prim_object::prim_object(std::vector<char>& prim_data, uint32_t& prim_posi
 
     //LOG("      - PRIM object (" + std::to_string(object) + ") header sub type value: " + util::uint8_t_to_hex_string(sub_type));
 
-    if (sub_type == 0x0)
-    {
+    if (sub_type == 0x0) {
         //LOG("      - PRIM object (" + std::to_string(object) + ") header sub type: Standard");
-    }
-    else if (sub_type == 0x1)
-    {
+    } else if (sub_type == 0x1) {
         //LOG("      - PRIM object (" + std::to_string(object) + ") header sub type: Linked");
-    }
-    else if (sub_type == 0x2)
-    {
+    } else if (sub_type == 0x2) {
         //LOG("      - PRIM object (" + std::to_string(object) + ") header sub type: Weighted");
-    }
-    else if (sub_type == 0x3)
-    {
+    } else if (sub_type == 0x3) {
         //LOG("      - PRIM object (" + std::to_string(object) + ") header sub type: StandardUUV2");
-    }
-    else if (sub_type == 0x4)
-    {
+    } else if (sub_type == 0x4) {
         //LOG("      - PRIM object (" + std::to_string(object) + ") header sub type: StandardUUV3");
-    }
-    else if (sub_type == 0x5)
-    {
+    } else if (sub_type == 0x5) {
         //LOG("      - PRIM object (" + std::to_string(object) + ") header sub type: StandardUUV4");
-    }
-    else if (sub_type == 0x6)
-    {
+    } else if (sub_type == 0x6) {
         //LOG("      - PRIM object (" + std::to_string(object) + ") header sub type: SpeedTree");
     }
 
@@ -956,36 +853,28 @@ prim::prim_object::prim_object(std::vector<char>& prim_data, uint32_t& prim_posi
 
     //LOG("      - PRIM object (" + std::to_string(object) + ") header property flags: " + util::uint8_t_to_hex_string(property_flags));
 
-    if (property_flags == 0x0)
-    {
+    if (property_flags == 0x0) {
         //LOG("      - PRIM object (" + std::to_string(object) + ") header flag set: None");
     }
-    if ((property_flags & 0x1) == 0x1)
-    {
+    if ((property_flags & 0x1) == 0x1) {
         //LOG("      - PRIM object (" + std::to_string(object) + ") header flag set: XAxisLocked");
     }
-    if ((property_flags & 0x2) == 0x2)
-    {
+    if ((property_flags & 0x2) == 0x2) {
         //LOG("      - PRIM object (" + std::to_string(object) + ") header flag set: YAxisLocked");
     }
-    if ((property_flags & 0x4) == 0x4)
-    {
+    if ((property_flags & 0x4) == 0x4) {
         //LOG("      - PRIM object (" + std::to_string(object) + ") header flag set: ZAxisLocked");
     }
-    if ((property_flags & 0x8) == 0x8)
-    {
+    if ((property_flags & 0x8) == 0x8) {
         //LOG("      - PRIM object (" + std::to_string(object) + ") header flag set: 32BitVertexData");
     }
-    if ((property_flags & 0x10) == 0x10)
-    {
+    if ((property_flags & 0x10) == 0x10) {
         //LOG("      - PRIM object (" + std::to_string(object) + ") header flag set: PS3");
     }
-    if ((property_flags & 0x20) == 0x20)
-    {
+    if ((property_flags & 0x20) == 0x20) {
         //LOG("      - PRIM object (" + std::to_string(object) + ") header flag set: Color1");
     }
-    if ((property_flags & 0x40) == 0x40)
-    {
+    if ((property_flags & 0x40) == 0x40) {
         //LOG("      - PRIM object (" + std::to_string(object) + ") header flag set: NoPhysics");
     }
 
@@ -1065,8 +954,7 @@ prim::prim_object::prim_object(std::vector<char>& prim_data, uint32_t& prim_posi
 
 prim::prim_mesh::prim_mesh() = default;
 
-prim::prim_mesh::prim_mesh(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number)
-{
+prim::prim_mesh::prim_mesh(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number) {
     uint8_t bytes1 = 0;
     uint16_t bytes2 = 0;
     uint32_t bytes4 = 0;
@@ -1148,8 +1036,8 @@ prim::prim_mesh::prim_mesh(std::vector<char>& prim_data, uint32_t& prim_position
 
 prim::prim_weighted_mesh::prim_weighted_mesh() = default;
 
-prim::prim_weighted_mesh::prim_weighted_mesh(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number)
-{
+prim::prim_weighted_mesh::prim_weighted_mesh(std::vector<char>& prim_data, uint32_t& prim_position,
+                                             uint32_t prim_object_number) {
     uint8_t bytes1 = 0;
     uint16_t bytes2 = 0;
     uint32_t bytes4 = 0;
@@ -1183,8 +1071,9 @@ prim::prim_weighted_mesh::prim_weighted_mesh(std::vector<char>& prim_data, uint3
 
 prim::prim_sub_mesh::prim_sub_mesh() = default;
 
-prim::prim_sub_mesh::prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number, prim_mesh& temp_prim_mesh, std::vector<char>& prim_meta_data, bool flag_high_resolution, bool& success)
-{
+prim::prim_sub_mesh::prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number,
+                                   prim_mesh& temp_prim_mesh, std::vector<char>& prim_meta_data,
+                                   bool flag_high_resolution, bool& success) {
     uint8_t bytes1 = 0;
     uint16_t bytes2 = 0;
     uint32_t bytes4 = 0;
@@ -1243,16 +1132,14 @@ prim::prim_sub_mesh::prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_
 
     //LOG("          - PRIM object (" + std::to_string(object) + ") sub mesh unknown offset: " + util::uint32_t_to_hex_string(unknown_offset));
 
-    if (uv_channel_count == 1)
-    {
+    if (uv_channel_count == 1) {
         prim_position = index_buffer_offset;
 
         uint32_t index_count_total = index_count + index_count_additional;
 
         //LOG("          - PRIM object (" + std::to_string(object) + ") sub mesh indexes at (" + util::uint32_t_to_hex_string(index_buffer_offset) + "): ");
 
-        for (uint32_t x = 0; x < index_count_total; x++)
-        {
+        for (uint32_t x = 0; x < index_count_total; x++) {
             std::memcpy(&bytes2, &prim_data.data()[prim_position], sizeof(bytes2));
             std::memcpy(&prim_meta_data.data()[prim_position], &bytes2_zero, sizeof(bytes2));
             prim_position += 0x2;
@@ -1264,10 +1151,8 @@ prim::prim_sub_mesh::prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_
 
         prim_position = vertex_buffer_offset;
 
-        if (flag_high_resolution)
-        {
-            for (uint32_t v = 0; v < vertex_count; v++)
-            {
+        if (flag_high_resolution) {
+            for (uint32_t v = 0; v < vertex_count; v++) {
                 vector4 temp_vector4;
 
                 //LOG("          - PRIM object (" + std::to_string(object) + ") sub mesh vertex (32bit float): ");
@@ -1294,11 +1179,8 @@ prim::prim_sub_mesh::prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_
                 vertexes.push_back(temp_vector4.y);
                 vertexes.push_back(temp_vector4.z);
             }
-        }
-        else
-        {
-            for (uint32_t v = 0; v < vertex_count; v++)
-            {
+        } else {
+            for (uint32_t v = 0; v < vertex_count; v++) {
                 short temp_short = 0;
 
                 vector4 temp_vector4;
@@ -1311,7 +1193,8 @@ prim::prim_sub_mesh::prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_
 
                 //LOG("              - x: " + util::short_to_string(temp_short));
 
-                temp_vector4.x = (static_cast<float>(temp_short) * temp_prim_mesh.vertex_position_scale.x) / std::numeric_limits<short>::max() + temp_prim_mesh.vertex_position_bias.x;
+                temp_vector4.x = (static_cast<float>(temp_short) * temp_prim_mesh.vertex_position_scale.x) /
+                                 std::numeric_limits<short>::max() + temp_prim_mesh.vertex_position_bias.x;
 
                 std::memcpy(&temp_short, &prim_data.data()[prim_position], sizeof(bytes2));
                 std::memcpy(&prim_meta_data.data()[prim_position], &bytes2_zero, sizeof(bytes2));
@@ -1319,7 +1202,8 @@ prim::prim_sub_mesh::prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_
 
                 //LOG("              - y: " + util::short_to_string(temp_short));
 
-                temp_vector4.y = (static_cast<float>(temp_short) * temp_prim_mesh.vertex_position_scale.y) / std::numeric_limits<short>::max() + temp_prim_mesh.vertex_position_bias.y;
+                temp_vector4.y = (static_cast<float>(temp_short) * temp_prim_mesh.vertex_position_scale.y) /
+                                 std::numeric_limits<short>::max() + temp_prim_mesh.vertex_position_bias.y;
 
                 std::memcpy(&temp_short, &prim_data.data()[prim_position], sizeof(bytes2));
                 std::memcpy(&prim_meta_data.data()[prim_position], &bytes2_zero, sizeof(bytes2));
@@ -1327,7 +1211,8 @@ prim::prim_sub_mesh::prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_
 
                 //LOG("              - z: " + util::short_to_string(temp_short));
 
-                temp_vector4.z = (static_cast<float>(temp_short) * temp_prim_mesh.vertex_position_scale.z) / std::numeric_limits<short>::max() + temp_prim_mesh.vertex_position_bias.z;
+                temp_vector4.z = (static_cast<float>(temp_short) * temp_prim_mesh.vertex_position_scale.z) /
+                                 std::numeric_limits<short>::max() + temp_prim_mesh.vertex_position_bias.z;
 
                 std::memcpy(&temp_short, &prim_data.data()[prim_position], sizeof(bytes2));
                 std::memcpy(&prim_meta_data.data()[prim_position], &bytes2_zero, sizeof(bytes2));
@@ -1335,7 +1220,8 @@ prim::prim_sub_mesh::prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_
 
                 //LOG("              - w: " + util::short_to_string(temp_short));
 
-                temp_vector4.w = (static_cast<float>(temp_short) * temp_prim_mesh.vertex_position_scale.w) / std::numeric_limits<short>::max() + temp_prim_mesh.vertex_position_bias.w;
+                temp_vector4.w = (static_cast<float>(temp_short) * temp_prim_mesh.vertex_position_scale.w) /
+                                 std::numeric_limits<short>::max() + temp_prim_mesh.vertex_position_bias.w;
 
                 vertexes.push_back(temp_vector4.x);
                 vertexes.push_back(temp_vector4.y);
@@ -1353,8 +1239,7 @@ prim::prim_sub_mesh::prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_
 
         if (1)//if (prim_object_sub_type.at(o) != 0x2)
         {
-            for (uint32_t v = 0; v < vertex_count; v++)
-            {
+            for (uint32_t v = 0; v < vertex_count; v++) {
                 vector4 temp_vector4;
 
                 //LOG("          - PRIM object (" + std::to_string(object) + ") sub mesh vertex normal compressed (uint8_t):");
@@ -1502,7 +1387,8 @@ prim::prim_sub_mesh::prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_
 
                 //LOG("              - x: " + util::short_to_string(temp_short));
 
-                temp_vector2.x = (static_cast<float>(temp_short) * temp_prim_mesh.uv_position_scale.x) / std::numeric_limits<short>::max() + temp_prim_mesh.uv_position_bias.x;
+                temp_vector2.x = (static_cast<float>(temp_short) * temp_prim_mesh.uv_position_scale.x) /
+                                 std::numeric_limits<short>::max() + temp_prim_mesh.uv_position_bias.x;
 
                 std::memcpy(&temp_short, &prim_data.data()[prim_position], sizeof(bytes2));
                 std::memcpy(&prim_meta_data.data()[prim_position], &bytes2_zero, sizeof(bytes2));
@@ -1510,7 +1396,8 @@ prim::prim_sub_mesh::prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_
 
                 //LOG("              - y: " + util::short_to_string(temp_short));
 
-                temp_vector2.y = (static_cast<float>(temp_short) * temp_prim_mesh.uv_position_scale.y) / std::numeric_limits<short>::max() + temp_prim_mesh.uv_position_bias.y;
+                temp_vector2.y = (static_cast<float>(temp_short) * temp_prim_mesh.uv_position_scale.y) /
+                                 std::numeric_limits<short>::max() + temp_prim_mesh.uv_position_bias.y;
 
                 vertexes_uvs.push_back(temp_vector2.x);
                 vertexes_uvs.push_back(temp_vector2.y);
@@ -1520,10 +1407,9 @@ prim::prim_sub_mesh::prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_
                 //LOG("              - y: " + util::float_to_string(temp_vector2.y));
             }
 
-            if (temp_prim_mesh.prim_object_instance.sub_type == (uint32_t)prim_object::SUBTYPE::WEIGHTED || ((prim_object_instance.property_flags & (uint32_t)prim_object::PROPERTY_FLAGS::COLOR1) == 0x0))
-            {
-                for (uint32_t v = 0; v < vertex_count; v++)
-                {
+            if (temp_prim_mesh.prim_object_instance.sub_type == (uint32_t) prim_object::SUBTYPE::WEIGHTED ||
+                ((prim_object_instance.property_flags & (uint32_t) prim_object::PROPERTY_FLAGS::COLOR1) == 0x0)) {
+                for (uint32_t v = 0; v < vertex_count; v++) {
                     rgba temp_rgba;
 
                     std::memcpy(&bytes1, &prim_data.data()[prim_position], sizeof(bytes1));
@@ -1565,12 +1451,11 @@ prim::prim_sub_mesh::prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_
                 }
             }
 
-            if (cloth_offset)
-            {
+            if (cloth_offset) {
                 prim_position = cloth_offset;
 
-                if ((temp_prim_mesh.cloth_flags & (uint32_t)prim_mesh::CLOTH_FLAGS::SMALL) == (uint32_t)prim_mesh::CLOTH_FLAGS::SMALL)
-                {
+                if ((temp_prim_mesh.cloth_flags & (uint32_t) prim_mesh::CLOTH_FLAGS::SMALL) ==
+                    (uint32_t) prim_mesh::CLOTH_FLAGS::SMALL) {
                     std::memcpy(&bytes2, &prim_data.data()[prim_position], sizeof(bytes2));
 
                     uint32_t cloth_data_size = bytes2;
@@ -1578,9 +1463,7 @@ prim::prim_sub_mesh::prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_
                     cloth_data.resize(cloth_data_size);
 
                     std::memcpy(cloth_data.data(), &prim_data.data()[prim_position], cloth_data_size);
-                }
-                else
-                {
+                } else {
                     uint32_t cloth_data_size = vertex_count * 0x14;
 
                     cloth_data.resize(cloth_data_size);
@@ -1589,12 +1472,11 @@ prim::prim_sub_mesh::prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_
                 }
             }
 
-            if (collision_offset)
-            {
+            if (collision_offset) {
                 prim_position = collision_offset;
 
-                if (temp_prim_mesh.prim_object_instance.sub_type == (uint32_t)prim_object::SUBTYPE::STANDARD || temp_prim_mesh.prim_object_instance.sub_type == (uint32_t)prim_object::SUBTYPE::WEIGHTED)
-                {
+                if (temp_prim_mesh.prim_object_instance.sub_type == (uint32_t) prim_object::SUBTYPE::STANDARD ||
+                    temp_prim_mesh.prim_object_instance.sub_type == (uint32_t) prim_object::SUBTYPE::WEIGHTED) {
                     std::memcpy(&bytes2, &prim_data.data()[prim_position], sizeof(bytes2));
 
                     uint32_t collision_data_size = bytes2;
@@ -1605,9 +1487,7 @@ prim::prim_sub_mesh::prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_
                     collision_data.resize(collision_data_size);
 
                     std::memcpy(collision_data.data(), &prim_data.data()[prim_position], collision_data_size);
-                }
-                else
-                {
+                } else {
                     std::memcpy(&bytes2, &prim_data.data()[prim_position], sizeof(bytes2));
 
                     uint32_t collision_data_size = bytes2;
@@ -1617,9 +1497,7 @@ prim::prim_sub_mesh::prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_
                     std::memcpy(collision_data.data(), &prim_data.data()[prim_position], collision_data_size);
                 }
             }
-        }
-        else
-        {
+        } else {
             //LOG("Error: PRIM_OBJECT_IS_NOT_A_MESH_TYPE");
 
             task_multiple_status = PRIM_OBJECT_IS_NOT_A_MESH_TYPE;
@@ -1628,9 +1506,7 @@ prim::prim_sub_mesh::prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_
 
             //return;
         }
-    }
-    else
-    {
+    } else {
         //LOG("Error: PRIM_UV_CHANNEL_COUNT_GREATER_THAN_1");
 
         task_multiple_status = PRIM_UV_CHANNEL_COUNT_GREATER_THAN_1;
@@ -1643,8 +1519,11 @@ prim::prim_sub_mesh::prim_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_
 
 prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh() = default;
 
-prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_position, uint32_t prim_object_number, prim_weighted_mesh& temp_weighted_prim_mesh, std::vector<char>& prim_meta_data, bool flag_high_resolution, bool& success)
-{
+prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_data, uint32_t& prim_position,
+                                                     uint32_t prim_object_number,
+                                                     prim_weighted_mesh& temp_weighted_prim_mesh,
+                                                     std::vector<char>& prim_meta_data, bool flag_high_resolution,
+                                                     bool& success) {
     uint8_t bytes1 = 0;
     uint16_t bytes2 = 0;
     uint32_t bytes4 = 0;
@@ -1703,16 +1582,14 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
 
     //LOG("          - PRIM object (" + std::to_string(object) + ") sub mesh unknown offset: " + util::uint32_t_to_hex_string(unknown_offset));
 
-    if (uv_channel_count == 1)
-    {
+    if (uv_channel_count == 1) {
         prim_position = index_buffer_offset;
 
         uint32_t index_count_total = index_count + index_count_additional;
 
         //LOG("          - PRIM object (" + std::to_string(object) + ") sub mesh indexes at (" + util::uint32_t_to_hex_string(index_buffer_offset) + "): ");
 
-        for (uint32_t x = 0; x < index_count_total; x++)
-        {
+        for (uint32_t x = 0; x < index_count_total; x++) {
             std::memcpy(&bytes2, &prim_data.data()[prim_position], sizeof(bytes2));
             std::memcpy(&prim_meta_data.data()[prim_position], &bytes2_zero, sizeof(bytes2));
             prim_position += 0x2;
@@ -1724,10 +1601,8 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
 
         prim_position = vertex_buffer_offset;
 
-        if (flag_high_resolution)
-        {
-            for (uint32_t v = 0; v < vertex_count; v++)
-            {
+        if (flag_high_resolution) {
+            for (uint32_t v = 0; v < vertex_count; v++) {
                 vector4 temp_vector4;
 
                 //LOG("          - PRIM object (" + std::to_string(object) + ") sub mesh vertex (32bit float): ");
@@ -1754,11 +1629,8 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
                 vertexes.push_back(temp_vector4.y);
                 vertexes.push_back(temp_vector4.z);
             }
-        }
-        else
-        {
-            for (uint32_t v = 0; v < vertex_count; v++)
-            {
+        } else {
+            for (uint32_t v = 0; v < vertex_count; v++) {
                 short temp_short = 0;
 
                 vector4 temp_vector4;
@@ -1771,7 +1643,10 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
 
                 //LOG("              - x: " + util::short_to_string(temp_short));
 
-                temp_vector4.x = (static_cast<float>(temp_short) * temp_weighted_prim_mesh.prim_mesh_instance.vertex_position_scale.x) / std::numeric_limits<short>::max() + temp_weighted_prim_mesh.prim_mesh_instance.vertex_position_bias.x;
+                temp_vector4.x = (static_cast<float>(temp_short) *
+                                  temp_weighted_prim_mesh.prim_mesh_instance.vertex_position_scale.x) /
+                                 std::numeric_limits<short>::max() +
+                                 temp_weighted_prim_mesh.prim_mesh_instance.vertex_position_bias.x;
 
                 std::memcpy(&temp_short, &prim_data.data()[prim_position], sizeof(bytes2));
                 std::memcpy(&prim_meta_data.data()[prim_position], &bytes2_zero, sizeof(bytes2));
@@ -1779,7 +1654,10 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
 
                 //LOG("              - y: " + util::short_to_string(temp_short));
 
-                temp_vector4.y = (static_cast<float>(temp_short) * temp_weighted_prim_mesh.prim_mesh_instance.vertex_position_scale.y) / std::numeric_limits<short>::max() + temp_weighted_prim_mesh.prim_mesh_instance.vertex_position_bias.y;
+                temp_vector4.y = (static_cast<float>(temp_short) *
+                                  temp_weighted_prim_mesh.prim_mesh_instance.vertex_position_scale.y) /
+                                 std::numeric_limits<short>::max() +
+                                 temp_weighted_prim_mesh.prim_mesh_instance.vertex_position_bias.y;
 
                 std::memcpy(&temp_short, &prim_data.data()[prim_position], sizeof(bytes2));
                 std::memcpy(&prim_meta_data.data()[prim_position], &bytes2_zero, sizeof(bytes2));
@@ -1787,7 +1665,10 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
 
                 //LOG("              - z: " + util::short_to_string(temp_short));
 
-                temp_vector4.z = (static_cast<float>(temp_short) * temp_weighted_prim_mesh.prim_mesh_instance.vertex_position_scale.z) / std::numeric_limits<short>::max() + temp_weighted_prim_mesh.prim_mesh_instance.vertex_position_bias.z;
+                temp_vector4.z = (static_cast<float>(temp_short) *
+                                  temp_weighted_prim_mesh.prim_mesh_instance.vertex_position_scale.z) /
+                                 std::numeric_limits<short>::max() +
+                                 temp_weighted_prim_mesh.prim_mesh_instance.vertex_position_bias.z;
 
                 std::memcpy(&temp_short, &prim_data.data()[prim_position], sizeof(bytes2));
                 std::memcpy(&prim_meta_data.data()[prim_position], &bytes2_zero, sizeof(bytes2));
@@ -1795,7 +1676,10 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
 
                 //LOG("              - w: " + util::short_to_string(temp_short));
 
-                temp_vector4.w = (static_cast<float>(temp_short) * temp_weighted_prim_mesh.prim_mesh_instance.vertex_position_scale.w) / std::numeric_limits<short>::max() + temp_weighted_prim_mesh.prim_mesh_instance.vertex_position_bias.w;
+                temp_vector4.w = (static_cast<float>(temp_short) *
+                                  temp_weighted_prim_mesh.prim_mesh_instance.vertex_position_scale.w) /
+                                 std::numeric_limits<short>::max() +
+                                 temp_weighted_prim_mesh.prim_mesh_instance.vertex_position_bias.w;
 
                 vertexes.push_back(temp_vector4.x);
                 vertexes.push_back(temp_vector4.y);
@@ -1811,10 +1695,9 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
             }
         }
 
-        if (temp_weighted_prim_mesh.prim_mesh_instance.prim_object_instance.sub_type == (uint16_t)prim_object::SUBTYPE::WEIGHTED)
-        {
-            for (uint32_t v = 0; v < vertex_count; v++)
-            {
+        if (temp_weighted_prim_mesh.prim_mesh_instance.prim_object_instance.sub_type ==
+            (uint16_t) prim_object::SUBTYPE::WEIGHTED) {
+            for (uint32_t v = 0; v < vertex_count; v++) {
                 vector6 temp_vector6;
 
                 std::memcpy(&bytes1, &prim_data.data()[prim_position], sizeof(bytes1));
@@ -1917,8 +1800,7 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
 
         if (1)//if (prim_object_sub_type.at(o) != 0x2)
         {
-            for (uint32_t v = 0; v < vertex_count; v++)
-            {
+            for (uint32_t v = 0; v < vertex_count; v++) {
                 vector4 temp_vector4;
 
                 //LOG("          - PRIM object (" + std::to_string(object) + ") sub mesh vertex normal compressed (uint8_t):");
@@ -2066,7 +1948,10 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
 
                 //LOG("              - x: " + util::short_to_string(temp_short));
 
-                temp_vector2.x = (static_cast<float>(temp_short) * temp_weighted_prim_mesh.prim_mesh_instance.uv_position_scale.x) / std::numeric_limits<short>::max() + temp_weighted_prim_mesh.prim_mesh_instance.uv_position_bias.x;
+                temp_vector2.x = (static_cast<float>(temp_short) *
+                                  temp_weighted_prim_mesh.prim_mesh_instance.uv_position_scale.x) /
+                                 std::numeric_limits<short>::max() +
+                                 temp_weighted_prim_mesh.prim_mesh_instance.uv_position_bias.x;
 
                 std::memcpy(&temp_short, &prim_data.data()[prim_position], sizeof(bytes2));
                 std::memcpy(&prim_meta_data.data()[prim_position], &bytes2_zero, sizeof(bytes2));
@@ -2074,7 +1959,10 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
 
                 //LOG("              - y: " + util::short_to_string(temp_short));
 
-                temp_vector2.y = (static_cast<float>(temp_short) * temp_weighted_prim_mesh.prim_mesh_instance.uv_position_scale.y) / std::numeric_limits<short>::max() + temp_weighted_prim_mesh.prim_mesh_instance.uv_position_bias.y;
+                temp_vector2.y = (static_cast<float>(temp_short) *
+                                  temp_weighted_prim_mesh.prim_mesh_instance.uv_position_scale.y) /
+                                 std::numeric_limits<short>::max() +
+                                 temp_weighted_prim_mesh.prim_mesh_instance.uv_position_bias.y;
 
                 vertexes_uvs.push_back(temp_vector2.x);
                 vertexes_uvs.push_back(temp_vector2.y);
@@ -2084,10 +1972,10 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
                 //LOG("              - y: " + util::float_to_string(temp_vector2.y));
             }
 
-            if (temp_weighted_prim_mesh.prim_mesh_instance.prim_object_instance.sub_type == (uint32_t)prim_object::SUBTYPE::WEIGHTED || ((prim_object_instance.property_flags & (uint32_t)prim_object::PROPERTY_FLAGS::COLOR1) == 0x0))
-            {
-                for (uint32_t v = 0; v < vertex_count; v++)
-                {
+            if (temp_weighted_prim_mesh.prim_mesh_instance.prim_object_instance.sub_type ==
+                (uint32_t) prim_object::SUBTYPE::WEIGHTED ||
+                ((prim_object_instance.property_flags & (uint32_t) prim_object::PROPERTY_FLAGS::COLOR1) == 0x0)) {
+                for (uint32_t v = 0; v < vertex_count; v++) {
                     rgba temp_rgba;
 
                     std::memcpy(&bytes1, &prim_data.data()[prim_position], sizeof(bytes1));
@@ -2129,12 +2017,11 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
                 }
             }
 
-            if (cloth_offset)
-            {
+            if (cloth_offset) {
                 prim_position = cloth_offset;
 
-                if ((temp_weighted_prim_mesh.prim_mesh_instance.cloth_flags & (uint32_t)prim_mesh::CLOTH_FLAGS::SMALL) == (uint32_t)prim_mesh::CLOTH_FLAGS::SMALL)
-                {
+                if ((temp_weighted_prim_mesh.prim_mesh_instance.cloth_flags &
+                     (uint32_t) prim_mesh::CLOTH_FLAGS::SMALL) == (uint32_t) prim_mesh::CLOTH_FLAGS::SMALL) {
                     std::memcpy(&bytes2, &prim_data.data()[prim_position], sizeof(bytes2));
 
                     uint32_t cloth_data_size = bytes2;
@@ -2142,9 +2029,7 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
                     cloth_data.resize(cloth_data_size);
 
                     std::memcpy(cloth_data.data(), &prim_data.data()[prim_position], cloth_data_size);
-                }
-                else
-                {
+                } else {
                     uint32_t cloth_data_size = vertex_count * 0x14;
 
                     cloth_data.resize(cloth_data_size);
@@ -2153,12 +2038,13 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
                 }
             }
 
-            if (collision_offset)
-            {
+            if (collision_offset) {
                 prim_position = collision_offset;
 
-                if (temp_weighted_prim_mesh.prim_mesh_instance.prim_object_instance.sub_type == (uint32_t)prim_object::SUBTYPE::STANDARD || temp_weighted_prim_mesh.prim_mesh_instance.prim_object_instance.sub_type == (uint32_t)prim_object::SUBTYPE::WEIGHTED)
-                {
+                if (temp_weighted_prim_mesh.prim_mesh_instance.prim_object_instance.sub_type ==
+                    (uint32_t) prim_object::SUBTYPE::STANDARD ||
+                    temp_weighted_prim_mesh.prim_mesh_instance.prim_object_instance.sub_type ==
+                    (uint32_t) prim_object::SUBTYPE::WEIGHTED) {
                     std::memcpy(&bytes2, &prim_data.data()[prim_position], sizeof(bytes2));
 
                     uint32_t collision_data_size = bytes2;
@@ -2169,9 +2055,7 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
                     collision_data.resize(collision_data_size);
 
                     std::memcpy(collision_data.data(), &prim_data.data()[prim_position], collision_data_size);
-                }
-                else
-                {
+                } else {
                     std::memcpy(&bytes2, &prim_data.data()[prim_position], sizeof(bytes2));
 
                     uint32_t collision_data_size = bytes2;
@@ -2182,16 +2066,14 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
                 }
             }
 
-            if (temp_weighted_prim_mesh.prim_mesh_instance.prim_object_instance.sub_type != (uint32_t)prim_object::SUBTYPE::STANDARD)
-            {
-                if (temp_weighted_prim_mesh.bones_nodes_count)
-                {
+            if (temp_weighted_prim_mesh.prim_mesh_instance.prim_object_instance.sub_type !=
+                (uint32_t) prim_object::SUBTYPE::STANDARD) {
+                if (temp_weighted_prim_mesh.bones_nodes_count) {
                     prim_position = temp_weighted_prim_mesh.bones_nodes_offset;
 
                     uint32_t bones_nodes_data_size = temp_weighted_prim_mesh.bones_nodes_count * 2;
 
-                    for (uint32_t b = 0; b < bones_nodes_data_size; b++)
-                    {
+                    for (uint32_t b = 0; b < bones_nodes_data_size; b++) {
                         std::memcpy(&bytes4, &prim_data.data()[prim_position], sizeof(bytes4));
                         prim_position += 0x4;
 
@@ -2199,16 +2081,14 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
                     }
                 }
 
-                if (temp_weighted_prim_mesh.bone_info_offset)
-                {
+                if (temp_weighted_prim_mesh.bone_info_offset) {
                     prim_position = temp_weighted_prim_mesh.bone_info_offset;
 
                     std::memcpy(&bytes2, &prim_data.data()[prim_position], sizeof(bytes2));
 
                     uint32_t bone_info_data_size = bytes2;
 
-                    for (uint32_t b = 0; b < bone_info_data_size; b++)
-                    {
+                    for (uint32_t b = 0; b < bone_info_data_size; b++) {
                         std::memcpy(&bytes1, &prim_data.data()[prim_position], sizeof(bytes1));
                         prim_position += 0x1;
 
@@ -2216,8 +2096,7 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
                     }
                 }
 
-                if (temp_weighted_prim_mesh.bone_indices_offset)
-                {
+                if (temp_weighted_prim_mesh.bone_indices_offset) {
                     prim_position = temp_weighted_prim_mesh.bone_indices_offset;
 
                     std::memcpy(&bytes4, &prim_data.data()[prim_position], sizeof(bytes4));
@@ -2226,8 +2105,7 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
                     uint32_t bone_indices_data_size = bytes4;
                     bone_indices_data_size -= 2;
 
-                    for (uint32_t b = 0; b < bone_indices_data_size; b++)
-                    {
+                    for (uint32_t b = 0; b < bone_indices_data_size; b++) {
                         std::memcpy(&bytes2, &prim_data.data()[prim_position], sizeof(bytes2));
                         prim_position += 0x2;
 
@@ -2235,9 +2113,7 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
                     }
                 }
             }
-        }
-        else
-        {
+        } else {
             //LOG("Error: PRIM_OBJECT_IS_NOT_A_MESH_TYPE");
 
             task_multiple_status = PRIM_OBJECT_IS_NOT_A_MESH_TYPE;
@@ -2246,9 +2122,7 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
 
             //return;
         }
-    }
-    else
-    {
+    } else {
         //LOG("Error: PRIM_UV_CHANNEL_COUNT_GREATER_THAN_1");
 
         task_multiple_status = PRIM_UV_CHANNEL_COUNT_GREATER_THAN_1;
@@ -2259,16 +2133,14 @@ prim::prim_weighted_sub_mesh::prim_weighted_sub_mesh(std::vector<char>& prim_dat
     }
 }
 
-void prim::extract_meta(std::string output_path)
-{
+void prim::extract_meta(std::string output_path) {
     char char4[4];
 
     std::string prim_meta_file_name = file::output_path_append(prim_file_name + ".glb.meta", output_path);
 
     std::ofstream output_file = std::ofstream(prim_meta_file_name, std::ofstream::binary);
 
-    if (!output_file.good())
-    {
+    if (!output_file.good()) {
         LOG_AND_EXIT("Error: PRIM GLB meta file " + prim_meta_file_name + " could not be created.");
     }
 
@@ -2276,16 +2148,12 @@ void prim::extract_meta(std::string output_path)
 
     size_t pos = rpkg_base_file_name.find("patch");
 
-    if (pos != std::string::npos)
-    {
+    if (pos != std::string::npos) {
         rpkg_base_file_name = rpkg_base_file_name.substr(0, pos);
-    }
-    else
-    {
+    } else {
         pos = rpkg_base_file_name.find('.');
 
-        if (pos != std::string::npos)
-        {
+        if (pos != std::string::npos) {
             rpkg_base_file_name = rpkg_base_file_name.substr(0, pos);
         }
     }
@@ -2300,11 +2168,12 @@ void prim::extract_meta(std::string output_path)
 
     uint32_t prim_meta_data_size = prim_meta_data.size();
 
-    uint32_t compressed_size = LZ4_compressBound((int)prim_meta_data_size);
+    uint32_t compressed_size = LZ4_compressBound((int) prim_meta_data_size);
 
-    std::vector<char>output_file_data(compressed_size, 0);
+    std::vector<char> output_file_data(compressed_size, 0);
 
-    uint64_t compressed_size_final = LZ4_compress_HC(prim_meta_data.data(), output_file_data.data(), (int)prim_meta_data_size, compressed_size, LZ4HC_CLEVEL_MAX);
+    uint64_t compressed_size_final = LZ4_compress_HC(prim_meta_data.data(), output_file_data.data(),
+                                                     (int) prim_meta_data_size, compressed_size, LZ4HC_CLEVEL_MAX);
 
     std::memcpy(&char4, &prim_meta_data_size, 0x4);
     output_file.write(char4, 0x4);
@@ -2312,23 +2181,18 @@ void prim::extract_meta(std::string output_path)
     std::memcpy(&char4, &compressed_size_final, 0x4);
     output_file.write(char4, 0x4);
 
-    if (!borg_depends_file_name.empty())
-    {
+    if (!borg_depends_file_name.empty()) {
         uint32_t bone_count = asset3ds_data.bones_data.size();
         std::memcpy(&char4, &bone_count, 0x4);
         output_file.write(char4, 0x4);
-    }
-    else
-    {
+    } else {
         output_file.write("\0", 0x4);
     }
 
     output_file.write(output_file_data.data(), compressed_size_final);
 
-    if (!borg_depends_file_name.empty())
-    {
-        for (auto & b : asset3ds_data.bones_data)
-        {
+    if (!borg_depends_file_name.empty()) {
+        for (auto& b : asset3ds_data.bones_data) {
             uint32_t bone_name_length = b.name.length();
             bone_name_length++;
 
