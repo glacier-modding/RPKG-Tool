@@ -187,12 +187,9 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
                 languages.push_back("de");
                 languages.push_back("es");
                 languages.push_back("ru");
-                languages.push_back("mx");
-                languages.push_back("br");
-                languages.push_back("pl");
                 languages.push_back("cn");
-                languages.push_back("jp");
                 languages.push_back("tc");
+                languages.push_back("jp");
 
                 std::vector<char> json_meta_data;
 
