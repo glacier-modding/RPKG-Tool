@@ -1748,9 +1748,9 @@ namespace rpkg
 
 								string initialFolder = "";
 
-								if (File.Exists(userSettings.InputFolder))
+								if (File.Exists(userSettings.OutputFolder))
 								{
-									initialFolder = userSettings.InputFolder;
+									initialFolder = userSettings.OutputFolder;
 								}
 								else
 								{
@@ -1759,7 +1759,7 @@ namespace rpkg
 
 								fileDialog.InitialDirectory = initialFolder;
 
-								fileDialog.FileName = hashName.Split('.')[0] + ".entity.json";
+								fileDialog.FileName = initialFolder + "\\" + hashName.Split('.')[0] + ".entity.json";
 
 								var fileDialogResult = fileDialog.ShowDialog();
 
@@ -1875,9 +1875,9 @@ namespace rpkg
 
                                 string initialFolder = "";
 
-                                if (File.Exists(userSettings.InputFolder))
+                                if (File.Exists(userSettings.OutputFolder))
                                 {
-                                    initialFolder = userSettings.InputFolder;
+                                    initialFolder = userSettings.OutputFolder;
                                 }
                                 else
                                 {
@@ -1886,7 +1886,7 @@ namespace rpkg
 
                                 fileDialog.InitialDirectory = initialFolder;
 
-                                fileDialog.FileName = hashName.Split('.')[0] + ".material.json";
+                                fileDialog.FileName = initialFolder + "\\" + hashName.Split('.')[0] + ".material.json";
 
                                 var fileDialogResult = fileDialog.ShowDialog();
 
@@ -1928,9 +1928,9 @@ namespace rpkg
 
                                 string initialFolder = "";
 
-                                if (File.Exists(userSettings.InputFolder))
+                                if (File.Exists(userSettings.OutputFolder))
                                 {
-                                    initialFolder = userSettings.InputFolder;
+                                    initialFolder = userSettings.OutputFolder;
                                 }
                                 else
                                 {
@@ -1939,7 +1939,7 @@ namespace rpkg
 
                                 fileDialog.InitialDirectory = initialFolder;
 
-                                fileDialog.FileName = hashName.Split('.')[0] + ".asva.json";
+                                fileDialog.FileName = initialFolder + "\\" + hashName.Split('.')[0] + ".asva.json";
 
                                 var fileDialogResult = fileDialog.ShowDialog();
 
@@ -8826,9 +8826,9 @@ namespace rpkg
 
 						string initialFolder = "";
 
-						if (File.Exists(userSettings.InputFolder))
+						if (File.Exists(userSettings.OutputFolder))
 						{
-							initialFolder = userSettings.InputFolder;
+							initialFolder = userSettings.OutputFolder;
 						}
 						else
 						{
@@ -8837,7 +8837,7 @@ namespace rpkg
 
 						fileDialog.InitialDirectory = initialFolder;
 
-						fileDialog.FileName = hash + ".entity.json";
+						fileDialog.FileName = initialFolder + "\\" + hash + ".entity.json";
 
 						var fileDialogResult = fileDialog.ShowDialog();
 
