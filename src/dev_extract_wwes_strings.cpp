@@ -42,9 +42,9 @@ void dev_function::dev_extract_wwes_strings(std::string& input_path, std::string
                 continue;
 
             for (uint64_t j = 0; j < rpkg.hashes_indexes_based_on_resource_types.at(r).size(); j++) {
-                uint64_t hash_index = rpkg.hashes_indexes_based_on_resource_types.at(r).at(j);
+                const uint64_t hash_index = rpkg.hashes_indexes_based_on_resource_types.at(r).at(j);
 
-                std::string hash_file_name = util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
+                const std::string hash_file_name = util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
                                              rpkg.hash.at(hash_index).hash_resource_type;
 
                 uint64_t hash_size;
@@ -67,7 +67,7 @@ void dev_function::dev_extract_wwes_strings(std::string& input_path, std::string
                     LOG_AND_EXIT("Error: RPKG file " + rpkg.rpkg_file_path + " could not be read.");
                 }
 
-                file.seekg(rpkg.hash.at(hash_index).data.header.data_offset, file.beg);
+                file.seekg(rpkg.hash.at(hash_index).data.header.data_offset, std::ifstream::beg);
                 file.read(input_data.data(), hash_size);
                 file.close();
 
@@ -103,7 +103,7 @@ void dev_function::dev_extract_wwes_strings(std::string& input_path, std::string
                     }
 
                     for (uint64_t k = 0; k < text_search.length(); k++) {
-                        if (std::tolower(fxas_data->data()[position + k]) != std::tolower(text_search[k]))
+                        if (std::tolower((*fxas_data)[position + k]) != std::tolower(text_search[k]))
                             break;
 
                         if (k == (text_search.length() - 1)) {
@@ -117,8 +117,8 @@ void dev_function::dev_extract_wwes_strings(std::string& input_path, std::string
                                     break;
                                 }
 
-                                if (fxas_data->data()[position_start] < 0x20 ||
-                                    fxas_data->data()[position_start] > 0x7E) {
+                                if ((*fxas_data)[position_start] < 0x20 ||
+                                    (*fxas_data)[position_start] > 0x7E) {
                                     done_searching_start = true;
                                     break;
                                 }
@@ -133,16 +133,16 @@ void dev_function::dev_extract_wwes_strings(std::string& input_path, std::string
 
                             std::regex_search(fxas_string, m, re);
 
-                            if (m.size() <= 0) {
+                            if (m.empty()) {
                                 LOG_AND_EXIT("Error: Could not find FXAS IOI path name.");
                             }
 
                             std::smatch m2;
-                            re.assign("\\\\([^\\\\\\/]+)\\.wav");
+                            re.assign(R"(\\([^\\\/]+)\.wav)");
 
                             std::regex_search(fxas_string, m2, re);
 
-                            if (m2.size() <= 0) {
+                            if (m2.empty()) {
                                 LOG_AND_EXIT("Error: Could not parse FXAS IOI path name.");
                             }
 
@@ -213,7 +213,7 @@ void dev_function::dev_extract_wwes_strings(std::string& input_path, std::string
                     LOG_AND_EXIT("Error: RPKG file " + rpkg.rpkg_file_path + " could not be read.");
                 }
 
-                file.seekg(rpkg.hash.at(hash_index).data.header.data_offset, file.beg);
+                file.seekg(rpkg.hash.at(hash_index).data.header.data_offset, std::ifstream::beg);
                 file.read(input_data.data(), hash_size);
                 file.close();
 
@@ -241,7 +241,6 @@ void dev_function::dev_extract_wwes_strings(std::string& input_path, std::string
                 uint32_t position = 0;
 
                 char input[1024];
-                uint32_t bytes4 = 0;
 
                 bool adtllabl_not_found = true;
 
@@ -249,7 +248,7 @@ void dev_function::dev_extract_wwes_strings(std::string& input_path, std::string
 
                 while (adtllabl_not_found && position <= (decompressed_size - adtllabl.length())) {
                     for (int k = 0; k < adtllabl.length(); k++) {
-                        if (wwes_data->data()[position + k] != adtllabl[k]) {
+                        if ((*wwes_data)[position + k] != adtllabl[k]) {
                             break;
                         }
 
@@ -268,14 +267,14 @@ void dev_function::dev_extract_wwes_strings(std::string& input_path, std::string
 
                 position += static_cast<uint32_t>(adtllabl.length());
 
-                std::memcpy(&wwes_file_name_length, (&wwes_data->data()[0] + position), sizeof(bytes4));
+                std::memcpy(&wwes_file_name_length, (&(*wwes_data)[0] + position), BYTES4);
                 position += 0x8;
 
                 wwes_file_name_length -= 0x4;
 
                 std::vector<char> wwes_file_name;
 
-                std::memcpy(&input, (&wwes_data->data()[0] + position), wwes_file_name_length);
+                std::memcpy(&input, (&(*wwes_data)[0] + position), wwes_file_name_length);
                 for (uint64_t k = 0; k < wwes_file_name_length; k++) {
                     if (input[k] != 0) {
                         wwes_file_name.push_back(input[k]);
@@ -292,7 +291,7 @@ void dev_function::dev_extract_wwes_strings(std::string& input_path, std::string
                     lowercase.push_back(std::tolower(z));
                 }
 
-                std::unordered_map<std::string, uint64_t>::iterator it = fxas_to_wwes_ioi_path_map.find(lowercase);
+                auto it = fxas_to_wwes_ioi_path_map.find(lowercase);
 
                 std::string wem_file_name = "";
                 std::string wwes_meta_data_file_name = "";
@@ -320,7 +319,7 @@ void dev_function::dev_extract_wwes_strings(std::string& input_path, std::string
                                                                                  "ASSEMBLY\\"), output_path);
 
                     if (!wwes_name_map.empty()) {
-                        std::unordered_map<std::string, uint32_t>::iterator it = wwes_name_map.find(wem_base_name);
+                        auto it = wwes_name_map.find(wem_base_name);
 
                         if (it == wwes_name_map.end()) {
                             wwes_name_map[wem_base_name] = wwes_name_map.size();
@@ -333,7 +332,7 @@ void dev_function::dev_extract_wwes_strings(std::string& input_path, std::string
                                 std::string test_name =
                                         wem_base_name + "-" + std::to_string(count) + "-" + rpkg.rpkg_file_name;
 
-                                std::unordered_map<std::string, uint32_t>::iterator it2 = wwes_name_map.find(test_name);
+                                auto it2 = wwes_name_map.find(test_name);
 
                                 if (it2 == wwes_name_map.end()) {
                                     wem_base_name = test_name;
@@ -351,12 +350,6 @@ void dev_function::dev_extract_wwes_strings(std::string& input_path, std::string
                     }
 
                     wem_file_name = wem_base_name + ".wav].pc_wes";
-
-                    wwes_meta_data_file_name = wem_base_name + "_" + hash_file_name;
-
-                    ogg_file = wem_base_name + ".ogg";
-
-                    output_meta_file_path = wem_base_name;
                 } else {
                     total_wwes_fxas_not_linked++;
 
@@ -365,8 +358,8 @@ void dev_function::dev_extract_wwes_strings(std::string& input_path, std::string
 
                     std::string wem_base_name = directory + "/" + wwes_string;
 
-                    if (wwes_name_map.size() > 0) {
-                        std::unordered_map<std::string, uint32_t>::iterator it = wwes_name_map.find(wem_base_name);
+                    if (!wwes_name_map.empty()) {
+                        auto it = wwes_name_map.find(wem_base_name);
 
                         if (it == wwes_name_map.end()) {
                             wwes_name_map[wem_base_name] = wwes_name_map.size();
@@ -379,7 +372,7 @@ void dev_function::dev_extract_wwes_strings(std::string& input_path, std::string
                                 std::string test_name =
                                         wem_base_name + "-" + std::to_string(count) + "-" + rpkg.rpkg_file_name;
 
-                                std::unordered_map<std::string, uint32_t>::iterator it2 = wwes_name_map.find(test_name);
+                                auto it2 = wwes_name_map.find(test_name);
 
                                 if (it2 == wwes_name_map.end()) {
                                     wem_base_name = test_name;
@@ -397,12 +390,6 @@ void dev_function::dev_extract_wwes_strings(std::string& input_path, std::string
                     }
 
                     wem_file_name = wem_base_name + ".wav].pc_wes";
-
-                    wwes_meta_data_file_name = wem_base_name + "_" + hash_file_name;
-
-                    ogg_file = wem_base_name + ".ogg";
-
-                    output_meta_file_path = directory;
                 }
 
                 std::replace(wem_file_name.begin(), wem_file_name.end(), '\\', '/');

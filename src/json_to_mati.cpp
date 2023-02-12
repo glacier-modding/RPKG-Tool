@@ -36,9 +36,7 @@ void rpkg_function::json_to_mati(const std::string& input_path, const std::strin
         files = file::get_recursive_file_list(input_path);
     }
 
-    LOG("Loading Hash List...");
-    generic_function::load_hash_list(true);
-    LOG("Loading Hash List: Done");
+    force_load_hash_list();
 
     for (std::filesystem::path& file : files) {
         const uint64_t hash_value = file::get_hash_value_from_path(file, ".MATI.JSON");

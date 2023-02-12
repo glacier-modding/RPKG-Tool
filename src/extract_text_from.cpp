@@ -33,10 +33,6 @@ rpkg_function::extract_text_from(std::string& input_path, const std::string& fil
 
     ss << "Scanning folder: Done";
 
-    //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
-
-    //std::vector<std::string>().swap(prim_asset_file_names);
-
     const std::vector<std::string> filters = util::parse_input_filter(filter);
 
     for (const auto& filter : filters) {
@@ -64,11 +60,11 @@ rpkg_function::extract_text_from(std::string& input_path, const std::string& fil
 
             file::create_directories(text_output_dir);
 
-            std::string tga_path = text_output_dir + "\\" +
+            const std::string tga_path = text_output_dir + "\\" +
                                    util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) +
                                    "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + ".tga";
 
-            std::string meta_path = text_output_dir + "\\" + "metas";
+            const std::string meta_path = text_output_dir + "\\" + "metas";
 
             file::create_directories(meta_path);
 

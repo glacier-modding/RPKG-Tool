@@ -7,7 +7,6 @@
 #include "util.h"
 #include "text.h"
 #include "generic_function.h"
-#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <filesystem>
@@ -45,11 +44,7 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
 
     //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
 
-    if (!hash_list_loaded) {
-        LOG("Loading Hash List...");
-        generic_function::load_hash_list(true);
-        LOG("Loading Hash List: Done");
-    }
+    force_load_hash_list();
 
     //std::vector<std::string>().swap(prim_asset_file_names);
 
@@ -75,7 +70,7 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
 
         prim temp_prim(rpkg_index, it->second);
 
-        if (temp_prim.asset3ds_data.vertexes.size() <= 0 || !temp_prim.success)
+        if (temp_prim.asset3ds_data.vertexes.empty() || !temp_prim.success)
             continue;
 
         for (auto& color : temp_prim.asset3ds_data.colors) {
@@ -135,8 +130,6 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
             mati temp_mati(temp_rpkg_index, it2->second);
 
             temp_mati.map_textures();
-
-            std::unordered_map<uint64_t, uint64_t>::iterator it3;
 
             if (temp_mati.has_diffuse_texture) {
                 uint32_t temp_rpkg_index2 = rpkg_function::get_latest_hash(temp_mati.diffuse_texture_hash);

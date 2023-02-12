@@ -4,11 +4,11 @@
 #include <fstream>
 #include <iostream>
 
-void generic_function::load_hash_list(bool exit_if_no_hash_list, std::string path) {
+void generic_function::load_hash_list(bool exit_if_no_hash_list, const std::string& path) {
     if (hash_list_loaded)
         return;
 
-    std::string hash_path = (path == "" ? (exe_path + std::string("\\hash_list.txt")) : path);
+    std::string hash_path = (path.empty() ? (exe_path + std::string("\\hash_list.txt")) : path);
     std::ifstream hash_list_file = std::ifstream(hash_path, std::ifstream::binary);
 
     if (file::path_exists(hash_path)) {
@@ -25,17 +25,16 @@ void generic_function::load_hash_list(bool exit_if_no_hash_list, std::string pat
         }
     }
 
-    hash_list_file.seekg(0, hash_list_file.end);
+    hash_list_file.seekg(0, std::ifstream::end);
 
     uint64_t hash_list_file_size = (uint64_t) hash_list_file.tellg();
 
-    hash_list_file.seekg(0, hash_list_file.beg);
+    hash_list_file.seekg(0, std::ifstream::beg);
 
     std::vector<char> hash_list_data(hash_list_file_size, 0);
 
     hash_list_file.read(hash_list_data.data(), hash_list_file_size);
 
-    bool done = false;
     uint64_t position = 0;
     uint64_t last_position = 0;
     uint64_t line_count = 0;
@@ -47,20 +46,19 @@ void generic_function::load_hash_list(bool exit_if_no_hash_list, std::string pat
             hash_list_data[position] = 0x0;
 
             if (line_count == 3) {
-                std::string_view temp_string_view = std::string_view(
+                auto temp_string_view = std::string_view(
                         reinterpret_cast<char*>(&hash_list_data[last_position]));
 
                 size_t pos = temp_string_view.find_first_of('=');
                 hash_list_version = std::stoi(std::string(temp_string_view.substr((pos + 1))));
             } else if (line_count > 3) {
-                std::string_view temp_string_view = std::string_view(
+                auto temp_string_view = std::string_view(
                         reinterpret_cast<char*>(&hash_list_data[last_position]));
 
                 size_t pos = temp_string_view.find_first_of(',');
-                hash_list_hash_file_names.push_back(std::string(temp_string_view.substr(0, pos)));
-                hash_list_hash_value_strings.push_back(std::string(temp_string_view.substr(0, (pos - 5))));
-                hash_list_hash_strings.push_back(
-                        std::string(temp_string_view.substr(pos + 1, temp_string_view.length() - (pos + 1))));
+                hash_list_hash_file_names.emplace_back(temp_string_view.substr(0, pos));
+                hash_list_hash_value_strings.emplace_back(temp_string_view.substr(0, (pos - 5)));
+                hash_list_hash_strings.emplace_back(temp_string_view.substr(pos + 1, temp_string_view.length() - (pos + 1)));
                 hash_list_hash_map[std::strtoull(std::string(temp_string_view.substr(0, (pos - 5))).c_str(), nullptr,
                                                  16)] = hash_list_hash_file_names.size() - 1;
             }

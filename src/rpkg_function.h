@@ -39,7 +39,7 @@ public:
 
     static void search_repo(std::string& input_path, std::string& search, int max_results);
 
-    static void sdef_to_json(std::string& input_path, std::string& filter, std::string& output_path);
+    static void sdef_to_json(std::string& input_path, std::string& output_path);
 
     static void json_to_sdef(std::string& input_path, std::string& output_path);
 
@@ -125,7 +125,7 @@ public:
 
     static int load_temp_tblu_hash_depends(uint64_t rpkg_index, uint64_t hash_index);
 
-    static void extract_temp_from(std::string& input_path, std::string& filter, std::string& output_path);
+//    static void extract_temp_from(std::string& input_path, std::string& filter, std::string& output_path);
 
     static void extract_prel_refs(std::string& input_path);
 

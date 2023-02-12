@@ -119,7 +119,7 @@ void dev_function::dev_extract_rpkg_supermetas(std::string& input_path, std::str
 
                 if (temp_rpkg.rpkg_file_version == 2)
                 {
-                    file.read(input, sizeof(bytes4));
+                    file.read(input, BYTES4);
 
                     file.read(input, sizeof(bytes1));
                     std::memcpy(&bytes1, input, sizeof(bytes1));

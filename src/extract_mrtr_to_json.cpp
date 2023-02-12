@@ -3,7 +3,6 @@
 #include "global.h"
 #include "util.h"
 #include "mrtr.h"
-#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <filesystem>
@@ -27,8 +26,8 @@ void rpkg_function::extract_mrtr_to_json(std::string& input_path, const std::str
 
     const std::vector<std::string> filters = util::parse_input_filter(filter);
 
-    for (auto& filter : filters) {
-        uint64_t text_hash_value = std::strtoull(filter.c_str(), nullptr, 16);
+    for (const auto& filter : filters) {
+        const uint64_t text_hash_value = std::strtoull(filter.c_str(), nullptr, 16);
 
         for (uint64_t i = 0; i < rpkgs.size(); i++) {
             uint64_t rpkg_index = i;
@@ -36,7 +35,7 @@ void rpkg_function::extract_mrtr_to_json(std::string& input_path, const std::str
             if (rpkgs.at(i).rpkg_file_path != input_path)
                 continue;
 
-            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(text_hash_value);
+            auto it = rpkgs.at(rpkg_index).hash_map.find(text_hash_value);
 
             if (it == rpkgs.at(rpkg_index).hash_map.end())
                 continue;

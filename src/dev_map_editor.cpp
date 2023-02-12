@@ -3,7 +3,6 @@
 #include "global.h"
 #include "file.h"
 #include "util.h"
-#include "crypto.h"
 #include "temp.h"
 #include <iostream>
 #include <filesystem>
@@ -20,204 +19,204 @@ void extract_glb_and_return_coords(uint32_t temps_index, uint32_t entry_index, s
                                    std::vector<bool>& entityId_has_m_mTransform_and_m_eidParent,
                                    std::unordered_map<std::string, uint64_t>& entityId_temp_index_entityIndex_map,
                                    std::vector<std::string>& entityId_m_mTransform) {
-    if (temps.at(temps_index).tblu_return_value == TEMP_TBLU_FOUND) {
-        std::string entry_name = "";
+    if (temps.at(temps_index).tblu_return_value != TEMP_TBLU_FOUND) return;
 
-        if (entry_index < 0 || entry_index >= temps.at(temps_index).tblu_entityName.size()) {
+    std::string entry_name = "";
 
+    if (entry_index < 0 || entry_index >= temps.at(temps_index).tblu_entityName.size()) {
+
+    } else {
+        entry_name.append(temps.at(temps_index).tblu_entityName.at(entry_index));
+    }
+
+    //util::replace_all_string_in_string(entry_name, " ", "_");
+
+    std::string property_name = "";
+
+    auto it4 = entityId_temp_index_entityIndex_map.find(
+            std::to_string(temps_index) + ":" + util::int32_t_to_string(entry_index));
+
+    if (it4 != entityId_temp_index_entityIndex_map.end()) {
+        if (entityId_has_m_mTransform_and_m_eidParent.at(it4->second)) {
+            property_name = entry_name + " (M) (" + util::uint32_t_to_string(temps_index) + "_" +
+                            util::uint32_t_to_string(entry_index) + ")";
+
+            if (!entry_name.empty()) {
+                map_editor_parents.push_back(parent_string);
+
+                if (parent_string.empty()) {
+                    parent_string += property_name;
+                } else {
+                    parent_string += "/" + property_name;
+                }
+
+                std::cout << parent_string << std::endl;
+
+                std::cout << entityId_m_mTransform.at(it4->second) << std::endl;
+
+                map_editor_property_names.push_back(property_name);
+
+                map_editor_matrixes.push_back(map_editor_temp_matrix);
+
+                map_editor_glb_file_names.push_back(prim_asset_file_names);
+
+                auto it = temps_map.find(rpkgs.at(temps.at(temps_index).temp_rpkg_index).hash.at(
+                        temps.at(temps_index).temp_hash_index).hash_reference_data.hash_reference.at(
+                        temps.at(temps_index).temp_entityTypeResourceIndex.at(entry_index)));
+
+                if (it != temps_map.end()) {
+                    if (temps.at(it->second).tblu_return_value == TEMP_TBLU_FOUND) {
+                        if (!temps.at(it->second).temp_depends_file_name.empty()) {
+                            std::set<uint32_t> logical_parents_set;
+
+                            for (uint32_t e = 0; e < temps.at(it->second).temp_logicalParent.size(); e++) {
+                                if (temps.at(it->second).temp_logicalParent.at(e) >=
+                                    temps.at(it->second).temp_logicalParent.size()) {
+                                    //logical_parents_set.insert(temps.at(it->second).temp_logicalParent.at(e));
+                                    logical_parents_set.insert(e);
+                                }
+                            }
+
+                            for (auto it2 = logical_parents_set.begin(); it2 != logical_parents_set.end(); it2++) {
+                                std::cout << *it2 << std::endl;
+
+                                auto it3 = temps_map.find(rpkgs.at(temps.at(it->second).temp_rpkg_index).hash.at(
+                                        temps.at(it->second).temp_hash_index).hash_reference_data.hash_reference.at(
+                                        temps.at(it->second).temp_entityTypeResourceIndex.at(*it2)));
+
+                                if (it3 != temps_map.end()) {
+                                    //if (temps.at(it3->second).tblu_return_value == TEMP_TBLU_FOUND)
+                                    //{
+                                    if (!temps.at(it3->second).prim_depends_file_name.empty()) {
+                                        for (const auto& p : temps.at(it3->second).prim_depends_file_name) {
+                                            std::cout << "PRIM: " << p << std::endl;
+                                        }
+                                    }
+                                    //}
+                                }
+                            }
+                        } else {
+                            if (!temps.at(it->second).prim_depends_file_name.empty()) {
+                                for (const auto& p : temps.at(it->second).prim_depends_file_name) {
+                                    std::cout << "PRIM: " << p << std::endl;
+                                }
+                            }
+                        }
+                    }
+
+                    if (!temps.at(it->second).prim_depends_file_name.empty()) {
+                        for (const auto& p : temps.at(it->second).prim_depends_file_name) {
+                            std::cout << "PRIM: " << p << std::endl;
+                        }
+                    }
+                }
+            }
         } else {
-            entry_name.append(temps.at(temps_index).tblu_entityName.at(entry_index));
+            property_name = entry_name + " (NM) (" + util::uint32_t_to_string(temps_index) + "_" +
+                            util::uint32_t_to_string(entry_index) + ")";
+
+            if (!entry_name.empty()) {
+                map_editor_parents.push_back(parent_string);
+
+                if (parent_string.empty()) {
+                    parent_string += property_name;
+                } else {
+                    parent_string += "/" + property_name;
+                }
+
+                std::cout << parent_string << std::endl;
+
+                map_editor_property_names.push_back(property_name);
+
+                map_editor_matrixes.push_back(map_editor_temp_matrix);
+
+                map_editor_glb_file_names.push_back(prim_asset_file_names);
+            }
         }
+    }
 
-        //util::replace_all_string_in_string(entry_name, " ", "_");
+    bool m_eidParent_found = false;
+    uint64_t entityId_temp = 0;
+    uint64_t m_eidParent_entityID = 0;
+    int32_t m_eidParent_entityIndex = 0;
 
-        std::string property_name = "";
-
-        auto it4 = entityId_temp_index_entityIndex_map.find(
+    if (entry_index >= 0 && entry_index < temps.at(temps_index).tblu_entityName.size()) {
+        std::pair<std::multimap<std::string, uint64_t>::iterator, std::multimap<std::string, uint64_t>::iterator> er = entityId_m_eidParent_entityIndex_map.equal_range(
                 std::to_string(temps_index) + ":" + util::int32_t_to_string(entry_index));
 
-        if (it4 != entityId_temp_index_entityIndex_map.end()) {
-            if (entityId_has_m_mTransform_and_m_eidParent.at(it4->second)) {
-                property_name = entry_name + " (M) (" + util::uint32_t_to_string(temps_index) + "_" +
-                                util::uint32_t_to_string(entry_index) + ")";
+        for (auto it3 = er.first; it3 != er.second; it3++) {
+            if (!entityId_entity_logicalParent_top_level.at(it3->second)) {
+                m_eidParent_found = true;
 
-                if (!entry_name.empty()) {
-                    map_editor_parents.push_back(parent_string);
+                entityId_temp = entityId_temp_index.at(it3->second);
 
-                    if (parent_string.empty()) {
-                        parent_string += property_name;
-                    } else {
-                        parent_string += "/" + property_name;
-                    }
+                m_eidParent_entityID = entityId_m_eidParent_entityID.at(it3->second);
 
+                m_eidParent_entityIndex = entityId_m_eidParent_entityIndex.at(it3->second);
+
+                extract_glb_and_return_coords(entityId_temp, m_eidParent_entityIndex, parent_string,
+                                              entityId_temp_index, entityId_m_eidParent_entityID,
+                                              entityId_m_eidParent_entityIndex,
+                                              entityId_m_eidParent_entityIndex_map,
+                                              entityId_entity_logicalParent_top_level,
+                                              entityId_has_m_mTransform_and_m_eidParent,
+                                              entityId_temp_index_entityIndex_map, entityId_m_mTransform);
+            }
+        }
+    }
+
+    if (!m_eidParent_found) {
+        bool logical_parent_found = false;
+
+        for (uint32_t e = 0; e < temps.at(temps_index).temp_logicalParent.size(); e++) {
+            if (temps.at(temps_index).temp_logicalParent.at(e) == entry_index) {
+                if (entry_index == 1) {
                     std::cout << parent_string << std::endl;
-
-                    std::cout << entityId_m_mTransform.at(it4->second) << std::endl;
-
-                    map_editor_property_names.push_back(property_name);
-
-                    map_editor_matrixes.push_back(map_editor_temp_matrix);
-
-                    map_editor_glb_file_names.push_back(prim_asset_file_names);
-
-                    auto it = temps_map.find(rpkgs.at(temps.at(temps_index).temp_rpkg_index).hash.at(
-                            temps.at(temps_index).temp_hash_index).hash_reference_data.hash_reference.at(
-                            temps.at(temps_index).temp_entityTypeResourceIndex.at(entry_index)));
-
-                    if (it != temps_map.end()) {
-                        if (temps.at(it->second).tblu_return_value == TEMP_TBLU_FOUND) {
-                            if (temps.at(it->second).temp_depends_file_name.size() > 0) {
-                                std::set<uint32_t> logical_parents_set;
-
-                                for (uint32_t e = 0; e < temps.at(it->second).temp_logicalParent.size(); e++) {
-                                    if (temps.at(it->second).temp_logicalParent.at(e) >=
-                                        temps.at(it->second).temp_logicalParent.size()) {
-                                        //logical_parents_set.insert(temps.at(it->second).temp_logicalParent.at(e));
-                                        logical_parents_set.insert(e);
-                                    }
-                                }
-
-                                for (auto it2 = logical_parents_set.begin(); it2 != logical_parents_set.end(); it2++) {
-                                    std::cout << *it2 << std::endl;
-
-                                    auto it3 = temps_map.find(rpkgs.at(temps.at(it->second).temp_rpkg_index).hash.at(
-                                            temps.at(it->second).temp_hash_index).hash_reference_data.hash_reference.at(
-                                            temps.at(it->second).temp_entityTypeResourceIndex.at(*it2)));
-
-                                    if (it3 != temps_map.end()) {
-                                        //if (temps.at(it3->second).tblu_return_value == TEMP_TBLU_FOUND)
-                                        //{
-                                        if (temps.at(it3->second).prim_depends_file_name.size() > 0) {
-                                            for (const auto& p : temps.at(it3->second).prim_depends_file_name) {
-                                                std::cout << "PRIM: " << p << std::endl;
-                                            }
-                                        }
-                                        //}
-                                    }
-                                }
-                            } else {
-                                if (temps.at(it->second).prim_depends_file_name.size() > 0) {
-                                    for (const auto& p : temps.at(it->second).prim_depends_file_name) {
-                                        std::cout << "PRIM: " << p << std::endl;
-                                    }
-                                }
-                            }
-                        }
-
-                        if (temps.at(it->second).prim_depends_file_name.size() > 0) {
-                            for (const auto& p : temps.at(it->second).prim_depends_file_name) {
-                                std::cout << "PRIM: " << p << std::endl;
-                            }
-                        }
-                    }
                 }
-            } else {
-                property_name = entry_name + " (NM) (" + util::uint32_t_to_string(temps_index) + "_" +
-                                util::uint32_t_to_string(entry_index) + ")";
 
-                if (!entry_name.empty()) {
-                    map_editor_parents.push_back(parent_string);
+                extract_glb_and_return_coords(temps_index, e, parent_string, entityId_temp_index,
+                                              entityId_m_eidParent_entityID, entityId_m_eidParent_entityIndex,
+                                              entityId_m_eidParent_entityIndex_map,
+                                              entityId_entity_logicalParent_top_level,
+                                              entityId_has_m_mTransform_and_m_eidParent,
+                                              entityId_temp_index_entityIndex_map, entityId_m_mTransform);
 
-                    if (parent_string.empty()) {
-                        parent_string += property_name;
-                    } else {
-                        parent_string += "/" + property_name;
-                    }
-
-                    std::cout << parent_string << std::endl;
-
-                    map_editor_property_names.push_back(property_name);
-
-                    map_editor_matrixes.push_back(map_editor_temp_matrix);
-
-                    map_editor_glb_file_names.push_back(prim_asset_file_names);
-                }
+                logical_parent_found = true;
             }
         }
+    }
 
-        bool m_eidParent_found = false;
-        uint64_t entityId_temp = 0;
-        uint64_t m_eidParent_entityID = 0;
-        int32_t m_eidParent_entityIndex = 0;
+    if (entry_index < 0 || entry_index >= temps.at(temps_index).tblu_entityName.size()) {
+        return;
+    }
 
-        if (entry_index >= 0 && entry_index < temps.at(temps_index).tblu_entityName.size()) {
-            std::pair<std::multimap<std::string, uint64_t>::iterator, std::multimap<std::string, uint64_t>::iterator> er = entityId_m_eidParent_entityIndex_map.equal_range(
-                    std::to_string(temps_index) + ":" + util::int32_t_to_string(entry_index));
+    auto it1 = temps_map.find(
+            rpkgs.at(temps.at(temps_index).temp_rpkg_index).hash.at(
+                    temps.at(temps_index).temp_hash_index).hash_reference_data.hash_reference.at(
+                    temps.at(temps_index).temp_entityTypeResourceIndex.at(entry_index)));
 
-            for (auto it3 = er.first; it3 != er.second; it3++) {
-                if (!entityId_entity_logicalParent_top_level.at(it3->second)) {
-                    m_eidParent_found = true;
+    if (it1 != temps_map.end()) {
+        if (temps.at(it1->second).tblu_return_value == TEMP_TBLU_FOUND) {
+            std::set<uint32_t> logicalParentsSet;
 
-                    entityId_temp = entityId_temp_index.at(it3->second);
-
-                    m_eidParent_entityID = entityId_m_eidParent_entityID.at(it3->second);
-
-                    m_eidParent_entityIndex = entityId_m_eidParent_entityIndex.at(it3->second);
-
-                    extract_glb_and_return_coords(entityId_temp, m_eidParent_entityIndex, parent_string,
-                                                  entityId_temp_index, entityId_m_eidParent_entityID,
-                                                  entityId_m_eidParent_entityIndex,
-                                                  entityId_m_eidParent_entityIndex_map,
-                                                  entityId_entity_logicalParent_top_level,
-                                                  entityId_has_m_mTransform_and_m_eidParent,
-                                                  entityId_temp_index_entityIndex_map, entityId_m_mTransform);
+            for (uint32_t e1 = 0; e1 < temps.at(it1->second).temp_logicalParent.size(); e1++) {
+                if (temps.at(it1->second).temp_logicalParent.at(e1) >=
+                    temps.at(it1->second).temp_logicalParent.size()) {
+                    logicalParentsSet.insert(temps.at(it1->second).temp_logicalParent.at(e1));
                 }
             }
-        }
 
-        if (!m_eidParent_found) {
-            bool logical_parent_found = false;
+            for (auto it21 = logicalParentsSet.begin();
+                 it21 != logicalParentsSet.end(); it21++) {
+                std::cout << *it21 << std::endl;
 
-            for (uint32_t e = 0; e < temps.at(temps_index).temp_logicalParent.size(); e++) {
-                if (temps.at(temps_index).temp_logicalParent.at(e) == entry_index) {
-                    if (entry_index == 1) {
-                        std::cout << parent_string << std::endl;
-                    }
-
-                    extract_glb_and_return_coords(temps_index, e, parent_string, entityId_temp_index,
-                                                  entityId_m_eidParent_entityID, entityId_m_eidParent_entityIndex,
-                                                  entityId_m_eidParent_entityIndex_map,
-                                                  entityId_entity_logicalParent_top_level,
-                                                  entityId_has_m_mTransform_and_m_eidParent,
-                                                  entityId_temp_index_entityIndex_map, entityId_m_mTransform);
-
-                    logical_parent_found = true;
-                }
+                extract_glb_and_return_coords(it1->second, *it21, parent_string, entityId_temp_index,
+                                              entityId_m_eidParent_entityID, entityId_m_eidParent_entityIndex,
+                                              entityId_m_eidParent_entityIndex_map,
+                                              entityId_entity_logicalParent_top_level,
+                                              entityId_has_m_mTransform_and_m_eidParent,
+                                              entityId_temp_index_entityIndex_map, entityId_m_mTransform);
             }
-        }
-
-        if (entry_index >= 0 && entry_index < temps.at(temps_index).tblu_entityName.size()) {
-            std::unordered_map<uint64_t, uint32_t>::iterator it = temps_map.find(
-                    rpkgs.at(temps.at(temps_index).temp_rpkg_index).hash.at(
-                            temps.at(temps_index).temp_hash_index).hash_reference_data.hash_reference.at(
-                            temps.at(temps_index).temp_entityTypeResourceIndex.at(entry_index)));
-
-            if (it != temps_map.end()) {
-                if (temps.at(it->second).tblu_return_value == TEMP_TBLU_FOUND) {
-                    std::set<uint32_t> logical_parents_set;
-
-                    for (uint32_t e = 0; e < temps.at(it->second).temp_logicalParent.size(); e++) {
-                        if (temps.at(it->second).temp_logicalParent.at(e) >=
-                            temps.at(it->second).temp_logicalParent.size()) {
-                            logical_parents_set.insert(temps.at(it->second).temp_logicalParent.at(e));
-                        }
-                    }
-
-                    for (auto it2 = logical_parents_set.begin();
-                         it2 != logical_parents_set.end(); it2++) {
-                        std::cout << *it2 << std::endl;
-
-                        extract_glb_and_return_coords(it->second, *it2, parent_string, entityId_temp_index,
-                                                      entityId_m_eidParent_entityID, entityId_m_eidParent_entityIndex,
-                                                      entityId_m_eidParent_entityIndex_map,
-                                                      entityId_entity_logicalParent_top_level,
-                                                      entityId_has_m_mTransform_and_m_eidParent,
-                                                      entityId_temp_index_entityIndex_map, entityId_m_mTransform);
-                    }
-                }
-            }
-        } else {
-
         }
     }
 }
@@ -235,10 +234,6 @@ void map_recursive_parent_mapper(uint64_t entityId, uint64_t entityId_index, con
                                  std::vector<uint64_t>& entityId_m_eidParent_entityID,
                                  std::vector<uint64_t>& entityId_m_eidParent_entityIndex) {
     if (entityId_m_eidParent_found.at(entityId_index)) {
-        if (entityId_entityName.at(entityId_index) == "mockup_commentbubble") {
-            std::cout << "LOL!!!" << std::endl;
-        }
-
         if (entityId_m_eidParent_entityID.at(entityId_index) == 0xFFFFFFFFFFFFFFFF) {
             std::string temp_entityId_temp_index = std::to_string(entityId_temp_index.at(entityId_index)) + ":" +
                                                    std::to_string(entityId_m_eidParent_entityIndex.at(entityId_index));
@@ -274,10 +269,6 @@ void map_recursive_parent_mapper(uint64_t entityId, uint64_t entityId_index, con
             }
         }
     } else if (!entityId_entity_logicalParent_top_level.at(entityId_index)) {
-        if (entityId_entityName.at(entityId_index) == "mockup_commentbubble") {
-            std::cout << "LOL!!!" << std::endl;
-        }
-
         std::string temp_entityId_temp_index = std::to_string(entityId_temp_index.at(entityId_index)) + ":" +
                                                std::to_string(entityId_entity_logicalParent_index.at(entityId_index));
 
@@ -296,10 +287,6 @@ void map_recursive_parent_mapper(uint64_t entityId, uint64_t entityId_index, con
             std::cout << parent_string << std::endl;
         }
     } else {
-        if (entityId_entityName.at(entityId_index) == "mockup_commentbubble") {
-            std::cout << "LOL!!!" << std::endl;
-        }
-
         bool found = false;
 
         std::pair<std::multimap<uint64_t, std::string>::iterator, std::multimap<uint64_t, std::string>::iterator> er = entityId_temp_entity_index_map_temp_hash_depend_map.equal_range(
@@ -335,11 +322,6 @@ void map_recursive_parent_mapper(uint64_t entityId, uint64_t entityId_index, con
 {
     if (entityId_m_eidParent_found.at(entityId_index))
     {
-        if (entityId_entityName.at(entityId_index) == "mockup_commentbubble")
-        {
-            std::cout << "LOL!!!" << std::endl;
-        }
-
         if (entityId_m_eidParent_entityID.at(entityId_index) == 0xFFFFFFFFFFFFFFFF)
         {
             std::string temp_entityId_temp_index = std::to_string(entityId_temp_index.at(entityId_index)) + ":" + std::to_string(entityId_m_eidParent_entityIndex.at(entityId_index));
@@ -371,11 +353,6 @@ void map_recursive_parent_mapper(uint64_t entityId, uint64_t entityId_index, con
     }
     else if (!entityId_entity_logicalParent_top_level.at(entityId_index))
     {
-        if (entityId_entityName.at(entityId_index) == "mockup_commentbubble")
-        {
-            std::cout << "LOL!!!" << std::endl;
-        }
-
         std::string temp_entityId_temp_index = std::to_string(entityId_temp_index.at(entityId_index)) + ":" + std::to_string(entityId_entity_logicalParent_index.at(entityId_index));
 
         std::unordered_map<std::string, uint64_t>::iterator itmap = entityId_temp_entity_index_map.find(temp_entityId_temp_index);
@@ -391,11 +368,6 @@ void map_recursive_parent_mapper(uint64_t entityId, uint64_t entityId_index, con
     }
     else
     {
-        if (entityId_entityName.at(entityId_index) == "mockup_commentbubble")
-        {
-            std::cout << "LOL!!!" << std::endl;
-        }
-
         bool found = false;
 
         std::pair <std::multimap<uint64_t, std::string>::iterator, std::multimap<uint64_t, std::string>::iterator> er = entityId_temp_entity_index_map_temp_hash_depend_map.equal_range(rpkgs.at(temps.at(entityId_temp_index.at(entityId_index)).temp_rpkg_index).hash.at(temps.at(entityId_temp_index.at(entityId_index)).temp_hash_index).hash_value);
@@ -468,11 +440,7 @@ void dev_function::dev_map_editor(std::string& input_path, std::string& filter, 
 
         //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
 
-        //LOG("Loading Hash List...");
-
-        //generic_function::load_hash_list(true);
-
-        //LOG("Loading Hash List: Done");
+        //force_load_hash_list();
 
         uint64_t temp_hash_value = std::strtoull(filter.c_str(), nullptr, 16);
 
@@ -767,8 +735,6 @@ void dev_function::dev_map_editor(std::string& input_path, std::string& filter, 
                                 entityId_m_mTransform.push_back(m_mTransform);
                             }
                         }
-
-                        std::cout << "LOL!!!" << std::endl;
                     }
 
                     std::set<uint32_t> logical_parents_set;
@@ -972,8 +938,6 @@ void dev_function::dev_map_editor(std::string& input_path, std::string& filter, 
                                 }
                             }
                         }
-
-                        std::cout <<"LOL!!!" << std::endl;
                     }
 
                     for (std::unordered_map<uint64_t, uint64_t>::iterator itmap = entityId_map.begin(); itmap != entityId_map.end(); itmap++)

@@ -15,11 +15,7 @@ void dev_function::dev_dlge_names(std::string& input_path, const std::string& ou
 
     nlohmann::ordered_json json;
 
-    if (!hash_list_loaded) {
-        LOG("Loading Hash List...");
-        generic_function::load_hash_list(true);
-        LOG("Loading Hash List: Done");
-    }
+    force_load_hash_list();
 
     for (uint64_t i = 0; i < rpkgs.size(); i++) {
         for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++) {
@@ -43,7 +39,7 @@ void dev_function::dev_dlge_names(std::string& input_path, const std::string& ou
 
                     nlohmann::ordered_json temp_json = nlohmann::ordered_json::array();
 
-                    for (const unsigned long long h : rpkgs.at(rpkg_index).hash.at(it->second).hash_reference_data.
+                    for (const uint64_t h : rpkgs.at(rpkg_index).hash.at(it->second).hash_reference_data.
                             hash_reference) {
                         temp_json.push_back(util::hash_to_ioi_string(h, true));
                     }

@@ -6,10 +6,6 @@
 #include <unordered_map>
 #include <chrono>
 
-// we have to be recursive, no other way to do this
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "misc-no-recursion"
-
 void recursive_hash_depends_search(uint64_t hash_value, std::vector<uint64_t>& hashes_to_extract,
                                    std::unordered_map<uint64_t, uint64_t>& hashes_to_extract_map) {
     for (auto& rpkg : rpkgs) {
@@ -37,8 +33,6 @@ void recursive_hash_depends_search(uint64_t hash_value, std::vector<uint64_t>& h
         }
     }
 }
-
-#pragma clang diagnostic pop
 
 void
 rpkg_function::extract_all_hash_depends_from(std::string& input_path, std::string& unparsed_filters,

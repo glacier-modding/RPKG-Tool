@@ -53,7 +53,7 @@ void dev_function::dev_extract_wwev_strings(std::string& input_path, std::string
                     LOG_AND_EXIT("Error: RPKG file " + rpkg.rpkg_file_path + " could not be read.");
                 }
 
-                file.seekg(rpkg.hash.at(hash_index).data.header.data_offset, file.beg);
+                file.seekg(rpkg.hash.at(hash_index).data.header.data_offset, std::ifstream::beg);
                 file.read(input_data.data(), hash_size);
                 file.close();
 
@@ -83,9 +83,8 @@ void dev_function::dev_extract_wwev_strings(std::string& input_path, std::string
                 uint32_t position = 0;
 
                 char input[1024];
-                uint32_t bytes4 = 0;
 
-                std::memcpy(&wwev_file_name_length, &wwev_data->data()[position], sizeof(bytes4));
+                std::memcpy(&wwev_file_name_length, &(*wwev_data)[position], BYTES4);
 
                 std::vector<char> wwev_meta_data;
 
@@ -97,7 +96,7 @@ void dev_function::dev_extract_wwev_strings(std::string& input_path, std::string
                     wwev_meta_data.push_back(k);
                 }
 
-                std::memcpy(&input, &wwev_data->data()[position], (wwev_file_name_length + static_cast<uint64_t>(0xC)));
+                std::memcpy(&input, &(*wwev_data)[position], (wwev_file_name_length + static_cast<uint64_t>(0xC)));
                 for (uint64_t k = 0; k < (wwev_file_name_length + static_cast<uint64_t>(0xC)); k++) {
                     wwev_meta_data.push_back(input[k]);
                 }
@@ -108,14 +107,14 @@ void dev_function::dev_extract_wwev_strings(std::string& input_path, std::string
                         static_cast<uint64_t>(wwev_file_name_length) + static_cast<uint64_t>(1), 0);
                 wwev_file_name[wwev_file_name_length] = 0;
 
-                std::memcpy(wwev_file_name.data(), &wwev_data->data()[position], wwev_file_name_length);
+                std::memcpy(wwev_file_name.data(), &(*wwev_data)[position], wwev_file_name_length);
                 position += wwev_file_name_length;
                 position += 0x4;
 
-                std::memcpy(&wwev_file_count, &wwev_data->data()[position], sizeof(bytes4));
+                std::memcpy(&wwev_file_count, &(*wwev_data)[position], BYTES4);
                 position += 0x4;
 
-                std::memcpy(&wwev_file_count_test, &wwev_data->data()[position], sizeof(bytes4));
+                std::memcpy(&wwev_file_count_test, &(*wwev_data)[position], BYTES4);
 
                 current_path.append("\\");
                 current_path.append(std::string(wwev_file_name.data()));

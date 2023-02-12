@@ -110,7 +110,7 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
 
                 std::string hash_string = util::uint64_t_to_hex_string(ores_entry.second);
 
-                if (!extract_single_hash || (extract_single_hash && filter == hash_string)) {
+                if (!extract_single_hash || filter == hash_string) {
                     for (uint64_t i = 0; i < rpkgs.size(); i++) {
                         uint64_t rpkg_index2 = i;
 

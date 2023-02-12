@@ -4,7 +4,6 @@
 #include <iostream>
 #include <chrono>
 #include <sstream>
-#include <regex>
 #include <filesystem>
 
 void rpkg_function::search_repo(std::string& input_path, std::string& search, int max_results) {
@@ -21,30 +20,28 @@ void rpkg_function::search_repo(std::string& input_path, std::string& search, in
         rpkg_function::import_rpkg_files_in_folder(input_path);
     }
 
-    uint32_t results_count = 0;
-
-    std::string search_lower_case = util::to_lower_case(search);
+    const std::string search_lower_case = util::to_lower_case(search);
 
     // uint32_t search_crc32_dec = std::strtoul(search.c_str(), nullptr, 10);
 
     // uint32_t search_crc32_hex = std::strtoul(search.c_str(), nullptr, 16);
 
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
+    const std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
     // int stringstream_length = 80;
 
-    std::string message = "Searching REPO (00204D1AFD76AB13)...";
+    const std::string message = "Searching REPO (00204D1AFD76AB13)...";
 
-    uint64_t repo_hash_value = 0x00204D1AFD76AB13;
+    constexpr uint64_t repo_hash_value = 0x00204D1AFD76AB13;
 
-    uint32_t repo_rpkg_index = rpkg_function::get_latest_hash(repo_hash_value);
+    const uint32_t repo_rpkg_index = rpkg_function::get_latest_hash(repo_hash_value);
 
     if (repo_rpkg_index != UINT32_MAX) {
         const auto it = rpkgs.at(repo_rpkg_index).hash_map.find(repo_hash_value);
 
         if (it != rpkgs.at(repo_rpkg_index).hash_map.end()) {
-            uint64_t ores_hash_value = 0x00858D45F5F9E3CA;
+            constexpr uint64_t ores_hash_value = 0x00858D45F5F9E3CA;
 
-            uint32_t ores_rpkg_index = rpkg_function::get_latest_hash(ores_hash_value);
+            const uint32_t ores_rpkg_index = rpkg_function::get_latest_hash(ores_hash_value);
 
             if (ores_rpkg_index != UINT32_MAX) {
                 auto it2 = rpkgs.at(ores_rpkg_index).hash_map.find(ores_hash_value);

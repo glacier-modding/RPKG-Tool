@@ -93,17 +93,17 @@ void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::stri
 
                 bool found = false;
 
-                for (uint64_t z = 0; z < filters.size(); z++) {
-                    std::size_t found_position = hash_file_name.find(filters.at(z));
+                for (const auto & filter : filters) {
+                    std::size_t found_position = hash_file_name.find(filter);
 
-                    if (found_position != std::string::npos && filters.at(z) != "") {
+                    if (found_position != std::string::npos && !filter.empty()) {
                         found = true;
 
                         break;
                     }
                 }
 
-                if (found || filter == "") {
+                if (found || filter.empty()) {
                     std::string message = "Extracting RTLV as JSON: ";
 
                     if (((rtlv_current_count * static_cast<uint64_t>(100000)) / rtlv_count) %
@@ -142,7 +142,7 @@ void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::stri
                         LOG_AND_EXIT("Error: RPKG file " + rpkg.rpkg_file_path + " could not be read.");
                     }
 
-                    file.seekg(rpkg.hash.at(hash_index).data.header.data_offset, file.beg);
+                    file.seekg(rpkg.hash.at(hash_index).data.header.data_offset, std::ifstream::beg);
                     file.read(input_data.data(), hash_size);
                     file.close();
 
@@ -188,52 +188,51 @@ void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::stri
                     uint32_t position = 0;
 
                     char char4[4] = "";
-                    uint16_t bytes2 = 0;
-                    uint32_t bytes4 = 0;
-                    uint64_t bytes8 = 0;
 
                     position = 0x58;
-                    std::memcpy(&languages_starting_offset, &rtlv_data->data()[position], sizeof(bytes4));
+                    std::memcpy(&languages_starting_offset, &(*rtlv_data)[position], BYTES4);
 
                     // Quick fix for New Hitman 3 LOCR
-                    std::memcpy(&check_for_languages, &rtlv_data->data()[0xC4], sizeof(bytes4));
+                    std::memcpy(&check_for_languages, &(*rtlv_data)[0xC4], BYTES4);
                     if (check_for_languages == 9) {
-                        languages.push_back("xx");
-                        languages.push_back("en");
-                        languages.push_back("fr");
-                        languages.push_back("it");
-                        languages.push_back("de");
-                        languages.push_back("es");
-                        languages.push_back("ru");
-                        languages.push_back("cn");
-                        languages.push_back("tc");
+                        languages.emplace_back("xx");
+                        languages.emplace_back("en");
+                        languages.emplace_back("fr");
+                        languages.emplace_back("it");
+                        languages.emplace_back("de");
+                        languages.emplace_back("es");
+                        languages.emplace_back("ru");
+                        languages.emplace_back("cn");
+                        languages.emplace_back("tc");
                     } else {
-                        languages.push_back("xx");
-                        languages.push_back("en");
-                        languages.push_back("fr");
-                        languages.push_back("it");
-                        languages.push_back("de");
-                        languages.push_back("es");
-                        languages.push_back("ru");
-                        languages.push_back("mx");
-                        languages.push_back("br");
-                        languages.push_back("pl");
-                        languages.push_back("cn");
-                        languages.push_back("jp");
-                        languages.push_back("tc");
+                        languages.emplace_back("xx");
+                        languages.emplace_back("en");
+                        languages.emplace_back("fr");
+                        languages.emplace_back("it");
+                        languages.emplace_back("de");
+                        languages.emplace_back("es");
+                        languages.emplace_back("ru");
+                        languages.emplace_back("mx");
+                        languages.emplace_back("br");
+                        languages.emplace_back("pl");
+                        languages.emplace_back("cn");
+                        languages.emplace_back("jp");
+                        languages.emplace_back("tc");
                     }
 
                     position = 0;
-                    std::memcpy(&rtlv_header_value, &rtlv_data->data()[position], sizeof(bytes8));
+                    std::memcpy(&rtlv_header_value, &(*rtlv_data)[position], BYTES8);
 
-                    for (uint64_t k = 0; k < sizeof(bytes8); k++) {
-                        json_meta_data.push_back(rtlv_data->data()[position + k]);
+                    for (uint64_t k = 0; k < BYTES8; k++) {
+                        json_meta_data.push_back((*rtlv_data)[position + k]);
                     }
 
-                    position += sizeof(bytes8);
+                    uint32_t bytes4 = 0;
 
-                    std::memcpy(&bytes4, &rtlv_data->data()[position], sizeof(bytes4));
-                    position += sizeof(bytes4);
+                    position += BYTES8;
+
+                    std::memcpy(&bytes4, &(*rtlv_data)[position], BYTES4);
+                    position += BYTES4;
 
                     rtlv_data_size = ((bytes4 & 0x000000FF) << 0x18) + ((bytes4 & 0x0000FF00) << 0x8) +
                                      ((bytes4 & 0x00FF0000) >> 0x8) + ((bytes4 & 0xFF000000) >> 0x18);
@@ -243,49 +242,51 @@ void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::stri
 
                         rtlv_header_data_size = languages_starting_offset - position;
 
-                        std::memcpy(&char4, &rtlv_header_data_size, sizeof(bytes4));
+                        std::memcpy(&char4, &rtlv_header_data_size, BYTES4);
 
                         for (char& k : char4) {
                             json_meta_data.push_back(k);
                         }
 
                         for (uint64_t k = 0; k < rtlv_header_data_size; k++) {
-                            rtlv_header.push_back(rtlv_data->data()[position]);
+                            rtlv_header.push_back((*rtlv_data)[position]);
 
-                            json_meta_data.push_back(rtlv_data->data()[position]);
+                            json_meta_data.push_back((*rtlv_data)[position]);
 
                             position += 1;
                         }
 
-                        std::memcpy(&number_of_languages, &rtlv_data->data()[position], sizeof(bytes4));
+                        std::memcpy(&number_of_languages, &(*rtlv_data)[position], BYTES4);
 
-                        for (uint64_t k = 0; k < sizeof(bytes4); k++) {
-                            json_meta_data.push_back(rtlv_data->data()[position + k]);
+                        for (uint64_t k = 0; k < BYTES4; k++) {
+                            json_meta_data.push_back((*rtlv_data)[position + k]);
                         }
 
-                        position += sizeof(bytes4);
+                        position += BYTES4;
+
+                        uint16_t bytes2 = 0;
 
                         for (uint64_t k = 0; k < number_of_languages; k++) {
                             uint16_t section_length = 0;
 
-                            std::memcpy(&section_length, &rtlv_data->data()[position], sizeof(bytes2));
-                            position += sizeof(bytes2);
+                            std::memcpy(&section_length, &(*rtlv_data)[position], BYTES2);
+                            position += BYTES2;
 
-                            std::memcpy(&bytes2, &rtlv_data->data()[position], sizeof(bytes2));
-                            position += sizeof(bytes2);
+                            std::memcpy(&bytes2, &(*rtlv_data)[position], BYTES2);
+                            position += BYTES2;
 
-                            language_unknowns.push_back(bytes2);
+                            language_unknowns.push_back(BYTES2);
 
-                            std::memcpy(&bytes4, &rtlv_data->data()[position], sizeof(bytes4));
-                            position += sizeof(bytes4);
+                            std::memcpy(&bytes4, &(*rtlv_data)[position], BYTES4);
+                            position += BYTES4;
 
-                            std::memcpy(&bytes4, &rtlv_data->data()[position], sizeof(bytes4));
-                            position += sizeof(bytes4);
+                            std::memcpy(&bytes4, &(*rtlv_data)[position], BYTES4);
+                            position += BYTES4;
 
                             language_offsets.push_back(bytes4);
 
-                            std::memcpy(&bytes4, &rtlv_data->data()[position], sizeof(bytes4));
-                            position += sizeof(bytes4);
+                            std::memcpy(&bytes4, &(*rtlv_data)[position], BYTES4);
+                            position += BYTES4;
                         }
 
                         for (uint64_t k = 0; k < number_of_languages; k++) {
@@ -293,21 +294,21 @@ void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::stri
 
                             temp_language_json_object["Language"] = languages.at(k);
 
-                            std::memcpy(&bytes4, &rtlv_data->data()[position], sizeof(bytes4));
-                            position += sizeof(bytes4);
+                            std::memcpy(&bytes4, &(*rtlv_data)[position], BYTES4);
+                            position += BYTES4;
 
                             language_data_sizes.push_back(bytes4);
 
                             std::vector<char> temp_string;
 
                             if (language_data_sizes.back() == 0) {
-                                std::memcpy(&bytes4, &rtlv_data->data()[position], sizeof(bytes4));
-                                position += sizeof(bytes4);
+                                std::memcpy(&bytes4, &(*rtlv_data)[position], BYTES4);
+                                position += BYTES4;
 
                                 temp_language_json_object["String"] = "";
                             } else {
                                 for (uint64_t l = 0; l < language_data_sizes.back(); l++) {
-                                    temp_string.push_back(rtlv_data->data()[position]);
+                                    temp_string.push_back((*rtlv_data)[position]);
                                     position += 1;
                                 }
 
@@ -332,10 +333,10 @@ void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::stri
                                                              static_cast<uint64_t>(4)], data + 1, sizeof(uint32_t));
                                 }
 
-                                uint32_t last_zero_position = static_cast<uint32_t>(temp_string.size());
+                                auto last_zero_position = static_cast<uint32_t>(temp_string.size());
 
-                                if (temp_string.size() > 0) {
-                                    uint32_t m = static_cast<uint32_t>(temp_string.size() - 1);
+                                if (!temp_string.empty()) {
+                                    auto m = static_cast<uint32_t>(temp_string.size() - 1);
 
                                     while (m >= 0) {
                                         if (temp_string.at(m) != 0) {
@@ -359,7 +360,7 @@ void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::stri
 
                         if ((decompressed_size - position) > 0) {
                             for (uint64_t k = 0; k < (decompressed_size - position); k++) {
-                                json_meta_data.push_back(rtlv_data->data()[position + k]);
+                                json_meta_data.push_back((*rtlv_data)[position + k]);
                             }
                         }
 

@@ -40,7 +40,7 @@ void rpkg_function::extract_prim_model_from(std::string& input_path, std::string
 
     std::vector<std::string> filters = util::parse_input_filter(std::move(filter));
 
-    for (auto& filter : filters) {
+    for (const auto& filter : filters) {
         uint64_t temp_hash_value = std::strtoull(filter.c_str(), nullptr, 16);
 
         for (uint64_t i = 0; i < rpkgs.size(); i++) {
@@ -72,12 +72,12 @@ void rpkg_function::extract_prim_model_from(std::string& input_path, std::string
                     util::replace_all_string_in_string(output_path, to_replace, replace_with);
                 }
 
-                std::string prim_output_path = file::output_path_append(
+                const std::string prim_output_path = file::output_path_append(
                         util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." +
                         rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + "\\PRIM\\" +
                         rpkgs.at(rpkg_index).rpkg_file_name, output_path);
 
-                std::string text_output_path = file::output_path_append(
+                const std::string text_output_path = file::output_path_append(
                         util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." +
                         rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type, output_path);
 
@@ -91,7 +91,7 @@ void rpkg_function::extract_prim_model_from(std::string& input_path, std::string
 
                 prim_asset_file_names.push_back(asset_file_name);
 
-                std::string meta_path = prim_output_path + "\\" + "metas";
+                const std::string meta_path = prim_output_path + "\\" + "metas";
 
                 file::create_directories(meta_path);
 

@@ -177,7 +177,7 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     } else if (command == "-json_to_sdef") {
         rpkg_function::json_to_sdef(input_path, output_path);
     } else if (command == "-sdef_to_json") {
-        rpkg_function::sdef_to_json(input_path, filter, output_path);
+        rpkg_function::sdef_to_json(input_path, output_path);
     } else if (command == "-dev_dlge_names") {
         dev_function::dev_dlge_names(input_path, output_path);
     } else if (command == "-search_repo") {

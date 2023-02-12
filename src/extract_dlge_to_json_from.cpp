@@ -96,10 +96,10 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
 
                 bool found = false;
 
-                for (uint64_t z = 0; z < filters.size(); z++) {
-                    std::size_t found_position = hash_file_name.find(filters.at(z));
+                for (const auto & filter : filters) {
+                    std::size_t found_position = hash_file_name.find(filter);
 
-                    if (found_position != std::string::npos && filters.at(z) != "") {
+                    if (found_position != std::string::npos && !filter.empty()) {
                         found = true;
 
                         break;
@@ -181,15 +181,15 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
                 std::vector<std::vector<uint32_t>> language_string_sizes;
                 std::vector<std::vector<uint64_t>> language_string_metas;
                 std::vector<std::string> languages;
-                languages.push_back("en");
-                languages.push_back("fr");
-                languages.push_back("it");
-                languages.push_back("de");
-                languages.push_back("es");
-                languages.push_back("ru");
-                languages.push_back("cn");
-                languages.push_back("tc");
-                languages.push_back("jp");
+                languages.emplace_back("en");
+                languages.emplace_back("fr");
+                languages.emplace_back("it");
+                languages.emplace_back("de");
+                languages.emplace_back("es");
+                languages.emplace_back("ru");
+                languages.emplace_back("cn");
+                languages.emplace_back("tc");
+                languages.emplace_back("jp");
 
                 std::vector<char> json_meta_data;
 
@@ -201,9 +201,9 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
                 uint32_t bytes4 = 0;
                 uint64_t bytes8 = 0;
 
-                std::memcpy(&bytes4, &dlge_data->data()[position], sizeof(bytes4));
+                std::memcpy(&bytes4, &(*dlge_data)[position], BYTES4);
 
-                position += sizeof(bytes4);
+                position += BYTES4;
 
                 if (bytes4 != 0) {
                     LOG("Error: DLGE file " << hash_file_name << " in " << rpkgs.at(i).rpkg_file_name
@@ -211,9 +211,9 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
                     break;
                 }
 
-                std::memcpy(&bytes4, &dlge_data->data()[position], sizeof(bytes4));
+                std::memcpy(&bytes4, &(*dlge_data)[position], BYTES4);
 
-                position += sizeof(bytes4);
+                position += BYTES4;
 
                 if (bytes4 != 1) {
                     LOG("Error: DLGE file " << hash_file_name << " in " << rpkgs.at(i).rpkg_file_name
@@ -223,9 +223,9 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
 
                 uint8_t text_available = 0;
 
-                std::memcpy(&bytes1, &dlge_data->data()[position], sizeof(bytes1));
+                std::memcpy(&bytes1, &(*dlge_data)[position], BYTES1);
 
-                position += sizeof(bytes1);
+                position += BYTES1;
 
                 if (bytes1 == 1) {
                     text_available = 1;
@@ -240,29 +240,29 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
                 while (text_available) {
                     number_of_dlge_categories++;
 
-                    std::memcpy(&bytes4, &dlge_data->data()[position], sizeof(bytes4));
+                    std::memcpy(&bytes4, &(*dlge_data)[position], BYTES4);
 
-                    for (uint64_t k = 0; k < sizeof(bytes4); k++) {
-                        json_meta_data.push_back(dlge_data->data()[position + k]);
+                    for (uint64_t k = 0; k < BYTES4; k++) {
+                        json_meta_data.push_back((*dlge_data)[position + k]);
                     }
 
-                    position += sizeof(bytes4);
+                    position += BYTES4;
 
                     dlge_categories.push_back(bytes4);
 
-                    std::memcpy(&bytes4, &dlge_data->data()[position], sizeof(bytes4));
+                    std::memcpy(&bytes4, &(*dlge_data)[position], BYTES4);
 
-                    for (uint64_t k = 0; k < sizeof(bytes4); k++) {
-                        json_meta_data.push_back(dlge_data->data()[position + k]);
+                    for (uint64_t k = 0; k < BYTES4; k++) {
+                        json_meta_data.push_back((*dlge_data)[position + k]);
                     }
 
-                    position += sizeof(bytes4);
+                    position += BYTES4;
 
                     dlge_identifiers.push_back(bytes4);
 
-                    std::memcpy(&bytes4, &dlge_data->data()[position], sizeof(bytes4));
+                    std::memcpy(&bytes4, &(*dlge_data)[position], BYTES4);
 
-                    position += sizeof(bytes4);
+                    position += BYTES4;
 
                     if (bytes4 != 0) {
                         LOG("Error: DLGE file " << hash_file_name << " in " << rpkgs.at(i).rpkg_file_name
@@ -271,9 +271,9 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
                         break;
                     }
 
-                    std::memcpy(&bytes8, &dlge_data->data()[position], sizeof(bytes8));
+                    std::memcpy(&bytes8, &(*dlge_data)[position], BYTES8);
 
-                    position += sizeof(bytes8);
+                    position += BYTES8;
 
                     if (bytes8 != 0xFFFFFFFFFFFFFFFF) {
                         LOG("Error: DLGE file " << hash_file_name << " in " << rpkgs.at(i).rpkg_file_name
@@ -282,9 +282,9 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
                         break;
                     }
 
-                    std::memcpy(&bytes4, &dlge_data->data()[position], sizeof(bytes4));
+                    std::memcpy(&bytes4, &(*dlge_data)[position], BYTES4);
 
-                    position += sizeof(bytes4);
+                    position += BYTES4;
 
                     if (bytes4 != 0) {
                         LOG("Error: DLGE file " << hash_file_name << " in " << rpkgs.at(i).rpkg_file_name
@@ -293,38 +293,38 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
                         break;
                     }
 
-                    std::memcpy(&bytes4, &dlge_data->data()[position], sizeof(bytes4));
+                    std::memcpy(&bytes4, &(*dlge_data)[position], BYTES4);
 
                     if (bytes4 == 0) {
-                        for (uint64_t k = 0; k < sizeof(bytes4); k++) {
-                            json_meta_data.push_back(dlge_data->data()[position + k]);
+                        for (uint64_t k = 0; k < BYTES4; k++) {
+                            json_meta_data.push_back((*dlge_data)[position + k]);
                         }
 
-                        position += sizeof(bytes4);
+                        position += BYTES4;
                     }
 
                     uint32_t check_variable_1 = 0;
                     uint32_t check_variable_2 = 0;
 
-                    std::memcpy(&check_variable_1, &dlge_data->data()[position], sizeof(bytes4));
+                    std::memcpy(&check_variable_1, &(*dlge_data)[position], BYTES4);
 
-                    position += sizeof(bytes4);
+                    position += BYTES4;
 
-                    std::memcpy(&check_variable_2, &dlge_data->data()[position], sizeof(bytes4));
+                    std::memcpy(&check_variable_2, &(*dlge_data)[position], BYTES4);
 
-                    position += sizeof(bytes4);
+                    position += BYTES4;
 
-                    position -= sizeof(bytes8);
+                    position -= BYTES8;
 
                     if ((check_variable_1 == 0xFFFFFFFF && check_variable_2 == 0xFFFFFFFF) ||
                         ((check_variable_1 + 1) == check_variable_2) || check_variable_2 == 0xFFFFFFFF) {
-                        std::memcpy(&bytes8, &dlge_data->data()[position], sizeof(bytes8));
+                        std::memcpy(&bytes8, &(*dlge_data)[position], BYTES8);
 
-                        for (uint64_t k = 0; k < sizeof(bytes8); k++) {
-                            json_meta_data.push_back(dlge_data->data()[position + k]);
+                        for (uint64_t k = 0; k < BYTES8; k++) {
+                            json_meta_data.push_back((*dlge_data)[position + k]);
                         }
 
-                        position += sizeof(bytes8);
+                        position += BYTES8;
 
                         dlge_section_metas.push_back(bytes8);
                     } else {
@@ -347,15 +347,15 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
 
                         temp_language_json_object["Language"] = languages.at(number_of_languages);
 
-                        std::memcpy(&bytes4, &dlge_data->data()[position], sizeof(bytes4));
-                        position += sizeof(bytes4);
+                        std::memcpy(&bytes4, &(*dlge_data)[position], BYTES4);
+                        position += BYTES4;
 
                         temp_language_string_sizes.push_back(bytes4);
 
                         std::vector<char> temp_string;
 
                         for (uint64_t l = 0; l < temp_language_string_sizes.back(); l++) {
-                            temp_string.push_back(dlge_data->data()[position]);
+                            temp_string.push_back((*dlge_data)[position]);
                             position += 1;
                         }
 
@@ -383,10 +383,10 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
                             dlge_has_text = true;
                         }
 
-                        uint32_t last_zero_position = static_cast<uint32_t>(temp_string.size());
+                        auto last_zero_position = static_cast<uint32_t>(temp_string.size());
 
                         if (!temp_string.empty()) {
-                            uint32_t m = static_cast<uint32_t>(temp_string.size() - 1);
+                            auto m = static_cast<uint32_t>(temp_string.size() - 1);
 
                             while (m >= 0) {
                                 if (temp_string.at(m) != 0) {
@@ -398,7 +398,7 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
                             }
                         }
 
-                        if (temp_string.size() > 0) {
+                        if (!temp_string.empty()) {
                             std::string temp_string_with_zero_pad_removed = std::string(temp_string.begin(),
                                                                                         temp_string.end()).substr(0,
                                                                                                                   last_zero_position);
@@ -411,33 +411,33 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
                         json_object.push_back(temp_language_json_object);
 
                         if ((position + 0x8) <= decompressed_size) {
-                            std::memcpy(&bytes4, &dlge_data->data()[position], sizeof(bytes4));
+                            std::memcpy(&bytes4, &(*dlge_data)[position], BYTES4);
 
                             if (bytes4 == 0) {
-                                for (uint64_t k = 0; k < sizeof(bytes4); k++) {
-                                    json_meta_data.push_back(dlge_data->data()[position + k]);
+                                for (uint64_t k = 0; k < BYTES4; k++) {
+                                    json_meta_data.push_back((*dlge_data)[position + k]);
                                 }
 
-                                position += sizeof(bytes4);
+                                position += BYTES4;
                             }
 
-                            std::memcpy(&check_variable_1, &dlge_data->data()[position], sizeof(bytes4));
-                            position += sizeof(bytes4);
+                            std::memcpy(&check_variable_1, &(*dlge_data)[position], BYTES4);
+                            position += BYTES4;
 
-                            std::memcpy(&check_variable_2, &dlge_data->data()[position], sizeof(bytes4));
-                            position += sizeof(bytes4);
+                            std::memcpy(&check_variable_2, &(*dlge_data)[position], BYTES4);
+                            position += BYTES4;
 
-                            position -= sizeof(bytes8);
+                            position -= BYTES8;
 
                             if ((check_variable_1 == 0xFFFFFFFF && check_variable_2 == 0xFFFFFFFF) ||
                                 ((check_variable_1 + 1) == check_variable_2) || check_variable_2 == 0xFFFFFFFF) {
-                                std::memcpy(&bytes8, &dlge_data->data()[position], sizeof(bytes8));
+                                std::memcpy(&bytes8, &(*dlge_data)[position], BYTES8);
 
-                                for (uint64_t k = 0; k < sizeof(bytes8); k++) {
-                                    json_meta_data.push_back(dlge_data->data()[position + k]);
+                                for (uint64_t k = 0; k < BYTES8; k++) {
+                                    json_meta_data.push_back((*dlge_data)[position + k]);
                                 }
 
-                                position += sizeof(bytes8);
+                                position += BYTES8;
 
                                 temp_language_string_metas.push_back(bytes8);
                             } else {
@@ -451,12 +451,12 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
                     }
 
                     if ((position + 0x1) <= decompressed_size) {
-                        std::memcpy(&bytes1, &dlge_data->data()[position], sizeof(bytes1));
+                        std::memcpy(&bytes1, &(*dlge_data)[position], BYTES1);
 
                         if (bytes1 == 1) {
                             text_available = 1;
 
-                            position += sizeof(bytes1);
+                            position += BYTES1;
                         } else {
                             text_available = 0;
                         }
@@ -469,7 +469,7 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
 
                 if ((decompressed_size - position) > 0) {
                     for (uint64_t k = 0; k < (decompressed_size - position); k++) {
-                        json_meta_data.push_back(dlge_data->data()[position + k]);
+                        json_meta_data.push_back((*dlge_data)[position + k]);
                     }
                 }
 
@@ -507,11 +507,11 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
 
                     char char4[4];
 
-                    std::memcpy(&char4, &number_of_dlge_categories, sizeof(bytes4));
-                    json_meta_file.write(char4, sizeof(bytes4));
+                    std::memcpy(&char4, &number_of_dlge_categories, BYTES4);
+                    json_meta_file.write(char4, BYTES4);
 
-                    std::memcpy(&char4, &number_of_languages, sizeof(bytes4));
-                    json_meta_file.write(char4, sizeof(bytes4));
+                    std::memcpy(&char4, &number_of_languages, BYTES4);
+                    json_meta_file.write(char4, BYTES4);
 
                     json_meta_file.write(json_meta_data.data(), json_meta_data.size());
 

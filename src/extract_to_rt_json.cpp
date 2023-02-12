@@ -7,7 +7,6 @@
 #include "thirdparty/rapidjson/document.h"
 #include "thirdparty/rapidjson/prettywriter.h"
 #include "thirdparty/rapidjson/stringbuffer.h"
-#include <unordered_map>
 #include <sstream>
 #include <fstream>
 #include <filesystem>
@@ -18,6 +17,13 @@
 #pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM2016.lib")
 #pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM2.lib")
 #pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM3.lib")
+
+const std::vector<std::string> hm2016_valid_resources = {"TEMP", "AIRG", "TBLU", "CRMD", "ATMD", "CBLU", "CPPT", "DSWB",
+                                                         "GFXF", "GIDX", "VIDB", "WSGB"};
+const std::vector<std::string> hm2_valid_resources = {"TEMP", "AIRG", "TBLU", "CRMD", "ATMD", "CBLU", "CPPT", "DSWB",
+                                                      "ECPB", "GFXF", "GIDX", "VIDB", "WSGB"};
+const std::vector<std::string> hm3_valid_resources = {"TEMP", "AIRG", "TBLU", "CRMD", "ATMD", "CBLU", "CPPT", "DSWB",
+                                                      "ECPB", "GFXF", "GIDX", "VIDB", "WSGB"};
 
 void rpkg_function::extract_to_rt_json(std::string& input_path, std::string& filter, std::string& version,
                                        std::string& output_path) {
@@ -37,22 +43,15 @@ void rpkg_function::extract_to_rt_json(std::string& input_path, std::string& fil
         LOG_AND_RETURN("Error: Version (HM2016, HM2, or HM3) must be passed via -version on the command line.");
     }
 
-    std::vector<std::string> hm2016_valid_resources = {"TEMP", "AIRG", "TBLU", "CRMD", "ATMD", "CBLU", "CPPT", "DSWB",
-                                                       "GFXF", "GIDX", "VIDB", "WSGB"};
-    std::vector<std::string> hm2_valid_resources = {"TEMP", "AIRG", "TBLU", "CRMD", "ATMD", "CBLU", "CPPT", "DSWB",
-                                                    "ECPB", "GFXF", "GIDX", "VIDB", "WSGB"};
-    std::vector<std::string> hm3_valid_resources = {"TEMP", "AIRG", "TBLU", "CRMD", "ATMD", "CBLU", "CPPT", "DSWB",
-                                                    "ECPB", "GFXF", "GIDX", "VIDB", "WSGB"};
-
     if (!file::path_exists(input_path)) {
         LOG_AND_EXIT("Error: The RPKG file " + input_path + " does not exist.");
     }
 
     rpkg_function::import_rpkg(input_path, true);
 
-    std::vector<std::string> filters = util::parse_input_filter(filter);
+    const std::vector<std::string> filters = util::parse_input_filter(filter);
 
-    for (auto& filter : filters) {
+    for (const auto& filter : filters) {
         uint64_t text_hash_value = std::strtoull(filter.c_str(), nullptr, 16);
 
         for (uint64_t i = 0; i < rpkgs.size(); i++) {
@@ -61,7 +60,7 @@ void rpkg_function::extract_to_rt_json(std::string& input_path, std::string& fil
             if (rpkgs.at(i).rpkg_file_path != input_path)
                 continue;
 
-            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(text_hash_value);
+            auto it = rpkgs.at(rpkg_index).hash_map.find(text_hash_value);
 
             if (it == rpkgs.at(rpkg_index).hash_map.end())
                 continue;
@@ -113,7 +112,7 @@ void rpkg_function::extract_to_rt_json(std::string& input_path, std::string& fil
                 LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(rpkg_index).rpkg_file_path + " could not be read.");
             }
 
-            file.seekg(rpkgs.at(rpkg_index).hash.at(it->second).data.header.data_offset, file.beg);
+            file.seekg(rpkgs.at(rpkg_index).hash.at(it->second).data.header.data_offset, std::ifstream::beg);
             file.read(temp_input_data.data(), temp_hash_size);
             file.close();
 

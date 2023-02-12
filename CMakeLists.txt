@@ -216,7 +216,6 @@ set(RPKG_COMMON_SOURCES
         src/extract_rpkg_meta.cpp
         src/extract_rtlv_to_json_from.cpp
         src/extract_sdef_to_json.cpp
-        src/extract_temp_from.cpp
         src/extract_text_from.cpp
         src/extract_to_rt_json.cpp
         src/extract_wwem_to_ogg_from.cpp

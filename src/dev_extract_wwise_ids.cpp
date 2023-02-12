@@ -13,6 +13,8 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& o
 
     rpkg_function::import_rpkg_files_in_folder(input_path);
 
+    uint32_t bytes4 = 0;
+
     for (auto& rpkg : rpkgs) {
         for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++) {
             if (rpkg.hash_resource_types.at(r) != "WWEV")
@@ -46,7 +48,7 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& o
                     LOG_AND_EXIT("Error: RPKG file " + rpkg.rpkg_file_path + " could not be read.");
                 }
 
-                file.seekg(rpkg.hash.at(hash_index).data.header.data_offset, file.beg);
+                file.seekg(rpkg.hash.at(hash_index).data.header.data_offset, std::ifstream::beg);
                 file.read(input_data.data(), hash_size);
                 file.close();
 
@@ -76,9 +78,8 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& o
                 uint32_t position = 0;
 
                 char input[1024];
-                uint32_t bytes4 = 0;
 
-                std::memcpy(&wwev_file_name_length, &wwev_data->data()[position], sizeof(bytes4));
+                std::memcpy(&wwev_file_name_length, &(*wwev_data)[position], BYTES4);
 
                 std::vector<char> wwev_meta_data;
 
@@ -86,7 +87,7 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& o
 
                 std::memcpy(&hash, &rpkg.hash.at(hash_index).hash_value, 0x8);
 
-                std::memcpy(&input, &wwev_data->data()[position], (wwev_file_name_length + static_cast<uint64_t>(0xC)));
+                std::memcpy(&input, &(*wwev_data)[position], (wwev_file_name_length + static_cast<uint64_t>(0xC)));
 
                 position += 0x4;
 
@@ -94,14 +95,14 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& o
                         static_cast<uint64_t>(wwev_file_name_length) + static_cast<uint64_t>(1), 0);
                 wwev_file_name[wwev_file_name_length] = 0;
 
-                std::memcpy(wwev_file_name.data(), &wwev_data->data()[position], wwev_file_name_length);
+                std::memcpy(wwev_file_name.data(), &(*wwev_data)[position], wwev_file_name_length);
                 position += wwev_file_name_length;
                 position += 0x4;
 
-                std::memcpy(&wwev_file_count, &wwev_data->data()[position], sizeof(bytes4));
+                std::memcpy(&wwev_file_count, &(*wwev_data)[position], BYTES4);
                 position += 0x4;
 
-                std::memcpy(&wwev_file_count_test, &wwev_data->data()[position], sizeof(bytes4));
+                std::memcpy(&wwev_file_count_test, &(*wwev_data)[position], BYTES4);
 
                 current_path.append("\\");
                 current_path.append(std::string(wwev_file_name.data()));
@@ -119,7 +120,7 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& o
 
                 if (wwev_file_count > 0) {
                     for (uint64_t k = 0; k < wwev_file_count; k++) {
-                        std::memcpy(&bytes4, &wwev_data->data()[position], 0x4);
+                        std::memcpy(&bytes4, &(*wwev_data)[position], 0x4);
 
                         std::cout << "WWEV file " << std::to_string(k) << ": " << std::endl;
                         std::cout << "  - Wwise ID: " << util::uint32_t_to_hex_string(bytes4) << std::endl;
@@ -128,26 +129,26 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& o
 
                         uint32_t wem_size;
 
-                        std::memcpy(&wem_size, &wwev_data->data()[position], sizeof(bytes4));
+                        std::memcpy(&wem_size, &(*wwev_data)[position], BYTES4);
                         position += 0x4;
 
                         std::cout << "  - Length: " << util::uint32_t_to_hex_string(wem_size) << std::endl;
 
                         std::vector<char> wwev_file_data(wem_size, 0);
 
-                        std::memcpy(wwev_file_data.data(), &wwev_data->data()[position], wem_size);
+                        std::memcpy(wwev_file_data.data(), &(*wwev_data)[position], wem_size);
                         position += wem_size;
 
                         std::string wem_file = wem_path + "\\" + std::to_string(k) + ".wem";
                     }
                 } else {
-                    std::memcpy(&bytes4, &wwev_data->data()[position], 0x4);
+                    std::memcpy(&bytes4, &(*wwev_data)[position], 0x4);
 
                     if (bytes4 != 0) {
                         return;
                     }
 
-                    std::memcpy(&bytes4, &wwev_data->data()[position], 0x4);
+                    std::memcpy(&bytes4, &(*wwev_data)[position], 0x4);
 
                     uint32_t length = bytes4;
 
@@ -156,7 +157,7 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& o
                     for (uint64_t k = 0; k < length; k++) {
                         position += 0x4;
 
-                        std::memcpy(&bytes4, &wwev_data->data()[position], 0x4);
+                        std::memcpy(&bytes4, &(*wwev_data)[position], 0x4);
 
                         std::cout << "WWEV Link Type(0) " << std::to_string(k) << ": " << std::endl;
                         std::cout << "  - Wwise ID: " << util::uint32_t_to_hex_string(bytes4) << std::endl;
@@ -165,7 +166,7 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& o
 
                         uint32_t wem_size;
 
-                        std::memcpy(&wem_size, &wwev_data->data()[position], sizeof(bytes4));
+                        std::memcpy(&wem_size, &(*wwev_data)[position], sizeof(bytes4));
 
                         position += 0x4;
 
@@ -178,13 +179,13 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& o
                 if (position + 0x4 > decompressed_size)
                     continue;
 
-                std::memcpy(&bytes4, &wwev_data->data()[position], 0x4);
+                std::memcpy(&bytes4, &(*wwev_data)[position], 0x4);
 
                 if (bytes4 == 0) {
                     return;
                 }
 
-                std::memcpy(&bytes4, &wwev_data->data()[position], 0x4);
+                std::memcpy(&bytes4, &(*wwev_data)[position], 0x4);
 
                 uint32_t length = bytes4;
 
@@ -193,7 +194,7 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& o
                 for (uint64_t k = 0; k < length; k++) {
                     position += 0x4;
 
-                    std::memcpy(&bytes4, &wwev_data->data()[position], 0x4);
+                    std::memcpy(&bytes4, &(*wwev_data)[position], 0x4);
 
                     std::cout << "WWEV Link Type(1) " << std::to_string(k) << ": " << std::endl;
                     std::cout << "  - Wwise ID: " << util::uint32_t_to_hex_string(bytes4) << std::endl;
@@ -202,7 +203,7 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& o
 
                     uint32_t wem_size;
 
-                    std::memcpy(&wem_size, &wwev_data->data()[position], sizeof(bytes4));
+                    std::memcpy(&wem_size, &(*wwev_data)[position], sizeof(bytes4));
 
                     position += 0x4;
 
