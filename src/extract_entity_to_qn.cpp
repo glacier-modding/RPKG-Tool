@@ -31,17 +31,12 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
     }
 
     std::filesystem::path base_folder_path = input_path;
-
     std::string parent_path = base_folder_path.parent_path().string();
-
     rpkg_function::import_rpkg_files_in_folder(parent_path);
 
     std::stringstream ss;
-
     ss << "Scanning folder: Done";
-
-    timing_string = "Extracting entity (TEMP/TBLU) to QN (QuickEntity v2.1) JSON...";
-
+    timing_string = "Extracting entity (TEMP/TBLU) to QN (QuickEntity) JSON...";
     //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
 
     force_load_hash_list();
@@ -61,16 +56,12 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
         if (it6 == rpkgs.at(rpkg_index).hash_map.end())
             continue;
 
-        temp temp_temp(rpkg_index, it6->second, 3);
-
         std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
 
-        temp_temp.load_data();
+        entity temp_entity(rpkg_index, it6->second, 3);
 
         std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
         std::string message = "Converting entity (TEMP/TBLU) via ResourceTool to RT JSON...";
-
         std::stringstream ss;
 
         ss << message << "100% Done in "
@@ -80,7 +71,6 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
         LOG(ss.str());
 
         std::string temp_output_path = "";
-
         bool output_path_is_dir = false;
 
         if (output_path.length() > 5) {
@@ -103,11 +93,11 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
 
         start_time = std::chrono::high_resolution_clock::now();
 
-        temp_temp.rt_json_to_qn_json();
+        temp_entity.to_qn_json(temp_output_path);
 
         end_time = std::chrono::high_resolution_clock::now();
 
-        message = "Converting entity (TEMP/TBLU) from RT JSON to QN (QuickEntity v2.1) JSON...";
+        message = "Converting entity (TEMP/TBLU) from RT JSON to QN (QuickEntity) JSON...";
 
         ss.str(std::string());
 
@@ -116,8 +106,6 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
            << "s";
 
         LOG(ss.str());
-
-        temp_temp.write_qn_json_to_file(temp_output_path);
     }
 
     percent_progress = (uint32_t) 100;

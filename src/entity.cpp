@@ -2,16 +2,19 @@
 #include "rpkg_function.h"
 #include "global.h"
 #include "crypto.h"
+#include "file.h"
 #include "util.h"
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/rapidjson/stringbuffer.h"
 #include "thirdparty/directxmath/DirectXMath.h"
+#include "thirdparty/quickentity-rs/quickentity_rs.dll.h"
 #include <unordered_map>
 #include <fstream>
 #include <iomanip>
 
 #pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM2.lib")
 #pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM3.lib")
+#pragma comment(lib, "../thirdparty/quickentity-rs/quickentity_rs.dll.lib")
 
 entity::entity() = default;
 
@@ -133,6 +136,8 @@ entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
 
                 temp_yyjson_doc = yyjson_read(temp_json_input->JsonData, temp_json_input->StrSize, 0);
 
+                rt_temp_json = std::string(temp_json_input->JsonData, temp_json_input->StrSize);
+
                 resource_tool_converter_temp->FreeJsonString(temp_json_input);
 
                 std::vector<char>().swap(temp_data);
@@ -202,12 +207,28 @@ entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
 
                 tblu_yyjson_doc = yyjson_read(tblu_json_input->JsonData, tblu_json_input->StrSize, 0);
 
+                rt_tblu_json = std::string(tblu_json_input->JsonData, tblu_json_input->StrSize);
+
                 resource_tool_converter_tblu->FreeJsonString(tblu_json_input);
 
                 std::vector<char>().swap(tblu_data);
             }
         }
     }
+}
+
+void entity::to_qn_json(std::string& output_path)
+{
+    std::string temp_meta_json = rpkg_function::generate_hash_meta_json(temp_rpkg_index, temp_hash_index);
+    std::string tblu_meta_json = rpkg_function::generate_hash_meta_json(tblu_rpkg_index, tblu_hash_index);
+
+    char* entity_json_string = convert_entity_to_qn(rt_temp_json.c_str(), temp_meta_json.c_str(), rt_tblu_json.c_str(), tblu_meta_json.c_str());
+
+    std::string entity_json = std::string(entity_json_string);
+
+    free_json_string(entity_json_string);
+
+    file::write_to_file(output_path, entity_json);
 }
 
 uint32_t

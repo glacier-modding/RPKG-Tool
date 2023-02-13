@@ -20,6 +20,7 @@ struct rpkg_extraction_vars {
 
 class rpkg_function {
 public:
+    static std::string generate_hash_meta_json(const uint64_t rpkg_index, const uint64_t hash_index);
     static void extract_latest_hash(std::string& input_path, std::string& filter, std::string& output_path);
 
     static void json_to_asva(const std::string& input_path, const std::string& output_path);
