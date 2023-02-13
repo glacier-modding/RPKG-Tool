@@ -1,6 +1,7 @@
 task:
   windows_container:
     image: cirrusci/windowsservercore:cmake-2022.06.23
+    cpu: 4
 
   Prepare_Ninja_script: choco install -y ninja
 
@@ -15,7 +16,7 @@ task:
     cmake --build cmake-build-release --target %TARGET%
 
   Download_Hash_List_script:
-    - pwsh: Invoke-WebRequest -Uri "https://hitmandb.glaciermodding.org/latest-hashes.7z" -OutFile "latest-hashes.7z"
+    - ps: Invoke-WebRequest -Uri "https://hitmandb.glaciermodding.org/latest-hashes.7z" -OutFile "latest-hashes.7z"
   
   Prepare_Artifacts_script: |
     7z e latest-hashes.7z -o_rpkg
