@@ -4,7 +4,6 @@
 #include "crypto.h"
 #include "util.h"
 #include "thirdparty/lz4/lz4.h"
-#include <unordered_map>
 #include <fstream>
 
 borg::borg() = default;
@@ -36,7 +35,7 @@ borg::borg(uint64_t rpkgs_index, uint64_t hash_index) {
         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(borg_rpkg_index).rpkg_file_path + " could not be read.");
     }
 
-    file.seekg(rpkgs.at(borg_rpkg_index).hash.at(borg_hash_index).data.header.data_offset, file.beg);
+    file.seekg(rpkgs.at(borg_rpkg_index).hash.at(borg_hash_index).data.header.data_offset, std::ifstream::beg);
     file.read(borg_input_data.data(), borg_hash_size);
     file.close();
 
@@ -59,39 +58,37 @@ borg::borg(uint64_t rpkgs_index, uint64_t hash_index) {
     std::vector<char>().swap(borg_input_data);
 
     char input[1024];
-    uint16_t bytes2 = 0;
-    uint32_t bytes4 = 0;
 
-    std::memcpy(&borg_primary_header_offset, &borg_data.data()[borg_position], sizeof(bytes4));
+    std::memcpy(&borg_primary_header_offset, &borg_data[borg_position], BYTES4);
     borg_position += 0x4;
 
     borg_position = borg_primary_header_offset;
 
-    std::memcpy(&bones_count, &borg_data.data()[borg_position], sizeof(bytes4));
+    std::memcpy(&bones_count, &borg_data[borg_position], BYTES4);
     borg_position += 0x4;
 
-    std::memcpy(&bones_count_animated, &borg_data.data()[borg_position], sizeof(bytes4));
+    std::memcpy(&bones_count_animated, &borg_data[borg_position], BYTES4);
     borg_position += 0x4;
 
-    std::memcpy(&bones_offset, &borg_data.data()[borg_position], sizeof(bytes4));
+    std::memcpy(&bones_offset, &borg_data[borg_position], BYTES4);
     borg_position += 0x4;
 
-    std::memcpy(&poses_offset, &borg_data.data()[borg_position], sizeof(bytes4));
+    std::memcpy(&poses_offset, &borg_data[borg_position], BYTES4);
     borg_position += 0x4;
 
-    std::memcpy(&poses_inverse_matrices, &borg_data.data()[borg_position], sizeof(bytes4));
+    std::memcpy(&poses_inverse_matrices, &borg_data[borg_position], BYTES4);
     borg_position += 0x4;
 
-    std::memcpy(&bones_constraints, &borg_data.data()[borg_position], sizeof(bytes4));
+    std::memcpy(&bones_constraints, &borg_data.data()[borg_position], BYTES4);
     borg_position += 0x4;
 
-    std::memcpy(&poses_header, &borg_data.data()[borg_position], sizeof(bytes4));
+    std::memcpy(&poses_header, &borg_data[borg_position], BYTES4);
     borg_position += 0x4;
 
-    std::memcpy(&bones_invert, &borg_data.data()[borg_position], sizeof(bytes4));
+    std::memcpy(&bones_invert, &borg_data[borg_position], BYTES4);
     borg_position += 0x4;
 
-    std::memcpy(&bones_map, &borg_data.data()[borg_position], sizeof(bytes4));
+    std::memcpy(&bones_map, &borg_data[borg_position], BYTES4);
     borg_position += 0x4;
 
     borg_position = bones_offset;
@@ -99,7 +96,7 @@ borg::borg(uint64_t rpkgs_index, uint64_t hash_index) {
     if (log_output) {
         LOG("BORG file: " + borg_file_name);
 
-        std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(
+        auto it2 = hash_list_hash_map.find(
                 rpkgs.at(borg_rpkg_index).hash.at(borg_hash_index).hash_value);
 
         if (it2 != hash_list_hash_map.end()) {
@@ -123,33 +120,33 @@ borg::borg(uint64_t rpkgs_index, uint64_t hash_index) {
     for (uint32_t b = 0; b < bones_count; b++) {
         bone_data temp_bone_data;
 
-        std::memcpy(&temp_bone_data.position.x, &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&temp_bone_data.position.x, &borg_data[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&temp_bone_data.position.y, &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&temp_bone_data.position.y, &borg_data[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&temp_bone_data.position.z, &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&temp_bone_data.position.z, &borg_data[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&temp_bone_data.parent_id, &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&temp_bone_data.parent_id, &borg_data[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&temp_bone_data.size.x, &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&temp_bone_data.size.x, &borg_data[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&temp_bone_data.size.y, &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&temp_bone_data.size.y, &borg_data[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&temp_bone_data.size.z, &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&temp_bone_data.size.z, &borg_data[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&input, &borg_data.data()[borg_position], 0x22);
+        std::memcpy(&input, &borg_data[borg_position], 0x22);
         borg_position += 0x22;
 
         temp_bone_data.name = std::string(input);
 
-        std::memcpy(&temp_bone_data.part, &borg_data.data()[borg_position], sizeof(bytes2));
+        std::memcpy(&temp_bone_data.part, &borg_data[borg_position], BYTES2);
         borg_position += 0x2;
 
         if (log_output) {
@@ -177,16 +174,16 @@ borg::borg(uint64_t rpkgs_index, uint64_t hash_index) {
         float temp_float_c = 0;
         float temp_float_d = 0;
 
-        std::memcpy(&temp_float_a, &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&temp_float_a, &borg_data[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&temp_float_b, &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&temp_float_b, &borg_data[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&temp_float_c, &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&temp_float_c, &borg_data[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&temp_float_d, &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&temp_float_d, &borg_data[borg_position], BYTES4);
         borg_position += 0x4;
 
         DirectX::XMVECTOR temp_bone_quaternion;
@@ -197,16 +194,16 @@ borg::borg(uint64_t rpkgs_index, uint64_t hash_index) {
 
         vector4 temp_vector4;
 
-        std::memcpy(&temp_vector4.x, &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&temp_vector4.x, &borg_data[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&temp_vector4.y, &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&temp_vector4.y, &borg_data[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&temp_vector4.z, &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&temp_vector4.z, &borg_data[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&temp_vector4.w, &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&temp_vector4.w, &borg_data[borg_position], BYTES4);
         borg_position += 0x4;
 
         if (log_output) {
@@ -240,40 +237,40 @@ borg::borg(uint64_t rpkgs_index, uint64_t hash_index) {
     for (uint32_t b = 0; b < bones_count; b++) {
         DirectX::XMMATRIX inverse_bind_matrix = DirectX::XMMatrixIdentity();
 
-        std::memcpy(&inverse_bind_matrix.r[0].m128_f32[0], &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&inverse_bind_matrix.r[0].m128_f32[0], &borg_data.data()[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&inverse_bind_matrix.r[0].m128_f32[1], &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&inverse_bind_matrix.r[0].m128_f32[1], &borg_data.data()[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&inverse_bind_matrix.r[0].m128_f32[2], &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&inverse_bind_matrix.r[0].m128_f32[2], &borg_data.data()[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&inverse_bind_matrix.r[1].m128_f32[0], &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&inverse_bind_matrix.r[1].m128_f32[0], &borg_data.data()[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&inverse_bind_matrix.r[1].m128_f32[1], &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&inverse_bind_matrix.r[1].m128_f32[1], &borg_data.data()[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&inverse_bind_matrix.r[1].m128_f32[2], &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&inverse_bind_matrix.r[1].m128_f32[2], &borg_data.data()[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&inverse_bind_matrix.r[2].m128_f32[0], &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&inverse_bind_matrix.r[2].m128_f32[0], &borg_data.data()[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&inverse_bind_matrix.r[2].m128_f32[1], &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&inverse_bind_matrix.r[2].m128_f32[1], &borg_data.data()[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&inverse_bind_matrix.r[2].m128_f32[2], &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&inverse_bind_matrix.r[2].m128_f32[2], &borg_data.data()[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&inverse_bind_matrix.r[3].m128_f32[0], &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&inverse_bind_matrix.r[3].m128_f32[0], &borg_data.data()[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&inverse_bind_matrix.r[3].m128_f32[1], &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&inverse_bind_matrix.r[3].m128_f32[1], &borg_data.data()[borg_position], BYTES4);
         borg_position += 0x4;
 
-        std::memcpy(&inverse_bind_matrix.r[3].m128_f32[2], &borg_data.data()[borg_position], sizeof(bytes4));
+        std::memcpy(&inverse_bind_matrix.r[3].m128_f32[2], &borg_data.data()[borg_position], BYTES4);
         borg_position += 0x4;
 
         if (log_output) {

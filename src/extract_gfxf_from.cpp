@@ -10,6 +10,8 @@
 #include <sstream>
 #include <fstream>
 
+constexpr char bin1_header[] = {0x42, 0x49, 0x4E, 0x31, 0x00, 0x08, 0x01, 0x00};
+
 void rpkg_function::extract_gfxf_from(std::string& input_path, std::string& filter, std::string& output_path) {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
@@ -125,9 +127,9 @@ void rpkg_function::extract_gfxf_from(std::string& input_path, std::string& filt
     std::vector<std::string> not_found_in;
 
     for (uint64_t z = 0; z < filters.size(); z++) {
-        found_in.push_back("");
+        found_in.emplace_back("");
 
-        not_found_in.push_back("");
+        not_found_in.emplace_back("");
     }
 
     for (uint64_t i = 0; i < rpkgs.size(); i++) {
@@ -216,12 +218,10 @@ void rpkg_function::extract_gfxf_from(std::string& input_path, std::string& filt
 
                         std::vector<char> gfxf_meta_data;
 
-                        char bin1_header[] = {0x42, 0x49, 0x4E, 0x31, 0x00, 0x08, 0x01, 0x00};
-
                         bool is_valid_bin1_header = true;
 
                         for (uint64_t k = 0; k < sizeof(bin1_header); k++) {
-                            if (gfxf_data->data()[k] != bin1_header[k]) {
+                            if ((*gfxf_data)[k] != bin1_header[k]) {
                                 is_valid_bin1_header = false;
                             }
 
@@ -246,7 +246,7 @@ void rpkg_function::extract_gfxf_from(std::string& input_path, std::string& filt
                             uint32_t dds_data_offset_start = 0;
                             uint32_t dds_data_offset_end = 0;
 
-                            std::memcpy(&input, &gfxf_data->data()[position], sizeof(bytes4));
+                            std::memcpy(&input, &(*gfxf_data)[position], BYTES4);
                             position += 0x4;
 
                             char4[0] = input[3];
@@ -256,29 +256,29 @@ void rpkg_function::extract_gfxf_from(std::string& input_path, std::string& filt
 
                             //std::cout << char4 << std::endl;
 
-                            std::memcpy(&gfxf_file_length, &char4[0], sizeof(bytes4));
+                            std::memcpy(&gfxf_file_length, &char4[0], BYTES4);
 
                             //std::cout << std::hex << gfxf_file_length << std::endl;
 
-                            std::memcpy(&bytes4, &gfxf_data->data()[position], sizeof(bytes4));
+                            std::memcpy(&bytes4, &(*gfxf_data)[position], BYTES4);
                             position += 0x4;
 
-                            std::memcpy(&gfx_file_offset, &gfxf_data->data()[position], sizeof(bytes4));
+                            std::memcpy(&gfx_file_offset, &(*gfxf_data)[position], BYTES4);
                             gfx_file_offset += 0x10;
                             position += 0x4;
 
-                            std::memcpy(&bytes4, &gfxf_data->data()[position], sizeof(bytes4));
+                            std::memcpy(&bytes4, &(*gfxf_data)[position], BYTES4);
                             position += 0x4;
 
-                            std::memcpy(&gfx_file_length, &gfxf_data->data()[position], sizeof(bytes4));
+                            std::memcpy(&gfx_file_length, &(*gfxf_data)[position], BYTES4);
                             position += 0x4;
 
-                            std::memcpy(&bytes4, &gfxf_data->data()[position], sizeof(bytes4));
+                            std::memcpy(&bytes4, &(*gfxf_data)[position], BYTES4);
                             position += 0x4;
 
                             //std::cout << rpkgs.at(i).rpkg_file_name << "," << hash_file_name << std::endl;
 
-                            std::memcpy(&bytes8, &gfxf_data->data()[position], sizeof(bytes8));
+                            std::memcpy(&bytes8, &(*gfxf_data)[position], BYTES8);
 
                             if (bytes8 != 0xFFFFFFFFFFFFFFFF) {
                                 gfxf_contains_dds = true;
@@ -291,32 +291,32 @@ void rpkg_function::extract_gfxf_from(std::string& input_path, std::string& filt
                             if (gfxf_contains_dds) {
                                 //std::cout << "GFXF contains DDS files." << std::endl;
 
-                                std::memcpy(&dds_names_offset_start, &gfxf_data->data()[position], sizeof(bytes4));
+                                std::memcpy(&dds_names_offset_start, &(*gfxf_data)[position], BYTES4);
                                 dds_names_offset_start += 0x10;
                                 position += 0x8;
 
-                                std::memcpy(&dds_names_offset_end, &gfxf_data->data()[position], sizeof(bytes4));
+                                std::memcpy(&dds_names_offset_end, &(*gfxf_data)[position], BYTES4);
                                 dds_names_offset_end += 0x10;
                                 position += 0x8;
 
-                                std::memcpy(&dds_names_offset_end, &gfxf_data->data()[position], sizeof(bytes4));
+                                std::memcpy(&dds_names_offset_end, &(*gfxf_data)[position], BYTES4);
                                 dds_names_offset_end += 0x10;
                                 position += 0x8;
 
-                                std::memcpy(&dds_data_offset_start, &gfxf_data->data()[position], sizeof(bytes4));
+                                std::memcpy(&dds_data_offset_start, &(*gfxf_data)[position], BYTES4);
                                 dds_data_offset_start += 0x10;
                                 position += 0x8;
 
-                                std::memcpy(&dds_data_offset_end, &gfxf_data->data()[position], sizeof(bytes4));
+                                std::memcpy(&dds_data_offset_end, &(*gfxf_data)[position], BYTES4);
                                 dds_data_offset_end += 0x10;
                                 position += 0x8;
 
-                                std::memcpy(&dds_data_offset_end, &gfxf_data->data()[position], sizeof(bytes4));
+                                std::memcpy(&dds_data_offset_end, &(*gfxf_data)[position], BYTES4);
                                 dds_data_offset_end += 0x10;
                                 position += 0x8;
                             }
 
-                            std::memcpy(&bytes4, &gfxf_data->data()[position], sizeof(bytes4));
+                            std::memcpy(&bytes4, &(*gfxf_data)[position], BYTES4);
                             position += 0x4;
 
                             //std::cout << bytes4 << std::endl;
@@ -329,7 +329,7 @@ void rpkg_function::extract_gfxf_from(std::string& input_path, std::string& filt
                             std::vector<char> gfx_data;
 
                             for (uint64_t k = 0; k < gfx_file_length; k++) {
-                                gfx_data.push_back(gfxf_data->data()[position]);
+                                gfx_data.push_back((*gfxf_data)[position]);
 
                                 position++;
                             }
@@ -360,10 +360,10 @@ void rpkg_function::extract_gfxf_from(std::string& input_path, std::string& filt
                                     position++;
                                 }
 
-                                std::memcpy(&dds_names_count, &gfxf_data->data()[position], sizeof(bytes4));
+                                std::memcpy(&dds_names_count, &(*gfxf_data)[position], BYTES4);
 
-                                for (uint64_t k = 0; k < sizeof(bytes4); k++) {
-                                    gfxf_meta_data.push_back(gfxf_data->data()[position + k]);
+                                for (uint64_t k = 0; k < BYTES4; k++) {
+                                    gfxf_meta_data.push_back((*gfxf_data)[position + k]);
                                 }
 
                                 position += 0x4;
@@ -374,12 +374,12 @@ void rpkg_function::extract_gfxf_from(std::string& input_path, std::string& filt
                                     uint32_t dds_name_length = 0;
                                     uint32_t dds_name_offset = 0;
 
-                                    std::memcpy(&dds_name_length, &gfxf_data->data()[position], sizeof(bytes4));
+                                    std::memcpy(&dds_name_length, &(*gfxf_data)[position], BYTES4);
                                     dds_name_length &= 0xBFFFFFFF;
 
-                                    std::memcpy(&input, &dds_name_length, sizeof(bytes4));
+                                    std::memcpy(&input, &dds_name_length, BYTES4);
 
-                                    for (uint64_t k = 0; k < sizeof(bytes4); k++) {
+                                    for (uint64_t k = 0; k < BYTES4; k++) {
                                         gfxf_meta_data.push_back(input[k]);
                                     }
 
@@ -387,20 +387,20 @@ void rpkg_function::extract_gfxf_from(std::string& input_path, std::string& filt
 
                                     //std::cout << std::hex << dds_name_length << std::endl;
 
-                                    std::memcpy(&dds_name_offset, &gfxf_data->data()[position], sizeof(bytes4));
+                                    std::memcpy(&dds_name_offset, &(*gfxf_data)[position], BYTES4);
                                     dds_name_offset += 0x10;
                                     position += 0x8;
 
                                     //std::cout << std::hex << dds_name_offset << std::endl;
 
-                                    std::memcpy(&input, &gfxf_data->data()[dds_name_offset],
+                                    std::memcpy(&input, &(*gfxf_data)[dds_name_offset],
                                                 (static_cast<uint64_t>(dds_name_length) + static_cast<uint64_t>(1)));
 
                                     for (uint64_t k = 0; k < static_cast<uint64_t>(dds_name_length); k++) {
-                                        gfxf_meta_data.push_back(gfxf_data->data()[dds_name_offset + k]);
+                                        gfxf_meta_data.push_back((*gfxf_data)[dds_name_offset + k]);
                                     }
 
-                                    dds_names.push_back(std::string(input));
+                                    dds_names.emplace_back(input);
 
                                     //std::cout << dds_names.back() << std::endl;
                                 }
@@ -412,18 +412,18 @@ void rpkg_function::extract_gfxf_from(std::string& input_path, std::string& filt
                                     uint32_t temp_dds_data_offset_start = 0;
                                     uint32_t temp_dds_data_offset_end = 0;
 
-                                    std::memcpy(&temp_dds_data_offset_start, &gfxf_data->data()[position],
-                                                sizeof(bytes4));
+                                    std::memcpy(&temp_dds_data_offset_start, &(*gfxf_data)[position],
+                                                BYTES4);
                                     temp_dds_data_offset_start += 0x10;
                                     position += 0x8;
 
-                                    std::memcpy(&temp_dds_data_offset_end, &gfxf_data->data()[position],
-                                                sizeof(bytes4));
+                                    std::memcpy(&temp_dds_data_offset_end, &(*gfxf_data)[position],
+                                                BYTES4);
                                     temp_dds_data_offset_end += 0x10;
                                     position += 0x8;
 
-                                    std::memcpy(&temp_dds_data_offset_end, &gfxf_data->data()[position],
-                                                sizeof(bytes4));
+                                    std::memcpy(&temp_dds_data_offset_end, &(*gfxf_data)[position],
+                                                BYTES4);
                                     temp_dds_data_offset_end += 0x10;
                                     position += 0x8;
 
@@ -441,7 +441,7 @@ void rpkg_function::extract_gfxf_from(std::string& input_path, std::string& filt
                                                      " could not be created.");
                                     }
 
-                                    output_file.write(&gfxf_data->data()[temp_dds_data_offset_start],
+                                    output_file.write(&(*gfxf_data)[temp_dds_data_offset_start],
                                                       temp_dds_data_length);
 
                                     output_file.close();
@@ -469,7 +469,7 @@ void rpkg_function::extract_gfxf_from(std::string& input_path, std::string& filt
 
                             if ((decompressed_size - position) > 0) {
                                 for (uint64_t k = 0; k < (decompressed_size - position); k++) {
-                                    gfxf_meta_data.push_back(gfxf_data->data()[position + k]);
+                                    gfxf_meta_data.push_back((*gfxf_data)[position + k]);
                                 }
                             }
 
@@ -488,18 +488,18 @@ void rpkg_function::extract_gfxf_from(std::string& input_path, std::string& filt
             }
         }
 
-        if (filter == "")
+        if (filter.empty())
             continue;
 
         for (uint64_t z = 0; z < filters.size(); z++) {
             if (extracted.at(z)) {
-                if (found_in.at(z) == "") {
+                if (found_in.at(z).empty()) {
                     found_in.at(z).append(rpkgs.at(i).rpkg_file_name);
                 } else {
                     found_in.at(z).append(", " + rpkgs.at(i).rpkg_file_name);
                 }
             } else {
-                if (not_found_in.at(z) == "") {
+                if (not_found_in.at(z).empty()) {
                     not_found_in.at(z).append(rpkgs.at(i).rpkg_file_name);
                 } else {
                     not_found_in.at(z).append(", " + rpkgs.at(i).rpkg_file_name);
@@ -519,7 +519,7 @@ void rpkg_function::extract_gfxf_from(std::string& input_path, std::string& filt
 
     percent_progress = static_cast<uint32_t>(100);
 
-    if (filter != "") {
+    if (!filter.empty()) {
         for (uint64_t z = 0; z < filters.size(); z++) {
             LOG(std::endl << "\"" << filters.at(z) << "\" was found in and extracted from: " << found_in.at(z));
 

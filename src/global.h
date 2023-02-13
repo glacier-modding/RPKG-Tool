@@ -354,3 +354,23 @@ extern int map_percent_progress_map_writing_changes_to_qn;
 extern std::unordered_map<uint64_t, entity> deep_search_entities_map;
 extern nlohmann::ordered_json localization_json;
 extern std::string hashes_based_on_resource_type;
+
+/**
+ * uint8_t
+ */
+#define BYTES1 1
+
+/**
+ * uint16_t
+ */
+#define BYTES2 2
+
+/**
+ * uint32_t
+ */
+#define BYTES4 4
+
+/**
+ * uint64_t
+ */
+#define BYTES8 8

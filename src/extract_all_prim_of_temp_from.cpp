@@ -53,28 +53,30 @@ void rpkg_function::extract_all_prim_of_temp_from(std::string& input_path, const
         for (uint64_t i = 0; i < rpkgs.size(); i++) {
             const uint64_t rpkg_index = i;
 
-            if (rpkgs.at(i).rpkg_file_path == input_path) {
-                auto it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+            if (rpkgs.at(i).rpkg_file_path != input_path) continue;
 
-                if (it != rpkgs.at(rpkg_index).hash_map.end()) {
-                    if (gui_control == ABORT_CURRENT_TASK) {
-                        return;
-                    }
+            auto it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
-                    std::string temp_hash_file_name =
-                            util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." +
-                            rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type;
+            if (it == rpkgs.at(rpkg_index).hash_map.end()) {
+                continue;
+            }
 
-                    if (rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type == "TEMP") {
-                        temp temp_temp(rpkg_index, it->second);
+            if (gui_control == ABORT_CURRENT_TASK) {
+                return;
+            }
 
-                        for (uint64_t j = 0; j < temp_temp.prim_depends_file_name.size(); j++) {
-                            rpkg_function::extract_prim_from(rpkgs.at(temp_temp.prim_depends_rpkg_index.at(j).at(
-                                                                     temp_temp.prim_depends_rpkg_index_index.at(j))).rpkg_file_path,
-                                                             temp_temp.prim_depends_file_name.at(j), output_path, type,
-                                                             true);
-                        }
-                    }
+            std::string temp_hash_file_name =
+                    util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) + "." +
+                    rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type;
+
+            if (rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type == "TEMP") {
+                temp temp_temp(rpkg_index, it->second);
+
+                for (uint64_t j = 0; j < temp_temp.prim_depends_file_name.size(); j++) {
+                    rpkg_function::extract_prim_from(rpkgs.at(temp_temp.prim_depends_rpkg_index.at(j).at(
+                                                             temp_temp.prim_depends_rpkg_index_index.at(j))).rpkg_file_path,
+                                                     temp_temp.prim_depends_file_name.at(j), output_path, type,
+                                                     true);
                 }
             }
         }

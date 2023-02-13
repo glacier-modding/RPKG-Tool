@@ -727,11 +727,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
 
     rpkg_function::import_rpkg_files_in_folder(parent_path);
 
-    if (!hash_list_loaded) {
-        LOG("Loading Hash List...");
-        generic_function::load_hash_list(true);
-        LOG("Loading Hash List: Done");
-    }
+    force_load_hash_list();
 
     uint32_t rpkg_index = rpkg_function::get_latest_hash(map_root_hash_value);
 

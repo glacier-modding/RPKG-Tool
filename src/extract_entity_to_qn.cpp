@@ -4,7 +4,6 @@
 #include "util.h"
 #include "generic_function.h"
 #include <iostream>
-#include <unordered_map>
 #include <chrono>
 #include <sstream>
 #include <filesystem>
@@ -45,11 +44,7 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
 
     //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
 
-    if (!hash_list_loaded) {
-        LOG("Loading Hash List...");
-        generic_function::load_hash_list(true);
-        LOG("Loading Hash List: Done");
-    }
+    force_load_hash_list();
 
     std::vector<std::string> filters = util::parse_input_filter(filter);
 
@@ -61,7 +56,7 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
         if (rpkg_index == UINT32_MAX)
             continue;
 
-        std::unordered_map<uint64_t, uint64_t>::iterator it6 = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+        auto it6 = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
         if (it6 == rpkgs.at(rpkg_index).hash_map.end())
             continue;
@@ -99,7 +94,7 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
         }
 
         if (output_path_is_dir) {
-            if (output_path != "") {
+            if (!output_path.empty()) {
                 file::create_directories(output_path);
             }
 

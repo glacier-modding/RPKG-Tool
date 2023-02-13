@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <stdint.h>
+#include <cstdint>
 #include <variant>
 #include "hash.h"
 #include "global.h"
@@ -34,30 +34,30 @@ public:
 
     material(uint64_t rpkgs_index, uint64_t hash_index);
 
-    material(std::string json_path, std::string output_path);
+    material(const std::string& json_path, const std::string& output_path);
     //material(std::string material_path, std::string material_meta_path, uint64_t hash_value, std::string output_path, bool output_path_is_file);
 
     void generate_json();
 
-    void write_json_to_file(std::string output_path);
+    void write_json_to_file(const std::string& output_path) const;
 
     nlohmann::ordered_json
     read_mati_properties_json(nlohmann::ordered_json temp_json, uint32_t position, uint32_t parent,
                               bool from_mati_file);
 
-    MATI_PROPERTY_TYPE get_property_type(std::string key);
+    [[nodiscard]] MATI_PROPERTY_TYPE get_property_type(const std::string& key) const;
 
-    void align(std::vector<char>& material_data);
+    static void align(std::vector<char>& material_data);
 
-    void write_uint32_t(std::vector<char>& material_data, uint32_t data);
+    static void write_uint32_t(std::vector<char>& material_data, uint32_t data);
 
-    void write_string(std::vector<char>& material_data, std::string data);
+    static void write_string(std::vector<char>& material_data, const std::string& data);
 
-    void write_float(std::vector<char>& material_data, float data);
+    static void write_float(std::vector<char>& material_data, float data);
 
-    void write_name(std::vector<char>& material_data, std::string name);
+    static void write_name(std::vector<char>& material_data, std::string name);
 
-    void write_property_type(std::vector<char>& material_data, std::string name);
+    void write_property_type(std::vector<char>& material_data, const std::string& name);
 
     std::string get_property_name(std::string property);
 
@@ -85,7 +85,8 @@ public:
     std::string json_error = "";
     std::string type = "";
     std::vector<mati_property> mati_properties;
-    std::vector<std::string> ClassFlags = {
+
+    const std::vector<std::string> ClassFlags = {
             "REFLECTION2D",
             "REFRACTION2D",
             "LIGHTING",
@@ -109,7 +110,8 @@ public:
             "UNKNOWN_4",
             "UNKNOWN_5"
     };
-    std::vector<std::string> InstanceFlags = {
+
+    const std::vector<std::string> InstanceFlags = {
             "OPAQUE_EMISSIVE",
             "TRANS_EMISSIVE",
             "TRANSADD_EMISSIVE",
@@ -125,7 +127,8 @@ public:
             "DECAL_EMISSIVE",
             "WATER_CLIPPING"
     };
-    std::unordered_map<std::string, std::string> mati_property_name_map = {
+
+    const std::unordered_map<std::string, std::string> mati_property_name_map = {
             {"AREF", "Alpha Reference"},
             {"ATST", "Alpha Test Enabled"},
             {"BENA", "Blend Enabled"},
@@ -158,7 +161,8 @@ public:
             {"VALU", "Value"},
             {"ZBIA", "Z Bias"},
             {"ZOFF", "Z Offset"}};
-    std::unordered_map<std::string, std::string> mati_property_name_map_reversed = {
+
+    const std::unordered_map<std::string, std::string> mati_property_name_map_reversed = {
             {"Alpha Reference",       "AREF"},
             {"Alpha Test Enabled",    "ATST"},
             {"Blend Enabled",         "BENA"},
@@ -191,7 +195,8 @@ public:
             {"Value",                 "VALU"},
             {"Z Bias",                "ZBIA"},
             {"Z Offset",              "ZOFF"}};
-    std::unordered_map<std::string, MATI_PROPERTY_TYPE> mati_property_type_map = {
+
+    const std::unordered_map<std::string, MATI_PROPERTY_TYPE> mati_property_type_map = {
             {"AREF", MATI_PROPERTY_TYPE::INT},
             {"ATST", MATI_PROPERTY_TYPE::INT},
             {"BENA", MATI_PROPERTY_TYPE::INT},

@@ -14,7 +14,7 @@ public:
 
     void load_hash_depends();
 
-    void extract_meta(std::string output_path);
+    void extract_meta(const std::string& output_path);
 
     class prim_header {
     public:

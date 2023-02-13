@@ -134,9 +134,9 @@ rpkg_function::extract_all_prim_model_from(std::string& input_path, std::string&
     std::vector<std::string> not_found_in;
 
     for (uint64_t z = 0; z < filters.size(); z++) {
-        found_in.push_back("");
+        found_in.emplace_back("");
 
-        not_found_in.push_back("");
+        not_found_in.emplace_back("");
     }
 
     for (auto& rpkg : rpkgs) {
@@ -167,8 +167,8 @@ rpkg_function::extract_all_prim_model_from(std::string& input_path, std::string&
 
                         prim_count_current++;
 
-                        if (!extract_single_hash || (extract_single_hash && filter == util::uint64_t_to_hex_string(
-                                rpkg.hash.at(hash_index).hash_value))) {
+                        if (!extract_single_hash || filter == util::uint64_t_to_hex_string(
+                                rpkg.hash.at(hash_index).hash_value)) {
                             std::string hash_file_name =
                                     util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
                                     rpkg.hash.at(hash_index).hash_resource_type;

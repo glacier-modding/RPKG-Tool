@@ -20,9 +20,7 @@
 #pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM2.lib")
 #pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM3.lib")
 
-temp::temp() {
-
-}
+temp::temp() = default;
 
 temp::temp(uint64_t rpkgs_index, uint64_t hash_index) {
     initialize_enum_map_h2();
@@ -613,7 +611,7 @@ void temp::temp_version_check() {
         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(temp_rpkg_index).rpkg_file_path + " could not be read.");
     }
 
-    file.seekg(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.header.data_offset, file.beg);
+    file.seekg(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).data.header.data_offset, std::ifstream::beg);
     file.read(temp_input_data.data(), temp_hash_size);
     file.close();
 
@@ -645,15 +643,15 @@ void temp::temp_version_check() {
 
     temp_position = 0x20;
 
-    std::memcpy(&temp_sub_entity_table_offset, &temp_data.data()[temp_position], 0x4);
+    std::memcpy(&temp_sub_entity_table_offset, &temp_data[temp_position], 0x4);
 
     temp_position = 0x28;
 
-    std::memcpy(&temp_after_sub_entity_table_offset, &temp_data.data()[temp_position], 0x4);
+    std::memcpy(&temp_after_sub_entity_table_offset, &temp_data[temp_position], 0x4);
 
     temp_position = 0x6C;
 
-    std::memcpy(&entity_count, &temp_data.data()[temp_position], 0x4);
+    std::memcpy(&entity_count, &temp_data[temp_position], 0x4);
 
     if (temp_sub_entity_table_offset == 0x60 && entity_count != 0xFFFFFFFF) {
         uint32_t temp_version_check = temp_after_sub_entity_table_offset - temp_sub_entity_table_offset;
@@ -810,7 +808,7 @@ void temp::get_entries_hash_reference_data(uint32_t entry_index) {
     }
 }
 
-void temp::get_temp_entries_data(std::string value_type, std::string type_string) {
+void temp::get_temp_entries_data(const std::string& value_type, std::string type_string) {
     std::vector<char>().swap(response_data);
 
     std::string propertyValues_string = "0";
@@ -1030,8 +1028,8 @@ void temp::get_temp_entries_data(std::string value_type, std::string type_string
 }
 
 void temp::json_temp_node_scan(const rapidjson::Value& node, std::string& propertyValues_string,
-                               std::string& nPropertyID_string, std::string& type_string, std::string json_pointer,
-                               std::string json_type) {
+                               std::string& nPropertyID_string, std::string& type_string, const std::string& json_pointer,
+                               const std::string& json_type) {
     bool output = true;
 
     std::stringstream ss;
@@ -1253,7 +1251,7 @@ void temp::json_temp_node_scan(const rapidjson::Value& node, std::string& proper
     }
 }
 
-void temp::get_entries_data(uint32_t entry_index, std::string value_type) {
+void temp::get_entries_data(uint32_t entry_index, const std::string& value_type) {
     std::vector<char>().swap(response_data);
 
     std::string propertyValues_string = "";

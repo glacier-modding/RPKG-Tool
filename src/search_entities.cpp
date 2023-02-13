@@ -27,33 +27,32 @@ void rpkg_function::search_entities(std::string& input_path, std::string& search
     for (uint64_t i = 0; i < rpkgs.size(); i++) {
         std::string message = "Searching " + rpkgs.at(i).rpkg_file_name + "...";
 
-        if (input_path.empty() || input_path == rpkgs.at(i).rpkg_file_path) {
-            for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++) {
-                if (gui_control == ABORT_CURRENT_TASK) {
-                    return;
-                }
+        if (!input_path.empty() && input_path != rpkgs.at(i).rpkg_file_path) continue;
 
-                if (rpkgs.at(i).hash_resource_types.at(r) == "TEMP") {
-                    for (uint64_t j = 0; j < rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).size(); j++) {
-                        uint64_t hash_index = rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).at(j);
+        for (uint64_t r1 = 0; r1 < rpkgs.at(i).hash_resource_types.size(); r1++) {
+            if (gui_control == ABORT_CURRENT_TASK) {
+                return;
+            }
 
-                        uint64_t temp_hash_value = rpkgs.at(i).hash.at(hash_index).hash_value;
+            if (rpkgs.at(i).hash_resource_types.at(r1) == "TEMP") {
+                for (uint64_t j = 0; j < rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r1).size(); j++) {
+                    uint64_t hash_index = rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r1).at(j);
 
-                        uint32_t rpkg_index = rpkg_function::get_latest_hash(temp_hash_value);
+                    uint64_t temp_hash_value = rpkgs.at(i).hash.at(hash_index).hash_value;
 
-                        if (rpkg_index == UINT32_MAX)
-                            continue;
+                    uint32_t rpkg_index = rpkg_function::get_latest_hash(temp_hash_value);
 
-                        if (!input_path.empty() && input_path != rpkgs.at(rpkg_index).rpkg_file_path)
-                            continue;
+                    if (rpkg_index == UINT32_MAX)
+                        continue;
 
-                        auto it6 = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+                    if (!input_path.empty() && input_path != rpkgs.at(rpkg_index).rpkg_file_path)
+                        continue;
 
-                        if (it6 != rpkgs.at(rpkg_index).hash_map.end()) {
-                            entities_hash_size_total += rpkgs.at(rpkg_index).hash.at(
-                                    it6->second).data.resource.size_final;
-                            entities_hash_count++;
-                        }
+                    auto it6 = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+
+                    if (it6 != rpkgs.at(rpkg_index).hash_map.end()) {
+                        entities_hash_size_total += rpkgs.at(rpkg_index).hash.at(it6->second).data.resource.size_final;
+                        entities_hash_count++;
                     }
                 }
             }
@@ -65,13 +64,13 @@ void rpkg_function::search_entities(std::string& input_path, std::string& search
 
     std::unordered_map<uint64_t, uint64_t> hash_searched;
 
-    std::string search_lower_case = util::to_lower_case(search);
+    const std::string search_lower_case = util::to_lower_case(search);
 
     std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
     int stringstream_length = 80;
 
     for (uint64_t i = 0; i < rpkgs.size(); i++) {
-        std::string message = "Searching " + rpkgs.at(i).rpkg_file_name + "...";
+        const std::string message = "Searching " + rpkgs.at(i).rpkg_file_name + "...";
 
         if (input_path.empty() || input_path == rpkgs.at(i).rpkg_file_path) {
             for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++) {
@@ -162,9 +161,4 @@ void rpkg_function::search_entities(std::string& input_path, std::string& search
 
     task_single_status = TASK_SUCCESSFUL;
     task_multiple_status = TASK_SUCCESSFUL;
-    /*}
-    else
-    {
-        LOG_AND_EXIT("Error: The folder " + input_path + " to with the input RPKGs does not exist.");
-    }*/
 }

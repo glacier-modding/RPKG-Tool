@@ -36,13 +36,13 @@ public:
 
     void get_entries_hash_reference_data(uint32_t entry_index);
 
-    void get_temp_entries_data(std::string value_type, std::string type_string);
+    void get_temp_entries_data(const std::string& value_type, std::string type_string);
 
     void json_temp_node_scan(const rapidjson::Value& node, std::string& propertyValues_string,
-                             std::string& nPropertyID_string, std::string& type_string, std::string json_pointer,
-                             std::string json_type);
+                             std::string& nPropertyID_string, std::string& type_string, const std::string& json_pointer,
+                             const std::string& json_type);
 
-    void get_entries_data(uint32_t entry_index, std::string value_type);
+    void get_entries_data(uint32_t entry_index, const std::string& value_type);
 
     void
     json_node_scan(const rapidjson::Value& node, std::string& propertyValues_string, std::string& nPropertyID_string,

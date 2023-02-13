@@ -110,10 +110,10 @@ void rpkg_function::extract_prel_refs(std::string& input_path) {
                 uint64_t master_hash_depends_count = 0;
                 std::vector<uint64_t> master_hash_depends;
 
-                std::memcpy(&master_hash_value, &prel_data->data()[position], sizeof(uint64_t));
+                std::memcpy(&master_hash_value, &(*prel_data)[position], sizeof(uint64_t));
                 position += 0x8;
 
-                std::memcpy(&master_hash_depends_count, &prel_data->data()[position], sizeof(uint64_t));
+                std::memcpy(&master_hash_depends_count, &(*prel_data)[position], sizeof(uint64_t));
                 position += 0x8;
 
                 std::cout << std::endl << std::endl << "PREL file name: " << hash_file_name << std::endl;
@@ -133,7 +133,7 @@ void rpkg_function::extract_prel_refs(std::string& input_path) {
                 for (uint64_t k = 0; k < master_hash_depends_count; k++) {
                     uint64_t temp_master_hash_depend_hash_value = 0;
 
-                    std::memcpy(&temp_master_hash_depend_hash_value, &prel_data->data()[position], sizeof(uint64_t));
+                    std::memcpy(&temp_master_hash_depend_hash_value, &(*prel_data)[position], sizeof(uint64_t));
                     position += 0x8;
 
                     master_hash_depends.push_back(temp_master_hash_depend_hash_value);

@@ -31,9 +31,9 @@ void rpkg_function::extract_mati_to_json(std::string& input_path, const std::str
 
     rpkg_function::import_rpkg(input_path, true);
 
-    std::vector<std::string> filters = util::parse_input_filter(filter);
+    const std::vector<std::string> filters = util::parse_input_filter(filter);
 
-    for (auto& filter : filters) {
+    for (const auto& filter : filters) {
         uint64_t text_hash_value = std::strtoull(filter.c_str(), nullptr, 16);
 
         for (uint64_t i = 0; i < rpkgs.size(); i++) {

@@ -107,7 +107,7 @@ void rpkg_function::search_hash_data(std::string& search_type, std::string& sear
         while (std::regex_search(data_string, m, re)) {
             position += m.position();
 
-            LOG("Regex search with regex \"" << search << "\" returned result in hash file/resouce " << hash_file_name);
+            LOG("Regex search with regex \"" << search << "\" returned result in hash file/resource " << hash_file_name);
 
             for (size_t k = 0; k < m.size(); k++) {
                 LOG("Match[" << k << "]: " << m[k].str());

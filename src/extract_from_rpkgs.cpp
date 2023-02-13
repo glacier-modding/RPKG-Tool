@@ -6,7 +6,6 @@
 #include "crypto.h"
 #include "thirdparty/lz4/lz4.h"
 #include <fstream>
-#include <regex>
 #include <sstream>
 #include <filesystem>
 
@@ -109,7 +108,7 @@ void rpkg_function::extract_from_rpkgs(rpkg_extraction_vars& rpkg_vars) {
                     LOG_AND_EXIT("Error: RPKG file " + rpkg_vars.input_path + " could not be read.");
                 }
 
-                file.seekg(rpkgs.at(i).hash.at(j).data.header.data_offset, file.beg);
+                file.seekg(rpkgs.at(i).hash.at(j).data.header.data_offset, std::ifstream::beg);
                 file.read(input_data.data(), hash_size);
 
                 if (rpkgs.at(i).hash.at(j).data.xored) {

@@ -317,7 +317,7 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
                             }
 
                             for (uint64_t l = 0; l < text_search.length(); l++) {
-                                if (std::tolower(fxas_data->data()[position + l]) != std::tolower(text_search[l]))
+                                if (std::tolower((*fxas_data)[position + l]) != std::tolower(text_search[l]))
                                     break;
 
                                 if (l != text_search.length() - 1)
@@ -457,7 +457,6 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
                 uint32_t position = 0;
 
                 char input[1024];
-                uint32_t bytes4 = 0;
 
                 bool adtllabl_not_found = true;
 
@@ -489,7 +488,7 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
                 if (!adtllabl_not_found) {
                     position += static_cast<uint32_t>(adtllabl.length());
 
-                    std::memcpy(&wwem_file_name_length, (&(*wwem_data)[0] + position), sizeof(bytes4));
+                    std::memcpy(&wwem_file_name_length, (&(*wwem_data)[0] + position), BYTES4);
                     position += 0x8;
 
                     wwem_file_name_length -= 0x4;
@@ -682,7 +681,7 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
                                                      " could not be read.");
                                     }
 
-                                    file2.seekg(rpkgs.at(a).hash.at(hash_index2).data.header.data_offset, file2.beg);
+                                    file2.seekg(rpkgs.at(a).hash.at(hash_index2).data.header.data_offset, std::ifstream::beg);
                                     file2.read(input_data2.data(), hash_size);
                                     file2.close();
 
@@ -711,9 +710,8 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
                                     uint32_t position = 0;
 
                                     char input[1024];
-                                    uint32_t bytes4 = 0;
 
-                                    std::memcpy(&wwev_file_name_length, &(*wwev_data)[position], sizeof(bytes4));
+                                    std::memcpy(&wwev_file_name_length, &(*wwev_data)[position], BYTES4);
 
                                     std::vector<char> wwev_meta_data;
 

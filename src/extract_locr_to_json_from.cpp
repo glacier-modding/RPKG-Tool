@@ -192,13 +192,13 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
                     bool isLOCRv2 = false;
                     bool symKey = false;
 
-                    if ((unsigned int) locr_data->data()[0] == 0 || (unsigned int) locr_data->data()[0] == 1) {
+                    if ((unsigned int) (*locr_data)[0] == 0 || (unsigned int) (*locr_data)[0] == 1) {
                         position += 1;
-                        std::memcpy(&number_of_languages, &locr_data->data()[position], sizeof(bytes4));
+                        std::memcpy(&number_of_languages, &(*locr_data)[position], BYTES4);
                         number_of_languages = (number_of_languages - 1) / 4;
                         isLOCRv2 = true;
                     } else {
-                        std::memcpy(&number_of_languages, &locr_data->data()[position], sizeof(bytes4));
+                        std::memcpy(&number_of_languages, &(*locr_data)[position], BYTES4);
                         number_of_languages = (number_of_languages) / 4;
                     }
 
@@ -214,44 +214,44 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
 
                     // Quick fix for New Hitman 3 LOCR
                     if (number_of_languages == 9 && isLOCRv2) {
-                        languages.push_back("xx");
-                        languages.push_back("en");
-                        languages.push_back("fr");
-                        languages.push_back("it");
-                        languages.push_back("de");
-                        languages.push_back("es");
-                        languages.push_back("ru");
-                        languages.push_back("cn");
-                        languages.push_back("tc");
+                        languages.emplace_back("xx");
+                        languages.emplace_back("en");
+                        languages.emplace_back("fr");
+                        languages.emplace_back("it");
+                        languages.emplace_back("de");
+                        languages.emplace_back("es");
+                        languages.emplace_back("ru");
+                        languages.emplace_back("cn");
+                        languages.emplace_back("tc");
                     } else if (number_of_languages == 10 && isLOCRv2) {
-                        languages.push_back("xx");
-                        languages.push_back("en");
-                        languages.push_back("fr");
-                        languages.push_back("it");
-                        languages.push_back("de");
-                        languages.push_back("es");
-                        languages.push_back("ru");
-                        languages.push_back("cn");
-                        languages.push_back("tc");
-                        languages.push_back("jp");
+                        languages.emplace_back("xx");
+                        languages.emplace_back("en");
+                        languages.emplace_back("fr");
+                        languages.emplace_back("it");
+                        languages.emplace_back("de");
+                        languages.emplace_back("es");
+                        languages.emplace_back("ru");
+                        languages.emplace_back("cn");
+                        languages.emplace_back("tc");
+                        languages.emplace_back("jp");
                     } else {
-                        languages.push_back("xx");
-                        languages.push_back("en");
-                        languages.push_back("fr");
-                        languages.push_back("it");
-                        languages.push_back("de");
-                        languages.push_back("es");
-                        languages.push_back("ru");
-                        languages.push_back("mx");
-                        languages.push_back("br");
-                        languages.push_back("pl");
-                        languages.push_back("cn");
-                        languages.push_back("jp");
-                        languages.push_back("tc");
+                        languages.emplace_back("xx");
+                        languages.emplace_back("en");
+                        languages.emplace_back("fr");
+                        languages.emplace_back("it");
+                        languages.emplace_back("de");
+                        languages.emplace_back("es");
+                        languages.emplace_back("ru");
+                        languages.emplace_back("mx");
+                        languages.emplace_back("br");
+                        languages.emplace_back("pl");
+                        languages.emplace_back("cn");
+                        languages.emplace_back("jp");
+                        languages.emplace_back("tc");
                     }
 
                     for (uint64_t k = 0; k < number_of_languages; k++) {
-                        std::memcpy(&bytes4, &locr_data->data()[position], sizeof(bytes4));
+                        std::memcpy(&bytes4, &(*locr_data)[position], BYTES4);
                         position += 4;
 
                         language_offsets.push_back(bytes4);
@@ -259,14 +259,14 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
 
                     for (uint64_t k = 0; k < (number_of_languages * (uint64_t) 0x4 +
                                               (isLOCRv2 ? (uint64_t) 0x1 : (uint64_t) 0x0)); k++) {
-                        json_meta_data.push_back(locr_data->data()[k]);
+                        json_meta_data.push_back((*locr_data)[k]);
                     }
 
                     for (uint64_t k = 0; k < number_of_languages; k++) {
                         if (language_offsets.at(k) == 0xFFFFFFFF)
                             continue;
 
-                        std::memcpy(&bytes4, &locr_data->data()[position], sizeof(bytes4));
+                        std::memcpy(&bytes4, &(*locr_data)[position], BYTES4);
                         position += 4;
 
                         language_string_count.push_back(bytes4);
@@ -286,18 +286,18 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
                         for (uint64_t l = 0; l < language_string_count.back(); l++) {
                             std::vector<char> temp_string;
 
-                            std::memcpy(&bytes4, &locr_data->data()[position], sizeof(bytes4));
+                            std::memcpy(&bytes4, &(*locr_data)[position], BYTES4);
                             position += 4;
 
                             temp_language_string_hash.push_back(bytes4);
 
-                            std::memcpy(&bytes4, &locr_data->data()[position], sizeof(bytes4));
+                            std::memcpy(&bytes4, &(*locr_data)[position], BYTES4);
                             position += 4;
 
                             temp_language_string_length.push_back(bytes4);
 
                             for (uint64_t m = 0; m < temp_language_string_length.back(); m++) {
-                                temp_string.push_back(locr_data->data()[position]);
+                                temp_string.push_back((*locr_data)[position]);
                                 position += 1;
                             }
 
@@ -338,10 +338,10 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
                                                 data + 1, sizeof(uint32_t));
                                 }
 
-                                uint32_t last_zero_position = (uint32_t) temp_string.size();
+                                auto last_zero_position = (uint32_t) temp_string.size();
 
                                 if (!temp_string.empty()) {
-                                    uint32_t m = (uint32_t) (temp_string.size() - 1);
+                                    auto m = (uint32_t) (temp_string.size() - 1);
 
                                     while (m >= 0) {
                                         if (temp_string.at(m) != 0) {

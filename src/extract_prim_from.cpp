@@ -55,7 +55,7 @@ void rpkg_function::extract_prim_from(std::string& input_path, std::string filte
 
             auto it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
-            if (!(it != rpkgs.at(rpkg_index).hash_map.end()))
+            if (it == rpkgs.at(rpkg_index).hash_map.end())
                 continue;
 
             if (gui_control == ABORT_CURRENT_TASK) {

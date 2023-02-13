@@ -79,9 +79,9 @@ void rpkg_function::extract_all_text_from(std::string& input_path, std::string& 
                         util::uint64_t_to_hex_string(rpkg.hash.at(hashIndex).hash_value) + "." +
                         rpkg.hash.at(hashIndex).hash_resource_type;
 
-                std::chrono::time_point endTime = std::chrono::high_resolution_clock::now();
+                const std::chrono::time_point endTime = std::chrono::high_resolution_clock::now();
 
-                double time_in_seconds_from_start_time = (0.000000001 *
+                const double time_in_seconds_from_start_time = (0.000000001 *
                                                           std::chrono::duration_cast<std::chrono::nanoseconds>(
                                                                   endTime - start_time).count());
 
@@ -168,8 +168,8 @@ void rpkg_function::extract_all_text_from(std::string& input_path, std::string& 
 
                     prim_count_current++;
 
-                    if (!extract_single_hash || (extract_single_hash && filter == util::uint64_t_to_hex_string(
-                            rpkg.hash.at(hash_index).hash_value))) {
+                    if (!extract_single_hash || filter == util::uint64_t_to_hex_string(
+                            rpkg.hash.at(hash_index).hash_value)) {
                         std::string hash_file_name =
                                 util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
                                 rpkg.hash.at(hash_index).hash_resource_type;
