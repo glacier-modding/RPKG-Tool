@@ -34,3 +34,41 @@ task:
         TARGET: rpkg-lib
       rpkg-lib_artifacts:
         path: _rpkg
+task:
+  windows_container:
+    image: cirrusci/windowsservercore:cmake-2022.06.23
+
+  Prepare_Ninja_script: choco install -y ninja
+
+  Configure_script: |
+    "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" x64
+    mkdir cmake-build-release
+    cd cmake-build-release
+    cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_COMPILER=cl -DCMAKE_C_COMPILER=cl ..
+
+  Build_script: |
+    "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" x64
+    cmake --build cmake-build-release --target %TARGET%
+
+  Download_Hash_List_script:
+    - pwsh: Invoke-WebRequest -Uri "https://hitmandb.glaciermodding.org/latest-hashes.7z" -OutFile "latest-hashes.7z"
+  
+  run: |
+    7z e latest-hashes.7z -o_rpkg
+    cp cmake-build-release/*.dll _rpkg
+    cp cmake-build-release/*.exe _rpkg
+    cp cmake-build-release/*.pdb _rpkg
+    cp cmake-build-release/*.lib _rpkg
+    cp thirdparty/zhmtools/*.dll _rpkg
+
+  matrix:
+    - name: Build CLI
+      env:
+        TARGET: rpkg-cli
+      rpkg-cli_artifacts:
+        path: _rpkg
+    - name: Build DLL
+      env:
+        TARGET: rpkg-lib
+      rpkg-lib_artifacts:
+        path: _rpkg
