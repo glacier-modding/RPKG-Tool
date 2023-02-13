@@ -20,10 +20,10 @@ task:
   
   Prepare_Artifacts_script: |
     7z e latest-hashes.7z -o_rpkg
-    cp cmake-build-release\*.dll _rpkg
-    cp cmake-build-release\*.exe _rpkg
-    cp cmake-build-release\*.pdb _rpkg
-    cp thirdparty\zhmtools\*.dll _rpkg
+    cp "cmake-build-release\*.dll" _rpkg
+    cp "cmake-build-release\*.exe" _rpkg
+    cp "cmake-build-release\*.pdb" _rpkg
+    cp "thirdparty\zhmtools\*.dll" _rpkg
 
   matrix:
     - name: Build CLI
