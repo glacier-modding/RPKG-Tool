@@ -11,19 +11,18 @@ class entity {
 public:
     entity();
 
-    entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version);
+    entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version, std::string& output_path);
 
-    void to_qn_json(std::string& output_path);
-    uint32_t
-    search(std::string search_string, bool search_entity_ids, bool search_entity_names, bool search_property_names,
-           bool search_property_values, uint32_t results_count, uint32_t max_results);
+    uint32_t search(std::string search_string,
+                    uint32_t results_count,
+                    uint32_t max_results);
+    bool search_json(yyjson_val* json, std::string& search_string);
+    void free_yyjson_doc();
+    bool find_ci(const char* s1, const char* s2);
 
     uint32_t temp_rpkg_index = 0;
     uint32_t temp_hash_index = 0;
     uint32_t tblu_rpkg_index = 0;
     uint32_t tblu_hash_index = 0;
-    yyjson_doc* temp_yyjson_doc = nullptr;
-    yyjson_doc* tblu_yyjson_doc = nullptr;
-    std::string rt_temp_json = "";
-    std::string rt_tblu_json = "";
+    yyjson_doc* entity_yyjson_doc = nullptr;
 };

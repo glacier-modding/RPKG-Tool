@@ -167,7 +167,7 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     } else if (command == "-mati_to_json") {
         rpkg_function::mati_to_json(input_path, filter, output_path);
     } else if (command == "-search_entities") {
-        rpkg_function::search_entities(input_path, search, true, true, true, true, 1000);
+        rpkg_function::search_entities(input_path, search, true, 1000);
     } else if (command == "-search_localization") {
         rpkg_function::search_localization(input_path, search, output_path, true, true, true, 1000);
     } else if (command == "-get_line_string") {

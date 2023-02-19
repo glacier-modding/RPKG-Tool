@@ -2189,8 +2189,10 @@ char* get_localization_search_results() {
     return &localization_search_results[0];
 }
 
-int deep_search_entities(char* input_path, char* search_value, bool search_entity_ids, bool search_entity_names,
-                         bool search_property_names, bool search_property_values, int max_results) {
+int deep_search_entities(char* input_path,
+                         char* search_value,
+                         int max_results,
+                         bool store_jsons) {
     gui_control = READY;
     task_single_status = READY;
     task_multiple_status = READY;
@@ -2203,23 +2205,10 @@ int deep_search_entities(char* input_path, char* search_value, bool search_entit
 
     entities_search_results = "";
 
-    bool search_entity_ids_bool = false;
-    bool search_entity_names_bool = false;
-    bool search_property_names_bool = false;
-    bool search_property_values_bool = false;
-
-    if (search_entity_ids != 0)
-        search_entity_ids_bool = true;
-    if (search_entity_names != 0)
-        search_entity_names_bool = true;
-    if (search_property_names != 0)
-        search_property_names_bool = true;
-    if (search_property_values != 0)
-        search_property_values_bool = true;
-
-    rpkg_function::search_entities(input_path_string, search, search_entity_ids_bool,
-                                   search_entity_names_bool, search_property_names_bool, search_property_values_bool,
-                                   max_results);
+    rpkg_function::search_entities(input_path_string,
+                                   search,
+                                   max_results,
+                                   store_jsons);
 
     return 0;
 }

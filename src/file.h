@@ -14,6 +14,8 @@ public:
 
     static bool write_to_file(const std::string& file_name, const std::string& data);
 
+    static bool write_to_file(const std::string& file_name, const char* data);
+
     static bool path_exists(const std::string& path);
 
     static void create_directories(const std::string& path);

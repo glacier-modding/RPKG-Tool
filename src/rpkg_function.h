@@ -59,9 +59,10 @@ public:
     static void search_localization(std::string& input_path, std::string& search, std::string& output_path,
                                     bool search_dlge, bool search_locr, bool search_rtlv, int max_results);
 
-    static void search_entities(std::string& input_path, std::string& search, bool search_entity_ids,
-                                bool search_entity_names, bool search_property_names, bool search_property_values,
-                                int max_results);
+    static void search_entities(std::string& input_path,
+                                std::string& search,
+                                int max_results,
+                                bool store_jsons);
 
     static void
     extract_to_rt_json(std::string& input_path, std::string& filter, std::string& version, std::string& output_path);

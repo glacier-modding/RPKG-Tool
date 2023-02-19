@@ -7,14 +7,14 @@
 #include <chrono>
 #include <sstream>
 
-void rpkg_function::search_entities(std::string& input_path, std::string& search, bool search_entity_ids,
-                                    bool search_entity_names, bool search_property_names,
-                                    bool search_property_values, int max_results) {
+void rpkg_function::search_entities(std::string& input_path,
+                                    std::string& search,
+                                    int max_results,
+                                    bool store_jsons) {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
     percent_progress = (uint32_t) 0;
-
     log_output = false;
 
     entities_search_results = "";
@@ -35,26 +35,7 @@ void rpkg_function::search_entities(std::string& input_path, std::string& search
             }
 
             if (rpkgs.at(i).hash_resource_types.at(r1) == "TEMP") {
-                for (uint64_t j = 0; j < rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r1).size(); j++) {
-                    uint64_t hash_index = rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r1).at(j);
-
-                    uint64_t temp_hash_value = rpkgs.at(i).hash.at(hash_index).hash_value;
-
-                    uint32_t rpkg_index = rpkg_function::get_latest_hash(temp_hash_value);
-
-                    if (rpkg_index == UINT32_MAX)
-                        continue;
-
-                    if (!input_path.empty() && input_path != rpkgs.at(rpkg_index).rpkg_file_path)
-                        continue;
-
-                    auto it6 = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
-
-                    if (it6 != rpkgs.at(rpkg_index).hash_map.end()) {
-                        entities_hash_size_total += rpkgs.at(rpkg_index).hash.at(it6->second).data.resource.size_final;
-                        entities_hash_count++;
-                    }
-                }
+                entities_hash_count += rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r1).size();
             }
         }
     }
@@ -63,6 +44,12 @@ void rpkg_function::search_entities(std::string& input_path, std::string& search
     uint64_t entities_hash_size_current = 0;
 
     std::unordered_map<uint64_t, uint64_t> hash_searched;
+
+    if (!store_jsons) {
+        for (auto entity : deep_search_entities_map)
+            entity.second.free_yyjson_doc();
+        std::unordered_map<uint64_t, entity>().swap(deep_search_entities_map);
+    }
 
     const std::string search_lower_case = util::to_lower_case(search);
 
@@ -93,8 +80,7 @@ void rpkg_function::search_entities(std::string& input_path, std::string& search
 
                         uint32_t rpkgIndex = rpkg_function::get_latest_hash(tempHashValue);
 
-                        if (rpkgIndex == UINT32_MAX ||
-                            !(input_path.empty() || input_path == rpkgs.at(rpkgIndex).rpkg_file_path))
+                        if (rpkgIndex == UINT32_MAX)
                             continue;
 
                         auto it61 = rpkgs.at(rpkgIndex).hash_map.find(tempHashValue);
@@ -102,15 +88,13 @@ void rpkg_function::search_entities(std::string& input_path, std::string& search
                         if (!(it61 != rpkgs.at(rpkgIndex).hash_map.end()))
                             continue;
 
-                        if (((entities_hash_count_current * (uint64_t) 100000) / (uint64_t) entities_hash_count) %
+                        if (((entities_hash_count_current * (uint64_t)100000) / (uint64_t)entities_hash_count) %
                             (uint64_t) 10 == 0 && entities_hash_count_current > 0) {
-                            stringstream_length = console::update_console(message, entities_hash_size_total,
-                                                                          entities_hash_size_current, start_time,
+                            stringstream_length = console::update_console(message, entities_hash_count,
+                                                                          entities_hash_count_current, start_time,
                                                                           stringstream_length);
                         }
 
-                        entities_hash_size_current += rpkgs.at(rpkgIndex).hash.at(
-                                it61->second).data.resource.size_final;
                         entities_hash_count_current++;
 
                         auto it4 = hash_searched.find(tempHashValue);
@@ -118,24 +102,27 @@ void rpkg_function::search_entities(std::string& input_path, std::string& search
                         if (!(it4 == hash_searched.end()))
                             continue;
 
-                        auto it = deep_search_entities_map.find(tempHashValue);
+                        if (store_jsons) {
+                            auto it = deep_search_entities_map.find(tempHashValue);
 
-                        if (it == deep_search_entities_map.end()) {
-                            deep_search_entities_map.emplace(tempHashValue, entity(rpkgIndex, it61->second, 3));
+                            if (it == deep_search_entities_map.end()) {
+                                timing_string = "Loading entity " + util::hash_to_ioi_string(rpkgs.at(rpkgIndex).hash.at(it61->second).hash_value, true) + "...";
+                                std::string empty = "";
+                                deep_search_entities_map.emplace(tempHashValue, entity(rpkgIndex, it61->second, 3, empty));
+                            }
 
                             results_count = deep_search_entities_map[tempHashValue].search(search_lower_case,
-                                                                                           search_entity_ids,
-                                                                                           search_entity_names,
-                                                                                           search_property_names,
-                                                                                           search_property_values,
-                                                                                           results_count, max_results);
-                        } else {
-                            results_count = deep_search_entities_map[tempHashValue].search(search_lower_case,
-                                                                                           search_entity_ids,
-                                                                                           search_entity_names,
-                                                                                           search_property_names,
-                                                                                           search_property_values,
-                                                                                           results_count, max_results);
+                                                                                           results_count,
+                                                                                           max_results);
+                        }
+                        else {
+                            std::string empty = "";
+                            entity temp_entity(rpkgIndex, it61->second, 3, empty);
+
+                            results_count = temp_entity.search(search_lower_case,
+                                                               results_count,
+                                                               max_results);
+                            temp_entity.free_yyjson_doc();
                         }
 
                         hash_searched[tempHashValue] = hash_searched.size();

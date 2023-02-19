@@ -71,6 +71,20 @@ bool file::write_to_file(const std::string& file_name, const std::vector<char>& 
     return true;
 }
 
+bool file::write_to_file(const std::string& file_name, const char* data) {
+    std::ofstream output_file = std::ofstream(file_name, std::ofstream::binary);
+
+    if (!output_file.good()) {
+        return false;
+    }
+
+    output_file.write(data, std::strlen(data));
+
+    output_file.close();
+
+    return true;
+}
+
 bool file::path_exists(const std::string& path) {
     return std::filesystem::exists(path);
 }

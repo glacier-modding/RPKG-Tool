@@ -265,19 +265,23 @@ namespace rpkg
 			item = new System.Windows.Forms.TreeNode();
 			item.Text = "NOTE: Subsequent searches are faster than the first search, as the first search";
 			item.Name = "deepsearch";
+			item.Tag = "None";
 			DeepSearchEntitiesTreeView.Nodes.Add(item);
 			item = new System.Windows.Forms.TreeNode();
 			item.Text = "      loads/keeps RPKG's entities into JSONs in memory while searching them.";
 			item.Name = "deepsearch";
-			DeepSearchEntitiesTreeView.Nodes.Add(item);
+            item.Tag = "None";
+            DeepSearchEntitiesTreeView.Nodes.Add(item);
 			item = new System.Windows.Forms.TreeNode();
 			item.Text = "NOTE: Make sure you load all RPKGs in your Hitman Runtime folder to ensure";
 			item.Name = "deepsearch";
-			REPOTreeView.Nodes.Add(item);
+            item.Tag = "None";
+            REPOTreeView.Nodes.Add(item);
 			item = new System.Windows.Forms.TreeNode();
 			item.Text = "you are searching/accessing the latest REPO and ORES from the game!";
 			item.Name = "deepsearch";
-			REPOTreeView.Nodes.Add(item);
+            item.Tag = "None";
+            REPOTreeView.Nodes.Add(item);
 
 			MainTreeView.Name = "MainTreeView";
 			SearchRPKGsTreeView.Name = "SearchRPKGsTreeView";
@@ -358,11 +362,15 @@ namespace rpkg
 
 					if (itemName == "deepsearch")
 					{
-						DetailsTextBox.Text = itemHeader;
+						if (item.Tag.ToString() == "None")
+							return;
 
-						DetailsTextBox.Visibility = Visibility.Visible;
+                        DeepSearchTextBox.Text = item.Tag.ToString();
+
+						DetailsTextBox.Visibility = Visibility.Collapsed;
 						MainScrollViewer.Visibility = Visibility.Collapsed;
-						MainStackPanel.Visibility = Visibility.Collapsed;
+                        DeepSearchTextBox.Visibility = Visibility.Visible;
+                        MainStackPanel.Visibility = Visibility.Collapsed;
 						EditPatchDeletionListButton.Visibility = Visibility.Collapsed;
 						SaveChangesToPatchDeletionListButton.Visibility = Visibility.Collapsed;
 						DiscardChangesToPatchDeletionListButton.Visibility = Visibility.Collapsed;
@@ -371,7 +379,7 @@ namespace rpkg
 						DiscardChangesToHashDependsButton.Visibility = Visibility.Collapsed;
 						ExtractHashDependsButton.Visibility = Visibility.Collapsed;
 
-						if (ThirdTabRight.Visibility == Visibility.Visible)
+                        if (ThirdTabRight.Visibility == Visibility.Visible)
 						{
 							ThirdTabRight.Visibility = Visibility.Collapsed;
 							ThirdTabRightSeparator.Visibility = Visibility.Collapsed;
@@ -435,9 +443,10 @@ namespace rpkg
 							SixthTabRightSeparator.Visibility = Visibility.Collapsed;
 						}
 
-						DetailsTextBox.Visibility = Visibility.Visible;
+						DetailsTextBox.Visibility = Visibility.Collapsed;
 						MainScrollViewer.Visibility = Visibility.Collapsed;
-						MainStackPanel.Visibility = Visibility.Collapsed;
+                        DeepSearchTextBox.Visibility = Visibility.Collapsed;
+                        MainStackPanel.Visibility = Visibility.Collapsed;
 						EditPatchDeletionListButton.Visibility = Visibility.Collapsed;
 						SaveChangesToPatchDeletionListButton.Visibility = Visibility.Collapsed;
 						DiscardChangesToPatchDeletionListButton.Visibility = Visibility.Collapsed;
@@ -482,7 +491,8 @@ namespace rpkg
 
 							DetailsTextBox.Visibility = Visibility.Visible;
 							MainScrollViewer.Visibility = Visibility.Collapsed;
-							MainStackPanel.Visibility = Visibility.Collapsed;
+                            DeepSearchTextBox.Visibility = Visibility.Collapsed;
+                            MainStackPanel.Visibility = Visibility.Collapsed;
 							EditPatchDeletionListButton.Visibility = Visibility.Visible;
 							SaveChangesToPatchDeletionListButton.Visibility = Visibility.Collapsed;
 							DiscardChangesToPatchDeletionListButton.Visibility = Visibility.Collapsed;
@@ -495,7 +505,8 @@ namespace rpkg
 						{
 							DetailsTextBox.Visibility = Visibility.Visible;
 							MainScrollViewer.Visibility = Visibility.Collapsed;
-							MainStackPanel.Visibility = Visibility.Collapsed;
+                            DeepSearchTextBox.Visibility = Visibility.Collapsed;
+                            MainStackPanel.Visibility = Visibility.Collapsed;
 							EditPatchDeletionListButton.Visibility = Visibility.Collapsed;
 							SaveChangesToPatchDeletionListButton.Visibility = Visibility.Collapsed;
 							DiscardChangesToPatchDeletionListButton.Visibility = Visibility.Collapsed;
@@ -570,7 +581,8 @@ namespace rpkg
 
 						DetailsTextBox.Visibility = Visibility.Visible;
 						MainScrollViewer.Visibility = Visibility.Collapsed;
-						MainStackPanel.Visibility = Visibility.Collapsed;
+                        DeepSearchTextBox.Visibility = Visibility.Collapsed;
+                        MainStackPanel.Visibility = Visibility.Collapsed;
 						EditPatchDeletionListButton.Visibility = Visibility.Collapsed;
 						SaveChangesToPatchDeletionListButton.Visibility = Visibility.Collapsed;
 						DiscardChangesToPatchDeletionListButton.Visibility = Visibility.Collapsed;
@@ -1114,12 +1126,16 @@ namespace rpkg
 						}
 					}
 					else if (headerName == "deepsearch")
-					{
-						DetailsTextBox.Text = header;
+                    {
+                        if (e.Node.Tag.ToString() == "None")
+                            return;
+
+                        DeepSearchTextBox.Text = e.Node.Tag.ToString();
 
 						DetailsTextBox.Visibility = Visibility.Visible;
 						MainScrollViewer.Visibility = Visibility.Collapsed;
-						MainStackPanel.Visibility = Visibility.Collapsed;
+                        DeepSearchTextBox.Visibility = Visibility.Collapsed;
+                        MainStackPanel.Visibility = Visibility.Collapsed;
 						EditPatchDeletionListButton.Visibility = Visibility.Collapsed;
 						SaveChangesToPatchDeletionListButton.Visibility = Visibility.Collapsed;
 						DiscardChangesToPatchDeletionListButton.Visibility = Visibility.Collapsed;
@@ -4528,7 +4544,11 @@ namespace rpkg
 				xshdJSONDark = XmlReader.Create(new MemoryStream(Properties.Resources.JSON_Dark));
 				REPOJSONTextEditor.SyntaxHighlighting = HighlightingLoader.Load(xshdJSONDark, HighlightingManager.Instance);
 				REPOJSONTextEditor.Foreground = Brushes.White;
-				HexViewerTextBox.Foreground = Brushes.White;
+				LocalizationTextBox.SyntaxHighlighting = REPOJSONTextEditor.SyntaxHighlighting;
+                LocalizationTextBox.Foreground = Brushes.White;
+                DeepSearchTextBox.SyntaxHighlighting = REPOJSONTextEditor.SyntaxHighlighting;
+                DeepSearchTextBox.Foreground = Brushes.White;
+                HexViewerTextBox.Foreground = Brushes.White;
 			}
 			else if (brightness == "Light")
 			{
@@ -4547,7 +4567,11 @@ namespace rpkg
 				xshdJSONLight = XmlReader.Create(new MemoryStream(Properties.Resources.JSON_Light));
 				REPOJSONTextEditor.SyntaxHighlighting = HighlightingLoader.Load(xshdJSONLight, HighlightingManager.Instance);
 				REPOJSONTextEditor.Foreground = Brushes.Black;
-				HexViewerTextBox.Foreground = Brushes.Black;
+				LocalizationTextBox.SyntaxHighlighting = REPOJSONTextEditor.SyntaxHighlighting;
+                LocalizationTextBox.Foreground = Brushes.Black;
+                DeepSearchTextBox.SyntaxHighlighting = REPOJSONTextEditor.SyntaxHighlighting;
+                DeepSearchTextBox.Foreground = Brushes.Black;
+                HexViewerTextBox.Foreground = Brushes.Black;
 			}
 		}
 
@@ -4606,6 +4630,7 @@ namespace rpkg
 		Dictionary<string, string[]> enumDictionary;
 		JsonDocument visualEditorJSON;
 		bool loadingVisualEditor = false;
+		string timing_string = "";
 
 		private enum OggPlayerState
 		{
@@ -4715,7 +4740,7 @@ namespace rpkg
 		public delegate int execute_get_direct_hash_depends(string rpkg_file, string hash_string);
 		public delegate int execute_task(string csharp_command, string csharp_input_path, string csharp_filter, string search, string search_type, string csharp_output_path);
 		public delegate int execute_deep_search_localization(string input_path, string search_value, int search_dlge, int search_locr, int search_rtlv, int max_results);
-		public delegate int execute_deep_search_entities(string input_path, string search_value, int search_entity_ids, int search_entity_names, int search_property_names, int search_property_values, int max_results);
+		public delegate int execute_deep_search_entities(string input_path, string search_value, int max_results, int store_jsons);
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "task_execute", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int task_execute(string csharp_command, string csharp_input_path, string csharp_filter,
@@ -4901,8 +4926,10 @@ namespace rpkg
 		public static extern IntPtr get_localization_search_results();
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "deep_search_entities", CallingConvention = CallingConvention.Cdecl)]
-		public static extern int deep_search_entities(string input_path, string search_value, int search_entity_ids,
-			int search_entity_names, int search_property_names, int search_property_values, int max_results);
+		public static extern int deep_search_entities(string input_path,
+													  string search_value,
+                                                      int max_results,
+													  int store_jsons);
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "get_entities_search_results_size",
 			CallingConvention = CallingConvention.Cdecl)]
@@ -4971,7 +4998,10 @@ namespace rpkg
 		[DllImport("rpkg-lib.dll", EntryPoint = "update_json_at_pointer", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int update_json_at_pointer(string id, string json_pointer, string value);
 
-		private void LoadResources()
+        [DllImport("rpkg-lib.dll", EntryPoint = "get_timing_string", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr get_timing_string();
+        
+        private void LoadResources()
 		{
 			MemoryStream memoryStream1 = new MemoryStream(Properties.Resources.i1, 0, Properties.Resources.i1.Length, true, true);
 			MemoryStream memoryStream2 = new MemoryStream(Properties.Resources.i2, 0, Properties.Resources.i2.Length, true, true);
@@ -5424,7 +5454,8 @@ namespace rpkg
 			}
 
 			DetailsTextBox.Visibility = Visibility.Collapsed;
-			MainScrollViewer.Visibility = Visibility.Visible;
+            DeepSearchTextBox.Visibility = Visibility.Collapsed;
+            MainScrollViewer.Visibility = Visibility.Visible;
 			MainStackPanel.Visibility = Visibility.Visible;
 			EditPatchDeletionListButton.Visibility = Visibility.Collapsed;
 			SaveChangesToPatchDeletionListButton.Visibility = Visibility.Visible;
@@ -5840,7 +5871,8 @@ namespace rpkg
 		{
 			DetailsTextBox.Visibility = Visibility.Visible;
 			MainScrollViewer.Visibility = Visibility.Collapsed;
-			MainStackPanel.Visibility = Visibility.Collapsed;
+            DeepSearchTextBox.Visibility = Visibility.Collapsed;
+            MainStackPanel.Visibility = Visibility.Collapsed;
 			EditPatchDeletionListButton.Visibility = Visibility.Visible;
 			SaveChangesToPatchDeletionListButton.Visibility = Visibility.Collapsed;
 			DiscardChangesToPatchDeletionListButton.Visibility = Visibility.Collapsed;
@@ -5909,7 +5941,8 @@ namespace rpkg
 			}
 
 			DetailsTextBox.Visibility = Visibility.Collapsed;
-			MainScrollViewer.Visibility = Visibility.Visible;
+            DeepSearchTextBox.Visibility = Visibility.Collapsed;
+            MainScrollViewer.Visibility = Visibility.Visible;
 			MainStackPanel.Visibility = Visibility.Visible;
 			EditHashDependsButton.Visibility = Visibility.Collapsed;
 			SaveChangesToHashDependsButton.Visibility = Visibility.Visible;
@@ -6864,7 +6897,8 @@ namespace rpkg
 		{
 			DetailsTextBox.Visibility = Visibility.Visible;
 			MainScrollViewer.Visibility = Visibility.Collapsed;
-			MainStackPanel.Visibility = Visibility.Collapsed;
+            DeepSearchTextBox.Visibility = Visibility.Collapsed;
+            MainStackPanel.Visibility = Visibility.Collapsed;
 			EditHashDependsButton.Visibility = Visibility.Visible;
 			SaveChangesToHashDependsButton.Visibility = Visibility.Collapsed;
 			DiscardChangesToHashDependsButton.Visibility = Visibility.Collapsed;
@@ -7838,7 +7872,9 @@ namespace rpkg
 				int return_value = set_gui_control(gui_control_value);
 
 				DeepSearchEntitiesButton.Content = "Start Search";
-			}
+
+                DeepSearchEntitiesLoadTreeView();
+            }
 			else
 			{
 				if (DeepSearchEntitiesTextBox.Text.Length > 0)
@@ -7873,32 +7909,14 @@ namespace rpkg
 
 					execute_deep_search_entities rpkgExecute = deep_search_entities;
 
-					int search_entity_ids = 0;
-					int search_entity_names = 0;
-					int search_property_names = 0;
-					int search_property_values = 0;
+                    int store_jsons = 0;
 
-					/*if (DeepSearchEntitiesEntityIDsCheckBox.IsChecked ?? false)
-					{
-						search_entity_ids = 1;
-					}
+                    if (DeepSearchEntitiesStoreJSONCheckBox.IsChecked ?? false)
+                    {
+                        store_jsons = 1;
+                    }
 
-					if (DeepSearchEntitiesEntityNamesCheckBox.IsChecked ?? false)
-					{
-						search_entity_names = 1;
-					}
-
-					if (DeepSearchEntitiesPropertyNamesCheckBox.IsChecked ?? false)
-					{
-						search_property_names = 1;
-					}
-
-					if (DeepSearchEntitiesPropertyValuesCheckBox.IsChecked ?? false)
-					{
-						search_property_values = 1;
-					}*/
-
-					int maxSearchResults = 0;
+                    int maxSearchResults = 0;
 
 					int.TryParse(DeepSearchEntitiesComboBox.Text, out maxSearchResults);
 
@@ -7907,7 +7925,12 @@ namespace rpkg
 						maxSearchResults = 100;
 					}
 
-					IAsyncResult ar = rpkgExecute.BeginInvoke(input_path, DeepSearchEntitiesTextBox.Text, search_entity_ids, search_entity_names, search_property_names, search_property_values, maxSearchResults, null, null);
+                    IAsyncResult ar = rpkgExecute.BeginInvoke(input_path,
+															  DeepSearchEntitiesTextBox.Text,
+                                                              maxSearchResults,
+															  store_jsons,
+															  null,
+															  null);
 
 					deepSearchEntitiesWorker = new BackgroundWorker();
 					deepSearchEntitiesWorker.WorkerReportsProgress = true;
@@ -7931,7 +7954,9 @@ namespace rpkg
 				set_gui_control(gui_control_value);
 
 				DeepSearchLocalizationButton.Content = "Start Search";
-			}
+
+                DeepSearchLocalizationLoadTreeView();
+            }
 			else
 			{
 				if (DeepSearchLocalizationTextBox.Text.Length > 0)
@@ -8052,67 +8077,76 @@ namespace rpkg
 
 		void deepSearchLocalizationWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 		{
-			DeepSearchLocalizationButton.Content = "Start Search";
+			DeepSearchLocalizationLoadTreeView();
+        }
 
-			UInt32 localization_data_size = get_localization_search_results_size();
+        void DeepSearchLocalizationLoadTreeView()
+		{
+            DeepSearchLocalizationButton.Content = "Start Search";
 
-			byte[] localization_data = new byte[localization_data_size];
+            UInt32 localization_data_size = get_localization_search_results_size();
 
-			Marshal.Copy(get_localization_search_results(), localization_data, 0, (int)localization_data_size);
+            byte[] localization_data = new byte[localization_data_size];
 
-			if (localization_data_size > 0)
-			{
-				//DeepSearchLocalizationTreeView.Nodes.Add(Encoding.UTF8.GetString(localization_data));
+            Marshal.Copy(get_localization_search_results(), localization_data, 0, (int)localization_data_size);
 
-				string[] records = Encoding.UTF8.GetString(localization_data).Split(new[] { "||||||" }, StringSplitOptions.None);
+            if (localization_data_size > 0)
+            {
+                //DeepSearchLocalizationTreeView.Nodes.Add(Encoding.UTF8.GetString(localization_data));
 
-				foreach (string r in records)
-				{
-					if (r.Length > 0)
-					{
-						string[] data = r.Split(new[] { "||||" }, StringSplitOptions.None);
+                string[] records = Encoding.UTF8.GetString(localization_data).Split(new[] { "||||||" }, StringSplitOptions.None);
 
-						if (data.Length == 3)
-						{
-							System.Windows.Forms.TreeNode node1 = findTreeNode(ref DeepSearchLocalizationTreeView, data[0]);
+                foreach (string r in records)
+                {
+                    if (r.Length > 0)
+                    {
+                        string[] data = r.Split(new[] { "||||" }, StringSplitOptions.None);
 
-							if (node1 == null)
-							{
-								DeepSearchLocalizationTreeView.Nodes.Add(data[0]);
-							}
+                        if (data.Length == 3)
+                        {
+                            System.Windows.Forms.TreeNode node1 = findTreeNode(ref DeepSearchLocalizationTreeView, data[0]);
 
-							node1 = findTreeNode(ref DeepSearchLocalizationTreeView, data[0]);
+                            if (node1 == null)
+                            {
+                                DeepSearchLocalizationTreeView.Nodes.Add(data[0]);
+                            }
 
-							if (node1 != null)
-							{
-								System.Windows.Forms.TreeNode node2 = findTreeNode(ref node1, data[1]);
+                            node1 = findTreeNode(ref DeepSearchLocalizationTreeView, data[0]);
 
-								if (node2 != null)
-								{
-									System.Windows.Forms.TreeNode node3 = node2.Nodes.Add(data[2]);
+                            if (node1 != null)
+                            {
+                                System.Windows.Forms.TreeNode node2 = findTreeNode(ref node1, data[1]);
 
-									node3.Name = "deepsearch";
-								}
-								else
-								{
-									node2 = node1.Nodes.Add(data[1]);
+                                if (node2 != null)
+                                {
+                                    System.Windows.Forms.TreeNode node3 = node2.Nodes.Add(data[2]);
 
-									System.Windows.Forms.TreeNode node3 = node2.Nodes.Add(data[2]);
+                                    node3.Name = "deepsearch";
+                                    node3.Tag = data[2];
+                                }
+                                else
+                                {
+                                    node2 = node1.Nodes.Add(data[1]);
 
-									node3.Name = "deepsearch";
-								}
-							}
-						}
-					}
-				}
-			}
-			else
-			{
-				DeepSearchLocalizationTreeView.Nodes.Add("Search returned 0 results.");
-			}
-		}
+                                    System.Windows.Forms.TreeNode node3 = node2.Nodes.Add(data[2]);
 
-		void deepSearchEntitiesWorker_DoWork(object sender, DoWorkEventArgs e)
+                                    node3.Name = "deepsearch";
+                                    node3.Tag = data[2];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                System.Windows.Forms.TreeNode node = DeepSearchLocalizationTreeView.Nodes.Add("Search returned 0 results.");
+                node.Name = "deepsearch";
+                node.Tag = "None";
+            }
+        }
+
+        void deepSearchEntitiesWorker_DoWork(object sender, DoWorkEventArgs e)
 		{
 			int percent = 0;
 			int task_single_status = 0;
@@ -8151,69 +8185,72 @@ namespace rpkg
 		void deepSearchEntitiesWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
 		{
 			DeepSearchEntitiesProgressBar.Value = e.ProgressPercentage;
-		}
 
-		void deepSearchEntitiesWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+            timing_string = Marshal.PtrToStringAnsi(get_timing_string());
+
+            DeepSearchEntitiesProgressText.Text = timing_string;
+        }
+
+        void deepSearchEntitiesWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 		{
-			DeepSearchEntitiesButton.Content = "Start Search";
+			DeepSearchEntitiesLoadTreeView();
+        }
 
-			UInt32 entities_data_size = get_entities_search_results_size();
+		void DeepSearchEntitiesLoadTreeView()
+		{
+            DeepSearchEntitiesButton.Content = "Start Search";
 
-			byte[] entities_data = new byte[entities_data_size];
+            UInt32 entities_data_size = get_entities_search_results_size();
 
-			Marshal.Copy(get_entities_search_results(), entities_data, 0, (int)entities_data_size);
+            byte[] entities_data = new byte[entities_data_size];
 
-			if (entities_data_size > 0)
-			{
-				//DeepSearchLocalizationTreeView.Nodes.Add(Encoding.UTF8.GetString(localization_data));
+            Marshal.Copy(get_entities_search_results(), entities_data, 0, (int)entities_data_size);
 
-				string[] records = Encoding.UTF8.GetString(entities_data).Split(new[] { "||||||" }, StringSplitOptions.None);
+            if (entities_data_size > 0)
+            {
+                //DeepSearchLocalizationTreeView.Nodes.Add(Encoding.UTF8.GetString(localization_data));
 
-				foreach (string r in records)
-				{
-					if (r.Length > 0)
-					{
-						string[] data = r.Split(new[] { "||||" }, StringSplitOptions.None);
+                string[] records = Encoding.UTF8.GetString(entities_data).Split(new[] { "||||||" }, StringSplitOptions.None);
 
-						if (data.Length == 3)
-						{
-							System.Windows.Forms.TreeNode node1 = findTreeNode(ref DeepSearchEntitiesTreeView, data[0]);
+                foreach (string r in records)
+                {
+                    if (r.Length > 0)
+                    {
+                        string[] data = r.Split(new[] { "||||" }, StringSplitOptions.None);
 
-							if (node1 == null)
-							{
-								DeepSearchEntitiesTreeView.Nodes.Add(data[0]);
-							}
+                        if (data.Length == 5)
+                        {
+                            System.Windows.Forms.TreeNode node1 = findTreeNode(ref DeepSearchEntitiesTreeView, data[0]);
 
-							node1 = findTreeNode(ref DeepSearchEntitiesTreeView, data[0]);
+                            if (node1 == null)
+                            {
+                                DeepSearchEntitiesTreeView.Nodes.Add(data[0]);
+                            }
 
-							if (node1 != null)
-							{
-								System.Windows.Forms.TreeNode node2 = findTreeNode(ref node1, data[1]);
+                            node1 = findTreeNode(ref DeepSearchEntitiesTreeView, data[0]);
 
-								if (node2 != null)
-								{
-									System.Windows.Forms.TreeNode node3 = node2.Nodes.Add(data[2]);
+                            if (node1 != null)
+                            {
+                                System.Windows.Forms.TreeNode node2 = findTreeNode(ref node1, data[1]);
 
-									node3.Name = "deepsearch";
-								}
-								else
-								{
-									node2 = node1.Nodes.Add(data[1]);
+                                if (node2 == null)
+                                    node2 = node1.Nodes.Add(data[1]);
 
-									System.Windows.Forms.TreeNode node3 = node2.Nodes.Add(data[2]);
-
-									node3.Name = "deepsearch";
-								}
-							}
-						}
-					}
-				}
-			}
-			else
-			{
-				DeepSearchEntitiesTreeView.Nodes.Add("Search returned 0 results.");
-			}
-		}
+                                System.Windows.Forms.TreeNode node3 = node2.Nodes.Add(data[2]);
+                                node3.Name = "deepsearch";
+                                node3.Tag = data[3];
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                System.Windows.Forms.TreeNode node = DeepSearchEntitiesTreeView.Nodes.Add("Search returned 0 results.");
+                node.Name = "deepsearch";
+                node.Tag = "None";
+            }
+        }
 
 		System.Windows.Forms.TreeNode findTreeNode(ref System.Windows.Forms.TreeView treeView, string nodeText)
 		{
@@ -9953,9 +9990,32 @@ namespace rpkg
 					}
 				}
 			}
-		}
+        }
 
-		private void REPOHashTextBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        private void DeepSearchTextBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            bool controlKey = Keyboard.Modifiers == ModifierKeys.Control;
+
+            if (controlKey)
+            {
+                if (e.Delta > 0)
+                {
+                    if (DeepSearchTextBox.FontSize < 64)
+                    {
+                        DeepSearchTextBox.FontSize = Math.Min(64, DeepSearchTextBox.FontSize + 1);
+                    }
+                }
+                else
+                {
+                    if (DeepSearchTextBox.FontSize > 4)
+                    {
+                        DeepSearchTextBox.FontSize = Math.Max(4, DeepSearchTextBox.FontSize - 1);
+                    }
+                }
+            }
+        }
+
+        private void REPOHashTextBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
 		{
 			bool controlKey = Keyboard.Modifiers == ModifierKeys.Control;
 

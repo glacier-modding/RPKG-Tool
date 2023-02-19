@@ -56,30 +56,18 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
         if (it6 == rpkgs.at(rpkg_index).hash_map.end())
             continue;
 
-        std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-
-        entity temp_entity(rpkg_index, it6->second, 3);
-
-        std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-        std::string message = "Converting entity (TEMP/TBLU) via ResourceTool to RT JSON...";
-        std::stringstream ss;
-
-        ss << message << "100% Done in "
-           << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count())
-           << "s";
-
-        LOG(ss.str());
-
         std::string temp_output_path = "";
         bool output_path_is_dir = false;
 
         if (output_path.length() > 5) {
             if (util::to_lower_case(output_path).substr(output_path.length() - 5) == ".json") {
                 temp_output_path = output_path;
-            } else {
+            }
+            else {
                 output_path_is_dir = true;
             }
-        } else {
+        }
+        else {
             output_path_is_dir = true;
         }
 
@@ -91,15 +79,16 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
             temp_output_path = file::output_path_append(filter + ".entity.json", output_path);
         }
 
-        start_time = std::chrono::high_resolution_clock::now();
+        std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
 
-        temp_entity.to_qn_json(temp_output_path);
+        entity temp_entity(rpkg_index, it6->second, 3, temp_output_path);
 
-        end_time = std::chrono::high_resolution_clock::now();
+        temp_entity.free_yyjson_doc();
 
-        message = "Converting entity (TEMP/TBLU) from RT JSON to QN (QuickEntity) JSON...";
+        std::string message = "Converting entity (TEMP/TBLU) to QN (QuickEntity) JSON...";
+        std::stringstream ss;
 
-        ss.str(std::string());
+        std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
 
         ss << message << "100% Done in "
            << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count())

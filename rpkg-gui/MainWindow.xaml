@@ -422,16 +422,16 @@
                             <TextBox Grid.Row="0" Grid.Column="1" x:Name="SearchHashListTextBox" TextChanged="SearchHashListTextBox_TextChanged" FontFamily="Consolas" TextWrapping="NoWrap"/>
                             <Label Grid.Row="0" Grid.Column="2" Content="Max results:" FontSize="14"/>
                             <ComboBox Grid.Row="0" Grid.Column="3" x:Name="SearchHashListComboBox" FontFamily="Consolas">
-                                <ComboBoxItem Content="100" IsSelected="True"/>
-                                <ComboBoxItem Content="200"/>
-                                <ComboBoxItem Content="500"/>
-                                <ComboBoxItem Content="1000"/>
-                                <ComboBoxItem Content="2000"/>
-                                <ComboBoxItem Content="5000"/>
-                                <ComboBoxItem Content="10000"/>
-                                <ComboBoxItem Content="20000"/>
-                                <ComboBoxItem Content="50000"/>
-                                <ComboBoxItem Content="100000"/>
+								<ComboBoxItem Content="100" IsSelected="True"/>
+								<ComboBoxItem Content="200"/>
+								<ComboBoxItem Content="500"/>
+								<ComboBoxItem Content="1000"/>
+								<ComboBoxItem Content="2000"/>
+								<ComboBoxItem Content="5000"/>
+								<ComboBoxItem Content="10000"/>
+								<ComboBoxItem Content="20000"/>
+								<ComboBoxItem Content="50000"/>
+								<ComboBoxItem Content="100000"/>
                             </ComboBox>
                             <!--TreeView Grid.Row="1" Grid.ColumnSpan="4" x:Name="SearchHashListTreeView" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" BorderThickness="1"/-->
                             <WindowsFormsHost Grid.Row="2" Grid.ColumnSpan="4" x:Name="SearchHashListTreeViewWindowsFormsHost">
@@ -468,34 +468,52 @@
                             <TextBox Grid.Row="0" Grid.Column="1" x:Name="DeepSearchEntitiesTextBox" FontFamily="Consolas" TextWrapping="NoWrap"/>
                             <Label Grid.Row="0" Grid.Column="2" Content="Max results:" FontSize="14"/>
                             <ComboBox Grid.Row="0" Grid.Column="3" x:Name="DeepSearchEntitiesComboBox" FontFamily="Consolas">
-                                <ComboBoxItem Content="100" IsSelected="True"/>
-                                <ComboBoxItem Content="200"/>
-                                <ComboBoxItem Content="500"/>
-                                <ComboBoxItem Content="1000"/>
-                                <ComboBoxItem Content="2000"/>
-                                <ComboBoxItem Content="5000"/>
-                                <ComboBoxItem Content="10000"/>
-                                <ComboBoxItem Content="20000"/>
-                                <ComboBoxItem Content="50000"/>
-                                <ComboBoxItem Content="100000"/>
+								<ComboBoxItem Content="100" IsSelected="True"/>
+								<ComboBoxItem Content="200"/>
+								<ComboBoxItem Content="500"/>
+								<ComboBoxItem Content="1000"/>
+								<ComboBoxItem Content="2000"/>
+								<ComboBoxItem Content="5000"/>
+								<ComboBoxItem Content="10000"/>
+								<ComboBoxItem Content="20000"/>
+								<ComboBoxItem Content="50000"/>
+								<ComboBoxItem Content="100000"/>
                             </ComboBox>
                             <Grid Grid.Row="1" Grid.ColumnSpan="4">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
+									<RowDefinition Height="Auto"/>
+									<RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <Label Grid.Row="0" Grid.Column="0" Content="Search within RPKGS:" VerticalContentAlignment="Center" FontSize="14"/>
+                                <Label Grid.Row="0" Grid.Column="0" Content="Search in RPKG(s):" VerticalContentAlignment="Center" FontSize="14"/>
                                 <ComboBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" x:Name="DeepSearchEntitiesRPKGsComboBox" FontFamily="Consolas" Margin="15" VerticalAlignment="Center"/>
-                                <Label Grid.Row="1" Grid.Column="0" Content="Search progress:" VerticalContentAlignment="Center" FontSize="14"/>
-                                <ProgressBar Grid.Row="1" Grid.Column="1" Value="0" Name="DeepSearchEntitiesProgressBar" Margin="10"/>
-                                <Button Grid.Row="1" Grid.Column="2" Name="DeepSearchEntitiesButton" Content="Start Search" Margin="5" Click="DeepSearchEntitiesButton_Click"/>
-                                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" VerticalAlignment="Center">
+								<Label Grid.Row="1" Grid.Column="0" Content="Options:" FontSize="14" VerticalAlignment="Center"/>
+								<Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Center">
+									<Grid.RowDefinitions>
+										<RowDefinition Height="Auto"/>
+									</Grid.RowDefinitions>
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="*"/>
+									</Grid.ColumnDefinitions>
+									<UniformGrid Rows="1" Columns="1" VerticalAlignment="Center">
+										<CheckBox Name="DeepSearchEntitiesStoreJSONCheckBox" Content="Store Entities In Memory (Subsequent searches are faster, uses more RAM)" HorizontalAlignment="Left" IsChecked="True"/>
+									</UniformGrid>
+								</Grid>
+								<Label Grid.Row="2" Grid.Column="0" Content="Search progress:" VerticalContentAlignment="Center" FontSize="14"/>
+                                <ProgressBar Grid.Row="2" Grid.Column="1" Value="0" Name="DeepSearchEntitiesProgressBar" Margin="10"/>
+                                <Button Grid.Row="2" Grid.Column="2" Name="DeepSearchEntitiesButton" Content="Start Search" Margin="5" Click="DeepSearchEntitiesButton_Click"/>
+								<Label Grid.Row="3" Grid.Column="0" Content="Search status:" VerticalContentAlignment="Center" FontSize="14"/>
+								<Label Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Name="DeepSearchEntitiesProgressTextLabel" VerticalContentAlignment="Center" FontSize="14" Height="64" Margin="10" HorizontalAlignment="Left">
+									<TextBlock Name="DeepSearchEntitiesProgressText" TextWrapping="WrapWithOverflow" MaxHeight="64"/>
+								</Label>
+								<Grid Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" VerticalAlignment="Center">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
@@ -539,16 +557,16 @@
                             <TextBox Grid.Row="0" Grid.Column="1" x:Name="DeepSearchLocalizationTextBox" FontFamily="Consolas" TextWrapping="NoWrap"/>
                             <Label Grid.Row="0" Grid.Column="2" Content="Max results:" FontSize="14"/>
                             <ComboBox Grid.Row="0" Grid.Column="3" x:Name="DeepSearchLocalizationComboBox" FontFamily="Consolas">
-                                <ComboBoxItem Content="100" IsSelected="True"/>
-                                <ComboBoxItem Content="200"/>
-                                <ComboBoxItem Content="500"/>
-                                <ComboBoxItem Content="1000"/>
-                                <ComboBoxItem Content="2000"/>
-                                <ComboBoxItem Content="5000"/>
-                                <ComboBoxItem Content="10000"/>
-                                <ComboBoxItem Content="20000"/>
-                                <ComboBoxItem Content="50000"/>
-                                <ComboBoxItem Content="100000"/>
+								<ComboBoxItem Content="100" IsSelected="True"/>
+								<ComboBoxItem Content="200"/>
+								<ComboBoxItem Content="500"/>
+								<ComboBoxItem Content="1000"/>
+								<ComboBoxItem Content="2000"/>
+								<ComboBoxItem Content="5000"/>
+								<ComboBoxItem Content="10000"/>
+								<ComboBoxItem Content="20000"/>
+								<ComboBoxItem Content="50000"/>
+								<ComboBoxItem Content="100000"/>
                             </ComboBox>
                             <Grid Grid.Row="1" Grid.ColumnSpan="4">
                                 <Grid.RowDefinitions>
@@ -562,7 +580,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <Label Grid.Row="0" Grid.Column="0" Content="Search within RPKGS:" VerticalContentAlignment="Center" FontSize="14"/>
+                                <Label Grid.Row="0" Grid.Column="0" Content="Search in RPKG(s):" VerticalContentAlignment="Center" FontSize="14"/>
                                 <ComboBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" x:Name="DeepSearchLocalizationRPKGsComboBox" FontFamily="Consolas" Margin="15" VerticalAlignment="Center"/>
                                 <Label Grid.Row="1" Grid.Column="0" Content="Search through:" FontSize="14" VerticalAlignment="Center"/>
                                 <Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Center">
@@ -629,6 +647,7 @@
 
                         </StackPanel>
                     </ScrollViewer>
+					<avalonEdit:TextEditor Grid.Row="1" Grid.ColumnSpan="3" x:Name="DeepSearchTextBox" ShowLineNumbers="True" FontFamily="Consolas" FontSize="14" Foreground="white" Margin="5" PreviewMouseWheel="DeepSearchTextBox_PreviewMouseWheel" Visibility="Collapsed" IsReadOnly="True"/>
                 </Grid>
             </TabItem>
             <TabItem Name="SecondTabRightSeparator">
@@ -652,7 +671,7 @@
                 <Image Name="image7"/>
             </TabItem>
             <TabItem x:Name="ThirdTabRight" Header="JSON Viewer" Visibility="Collapsed">
-                <TextBox x:Name="LocalizationTextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="Wrap" IsReadOnly="True" PreviewMouseWheel="LocalizationTextBox_PreviewMouseWheel"/>
+				<avalonEdit:TextEditor Grid.Row="1" Grid.Column="0" x:Name="LocalizationTextBox" ShowLineNumbers="True" FontFamily="Consolas" FontSize="14" Foreground="white" Margin="5" PreviewMouseWheel="LocalizationTextBox_PreviewMouseWheel"/>
             </TabItem>
             <TabItem Name="FourthTabRightSeparator" Visibility="Collapsed">
                 <TabItem.Header>

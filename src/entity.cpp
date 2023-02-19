@@ -18,7 +18,7 @@
 
 entity::entity() = default;
 
-entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version) {
+entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version, std::string& output_path) {
     temp_rpkg_index = rpkgs_index;
     temp_hash_index = hash_index;
 
@@ -134,11 +134,7 @@ entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
                 JsonString* temp_json_input = resource_tool_converter_temp->FromMemoryToJsonString(
                         (const void*) temp_data.data(), (size_t) temp_data.size());
 
-                temp_yyjson_doc = yyjson_read(temp_json_input->JsonData, temp_json_input->StrSize, 0);
-
-                rt_temp_json = std::string(temp_json_input->JsonData, temp_json_input->StrSize);
-
-                resource_tool_converter_temp->FreeJsonString(temp_json_input);
+                //std::string rt_temp_json = std::string(temp_json_input->JsonData, temp_json_input->StrSize);
 
                 std::vector<char>().swap(temp_data);
 
@@ -205,72 +201,405 @@ entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version)
                 JsonString* tblu_json_input = resource_tool_converter_tblu->FromMemoryToJsonString(
                         (const void*) tblu_data.data(), (size_t) tblu_data.size());
 
-                tblu_yyjson_doc = yyjson_read(tblu_json_input->JsonData, tblu_json_input->StrSize, 0);
-
-                rt_tblu_json = std::string(tblu_json_input->JsonData, tblu_json_input->StrSize);
-
-                resource_tool_converter_tblu->FreeJsonString(tblu_json_input);
+                //std::string rt_tblu_json = std::string(tblu_json_input->JsonData, tblu_json_input->StrSize);
 
                 std::vector<char>().swap(tblu_data);
+
+                std::string temp_meta_json = rpkg_function::generate_hash_meta_json(temp_rpkg_index, temp_hash_index);
+                std::string tblu_meta_json = rpkg_function::generate_hash_meta_json(tblu_rpkg_index, tblu_hash_index);
+
+                char* entity_json_string = convert_entity_to_qn(temp_json_input->JsonData, temp_meta_json.c_str(), tblu_json_input->JsonData, tblu_meta_json.c_str());
+
+                //std::string entity_json = std::string(entity_json_string);
+
+                if (output_path != "")
+                    file::write_to_file(output_path, entity_json_string);
+
+                entity_yyjson_doc = yyjson_read(entity_json_string, std::strlen(entity_json_string), 0);
+
+                free_json_string(entity_json_string);
+                resource_tool_converter_temp->FreeJsonString(temp_json_input);
+                resource_tool_converter_tblu->FreeJsonString(tblu_json_input);
             }
         }
     }
 }
 
-void entity::to_qn_json(std::string& output_path)
-{
-    std::string temp_meta_json = rpkg_function::generate_hash_meta_json(temp_rpkg_index, temp_hash_index);
-    std::string tblu_meta_json = rpkg_function::generate_hash_meta_json(tblu_rpkg_index, tblu_hash_index);
+uint32_t entity::search(std::string search_string,
+                        uint32_t results_count,
+                        uint32_t max_results) {
 
-    char* entity_json_string = convert_entity_to_qn(rt_temp_json.c_str(), temp_meta_json.c_str(), rt_tblu_json.c_str(), tblu_meta_json.c_str());
+    yyjson_val* root = yyjson_doc_get_root(entity_yyjson_doc);
+    yyjson_val* entities = yyjson_obj_get(root, "entities");
 
-    std::string entity_json = std::string(entity_json_string);
+    yyjson_val* key, * val;
+    yyjson_obj_iter iter;
 
-    free_json_string(entity_json_string);
+    yyjson_obj_iter_init(root, &iter);
 
-    file::write_to_file(output_path, entity_json);
-}
+    while ((key = yyjson_obj_iter_next(&iter))) {
+        val = yyjson_obj_iter_get_val(key);
 
-uint32_t
-entity::search(std::string search_string, bool search_entity_ids, bool search_entity_names, bool search_property_names,
-               bool search_property_values, uint32_t results_count, uint32_t max_results) {
-    yyjson_val* temp_root = yyjson_doc_get_root(temp_yyjson_doc);
-    yyjson_val* tblu_root = yyjson_doc_get_root(tblu_yyjson_doc);
+        std::string key_string(yyjson_get_str(key));
 
-    yyjson_val* temp_subEntities = yyjson_obj_get(temp_root, "subEntities");
-    yyjson_val* tblu_subEntities = yyjson_obj_get(tblu_root, "subEntities");
+        if (key_string == "entities") {
+            yyjson_val* key2, * val2;
+            yyjson_obj_iter iter2;
 
-    if (yyjson_arr_size(temp_subEntities) != yyjson_arr_size(tblu_subEntities)) {
-        return results_count;
-    }
+            yyjson_obj_iter_init(entities, &iter2);
 
-    size_t tblu_subEntities_index;
-    size_t tblu_subEntities_max;
-    yyjson_val* tblu_subEntities_entry;
+            std::string entities_size = std::to_string(yyjson_obj_size(entities));
+            int entities_index = 0;
 
-    yyjson_arr_foreach(tblu_subEntities, tblu_subEntities_index, tblu_subEntities_max, tblu_subEntities_entry) {
-        if (results_count < max_results) {
-            yyjson_val* tblu_entityId = yyjson_obj_get(tblu_subEntities_entry, "entityId");
-            yyjson_val* tblu_entityName = yyjson_obj_get(tblu_subEntities_entry, "entityName");
+            timing_string = "Searching " + entities_size + " entities in " + util::hash_to_ioi_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value, true) + "...";
 
-            std::string entityIdString = util::uint64_t_to_hex_string_for_qn(yyjson_get_uint(tblu_entityId));
-            std::string entityNameString = util::to_lower_case(yyjson_get_str(tblu_entityName));
+            while ((key2 = yyjson_obj_iter_next(&iter2))) {
+                const char* key_string2 = yyjson_get_str(key2);
 
-            if (entityIdString.find(search_string) != std::string::npos ||
-                entityNameString.find(search_string) != std::string::npos) {
-                entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path + "||||" +
-                                           util::uint64_t_to_hex_string(
-                                                   rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value) +
-                                           "." + rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type +
-                                           " " + util::hash_to_ioi_string(
-                        rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value, false) + "||||" +
-                                           entityIdString + ": " + std::string(yyjson_get_str(tblu_entityName)) +
-                                           "||||||";
+                entities_index++;
 
-                results_count++;
+                if (results_count < max_results) {
+                    val2 = yyjson_obj_iter_get_val(key2);
+
+                    bool found = false;
+
+                    //if (key_string2.find(search_string) != std::string::npos)
+                    if (find_ci(key_string2, search_string.c_str()))
+                        found = true;
+
+                    //if (!found)
+                    //    if (search_json(val2, search_string))
+                    //        found = true;
+
+                    if (!found) {
+                        char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_NOFLAG, NULL);
+                        //if (util::to_lower_case(temp_json).find(search_string) != std::string::npos)
+                        if (find_ci(temp_json, search_string.c_str()))
+                            found = true;
+                        free(temp_json);
+                    }
+
+                    if (found) {
+                        yyjson_val* name2 = yyjson_obj_get(val2, "name");
+
+                        char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_PRETTY, NULL);
+
+                        entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path +
+                            "||||" +
+                            util::uint64_t_to_hex_string(
+                                rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value) +
+                            "." +
+                            rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type +
+                            " " +
+                            util::hash_to_ioi_string(
+                                rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value, false) +
+                            "||||" +
+                            key_string2 +
+                            ": " +
+                            std::string(yyjson_get_str(name2)) +
+                            "||||" +
+                            std::string(temp_json) +
+                            "||||" +
+                            key_string +
+                            "||||||";
+
+                        free(temp_json);
+
+                        results_count++;
+                    }
+                }
+            }
+        }
+        else if (yyjson_is_arr(val)) {
+            yyjson_val* val2;
+            yyjson_arr_iter iter2;
+            int arr_index = 0;
+
+            yyjson_arr_iter_init(val, &iter2);
+
+            while ((val2 = yyjson_arr_iter_next(&iter2))) {
+                if (results_count < max_results) {
+                    bool found = false;
+
+                    //if (search_json(val2, search_string))
+                    //    found = true;
+
+                    if (!found) {
+                        char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_NOFLAG, NULL);
+                        //if (util::to_lower_case(temp_json).find(search_string) != std::string::npos)
+                        if (find_ci(temp_json, search_string.c_str()))
+                            found = true;
+                        free(temp_json);
+                    }
+
+                    if (found) {
+                        char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_PRETTY, NULL);
+
+                        entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path +
+                            "||||" +
+                            util::uint64_t_to_hex_string(
+                                rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value) +
+                            "." +
+                            rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type +
+                            " " +
+                            util::hash_to_ioi_string(
+                                rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value, false) +
+                            "||||" +
+                            key_string +
+                            ": " +
+                            std::to_string(arr_index) +
+                            "||||" +
+                            std::string(temp_json) +
+                            "||||" +
+                            key_string +
+                            "||||||";
+
+                        free(temp_json);
+
+                        results_count++;
+                    }
+                }
+
+                arr_index++;
+            }
+        }
+        else if (yyjson_is_obj(val)) {
+            yyjson_val* key2, * val2;
+            yyjson_obj_iter iter2;
+
+            yyjson_obj_iter_init(val, &iter);
+
+            while ((key2 = yyjson_obj_iter_next(&iter2))) {
+                if (results_count < max_results) {
+                    val2 = yyjson_obj_iter_get_val(key2);
+
+                    const char* key_string2 = yyjson_get_str(key2);
+
+                    bool found = false;
+
+                    //if (key_string.find(search_string) != std::string::npos)
+                    if (find_ci(key_string2, search_string.c_str()))
+                        found = true;
+
+                    //if (search_json(val2, search_string))
+                    //    found = true;
+
+                    if (!found) {
+                        char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_NOFLAG, NULL);
+                        //if (util::to_lower_case(temp_json).find(search_string) != std::string::npos)
+                        if (find_ci(temp_json, search_string.c_str()))
+                            found = true;
+                        free(temp_json);
+                    }
+
+                    if (found) {
+                        char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_PRETTY, NULL);
+
+                        entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path +
+                            "||||" +
+                            util::uint64_t_to_hex_string(
+                                rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value) +
+                            "." +
+                            rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type +
+                            " " +
+                            util::hash_to_ioi_string(
+                                rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value, false) +
+                            "||||" +
+                            key_string +
+                            ": " +
+                            key_string2 +
+                            "||||" +
+                            std::string(temp_json) +
+                            "||||" +
+                            key_string +
+                            "||||||";
+
+                        free(temp_json);
+
+                        results_count++;
+                    }
+                }
+            }
+        }
+        else if (yyjson_is_num(val)) {
+            if (results_count < max_results) {
+                std::string val_string = "";
+
+                if (yyjson_is_uint(val))
+                    val_string = std::to_string(yyjson_get_uint(val));
+                if (yyjson_is_sint(val))
+                    val_string = std::to_string(yyjson_get_sint(val));
+                if (yyjson_is_int(val))
+                    val_string = std::to_string(yyjson_get_int(val));
+                if (yyjson_is_real(val))
+                    val_string = std::to_string(yyjson_get_real(val));
+
+                bool found = false;
+
+                if (val_string.find(search_string) != std::string::npos)
+                    found = true;
+
+                if (found) {
+                    char* temp_json = yyjson_val_write(val, YYJSON_WRITE_PRETTY, NULL);
+
+                    entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path +
+                        "||||" +
+                        util::uint64_t_to_hex_string(
+                            rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value) +
+                        "." +
+                        rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type +
+                        " " +
+                        util::hash_to_ioi_string(
+                            rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value, false) +
+                        "||||" +
+                        key_string +
+                        ": " + 
+                        val_string +
+                        "||||" +
+                        std::string(temp_json) +
+                        "||||" +
+                        key_string +
+                        "||||||";
+
+                    free(temp_json);
+
+                    results_count++;
+                }
+            }
+        }
+        else if (yyjson_is_str(val)) {
+            if (results_count < max_results) {
+                const char* val_string = yyjson_get_str(val);
+
+                bool found = false;
+
+                //if (val_string.find(search_string) != std::string::npos)
+                if (find_ci(val_string, search_string.c_str()))
+                    found = true;
+
+                if (found) {
+                    char* temp_json = yyjson_val_write(val, YYJSON_WRITE_PRETTY, NULL);
+
+                    entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path +
+                        "||||" +
+                        util::uint64_t_to_hex_string(
+                            rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value) +
+                        "." +
+                        rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type +
+                        " " +
+                        util::hash_to_ioi_string(
+                            rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value, false) +
+                        "||||" +
+                        key_string +
+                        ": " +
+                        val_string +
+                        "||||" +
+                        std::string(temp_json) +
+                        "||||" +
+                        key_string +
+                        "||||||";
+
+                    free(temp_json);
+
+                    results_count++;
+                }
             }
         }
     }
 
     return results_count;
+}
+
+bool entity::search_json(yyjson_val* json, std::string& search_string)
+{
+    if (yyjson_is_null(json))
+        return false;
+
+    if (yyjson_is_arr(json)) {
+        yyjson_val* val;
+        yyjson_arr_iter iter;
+        yyjson_arr_iter_init(json, &iter);
+
+        while ((val = yyjson_arr_iter_next(&iter))) {
+            if (search_json(val, search_string))
+                return true;
+        }
+    }
+    else if (yyjson_is_obj(json)) {
+        yyjson_val* key, * val;
+        yyjson_obj_iter iter;
+        yyjson_obj_iter_init(json, &iter);
+
+        while ((key = yyjson_obj_iter_next(&iter))) {
+            val = yyjson_obj_iter_get_val(key);
+
+            std::string key_string = util::to_lower_case(yyjson_get_str(key));
+
+            if (key_string.find(search_string) != std::string::npos)
+                return true;
+
+            if (search_json(val, search_string))
+                return true;
+        }
+    }
+    else if (yyjson_is_num(json)) {
+        std::string val_string = "";
+
+        if (yyjson_is_uint(json))
+            val_string = std::to_string(yyjson_get_uint(json));
+        if (yyjson_is_sint(json))
+            val_string = std::to_string(yyjson_get_sint(json));
+        if (yyjson_is_int(json))
+            val_string = std::to_string(yyjson_get_int(json));
+        if (yyjson_is_real(json))
+            val_string = std::to_string(yyjson_get_real(json));        
+
+        if (val_string.find(search_string) != std::string::npos)
+            return true;
+    }
+    else if (yyjson_is_str(json)) {
+        std::string val_string = util::to_lower_case(yyjson_get_str(json));
+
+        if (val_string.find(search_string) != std::string::npos)
+            return true;
+    }
+
+    return false;
+}
+
+void entity::free_yyjson_doc() {
+    yyjson_doc_free(entity_yyjson_doc);
+}
+
+bool entity::find_ci(const char* s1, const char* s2) {
+    // s1 is haystack, s2 is needle
+    // s2 should already be all lower case
+    size_t pos = 0;
+    bool found = false;
+
+    while (!found) {
+        if (s1[pos] == '\0')
+            return false;
+
+        size_t pos1 = pos;
+        size_t pos2 = 0;
+        found = true;
+
+        while (s2[pos2] != '\0') {
+            if (s1[pos1] == '\0')
+                return false;
+
+            if (std::tolower(s1[pos1]) != s2[pos2]) {
+                found = false;
+                break;
+            }
+
+            pos1++;
+            pos2++;
+        }
+
+        pos++;
+    }
+
+    return true;
 }

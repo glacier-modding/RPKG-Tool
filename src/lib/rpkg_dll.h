@@ -175,8 +175,10 @@ RPKG_EXPORT uint32_t get_localization_search_results_size();
 RPKG_EXPORT char* get_localization_search_results();
 
 RPKG_EXPORT int
-deep_search_entities(char* input_path, char* search_value, bool search_entity_ids, bool search_entity_names,
-                     bool search_property_names, bool search_property_values, int max_results);
+deep_search_entities(char* input_path,
+                     char* search_value,
+                     int max_results,
+                     bool store_jsons);
 
 RPKG_EXPORT uint32_t get_entities_search_results_size();
 
