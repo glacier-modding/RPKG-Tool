@@ -19,6 +19,7 @@
 #include <string_view>
 #include <set>
 #include <filesystem>
+#include <regex>
 
 using json = nlohmann::ordered_json;
 
@@ -2190,7 +2191,8 @@ char* get_localization_search_results() {
 }
 
 int deep_search_entities(char* input_path,
-                         char* search_value,
+                         char** search_strings,
+                         int search_strings_count,
                          int max_results,
                          bool store_jsons) {
     gui_control = READY;
@@ -2200,13 +2202,14 @@ int deep_search_entities(char* input_path,
     std::string input_path_string = std::string(input_path);
     std::string filter = "";
     std::string output_path = "";
-    std::string search = std::string(search_value);
+    //std::string search = std::string(search_value);
     std::string search_type = "";
 
     entities_search_results = "";
 
     rpkg_function::search_entities(input_path_string,
-                                   search,
+                                   search_strings,
+                                   search_strings_count,
                                    max_results,
                                    store_jsons);
 
@@ -2424,6 +2427,17 @@ int update_json_at_pointer(const char* id, const char* json_pointer, const char*
     }
 
     return 0;
+}
+
+int is_valid_regex(const char* regex_string) {
+    try {
+        std::regex r(regex_string);
+    }
+    catch (std::regex_error &e) {
+        return 0;
+    }
+
+    return 1;
 }
 
 #pragma clang diagnostic pop

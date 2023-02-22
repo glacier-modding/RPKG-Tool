@@ -25,6 +25,9 @@ public:
                                                    const std::string& string_after);
 
     static void split_string(const std::string& temp_string, const std::string& split_string,
+                            std::vector<std::string>& split_strings);
+
+    static void split_string(const std::string& temp_string, const std::string& split_string,
                              std::vector<uint64_t>& split_positions);
 
     static void split_string_view(const std::string_view& temp_string_view, const std::string& split_string,

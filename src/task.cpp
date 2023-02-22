@@ -167,7 +167,11 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     } else if (command == "-mati_to_json") {
         rpkg_function::mati_to_json(input_path, filter, output_path);
     } else if (command == "-search_entities") {
-        rpkg_function::search_entities(input_path, search, true, 1000);
+        /*char* search_strings[3];
+        search_strings[0] = "n";
+        search_strings[1] = "\"m_nOutfitVariation\":\\{\"type\":\"int32\",\"value\":[0-9]+\\}";
+        search_strings[2] = "r";
+        rpkg_function::search_entities(input_path, search_strings, 3, 1000, true);*/
     } else if (command == "-search_localization") {
         rpkg_function::search_localization(input_path, search, output_path, true, true, true, 1000);
     } else if (command == "-get_line_string") {

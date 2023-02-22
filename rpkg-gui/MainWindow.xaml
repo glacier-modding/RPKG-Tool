@@ -457,29 +457,27 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <StackPanel Orientation="Horizontal">
-                                <Label Grid.Row="0" Grid.Column="0" Content="Search value:" VerticalContentAlignment="Center" FontSize="14"/>
-                            </StackPanel>
-                            <TextBox Grid.Row="0" Grid.Column="1" x:Name="DeepSearchEntitiesTextBox" FontFamily="Consolas" TextWrapping="NoWrap"/>
-                            <Label Grid.Row="0" Grid.Column="2" Content="Max results:" FontSize="14"/>
-                            <ComboBox Grid.Row="0" Grid.Column="3" x:Name="DeepSearchEntitiesComboBox" FontFamily="Consolas">
-								<ComboBoxItem Content="100" IsSelected="True"/>
-								<ComboBoxItem Content="200"/>
-								<ComboBoxItem Content="500"/>
-								<ComboBoxItem Content="1000"/>
-								<ComboBoxItem Content="2000"/>
-								<ComboBoxItem Content="5000"/>
-								<ComboBoxItem Content="10000"/>
-								<ComboBoxItem Content="20000"/>
-								<ComboBoxItem Content="50000"/>
-								<ComboBoxItem Content="100000"/>
-                            </ComboBox>
-                            <Grid Grid.Row="1" Grid.ColumnSpan="4">
+							<Grid Grid.Row="0" Name="DeepSearchEntityGrid">
+								<Grid.RowDefinitions>
+									<RowDefinition Height="Auto"/>
+								</Grid.RowDefinitions>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="Auto"/>
+									<ColumnDefinition Width="Auto"/>
+									<ColumnDefinition Width="*"/>
+									<ColumnDefinition Width="Auto"/>
+									<ColumnDefinition Width="Auto"/>
+								</Grid.ColumnDefinitions>
+								<Label Grid.Row="0" Grid.Column="0" Content="Search value:" VerticalContentAlignment="Center" FontSize="14"/>
+								<TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" x:Name="DeepSearchEntitiesTextBox" FontFamily="Consolas" TextWrapping="NoWrap"/>
+								<Border Grid.Row="0" Grid.Column="3" BorderBrush="White" BorderThickness="0,1,1,1">
+									<CheckBox Name="DeepSearchEntitiesValueCheckBox" Content=".*" FontFamily="Consolas" FontSize="14" HorizontalAlignment="Left" IsChecked="False" Margin="5"/>
+								</Border>
+								<Button Grid.Row="0" Grid.Column="4" Name="DeepSearchEntitiesValueAddButton" Content="    Add    " Click="DeepSearchEntitiesValueAddButton_Click"/>
+							</Grid>
+                            <Grid Grid.Row="1">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
@@ -491,11 +489,25 @@
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
+									<ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <Label Grid.Row="0" Grid.Column="0" Content="Search in RPKG(s):" VerticalContentAlignment="Center" FontSize="14"/>
-                                <ComboBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" x:Name="DeepSearchEntitiesRPKGsComboBox" FontFamily="Consolas" Margin="15" VerticalAlignment="Center"/>
+                                <ComboBox Grid.Row="0" Grid.Column="1" x:Name="DeepSearchEntitiesRPKGsComboBox" FontFamily="Consolas" Margin="5" VerticalAlignment="Center"/>
+								<Label Grid.Row="0" Grid.Column="2" Content="Max results:" VerticalContentAlignment="Center" FontSize="14"/>
+								<ComboBox Grid.Row="0" Grid.Column="3" x:Name="DeepSearchEntitiesComboBox" FontFamily="Consolas" VerticalAlignment="Center">
+									<ComboBoxItem Content="100" IsSelected="True"/>
+									<ComboBoxItem Content="200"/>
+									<ComboBoxItem Content="500"/>
+									<ComboBoxItem Content="1000"/>
+									<ComboBoxItem Content="2000"/>
+									<ComboBoxItem Content="5000"/>
+									<ComboBoxItem Content="10000"/>
+									<ComboBoxItem Content="20000"/>
+									<ComboBoxItem Content="50000"/>
+									<ComboBoxItem Content="100000"/>
+								</ComboBox>
 								<Label Grid.Row="1" Grid.Column="0" Content="Options:" FontSize="14" VerticalAlignment="Center"/>
-								<Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Center">
+								<Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" VerticalAlignment="Center">
 									<Grid.RowDefinitions>
 										<RowDefinition Height="Auto"/>
 									</Grid.RowDefinitions>
@@ -508,12 +520,12 @@
 								</Grid>
 								<Label Grid.Row="2" Grid.Column="0" Content="Search progress:" VerticalContentAlignment="Center" FontSize="14"/>
                                 <ProgressBar Grid.Row="2" Grid.Column="1" Value="0" Name="DeepSearchEntitiesProgressBar" Margin="10"/>
-                                <Button Grid.Row="2" Grid.Column="2" Name="DeepSearchEntitiesButton" Content="Start Search" Margin="5" Click="DeepSearchEntitiesButton_Click"/>
+                                <Button Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Name="DeepSearchEntitiesButton" Content="Start Search" Margin="5" Click="DeepSearchEntitiesButton_Click"/>
 								<Label Grid.Row="3" Grid.Column="0" Content="Search status:" VerticalContentAlignment="Center" FontSize="14"/>
-								<Label Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Name="DeepSearchEntitiesProgressTextLabel" VerticalContentAlignment="Center" FontSize="14" Height="64" Margin="10" HorizontalAlignment="Left">
+								<Label Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Name="DeepSearchEntitiesProgressTextLabel" VerticalContentAlignment="Center" FontSize="14" Height="64" Margin="10" HorizontalAlignment="Left">
 									<TextBlock Name="DeepSearchEntitiesProgressText" TextWrapping="WrapWithOverflow" MaxHeight="64"/>
 								</Label>
-								<Grid Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" VerticalAlignment="Center">
+								<Grid Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="4" VerticalAlignment="Center">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>

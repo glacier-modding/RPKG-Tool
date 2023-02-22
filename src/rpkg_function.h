@@ -60,7 +60,8 @@ public:
                                     bool search_dlge, bool search_locr, bool search_rtlv, int max_results);
 
     static void search_entities(std::string& input_path,
-                                std::string& search,
+                                char** search_strings,
+                                int search_strings_count,
                                 int max_results,
                                 bool store_jsons);
 

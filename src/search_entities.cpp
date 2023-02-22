@@ -8,7 +8,8 @@
 #include <sstream>
 
 void rpkg_function::search_entities(std::string& input_path,
-                                    std::string& search,
+                                    char** search_strings,
+                                    int search_strings_count,
                                     int max_results,
                                     bool store_jsons) {
     task_single_status = TASK_EXECUTING;
@@ -16,7 +17,8 @@ void rpkg_function::search_entities(std::string& input_path,
 
     percent_progress = (uint32_t) 0;
     log_output = false;
-
+    //rpkg_function::import_rpkg_files_in_folder("H:\\HITMAN3\\Runtime");
+    //input_path = "";
     entities_search_results = "";
 
     uint32_t results_count = 0;
@@ -51,7 +53,30 @@ void rpkg_function::search_entities(std::string& input_path,
         std::unordered_map<uint64_t, entity>().swap(deep_search_entities_map);
     }
 
-    const std::string search_lower_case = util::to_lower_case(search);
+    std::vector<search_item> search_items;
+
+    for (int i = 0; i < search_strings_count / 3; i++)
+    {
+        search_items.emplace_back();
+
+        int index = i * 3;
+
+        if (search_strings[index][0] == 'n')
+            search_items.back().operation = NONE;
+        else if (search_strings[index][0] == 'a')
+            search_items.back().operation = AND;
+        else if (search_strings[index][0] == 'o')
+            search_items.back().operation = OR;
+
+        if (search_strings[index + 2][0] == 'd') {
+            search_items.back().type = DEFAULT;
+            search_items.back().search = util::to_lower_case(search_strings[index + 1]);
+        }
+        else if (search_strings[index + 2][0] == 'r') {
+            search_items.back().type = REGEX;
+            search_items.back().search = search_strings[index + 1];
+        }
+    }
 
     std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
     int stringstream_length = 80;
@@ -111,7 +136,7 @@ void rpkg_function::search_entities(std::string& input_path,
                                 deep_search_entities_map.emplace(tempHashValue, entity(rpkgIndex, it61->second, 3, empty));
                             }
 
-                            results_count = deep_search_entities_map[tempHashValue].search(search_lower_case,
+                            results_count = deep_search_entities_map[tempHashValue].search(search_items,
                                                                                            results_count,
                                                                                            max_results);
                         }
@@ -119,7 +144,7 @@ void rpkg_function::search_entities(std::string& input_path,
                             std::string empty = "";
                             entity temp_entity(rpkgIndex, it61->second, 3, empty);
 
-                            results_count = temp_entity.search(search_lower_case,
+                            results_count = temp_entity.search(search_items,
                                                                results_count,
                                                                max_results);
                             temp_entity.free_yyjson_doc();

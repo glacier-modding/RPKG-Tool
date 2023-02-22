@@ -174,6 +174,31 @@ void util::split_string(const std::string& temp_string, const std::string& split
     }
 }
 
+void util::split_string(const std::string& temp_string, const std::string& split_string,
+                        std::vector<std::string>& split_strings) {
+    bool done = false;
+
+    uint64_t position = 0;
+    uint64_t last_position = 0;
+
+    while (!done) {
+        size_t pos1 = temp_string.substr(position).find(split_string);
+
+        if (pos1 != std::string::npos) {
+            split_strings.emplace_back(temp_string.substr(position, pos1));
+            pos1 += split_string.length() - 1;
+            last_position = position + pos1 + 1;
+        }
+        else {
+            done = true;
+        }
+
+        position += pos1 + 1;
+    }
+
+    split_strings.emplace_back(temp_string.substr(last_position, temp_string.length()));
+}
+
 std::string util::string_to_hex_string(const std::string input_string) {
     std::string output_string;
 

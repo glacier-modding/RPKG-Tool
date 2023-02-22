@@ -4631,6 +4631,7 @@ namespace rpkg
 		JsonDocument visualEditorJSON;
 		bool loadingVisualEditor = false;
 		string timing_string = "";
+		public int deepSearchEntitiesValueInputCount = 0;
 
 		private enum OggPlayerState
 		{
@@ -4740,7 +4741,7 @@ namespace rpkg
 		public delegate int execute_get_direct_hash_depends(string rpkg_file, string hash_string);
 		public delegate int execute_task(string csharp_command, string csharp_input_path, string csharp_filter, string search, string search_type, string csharp_output_path);
 		public delegate int execute_deep_search_localization(string input_path, string search_value, int search_dlge, int search_locr, int search_rtlv, int max_results);
-		public delegate int execute_deep_search_entities(string input_path, string search_value, int max_results, int store_jsons);
+		public delegate int execute_deep_search_entities(string input_path, string[] search_strings, int search_strings_count, int max_results, int store_jsons);
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "task_execute", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int task_execute(string csharp_command, string csharp_input_path, string csharp_filter,
@@ -4927,7 +4928,8 @@ namespace rpkg
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "deep_search_entities", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int deep_search_entities(string input_path,
-													  string search_value,
+													  string[] search_strings,
+                                                      int search_strings_count,
                                                       int max_results,
 													  int store_jsons);
 
@@ -5000,7 +5002,10 @@ namespace rpkg
 
         [DllImport("rpkg-lib.dll", EntryPoint = "get_timing_string", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr get_timing_string();
-        
+
+        [DllImport("rpkg-lib.dll", EntryPoint = "is_valid_regex", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int is_valid_regex(string regex_string);
+
         private void LoadResources()
 		{
 			MemoryStream memoryStream1 = new MemoryStream(Properties.Resources.i1, 0, Properties.Resources.i1.Length, true, true);
@@ -7840,6 +7845,82 @@ namespace rpkg
             }
         }
 
+		private void DeepSearchEntitiesTextBoxButton_Click(object sender, RoutedEventArgs e)
+		{
+            DeepSearchEntityGrid.Children.Remove(FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBoxComboBox" + deepSearchEntitiesValueInputCount.ToString()) as ComboBox);
+            DeepSearchEntityGrid.Children.Remove(FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBox" + deepSearchEntitiesValueInputCount.ToString()) as TextBox);
+            DeepSearchEntityGrid.Children.Remove(FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBoxCheckBox" + deepSearchEntitiesValueInputCount.ToString()) as CheckBox);
+            DeepSearchEntityGrid.Children.Remove(FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBoxBorder" + deepSearchEntitiesValueInputCount.ToString()) as Border);            
+            DeepSearchEntityGrid.Children.Remove(FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBoxButton" + deepSearchEntitiesValueInputCount.ToString()) as Button);
+
+            deepSearchEntitiesValueInputCount--;
+
+            DeepSearchEntityGrid.RowDefinitions.RemoveAt(deepSearchEntitiesValueInputCount);
+
+			if (deepSearchEntitiesValueInputCount > 0)
+			{
+                Button valueInputButton = new Button();
+                valueInputButton.Name = "DeepSearchEntitiesTextBoxButton" + deepSearchEntitiesValueInputCount.ToString();
+                valueInputButton.Content = "Remove";
+                valueInputButton.Click += DeepSearchEntitiesTextBoxButton_Click;
+                DeepSearchEntityGrid.Children.Add(valueInputButton);
+                Grid.SetRow(valueInputButton, deepSearchEntitiesValueInputCount);
+                Grid.SetColumn(valueInputButton, 4);
+            }
+        }
+
+        private void DeepSearchEntitiesValueAddButton_Click(object sender, RoutedEventArgs e)
+		{
+            deepSearchEntitiesValueInputCount++;
+
+            RowDefinition rowDefinition = new RowDefinition();
+            rowDefinition.Height = new GridLength(1, GridUnitType.Auto);
+            DeepSearchEntityGrid.RowDefinitions.Add(rowDefinition);
+
+            ComboBox valueInputComboBox = new ComboBox();
+            valueInputComboBox.Name = "DeepSearchEntitiesTextBoxComboBox" + deepSearchEntitiesValueInputCount.ToString();
+			valueInputComboBox.Items.Add("AND");
+            valueInputComboBox.Items.Add("OR");
+			valueInputComboBox.SelectedItem = "AND";
+            DeepSearchEntityGrid.Children.Add(valueInputComboBox);
+            Grid.SetRow(valueInputComboBox, deepSearchEntitiesValueInputCount);
+            Grid.SetColumn(valueInputComboBox, 1);
+
+            TextBox valueInput = new TextBox();
+			valueInput.Name = "DeepSearchEntitiesTextBox" + deepSearchEntitiesValueInputCount.ToString();
+			valueInput.FontFamily = new FontFamily("Consolas");
+            DeepSearchEntityGrid.Children.Add(valueInput);
+            Grid.SetRow(valueInput, deepSearchEntitiesValueInputCount);
+            Grid.SetColumn(valueInput, 2);
+
+            Border valueInputBorder = new Border();
+            valueInputBorder.Name = "DeepSearchEntitiesTextBoxBorder" + deepSearchEntitiesValueInputCount.ToString();
+			valueInputBorder.BorderBrush = Brushes.White;
+			valueInputBorder.BorderThickness = new Thickness(0, 1, 1, 1);
+            DeepSearchEntityGrid.Children.Add(valueInputBorder);
+            Grid.SetRow(valueInputBorder, deepSearchEntitiesValueInputCount);
+            Grid.SetColumn(valueInputBorder, 3);
+            CheckBox valueInputCheckBox = new CheckBox();
+            valueInputCheckBox.Name = "DeepSearchEntitiesTextBoxCheckBox" + deepSearchEntitiesValueInputCount.ToString();
+			valueInputCheckBox.Content = ".*";
+			valueInputCheckBox.FontFamily = new FontFamily("Consolas");
+			valueInputCheckBox.HorizontalAlignment = HorizontalAlignment.Left;
+			valueInputCheckBox.IsChecked = false;
+			valueInputCheckBox.Margin = new Thickness(5, 0, 5, 0);
+            valueInputBorder.Child = valueInputCheckBox;
+
+            if (deepSearchEntitiesValueInputCount > 1)
+				DeepSearchEntityGrid.Children.Remove(FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBoxButton" + (deepSearchEntitiesValueInputCount - 1).ToString()) as Button);
+
+            Button valueInputButton = new Button();
+            valueInputButton.Name = "DeepSearchEntitiesTextBoxButton" + deepSearchEntitiesValueInputCount.ToString();
+			valueInputButton.Content = "Remove";
+            valueInputButton.Click += DeepSearchEntitiesTextBoxButton_Click;
+            DeepSearchEntityGrid.Children.Add(valueInputButton);
+            Grid.SetRow(valueInputButton, deepSearchEntitiesValueInputCount);
+            Grid.SetColumn(valueInputButton, 4);
+        }
+
         private void DeepSearchEntitiesButton_Click(object sender, RoutedEventArgs e)
 		{
 			/*if (MainTreeView.Nodes.Count > 0)
@@ -7925,8 +8006,76 @@ namespace rpkg
 						maxSearchResults = 100;
 					}
 
+					List<string> searchStringsList = new List<string>();
+
+                    searchStringsList.Add("n"); //none
+                    searchStringsList.Add(DeepSearchEntitiesTextBox.Text);
+
+					if (DeepSearchEntitiesValueCheckBox.IsChecked ?? false)
+					{
+						searchStringsList.Add("r"); //regex
+
+						//MessageBoxShow(DeepSearchEntitiesTextBox.Text);
+
+						int response = is_valid_regex(DeepSearchEntitiesTextBox.Text);
+
+                        //MessageBoxShow(response.ToString());
+
+                        if (is_valid_regex(DeepSearchEntitiesTextBox.Text) == 0)
+                        {
+                            MessageBoxShow("Error: The input regex string is not valid:\n\n" + DeepSearchEntitiesTextBox.Text);
+                            return;
+                        }
+                    }
+					else
+						searchStringsList.Add("d"); //default
+
+                    if (deepSearchEntitiesValueInputCount > 0)
+					{
+						for (int i = 0; i < deepSearchEntitiesValueInputCount; i++)
+						{
+                            ComboBox valueComboBox = FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBoxComboBox" + (i + 1).ToString()) as ComboBox;
+                            TextBox valueTextBox = FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBox" + (i + 1).ToString()) as TextBox;
+                            CheckBox valueCheckBox = FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBoxCheckBox" + (i + 1).ToString()) as CheckBox;
+
+							if (valueComboBox != null && valueTextBox != null && valueCheckBox != null)
+							{
+								if (valueTextBox.Text.Length > 0)
+								{
+									if (valueComboBox.SelectedItem.ToString() == "AND")
+										searchStringsList.Add("a"); //and
+									else
+										searchStringsList.Add("o"); //or
+
+									searchStringsList.Add(valueTextBox.Text);
+
+									if (valueCheckBox.IsChecked ?? false)
+                                    {
+                                        searchStringsList.Add("r"); //regex
+
+                                        if (is_valid_regex(valueTextBox.Text) == 0)
+                                        {
+                                            MessageBoxShow("Error: The input regex string is not valid:\n\n" + valueTextBox.Text);
+                                            return;
+                                        }
+                                    }
+									else
+										searchStringsList.Add("d"); //default
+								}
+							}
+                        }
+					}
+
+					//foreach (string s in searchStringsList)
+					//{
+						//MessageBoxShow(s);
+					//}
+
+					string[] searchStrings = searchStringsList.ToArray();
+
                     IAsyncResult ar = rpkgExecute.BeginInvoke(input_path,
-															  DeepSearchEntitiesTextBox.Text,
+                                                              searchStrings,
+															  searchStringsList.Count,
                                                               maxSearchResults,
 															  store_jsons,
 															  null,
@@ -7941,6 +8090,10 @@ namespace rpkg
 					deepSearchEntitiesWorker.RunWorkerAsync();
 
 					DeepSearchEntitiesButton.Content = "Stop Search";
+				}
+				else
+				{
+					MessageBoxShow("Must enter a search value before starting search.");
 				}
 			}
 		}

@@ -176,7 +176,8 @@ RPKG_EXPORT char* get_localization_search_results();
 
 RPKG_EXPORT int
 deep_search_entities(char* input_path,
-                     char* search_value,
+                     char** search_strings,
+                     int search_strings_count,
                      int max_results,
                      bool store_jsons);
 
@@ -225,3 +226,5 @@ RPKG_EXPORT int erase_repo_entry(const char* id);
 RPKG_EXPORT int get_repo_entry(const char* id);
 
 RPKG_EXPORT int update_json_at_pointer(const char* id, const char* json_pointer, const char* value);
+
+RPKG_EXPORT int is_valid_regex(const char* regex_string);

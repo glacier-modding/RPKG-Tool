@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <fstream>
 #include <iomanip>
+#include <regex>
 
 #pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM2.lib")
 #pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM3.lib")
@@ -225,9 +226,10 @@ entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version,
     }
 }
 
-uint32_t entity::search(std::string search_string,
+uint32_t entity::search(std::vector<search_item>& search_items_input,
                         uint32_t results_count,
                         uint32_t max_results) {
+    search_items = search_items_input;
 
     yyjson_val* root = yyjson_doc_get_root(entity_yyjson_doc);
     yyjson_val* entities = yyjson_obj_get(root, "entities");
@@ -263,21 +265,11 @@ uint32_t entity::search(std::string search_string,
 
                     bool found = false;
 
-                    //if (key_string2.find(search_string) != std::string::npos)
-                    if (find_ci(key_string2, search_string.c_str()))
-                        found = true;
+                    search_value(found, key_string2);
 
-                    //if (!found)
-                    //    if (search_json(val2, search_string))
-                    //        found = true;
-
-                    if (!found) {
-                        char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_NOFLAG, NULL);
-                        //if (util::to_lower_case(temp_json).find(search_string) != std::string::npos)
-                        if (find_ci(temp_json, search_string.c_str()))
-                            found = true;
-                        free(temp_json);
-                    }
+                    char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_NOFLAG, NULL);
+                    search_value(found, temp_json);
+                    free(temp_json);
 
                     if (found) {
                         yyjson_val* name2 = yyjson_obj_get(val2, "name");
@@ -324,13 +316,9 @@ uint32_t entity::search(std::string search_string,
                     //if (search_json(val2, search_string))
                     //    found = true;
 
-                    if (!found) {
-                        char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_NOFLAG, NULL);
-                        //if (util::to_lower_case(temp_json).find(search_string) != std::string::npos)
-                        if (find_ci(temp_json, search_string.c_str()))
-                            found = true;
-                        free(temp_json);
-                    }
+                    char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_NOFLAG, NULL);
+                    search_value(found, temp_json);
+                    free(temp_json);
 
                     if (found) {
                         char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_PRETTY, NULL);
@@ -377,20 +365,11 @@ uint32_t entity::search(std::string search_string,
 
                     bool found = false;
 
-                    //if (key_string.find(search_string) != std::string::npos)
-                    if (find_ci(key_string2, search_string.c_str()))
-                        found = true;
+                    search_value(found, key_string2);
 
-                    //if (search_json(val2, search_string))
-                    //    found = true;
-
-                    if (!found) {
-                        char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_NOFLAG, NULL);
-                        //if (util::to_lower_case(temp_json).find(search_string) != std::string::npos)
-                        if (find_ci(temp_json, search_string.c_str()))
-                            found = true;
-                        free(temp_json);
-                    }
+                    char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_NOFLAG, NULL);
+                    search_value(found, temp_json);
+                    free(temp_json);
 
                     if (found) {
                         char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_PRETTY, NULL);
@@ -436,8 +415,7 @@ uint32_t entity::search(std::string search_string,
 
                 bool found = false;
 
-                if (val_string.find(search_string) != std::string::npos)
-                    found = true;
+                search_value(found, val_string.c_str());
 
                 if (found) {
                     char* temp_json = yyjson_val_write(val, YYJSON_WRITE_PRETTY, NULL);
@@ -473,9 +451,7 @@ uint32_t entity::search(std::string search_string,
 
                 bool found = false;
 
-                //if (val_string.find(search_string) != std::string::npos)
-                if (find_ci(val_string, search_string.c_str()))
-                    found = true;
+                search_value(found, val_string);
 
                 if (found) {
                     char* temp_json = yyjson_val_write(val, YYJSON_WRITE_PRETTY, NULL);
@@ -506,6 +482,8 @@ uint32_t entity::search(std::string search_string,
             }
         }
     }
+
+    std::vector<search_item>().swap(search_items);
 
     return results_count;
 }
@@ -602,4 +580,26 @@ bool entity::find_ci(const char* s1, const char* s2) {
     }
 
     return true;
+}
+
+void entity::search_value(bool& found, const char* value) {
+    for (auto item : search_items) {
+        bool temp_found = false;
+
+        if (item.type == DEFAULT) {
+            if (find_ci(value, item.search.c_str()))
+                temp_found = true;
+        }
+        else if (item.type == REGEX) {
+            if (std::regex_search(value, std::regex(item.search.c_str(), std::regex_constants::icase)))
+                temp_found = true;
+        }
+
+        if (item.operation == NONE)
+            found = temp_found;
+        else if (item.operation == AND)
+            found = found && temp_found;
+        else if (item.operation == OR)
+            found = found || temp_found;
+    }
 }
