@@ -18,12 +18,12 @@
 #pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM2.lib")
 #pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM3.lib")
 
-const std::vector<std::string> hm2016_valid_resources = {"TEMP", "AIRG", "TBLU", "CRMD", "ATMD", "CBLU", "CPPT", "DSWB",
+const std::vector<std::string> hm2016_valid_resources = {"TEMP", "AIRG", "TBLU", "RTLV", "CRMD", "ATMD", "CBLU", "CPPT", "DSWB",
                                                          "GFXF", "GIDX", "VIDB", "WSGB"};
-const std::vector<std::string> hm2_valid_resources = {"TEMP", "AIRG", "TBLU", "CRMD", "ATMD", "CBLU", "CPPT", "DSWB",
-                                                      "ECPB", "GFXF", "GIDX", "VIDB", "WSGB"};
-const std::vector<std::string> hm3_valid_resources = {"TEMP", "AIRG", "TBLU", "CRMD", "ATMD", "CBLU", "CPPT", "DSWB",
-                                                      "ECPB", "GFXF", "GIDX", "VIDB", "WSGB"};
+const std::vector<std::string> hm2_valid_resources = {"TEMP", "AIRG", "TBLU", "RTLV", "CRMD", "ATMD", "CBLU", "CPPT", "DSWB",
+                                                      "ECPB", "GFXF", "GIDX", "VIDB", "WSGB", "ENUM"};
+const std::vector<std::string> hm3_valid_resources = {"TEMP", "AIRG", "TBLU", "RTLV", "CRMD", "ATMD", "CBLU", "CPPT", "DSWB",
+                                                      "ECPB", "GFXF", "GIDX", "VIDB", "WSGB", "ENUM"};
 
 void rpkg_function::extract_to_rt_json(std::string& input_path, std::string& filter, std::string& version,
                                        std::string& output_path) {

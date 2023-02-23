@@ -1555,7 +1555,7 @@ namespace rpkg
 
 							rightClickMenu = new RightClickMenu(buttons);
 						}
-						else if (hashType == "ECPB")
+						else if (hashType == "ECPB" || hashType == "ENUM")
 						{
 							string[] buttons = { "Extract " + hashName, "Extract To Hitman 3 RT (ResourceTool) JSON", "Extract To Hitman 2 RT (ResourceTool) JSON", "Cancel" };
 
@@ -1852,7 +1852,7 @@ namespace rpkg
 
 								progress.message.Content = "Extracting " + hashName + " To JSON To IOI Path...";
 							}
-							else if (hashType == "AIRG" || hashType == "CRMD" || hashType == "ATMD" || hashType == "CBLU" || hashType == "CPPT" || hashType == "DSWB" || hashType == "ECPB" || hashType == "GFXF" || hashType == "GIDX" || hashType == "VIDB" || hashType == "WSGB")
+							else if (hashType == "AIRG" || hashType == "CRMD" || hashType == "ATMD" || hashType == "CBLU" || hashType == "CPPT" || hashType == "DSWB" || hashType == "ECPB" || hashType == "GFXF" || hashType == "GIDX" || hashType == "VIDB" || hashType == "WSGB" || hashType == "ENUM")
 							{
 								command = "-extract_to_rt_json";
 
@@ -2228,7 +2228,7 @@ namespace rpkg
 
 								return;
 							}
-							else if (hashType == "AIRG" || hashType == "CRMD" || hashType == "ATMD" || hashType == "CBLU" || hashType == "CPPT" || hashType == "DSWB" || hashType == "ECPB" || hashType == "GFXF" || hashType == "GIDX" || hashType == "VIDB" || hashType == "WSGB")
+							else if (hashType == "AIRG" || hashType == "CRMD" || hashType == "ATMD" || hashType == "CBLU" || hashType == "CPPT" || hashType == "DSWB" || hashType == "ECPB" || hashType == "GFXF" || hashType == "GIDX" || hashType == "VIDB" || hashType == "WSGB" || hashType == "ENUM" || hashType == "RTLV")
 							{
 								command = "-extract_to_rt_json";
 
