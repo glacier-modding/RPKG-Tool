@@ -13,6 +13,7 @@ using System.Threading;
 using MahApps.Metro.Controls;
 using ControlzEx.Theming;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Diagnostics;
 using System.Security;
 using NAudio.Wave;
@@ -4741,7 +4742,7 @@ namespace rpkg
 		public delegate int execute_get_direct_hash_depends(string rpkg_file, string hash_string);
 		public delegate int execute_task(string csharp_command, string csharp_input_path, string csharp_filter, string search, string search_type, string csharp_output_path);
 		public delegate int execute_deep_search_localization(string input_path, string search_value, int search_dlge, int search_locr, int search_rtlv, int max_results);
-		public delegate int execute_deep_search_entities(string input_path, string[] search_strings, int search_strings_count, int max_results, int store_jsons);
+		public delegate int execute_deep_search_entities(string input_path, string[] search_strings, int search_strings_count, int max_results, int store_jsons, int use_latest_hashes);
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "task_execute", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int task_execute(string csharp_command, string csharp_input_path, string csharp_filter,
@@ -4931,7 +4932,8 @@ namespace rpkg
 													  string[] search_strings,
                                                       int search_strings_count,
                                                       int max_results,
-													  int store_jsons);
+													  int store_jsons,
+                                                      int use_latest_hashes);
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "get_entities_search_results_size",
 			CallingConvention = CallingConvention.Cdecl)]
@@ -7955,12 +7957,18 @@ namespace rpkg
 				DeepSearchEntitiesButton.Content = "Start Search";
 
                 DeepSearchEntitiesLoadTreeView();
+
+                DeepSearchEntitiesProgressTextLabel.Visibility = Visibility.Collapsed;
+                DeepSearchEntitiesSaveToJSONButton.Visibility = Visibility.Visible;
             }
 			else
 			{
 				if (DeepSearchEntitiesTextBox.Text.Length > 0)
-				{
-					DeepSearchEntitiesTreeView.Nodes.Clear();
+                {
+                    DeepSearchEntitiesProgressTextLabel.Visibility = Visibility.Visible;
+                    DeepSearchEntitiesSaveToJSONButton.Visibility = Visibility.Collapsed;
+
+                    DeepSearchEntitiesTreeView.Nodes.Clear();
 
 					string input_path = "";
 
@@ -7997,6 +8005,13 @@ namespace rpkg
                         store_jsons = 1;
                     }
 
+                    int use_latest_hash = 0;
+
+                    if (DeepSearchEntitiesLatestHashCheckBox.IsChecked ?? false)
+                    {
+                        use_latest_hash = 1;
+                    }
+
                     int maxSearchResults = 0;
 
 					int.TryParse(DeepSearchEntitiesComboBox.Text, out maxSearchResults);
@@ -8017,13 +8032,13 @@ namespace rpkg
 
 						//MessageBoxShow(DeepSearchEntitiesTextBox.Text);
 
-						int response = is_valid_regex(DeepSearchEntitiesTextBox.Text);
+						//int response = is_valid_regex(DeepSearchEntitiesTextBox.Text);
 
                         //MessageBoxShow(response.ToString());
 
                         if (is_valid_regex(DeepSearchEntitiesTextBox.Text) == 0)
                         {
-                            MessageBoxShow("Error: The input regex string is not valid:\n\n" + DeepSearchEntitiesTextBox.Text);
+                            MessageBoxShow("Error: The input regex string is not valid:\n\n" + DeepSearchEntitiesTextBox.Text.Replace("_","__"));
                             return;
                         }
                     }
@@ -8078,7 +8093,8 @@ namespace rpkg
 															  searchStringsList.Count,
                                                               maxSearchResults,
 															  store_jsons,
-															  null,
+                                                              use_latest_hash,
+                                                              null,
 															  null);
 
 					deepSearchEntitiesWorker = new BackgroundWorker();
@@ -8350,7 +8366,10 @@ namespace rpkg
         }
 
 		void DeepSearchEntitiesLoadTreeView()
-		{
+        {
+            DeepSearchEntitiesProgressTextLabel.Visibility = Visibility.Collapsed;
+            DeepSearchEntitiesSaveToJSONButton.Visibility = Visibility.Visible;
+
             DeepSearchEntitiesButton.Content = "Start Search";
 
             UInt32 entities_data_size = get_entities_search_results_size();
@@ -8447,9 +8466,131 @@ namespace rpkg
 
 			DeepSearchLocalizationRPKGsComboBox.ItemsSource = items;
 			DeepSearchLocalizationRPKGsComboBox.SelectedIndex = 0;
-		}
 
-		private void DeepSearchEntitiesExpandAllButton_Click(object sender, RoutedEventArgs e)
+			DeepSearchEntitiesLatestHashCheckBox.IsEnabled = false;
+            DeepSearchEntitiesLatestHashCheckBox.IsChecked = false;
+        }
+
+		private void DeepSearchEntitiesRPKGsComboBox_DropDownClosed(object sender, EventArgs e)
+        {
+			if (DeepSearchEntitiesRPKGsComboBox.Text == "All Loaded RPKGs" || DeepSearchEntitiesRPKGsComboBox.Text.Length == 0)
+			{
+                DeepSearchEntitiesLatestHashCheckBox.IsEnabled = false;
+                DeepSearchEntitiesLatestHashCheckBox.IsChecked = false;
+            }
+			else
+			{
+                DeepSearchEntitiesLatestHashCheckBox.IsEnabled = true;
+            }
+		}
+        
+        private void DeepSearchEntitiesSaveToJSONButton_Click(object sender, RoutedEventArgs e)
+        {
+			if (!DeepSearchEntitiesTreeView.Nodes[0].Text.ToLower().Contains(".rpkg"))
+			{
+				MessageBoxShow("No search results, nothing to save to JSON file.");
+				return;
+			}
+
+            var fileDialog = new Ookii.Dialogs.Wpf.VistaSaveFileDialog();
+            fileDialog.Title = "Select file to search results JSON to:";
+            fileDialog.Filter = "JSON file|*.json";
+            string initialFolder = "";
+            string resultsJSONPath = "";
+
+            if (File.Exists(userSettings.OutputFolder))
+            {
+                initialFolder = userSettings.OutputFolder;
+            }
+            else
+            {
+                initialFolder = Directory.GetCurrentDirectory();
+            }
+
+            fileDialog.InitialDirectory = initialFolder;
+            fileDialog.FileName = initialFolder + "\\entity_deep_search.json";
+            var fileDialogResult = fileDialog.ShowDialog();
+
+            if (fileDialogResult == true)
+            {
+                resultsJSONPath = fileDialog.FileName;
+            }
+            else
+            {
+                return;
+            }
+
+			var resultsJson = new JsonObject();
+
+			resultsJson["Search"] = new JsonArray();
+
+			var searchValue = new JsonObject();
+            searchValue["Operation"] = "None";
+
+            if (DeepSearchEntitiesValueCheckBox.IsChecked ?? false)
+                searchValue["Type"] = "Regex";
+            else
+                searchValue["Type"] = "Default";
+
+            searchValue["Value"] = DeepSearchEntitiesTextBox.Text;
+			((JsonArray)resultsJson["Search"]).Add(searchValue);
+
+            if (deepSearchEntitiesValueInputCount > 0)
+            {
+                for (int i = 0; i < deepSearchEntitiesValueInputCount; i++)
+                {
+                    ComboBox valueComboBox = FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBoxComboBox" + (i + 1).ToString()) as ComboBox;
+                    TextBox valueTextBox = FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBox" + (i + 1).ToString()) as TextBox;
+                    CheckBox valueCheckBox = FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBoxCheckBox" + (i + 1).ToString()) as CheckBox;
+
+                    if (valueComboBox != null && valueTextBox != null && valueCheckBox != null)
+                    {
+                        if (valueTextBox.Text.Length > 0)
+                        {
+                            searchValue = new JsonObject();
+
+                            if (valueComboBox.SelectedItem.ToString() == "AND")
+                                searchValue["Operation"] = "AND";
+                            else
+                                searchValue["Operation"] = "OR";
+
+                            searchValue["Value"] = valueTextBox.Text;
+
+                            if (valueCheckBox.IsChecked ?? false)
+                                searchValue["Type"] = "Regex";
+                            else
+                                searchValue["Type"] = "Default";
+
+                            ((JsonArray)resultsJson["Search"]).Add(searchValue);
+                        }
+                    }
+                }
+            }
+
+            foreach (System.Windows.Forms.TreeNode node1 in DeepSearchEntitiesTreeView.Nodes)
+			{
+				var resultsRPKG = new JsonObject();
+
+				foreach (System.Windows.Forms.TreeNode node2 in node1.Nodes)
+                {
+                    var resultsEntity = new JsonObject();
+
+					foreach (System.Windows.Forms.TreeNode node3 in node2.Nodes)
+                    {
+						resultsEntity[node3.Text] = JsonNode.Parse(node3.Tag.ToString()).AsObject();
+                    }
+
+                    resultsRPKG[node2.Text] = resultsEntity;
+                }
+
+                resultsJson[node1.Text] = resultsRPKG;
+            }
+
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            File.WriteAllText(resultsJSONPath, resultsJson.ToJsonString(options));
+        }
+
+        private void DeepSearchEntitiesExpandAllButton_Click(object sender, RoutedEventArgs e)
 		{
 			DeepSearchEntitiesTreeView.ExpandAll();
 		}

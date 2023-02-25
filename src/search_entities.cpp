@@ -11,14 +11,15 @@ void rpkg_function::search_entities(std::string& input_path,
                                     char** search_strings,
                                     int search_strings_count,
                                     int max_results,
-                                    bool store_jsons) {
+                                    bool store_jsons,
+                                    bool use_latest_hashes) {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
     percent_progress = (uint32_t) 0;
     log_output = false;
     //rpkg_function::import_rpkg_files_in_folder("H:\\HITMAN3\\Runtime");
-    //input_path = "";
+    //input_path = "H:\\HITMAN3\\Runtime\\chunk25.rpkg";
     entities_search_results = "";
 
     uint32_t results_count = 0;
@@ -106,6 +107,9 @@ void rpkg_function::search_entities(std::string& input_path,
                         uint32_t rpkgIndex = rpkg_function::get_latest_hash(tempHashValue);
 
                         if (rpkgIndex == UINT32_MAX)
+                            continue;
+
+                        if (use_latest_hashes && (uint64_t)i != rpkgIndex)
                             continue;
 
                         auto it61 = rpkgs.at(rpkgIndex).hash_map.find(tempHashValue);

@@ -2194,7 +2194,8 @@ int deep_search_entities(char* input_path,
                          char** search_strings,
                          int search_strings_count,
                          int max_results,
-                         bool store_jsons) {
+                         bool store_jsons,
+                         bool use_latest_hashes) {
     gui_control = READY;
     task_single_status = READY;
     task_multiple_status = READY;
@@ -2211,7 +2212,8 @@ int deep_search_entities(char* input_path,
                                    search_strings,
                                    search_strings_count,
                                    max_results,
-                                   store_jsons);
+                                   store_jsons,
+                                   use_latest_hashes);
 
     return 0;
 }

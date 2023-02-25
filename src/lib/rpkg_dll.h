@@ -179,7 +179,8 @@ deep_search_entities(char* input_path,
                      char** search_strings,
                      int search_strings_count,
                      int max_results,
-                     bool store_jsons);
+                     bool store_jsons,
+                     bool use_latest_hashes);
 
 RPKG_EXPORT uint32_t get_entities_search_results_size();
 

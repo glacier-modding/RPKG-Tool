@@ -595,11 +595,9 @@ void entity::search_value(bool& found, const char* value) {
                 temp_found = true;
         }
 
-        if (item.operation == NONE)
-            found = temp_found;
+        if (item.operation == NONE || item.operation == OR)
+            found = found || temp_found;
         else if (item.operation == AND)
             found = found && temp_found;
-        else if (item.operation == OR)
-            found = found || temp_found;
     }
 }

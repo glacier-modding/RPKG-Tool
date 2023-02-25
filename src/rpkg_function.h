@@ -63,7 +63,8 @@ public:
                                 char** search_strings,
                                 int search_strings_count,
                                 int max_results,
-                                bool store_jsons);
+                                bool store_jsons,
+                                bool use_latest_hashes);
 
     static void
     extract_to_rt_json(std::string& input_path, std::string& filter, std::string& version, std::string& output_path);
