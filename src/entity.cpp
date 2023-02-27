@@ -1,5 +1,6 @@
 #include "entity.h"
 #include "rpkg_function.h"
+#include "generic_function.h"
 #include "global.h"
 #include "crypto.h"
 #include "file.h"
@@ -226,10 +227,14 @@ entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version,
     }
 }
 
-uint32_t entity::search(std::vector<search_item>& search_items_input,
+uint32_t entity::search(std::vector<search_item>& search_items,
                         uint32_t results_count,
                         uint32_t max_results) {
-    search_items = search_items_input;
+    for (auto& item : search_items)
+        item.found = false;
+
+    std::string temp_entities_search_results = "";
+    uint32_t temp_results_count = results_count;
 
     yyjson_val* root = yyjson_doc_get_root(entity_yyjson_doc);
     yyjson_val* entities = yyjson_obj_get(root, "entities");
@@ -242,9 +247,9 @@ uint32_t entity::search(std::vector<search_item>& search_items_input,
     while ((key = yyjson_obj_iter_next(&iter))) {
         val = yyjson_obj_iter_get_val(key);
 
-        std::string key_string(yyjson_get_str(key));
+        const char* category = yyjson_get_str(key);
 
-        if (key_string == "entities") {
+        if (std::strcmp(category, "entities") == 0) {
             yyjson_val* key2, * val2;
             yyjson_obj_iter iter2;
 
@@ -256,44 +261,50 @@ uint32_t entity::search(std::vector<search_item>& search_items_input,
             timing_string = "Searching " + entities_size + " entities in " + util::hash_to_ioi_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value, true) + "...";
 
             while ((key2 = yyjson_obj_iter_next(&iter2))) {
-                const char* key_string2 = yyjson_get_str(key2);
+                const char* key_string = yyjson_get_str(key2);
 
                 entities_index++;
 
-                if (results_count < max_results) {
-                    val2 = yyjson_obj_iter_get_val(key2);
+                val2 = yyjson_obj_iter_get_val(key2);
 
-                    bool found = false;
+                for (auto& item : search_items) {
+                    if (item.category != search_category::ALL && search_category_strings.find(category) != search_category_strings.end())
+                        if (search_category_strings[category] != item.category)
+                            continue;
 
-                    search_value(found, key_string2);
+                    bool found = search_value(item, key_string);
 
-                    char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_NOFLAG, NULL);
-                    search_value(found, temp_json);
-                    free(temp_json);
+                    if (!found) {
+                        char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_NOFLAG, NULL);
+                        found = search_value(item, temp_json);
+                        free(temp_json);
+                    }
 
                     if (found) {
-                        yyjson_val* name2 = yyjson_obj_get(val2, "name");
+                        item.found = true;
+
+                        yyjson_val* name = yyjson_obj_get(val2, "name");
 
                         char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_PRETTY, NULL);
 
-                        entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path +
-                            "||||" +
-                            util::uint64_t_to_hex_string(
-                                rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value) +
-                            "." +
-                            rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type +
-                            " " +
-                            util::hash_to_ioi_string(
-                                rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value, false) +
-                            "||||" +
-                            key_string2 +
-                            ": " +
-                            std::string(yyjson_get_str(name2)) +
-                            "||||" +
-                            std::string(temp_json) +
-                            "||||" +
-                            key_string +
-                            "||||||";
+                        temp_entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path;
+                        temp_entities_search_results += "||||";
+                        temp_entities_search_results += util::uint64_t_to_hex_string(
+                            rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value);
+                        temp_entities_search_results += ".";
+                        temp_entities_search_results += rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type;
+                        temp_entities_search_results += " ";
+                        temp_entities_search_results += util::hash_to_hash_list_string(
+                            rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value);
+                        temp_entities_search_results += "||||";
+                        temp_entities_search_results += key_string;
+                        temp_entities_search_results += ": ";
+                        temp_entities_search_results += std::string(yyjson_get_str(name));
+                        temp_entities_search_results += "||||";
+                        temp_entities_search_results += std::string(temp_json);
+                        temp_entities_search_results += "||||";
+                        temp_entities_search_results += category;
+                        temp_entities_search_results += "||||||";
 
                         free(temp_json);
 
@@ -310,37 +321,38 @@ uint32_t entity::search(std::vector<search_item>& search_items_input,
             yyjson_arr_iter_init(val, &iter2);
 
             while ((val2 = yyjson_arr_iter_next(&iter2))) {
-                if (results_count < max_results) {
-                    bool found = false;
-
-                    //if (search_json(val2, search_string))
-                    //    found = true;
+                for (auto& item : search_items) {
+                    if (item.category != search_category::ALL && search_category_strings.find(category) != search_category_strings.end())
+                        if (search_category_strings[category] != item.category)
+                            continue;
 
                     char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_NOFLAG, NULL);
-                    search_value(found, temp_json);
+                    bool found = search_value(item, temp_json);
                     free(temp_json);
 
                     if (found) {
-                        char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_PRETTY, NULL);
+                        item.found = true;
 
-                        entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path +
-                            "||||" +
-                            util::uint64_t_to_hex_string(
-                                rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value) +
-                            "." +
-                            rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type +
-                            " " +
-                            util::hash_to_ioi_string(
-                                rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value, false) +
-                            "||||" +
-                            key_string +
-                            ": " +
-                            std::to_string(arr_index) +
-                            "||||" +
-                            std::string(temp_json) +
-                            "||||" +
-                            key_string +
-                            "||||||";
+                        temp_json = yyjson_val_write(val2, YYJSON_WRITE_PRETTY, NULL);
+
+                        temp_entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path;
+                        temp_entities_search_results += "||||";
+                        temp_entities_search_results += util::uint64_t_to_hex_string(
+                            rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value);
+                        temp_entities_search_results += ".";
+                        temp_entities_search_results += rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type;
+                        temp_entities_search_results += " ";
+                        temp_entities_search_results += util::hash_to_hash_list_string(
+                            rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value);
+                        temp_entities_search_results += "||||";
+                        temp_entities_search_results += category;
+                        temp_entities_search_results += ": ";
+                        temp_entities_search_results += std::to_string(arr_index);
+                        temp_entities_search_results += "||||";
+                        temp_entities_search_results += std::string(temp_json);
+                        temp_entities_search_results += "||||";
+                        temp_entities_search_results += category;
+                        temp_entities_search_results += "||||||";
 
                         free(temp_json);
 
@@ -355,43 +367,49 @@ uint32_t entity::search(std::vector<search_item>& search_items_input,
             yyjson_val* key2, * val2;
             yyjson_obj_iter iter2;
 
-            yyjson_obj_iter_init(val, &iter);
+            yyjson_obj_iter_init(val, &iter2);
 
             while ((key2 = yyjson_obj_iter_next(&iter2))) {
-                if (results_count < max_results) {
-                    val2 = yyjson_obj_iter_get_val(key2);
+                val2 = yyjson_obj_iter_get_val(key2);
 
-                    const char* key_string2 = yyjson_get_str(key2);
+                const char* key_string = yyjson_get_str(key2);
 
-                    bool found = false;
+                for (auto& item : search_items) {
+                    if (item.category != search_category::ALL && search_category_strings.find(category) != search_category_strings.end())
+                        if (search_category_strings[category] != item.category)
+                            continue;
 
-                    search_value(found, key_string2);
+                    bool found = search_value(item, key_string);
 
-                    char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_NOFLAG, NULL);
-                    search_value(found, temp_json);
-                    free(temp_json);
+                    if (!found) {
+                        char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_NOFLAG, NULL);
+                        found = search_value(item, temp_json);
+                        free(temp_json);
+                    }
 
                     if (found) {
+                        item.found = true;
+
                         char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_PRETTY, NULL);
 
-                        entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path +
-                            "||||" +
-                            util::uint64_t_to_hex_string(
-                                rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value) +
-                            "." +
-                            rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type +
-                            " " +
-                            util::hash_to_ioi_string(
-                                rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value, false) +
-                            "||||" +
-                            key_string +
-                            ": " +
-                            key_string2 +
-                            "||||" +
-                            std::string(temp_json) +
-                            "||||" +
-                            key_string +
-                            "||||||";
+                        temp_entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path;
+                        temp_entities_search_results += "||||";
+                        temp_entities_search_results += util::uint64_t_to_hex_string(
+                            rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value);
+                        temp_entities_search_results += ".";
+                        temp_entities_search_results += rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type;
+                        temp_entities_search_results += " ";
+                        temp_entities_search_results += util::hash_to_hash_list_string(
+                            rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value);
+                        temp_entities_search_results += "||||";
+                        temp_entities_search_results += category;
+                        temp_entities_search_results += ": ";
+                        temp_entities_search_results += key_string;
+                        temp_entities_search_results += "||||";
+                        temp_entities_search_results += std::string(temp_json);
+                        temp_entities_search_results += "||||";
+                        temp_entities_search_results += category;
+                        temp_entities_search_results += "||||||";
 
                         free(temp_json);
 
@@ -401,43 +419,47 @@ uint32_t entity::search(std::vector<search_item>& search_items_input,
             }
         }
         else if (yyjson_is_num(val)) {
-            if (results_count < max_results) {
-                std::string val_string = "";
+            std::string val_string = "";
 
-                if (yyjson_is_uint(val))
-                    val_string = std::to_string(yyjson_get_uint(val));
-                if (yyjson_is_sint(val))
-                    val_string = std::to_string(yyjson_get_sint(val));
-                if (yyjson_is_int(val))
-                    val_string = std::to_string(yyjson_get_int(val));
-                if (yyjson_is_real(val))
-                    val_string = std::to_string(yyjson_get_real(val));
+            if (yyjson_is_uint(val))
+                val_string = std::to_string(yyjson_get_uint(val));
+            if (yyjson_is_sint(val))
+                val_string = std::to_string(yyjson_get_sint(val));
+            if (yyjson_is_int(val))
+                val_string = std::to_string(yyjson_get_int(val));
+            if (yyjson_is_real(val))
+                val_string = std::to_string(yyjson_get_real(val));
 
-                bool found = false;
+            for (auto& item : search_items) {
+                if (item.category != search_category::ALL && search_category_strings.find(category) != search_category_strings.end())
+                    if (search_category_strings[category] != item.category)
+                        continue;
 
-                search_value(found, val_string.c_str());
+                bool found = search_value(item, val_string.c_str());
 
                 if (found) {
+                    item.found = true;
+
                     char* temp_json = yyjson_val_write(val, YYJSON_WRITE_PRETTY, NULL);
 
-                    entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path +
-                        "||||" +
-                        util::uint64_t_to_hex_string(
-                            rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value) +
-                        "." +
-                        rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type +
-                        " " +
-                        util::hash_to_ioi_string(
-                            rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value, false) +
-                        "||||" +
-                        key_string +
-                        ": " + 
-                        val_string +
-                        "||||" +
-                        std::string(temp_json) +
-                        "||||" +
-                        key_string +
-                        "||||||";
+                    temp_entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path;
+                    temp_entities_search_results += "||||";
+                    temp_entities_search_results += util::uint64_t_to_hex_string(
+                        rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value);
+                    temp_entities_search_results += ".";
+                    temp_entities_search_results += rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type;
+                    temp_entities_search_results += " ";
+                    temp_entities_search_results += util::hash_to_hash_list_string(
+                        rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value);
+                    temp_entities_search_results += "||||";
+                    temp_entities_search_results += category;
+                    temp_entities_search_results += ": ";
+                    temp_entities_search_results += val_string;
+                    temp_entities_search_results += "||||";
+                    temp_entities_search_results += std::string(temp_json);
+                    temp_entities_search_results += "||||";
+                    temp_entities_search_results += category;
+                    temp_entities_search_results += "||||||";
 
                     free(temp_json);
 
@@ -446,34 +468,42 @@ uint32_t entity::search(std::vector<search_item>& search_items_input,
             }
         }
         else if (yyjson_is_str(val)) {
-            if (results_count < max_results) {
-                const char* val_string = yyjson_get_str(val);
+            const char* val_string = yyjson_get_str(val);
 
-                bool found = false;
+            for (auto& item : search_items) {
+                if (item.category != search_category::ALL && search_category_strings.find(category) != search_category_strings.end())
+                    if (search_category_strings[category] != item.category)
+                        continue;
 
-                search_value(found, val_string);
+                bool found = search_value(item, val_string);
+
+                if (!found)
+                    if (item.category == search_category::TEMPHASH || item.category == search_category::TBLUHASH)
+                        found = found || search_hash_ioi_string(std::strtoull(val_string, nullptr, 16), item);
 
                 if (found) {
+                    item.found = true;
+
                     char* temp_json = yyjson_val_write(val, YYJSON_WRITE_PRETTY, NULL);
 
-                    entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path +
-                        "||||" +
-                        util::uint64_t_to_hex_string(
-                            rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value) +
-                        "." +
-                        rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type +
-                        " " +
-                        util::hash_to_ioi_string(
-                            rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value, false) +
-                        "||||" +
-                        key_string +
-                        ": " +
-                        val_string +
-                        "||||" +
-                        std::string(temp_json) +
-                        "||||" +
-                        key_string +
-                        "||||||";
+                    temp_entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path;
+                    temp_entities_search_results += "||||";
+                    temp_entities_search_results += util::uint64_t_to_hex_string(
+                        rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value);
+                    temp_entities_search_results += ".";
+                    temp_entities_search_results += rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_resource_type;
+                    temp_entities_search_results += " ";
+                    temp_entities_search_results += util::hash_to_hash_list_string(
+                        rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value);
+                    temp_entities_search_results += "||||";
+                    temp_entities_search_results += category;
+                    temp_entities_search_results += ": ";
+                    temp_entities_search_results += val_string;
+                    temp_entities_search_results += "||||";
+                    temp_entities_search_results += std::string(temp_json);
+                    temp_entities_search_results += "||||";
+                    temp_entities_search_results += category;
+                    temp_entities_search_results += "||||||";
 
                     free(temp_json);
 
@@ -483,9 +513,22 @@ uint32_t entity::search(std::vector<search_item>& search_items_input,
         }
     }
 
-    std::vector<search_item>().swap(search_items);
+    bool found = true;
+    size_t size = entities_search_results.length();
 
-    return results_count;
+    for (auto& item : search_items) {
+        if (!item.found)
+            found = false;
+    }
+
+    if (found) {
+        size += temp_entities_search_results.length();
+        entities_search_results.reserve(size);
+        entities_search_results += temp_entities_search_results;
+        return results_count;
+    }
+    else
+        return temp_results_count;
 }
 
 bool entity::search_json(yyjson_val* json, std::string& search_string)
@@ -582,22 +625,37 @@ bool entity::find_ci(const char* s1, const char* s2) {
     return true;
 }
 
-void entity::search_value(bool& found, const char* value) {
-    for (auto item : search_items) {
-        bool temp_found = false;
-
-        if (item.type == DEFAULT) {
-            if (find_ci(value, item.search.c_str()))
-                temp_found = true;
-        }
-        else if (item.type == REGEX) {
-            if (std::regex_search(value, std::regex(item.search.c_str(), std::regex_constants::icase)))
-                temp_found = true;
-        }
-
-        if (item.operation == NONE || item.operation == OR)
-            found = found || temp_found;
-        else if (item.operation == AND)
-            found = found && temp_found;
+bool entity::search_value(const search_item& item, const char* value)
+{
+    if (item.type == search_type::DEFAULT) {
+        if (find_ci(value, item.search.c_str()))
+            return true;
     }
+    else if (item.type == search_type::REGEX) {
+        if (std::regex_search(value, std::regex(item.search.c_str(), std::regex_constants::icase)))
+            return true;
+    }
+
+    return false;
+}
+
+bool entity::search_hash_ioi_string(const uint64_t hash_value, const search_item& item) {
+    if (hash_list_loaded) {
+        std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(hash_value);
+
+        if (it2 != hash_list_hash_map.end()) {
+            if (hash_list_hash_strings.at(it2->second) != "") {
+                if (item.type == search_type::DEFAULT)
+                    return find_ci(
+                        util::to_lower_case(hash_list_hash_strings.at(it2->second)).c_str(), 
+                        item.search.c_str());
+                else if (item.type == search_type::REGEX)
+                    return std::regex_search(
+                        util::to_lower_case(hash_list_hash_strings.at(it2->second)).c_str(), 
+                        std::regex(item.search.c_str(), std::regex_constants::icase));
+            }
+        }
+    }
+
+    return false;
 }

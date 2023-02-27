@@ -61,6 +61,8 @@ public:
 
     static void search_entities(std::string& input_path,
                                 char** search_strings,
+                                int* search_types,
+                                int* search_categories,
                                 int search_strings_count,
                                 int max_results,
                                 bool store_jsons,

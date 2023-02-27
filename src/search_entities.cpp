@@ -1,4 +1,5 @@
 #include "rpkg_function.h"
+#include "generic_function.h"
 #include "global.h"
 #include "console.h"
 #include "util.h"
@@ -9,6 +10,8 @@
 
 void rpkg_function::search_entities(std::string& input_path,
                                     char** search_strings,
+                                    int* search_types,
+                                    int* search_categories,
                                     int search_strings_count,
                                     int max_results,
                                     bool store_jsons,
@@ -19,8 +22,10 @@ void rpkg_function::search_entities(std::string& input_path,
     percent_progress = (uint32_t) 0;
     log_output = false;
     //rpkg_function::import_rpkg_files_in_folder("H:\\HITMAN3\\Runtime");
-    //input_path = "H:\\HITMAN3\\Runtime\\chunk25.rpkg";
-    entities_search_results = "";
+    //input_path = "";
+    std::string().swap(entities_search_results);
+
+    force_load_hash_list();
 
     uint32_t results_count = 0;
 
@@ -54,28 +59,21 @@ void rpkg_function::search_entities(std::string& input_path,
         std::unordered_map<uint64_t, entity>().swap(deep_search_entities_map);
     }
 
-    std::vector<search_item> search_items;
+    std::vector<entity::search_item> search_items;
 
-    for (int i = 0; i < search_strings_count / 3; i++)
+    for (int i = 0; i < search_strings_count; i++)
     {
         search_items.emplace_back();
 
-        int index = i * 3;
+        search_items.back().category = (entity::search_category)search_categories[i];
 
-        if (search_strings[index][0] == 'n')
-            search_items.back().operation = NONE;
-        else if (search_strings[index][0] == 'a')
-            search_items.back().operation = AND;
-        else if (search_strings[index][0] == 'o')
-            search_items.back().operation = OR;
-
-        if (search_strings[index + 2][0] == 'd') {
-            search_items.back().type = DEFAULT;
-            search_items.back().search = util::to_lower_case(search_strings[index + 1]);
+        if (search_types[i] == (int)entity::search_type::DEFAULT) {
+            search_items.back().type = entity::search_type::DEFAULT;
+            search_items.back().search = util::to_lower_case(search_strings[i]);
         }
-        else if (search_strings[index + 2][0] == 'r') {
-            search_items.back().type = REGEX;
-            search_items.back().search = search_strings[index + 1];
+        else if (search_types[i] == (int)entity::search_type::REGEX) {
+            search_items.back().type = entity::search_type::REGEX;
+            search_items.back().search = search_strings[i];
         }
     }
 
@@ -98,6 +96,9 @@ void rpkg_function::search_entities(std::string& input_path,
                     if (gui_control == ABORT_CURRENT_TASK) {
                         return;
                     }
+
+                    if (results_count >= max_results)
+                        break;
 
                     if (results_count < max_results) {
                         uint64_t hashIndex = rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r).at(j2);

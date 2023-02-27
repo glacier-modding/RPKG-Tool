@@ -470,8 +470,24 @@
 									<ColumnDefinition Width="Auto"/>
 									<ColumnDefinition Width="Auto"/>
 								</Grid.ColumnDefinitions>
-								<Label Grid.Row="0" Grid.Column="0" Content="Search value:" VerticalContentAlignment="Center" FontSize="14"/>
-								<TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" x:Name="DeepSearchEntitiesTextBox" FontFamily="Consolas" TextWrapping="NoWrap"/>
+								<Label Grid.Row="0" Grid.Column="0" Content="Search:" VerticalContentAlignment="Center" FontSize="14"/>
+								<ComboBox Grid.Row="0" Grid.Column="1" x:Name="DeepSearchEntitiesTextBoxCategoryComboBox" FontFamily="Consolas" VerticalAlignment="Center">
+									<ComboBoxItem Content="ALL" IsSelected="True"/>
+									<ComboBoxItem Content="tempHash (or IOI Path of)"/>
+									<ComboBoxItem Content="tbluHash (or IOI Path of)"/>
+									<ComboBoxItem Content="rootEntity"/>
+									<ComboBoxItem Content="entities"/>
+									<ComboBoxItem Content="propertyOverrides"/>
+									<ComboBoxItem Content="overrideDeletes"/>
+									<ComboBoxItem Content="pinConnectionOverrides"/>
+									<ComboBoxItem Content="pinConnectionOverrideDeletes"/>
+									<ComboBoxItem Content="externalScenes"/>
+									<ComboBoxItem Content="subType"/>
+									<ComboBoxItem Content="extraFactoryDependencies"/>
+									<ComboBoxItem Content="extraBlueprintDependencies"/>
+									<ComboBoxItem Content="comments"/>
+								</ComboBox>
+								<TextBox Grid.Row="0" Grid.Column="2" x:Name="DeepSearchEntitiesTextBox" FontFamily="Consolas" TextWrapping="NoWrap"/>
 								<Border Grid.Row="0" Grid.Column="3" BorderBrush="White" BorderThickness="0,1,1,1">
 									<CheckBox Name="DeepSearchEntitiesValueCheckBox" Content=".*" FontFamily="Consolas" FontSize="14" HorizontalAlignment="Left" IsChecked="False" Margin="5"/>
 								</Border>
@@ -495,6 +511,8 @@
                                 <ComboBox Grid.Row="0" Grid.Column="1" x:Name="DeepSearchEntitiesRPKGsComboBox" FontFamily="Consolas" Margin="5" VerticalAlignment="Center" DropDownClosed="DeepSearchEntitiesRPKGsComboBox_DropDownClosed"/>
 								<Label Grid.Row="0" Grid.Column="2" Content="Max results:" VerticalContentAlignment="Center" FontSize="14"/>
 								<ComboBox Grid.Row="0" Grid.Column="3" x:Name="DeepSearchEntitiesComboBox" FontFamily="Consolas" VerticalAlignment="Center">
+									<ComboBoxItem Content="10"/>
+									<ComboBoxItem Content="50"/>
 									<ComboBoxItem Content="100" IsSelected="True"/>
 									<ComboBoxItem Content="200"/>
 									<ComboBoxItem Content="500"/>
@@ -571,6 +589,8 @@
                             <TextBox Grid.Row="0" Grid.Column="1" x:Name="DeepSearchLocalizationTextBox" FontFamily="Consolas" TextWrapping="NoWrap"/>
                             <Label Grid.Row="0" Grid.Column="2" Content="Max results:" FontSize="14"/>
                             <ComboBox Grid.Row="0" Grid.Column="3" x:Name="DeepSearchLocalizationComboBox" FontFamily="Consolas">
+								<ComboBoxItem Content="10"/>
+								<ComboBoxItem Content="50"/>
 								<ComboBoxItem Content="100" IsSelected="True"/>
 								<ComboBoxItem Content="200"/>
 								<ComboBoxItem Content="500"/>

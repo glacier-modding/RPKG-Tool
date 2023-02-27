@@ -177,6 +177,8 @@ RPKG_EXPORT char* get_localization_search_results();
 RPKG_EXPORT int
 deep_search_entities(char* input_path,
                      char** search_strings,
+                     int* search_types,
+                     int* search_categories,
                      int search_strings_count,
                      int max_results,
                      bool store_jsons,

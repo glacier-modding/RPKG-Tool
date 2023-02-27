@@ -4726,7 +4726,31 @@ namespace rpkg
 			BEHAVIOURS
 		};
 
-		private int oggPlayerState = (int)OggPlayerState.NULL;
+        public enum EntityDeepSearchType
+        {
+            DEFAULT,
+            REGEX
+        };
+
+        public enum EntityDeepSearchCategory
+        {
+            ALL,
+            TEMPHASH,
+            TBLUHASH,
+			ROOTENTITY,
+            ENTITIES,
+            PROPERTYOVERRIDES,
+            OVERRIDEDELETES,
+            PINCONNECTIONOVERRIDES,
+            PINCONNECTIONOVERRIDEDELETES,
+            EXTERNALSCENES,
+            SUBTYPE,
+            EXTRAFACTORYDEPENDENCIES,
+            EXTRABLUEPRINTDEPENDENCIES,
+            COMMENTS
+        };
+
+        private int oggPlayerState = (int)OggPlayerState.NULL;
 		private bool oggPlayerRunning = false;
 		private bool oggPlayerPaused = false;
 		private bool oggPlayerStopped = false;
@@ -4742,7 +4766,7 @@ namespace rpkg
 		public delegate int execute_get_direct_hash_depends(string rpkg_file, string hash_string);
 		public delegate int execute_task(string csharp_command, string csharp_input_path, string csharp_filter, string search, string search_type, string csharp_output_path);
 		public delegate int execute_deep_search_localization(string input_path, string search_value, int search_dlge, int search_locr, int search_rtlv, int max_results);
-		public delegate int execute_deep_search_entities(string input_path, string[] search_strings, int search_strings_count, int max_results, int store_jsons, int use_latest_hashes);
+		public delegate int execute_deep_search_entities(string input_path, string[] search_strings, int[] search_types, int[] search_categories, int search_strings_count, int max_results, int store_jsons, int use_latest_hashes);
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "task_execute", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int task_execute(string csharp_command, string csharp_input_path, string csharp_filter,
@@ -4930,6 +4954,8 @@ namespace rpkg
 		[DllImport("rpkg-lib.dll", EntryPoint = "deep_search_entities", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int deep_search_entities(string input_path,
 													  string[] search_strings,
+                                                      int[] search_types,
+													  int[] search_categories,
                                                       int search_strings_count,
                                                       int max_results,
 													  int store_jsons,
@@ -7848,8 +7874,8 @@ namespace rpkg
         }
 
 		private void DeepSearchEntitiesTextBoxButton_Click(object sender, RoutedEventArgs e)
-		{
-            DeepSearchEntityGrid.Children.Remove(FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBoxComboBox" + deepSearchEntitiesValueInputCount.ToString()) as ComboBox);
+		{   
+            DeepSearchEntityGrid.Children.Remove(FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBoxCategoryComboBox" + deepSearchEntitiesValueInputCount.ToString()) as ComboBox);
             DeepSearchEntityGrid.Children.Remove(FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBox" + deepSearchEntitiesValueInputCount.ToString()) as TextBox);
             DeepSearchEntityGrid.Children.Remove(FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBoxCheckBox" + deepSearchEntitiesValueInputCount.ToString()) as CheckBox);
             DeepSearchEntityGrid.Children.Remove(FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBoxBorder" + deepSearchEntitiesValueInputCount.ToString()) as Border);            
@@ -7879,14 +7905,27 @@ namespace rpkg
             rowDefinition.Height = new GridLength(1, GridUnitType.Auto);
             DeepSearchEntityGrid.RowDefinitions.Add(rowDefinition);
 
-            ComboBox valueInputComboBox = new ComboBox();
-            valueInputComboBox.Name = "DeepSearchEntitiesTextBoxComboBox" + deepSearchEntitiesValueInputCount.ToString();
-			valueInputComboBox.Items.Add("AND");
-            valueInputComboBox.Items.Add("OR");
-			valueInputComboBox.SelectedItem = "AND";
-            DeepSearchEntityGrid.Children.Add(valueInputComboBox);
-            Grid.SetRow(valueInputComboBox, deepSearchEntitiesValueInputCount);
-            Grid.SetColumn(valueInputComboBox, 1);
+            ComboBox valueInputCategoryComboBox = new ComboBox();
+            valueInputCategoryComboBox.Name = "DeepSearchEntitiesTextBoxCategoryComboBox" + deepSearchEntitiesValueInputCount.ToString();
+            valueInputCategoryComboBox.Items.Add("ALL");
+            valueInputCategoryComboBox.Items.Add("tempHash (or IOI Path of)");
+            valueInputCategoryComboBox.Items.Add("tbluHash (or IOI Path of)");
+            valueInputCategoryComboBox.Items.Add("rootEntity");
+            valueInputCategoryComboBox.Items.Add("entities");
+            valueInputCategoryComboBox.Items.Add("propertyOverrides");
+            valueInputCategoryComboBox.Items.Add("overrideDeletes");
+            valueInputCategoryComboBox.Items.Add("pinConnectionOverrides");
+            valueInputCategoryComboBox.Items.Add("pinConnectionOverrideDeletes");
+            valueInputCategoryComboBox.Items.Add("externalScenes");
+            valueInputCategoryComboBox.Items.Add("subType");
+            valueInputCategoryComboBox.Items.Add("extraFactoryDependencies");
+            valueInputCategoryComboBox.Items.Add("extraBlueprintDependencies");
+            valueInputCategoryComboBox.Items.Add("comments");
+            valueInputCategoryComboBox.SelectedItem = "ALL";
+            valueInputCategoryComboBox.FontFamily = new FontFamily("Consolas");
+            DeepSearchEntityGrid.Children.Add(valueInputCategoryComboBox);
+            Grid.SetRow(valueInputCategoryComboBox, deepSearchEntitiesValueInputCount);
+            Grid.SetColumn(valueInputCategoryComboBox, 1);
 
             TextBox valueInput = new TextBox();
 			valueInput.Name = "DeepSearchEntitiesTextBox" + deepSearchEntitiesValueInputCount.ToString();
@@ -7921,6 +7960,43 @@ namespace rpkg
             DeepSearchEntityGrid.Children.Add(valueInputButton);
             Grid.SetRow(valueInputButton, deepSearchEntitiesValueInputCount);
             Grid.SetColumn(valueInputButton, 4);
+        }
+
+		int GetEntityDeepSearchCategory(ref ComboBox comboBox)
+		{
+			if (comboBox == null)
+				return (int)EntityDeepSearchCategory.ALL;
+
+			if (comboBox.Text == "ALL")
+				return (int)EntityDeepSearchCategory.ALL;
+			else if (comboBox.Text == "tempHash (or IOI Path of)")
+				return (int)EntityDeepSearchCategory.TEMPHASH;
+			else if (comboBox.Text == "tbluHash (or IOI Path of)")
+				return (int)EntityDeepSearchCategory.TBLUHASH;
+			else if (comboBox.Text == "rootEntity")
+				return (int)EntityDeepSearchCategory.ROOTENTITY;
+			else if (comboBox.Text == "entities")
+				return (int)EntityDeepSearchCategory.ENTITIES;
+			else if (comboBox.Text == "propertyOverrides")
+				return (int)EntityDeepSearchCategory.PROPERTYOVERRIDES;
+			else if (comboBox.Text == "overrideDeletes")
+				return (int)EntityDeepSearchCategory.OVERRIDEDELETES;
+			else if (comboBox.Text == "pinConnectionOverrides")
+				return (int)EntityDeepSearchCategory.PINCONNECTIONOVERRIDES;
+			else if (comboBox.Text == "pinConnectionOverrideDeletes")
+				return (int)EntityDeepSearchCategory.PINCONNECTIONOVERRIDEDELETES;
+			else if (comboBox.Text == "externalScenes")
+				return (int)EntityDeepSearchCategory.EXTERNALSCENES;
+			else if (comboBox.Text == "subType")
+				return (int)EntityDeepSearchCategory.SUBTYPE;
+			else if (comboBox.Text == "extraFactoryDependencies")
+				return (int)EntityDeepSearchCategory.EXTRAFACTORYDEPENDENCIES;
+			else if (comboBox.Text == "extraBlueprintDependencies")
+				return (int)EntityDeepSearchCategory.EXTRABLUEPRINTDEPENDENCIES;
+			else if (comboBox.Text == "comments")
+				return (int)EntityDeepSearchCategory.COMMENTS;
+
+            return (int)EntityDeepSearchCategory.ALL;
         }
 
         private void DeepSearchEntitiesButton_Click(object sender, RoutedEventArgs e)
@@ -8022,19 +8098,15 @@ namespace rpkg
 					}
 
 					List<string> searchStringsList = new List<string>();
+                    List<int> searchTypesList = new List<int>();
+                    List<int> searchCategoriesList = new List<int>();
 
-                    searchStringsList.Add("n"); //none
+                    searchCategoriesList.Add(GetEntityDeepSearchCategory(ref DeepSearchEntitiesTextBoxCategoryComboBox));
                     searchStringsList.Add(DeepSearchEntitiesTextBox.Text);
 
 					if (DeepSearchEntitiesValueCheckBox.IsChecked ?? false)
 					{
-						searchStringsList.Add("r"); //regex
-
-						//MessageBoxShow(DeepSearchEntitiesTextBox.Text);
-
-						//int response = is_valid_regex(DeepSearchEntitiesTextBox.Text);
-
-                        //MessageBoxShow(response.ToString());
+                        searchTypesList.Add((int)EntityDeepSearchType.REGEX);
 
                         if (is_valid_regex(DeepSearchEntitiesTextBox.Text) == 0)
                         {
@@ -8042,31 +8114,28 @@ namespace rpkg
                             return;
                         }
                     }
-					else
-						searchStringsList.Add("d"); //default
+                    else
+                        searchTypesList.Add((int)EntityDeepSearchType.DEFAULT);
 
                     if (deepSearchEntitiesValueInputCount > 0)
 					{
 						for (int i = 0; i < deepSearchEntitiesValueInputCount; i++)
-						{
-                            ComboBox valueComboBox = FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBoxComboBox" + (i + 1).ToString()) as ComboBox;
+                        {
+                            ComboBox valueComboBox = FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBoxCategoryComboBox" + (i + 1).ToString()) as ComboBox;
                             TextBox valueTextBox = FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBox" + (i + 1).ToString()) as TextBox;
                             CheckBox valueCheckBox = FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBoxCheckBox" + (i + 1).ToString()) as CheckBox;
 
 							if (valueComboBox != null && valueTextBox != null && valueCheckBox != null)
 							{
 								if (valueTextBox.Text.Length > 0)
-								{
-									if (valueComboBox.SelectedItem.ToString() == "AND")
-										searchStringsList.Add("a"); //and
-									else
-										searchStringsList.Add("o"); //or
+                                {
+                                    searchCategoriesList.Add(GetEntityDeepSearchCategory(ref valueComboBox));
 
-									searchStringsList.Add(valueTextBox.Text);
+                                    searchStringsList.Add(valueTextBox.Text);
 
 									if (valueCheckBox.IsChecked ?? false)
                                     {
-                                        searchStringsList.Add("r"); //regex
+                                        searchTypesList.Add((int)EntityDeepSearchType.REGEX);
 
                                         if (is_valid_regex(valueTextBox.Text) == 0)
                                         {
@@ -8075,22 +8144,26 @@ namespace rpkg
                                         }
                                     }
 									else
-										searchStringsList.Add("d"); //default
-								}
+                                        searchTypesList.Add((int)EntityDeepSearchType.DEFAULT);
+                                }
 							}
                         }
 					}
 
-					//foreach (string s in searchStringsList)
-					//{
-						//MessageBoxShow(s);
-					//}
-
 					string[] searchStrings = searchStringsList.ToArray();
+                    int[] searchTypes = searchTypesList.ToArray();
+                    int[] searchCategories = searchCategoriesList.ToArray();
+
+                    //for (int s = 0; s < searchStringsList.Count; s++)
+                    //{
+						//MessageBoxShow(searchStringsList[s] + ", " + searchTypesList[s].ToString() + ", " + searchCategoriesList[s].ToString());
+                    //}
 
                     IAsyncResult ar = rpkgExecute.BeginInvoke(input_path,
                                                               searchStrings,
-															  searchStringsList.Count,
+                                                              searchTypes,
+                                                              searchCategories,
+                                                              searchStringsList.Count,
                                                               maxSearchResults,
 															  store_jsons,
                                                               use_latest_hash,
@@ -8367,6 +8440,8 @@ namespace rpkg
 
 		void DeepSearchEntitiesLoadTreeView()
         {
+            DeepSearchEntitiesTreeView.Nodes.Clear();
+
             DeepSearchEntitiesProgressTextLabel.Visibility = Visibility.Collapsed;
             DeepSearchEntitiesSaveToJSONButton.Visibility = Visibility.Visible;
 
@@ -8380,6 +8455,7 @@ namespace rpkg
 
             if (entities_data_size > 0)
             {
+				//File.WriteAllText("test.txt", Encoding.UTF8.GetString(entities_data));
                 //DeepSearchLocalizationTreeView.Nodes.Add(Encoding.UTF8.GetString(localization_data));
 
                 string[] records = Encoding.UTF8.GetString(entities_data).Split(new[] { "||||||" }, StringSplitOptions.None);
@@ -8525,7 +8601,7 @@ namespace rpkg
 			resultsJson["Search"] = new JsonArray();
 
 			var searchValue = new JsonObject();
-            searchValue["Operation"] = "None";
+			searchValue["Category"] = DeepSearchEntitiesTextBoxCategoryComboBox.Text;
 
             if (DeepSearchEntitiesValueCheckBox.IsChecked ?? false)
                 searchValue["Type"] = "Regex";
@@ -8539,7 +8615,7 @@ namespace rpkg
             {
                 for (int i = 0; i < deepSearchEntitiesValueInputCount; i++)
                 {
-                    ComboBox valueComboBox = FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBoxComboBox" + (i + 1).ToString()) as ComboBox;
+                    ComboBox valueComboBox = FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBoxCategoryComboBox" + (i + 1).ToString()) as ComboBox;
                     TextBox valueTextBox = FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBox" + (i + 1).ToString()) as TextBox;
                     CheckBox valueCheckBox = FindDescendant(RPKGMainWindow, "DeepSearchEntitiesTextBoxCheckBox" + (i + 1).ToString()) as CheckBox;
 
@@ -8548,12 +8624,7 @@ namespace rpkg
                         if (valueTextBox.Text.Length > 0)
                         {
                             searchValue = new JsonObject();
-
-                            if (valueComboBox.SelectedItem.ToString() == "AND")
-                                searchValue["Operation"] = "AND";
-                            else
-                                searchValue["Operation"] = "OR";
-
+                            searchValue["Category"] = valueComboBox.Text;
                             searchValue["Value"] = valueTextBox.Text;
 
                             if (valueCheckBox.IsChecked ?? false)
@@ -8577,7 +8648,7 @@ namespace rpkg
 
 					foreach (System.Windows.Forms.TreeNode node3 in node2.Nodes)
                     {
-						resultsEntity[node3.Text] = JsonNode.Parse(node3.Tag.ToString()).AsObject();
+						resultsEntity[node3.Text] = JsonNode.Parse(node3.Tag.ToString());
                     }
 
                     resultsRPKG[node2.Text] = resultsEntity;

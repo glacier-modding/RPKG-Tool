@@ -2192,6 +2192,8 @@ char* get_localization_search_results() {
 
 int deep_search_entities(char* input_path,
                          char** search_strings,
+                         int* search_types,
+                         int* search_categories,
                          int search_strings_count,
                          int max_results,
                          bool store_jsons,
@@ -2206,10 +2208,10 @@ int deep_search_entities(char* input_path,
     //std::string search = std::string(search_value);
     std::string search_type = "";
 
-    entities_search_results = "";
-
     rpkg_function::search_entities(input_path_string,
                                    search_strings,
+                                   search_types,
+                                   search_categories,
                                    search_strings_count,
                                    max_results,
                                    store_jsons,

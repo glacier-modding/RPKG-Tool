@@ -167,11 +167,16 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     } else if (command == "-mati_to_json") {
         rpkg_function::mati_to_json(input_path, filter, output_path);
     } else if (command == "-search_entities") {
-        /*char* search_strings[3];
-        search_strings[0] = "n";
-        search_strings[1] = "1f36691dfed0962d";
-        search_strings[2] = "d";
-        rpkg_function::search_entities(input_path, search_strings, 3, 1000, true, true);*/
+        /*char* search_strings[1];
+        search_strings[0] = "transform";
+        search_strings[1] = "00";
+        int search_types[2];
+        search_types[0] = (int)entity::search_type::DEFAULT;
+        search_types[1] = (int)entity::search_type::DEFAULT;
+        int search_categories[2];
+        search_categories[0] = (int)entity::search_category::ALL;
+        search_categories[1] = (int)entity::search_category::TEMPHASH;
+        rpkg_function::search_entities(input_path, search_strings, search_types, search_categories, 2, 10, true, true);*/
     } else if (command == "-search_localization") {
         rpkg_function::search_localization(input_path, search, output_path, true, true, true, 1000);
     } else if (command == "-get_line_string") {
