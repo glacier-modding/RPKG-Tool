@@ -60,6 +60,10 @@ void rpkg_function::json_to_hash_meta(std::string& input_path) {
 
     std::string temp_string = hash_value.GetString();
 
+    if (temp_string.substr(0, 1) == "[") {
+        temp_string = generic_function::compute_ioi_hash(temp_string);
+    }
+
     uint64_t temp_uint64_t = std::strtoull(temp_string.c_str(), nullptr, 16);
 
     std::memcpy(&char8, &temp_uint64_t, 0x8);

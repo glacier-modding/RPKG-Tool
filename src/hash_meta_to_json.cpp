@@ -39,7 +39,7 @@ void rpkg_function::hash_meta_to_json(std::string& input_path) {
         meta_file.read(input, sizeof(bytes8));
         std::memcpy(&bytes8, input, sizeof(bytes8));
         meta_data.hash_value = bytes8;
-        json_string += R"("hash_value":")" + util::uint64_t_to_hex_string(meta_data.hash_value) + "\",";
+        json_string += R"("hash_value":")" + util::hash_to_ioi_string(meta_data.hash_value, true) + "\",";
 
         meta_file.read(input, sizeof(bytes8));
         std::memcpy(&bytes8, input, sizeof(bytes8));
