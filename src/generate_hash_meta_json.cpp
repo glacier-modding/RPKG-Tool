@@ -6,7 +6,10 @@ std::string rpkg_function::generate_hash_meta_json(const uint64_t rpkg_index, co
 {
     // Output hash's meta data to JSON format
     nlohmann::ordered_json json;
-    json["hash_value"] = util::hash_to_ioi_string(rpkgs.at(rpkg_index).hash.at(hash_index).hash_value, true);
+    json["hash_value"] = util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(hash_index).hash_value);
+    if (std::string path = util::hash_to_ioi_string(rpkgs.at(rpkg_index).hash.at(hash_index).hash_value, false); path != "") {
+        json["hash_path"] = path;
+    }
     json["hash_offset"] = rpkgs.at(rpkg_index).hash.at(hash_index).data.header.data_offset;
     json["hash_size"] = rpkgs.at(rpkg_index).hash.at(hash_index).data.header.data_size;
     json["hash_resource_type"] = std::string(rpkgs.at(rpkg_index).hash.at(hash_index).hash_resource_type.data(), 4);

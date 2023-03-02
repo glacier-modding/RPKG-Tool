@@ -60,7 +60,7 @@ void rpkg_function::json_to_hash_meta(std::string& input_path) {
 
     std::string temp_string = hash_value.GetString();
 
-    if (temp_string.substr(0, 1) == "[") {
+    if (!util::is_valid_hash(temp_string)) {
         temp_string = generic_function::compute_ioi_hash(temp_string);
     }
 
