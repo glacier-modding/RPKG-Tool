@@ -444,7 +444,7 @@ namespace rpkg
 							SixthTabRightSeparator.Visibility = Visibility.Collapsed;
 						}
 
-						DetailsTextBox.Visibility = Visibility.Collapsed;
+						DetailsTextBox.Visibility = Visibility.Visible;
 						MainScrollViewer.Visibility = Visibility.Collapsed;
                         DeepSearchTextBox.Visibility = Visibility.Collapsed;
                         MainStackPanel.Visibility = Visibility.Collapsed;

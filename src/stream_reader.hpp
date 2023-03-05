@@ -27,6 +27,11 @@ public:
         position += s.length();
     }
 
+    template<typename T>
+    void Peek(T* data, size_t offset) {
+        memcpy(data, reinterpret_cast<T*>(StreamPosition() + offset), sizeof(T));
+    }
+
     void SeekBy(size_t length) { position += length; }
 
     void SeekTo(size_t offset) { position = offset; }

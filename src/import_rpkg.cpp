@@ -53,6 +53,17 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path, bool with_timing) {
     // Read in RPKG main header
     rpkg_file.Read<rpkg::Header>(&rpkgs.back().header);
 
+    // Check if ALPHA RPKG
+    if (rpkgs.back().rpkg_file_version == 1 &&
+        rpkgs.back().header.hash_count == 0 &&
+        rpkgs.back().header.hash_header_table_size == 0 &&
+        rpkgs.back().header.hash_resource_table_size == 0xFFFFFFFF &&
+        rpkgs.back().header.patch_count == 0xFFFFFFFF) {
+        rpkgs.back().game_version = rpkg::Game::ALPHAS;
+        rpkg_file.SeekBy(8);
+        rpkg_file.Read<rpkg::Header>(&rpkgs.back().header);
+    }
+
     // Record patch offset for later, needed if RPKG is a patch file
     uint64_t patch_offset = rpkg_file.Position();
 
@@ -63,7 +74,9 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path, bool with_timing) {
     }
 
     // Perform tests to determine if RPKG is a patch file or not
-    if (rpkgs.back().rpkg_file_version == 1 && (rpkgs.back().header.patch_count * 8 + 0x24) >= rpkg_file.Size())
+    if (rpkgs.back().game_version == rpkg::Game::ALPHAS)
+        rpkgs.back().is_patch_file = false;
+    else if (rpkgs.back().rpkg_file_version == 1 && (rpkgs.back().header.patch_count * 8 + 0x24) >= rpkg_file.Size())
         rpkgs.back().is_patch_file = false;
     else if (rpkgs.back().rpkg_file_version == 2 && (rpkgs.back().header.patch_count * 8 + 0x2D) >= rpkg_file.Size())
         rpkgs.back().is_patch_file = false;
@@ -103,6 +116,8 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path, bool with_timing) {
 
     // Seek to the hash data table's offset
     size_t hash_data_offset = 0x10;
+    if (rpkgs.back().game_version == rpkg::Game::ALPHAS)
+        hash_data_offset += 0x18;
     if (rpkgs.back().rpkg_file_version == 2)
         hash_data_offset += 9;
     if (rpkgs.back().is_patch_file)
@@ -122,14 +137,36 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path, bool with_timing) {
     // Init timer
     std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
 
-    // Read in the hash files/resources data tables
-    for (size_t i = 0; i < rpkgs.back().header.hash_count; i++) {
-        // Emplace back new hash in rpkg
-        rpkgs.back().hash.emplace_back();
+    if (rpkgs.back().game_version == rpkg::Game::ALPHAS) {
+        // Read in the hash files/resources data tables
+        for (size_t i = 0; i < rpkgs.back().header.hash_count; i++) {
+            // Emplace back new hash in rpkg
+            rpkgs.back().hash.emplace_back();
 
-        hash_tables_stream.Read<hash::HashHeader>(&rpkgs.back().hash.back().data.header);
+            hash_tables_stream.Read<uint64_t>(&rpkgs.back().hash.back().data.header.hash);
+            hash_tables_stream.Read<uint64_t>(&rpkgs.back().hash.back().data.header.data_offset);
+            rpkgs.back().hash.back().data.header.data_size = 0;
 
-        rpkgs.back().hash_map[rpkgs.back().hash.back().data.header.hash] = (uint64_t) rpkgs.back().hash_map.size();
+            rpkgs.back().hash_map[rpkgs.back().hash.back().data.header.hash] = (uint64_t)rpkgs.back().hash_map.size();
+        }
+
+        // The ALPHA doesn't include the hash data header data sizes, so must calculate them
+        for (size_t i = 0; i < rpkgs.back().header.hash_count - 1; i++) {
+            rpkgs.back().hash[i].data.header.data_size = rpkgs.back().hash[i + 1].data.header.data_offset - rpkgs.back().hash[i].data.header.data_offset;
+        }
+
+        rpkgs.back().hash[rpkgs.back().header.hash_count].data.header.data_size = rpkg_file.Size() - rpkgs.back().hash[rpkgs.back().header.hash_count].data.header.data_offset;
+    }
+    else {
+        // Read in the hash files/resources data tables
+        for (size_t i = 0; i < rpkgs.back().header.hash_count; i++) {
+            // Emplace back new hash in rpkg
+            rpkgs.back().hash.emplace_back();
+
+            hash_tables_stream.Read<hash::HashHeader>(&rpkgs.back().hash.back().data.header);
+
+            rpkgs.back().hash_map[rpkgs.back().hash.back().data.header.hash] = (uint64_t)rpkgs.back().hash_map.size();
+        }
     }
 
     // Emplace back the hash depends map
@@ -149,19 +186,22 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path, bool with_timing) {
         rpkgs.back().hash[i].data.resource.resource_type[3] = type[0];
 
         // Determine hash's size and if it is LZ4ed and/or XORed
-        if ((rpkgs.back().hash[i].data.header.data_size & 0x3FFFFFFF) != 0) {
-            rpkgs.back().hash[i].data.lz4ed = true;
-            rpkgs.back().hash[i].data.size = rpkgs.back().hash[i].data.header.data_size;
+        if (rpkgs.back().game_version != rpkg::Game::ALPHAS) {
+            if ((rpkgs.back().hash[i].data.header.data_size & 0x3FFFFFFF) != 0) {
+                rpkgs.back().hash[i].data.lz4ed = true;
+                rpkgs.back().hash[i].data.size = rpkgs.back().hash[i].data.header.data_size;
 
-            if ((rpkgs.back().hash[i].data.header.data_size & 0x80000000) == 0x80000000) {
-                rpkgs.back().hash[i].data.size &= 0x3FFFFFFF;
-                rpkgs.back().hash[i].data.xored = true;
+                if ((rpkgs.back().hash[i].data.header.data_size & 0x80000000) == 0x80000000) {
+                    rpkgs.back().hash[i].data.size &= 0x3FFFFFFF;
+                    rpkgs.back().hash[i].data.xored = true;
+                }
             }
-        } else {
-            rpkgs.back().hash[i].data.size = rpkgs.back().hash[i].data.resource.size_final;
+            else {
+                rpkgs.back().hash[i].data.size = rpkgs.back().hash[i].data.resource.size_final;
 
-            if ((rpkgs.back().hash[i].data.header.data_size & 0x80000000) == 0x80000000)
-                rpkgs.back().hash[i].data.xored = true;
+                if ((rpkgs.back().hash[i].data.header.data_size & 0x80000000) == 0x80000000)
+                    rpkgs.back().hash[i].data.xored = true;
+            }
         }
 
         rpkgs.back().hash[i].hash_value = rpkgs.back().hash[i].data.header.hash;
@@ -205,15 +245,44 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path, bool with_timing) {
             uint32_t depends_count;
             hash_tables_stream.Read<uint32_t>(&depends_count);
             rpkgs.back().hash[i].hash_reference_data.hash_reference_count = depends_count;
+
+            // H1 Beta & H1 Steam Check
+            // In H1 Beta/Steam and the ALPHAs the depends count is XX XX XX 80 vs the normal XX XX XX C0,
+            // which specifies the ordering of the depends and their flags
+            // XX XX XX 80, the hash depends values are first followed by the flags
+            // XX XX XX C0, the depends flags are first followed by the hash depends values
+            if ((depends_count & 0xC0000000) != 0xC0000000) {
+                if (rpkgs.back().game_version != rpkg::Game::ALPHAS)
+                    rpkgs.back().game_version = rpkg::Game::H1_BETA_AND_STEAM;
+            }
+
             depends_count &= 0x3FFFFFFF;
 
-            rpkgs.back().hash[i].hash_reference_data.hash_reference_type.resize(depends_count);
-            hash_tables_stream.Read<uint8_t>(rpkgs.back().hash[i].hash_reference_data.hash_reference_type.data(),
-                                             depends_count);
+            /*uint8_t is_not_h1_steam = 0;
+            for (uint64_t j = 0; j < depends_count; j++) {
+                uint8_t zero_check = 0;
+                hash_tables_stream.Peek<uint8_t>(&zero_check, 7 + j * 8);
+                is_not_h1_steam |= zero_check;
+            }*/
 
-            rpkgs.back().hash[i].hash_reference_data.hash_reference.resize(depends_count);
-            hash_tables_stream.Read<uint64_t>(rpkgs.back().hash[i].hash_reference_data.hash_reference.data(),
-                                              depends_count);
+            if (rpkgs.back().game_version == rpkg::Game::DEFAULT) {
+                rpkgs.back().hash[i].hash_reference_data.hash_reference_type.resize(depends_count);
+                hash_tables_stream.Read<uint8_t>(rpkgs.back().hash[i].hash_reference_data.hash_reference_type.data(),
+                    depends_count);
+
+                rpkgs.back().hash[i].hash_reference_data.hash_reference.resize(depends_count);
+                hash_tables_stream.Read<uint64_t>(rpkgs.back().hash[i].hash_reference_data.hash_reference.data(),
+                    depends_count);
+            }
+            else {
+                rpkgs.back().hash[i].hash_reference_data.hash_reference.resize(depends_count);
+                hash_tables_stream.Read<uint64_t>(rpkgs.back().hash[i].hash_reference_data.hash_reference.data(),
+                    depends_count);
+
+                rpkgs.back().hash[i].hash_reference_data.hash_reference_type.resize(depends_count);
+                hash_tables_stream.Read<uint8_t>(rpkgs.back().hash[i].hash_reference_data.hash_reference_type.data(),
+                    depends_count);
+            }
 
             rpkgs.back().hash[i].hash_reference_data.hash_value = rpkgs.back().hash[i].data.header.hash;
 

@@ -15,6 +15,11 @@ public:
         uint32_t patch_count = 0;
     };
 #pragma pack(pop)
+    enum class Game {
+        ALPHAS,
+        H1_BETA_AND_STEAM,
+        DEFAULT
+    };
 
     rpkg();
 
@@ -24,6 +29,7 @@ public:
     int rpkg_file_version = 0;
     std::vector<char> rpkgv2_header;
     bool is_patch_file = false;
+    Game game_version = Game::DEFAULT;
     std::vector<uint64_t> patch_entry_list;
     std::vector<hash> hash;
     std::unordered_map<uint64_t, uint64_t> hash_map;
