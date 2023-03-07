@@ -354,14 +354,8 @@ sdef::sdef(std::string json_path, uint64_t hash_value, std::string output_path, 
                 uint32_t dlge_missing = 0xFFFFFFFF;
 
                 std::memcpy(&sdef_data[position], &dlge_missing, 0x4);
-            } else if (dlge_hash.find("[") != std::string::npos) {
-                dlge_hash_value = util::ioi_string_to_hash(dlge_hash);
-
-                std::memcpy(&sdef_data[position], &dlge_hash_depends_count, 0x4);
-
-                dlge_hash_depends_count++;
             } else {
-                dlge_hash_value = std::strtoull(dlge_hash.c_str(), nullptr, 16);
+                dlge_hash_value = util::ioi_string_to_hash(dlge_hash);
 
                 std::memcpy(&sdef_data[position], &dlge_hash_depends_count, 0x4);
 

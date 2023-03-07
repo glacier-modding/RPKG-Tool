@@ -35,17 +35,17 @@ std::string util::generate_guid() {
     return util::to_lower_case(guidString);
 }
 
-bool util::is_valid_hash(std::string hash) {
+bool util::is_valid_hash(const std::string& hash) {
     const std::string valid_chars = "0123456789ABCDEF";
 
-    hash = util::to_upper_case(hash);
+    std::string hash_upper = util::to_upper_case(hash);
 
-    if (hash.length() != 16) {
+    if (hash_upper.length() != 16) {
         return false;
     }
 
     for (int i = 0; i < 16; i++) {
-        if (valid_chars.find(hash[i]) == std::string::npos) {
+        if (valid_chars.find(hash_upper[i]) == std::string::npos) {
             return false;
         }
     }
@@ -66,7 +66,10 @@ std::string util::hash_type(const uint64_t hash_value) {
 }
 
 uint64_t util::ioi_string_to_hash(const std::string& ioi_string) {
-    return std::strtoull(generic_function::compute_ioi_hash(ioi_string).c_str(), nullptr, 16);
+    if (is_valid_hash(ioi_string))
+        return std::strtoull(ioi_string.c_str(), nullptr, 16);
+    else
+        return std::strtoull(generic_function::compute_ioi_hash(ioi_string).c_str(), nullptr, 16);
 }
 
 std::string util::hash_to_ioi_string(const uint64_t hash_value, const bool return_hash_if_not_found) {
@@ -236,20 +239,22 @@ std::vector<std::string> util::parse_input_filter(std::string input_string) {
     return filters;
 }
 
-std::string util::to_upper_case(std::string s) {
-    for (uint64_t i = 0; i < s.length(); i++) {
-        s[i] = std::toupper(s[i]);
-    }
+std::string util::to_upper_case(const std::string& s) {
+    std::string output(s.length(), ' ');
 
-    return s;
+    for (uint64_t i = 0; i < s.length(); i++)
+        output[i] = std::toupper(s[i]);
+
+    return output;
 }
 
-std::string util::to_lower_case(std::string s) {
-    for (char& i : s) {
-        i = std::tolower(i);
-    }
+std::string util::to_lower_case(const std::string& s) {
+    std::string output(s.length(), ' ');
 
-    return s;
+    for (uint64_t i = 0; i < s.length(); i++)
+        output[i] = std::tolower(s[i]);
+
+    return output;
 }
 
 std::string util::remove_all_string_from_string(std::string input_string, const std::string& to_remove) {

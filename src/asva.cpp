@@ -147,10 +147,7 @@ asva::asva(const std::string& json_path, const std::string& output_path) {
 
         std::string temp_string = json["ASVA"];
 
-        if (temp_string.find('[') != std::string::npos)
-            asva_hash_value = util::ioi_string_to_hash(temp_string);
-        else
-            asva_hash_value = std::strtoull(temp_string.c_str(), nullptr, 16);
+        asva_hash_value = util::ioi_string_to_hash(temp_string);
 
         for (auto& variation : json["Variations"].items()) {
             temp_string = variation.value();
@@ -158,10 +155,7 @@ asva::asva(const std::string& json_path, const std::string& output_path) {
             if (temp_string.length() > 0) {
                 uint64_t temp_hash = 0;
 
-                if (temp_string.find('[') != std::string::npos)
-                    temp_hash = util::ioi_string_to_hash(temp_string);
-                else
-                    temp_hash = std::strtoull(temp_string.c_str(), nullptr, 16);
+                temp_hash = util::ioi_string_to_hash(temp_string);
 
                 if (temp_hash && depends_map.find(temp_hash) == depends_map.end()) {
                     depends_map[temp_hash] = depends_map.size();

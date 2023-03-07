@@ -705,43 +705,23 @@ material::material(const std::string& json_path, const std::string& output_path)
 
         std::string temp_string = json["MATI"];
 
-        if (temp_string.find('[') != std::string::npos) {
-            mati_hash_value = util::ioi_string_to_hash(temp_string);
-        } else {
-            mati_hash_value = std::strtoull(temp_string.c_str(), nullptr, 16);
-        }
+        mati_hash_value = util::ioi_string_to_hash(temp_string);
 
         temp_string = json["MATT"];
 
-        if (temp_string.find('[') != std::string::npos) {
-            matt_hash_value = util::ioi_string_to_hash(temp_string);
-        } else {
-            matt_hash_value = std::strtoull(temp_string.c_str(), nullptr, 16);
-        }
+        matt_hash_value = util::ioi_string_to_hash(temp_string);
 
         temp_string = json["MATB"];
 
-        if (temp_string.find('[') != std::string::npos) {
-            matb_hash_value = util::ioi_string_to_hash(temp_string);
-        } else {
-            matb_hash_value = std::strtoull(temp_string.c_str(), nullptr, 16);
-        }
+        matb_hash_value = util::ioi_string_to_hash(temp_string);
 
         temp_string = json["ERES"];
 
-        if (temp_string.find('[') != std::string::npos) {
-            eres_hash_depends = util::ioi_string_to_hash(temp_string);
-        } else {
-            eres_hash_depends = std::strtoull(temp_string.c_str(), nullptr, 16);
-        }
+        eres_hash_depends = util::ioi_string_to_hash(temp_string);
 
         temp_string = json["MATE"];
 
-        if (temp_string.find('[') != std::string::npos) {
-            mate_hash_depends = util::ioi_string_to_hash(temp_string);
-        } else {
-            mate_hash_depends = std::strtoull(temp_string.c_str(), nullptr, 16);
-        }
+        mate_hash_depends = util::ioi_string_to_hash(temp_string);
 
         type = json["TYPE"];
         uint32_t class_flags = encode_flags(ClassFlags, json["Flags"]["Class"]);
@@ -760,11 +740,7 @@ material::material(const std::string& json_path, const std::string& output_path)
                         } else {
                             mati_text_depends_txids.push_back(texture_count);
 
-                            if (temp_string.find('[') != std::string::npos) {
-                                mati_text_depends.push_back(util::ioi_string_to_hash(temp_string));
-                            } else {
-                                mati_text_depends.push_back(std::strtoull(temp_string.c_str(), nullptr, 16));
-                            }
+                            mati_text_depends.push_back(util::ioi_string_to_hash(temp_string));
 
                             texture_count++;
                         }
@@ -832,10 +808,7 @@ material::material(const std::string& json_path, const std::string& output_path)
                                 mati_textures.end()) {
                                 matt_textures.push_back(true);
 
-                                if (text_value.find('[') != std::string::npos)
-                                    matt_text_depends.push_back(util::ioi_string_to_hash(text_value));
-                                else
-                                    matt_text_depends.push_back(std::strtoull(text_value.c_str(), nullptr, 16));
+                                matt_text_depends.push_back(util::ioi_string_to_hash(text_value));
 
                                 matt_hash_depends_count++;
                             } else {

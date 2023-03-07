@@ -908,19 +908,11 @@ mati::mati(std::string json_path, uint64_t hash_value, std::string output_path, 
 
         std::string temp_string = json["ERES"];
 
-        if (temp_string.find("[") != std::string::npos) {
-            eres_hash_depends = util::ioi_string_to_hash(temp_string);
-        } else {
-            eres_hash_depends = std::strtoull(temp_string.c_str(), nullptr, 16);
-        }
+        eres_hash_depends = util::ioi_string_to_hash(temp_string);
 
         temp_string = json["MATE"];
 
-        if (temp_string.find("[") != std::string::npos) {
-            mate_hash_depends = util::ioi_string_to_hash(temp_string);
-        } else {
-            mate_hash_depends = std::strtoull(temp_string.c_str(), nullptr, 16);
-        }
+        mate_hash_depends = util::ioi_string_to_hash(temp_string);
 
         type = json["TYPE"];
         unknown_flag_1 = json["UnknownFlags"]["Unk1"];
@@ -938,11 +930,7 @@ mati::mati(std::string json_path, uint64_t hash_value, std::string output_path, 
                     } else {
                         text_hash_depends_txids.push_back(texture_count);
 
-                        if (temp_string.find("[") != std::string::npos) {
-                            text_hash_depends.push_back(util::ioi_string_to_hash(temp_string));
-                        } else {
-                            text_hash_depends.push_back(std::strtoull(temp_string.c_str(), nullptr, 16));
-                        }
+                        text_hash_depends.push_back(util::ioi_string_to_hash(temp_string));
 
                         texture_count++;
                     }

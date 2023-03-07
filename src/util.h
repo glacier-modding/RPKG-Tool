@@ -9,7 +9,7 @@ public:
 
     static std::string generate_guid();
 
-    static bool is_valid_hash(std::string hash);
+    static bool is_valid_hash(const std::string& hash);
 
     static std::string hash_type(uint64_t hash_value);
 
@@ -37,9 +37,9 @@ public:
 
     static std::vector<std::string> parse_input_filter(std::string input_string);
 
-    static std::string to_upper_case(std::string s);
+    static std::string to_upper_case(const std::string& s);
 
-    static std::string to_lower_case(std::string s);
+    static std::string to_lower_case(const std::string& s);
 
     static std::string remove_all_string_from_string(std::string input_string, const std::string& to_remove);
 

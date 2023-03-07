@@ -300,13 +300,13 @@ void rpkg_function::json_to_hash_meta(std::string& input_path) {
                 LOG("Error: hash_reference_data[" + std::to_string(i) + "][\"hash\"] is empty in the JSON.");
 
                 response_string =
-                        "Error: hash_reference_data[" + std::to_string(i) + "][\"hash\"] is empty in the JSON.";
+                    "Error: hash_reference_data[" + std::to_string(i) + "][\"hash\"] is empty in the JSON.";
 
                 return;
-            } else if (hash_value_string.substr(0, 1) == "[") {
-                temp_string = generic_function::compute_ioi_hash(hash_value_string);
-            } else {
+            } else if (util::is_valid_hash(hash_value_string)) {
                 temp_string = hash_value_string;
+            } else {
+                temp_string = generic_function::compute_ioi_hash(hash_value_string);
             }
 
             temp_uint64_t = std::strtoull(temp_string.c_str(), nullptr, 16);
