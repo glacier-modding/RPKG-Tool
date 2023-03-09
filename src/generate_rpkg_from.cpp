@@ -204,8 +204,6 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
                                                           stringstream_length);
         }
 
-        bool use_hash_file_meta_data = false;
-
         std::ifstream file = std::ifstream(files.at(files_index.at(i)), std::ifstream::binary);
 
         if (!file.good()) {
@@ -220,14 +218,13 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
         std::vector<char> output_file_data;
 
         input_data_length.push_back(input_file_size);
-
         file.read(input_file_data.data(), input_file_size);
-
         file.close();
 
         hash temp_hash_data;
-
         hash meta_data;
+
+        bool use_hash_file_meta_data = false;
 
         if (file::path_exists(files.at(files_index.at(i)) + ".meta")) {
             use_hash_file_meta_data = true;
@@ -243,7 +240,23 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
             }
 
             temp_hash_data.hash_reference_data = meta_data.hash_reference_data;
-        } else {
+        } else if (file::path_exists(files.at(files_index.at(i)) + ".meta.json")) {
+            std::string hash_file_name = files.at(files_index.at(i)) + ".meta.json";
+
+            if (rpkg_function::import_hash_meta_json(meta_data, hash_file_name)) {
+                use_hash_file_meta_data = true;
+
+                uint64_t test_hash_value = std::strtoll(hash_strings.at(files_index.at(i)).c_str(), nullptr, 16);
+
+                if (meta_data.hash_value != test_hash_value && test_hash_value > 0x0) {
+                    meta_data.hash_value = test_hash_value;
+                }
+
+                temp_hash_data.hash_reference_data = meta_data.hash_reference_data;
+            }
+        }
+
+        if (!use_hash_file_meta_data) {
             found_all_meta_files = false;
 
             meta_data.data.lz4ed = true;

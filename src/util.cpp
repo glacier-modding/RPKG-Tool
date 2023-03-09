@@ -66,7 +66,9 @@ std::string util::hash_type(const uint64_t hash_value) {
 }
 
 uint64_t util::ioi_string_to_hash(const std::string& ioi_string) {
-    if (is_valid_hash(ioi_string))
+    if (ioi_string.length() == 0)
+        return 0;
+    else if (is_valid_hash(ioi_string))
         return std::strtoull(ioi_string.c_str(), nullptr, 16);
     else
         return std::strtoull(generic_function::compute_ioi_hash(ioi_string).c_str(), nullptr, 16);

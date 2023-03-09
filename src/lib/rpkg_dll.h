@@ -231,3 +231,11 @@ RPKG_EXPORT int get_repo_entry(const char* id);
 RPKG_EXPORT int update_json_at_pointer(const char* id, const char* json_pointer, const char* value);
 
 RPKG_EXPORT int is_valid_regex(const char* regex_string);
+
+RPKG_EXPORT int load_ioi_treeview();
+
+RPKG_EXPORT int get_ioi_treeview_children(char* parent);
+
+RPKG_EXPORT char* get_ioi_treeview();
+
+RPKG_EXPORT int get_ioi_treeview_size();

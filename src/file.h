@@ -6,6 +6,10 @@
 
 class file {
 public:
+    static std::string read_file_to_string(std::string path);
+
+    static std::vector<char> read_file(std::string path);
+
     static uint64_t get_hash_value_from_path(const std::filesystem::path& path, const std::string& extension);
 
     static std::vector<std::filesystem::path> get_recursive_file_list(std::string path);

@@ -227,6 +227,7 @@ set(RPKG_COMMON_SOURCES
         src/extract_wwev_to_ogg_from.cpp
         src/file.cpp
         src/file_reader.hpp
+        src/generate_ioi_treeview.cpp
         src/generate_rpkg_from.cpp
         src/generate_hash_meta_json.cpp
         src/get_latest_hash.cpp
@@ -242,9 +243,12 @@ set(RPKG_COMMON_SOURCES
         src/hash_meta_to_json.cpp
         src/hash_probe.cpp
         src/import_hash_meta.cpp
+        src/import_hash_meta_json.cpp
         src/import_rpkg.cpp
         src/import_rpkg_files_in_folder.cpp
         src/import_rpkg_meta.cpp
+        src/ioi_treeview.cpp
+        src/ioi_treeview.h
         src/json_to_asva.cpp
         src/json_to_hash_meta.cpp
         src/json_to_material.cpp

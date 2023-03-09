@@ -2444,4 +2444,86 @@ int is_valid_regex(const char* regex_string) {
     return 1;
 }
 
+int load_ioi_treeview() {
+    percent_progress = 0;
+    task_single_status = TASK_EXECUTING;
+    task_multiple_status = TASK_EXECUTING;
+    timing_string = "Loading IOI Treeview...";
+
+    ioi_treeview.Reset();
+    ioi_treeview.InitializeTreeView();
+
+    std::vector<char>().swap(ioi_treeview_response_data);
+
+    for (auto& node : ioi_treeview.root_nodes) {
+        char char4[4];
+        auto& node_ref = ioi_treeview.node_map[node];
+        uint32_t node_string_length = node_ref.name.length();
+        std::memcpy(&char4, &node_string_length, 0x4);
+
+        for (char i : char4)
+            ioi_treeview_response_data.push_back(i);
+
+        for (uint32_t i = 0; i < node_string_length; i++)
+            ioi_treeview_response_data.push_back(node_ref.name[i]);
+
+        uint32_t has_children = 1;
+
+        if (node_ref.children.size() == 0)
+            has_children = 0;
+
+        std::memcpy(&char4, &has_children, 0x4);
+
+        for (char i : char4)
+            ioi_treeview_response_data.push_back(i);
+    }
+
+    percent_progress = 100;
+    task_single_status = TASK_SUCCESSFUL;
+    task_multiple_status = TASK_SUCCESSFUL;
+
+    return 0;
+}
+
+int get_ioi_treeview_children(char* parent) {
+    std::string parent_node(parent);
+
+    std::vector<char>().swap(ioi_treeview_response_data);
+
+    if (ioi_treeview.node_map.find(parent_node) != ioi_treeview.node_map.end()) {
+        for (auto& node : ioi_treeview.node_map[parent_node].children) {
+            char char4[4];
+            auto& node_ref = ioi_treeview.node_map[node];
+            uint32_t node_string_length = node_ref.name.length();
+            std::memcpy(&char4, &node_string_length, 0x4);
+
+            for (char i : char4)
+                ioi_treeview_response_data.push_back(i);
+
+            for (uint32_t i = 0; i < node_string_length; i++)
+                ioi_treeview_response_data.push_back(node_ref.name[i]);
+
+            uint32_t has_children = 1;
+
+            if (node_ref.children.size() == 0)
+                has_children = 0;
+
+            std::memcpy(&char4, &has_children, 0x4);
+
+            for (char i : char4)
+                ioi_treeview_response_data.push_back(i);
+        }
+    }
+
+    return 0;
+}
+
+char* get_ioi_treeview() {
+    return &ioi_treeview_response_data[0];
+}
+
+int get_ioi_treeview_size() {
+    return (int)ioi_treeview_response_data.size();
+}
+
 #pragma clang diagnostic pop

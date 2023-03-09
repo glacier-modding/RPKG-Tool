@@ -3,6 +3,7 @@
 #include "rpkg.h"
 #include "temp.h"
 #include "entity.h"
+#include "ioi_treeview.h"
 #include "repo.h"
 #include "util.h"
 #include <string>
@@ -251,10 +252,12 @@ extern int task_single_status;
 extern int task_multiple_status;
 extern int task_map_status;
 extern int gui_control;
+extern IOITreeView ioi_treeview;
 extern std::vector<repo> repos;
 extern std::string check_json_response;
 extern std::string latest_hash_rpkg_path;
 extern std::string repo_response_data;
+extern std::vector<char> ioi_treeview_response_data;
 extern std::string entities_search_results;
 extern std::string localization_search_results;
 extern std::string localization_line_string;

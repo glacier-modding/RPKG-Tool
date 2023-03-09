@@ -5,6 +5,22 @@
 #include <fstream>
 #include <iostream>
 
+std::string file::read_file_to_string(std::string path) {
+    std::ifstream file = std::ifstream(path, std::ios_base::binary | std::ios_base::ate);
+    std::string file_data(file.tellg(), '\0');
+    file.seekg(0);
+    file.read(file_data.data(), file_data.length());
+    return file_data;
+}
+
+std::vector<char> file::read_file(std::string path) {
+    std::ifstream file = std::ifstream(path, std::ios_base::binary | std::ios_base::ate);
+    std::vector<char> file_data(file.tellg(), 0);
+    file.seekg(0);
+    file.read(file_data.data(), file_data.size());
+    return file_data;
+}
+
 uint64_t file::get_hash_value_from_path(const std::filesystem::path& path, const std::string& extension) {
     const std::string file_name = path.filename().string();
 

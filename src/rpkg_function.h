@@ -20,7 +20,10 @@ struct rpkg_extraction_vars {
 
 class rpkg_function {
 public:
+    static void generate_ioi_treeview(std::string& input_path, std::string& filter, std::string& output_path);
+
     static std::string generate_hash_meta_json(const uint64_t rpkg_index, const uint64_t hash_index);
+
     static void extract_latest_hash(std::string& input_path, std::string& filter, std::string& output_path);
 
     static void json_to_asva(const std::string& input_path, const std::string& output_path);
@@ -181,6 +184,8 @@ public:
 
     static void search_hash_data(std::string& search_type, std::string& search, std::vector<char>& search_data,
                                  std::string& hash_file_name);
+
+    static bool import_hash_meta_json(hash& hash_meta_data, const std::string& input_path);
 
     static void import_hash_meta(hash& hash_meta_data, const std::string& rpkg_meta_file_path);
 

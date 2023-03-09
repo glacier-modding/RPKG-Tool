@@ -207,6 +207,8 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
         rpkg_function::json_to_asva(input_path, output_path);
     } else if (command == "-extract_latest_hash") {
         rpkg_function::extract_latest_hash(input_path, filter, output_path);
+    } else if (command == "-generate_ioi_treeview") {
+        rpkg_function::generate_ioi_treeview(input_path, filter, output_path);
     }
 }
 
@@ -272,6 +274,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-export_map",
                                                     "-export_map_textured",
                                                     "-import_map",
+                                                    "-generate_ioi_treeview",
                                                     "-generate_rpkg_from",
                                                     "-generate_rpkg_quickly_from",
                                                     "-get_line_string",
