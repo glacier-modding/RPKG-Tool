@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(rpkg VERSION 2.28.0)
+project(rpkg VERSION 2.29.0)
 
 set(CMAKE_CXX_STANDARD 17)
 
