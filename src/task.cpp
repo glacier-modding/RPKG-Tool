@@ -209,6 +209,8 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
         rpkg_function::extract_latest_hash(input_path, filter, output_path);
     } else if (command == "-generate_ioi_treeview") {
         rpkg_function::generate_ioi_treeview(input_path, filter, output_path);
+    } else if (command == "-dev_extract_all_entities_to_qn") {
+        dev_function::dev_extract_all_entities_to_qn(input_path, output_path);
     }
 }
 
@@ -235,6 +237,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-decrypt_packagedefinition_thumbs",
                                                     "-dev_diff_rpkg_supermetas",
                                                     "-dev_dlge_names",
+                                                    "-dev_extract_all_entities_to_qn",
                                                     "-dev_extract_rpkg_supermetas",
                                                     "-dev_extract_wwem_strings",
                                                     "-dev_extract_wwes_strings",
