@@ -521,7 +521,7 @@ void mati::generate_json(std::string output_path) {
         std::cout << "MATI instance_offset: " << util::uint32_t_to_hex_string(instance_offset) << std::endl;
     }
 
-    json["$schema"] = "https://wiki.glaciermodding.org/schemas/mati.schema.json";
+    json["$schema"] = "https://glaciermodding.org/schemas/mati.schema.json";
     json["TYPE"] = type;
 
     if (eres_index == -1) {
@@ -841,7 +841,7 @@ mati::mati(std::string mati_path, std::string mati_meta_path, uint64_t hash_valu
         std::cout << "MATI instance_offset: " << util::uint32_t_to_hex_string(instance_offset) << std::endl;
     }
 
-    json["$schema"] = "https://wiki.glaciermodding.org/schemas/mati.schema.json";
+    json["$schema"] = "https://glaciermodding.org/schemas/mati.schema.json";
     json["TYPE"] = type;
 
     if (eres_index == -1) {

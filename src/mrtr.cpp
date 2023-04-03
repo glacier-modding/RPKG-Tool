@@ -75,7 +75,7 @@ void mrtr::generate_json() {
 
     json = nlohmann::ordered_json::object();
 
-    json["$schema"] = "https://wiki.glaciermodding.org/schemas/mrtr.schema.json";
+    json["$schema"] = "https://glaciermodding.org/schemas/mrtr.schema.json";
 
     json["Bones"] = nlohmann::ordered_json::array();
 
