@@ -4,7 +4,6 @@
 #include "crypto.h"
 #include "util.h"
 #include "thirdparty/json/json.hpp"
-#include <chrono>
 #include <sstream>
 #include <fstream>
 #include <filesystem>
@@ -27,35 +26,7 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path) {
     std::vector<std::string> locr_hash_strings;
     std::vector<std::string> locr_file_names;
 
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-
-    double console_update_rate = 1.0 / 2.0;
-    int period_count = 1;
-
     for (const auto& entry : std::filesystem::recursive_directory_iterator(input_folder_path)) {
-        std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-        double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(
-                end_time - start_time).count());
-
-        if (time_in_seconds_from_start_time > console_update_rate) {
-            start_time = end_time;
-
-            if (period_count > 3) {
-                period_count = 0;
-            }
-
-            std::stringstream ss;
-
-            ss << "Scanning folder" << std::string(period_count, '.');
-
-            timing_string = ss.str();
-
-            LOG_NO_ENDL("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-            period_count++;
-        }
-
         if (!std::filesystem::is_regular_file(entry.path().string()))
             continue;
 
@@ -107,43 +78,11 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path) {
 
     std::stringstream ss;
 
-    ss << "Scanning folder: Done";
-
-    timing_string = ss.str();
-
-    LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-    start_time = std::chrono::high_resolution_clock::now();
-
-    console_update_rate = 1.0 / 2.0;
-    period_count = 1;
+    LOG("Scanning folder: Done");
 
     for (uint64_t p = 0; p < json_file_paths.size(); p++) {
         if (gui_control == ABORT_CURRENT_TASK) {
             return;
-        }
-
-        std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-        double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(
-                end_time - start_time).count());
-
-        if (time_in_seconds_from_start_time > console_update_rate) {
-            start_time = end_time;
-
-            if (period_count > 3) {
-                period_count = 0;
-            }
-
-            ss.str(std::string());
-
-            ss << "Rebuilding JSON as LOCR" << std::string(period_count, '.');
-
-            timing_string = ss.str();
-
-            LOG_NO_ENDL("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-            period_count++;
         }
 
         if (!file::path_exists(json_file_paths.at(p) + ".meta")) {
@@ -166,15 +105,13 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path) {
             isLOCRv2 = true;
         }
 
-#ifdef _DEBUG
         LOG((isLOCRv2 ? "LOCRv2 identified" : "LOCRv1 identified"));
-#endif
 
         input_json_meta_file.seekg(0, std::ios_base::end);
 
         uint64_t input_json_meta_file_size = input_json_meta_file.tellg();
 
-        input_json_meta_file.seekg(0, input_json_meta_file.beg);
+        input_json_meta_file.seekg(0, std::ifstream::beg);
 
         if ((isLOCRv2 && (input_json_meta_file_size - 1) % 4 != 0) ||
             (!isLOCRv2 && input_json_meta_file_size % 4 != 0)) {
@@ -353,7 +290,7 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path) {
 
                                         std::string temp_string = it3.value()["String"];
 
-                                        uint32_t string_length = static_cast<uint32_t>(temp_string.length());
+                                        auto string_length = static_cast<uint32_t>(temp_string.length());
 
                                         if (symKey) {
                                             locr_section_size += static_cast<uint32_t>(temp_string.size()) +
@@ -416,7 +353,7 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path) {
                 for (const auto& it2 : it.value().items()) {
                     if (it2.value().contains("Language")) {
                         if (it2.value()["Language"] == languages.at(i)) {
-                            uint32_t section_string_count = static_cast<uint32_t>(locr_language_section_string_hashes.at(
+                            auto section_string_count = static_cast<uint32_t>(locr_language_section_string_hashes.at(
                                     i).size());
 
                             std::memcpy(&char4, &section_string_count, sizeof(uint32_t));
@@ -494,11 +431,7 @@ void rpkg_function::rebuild_locr_from_json_from(std::string& input_path) {
         output_file.write(locr_data.data(), locr_data.size());
     }
 
-    ss.str(std::string());
-
-    ss << "Rebuild JSON as LOCR: Done";
-
-    LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+    LOG("Rebuild JSON as LOCR: Done");
 
     percent_progress = static_cast<uint32_t>(100);
 

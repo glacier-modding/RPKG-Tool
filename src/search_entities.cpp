@@ -1,7 +1,6 @@
 #include "rpkg_function.h"
 #include "generic_function.h"
 #include "global.h"
-#include "console.h"
 #include "util.h"
 #include <iostream>
 #include <unordered_map>
@@ -30,26 +29,24 @@ void rpkg_function::search_entities(std::string& input_path,
     uint32_t results_count = 0;
 
     uint64_t entities_hash_count = 0;
-    uint64_t entities_hash_size_total = 0;
 
-    for (uint64_t i = 0; i < rpkgs.size(); i++) {
-        std::string message = "Searching " + rpkgs.at(i).rpkg_file_name + "...";
+    for (auto & rpkg : rpkgs) {
+        std::string message = "Searching " + rpkg.rpkg_file_name + "...";
 
-        if (!input_path.empty() && input_path != rpkgs.at(i).rpkg_file_path) continue;
+        if (!input_path.empty() && input_path != rpkg.rpkg_file_path) continue;
 
-        for (uint64_t r1 = 0; r1 < rpkgs.at(i).hash_resource_types.size(); r1++) {
+        for (uint64_t r1 = 0; r1 < rpkg.hash_resource_types.size(); r1++) {
             if (gui_control == ABORT_CURRENT_TASK) {
                 return;
             }
 
-            if (rpkgs.at(i).hash_resource_types.at(r1) == "TEMP") {
-                entities_hash_count += rpkgs.at(i).hashes_indexes_based_on_resource_types.at(r1).size();
+            if (rpkg.hash_resource_types.at(r1) == "TEMP") {
+                entities_hash_count += rpkg.hashes_indexes_based_on_resource_types.at(r1).size();
             }
         }
     }
 
     uint64_t entities_hash_count_current = 0;
-    uint64_t entities_hash_size_current = 0;
 
     std::unordered_map<uint64_t, uint64_t> hash_searched;
 
@@ -110,20 +107,13 @@ void rpkg_function::search_entities(std::string& input_path,
                         if (rpkgIndex == UINT32_MAX)
                             continue;
 
-                        if (use_latest_hashes && (uint64_t)i != rpkgIndex)
+                        if (use_latest_hashes && (uint64_t) i != rpkgIndex)
                             continue;
 
                         auto it61 = rpkgs.at(rpkgIndex).hash_map.find(tempHashValue);
 
                         if (!(it61 != rpkgs.at(rpkgIndex).hash_map.end()))
                             continue;
-
-                        if (((entities_hash_count_current * (uint64_t)100000) / (uint64_t)entities_hash_count) %
-                            (uint64_t) 10 == 0 && entities_hash_count_current > 0) {
-                            stringstream_length = console::update_console(message, entities_hash_count,
-                                                                          entities_hash_count_current, start_time,
-                                                                          stringstream_length);
-                        }
 
                         entities_hash_count_current++;
 
@@ -136,16 +126,17 @@ void rpkg_function::search_entities(std::string& input_path,
                             auto it = deep_search_entities_map.find(tempHashValue);
 
                             if (it == deep_search_entities_map.end()) {
-                                timing_string = "Loading entity " + util::hash_to_ioi_string(rpkgs.at(rpkgIndex).hash.at(it61->second).hash_value, true) + "...";
+                                timing_string = "Loading entity " + util::hash_to_ioi_string(
+                                        rpkgs.at(rpkgIndex).hash.at(it61->second).hash_value, true) + "...";
                                 std::string empty = "";
-                                deep_search_entities_map.emplace(tempHashValue, entity(rpkgIndex, it61->second, 3, empty));
+                                deep_search_entities_map.emplace(tempHashValue,
+                                                                 entity(rpkgIndex, it61->second, 3, empty));
                             }
 
                             results_count = deep_search_entities_map[tempHashValue].search(search_items,
                                                                                            results_count,
                                                                                            max_results);
-                        }
-                        else {
+                        } else {
                             std::string empty = "";
                             entity temp_entity(rpkgIndex, it61->second, 3, empty);
 
@@ -163,14 +154,8 @@ void rpkg_function::search_entities(std::string& input_path,
 
         std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
 
-        std::stringstream ss;
-
-        ss << message << "100% Done in "
-           << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count())
-           << "s";
-
-        LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
     }
+    LOG("Done");
 
     percent_progress = (uint32_t) 100;
 

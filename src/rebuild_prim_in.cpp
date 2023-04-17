@@ -12,7 +12,6 @@
 #include <GLTFSDK/GLBResourceReader.h>
 #include <GLTFSDK/Deserialize.h>
 #include <unordered_map>
-#include <chrono>
 #include <sstream>
 #include <fstream>
 #include <regex>
@@ -143,11 +142,6 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, bool generate_rpkgs
         LOG_AND_EXIT("Error: The folder " + input_rpkg_folder_path + " to rebuild the PRIMs does not exist.");
     }
 
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-
-    double console_update_rate = 1.0 / 2.0;
-    int period_count = 1;
-
     std::vector<std::string> prim_folders;
 
     std::string input_folder = input_rpkg_folder_path;
@@ -167,29 +161,6 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, bool generate_rpkgs
     prim_folders.push_back(input_folder);
 
     for (const auto& entry : std::filesystem::recursive_directory_iterator(input_rpkg_folder_path)) {
-        std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-        double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(
-                end_time - start_time).count());
-
-        if (time_in_seconds_from_start_time > console_update_rate) {
-            start_time = end_time;
-
-            if (period_count > 3) {
-                period_count = 0;
-            }
-
-            std::stringstream ss;
-
-            ss << "Scanning folder" << std::string(period_count, '.');
-
-            timing_string = ss.str();
-
-            LOG_NO_ENDL("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
-
-            period_count++;
-        }
-
         if (!std::filesystem::is_directory(entry.path().string()))
             continue;
 
@@ -212,20 +183,8 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, bool generate_rpkgs
         }
     }
 
-    std::stringstream ss;
-
-    ss << "Scanning folder: Done";
-
-    timing_string = ss.str();
-
-    LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
-
-    start_time = std::chrono::high_resolution_clock::now();
-    int stringstream_length = 80;
-
-    std::string message = "Rebuilding PRIM files...";
-
-    timing_string = message;
+    LOG("Scanning folder: Done");
+    LOG("Rebuilding PRIM files...");
 
     initialize_prim_float_values();
 
@@ -234,11 +193,6 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, bool generate_rpkgs
     for (uint64_t i = 0; i < prim_folders.size(); i++) {
         if (gui_control == ABORT_CURRENT_TASK) {
             return;
-        }
-
-        if (((i * static_cast<uint64_t>(100000)) / prim_folders.size()) % static_cast<uint64_t>(10) == 0 && i > 0) {
-            stringstream_length = console::update_console(message, prim_folders.size(), i, start_time,
-                                                          stringstream_length);
         }
 
         std::vector<std::string> glb_file_names;
@@ -754,7 +708,7 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, bool generate_rpkgs
                                     uint32_t y = v * 3 + 1;
                                     uint32_t z = v * 3 + 2;
 
-                                    short temp_short = static_cast<short>(std::roundf(
+                                    auto temp_short = static_cast<short>(std::roundf(
                                             std::numeric_limits<short>::max() *
                                             (vertices_data[x] - vertices_compression_bias[0]) /
                                             vertices_compression_scale[0]));
@@ -932,25 +886,6 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, bool generate_rpkgs
 
                                                                 value_found = true;
                                                             }
-                                                            /* }
-                                                                else
-                                                                {
-                                                                    float diff_a = weights_new[w] - prim_float_values[a];
-                                                                    float diff_b = prim_float_values[a + 1] - weights_new[w];
-
-                                                                    if (diff_a < diff_b)
-                                                                    {
-                                                                        weights_new[w] = prim_float_values[a];
-
-                                                                        value_found = true;
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        weights_new[w] = prim_float_values[a + 1];
-
-                                                                        value_found = true;
-                                                                    }
-                                                                }*/
                                                         }
                                                     }
                                                 }
@@ -1095,7 +1030,7 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, bool generate_rpkgs
 
                                         for (uint32_t w = 0; w < 4; w++) {
                                             if (weights[w] != 0.0f) {
-                                                weights_map.push_back(std::pair(weights[w], w));
+                                                weights_map.emplace_back(weights[w], w);
                                             }
                                         }
 
@@ -1124,25 +1059,6 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, bool generate_rpkgs
 
                                                                 value_found = true;
                                                             }
-                                                            /* }
-                                                                else
-                                                                {
-                                                                    float diff_a = weights_new[w] - prim_float_values[a];
-                                                                    float diff_b = prim_float_values[a + 1] - weights_new[w];
-
-                                                                    if (diff_a < diff_b)
-                                                                    {
-                                                                        weights_new[w] = prim_float_values[a];
-
-                                                                        value_found = true;
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        weights_new[w] = prim_float_values[a + 1];
-
-                                                                        value_found = true;
-                                                                    }
-                                                                }*/
                                                         }
                                                     }
                                                 }
@@ -1199,7 +1115,7 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, bool generate_rpkgs
                                         //float weights_total = weights_0_data[x] + weights_0_data[y] + weights_0_data[z] + weights_0_data[w];
                                         //float normalize_value = 1.0f / weights_total;
 
-                                        uint8_t temp_uint8_t = static_cast<unsigned char>(std::roundf(
+                                        auto temp_uint8_t = static_cast<unsigned char>(std::roundf(
                                                 weights[0] * 255.0f));
 
                                         std::memcpy(&char1, &temp_uint8_t, sizeof(uint8_t));
@@ -1405,7 +1321,7 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, bool generate_rpkgs
                             uint32_t y = v * 3 + 1;
                             uint32_t z = v * 3 + 2;
 
-                            uint8_t temp_uint8_t = static_cast<uint8_t>(std::round(
+                            auto temp_uint8_t = static_cast<uint8_t>(std::round(
                                     (normals_data[x] + 1.0) / 2.0 * 255.0));
 
                             std::memcpy(&char1, &temp_uint8_t, sizeof(uint8_t));
@@ -1481,7 +1397,7 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, bool generate_rpkgs
                             x = v * 2;
                             y = v * 2 + 1;
 
-                            short temp_short = static_cast<short>(std::roundf(
+                            auto temp_short = static_cast<short>(std::roundf(
                                     std::numeric_limits<short>::max() * (uvs_data[x] - uvs_compression_bias[0]) /
                                     uvs_compression_scale[0]));
 
@@ -2631,14 +2547,7 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, bool generate_rpkgs
         }
     }
 
-    std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-    ss.str(std::string());
-
-    ss << message << "100% Done in "
-       << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
-
-    LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
+    LOG("Done");
 
     percent_progress = static_cast<uint32_t>(100);
 

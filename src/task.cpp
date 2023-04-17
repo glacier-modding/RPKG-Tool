@@ -196,7 +196,7 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     } else if (command == "-json_to_mrtr") {
         rpkg_function::json_to_mrtr(input_path, output_path);
     } else if (command == "-mrtr_to_json") {
-        rpkg_function::mrtr_to_json(input_path, filter, output_path);
+        rpkg_function::mrtr_to_json(input_path, output_path);
     } else if (command == "-extract_material_to_json") {
         rpkg_function::extract_material_to_json(input_path, filter, output_path);
     } else if (command == "-json_to_material") {

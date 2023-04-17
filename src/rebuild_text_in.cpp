@@ -1,7 +1,6 @@
 #include "rpkg_function.h"
 #include "file.h"
 #include "global.h"
-#include "console.h"
 #include "util.h"
 #include <iostream>
 #include <chrono>
@@ -17,11 +16,6 @@ void rpkg_function::rebuild_text_in(std::string& input_path, std::string& output
     if (!file::path_exists(input_rpkg_folder_path)) {
         LOG_AND_EXIT("Error: The folder " + input_rpkg_folder_path + " to rebuild the TEXTs does not exist.");
     }
-
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-
-    double console_update_rate = 1.0 / 2.0;
-    int period_count = 1;
 
     std::vector<std::string> text_folders;
 
@@ -42,30 +36,6 @@ void rpkg_function::rebuild_text_in(std::string& input_path, std::string& output
     }
 
     for (const auto& entry : std::filesystem::recursive_directory_iterator(input_rpkg_folder_path)) {
-        std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-        double time_in_seconds_from_start_time = (0.000000001 *
-                                                  std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                                          end_time - start_time).count());
-
-        if (time_in_seconds_from_start_time > console_update_rate) {
-            start_time = end_time;
-
-            if (period_count > 3) {
-                period_count = 0;
-            }
-
-            std::stringstream ss;
-
-            ss << "Scanning folder" << std::string(period_count, '.');
-
-            timing_string = ss.str();
-
-            LOG_NO_ENDL("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-            period_count++;
-        }
-
         if (std::filesystem::is_directory(entry.path().string())) {
             input_folder = entry.path().string();
 
@@ -87,16 +57,7 @@ void rpkg_function::rebuild_text_in(std::string& input_path, std::string& output
         }
     }
 
-    std::stringstream ss;
-
-    ss << "Scanning folder: Done";
-
-    timing_string = ss.str();
-
-    LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-    start_time = std::chrono::high_resolution_clock::now();
-    int stringstream_length = 80;
+    LOG("Scanning folder: Done");
 
     std::string message = "Rebuilding TEXT files...";
 
@@ -104,14 +65,9 @@ void rpkg_function::rebuild_text_in(std::string& input_path, std::string& output
 
     std::set<std::string> directory_set;
 
-    for (uint64_t i = 0; i < text_folders.size(); i++) {
+    for (auto & text_folder : text_folders) {
         if (gui_control == ABORT_CURRENT_TASK) {
             return;
-        }
-
-        if (((i * (uint64_t) 100000) / (uint64_t) text_folders.size()) % (uint64_t) 10 == 0 && i > 0) {
-            stringstream_length = console::update_console(message, text_folders.size(), i, start_time,
-                                                          stringstream_length);
         }
 
         std::vector<std::string> tga_file_names;
@@ -121,7 +77,7 @@ void rpkg_function::rebuild_text_in(std::string& input_path, std::string& output
         std::vector<std::string> text_hash_strings;
         std::vector<std::string> text_file_names;
 
-        for (const auto& entry : std::filesystem::directory_iterator(text_folders.at(i))) {
+        for (const auto& entry : std::filesystem::directory_iterator(text_folder)) {
             if (std::filesystem::is_regular_file(entry.path().string())) {
                 std::size_t pos = entry.path().string().find_last_of("\\/");
 
@@ -140,7 +96,7 @@ void rpkg_function::rebuild_text_in(std::string& input_path, std::string& output
                     if (util::to_upper_case(file_name.substr((file_name.length() - 4), 4)) == ".TGA") {
                         hash_file_name = util::to_upper_case(file_name.substr(0, (file_name.length() - 4)));
                         std::string meta_file_path = file::output_path_append(
-                                "metas\\" + hash_file_name + ".tga.meta", text_folders.at(i));
+                                "metas\\" + hash_file_name + ".tga.meta", text_folder);
 
                         pos = hash_file_name.find_last_of('.');
 
@@ -184,7 +140,7 @@ void rpkg_function::rebuild_text_in(std::string& input_path, std::string& output
         for (uint64_t j = 0; j < tga_file_paths.size(); j++) {
             std::string rpkg_output_path = "";
 
-            bool texture_rebuilt = rpkg_function::rebuild_text(text_folders.at(i), tga_file_paths.at(j),
+            bool texture_rebuilt = rpkg_function::rebuild_text(text_folder, tga_file_paths.at(j),
                                                                text_file_names.at(j), meta_file_paths.at(j),
                                                                rpkg_output_path, rpkgs_path, generate_rpkgs);
 
@@ -207,15 +163,7 @@ void rpkg_function::rebuild_text_in(std::string& input_path, std::string& output
         }
     }
 
-    std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-    ss.str(std::string());
-
-    ss << message << "100% Done in "
-       << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count())
-       << "s";
-
-    LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+    LOG("Done");
 
     percent_progress = (uint32_t) 100;
 

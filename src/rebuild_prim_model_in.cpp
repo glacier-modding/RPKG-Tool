@@ -1,7 +1,6 @@
 #include "rpkg_function.h"
 #include "file.h"
 #include "global.h"
-#include "console.h"
 #include "util.h"
 #include <iostream>
 #include <chrono>
@@ -33,11 +32,6 @@ void rpkg_function::rebuild_prim_model_in(std::string& input_path, std::string& 
 
     rpkg_function::rebuild_text_in(input_path, output_path, false);
 
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-
-    double console_update_rate = 1.0 / 2.0;
-    int period_count = 1;
-
     std::vector<std::string> rebuilt_folders;
     std::vector<std::string> rpkg_file_names;
 
@@ -52,30 +46,6 @@ void rpkg_function::rebuild_prim_model_in(std::string& input_path, std::string& 
     }
 
     for (const auto& entry : std::filesystem::recursive_directory_iterator(input_rpkg_folder_path)) {
-        std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-        double time_in_seconds_from_start_time = (0.000000001 *
-                                                  std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                                          end_time - start_time).count());
-
-        if (time_in_seconds_from_start_time > console_update_rate) {
-            start_time = end_time;
-
-            if (period_count > 3) {
-                period_count = 0;
-            }
-
-            std::stringstream ss;
-
-            ss << "Scanning folder" << std::string(period_count, '.');
-
-            timing_string = ss.str();
-
-            LOG_NO_ENDL("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
-
-            period_count++;
-        }
-
         if (!std::filesystem::is_directory(entry.path().string()))
             continue;
 
@@ -131,31 +101,14 @@ void rpkg_function::rebuild_prim_model_in(std::string& input_path, std::string& 
         }
     }
 
-    std::stringstream ss;
-
-    ss << "Scanning folder: Done";
-
-    timing_string = ss.str();
-
-    LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
-
-    start_time = std::chrono::high_resolution_clock::now();
-    int stringstream_length = 80;
-
-    std::string message = "Rebuilding PRIM MODEL files...";
-
-    timing_string = message;
+    LOG("Scanning folder: Done");
+    LOG("Rebuilding PRIM MODEL files...");
 
     std::set<std::string> directory_set;
 
     for (uint64_t i = 0; i < rebuilt_folders.size(); i++) {
         if (gui_control == ABORT_CURRENT_TASK) {
             return;
-        }
-
-        if (((i * (uint64_t) 100000) / rebuilt_folders.size()) % (uint64_t) 10 == 0 && i > 0) {
-            stringstream_length = console::update_console(message, rebuilt_folders.size(), i, start_time,
-                                                          stringstream_length);
         }
 
         std::vector<std::string> rebuilt_file_names;
@@ -220,15 +173,7 @@ void rpkg_function::rebuild_prim_model_in(std::string& input_path, std::string& 
         rpkg_function::generate_rpkg_from(input_path, output_path_string, true);
     }
 
-    std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-    ss.str(std::string());
-
-    ss << message << "100% Done in "
-       << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count())
-       << "s";
-
-    LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
+    LOG("Done");
 
     percent_progress = (uint32_t) 100;
 

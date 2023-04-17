@@ -32,9 +32,9 @@ public:
 
     mati(uint64_t rpkgs_index, uint64_t hash_index);
 
-    mati(std::string json_path, uint64_t hash_value, std::string output_path, bool output_path_is_file);
+    mati(const std::string& json_path, uint64_t hash_value, const std::string& output_path, bool output_path_is_file);
 
-    mati(std::string mati_path, std::string mati_meta_path, uint64_t hash_value, std::string output_path,
+    mati(const std::string& mati_path, const std::string& mati_meta_path, uint64_t hash_value, const std::string& output_path,
          bool output_path_is_file);
 
     void load_hash_depends();
@@ -43,14 +43,12 @@ public:
 
     void read_properties(uint32_t position, uint32_t parent);
 
-    void generate_json(std::string output_path);
+    void generate_json(const std::string& output_path);
 
     nlohmann::ordered_json
     read_properties_json(nlohmann::ordered_json json, uint32_t position, uint32_t parent, bool from_mati_file);
 
-    void rebuild_properties(nlohmann::ordered_json json, std::string key);
-
-    MATI_PROPERTY_TYPE get_property_type(std::string key);
+    MATI_PROPERTY_TYPE get_property_type(const std::string& key);
 
     void align();
 
@@ -62,7 +60,7 @@ public:
 
     void write_name(std::string name);
 
-    void write_property_type(std::string name);
+    void write_property_type(const std::string& name);
 
     std::string mati_file_name = "";
     uint32_t mati_rpkg_index = 0;

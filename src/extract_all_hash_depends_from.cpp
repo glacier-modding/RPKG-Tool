@@ -1,7 +1,6 @@
 #include "rpkg_function.h"
 #include "file.h"
 #include "global.h"
-#include "console.h"
 #include "util.h"
 #include <unordered_map>
 #include <chrono>
@@ -47,8 +46,6 @@ rpkg_function::extract_all_hash_depends_from(std::string& input_path, std::strin
 
     std::vector<std::string> filters = util::parse_input_filter(unparsed_filters);
 
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-
     for (auto& filter : filters) {
         bool filter_found = false;
 
@@ -88,22 +85,15 @@ rpkg_function::extract_all_hash_depends_from(std::string& input_path, std::strin
             message = "Extracting all hash depends for " + filter + ": ";
         }
 
-        start_time = std::chrono::high_resolution_clock::now();
-        int stringstream_length = 80;
+        LOG(message);
 
-        for (uint64_t x = 0; x < hashes_to_extract.size(); x++) {
+        for (const auto& x : hashes_to_extract) {
             if (gui_control == ABORT_CURRENT_TASK) {
                 return;
             }
 
-            if (((x * static_cast<uint64_t>(100000)) / hashes_to_extract.size()) % static_cast<uint64_t>(100) == 0 &&
-                x > 0) {
-                stringstream_length = console::update_console(message, hashes_to_extract.size(), x, start_time,
-                                                              stringstream_length);
-            }
-
             for (auto& rpkg1 : rpkgs) {
-                auto it1 = rpkg1.hash_map.find(hashes_to_extract.at(x));
+                auto it1 = rpkg1.hash_map.find(x);
 
                 if (!(it1 != rpkg1.hash_map.end()))
                     continue;
@@ -115,7 +105,7 @@ rpkg_function::extract_all_hash_depends_from(std::string& input_path, std::strin
 
                         file::create_directories(prim_output_dir);
 
-                        std::string hash_filter = util::uint64_t_to_hex_string(hashes_to_extract.at(x));
+                        std::string hash_filter = util::uint64_t_to_hex_string(x);
                         rpkg_function::extract_prim_model_from(rpkg1.rpkg_file_path, hash_filter, prim_output_dir);
                     }
                     // we only want prims, either way, we're done with this item
@@ -142,7 +132,7 @@ rpkg_function::extract_all_hash_depends_from(std::string& input_path, std::strin
                 rpkg_extraction_vars rpkg_vars;
 
                 rpkg_vars.input_path = rpkg1.rpkg_file_path;
-                rpkg_vars.filter = util::uint64_t_to_hex_string(hashes_to_extract.at(x));
+                rpkg_vars.filter = util::uint64_t_to_hex_string(x);
                 rpkg_vars.output_path = file::output_path_append("ALLDEPENDS\\" + filter_hash_file_name + "\\",
                                                                  output_path);
 

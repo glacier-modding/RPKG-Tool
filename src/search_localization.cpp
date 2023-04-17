@@ -1,6 +1,5 @@
 #include "rpkg_function.h"
 #include "global.h"
-#include "console.h"
 #include "util.h"
 #include <iostream>
 #include <chrono>
@@ -25,14 +24,11 @@ void rpkg_function::search_localization(std::string& input_path, std::string& se
 
     uint32_t search_crc32_hex = std::strtoul(search.c_str(), nullptr, 16);
 
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-    int stringstream_length = 80;
-
     uint64_t localization_hash_count = 0;
     uint64_t localization_hash_size_total = 0;
 
     for (auto& rpkg : rpkgs) {
-        std::string message = "Searching " + rpkg.rpkg_file_name + "...";
+        LOG("Searching " + rpkg.rpkg_file_name + "...");
 
         if (input_path.empty() || input_path == rpkg.rpkg_file_path) {
             for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++) {
@@ -101,14 +97,6 @@ void rpkg_function::search_localization(std::string& input_path, std::string& se
                                 std::string temp_hash_string = util::uint64_t_to_hex_string(
                                         rpkg.hash.at(hash_index).hash_value);
 
-                                if (((localization_hash_count_current * (uint64_t) 100000) /
-                                     (uint64_t) localization_hash_count) % (uint64_t) 10 == 0 &&
-                                    localization_hash_count_current > 0) {
-                                    stringstream_length = console::update_console(message, localization_hash_size_total,
-                                                                                  localization_hash_size_current,
-                                                                                  start_time, stringstream_length);
-                                }
-
                                 localization_hash_size_current += rpkg.hash.at(hash_index).data.resource.size_final;
                                 localization_hash_count_current++;
 
@@ -166,14 +154,6 @@ void rpkg_function::search_localization(std::string& input_path, std::string& se
 
                                 std::string temp_hash_string = util::uint64_t_to_hex_string(
                                         rpkg.hash.at(hash_index).hash_value);
-
-                                if (((localization_hash_count_current * (uint64_t) 100000) /
-                                     (uint64_t) localization_hash_count) % (uint64_t) 10 == 0 &&
-                                    localization_hash_count_current > 0) {
-                                    stringstream_length = console::update_console(message, localization_hash_size_total,
-                                                                                  localization_hash_size_current,
-                                                                                  start_time, stringstream_length);
-                                }
 
                                 localization_hash_size_current += rpkg.hash.at(hash_index).data.resource.size_final;
                                 localization_hash_count_current++;
@@ -263,14 +243,6 @@ void rpkg_function::search_localization(std::string& input_path, std::string& se
                                 std::string temp_hash_string = util::uint64_t_to_hex_string(
                                         rpkg.hash.at(hash_index).hash_value);
 
-                                if (((localization_hash_count_current * (uint64_t) 100000) /
-                                     (uint64_t) localization_hash_count) % (uint64_t) 10 == 0 &&
-                                    localization_hash_count_current > 0) {
-                                    stringstream_length = console::update_console(message, localization_hash_size_total,
-                                                                                  localization_hash_size_current,
-                                                                                  start_time, stringstream_length);
-                                }
-
                                 localization_hash_size_current += rpkg.hash.at(hash_index).data.resource.size_final;
                                 localization_hash_count_current++;
 
@@ -319,15 +291,7 @@ void rpkg_function::search_localization(std::string& input_path, std::string& se
             }
         }
 
-        std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-        std::stringstream ss;
-
-        ss << message << "100% Done in "
-           << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count())
-           << "s";
-
-        LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+        LOG("Done");
     }
 
     percent_progress = (uint32_t) 100;

@@ -4,7 +4,6 @@
 #include "crypto.h"
 #include "util.h"
 #include "thirdparty/json/json.hpp"
-#include <chrono>
 #include <sstream>
 #include <fstream>
 #include <regex>
@@ -28,36 +27,7 @@ void rpkg_function::rebuild_rtlv_from_json_from(std::string& input_path) {
     std::vector<std::string> rtlv_hash_strings;
     std::vector<std::string> rtlv_file_names;
 
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-
-    double console_update_rate = 1.0 / 2.0;
-    int period_count = 1;
-
     for (const auto& entry : std::filesystem::recursive_directory_iterator(input_folder_path)) {
-        std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-        double time_in_seconds_from_start_time = (0.000000001 *
-                                                  std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                                          end_time - start_time).count());
-
-        if (time_in_seconds_from_start_time > console_update_rate) {
-            start_time = end_time;
-
-            if (period_count > 3) {
-                period_count = 0;
-            }
-
-            std::stringstream ss;
-
-            ss << "Scanning folder" << std::string(period_count, '.');
-
-            timing_string = ss.str();
-
-            LOG_NO_ENDL("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-            period_count++;
-        }
-
         if (!std::filesystem::is_regular_file(entry.path().string()))
             continue;
 
@@ -107,18 +77,7 @@ void rpkg_function::rebuild_rtlv_from_json_from(std::string& input_path) {
         }
     }
 
-    std::stringstream ss;
-
-    ss << "Scanning folder: Done";
-
-    timing_string = ss.str();
-
-    LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-    start_time = std::chrono::high_resolution_clock::now();
-
-    console_update_rate = 1.0 / 2.0;
-    period_count = 1;
+    LOG("Scanning folder: Done");
 
     for (uint64_t p = 0; p < json_file_paths.size(); p++) {
         if (gui_control == ABORT_CURRENT_TASK) {
@@ -129,30 +88,6 @@ void rpkg_function::rebuild_rtlv_from_json_from(std::string& input_path) {
             LOG("Error: JSON meta file " << json_file_paths.at(p) + ".meta" << " could not be found.");
             LOG("       Can not rebuild " << rtlv_file_names.at(p) << " from JSON file " << json_file_paths.at(p));
             continue;
-        }
-
-        std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-        double time_in_seconds_from_start_time = (0.000000001 *
-                                                  std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                                          end_time - start_time).count());
-
-        if (time_in_seconds_from_start_time > console_update_rate) {
-            start_time = end_time;
-
-            if (period_count > 3) {
-                period_count = 0;
-            }
-
-            ss.str(std::string());
-
-            ss << "Rebuilding JSON as RTLV" << std::string(period_count, '.');
-
-            timing_string = ss.str();
-
-            LOG_NO_ENDL("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-            period_count++;
         }
 
         std::ifstream input_json_meta_file = std::ifstream(json_file_paths.at(p) + ".meta",
@@ -388,11 +323,7 @@ void rpkg_function::rebuild_rtlv_from_json_from(std::string& input_path) {
         output_file.write(rtlv_data.data(), rtlv_data.size());
     }
 
-    ss.str(std::string());
-
-    ss << "Rebuilding JSON as RTLV: Done";
-
-    LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+    LOG("Rebuilding JSON as RTLV: Done");
 
     percent_progress = (uint32_t) 100;
 

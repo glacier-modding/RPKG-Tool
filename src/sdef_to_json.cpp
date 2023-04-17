@@ -49,9 +49,7 @@ void rpkg_function::sdef_to_json(std::string& input_path, std::string& output_pa
 
         if (hash_value) {
             if (file::path_exists(file.string() + ".meta")) {
-                timing_string = "Converting: " + file.filename().string() + " (+ SDEF.meta) to SDEF JSON";
-
-                LOG(timing_string);
+                LOG("Converting: " + file.filename().string() + " (+ SDEF.meta) to SDEF JSON");
 
                 if (output_path.empty()) {
                     sdef temp_sdef(file.string(), file.string() + ".meta", hash_value, file.parent_path().string(),
