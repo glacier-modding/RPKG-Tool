@@ -1,11 +1,9 @@
 #include "rpkg_function.h"
 #include "file.h"
 #include "global.h"
-#include "console.h"
 #include "util.h"
 #include "thirdparty/directxtex/DirectXTex.h"
 #include <unordered_map>
-#include <chrono>
 #include <sstream>
 #include <filesystem>
 
@@ -28,22 +26,16 @@ void rpkg_function::extract_all_text_from(std::string& input_path, std::string& 
     if (!input_path_is_rpkg_file) {
         rpkg_function::import_rpkg_files_in_folder(input_path);
     } else {
-        rpkg_function::import_rpkg(input_path, true);
+        rpkg_function::import_rpkg(input_path);
     }
 
     HRESULT hresult = CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
 
     if (FAILED(hresult)) {
-        LOG_AND_EXIT("Failed to initilize COM.");
+        LOG_AND_EXIT("Failed to initialize COM.");
     }
 
-    std::stringstream ss;
-
-    ss << "Scanning folder: Done";
-
-    timing_string = ss.str();
-
-    //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
+    LOG("Scanning folder: Done");
 
     file::create_directories(file::output_path_append("TEXT", output_path));
 
@@ -60,10 +52,6 @@ void rpkg_function::extract_all_text_from(std::string& input_path, std::string& 
     uint64_t prim_count = 0;
     uint64_t prim_hash_size_total = 0;
 
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-    double console_update_rate = 1.0 / 2.0;
-    int period_count = 1;
-
     for (auto& rpkg : rpkgs) {
         for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++) {
             if (rpkg.hash_resource_types.at(r) != "TEXT") continue;
@@ -79,30 +67,6 @@ void rpkg_function::extract_all_text_from(std::string& input_path, std::string& 
                         util::uint64_t_to_hex_string(rpkg.hash.at(hashIndex).hash_value) + "." +
                         rpkg.hash.at(hashIndex).hash_resource_type;
 
-                const std::chrono::time_point endTime = std::chrono::high_resolution_clock::now();
-
-                const double time_in_seconds_from_start_time = (0.000000001 *
-                                                          std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                                                  endTime - start_time).count());
-
-                if (time_in_seconds_from_start_time > console_update_rate) {
-                    start_time = endTime;
-
-                    if (period_count > 3) {
-                        period_count = 0;
-                    }
-
-                    std::stringstream ss1;
-
-                    ss1 << "Scanning RPKGs for TEXT files" << std::string(period_count, '.');
-
-                    timing_string = ss1.str();
-
-                    LOG_NO_ENDL("\r" << ss1.str() << std::string((80 - ss1.str().length()), ' '));
-
-                    period_count++;
-                }
-
                 prim_hash_size_total += rpkg.hash.at(hashIndex).data.resource.size_final;
 
                 prim_count++;
@@ -110,14 +74,7 @@ void rpkg_function::extract_all_text_from(std::string& input_path, std::string& 
         }
     }
 
-    ss.str(std::string());
-
-    ss << "Scanning RPKGs for TEXT files: Done";
-
-    LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-    start_time = std::chrono::high_resolution_clock::now();
-    int stringstream_length = 80;
+    LOG("Scanning RPKGs for TEXT files: Done");
 
     uint64_t prim_count_current = 0;
     uint64_t prim_hash_size_current = 0;
@@ -155,13 +112,6 @@ void rpkg_function::extract_all_text_from(std::string& input_path, std::string& 
 
                     if (gui_control == ABORT_CURRENT_TASK) {
                         return;
-                    }
-
-                    if (((prim_count_current * (uint64_t) 100000) / (uint64_t) prim_count) % (uint64_t) 10 ==
-                        0 && prim_count_current > 0) {
-                        stringstream_length = console::update_console(message, prim_hash_size_total,
-                                                                      prim_hash_size_current, start_time,
-                                                                      stringstream_length);
                     }
 
                     prim_hash_size_current += rpkg.hash.at(hash_index).data.resource.size_final;
@@ -221,15 +171,7 @@ void rpkg_function::extract_all_text_from(std::string& input_path, std::string& 
         }
     }
 
-    std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-    ss.str(std::string());
-
-    ss << message << "100% Done in "
-       << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count())
-       << "s";
-
-    LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+    LOG("Done");
 
     percent_progress = (uint32_t) 100;
 

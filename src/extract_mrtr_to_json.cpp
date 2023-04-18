@@ -3,7 +3,6 @@
 #include "global.h"
 #include "util.h"
 #include "mrtr.h"
-#include <chrono>
 #include <sstream>
 #include <filesystem>
 
@@ -22,7 +21,7 @@ void rpkg_function::extract_mrtr_to_json(std::string& input_path, const std::str
 
     log_output = false;
 
-    rpkg_function::import_rpkg(input_path, true);
+    rpkg_function::import_rpkg(input_path);
 
     const std::vector<std::string> filters = util::parse_input_filter(filter);
 
@@ -44,9 +43,8 @@ void rpkg_function::extract_mrtr_to_json(std::string& input_path, const std::str
                 return;
             }
 
-            timing_string =
-                    "Converting: " + util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) +
-                    "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + " to MRTR JSON";
+            LOG("Converting: " + util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) +
+                    "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + " to MRTR JSON");
 
             mrtr temp_mrtr(rpkg_index, it->second);
 

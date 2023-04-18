@@ -4,10 +4,9 @@
 #include "global.h"
 #include "file.h"
 #include "hash.h"
-#include "console.h"
 #include <sstream>
 
-void rpkg_function::import_rpkg(std::string& rpkg_file_path, bool with_timing) {
+void rpkg_function::import_rpkg(std::string& rpkg_file_path) {
     bool found = false;
 
     task_single_status = TASK_EXECUTING;
@@ -133,9 +132,6 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path, bool with_timing) {
 
     // Load RPKG's hash tables in StreamReader
     StreamReader hash_tables_stream(hash_tables.data(), hash_tables.size());
-
-    // Init timer
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
 
     if (rpkgs.back().game_version == rpkg::Game::ALPHAS) {
         // Read in the hash files/resources data tables
@@ -301,10 +297,8 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path, bool with_timing) {
 
     hashes_depends_map_rpkg_file_paths.push_back(rpkgs.back().rpkg_file_path);
 
-    if (with_timing) {
-        // The GUI needs this to know when importing is finished
-        percent_progress = static_cast<uint32_t>(100);
-    }
+    // The GUI needs this to know when importing is finished
+    percent_progress = static_cast<uint32_t>(100);
 
     task_single_status = TASK_SUCCESSFUL;
 }

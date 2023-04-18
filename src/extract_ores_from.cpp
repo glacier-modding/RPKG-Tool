@@ -4,7 +4,6 @@
 #include "ores.h"
 #include "global.h"
 #include "generic_function.h"
-#include <chrono>
 #include <filesystem>
 #include <sstream>
 #include <regex>
@@ -35,13 +34,7 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
         rpkg_function::import_rpkg_files_in_folder(input_path);
     }
 
-    std::stringstream ss;
-
-    ss << "Scanning folder: Done";
-
-    timing_string = ss.str();
-
-    //LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+    LOG("Scanning folder: Done");
 
     file::create_directories(file::output_path_append("ORES", output_path));
 
@@ -55,14 +48,7 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
         }
     }
 
-    timing_string = "Extracting ORES to IOI Paths...";
-
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-    double console_update_rate = 1.0 / 2.0;
-
-    log_output = false;
-
-    uint64_t temp_hash_value = 0x00858D45F5F9E3CA;
+    constexpr uint64_t temp_hash_value = 0x00858D45F5F9E3CA;
 
     uint32_t rpkg_index = rpkg_function::get_latest_hash(temp_hash_value);
 
@@ -70,7 +56,6 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
         auto it6 = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
         if (it6 != rpkgs.at(rpkg_index).hash_map.end()) {
-            int period_count = 1;
             uint64_t hash_index = it6->second;
 
             std::string hash_file_name =
@@ -84,30 +69,6 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
                     return;
                 }
 
-                std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-                double time_in_seconds_from_start_time = (0.000000001 *
-                                                          std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                                                  end_time - start_time).count());
-
-                if (time_in_seconds_from_start_time > console_update_rate) {
-                    start_time = end_time;
-
-                    if (period_count > 3) {
-                        period_count = 0;
-                    }
-
-                    std::stringstream ss;
-
-                    ss << "Extracting ORES to IOI Paths" << std::string(period_count, '.');
-
-                    timing_string = ss.str() + std::string((80 - ss.str().length()), ' ');
-
-                    LOG_NO_ENDL("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-                    period_count++;
-                }
-
                 std::string hash_string = util::uint64_t_to_hex_string(ores_entry.second);
 
                 if (!extract_single_hash || filter == hash_string) {
@@ -119,8 +80,8 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
                         if (it != rpkgs.at(i).hash_map.end()) {
                             uint64_t hash_index2 = it->second;
 
-                            std::string ores_ioi_path = "";
-                            std::string ores_ioi_directory = "";
+                            std::string ores_ioi_path;
+                            std::string ores_ioi_directory;
                             // std::string ores_base_name = "";
 
                             ores_ioi_path = file::output_path_append("ORES\\" + rpkgs.at(rpkg_index2).rpkg_file_name,
@@ -174,16 +135,10 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
         }
     }
 
-    ss.str(std::string());
-
-    ss << "Extracting ORES linked files: Done";
-
-    LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+    LOG("Extracting ORES linked files: Done");
 
     percent_progress = (uint32_t) 100;
 
     task_single_status = TASK_SUCCESSFUL;
     task_multiple_status = TASK_SUCCESSFUL;
-
-    log_output = true;
 }

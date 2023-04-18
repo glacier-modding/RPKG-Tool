@@ -4,7 +4,6 @@
 #include "../file.h"
 #include "../rpkg_function.h"
 #include "../crypto.h"
-#include "../console.h"
 #include "../text.h"
 #include "../generic_function.h"
 #include "thirdparty/lz4/lz4.h"
@@ -17,7 +16,6 @@
 #include <fstream>
 #include <iomanip>
 #include <string_view>
-#include <set>
 #include <filesystem>
 #include <regex>
 
@@ -949,9 +947,6 @@ int get_hashes_with_no_reverse_depends(char* rpkg_file) {
         total_hash_count += rpkgs.at(i).hash.size();
     }
 
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-    int stringstream_length = 80;
-
     /*std::unordered_map<uint64_t, uint64_t> hashes_depends_map;
 
     std::string message = "Building " + std::string(rpkg_file) + "\'s hash dependecy map...";
@@ -981,19 +976,11 @@ int get_hashes_with_no_reverse_depends(char* rpkg_file) {
         }
     }*/
 
-    start_time = std::chrono::high_resolution_clock::now();
-
-    std::string message = "Scanning hash dependecy map (of all imported RPKGs) for top level hash files/resources...";
+    LOG("Scanning hash dependecy map (of all imported RPKGs) for top level hash files/resources...");
 
     for (uint64_t i = 0; i < rpkgs.size(); i++) {
         if (rpkgs.at(i).rpkg_file_path == rpkg_file) {
             for (uint64_t j = 0; j < rpkgs.at(i).hash.size(); j++) {
-                if (((hash_count * (uint64_t) 100000) / (uint64_t) total_hash_count) % (uint64_t) 100 == 0 &&
-                    hash_count > 0) {
-                    stringstream_length = console::update_console(message, total_hash_count, hash_count, start_time,
-                                                                  stringstream_length);
-                }
-
                 hash_count++;
 
                 for (uint64_t k = 0; k < hashes_depends_map.size(); k++) {
@@ -1025,9 +1012,7 @@ int get_direct_hash_depends(char* rpkg_file, char* hash_string) {
 
     hash_direct_depends = "";
 
-    std::string message = "Locating " + std::string(hash_string) + "\'s direct hash depends...";
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-    int stringstream_length = 80;
+    LOG("Locating " + std::string(hash_string) + "\'s direct hash depends...");
 
     for (uint64_t i = 0; i < rpkgs.size(); i++) {
         if (rpkgs.at(i).rpkg_file_path == rpkg_file) {
@@ -1040,12 +1025,6 @@ int get_direct_hash_depends(char* rpkg_file, char* hash_string) {
                         rpkgs.at(i).hash.at(it->second).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
                 for (uint64_t j = 0; j < temp_hash_reference_count; j++) {
-                    if (((j * (uint64_t) 100000) / (uint64_t) temp_hash_reference_count) % (uint64_t) 100 == 0 &&
-                        j > 0) {
-                        stringstream_length = console::update_console(message, temp_hash_reference_count, j, start_time,
-                                                                      stringstream_length);
-                    }
-
                     for (uint64_t k = 0; k < rpkgs.size(); k++) {
                         if (rpkgs.at(k).rpkg_file_path == rpkg_file) {
                             std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(k).hash_map.find(
@@ -1367,24 +1346,10 @@ int load_recursive_temps(char* temp_hash, char* rpkg_file_path, uint32_t temp_ve
                 rpkg_function::recursive_temp_loader(rpkg_index, it->second, temp_version, parents_map, temps_indexes,
                                                      0, 0, 0);
 
-                std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-                int stringstream_length = 80;
-
-                timing_string = "Found " + util::uint32_t_to_string(temps.size()) +
-                                " TEMP/TBLU recursively linked file(s).\n\nLoading recursive TEMP/TBLU file data: 0% done";
-
-                percent_progress = 0;
-
-                std::string message = "Found " + util::uint32_t_to_string(temps.size()) +
-                                      " TEMP/TBLU recursively linked file(s).\n\nLoading recursive TEMP/TBLU file data: ";
+                LOG("Found " + util::uint32_t_to_string(temps.size()) +
+                                " TEMP/TBLU recursively linked file(s).\n\nLoading recursive TEMP/TBLU file data: 0% done");
 
                 for (uint64_t t = 0; t < temps.size(); t++) {
-                    //if (((t * (uint64_t)100000) / (uint64_t)temps.size()) % (uint64_t)100 == 0 && t > 0)
-                    if (t > 0) {
-                        stringstream_length = console::update_console(message, temps.size(), t, start_time,
-                                                                      stringstream_length);
-                    }
-
                     if (temps.at(t).tblu_return_value == TEMP_TBLU_FOUND) {
                         temps.at(t).load_data();
                     }
@@ -1443,27 +1408,17 @@ int load_non_recursive_temps(char* temp_hash, char* rpkg_file_path, uint32_t tem
 
                 temps_map[rpkgs.at(rpkg_index).hash.at(it->second).hash_value] = temps_index;
 
-                std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-                int stringstream_length = 80;
-
-                timing_string = "Loading non-recursive TEMP/TBLU file data: 0% done";
+                LOG("Loading non-recursive TEMP/TBLU file data: 0% done");
 
                 percent_progress = 0;
 
-                std::string message = "Loading non-recursive TEMP/TBLU file data: ";
-
                 for (uint64_t t = 0; t < temps.size(); t++) {
-                    if (t > 0) {
-                        stringstream_length = console::update_console(message, temps.size(), t, start_time,
-                                                                      stringstream_length);
-                    }
-
                     if (temps.at(t).tblu_return_value == TEMP_TBLU_FOUND) {
                         temps.at(t).load_data();
                     }
                 }
 
-                timing_string = "Loading non-recursive TEMP/TBLU file data: 100% done";
+                LOG("Loading non-recursive TEMP/TBLU file data: 100% done");
 
                 percent_progress = 100;
 
@@ -2063,24 +2018,12 @@ int import_rpkgs(char* rpkgs_path, char* rpkgs_list) {
         }
     }
 
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-
-    int stringstream_length = 80;
-
-    std::string message = "Importing all RPKG file(s) from " + rpkgs_path_string + ": ";
-
-    timing_string = message + "0% done";
+    LOG("Importing all RPKG file(s) from " + rpkgs_path_string + ": ");
 
     percent_progress = 0;
 
     for (uint32_t i = 0; i < rpkg_files.size(); i++) {
-        //if (((i * (uint64_t)1000) / (uint64_t)rpkg_files.size()) % (uint64_t)100 == 0 && i > 0)
-        if (i > 0) {
-            stringstream_length = console::update_console(message, rpkg_files.size(), i, start_time,
-                                                          stringstream_length);
-        }
-
-        rpkg_function::import_rpkg(rpkg_files.at(i), false);
+        rpkg_function::import_rpkg(rpkg_files.at(i));
     }
 
     timing_string = "Importing all RPKG file(s) from " + rpkgs_path_string + ": 100% done";

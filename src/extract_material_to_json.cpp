@@ -4,7 +4,6 @@
 #include "global.h"
 #include "util.h"
 #include "material.h"
-#include <chrono>
 #include <iostream>
 
 void rpkg_function::extract_material_to_json(std::string& input_path, std::string& filter, std::string& output_path) {

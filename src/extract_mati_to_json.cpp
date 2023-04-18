@@ -4,7 +4,6 @@
 #include "global.h"
 #include "util.h"
 #include "mati.h"
-#include <chrono>
 #include <filesystem>
 #include <iostream>
 
@@ -29,7 +28,7 @@ void rpkg_function::extract_mati_to_json(std::string& input_path, const std::str
         LOG("Loading Hash List: Done");
     }
 
-    rpkg_function::import_rpkg(input_path, true);
+    rpkg_function::import_rpkg(input_path);
 
     const std::vector<std::string> filters = util::parse_input_filter(filter);
 
@@ -51,9 +50,8 @@ void rpkg_function::extract_mati_to_json(std::string& input_path, const std::str
                 return;
             }
 
-            timing_string =
-                    "Converting: " + util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) +
-                    "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + " to MATI JSON";
+            LOG("Converting: " + util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) +
+                    "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + " to MATI JSON");
 
             mati temp_mati(rpkg_index, it->second);
 

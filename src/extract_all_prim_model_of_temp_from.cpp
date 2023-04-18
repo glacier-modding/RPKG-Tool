@@ -2,7 +2,6 @@
 #include "file.h"
 #include "global.h"
 #include "util.h"
-#include <chrono>
 #include <sstream>
 #include <filesystem>
 

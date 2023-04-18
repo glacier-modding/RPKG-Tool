@@ -209,59 +209,32 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
         task_map_status = MAP_RECURSIVE_TEMP_LOADING_EXECUTING;
 
         LOG("Calculating number of recursive entities (TEMP/TBLU)...");
-        timing_string = "Calculating number of recursive entities (TEMP/TBLU)...";
 
         temp_map.map_recursive_temp_loader(rpkg_index, hash_value);
 
         LOG("Number of recursive entities (TEMP/TBLU) found: " + util::uint32_t_to_string(temp_map.map_temps.size()));
-        timing_string = "Number of recursive entities (TEMP/TBLU) found: " +
-                        util::uint32_t_to_string(temp_map.map_temps.size());
-        temp_map.start_time = std::chrono::high_resolution_clock::now();
-        temp_map.stringstream_length = 80;
-        temp_map.message = "Loading recursive TEMP/TBLU entities: ";
-        timing_string = temp_map.message + "0% done";
 
-        for (uint64_t t = 0; t < temp_map.map_temps.size(); t++) {
+        for (auto & map_temp : temp_map.map_temps) {
             if (gui_control == ABORT_CURRENT_TASK) {
                 return;
             }
 
-            if (((t * (uint64_t) 10000) / (uint64_t) temp_map.map_temps.size()) % (uint64_t) 10 == 0 && t > 0) {
-                temp_map.stringstream_length = console::update_console(temp_map.message, temp_map.map_temps.size(), t,
-                                                                       temp_map.start_time,
-                                                                       temp_map.stringstream_length);
-            }
-
             map_percent_progress_recursive_temp = percent_progress;
 
-            if (temp_map.map_temps.at(t).tblu_return_value == TEMP_TBLU_FOUND) {
-                temp_map.map_temps.at(t).load_data();
+            if (map_temp.tblu_return_value == TEMP_TBLU_FOUND) {
+                map_temp.load_data();
             }
         }
 
-        temp_map.end_time = std::chrono::high_resolution_clock::now();
-        std::stringstream ss;
-        ss << temp_map.message << "100% Done in " << (0.000000001 *
-                                                      std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                                              temp_map.end_time - temp_map.start_time).count()) << "s";
-        LOG("\r" << ss.str() << std::string((temp_map.stringstream_length - ss.str().length()), ' '));
-        timing_string = ss.str();
+        LOG("Done 1");
 
         temp_map.root_scenes[hash_value] = temp_map.root_scenes.size();
 
         temp_map.get_root_scenes();
 
-        //std::unordered_map<uint64_t, uint64_t>::iterator it;
-
-        //for (it = temp_map.root_scenes.begin(); it != temp_map.root_scenes.end(); ++it)
-        //{
-        //std::cout << "Root scenes (TEMPs): " << util::uint64_t_to_hex_string(it->first) << std::endl;
-        //}
-
         task_map_status = MAP_GET_MAP_NODES_EXECUTING;
 
         LOG("Calculating number of map nodes...");
-        timing_string = "Calculating number of map node...";
         temp_map.map_node_count = 0;
 
         for (uint64_t t = 0; t < temp_map.map_temps.size(); t++) {
@@ -271,29 +244,17 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
         }
 
         LOG("Number of map nodes found: " + util::uint32_t_to_string(temp_map.map_node_count));
-        timing_string = "Number of map nodes found: " + util::uint32_t_to_string(temp_map.map_node_count);
-        temp_map.start_time = std::chrono::high_resolution_clock::now();
-        temp_map.stringstream_length = 80;
-        temp_map.message = "Loading map nodes: ";
-        timing_string = temp_map.message + "0% done";
         temp_map.map_node_count_current = 0;
 
         for (uint64_t t = 0; t < temp_map.map_temps.size(); t++) {
             temp_map.get_map_node(temp_map.map_temps.at(t));
         }
 
-        temp_map.end_time = std::chrono::high_resolution_clock::now();
-        ss.str(std::string(""));
-        ss << temp_map.message << "100% Done in " << (0.000000001 *
-                                                      std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                                              temp_map.end_time - temp_map.start_time).count()) << "s";
-        LOG("\r" << ss.str() << std::string((temp_map.stringstream_length - ss.str().length()), ' '));
-        timing_string = ss.str();
+        LOG("Done 2");
 
         task_map_status = MAP_EXTRACT_MAP_NODES_PRIMS_EXECUTING;
 
         LOG("Calculating number of map nodes with PRIMs...");
-        timing_string = "Calculating number of map node with PRIMs...";
         temp_map.map_node_prim_count = 0;
 
         for (uint64_t m = 0; m < temp_map.map_nodes.size(); m++) {
@@ -303,88 +264,12 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
         }
 
         LOG("Number of map nodes with PRIMs found: " + util::uint32_t_to_string(temp_map.map_node_prim_count));
-        timing_string =
-                "Number of map nodes with PRIMs found: " + util::uint32_t_to_string(temp_map.map_node_prim_count);
-        temp_map.start_time = std::chrono::high_resolution_clock::now();
-        temp_map.stringstream_length = 80;
-        temp_map.message = "Extracting all map's PRIMs as GLBs: ";
-        timing_string = temp_map.message + "0% done";
+
         temp_map.map_node_count_current = 0;
 
         temp_map.extract_map_prims(output_path, textured);
 
-        temp_map.end_time = std::chrono::high_resolution_clock::now();
-        ss.str(std::string(""));
-        ss << temp_map.message << "100% Done in " << (0.000000001 *
-                                                      std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                                              temp_map.end_time - temp_map.start_time).count()) << "s";
-        LOG("\r" << ss.str() << std::string((temp_map.stringstream_length - ss.str().length()), ' '));
-        timing_string = ss.str();
-
-        /*for (uint64_t m = 0; m < temp_map.map_nodes.size(); m++)
-        {
-            std::cout << std::endl;
-            std::cout << "temp_hash: " << util::uint64_t_to_hex_string(temp_map.map_nodes.at(m).temp_hash) << std::endl;
-            std::cout << "entityId: " << temp_map.map_nodes.at(m).entityId << std::endl;
-            std::cout << "subEntity: " << temp_map.map_nodes.at(m).subEntity << std::endl;
-            std::cout << "entryName: " << temp_map.map_nodes.at(m).entryName << std::endl;
-            std::cout << "entityTypeResourceIndex: " << temp_map.map_nodes.at(m).entityTypeResourceIndex << std::endl;
-            std::cout << "entityTypeResourceIndex_hash: " << util::uint64_t_to_hex_string(temp_map.map_nodes.at(m).entityTypeResourceIndex_hash) << std::endl;
-            std::cout << "entityTypeResourceIndex_hash_type: " << temp_map.map_nodes.at(m).entityTypeResourceIndex_hash_type << std::endl;
-
-            std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(temp_map.map_nodes.at(m).entityTypeResourceIndex_hash);
-
-            if (it2 != hash_list_hash_map.end())
-            {
-                std::cout << "entityTypeResourceIndex_hash IOI string: " << hash_list_hash_strings.at(it2->second) << std::endl;
-            }
-
-            if (temp_map.map_nodes.at(m).has_m_eidParent)
-            {
-                std::cout << "has_m_eidParent: " << temp_map.map_nodes.at(m).has_m_eidParent << std::endl;
-                std::cout << "has_m_eidParent_local: " << temp_map.map_nodes.at(m).has_m_eidParent_local << std::endl;
-                std::cout << "has_m_eidParent_external: " << temp_map.map_nodes.at(m).has_m_eidParent_external << std::endl;
-                std::cout << "entityID: " << temp_map.map_nodes.at(m).entityID << std::endl;
-                std::cout << "externalSceneIndex: " << temp_map.map_nodes.at(m).externalSceneIndex << std::endl;
-
-                if (temp_map.map_nodes.at(m).has_m_eidParent_external)
-                {
-                    std::cout << "externalSceneIndex_hash: " << util::uint64_t_to_hex_string(temp_map.map_nodes.at(m).externalSceneIndex_hash) << std::endl;
-
-                    std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(temp_map.map_nodes.at(m).externalSceneIndex_hash);
-
-                    if (it2 != hash_list_hash_map.end())
-                    {
-                        std::cout << "externalSceneIndex_hash IOI string: " << hash_list_hash_strings.at(it2->second) << std::endl;
-                    }
-                }
-
-                std::cout << "entityIndex: " << temp_map.map_nodes.at(m).entityIndex << std::endl;
-            }
-
-            if (temp_map.map_nodes.at(m).has_m_mTransform)
-            {
-                std::cout << "has_m_mTransform: " << temp_map.map_nodes.at(m).has_m_mTransform << std::endl;
-            }
-
-            //std::cout << "m_mTransform:" << map_nodes.at(m).m_mTransform << std::endl;
-
-            if (temp_map.map_nodes.at(m).has_prim_resource)
-            {
-                std::cout << "has_prim_resource: " << temp_map.map_nodes.at(m).has_prim_resource << std::endl;
-                std::cout << "prim_hash: " << temp_map.map_nodes.at(m).prim_hash << std::endl;
-                std::cout << "m_IDHigh: " << temp_map.map_nodes.at(m).m_IDHigh << std::endl;
-                std::cout << "m_IDLow: " << temp_map.map_nodes.at(m).m_IDLow << std::endl;
-                std::cout << "prim_hash: " << util::uint64_t_to_hex_string(temp_map.map_nodes.at(m).prim_hash) << std::endl;
-
-                it2 = hash_list_hash_map.find(temp_map.map_nodes.at(m).prim_hash);
-
-                if (it2 != hash_list_hash_map.end())
-                {
-                    std::cout << "PRIM file IOI string: " << hash_list_hash_strings.at(it2->second) << std::endl;
-                }
-            }
-        }*/
+        LOG("Done 3");
 
         for (uint64_t m = 0; m < temp_map.map_nodes.size(); m++) {
             bool is_parent_node_local = false;
@@ -394,7 +279,7 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
             auto it = temp_map.temp_hash_map_node_map.find(temp_map.map_nodes.at(m).temp_hash);
 
             if (it != temp_map.temp_hash_map_node_map.end()) {
-                for (unsigned int n : it->second) {
+                for (const auto n : it->second) {
                     if (temp_map.map_nodes.at(n).has_m_eidParent_local) {
                         local_temp_entity_count++;
 
@@ -417,15 +302,11 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
 
             for (auto it2 = temp_map.root_scenes.begin(); it2 != temp_map.root_scenes.end(); ++it2) {
                 if (temp_map.map_nodes.at(m).temp_hash == it2->first) {
-                    //std::cout << temp_map.map_nodes.at(m).entryName << "(" << util::uint64_t_to_hex_string(temp_map.map_nodes.at(m).temp_hash) << ")" << " is in root scene " << util::uint64_t_to_hex_string(it->first) << std::endl;
-
                     in_root_scene = true;
                 }
             }
 
             if (!temp_map.map_nodes.at(m).has_m_eidParent && is_parent_node_local && in_root_scene) {
-                //std::cout << temp_map.map_nodes.at(m).entryName << "(" << util::uint64_t_to_hex_string(temp_map.map_nodes.at(m).temp_hash) << ")" << " is a root scene top level map node!" << std::endl;
-
                 temp_map.map_nodes.at(m).is_top_level_root_node = true;
 
                 bool map_root_node_found = false;
@@ -440,8 +321,6 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
                     temp_map.map_root_nodes.push_back(m);
                 }
             } else if (!temp_map.map_nodes.at(m).has_m_eidParent && is_parent_node_local) {
-                //std::cout << temp_map.map_nodes.at(m).entryName << "(" << util::uint64_t_to_hex_string(temp_map.map_nodes.at(m).temp_hash) << ")" << " is a local top level map node!" << std::endl;
-
                 temp_map.map_nodes.at(m).is_top_level_Local_node = true;
 
                 temp_map.add_to_temp_hash_is_top_level_Local_node_map(m, temp_map.map_nodes.at(m).temp_hash);
@@ -464,80 +343,11 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
 
         task_map_status = MAP_GENERATE_GODOT_PROJECT_EXECUTING;
 
-        temp_map.start_time = std::chrono::high_resolution_clock::now();
-        temp_map.stringstream_length = 80;
-        temp_map.message = "Generating Godot project files: ";
-        timing_string = temp_map.message + "0% done";
         temp_map.map_node_count_current = 0;
 
         for (uint32_t m = 0; m < temp_map.map_root_nodes.size(); m++) {
             temp_map.generate_map_node_strings(temp_map.map_root_nodes.at(m), 0, "", 0);
         }
-
-        /*std::string UE5_file = "map_root_nodes=";
-
-        for (uint32_t m = 0; m < temp_map.map_root_nodes.size(); m++)
-        {
-            UE5_file += util::uint32_t_to_string(temp_map.map_root_nodes.at(m));
-
-            if (m < (temp_map.map_root_nodes.size() - 1))
-            {
-                UE5_file += ",";
-            }
-        }
-
-        UE5_file += "\n";
-
-        for (uint32_t m = 0; m < temp_map.map_nodes.size(); m++)
-        {
-            if (temp_map.map_nodes.at(m).has_parent_map_node)
-            {
-                UE5_file += util::uint32_t_to_string(m) + ",";
-
-                for (uint32_t p = 0; p < temp_map.map_nodes.at(m).parent_map_nodes.size(); p++)
-                {
-                    UE5_file += util::uint32_t_to_string(temp_map.map_nodes.at(m).parent_map_nodes.at(p));
-
-                    if (p < (temp_map.map_nodes.at(m).parent_map_nodes.size() - 1))
-                    {
-                        UE5_file += "|";
-                    }
-                    else
-                    {
-                        UE5_file += ",";
-                    }
-                }
-
-                UE5_file += temp_map.map_nodes.at(m).type + ",";
-                UE5_file += temp_map.map_nodes.at(m).m_mTransform_string + ",";
-                UE5_file += temp_map.map_nodes.at(m).has_prim_resource ? "1," : "0,";
-                UE5_file += util::uint64_t_to_hex_string(temp_map.map_nodes.at(m).prim_hash) + ",";
-                UE5_file += util::string_to_hex_string(temp_map.map_nodes.at(m).entryName) + "\n";
-            }
-            else
-            {
-                for (uint32_t n = 0; n < temp_map.map_root_nodes.size(); n++)
-                {
-                    if (m == temp_map.map_root_nodes.at(n))
-                    {
-                        UE5_file += util::uint32_t_to_string(m) + ",";
-                        UE5_file += "0,";
-                        UE5_file += temp_map.map_nodes.at(m).type + ",";
-                        UE5_file += "1,0,0,0,1,0,0,0,1,0,0,0,";
-                        UE5_file += temp_map.map_nodes.at(m).has_prim_resource ? "1," : "0,";
-                        UE5_file += util::uint64_t_to_hex_string(temp_map.map_nodes.at(m).prim_hash) + ",";
-                        UE5_file += util::string_to_hex_string(temp_map.map_nodes.at(m).entryName) + "\n";
-                    }
-                }
-            }
-        }
-
-        if (!file::write_to_file(file::output_path_append("UE5.txt", output_path), UE5_file))
-        {
-            LOG("Error: File " + file::output_path_append("UE5.txt", output_path) + " could not be created.");
-        }*/
-
-        //std::cout << temp_map.godot_tscn_file << std::endl;
 
         std::string godot_godot_file = "config_version = 5\n\n";
         godot_godot_file += "[application]\n\n";
@@ -567,13 +377,7 @@ void map::export_map(std::string& input_path, std::string& filter, std::string& 
             LOG_AND_RETURN(task_status_string);
         }
 
-        temp_map.end_time = std::chrono::high_resolution_clock::now();
-        ss.str(std::string(""));
-        ss << temp_map.message << "100% Done in " << (0.000000001 *
-                                                      std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                                              temp_map.end_time - temp_map.start_time).count()) << "s";
-        LOG("\r" << ss.str() << std::string((temp_map.stringstream_length - ss.str().length()), ' '));
-        timing_string = ss.str();
+        LOG("Done 4");
 
         task_map_status = MAP_EXPORT_SUCCESSFUL;
     } else {
@@ -649,7 +453,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
     if (!input_path_is_rpkg_file) {
         rpkg_function::import_rpkg_files_in_folder(input_path);
     } else {
-        rpkg_function::import_rpkg(input_path, false);
+        rpkg_function::import_rpkg(input_path);
     }
 
     std::string map_file_path = "";
@@ -813,26 +617,14 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
     task_map_status = MAP_GODOT_MAP_NODE_IMPORTING;
 
     LOG("Calculating number of map nodes in Godot scene file...");
-    timing_string = "Calculating number of map nodes in Godot scene file...";
 
     util::split_string_view(godot_scene_file_string_view, "[node", map_node_node_positions);
 
     LOG("Number of map nodes in Godot scene file found: " + util::uint32_t_to_string(map_node_node_positions.size()));
-    timing_string = "Number of map nodes in Godot scene file found: " +
-                    util::uint32_t_to_string(map_node_node_positions.size());
-    temp_map.start_time = std::chrono::high_resolution_clock::now();
-    temp_map.stringstream_length = 80;
-    temp_map.message = "Importing map node data from Godot scene file: ";
-    timing_string = temp_map.message + "0% done";
 
     for (uint64_t p = 1; p < map_node_node_positions.size(); p++) {
         if (gui_control == ABORT_CURRENT_TASK) {
             return;
-        }
-
-        if (((p * (uint64_t) 10000) / (uint64_t) map_node_node_positions.size()) % (uint64_t) 10 == 0 && p > 0) {
-            temp_map.stringstream_length = console::update_console(temp_map.message, map_node_node_positions.size(), p,
-                                                                   temp_map.start_time, temp_map.stringstream_length);
         }
 
         map_percent_progress_godot_map_nodes = percent_progress;
@@ -988,35 +780,17 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
         temp_map.map_nodes.push_back(temp_map_node);
     }
 
-    temp_map.end_time = std::chrono::high_resolution_clock::now();
-    std::stringstream ss;
-    ss << temp_map.message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(
-            temp_map.end_time - temp_map.start_time).count()) << "s";
-    LOG("\r" << ss.str() << std::string((temp_map.stringstream_length - ss.str().length()), ' '));
-    timing_string = ss.str();
+    LOG("Done 5");
 
     task_map_status = MAP_NODE_TEMP_LOADING;
 
     LOG("Number of map node unique entities (TEMP/TBLU) found: " + util::uint32_t_to_string(map_temp_hashes.size()));
-    timing_string =
-            "Number of map node unique entities (TEMP/TBLU) found: " + util::uint32_t_to_string(map_temp_hashes.size());
-    temp_map.start_time = std::chrono::high_resolution_clock::now();
-    temp_map.stringstream_length = 80;
-    temp_map.message = "Loading map node unique entities (TEMP/TBLU): ";
-    timing_string = temp_map.message + "0% done";
 
     uint32_t map_node_temp_load_count = 0;
 
     for (const uint64_t& temp_hash : map_temp_hashes) {
         if (gui_control == ABORT_CURRENT_TASK) {
             return;
-        }
-
-        if (((map_node_temp_load_count * (uint64_t) 10000) / (uint64_t) map_temp_hashes.size()) % (uint64_t) 10 == 0 &&
-            map_node_temp_load_count > 0) {
-            temp_map.stringstream_length = console::update_console(temp_map.message, map_temp_hashes.size(),
-                                                                   map_node_temp_load_count, temp_map.start_time,
-                                                                   temp_map.stringstream_length);
         }
 
         map_node_temp_load_count++;
@@ -1031,7 +805,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
             auto it = rpkgs.at(rpkg_index).hash_map.find(temp_hash);
 
             if (it != rpkgs.at(rpkg_index).hash_map.end()) {
-                temp_map.map_temps.emplace_back(temp(rpkg_index, it->second, 3));
+                temp_map.map_temps.emplace_back(rpkg_index, it->second, 3);
 
                 uint32_t temp_index = temp_map.map_temps.size() - 1;
 
@@ -1042,30 +816,15 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
         }
     }
 
-    temp_map.end_time = std::chrono::high_resolution_clock::now();
-    ss.str(std::string(""));
-    ss << temp_map.message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(
-            temp_map.end_time - temp_map.start_time).count()) << "s";
-    LOG("\r" << ss.str() << std::string((temp_map.stringstream_length - ss.str().length()), ' '));
-    timing_string = ss.str();
+    LOG("Done 6");
 
     std::unordered_map<uint64_t, bool> temps_modified_map;
 
     task_map_status = MAP_NODE_CHANGES_CHECK;
 
-    temp_map.start_time = std::chrono::high_resolution_clock::now();
-    temp_map.stringstream_length = 80;
-    temp_map.message = "Checking map nodes for changes: ";
-    timing_string = temp_map.message + "0% done";
-
     for (uint64_t m = 0; m < temp_map.map_nodes.size(); m++) {
         if (gui_control == ABORT_CURRENT_TASK) {
             return;
-        }
-
-        if (((m * (uint64_t) 10000) / (uint64_t) temp_map.map_nodes.size()) % (uint64_t) 10 == 0 && m > 0) {
-            temp_map.stringstream_length = console::update_console(temp_map.message, temp_map.map_nodes.size(), m,
-                                                                   temp_map.start_time, temp_map.stringstream_length);
         }
 
         map_percent_progress_map_node_changes_check = percent_progress;
@@ -1298,11 +1057,11 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
                     }
 
                     if (has_transform && has_primitive_scale) {
-                        temp_map.scale_transform(m_mTransform, primitive_scale.x, primitive_scale.y, primitive_scale.z);
+                        map::scale_transform(m_mTransform, primitive_scale.x, primitive_scale.y, primitive_scale.z);
 
                         matrix43 node_m_mTransform = temp_map.map_nodes.at(m).m_mTransform;
 
-                        temp_map.scale_transform(node_m_mTransform, primitive_scale.x, primitive_scale.y,
+                        map::scale_transform(node_m_mTransform, primitive_scale.x, primitive_scale.y,
                                                  primitive_scale.z);
 
                         if (!temp_map.matrixes_equal(node_m_mTransform, m_mTransform)) {
@@ -1721,21 +1480,11 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
         }
     }
 
-    temp_map.end_time = std::chrono::high_resolution_clock::now();
-    ss.str(std::string(""));
-    ss << temp_map.message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(
-            temp_map.end_time - temp_map.start_time).count()) << "s";
-    LOG("\r" << ss.str() << std::string((temp_map.stringstream_length - ss.str().length()), ' '));
-    timing_string = ss.str();
+    LOG("Done 7");
 
     std::unordered_map<uint64_t, bool>::iterator temps_modified_map_it;
 
     task_map_status = MAP_WRITING_CHANGES_TO_QN;
-
-    temp_map.start_time = std::chrono::high_resolution_clock::now();
-    temp_map.stringstream_length = 80;
-    temp_map.message = "Writing changes to QN (QuickEntity v2.1) JSON files: ";
-    timing_string = temp_map.message + "0% done";
 
     uint32_t map_node_jsons_count = 0;
 
@@ -1743,12 +1492,6 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
          temps_modified_map_it != temps_modified_map.end(); ++temps_modified_map_it) {
         if (gui_control == ABORT_CURRENT_TASK) {
             return;
-        }
-
-        if (map_node_jsons_count > 0) {
-            temp_map.stringstream_length = console::update_console(temp_map.message, temps_modified_map.size(),
-                                                                   map_node_jsons_count, temp_map.start_time,
-                                                                   temp_map.stringstream_length);
         }
 
         map_node_jsons_count++;
@@ -1800,12 +1543,7 @@ void map::import_map(std::string& input_path, std::string& map_path, std::string
         }
     }
 
-    temp_map.end_time = std::chrono::high_resolution_clock::now();
-    ss.str(std::string(""));
-    ss << temp_map.message << "100% Done in " << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(
-            temp_map.end_time - temp_map.start_time).count()) << "s";
-    LOG("\r" << ss.str() << std::string((temp_map.stringstream_length - ss.str().length()), ' '));
-    timing_string = ss.str();
+    LOG("Done 9");
 
     task_map_status = MAP_IMPORT_SUCCESSFUL;
 
@@ -1901,52 +1639,46 @@ void map::add_to_temp_hash_is_top_level_Local_node_map(uint32_t map_node, uint64
 
 void map::extract_map_prims(std::string output_path, bool textured) {
     for (auto& map_node : map_nodes) {
-        if (map_node.has_prim_resource) {
-            if (gui_control == ABORT_CURRENT_TASK) {
-                return;
-            }
+        if (!map_node.has_prim_resource) continue;
 
-            if (((map_node_prim_count_current * (uint64_t) 10000) / (uint64_t) map_node_prim_count) % (uint64_t) 10 ==
-                0 && map_node_prim_count_current > 0) {
-                stringstream_length = console::update_console(message, map_node_prim_count, map_node_prim_count_current,
-                                                              start_time, stringstream_length);
-            }
+        if (gui_control == ABORT_CURRENT_TASK) {
+            return;
+        }
 
-            map_node_prim_count_current++;
+        map_node_prim_count_current++;
 
-            map_percent_progress_map_nodes_prim = percent_progress;
+        map_percent_progress_map_nodes_prim = percent_progress;
 
-            auto it = map_prims_map.find(map_node.prim_hash);
+        auto it = map_prims_map.find(map_node.prim_hash);
 
-            if (it != map_prims_map.end()) {
-                //std::cout << map_nodes.at(m).prim_hash << " was already found/added." << std::endl;
-            } else {
-                uint32_t rpkg_index = rpkg_function::get_latest_hash(map_node.prim_hash);
+        if (it != map_prims_map.end()) {
+            //std::cout << map_nodes.at(m).prim_hash << " was already found/added." << std::endl;
+        } else {
+            uint32_t rpkg_index = rpkg_function::get_latest_hash(map_node.prim_hash);
 
-                if (rpkg_index != UINT32_MAX) {
-                    auto it2 = rpkgs.at(rpkg_index).hash_map.find(map_node.prim_hash);
+            if (rpkg_index != UINT32_MAX) {
+                auto it2 = rpkgs.at(rpkg_index).hash_map.find(map_node.prim_hash);
 
-                    std::string prim_hash_string = util::uint64_t_to_hex_string(map_node.prim_hash);
+                std::string prim_hash_string = util::uint64_t_to_hex_string(map_node.prim_hash);
 
-                    if (it2 != rpkgs.at(rpkg_index).hash_map.end()) {
-                        if (textured) {
-                            rpkg_function::extract_prim_textured_from(rpkgs.at(rpkg_index).rpkg_file_path,
-                                                                      prim_hash_string, output_path);
-                        } else {
-                            rpkg_function::extract_prim_from(rpkgs.at(rpkg_index).rpkg_file_path, prim_hash_string,
-                                                             output_path, GLB_SINGLE, false);
-                        }
-                    }
-
-                    if (file::path_exists(file::output_path_append(prim_hash_string + ".PRIM.glb", output_path))) {
-                        map_prims_map[map_node.prim_hash] = map_prims_map.size();
-
-                        map_prims.push_back(map_node.prim_hash);
-
-                        map_node.map_prims_index = map_prims.size() - 1;
+                if (it2 != rpkgs.at(rpkg_index).hash_map.end()) {
+                    if (textured) {
+                        rpkg_function::extract_prim_textured_from(rpkgs.at(rpkg_index).rpkg_file_path,
+                                                                  prim_hash_string, output_path);
                     } else {
-                        map_node.has_prim_resource = false;
+                        rpkg_function::extract_prim_from(rpkgs.at(rpkg_index).rpkg_file_path, prim_hash_string,
+                                                         output_path, GLB_SINGLE, false);
                     }
+                }
+
+                if (file::path_exists(file::output_path_append(prim_hash_string + ".PRIM.glb", output_path))) {
+                    map_prims_map[map_node.prim_hash] = map_prims_map.size();
+
+                    map_prims.push_back(map_node.prim_hash);
+
+                    map_node.map_prims_index = map_prims.size() - 1;
+                } else {
+                    map_node.has_prim_resource = false;
                 }
             }
         }
@@ -2108,14 +1840,6 @@ map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_node,
                                uint32_t level) {
     if (gui_control == ABORT_CURRENT_TASK) {
         return;
-    }
-
-    if (((map_node_count_current * (uint64_t) 10000) / (uint64_t) map_node_count) % (uint64_t) 10 == 0 &&
-        map_node_count_current > 0) {
-        if (map_node_count_current <= map_node_count) {
-            stringstream_length = console::update_console(message, map_node_count, map_node_count_current, start_time,
-                                                          stringstream_length);
-        }
     }
 
     map_node_count_current++;
@@ -2773,8 +2497,8 @@ map::generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_node,
     }
 
     if (has_aset_with_temp_resource) {
-        for (unsigned long long aset_temp_hashe : aset_temp_hashes) {
-            auto it = temp_hash_is_top_level_Local_node_map.find(aset_temp_hashe);
+        for (const auto& aset_temp_hash : aset_temp_hashes) {
+            auto it = temp_hash_is_top_level_Local_node_map.find(aset_temp_hash);
 
             if (it != temp_hash_is_top_level_Local_node_map.end()) {
                 for (unsigned int n : it->second) {
@@ -2963,12 +2687,6 @@ void map::get_map_node(temp& temp_temp) {
     for (uint64_t s = 0; s < temp_json_subEntities.Size(); s++) {
         if (gui_control == ABORT_CURRENT_TASK) {
             return;
-        }
-
-        if (((map_node_count_current * (uint64_t) 10000) / (uint64_t) map_node_count) % (uint64_t) 10 == 0 &&
-            map_node_count_current > 0) {
-            stringstream_length = console::update_console(message, map_node_count, map_node_count_current, start_time,
-                                                          stringstream_length);
         }
 
         map_node_count_current++;
@@ -3606,13 +3324,13 @@ void map::get_root_scenes() {
             //std::cout << "External scene TEMP file index: " << map_temps.at(t).temp_externalSceneTypeIndicesInResourceHeader.at(s) << std::endl;
         }
 
-        for (uint64_t s = 0; s < map_temp.temp_externalSceneHashes.size(); s++) {
+        for (const auto& temp_externalSceneHash : map_temp.temp_externalSceneHashes) {
             //std::cout << "External scene TEMP file: " << util::uint64_t_to_hex_string(map_temps.at(t).temp_externalSceneHashes.at(s)) << std::endl;
 
-            auto it = root_scenes.find(map_temp.temp_externalSceneHashes.at(s));
+            auto it = root_scenes.find(temp_externalSceneHash);
 
             if (it == root_scenes.end()) {
-                root_scenes[map_temp.temp_externalSceneHashes.at(s)] = root_scenes.size();
+                root_scenes[temp_externalSceneHash] = root_scenes.size();
 
                 get_root_scenes();
             }
@@ -3634,7 +3352,7 @@ void map::map_recursive_temp_loader(uint32_t rpkg_index, uint64_t hash_value) {
     it = rpkgs.at(rpkg_index).hash_map.find(hash_value);
 
     if (it != rpkgs.at(rpkg_index).hash_map.end()) {
-        map_temps.emplace_back(temp(rpkg_index, it->second, 3));
+        map_temps.emplace_back(rpkg_index, it->second, 3);
 
         uint32_t temp_index = map_temps.size() - 1;
 

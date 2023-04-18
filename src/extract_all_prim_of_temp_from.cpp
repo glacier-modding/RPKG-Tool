@@ -2,7 +2,6 @@
 #include "file.h"
 #include "global.h"
 #include "util.h"
-#include <chrono>
 #include <sstream>
 #include <filesystem>
 
@@ -26,7 +25,7 @@ void rpkg_function::extract_all_prim_of_temp_from(std::string& input_path, const
     if (!input_path_is_rpkg_file) {
         rpkg_function::import_rpkg_files_in_folder(input_path);
     } else {
-        rpkg_function::import_rpkg(input_path, true);
+        rpkg_function::import_rpkg(input_path);
     }
 
     std::stringstream ss;

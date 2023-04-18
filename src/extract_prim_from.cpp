@@ -29,7 +29,7 @@ void rpkg_function::extract_prim_from(std::string& input_path, std::string filte
     if (!input_path_is_rpkg_file) {
         rpkg_function::import_rpkg_files_in_folder(input_path);
     } else {
-        rpkg_function::import_rpkg(input_path, true);
+        rpkg_function::import_rpkg(input_path);
     }
 
     std::stringstream ss;

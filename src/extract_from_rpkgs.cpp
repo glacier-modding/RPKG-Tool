@@ -1,7 +1,6 @@
 #include "rpkg_function.h"
 #include "global.h"
 #include "util.h"
-#include "console.h"
 #include "file.h"
 #include "crypto.h"
 #include "thirdparty/lz4/lz4.h"
@@ -12,10 +11,6 @@
 void rpkg_function::extract_from_rpkgs(rpkg_extraction_vars& rpkg_vars) {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
-
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-
-    std::string message = "Extracting from RPKGs: ";
 
     std::vector<std::string> filters = util::parse_input_filter(rpkg_vars.filter);
 
@@ -34,9 +29,6 @@ void rpkg_function::extract_from_rpkgs(rpkg_extraction_vars& rpkg_vars) {
         rpkg_function::import_rpkg_files_in_folder(rpkg_vars.input_path);
 
         for (uint64_t i = 0; i < rpkgs.size(); i++) {
-            start_time = std::chrono::high_resolution_clock::now();
-            int stringstream_length = 80;
-
             std::vector<bool> extracted;
 
             for (uint64_t z = 0; z < filters.size(); z++) {
@@ -46,12 +38,6 @@ void rpkg_function::extract_from_rpkgs(rpkg_extraction_vars& rpkg_vars) {
             for (uint64_t j = 0; j < rpkgs.at(i).hash.size(); j++) {
                 if (gui_control == ABORT_CURRENT_TASK) {
                     return;
-                }
-
-                if (((j * static_cast<uint64_t>(100000)) / rpkgs.at(i).hash.size()) % static_cast<uint64_t>(100) == 0 &&
-                    j > 0) {
-                    stringstream_length = console::update_console(message, rpkgs.at(i).hash.size(), j, start_time,
-                                                                  stringstream_length);
                 }
 
                 std::string hash_file_name = util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(j).hash_value) + "." +
@@ -64,7 +50,7 @@ void rpkg_function::extract_from_rpkgs(rpkg_extraction_vars& rpkg_vars) {
                 for (uint64_t z = 0; z < filters.size(); z++) {
                     std::size_t found_position = hash_file_name.find(filters.at(z));
 
-                    if (found_position != std::string::npos && filters.at(z) != "") {
+                    if (found_position != std::string::npos && !filters.at(z).empty()) {
                         found = true;
 
                         input_filter_index = z;
@@ -73,7 +59,7 @@ void rpkg_function::extract_from_rpkgs(rpkg_extraction_vars& rpkg_vars) {
                     }
                 }
 
-                if (!found && rpkg_vars.filter != "")
+                if (!found && !rpkg_vars.filter.empty())
                     continue;
 
                 std::string hash_file_path = file::output_path_append(rpkgs.at(i).rpkg_file_name,
@@ -168,14 +154,7 @@ void rpkg_function::extract_from_rpkgs(rpkg_extraction_vars& rpkg_vars) {
         }
     }
 
-    std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-    std::stringstream ss;
-
-    ss << message << "100% Done in "
-       << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
-
-    LOG_NO_ENDL("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+    LOG("Done");
 
     percent_progress = static_cast<uint32_t>(100);
 

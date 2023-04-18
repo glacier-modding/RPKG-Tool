@@ -3,7 +3,6 @@
 #include "global.h"
 #include "util.h"
 #include <unordered_map>
-#include <chrono>
 
 void recursive_hash_depends_search(uint64_t hash_value, std::vector<uint64_t>& hashes_to_extract,
                                    std::unordered_map<uint64_t, uint64_t>& hashes_to_extract_map) {

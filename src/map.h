@@ -56,9 +56,9 @@ public:
 
     void extract_map_prims(std::string output_path, bool textured);
 
-    void scale_transform(matrix43& transform, float x, float y, float z);
+    static void scale_transform(matrix43& transform, float x, float y, float z);
 
-    bool extract_scale_from_transform(matrix43& transform, vector3& scale);
+    static bool extract_scale_from_transform(matrix43& transform, vector3& scale);
 
     void generate_map_node_strings(uint32_t root_map_node, uint32_t parent_map_node, const std::string& map_node_string,
                                    uint32_t level);
@@ -109,8 +109,4 @@ public:
     uint32_t map_node_count_current = 0;
     uint32_t map_node_prim_count = 0;
     uint32_t map_node_prim_count_current = 0;
-    std::chrono::time_point<std::chrono::high_resolution_clock> start_time;
-    std::chrono::time_point<std::chrono::high_resolution_clock> end_time;
-    int stringstream_length = 0;
-    std::string message = "";
 };

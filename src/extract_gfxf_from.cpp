@@ -3,9 +3,7 @@
 #include "util.h"
 #include "global.h"
 #include "crypto.h"
-#include "console.h"
 #include "thirdparty/lz4/lz4.h"
-#include <chrono>
 #include <filesystem>
 #include <sstream>
 #include <fstream>
@@ -32,13 +30,7 @@ void rpkg_function::extract_gfxf_from(std::string& input_path, std::string& filt
         rpkg_function::import_rpkg_files_in_folder(input_path);
     }
 
-    std::stringstream ss;
-
-    ss << "Scanning folder: Done";
-
-    timing_string = ss.str();
-
-    //LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+    LOG("Scanning folder: Done");
 
     file::create_directories(file::output_path_append("GFXF", output_path));
 
@@ -55,10 +47,6 @@ void rpkg_function::extract_gfxf_from(std::string& input_path, std::string& filt
     uint64_t gfxf_count = 0;
     uint64_t gfxf_hash_size_total = 0;
 
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-    double console_update_rate = 1.0 / 2.0;
-    int period_count = 1;
-
     for (auto& rpkg : rpkgs) {
         for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++) {
             if (rpkg.hash_resource_types.at(r) != "GFXF")
@@ -74,30 +62,6 @@ void rpkg_function::extract_gfxf_from(std::string& input_path, std::string& filt
                 std::string hash_file_name = util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
                                              rpkg.hash.at(hash_index).hash_resource_type;
 
-                std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-                double time_in_seconds_from_start_time = (0.000000001 *
-                                                          std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                                                  end_time - start_time).count());
-
-                if (time_in_seconds_from_start_time > console_update_rate) {
-                    start_time = end_time;
-
-                    if (period_count > 3) {
-                        period_count = 0;
-                    }
-
-                    std::stringstream ss;
-
-                    ss << "Scanning RPKGs for GFXF files" << std::string(period_count, '.');
-
-                    timing_string = ss.str();
-
-                    LOG_NO_ENDL("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-                    period_count++;
-                }
-
                 gfxf_hash_size_total += rpkg.hash.at(hash_index).data.resource.size_final;
 
                 gfxf_count++;
@@ -105,16 +69,7 @@ void rpkg_function::extract_gfxf_from(std::string& input_path, std::string& filt
         }
     }
 
-    ss.str(std::string());
-
-    ss << "Scanning RPKGs for GFXF files: Done";
-
-    LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-    start_time = std::chrono::high_resolution_clock::now();
-    int stringstream_length = 80;
-
-    std::string message = "Extracting GFXF files: ";
+    LOG("Scanning RPKGs for GFXF files: Done");
 
     if (!filter.empty()) {
         LOG("Extracting GFXF files with filter \"" << filter << "\"");
@@ -154,13 +109,6 @@ void rpkg_function::extract_gfxf_from(std::string& input_path, std::string& filt
                     std::string hash_file_name =
                             util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) + "." +
                             rpkgs.at(i).hash.at(hash_index).hash_resource_type;
-
-                    if (((gfxf_count_current * static_cast<uint64_t>(100000)) / gfxf_count) %
-                        static_cast<uint64_t>(10) == 0 && gfxf_count_current > 0) {
-                        stringstream_length = console::update_console(message, gfxf_hash_size_total,
-                                                                      gfxf_hash_size_current, start_time,
-                                                                      stringstream_length);
-                    }
 
                     gfxf_hash_size_current += rpkgs.at(i).hash.at(hash_index).data.resource.size_final;
 
@@ -508,14 +456,7 @@ void rpkg_function::extract_gfxf_from(std::string& input_path, std::string& filt
         }
     }
 
-    std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-    ss.str(std::string());
-
-    ss << message << "100% Done in "
-       << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
-
-    LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+    LOG("Done");
 
     percent_progress = static_cast<uint32_t>(100);
 

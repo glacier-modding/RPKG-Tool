@@ -20,9 +20,9 @@ struct rpkg_extraction_vars {
 
 class rpkg_function {
 public:
-    static void generate_ioi_treeview(std::string& input_path, std::string& filter, std::string& output_path);
+    static void generate_ioi_treeview(std::string& input_path);
 
-    static std::string generate_hash_meta_json(const uint64_t rpkg_index, const uint64_t hash_index);
+    static std::string generate_hash_meta_json(uint64_t rpkg_index, uint64_t hash_index);
 
     static void extract_latest_hash(std::string& input_path, std::string& filter, std::string& output_path);
 
@@ -78,7 +78,7 @@ public:
 
     static void extract_prim_textured_from(std::string& input_path, std::string& filter, std::string& output_path);
 
-    static void latest_hash(std::string& input_path, std::string& filter, std::string& output_path);
+    static void latest_hash(std::string& input_path, std::string& filter);
 
     static uint32_t get_latest_hash(uint64_t hash_value);
 
@@ -196,7 +196,7 @@ public:
     static bool import_rpkg_meta(rpkg& rpkg_meta_data, const std::string& rpkg_meta_file_path,
                                  const std::string& input_rpkg_folder_path);
 
-    static void import_rpkg(std::string& rpkg_file_name, bool with_timing);
+    static void import_rpkg(std::string& rpkg_file_name);
 
     static void extract_from_rpkg(rpkg_extraction_vars& rpkg_vars);
 

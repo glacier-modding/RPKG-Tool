@@ -24,6 +24,6 @@ void rpkg_function::import_rpkg_files_in_folder(const std::string& input_rpkg_fo
 
         std::string rpkg_to_import = entry.path().string();
 
-        rpkg_function::import_rpkg(rpkg_to_import, true);
+        rpkg_function::import_rpkg(rpkg_to_import);
     }
 }

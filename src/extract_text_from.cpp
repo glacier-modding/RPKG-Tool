@@ -3,7 +3,6 @@
 #include "global.h"
 #include "util.h"
 #include "text.h"
-#include <chrono>
 #include <sstream>
 #include <filesystem>
 
@@ -26,7 +25,7 @@ rpkg_function::extract_text_from(std::string& input_path, const std::string& fil
     if (!input_path_is_rpkg_file) {
         rpkg_function::import_rpkg_files_in_folder(input_path);
     } else {
-        rpkg_function::import_rpkg(input_path, true);
+        rpkg_function::import_rpkg(input_path);
     }
 
     std::stringstream ss;

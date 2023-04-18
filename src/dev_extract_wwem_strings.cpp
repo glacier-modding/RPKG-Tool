@@ -146,7 +146,7 @@ void dev_function::dev_extract_wwem_strings(std::string& input_path, std::string
 
                         bool done_searching = false;
 
-                        std::string text_search = ".wav";
+                        const std::string text_search = ".wav";
 
                         std::string fxas_string;
 

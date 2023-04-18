@@ -4,7 +4,6 @@
 #include "util.h"
 #include "generic_function.h"
 #include <iostream>
-#include <chrono>
 #include <sstream>
 #include <filesystem>
 
@@ -27,17 +26,14 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
     if (!input_path_is_rpkg_file) {
         rpkg_function::import_rpkg_files_in_folder(input_path);
     } else {
-        rpkg_function::import_rpkg(input_path, false);
+        rpkg_function::import_rpkg(input_path);
     }
 
     std::filesystem::path base_folder_path = input_path;
     std::string parent_path = base_folder_path.parent_path().string();
     rpkg_function::import_rpkg_files_in_folder(parent_path);
 
-    std::stringstream ss;
-    ss << "Scanning folder: Done";
-    timing_string = "Extracting entity (TEMP/TBLU) to QN (QuickEntity) JSON...";
-    //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
+    LOG("Scanning folder: Done");
 
     force_load_hash_list();
 
@@ -62,12 +58,10 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
         if (output_path.length() > 5) {
             if (util::to_lower_case(output_path).substr(output_path.length() - 5) == ".json") {
                 temp_output_path = output_path;
-            }
-            else {
+            } else {
                 output_path_is_dir = true;
             }
-        }
-        else {
+        } else {
             output_path_is_dir = true;
         }
 
@@ -79,22 +73,10 @@ void rpkg_function::extract_entity_to_qn(std::string& input_path, std::string& f
             temp_output_path = file::output_path_append(filter + ".entity.json", output_path);
         }
 
-        std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-
         entity temp_entity(rpkg_index, it6->second, 3, temp_output_path);
 
         temp_entity.free_yyjson_doc();
-
-        std::string message = "Converting entity (TEMP/TBLU) to QN (QuickEntity) JSON...";
-        std::stringstream ss;
-
-        std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-        ss << message << "100% Done in "
-           << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count())
-           << "s";
-
-        LOG(ss.str());
+        LOG("Done");
     }
 
     percent_progress = (uint32_t) 100;

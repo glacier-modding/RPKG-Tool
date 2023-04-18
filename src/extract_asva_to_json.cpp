@@ -4,7 +4,6 @@
 #include "global.h"
 #include "util.h"
 #include "asva.h"
-#include <chrono>
 #include <iostream>
 
 void rpkg_function::extract_asva_to_json(std::string& input_path, std::string& filter, std::string& output_path) {
@@ -20,8 +19,6 @@ void rpkg_function::extract_asva_to_json(std::string& input_path, std::string& f
         LOG_AND_EXIT("Error: The RPKG file " + input_path + " does not exist.");
     }
 
-    log_output = false;
-
     if (!hash_list_loaded) {
         LOG("Loading Hash List...");
         generic_function::load_hash_list(false);
@@ -32,13 +29,13 @@ void rpkg_function::extract_asva_to_json(std::string& input_path, std::string& f
 
     std::vector<std::string> filters = util::parse_input_filter(filter);
 
-    for (uint64_t f = 0; f < filters.size(); f++) {
-        uint64_t mati_hash_value = std::strtoull(filters.at(f).c_str(), nullptr, 16);
+    for (const auto & filter : filters) {
+        uint64_t mati_hash_value = std::strtoull(filter.c_str(), nullptr, 16);
 
         uint32_t rpkg_index = rpkg_function::get_latest_hash(mati_hash_value);
 
         if (rpkg_index != UINT32_MAX) {
-            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(
+            auto it = rpkgs.at(rpkg_index).hash_map.find(
                     mati_hash_value);
 
             if (it != rpkgs.at(rpkg_index).hash_map.end()) {
@@ -62,11 +59,11 @@ void rpkg_function::extract_asva_to_json(std::string& input_path, std::string& f
                 }
 
                 if (output_path_is_dir) {
-                    if (output_path != "") {
+                    if (!output_path.empty()) {
                         file::create_directories(output_path);
                     }
 
-                    temp_output_path = file::output_path_append(filters.at(f) + ".asva.json", output_path);
+                    temp_output_path = file::output_path_append(filter + ".asva.json", output_path);
                 }
 
                 temp_material.generate_json();
@@ -75,8 +72,6 @@ void rpkg_function::extract_asva_to_json(std::string& input_path, std::string& f
             }
         }
     }
-
-    log_output = true;
 
     task_single_status = TASK_SUCCESSFUL;
     task_multiple_status = TASK_SUCCESSFUL;

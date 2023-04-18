@@ -17,40 +17,11 @@ void dev_function::dev_diff_rpkg_supermetas(std::string& input_path, std::string
 
     input_path = file::parse_input_folder_path(input_path);
 
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-
-    double console_update_rate = 1.0 / 2.0;
-    int period_count = 1;
-
     std::unordered_map<std::string, uint64_t> supermeta_file_name_map;
     std::vector<std::vector<std::string>> supermeta_file_paths;
 
     for (const auto& entry : std::filesystem::recursive_directory_iterator(input_path))
     {
-        std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-        double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
-
-        if (time_in_seconds_from_start_time > console_update_rate)
-        {
-            start_time = end_time;
-
-            if (period_count > 3)
-            {
-                period_count = 0;
-            }
-
-            std::stringstream ss;
-
-            ss << "Scanning folder" << std::string(period_count, '.');
-
-            timing_string = ss.str();
-
-            LOG_NO_ENDL("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-            period_count++;
-        }
-
         if (std::filesystem::is_regular_file(entry.path().string()))
         {
             std::size_t pos = entry.path().string().find_last_of("\\/");

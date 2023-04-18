@@ -5,10 +5,9 @@
 #include "util.h"
 #include <iostream>
 #include <unordered_map>
-#include <chrono>
 #include <sstream>
 
-void rpkg_function::latest_hash(std::string& input_path, std::string& filter, std::string& output_path) {
+void rpkg_function::latest_hash(std::string& input_path, std::string& filter) {
     std::string input_rpkg_folder_path = file::parse_input_folder_path(input_path);
 
     if (file::path_exists(input_rpkg_folder_path)) {
@@ -20,17 +19,9 @@ void rpkg_function::latest_hash(std::string& input_path, std::string& filter, st
 
         rpkg_function::import_rpkg_files_in_folder(input_rpkg_folder_path);
 
-        std::stringstream ss;
-
-        ss << "Scanning folder: Done";
-
-        //LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+        LOG("Scanning folder: Done");
 
         std::vector<std::string> filters = util::parse_input_filter(filter);
-
-        std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-        double console_update_rate = 1.0 / 2.0;
-        int period_count = 1;
 
         for (uint64_t z = 0; z < filters.size(); z++) {
             uint64_t hash_value = std::strtoull(filters.at(z).c_str(), nullptr, 16);

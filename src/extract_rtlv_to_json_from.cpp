@@ -2,12 +2,10 @@
 #include "file.h"
 #include "global.h"
 #include "crypto.h"
-#include "console.h"
 #include "util.h"
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/json/json.hpp"
 #include <set>
-#include <chrono>
 #include <sstream>
 #include <fstream>
 #include <regex>
@@ -36,13 +34,7 @@ void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::stri
         rpkg_function::import_rpkg_files_in_folder(input_path);
     }
 
-    std::stringstream ss;
-
-    ss << "Scanning folder: Done";
-
-    timing_string = ss.str();
-
-    //LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+    LOG("Scanning folder: Done");
 
     if (output_to_string) {
         localization_string = "";
@@ -63,13 +55,7 @@ void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::stri
         }
     }
 
-    timing_string = "Extracting RTLV as JSON...";
-
-    if (log_output)
-            LOG("Extracting RTLV as JSON...");
-
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-    int stringstream_length = 80;
+    LOG("Extracting RTLV as JSON...");
 
     for (auto& rpkg : rpkgs) {
         if (rpkg.rpkg_file_path != input_path && input_path_is_rpkg_file)
@@ -105,12 +91,6 @@ void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::stri
 
                 if (found || filter.empty()) {
                     std::string message = "Extracting RTLV as JSON: ";
-
-                    if (((rtlv_current_count * static_cast<uint64_t>(100000)) / rtlv_count) %
-                        static_cast<uint64_t>(100) == 0 && rtlv_current_count > 0 && !output_to_string) {
-                        stringstream_length = console::update_console(message, rtlv_count, rtlv_current_count,
-                                                                      start_time, stringstream_length);
-                    }
 
                     rtlv_current_count++;
 
@@ -403,17 +383,10 @@ void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::stri
         }
     }
 
-    ss.str(std::string());
+    LOG("Extracting RTLV as JSON: Done");
 
-    ss << "Extracting RTLV as JSON: Done";
+    percent_progress = static_cast<uint32_t>(100);
 
-    if (log_output)
-            LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-    if (!output_to_string) {
-        percent_progress = static_cast<uint32_t>(100);
-
-        task_single_status = TASK_SUCCESSFUL;
-        task_multiple_status = TASK_SUCCESSFUL;
-    }
+    task_single_status = TASK_SUCCESSFUL;
+    task_multiple_status = TASK_SUCCESSFUL;
 }

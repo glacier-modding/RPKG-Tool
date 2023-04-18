@@ -102,7 +102,7 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     } else if (command == "-hash_probe") {
         rpkg_function::hash_probe(input_path, filter);
     } else if (command == "-import_rpkg") {
-        rpkg_function::import_rpkg(input_path, true);
+        rpkg_function::import_rpkg(input_path);
     } else if (command == "-rebuild_prim_model_in") {
         rpkg_function::rebuild_prim_model_in(input_path, output_path);
     } else if (command == "-rebuild_prim_in") {
@@ -149,7 +149,7 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     } else if (command == "-json_to_hash_meta") {
         rpkg_function::json_to_hash_meta(input_path);
     } else if (command == "-latest_hash") {
-        rpkg_function::latest_hash(input_path, filter, output_path);
+        rpkg_function::latest_hash(input_path, filter);
     } else if (command == "-export_map") {
         map::export_map(input_path, filter, search, output_path, false);
     } else if (command == "-export_map_textured") {
@@ -208,7 +208,7 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     } else if (command == "-extract_latest_hash") {
         rpkg_function::extract_latest_hash(input_path, filter, output_path);
     } else if (command == "-generate_ioi_treeview") {
-        rpkg_function::generate_ioi_treeview(input_path, filter, output_path);
+        rpkg_function::generate_ioi_treeview(input_path);
     } else if (command == "-dev_extract_all_entities_to_qn") {
         dev_function::dev_extract_all_entities_to_qn(input_path, output_path);
     }

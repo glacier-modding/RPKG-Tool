@@ -152,7 +152,6 @@ set(lib-quickentity-rs
         thirdparty/quickentity-rs/quickentity_rs.dll.h
 )
 set(thirdparty
-#        ${lib-directxmath}
         ${lib-json}
         ${lib-lz4}
         ${lib-md5}
@@ -272,8 +271,8 @@ set(RPKG_COMMON_SOURCES
         src/obj.cpp
         src/obj.h
         src/ores.cpp
-        src/pch.cpp
-        src/pch.h
+#        src/pch.cpp
+#        src/pch.h
         src/prim.cpp
         src/prim.h
         src/rebuild_dlge_from_json_from.cpp

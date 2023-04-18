@@ -4,7 +4,6 @@
 #include "util.h"
 #include <iostream>
 #include <unordered_map>
-#include <chrono>
 #include <sstream>
 
 void rpkg_function::search_entities(std::string& input_path,
@@ -74,11 +73,8 @@ void rpkg_function::search_entities(std::string& input_path,
         }
     }
 
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-    int stringstream_length = 80;
-
     for (uint64_t i = 0; i < rpkgs.size(); i++) {
-        const std::string message = "Searching " + rpkgs.at(i).rpkg_file_name + "...";
+        LOG("Searching " + rpkgs.at(i).rpkg_file_name + "...");
 
         if (input_path.empty() || input_path == rpkgs.at(i).rpkg_file_path) {
             for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++) {
@@ -151,10 +147,8 @@ void rpkg_function::search_entities(std::string& input_path,
                 }
             }
         }
-
-        std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
     }
+
     LOG("Done");
 
     percent_progress = (uint32_t) 100;

@@ -6,10 +6,9 @@
 #include "ioi_treeview.h"
 #include <iostream>
 #include <unordered_map>
-#include <chrono>
 #include <sstream>
 
-void rpkg_function::generate_ioi_treeview(std::string& input_path, std::string& filter, std::string& output_path) {
+void rpkg_function::generate_ioi_treeview(std::string& input_path) {
     std::string input_rpkg_folder_path = file::parse_input_folder_path(input_path);
 
     if (file::path_exists(input_rpkg_folder_path)) {

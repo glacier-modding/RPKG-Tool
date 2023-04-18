@@ -7,7 +7,6 @@
 #include "thirdparty/json/json.hpp"
 #include <iostream>
 #include <set>
-#include <chrono>
 #include <sstream>
 #include <fstream>
 #include <filesystem>
@@ -395,9 +394,7 @@ void rpkg_function::extract_locr_to_json_from(std::string& input_path, std::stri
         }
     }
 
-    if (log_output) {
-        LOG("Extracting LOCR as JSON: Done");
-    }
+    LOG("Extracting LOCR as JSON: Done");
 
     if (!output_to_string) {
         percent_progress = (uint32_t) 100;

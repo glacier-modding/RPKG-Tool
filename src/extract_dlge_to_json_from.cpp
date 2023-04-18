@@ -2,13 +2,11 @@
 #include "file.h"
 #include "global.h"
 #include "crypto.h"
-#include "console.h"
 #include "util.h"
 #include "hash.h"
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/json/json.hpp"
 #include <iostream>
-#include <chrono>
 #include <sstream>
 #include <fstream>
 #include <regex>
@@ -37,13 +35,7 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
         rpkg_function::import_rpkg_files_in_folder(input_path);
     }
 
-    std::stringstream ss;
-
-    ss << "Scanning folder: Done";
-
-    timing_string = ss.str();
-
-    //LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+    LOG("Scanning folder: Done");
 
     if (output_to_string) {
         localization_string = "";
@@ -65,13 +57,7 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
         }
     }
 
-    timing_string = "Extracting DLGE as JSON...";
-
-    if (log_output)
-            LOG("Extracting DLGE as JSON...");
-
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-    int stringstream_length = 80;
+    LOG("Extracting DLGE as JSON...");
 
     for (uint64_t i = 0; i < rpkgs.size(); i++) {
         if (rpkgs.at(i).rpkg_file_path != input_path && input_path_is_rpkg_file)
@@ -110,12 +96,6 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
                     continue;
 
                 std::string message = "Extracting DLGE as JSON: ";
-
-                if (((dlge_current_count * static_cast<uint64_t>(100000)) / dlge_count) % static_cast<uint64_t>(100) ==
-                    0 && dlge_current_count > 0 && !output_to_string) {
-                    stringstream_length = console::update_console(message, dlge_count, dlge_current_count, start_time,
-                                                                  stringstream_length);
-                }
 
                 dlge_current_count++;
 
@@ -604,12 +584,7 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
         }
     }
 
-    ss.str(std::string());
-
-    ss << "Extracting DLGE as JSON: Done";
-
-    if (log_output)
-            LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+    LOG("Extracting DLGE as JSON: Done");
 
     if (!output_to_string) {
         percent_progress = static_cast<uint32_t>(100);

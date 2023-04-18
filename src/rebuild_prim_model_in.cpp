@@ -3,7 +3,6 @@
 #include "global.h"
 #include "util.h"
 #include <iostream>
-#include <chrono>
 #include <sstream>
 #include <fstream>
 #include <filesystem>
@@ -118,11 +117,11 @@ void rpkg_function::rebuild_prim_model_in(std::string& input_path, std::string& 
             if (std::filesystem::is_regular_file(entry.path().string())) {
                 std::size_t pos = entry.path().string().find_last_of("\\/");
 
-                std::string file_name = "";
-                std::string hash_file_name = "";
-                std::string hash_string = "";
-                std::string resource_type = "";
-                std::string rpkg_name = "";
+                std::string file_name;
+                std::string hash_file_name;
+                std::string hash_string;
+                std::string resource_type;
+                std::string rpkg_name;
 
                 if (pos != std::string::npos) {
                     file_name = entry.path().string().substr(pos + 1, entry.path().string().length() - (pos + 1));
