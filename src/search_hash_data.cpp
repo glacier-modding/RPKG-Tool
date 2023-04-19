@@ -1,6 +1,7 @@
 #include "rpkg_function.h"
 #include "global.h"
 #include <regex>
+#include <iomanip>
 
 void rpkg_function::search_hash_data(std::string& search_type, std::string& search, std::vector<char>& search_data,
                                      std::string& hash_file_name) {
