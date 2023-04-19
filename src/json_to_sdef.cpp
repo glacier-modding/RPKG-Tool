@@ -3,7 +3,6 @@
 #include "generic_function.h"
 #include "file.h"
 #include "sdef.h"
-#include <iostream>
 #include <filesystem>
 
 void rpkg_function::json_to_sdef(std::string& input_path, std::string& output_path) {
@@ -36,9 +35,7 @@ void rpkg_function::json_to_sdef(std::string& input_path, std::string& output_pa
         files = file::get_recursive_file_list(input_path);
     }
 
-    LOG("Loading Hash List...");
-    generic_function::load_hash_list(true);
-    LOG("Loading Hash List: Done");
+    force_load_hash_list();
 
     for (std::filesystem::path& file : files) {
         const uint64_t hash_value = file::get_hash_value_from_path(file, ".SDEF.JSON");
@@ -46,9 +43,7 @@ void rpkg_function::json_to_sdef(std::string& input_path, std::string& output_pa
         if (!hash_value)
             continue;
 
-        timing_string = "Converting: " + file.filename().string() + " to SDEF (+ SDEF.meta)";
-
-        LOG(timing_string);
+        LOG("Converting: " + file.filename().string() + " to SDEF (+ SDEF.meta)");
 
         if (output_path.empty()) {
             sdef temp_sdef(file.string(), hash_value, file.parent_path().string(), output_path_is_file);

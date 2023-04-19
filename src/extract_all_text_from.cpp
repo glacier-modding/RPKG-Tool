@@ -79,8 +79,6 @@ void rpkg_function::extract_all_text_from(std::string& input_path, std::string& 
     uint64_t prim_count_current = 0;
     uint64_t prim_hash_size_current = 0;
 
-    std::string message = "Extracting TEXT/TEXD to TGA files: ";
-
     if (!filter.empty()) {
         LOG("Extracting TEXT to texture files with filter \"" << filter << "\"");
     }

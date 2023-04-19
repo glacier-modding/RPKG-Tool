@@ -36,13 +36,7 @@ void rpkg_function::extract_prel_refs(std::string& input_path) {
         rpkg_function::import_rpkg_files_in_folder(input_path);
     }
 
-    std::stringstream ss;
-
-    ss << "Scanning folder: Done";
-
-    timing_string = ss.str();
-
-    //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
+    LOG("Scanning folder: Done");
 
     for (auto& rpkg : rpkgs) {
         if (rpkg.rpkg_file_path != input_path && input_path_is_rpkg_file)

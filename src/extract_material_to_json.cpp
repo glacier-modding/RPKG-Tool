@@ -4,7 +4,6 @@
 #include "global.h"
 #include "util.h"
 #include "material.h"
-#include <iostream>
 
 void rpkg_function::extract_material_to_json(std::string& input_path, std::string& filter, std::string& output_path) {
     task_single_status = TASK_EXECUTING;
@@ -38,14 +37,9 @@ void rpkg_function::extract_material_to_json(std::string& input_path, std::strin
                     mati_hash_value);
 
             if (it != rpkgs.at(rpkg_index).hash_map.end()) {
-                timing_string = "Converting: " +
-                                util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) +
-                                "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type +
-                                " to Material Entity (MATI/MATT/MATB) JSON";
-
                 material temp_material(rpkg_index, it->second);
 
-                std::string temp_output_path = "";
+                std::string temp_output_path;
                 bool output_path_is_dir = false;
 
                 if (output_path.length() > 5) {

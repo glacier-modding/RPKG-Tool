@@ -4,7 +4,6 @@
 #include "global.h"
 #include "util.h"
 #include "asva.h"
-#include <iostream>
 
 void rpkg_function::extract_asva_to_json(std::string& input_path, std::string& filter, std::string& output_path) {
     task_single_status = TASK_EXECUTING;
@@ -39,10 +38,6 @@ void rpkg_function::extract_asva_to_json(std::string& input_path, std::string& f
                     mati_hash_value);
 
             if (it != rpkgs.at(rpkg_index).hash_map.end()) {
-                timing_string = "Converting: " +
-                                util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) +
-                                "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + " to ASVA JSON";
-
                 asva temp_material(rpkg_index, it->second);
 
                 std::string temp_output_path;

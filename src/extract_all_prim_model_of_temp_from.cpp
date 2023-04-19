@@ -25,8 +25,6 @@ void rpkg_function::extract_all_prim_model_of_temp_from(std::string& input_path,
     if (!input_path_is_rpkg_file) {
         rpkg_function::import_rpkg_files_in_folder(input_path);
     } else {
-        //rpkg_function::import_rpkg(input_path);
-
         const std::filesystem::path base_folder_path = input_path;
 
         std::string parent_path = base_folder_path.parent_path().string();
@@ -34,13 +32,7 @@ void rpkg_function::extract_all_prim_model_of_temp_from(std::string& input_path,
         rpkg_function::import_rpkg_files_in_folder(parent_path);
     }
 
-    std::stringstream ss;
-
-    ss << "Scanning folder: Done";
-
-    //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
-
-    timing_string = "Extracting linked PRIM Models To GLB/TGA File(s)...";
+    LOG("Scanning folder: Done");
 
     //std::vector<std::string>().swap(prim_asset_file_names);
 

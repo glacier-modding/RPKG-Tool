@@ -27,9 +27,7 @@ void rpkg_function::json_to_asva(const std::string& input_path, const std::strin
 
     for (std::filesystem::path& file : files) {
         if (file::has_extension(file.string(), ".asva.json")) {
-            timing_string = "Converting: " + file.filename().string() + " to ASVA (+ ASVA.meta)";
-
-            LOG(timing_string);
+            LOG("Converting: " + file.filename().string() + " to ASVA (+ ASVA.meta)");
 
             if (output_path.empty()) {
                 asva temp_asva(file.string(), file.parent_path().string());

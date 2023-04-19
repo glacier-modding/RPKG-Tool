@@ -2,7 +2,6 @@
 #include "generic_function.h"
 #include "global.h"
 #include "util.h"
-#include <iostream>
 #include <unordered_map>
 #include <sstream>
 
@@ -122,8 +121,6 @@ void rpkg_function::search_entities(std::string& input_path,
                             auto it = deep_search_entities_map.find(tempHashValue);
 
                             if (it == deep_search_entities_map.end()) {
-                                timing_string = "Loading entity " + util::hash_to_ioi_string(
-                                        rpkgs.at(rpkgIndex).hash.at(it61->second).hash_value, true) + "...";
                                 std::string empty = "";
                                 deep_search_entities_map.emplace(tempHashValue,
                                                                  entity(rpkgIndex, it61->second, 3, empty));

@@ -28,13 +28,7 @@ void rpkg_function::extract_prim_model_from(std::string& input_path, std::string
 
     rpkg_function::import_rpkg_files_in_folder(parent_path);
 
-    std::stringstream ss;
-
-    ss << "Scanning folder: Done";
-
-    //timing_string = "Calculating Entity World Coordinate Data And Extracting Associated PRIMs to glTFs...";
-
-    //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
+    LOG("Scanning folder: Done");
 
     //std::vector<std::string>().swap(prim_asset_file_names);
 

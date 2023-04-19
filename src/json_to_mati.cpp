@@ -3,7 +3,6 @@
 #include "generic_function.h"
 #include "file.h"
 #include "mati.h"
-#include <iostream>
 #include <filesystem>
 
 void rpkg_function::json_to_mati(const std::string& input_path, const std::string& output_path) {
@@ -42,9 +41,7 @@ void rpkg_function::json_to_mati(const std::string& input_path, const std::strin
         const uint64_t hash_value = file::get_hash_value_from_path(file, ".MATI.JSON");
 
         if (hash_value) {
-            timing_string = "Converting: " + file.filename().string() + " to MATI (+ MATI.meta)";
-
-            LOG(timing_string);
+            LOG("Converting: " + file.filename().string() + " to MATI (+ MATI.meta)");
 
             if (output_path.empty()) {
                 mati temp_mati(file.string(), hash_value, file.parent_path().string(), output_path_is_file);

@@ -1,17 +1,14 @@
 #include "entity.h"
 #include "rpkg_function.h"
-#include "generic_function.h"
 #include "global.h"
 #include "crypto.h"
 #include "file.h"
 #include "util.h"
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/rapidjson/stringbuffer.h"
-#include "thirdparty/directxmath/DirectXMath.h"
 #include "thirdparty/quickentity-rs/quickentity_rs.dll.h"
 #include <unordered_map>
 #include <fstream>
-#include <iomanip>
 #include <regex>
 
 #pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM2.lib")
@@ -214,7 +211,7 @@ entity::entity(uint64_t rpkgs_index, uint64_t hash_index, uint32_t temp_version,
 
                 //std::string entity_json = std::string(entity_json_string);
 
-                if (output_path != "")
+                if (!output_path.empty())
                     file::write_to_file(output_path, entity_json_string);
 
                 entity_yyjson_doc = yyjson_read(entity_json_string, std::strlen(entity_json_string), 0);
@@ -258,7 +255,7 @@ uint32_t entity::search(std::vector<search_item>& search_items,
             std::string entities_size = std::to_string(yyjson_obj_size(entities));
             int entities_index = 0;
 
-            timing_string = "Searching " + entities_size + " entities in " + util::hash_to_ioi_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value, true) + "...";
+            LOG("Searching " + entities_size + " entities in " + util::hash_to_ioi_string(rpkgs.at(temp_rpkg_index).hash.at(temp_hash_index).hash_value, true) + "...");
 
             while ((key2 = yyjson_obj_iter_next(&iter2))) {
                 const char* key_string = yyjson_get_str(key2);
@@ -275,7 +272,7 @@ uint32_t entity::search(std::vector<search_item>& search_items,
                     bool found = search_value(item, key_string);
 
                     if (!found) {
-                        char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_NOFLAG, NULL);
+                        char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_NOFLAG, nullptr);
                         found = search_value(item, temp_json);
                         free(temp_json);
                     }
@@ -285,7 +282,7 @@ uint32_t entity::search(std::vector<search_item>& search_items,
 
                         yyjson_val* name = yyjson_obj_get(val2, "name");
 
-                        char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_PRETTY, NULL);
+                        char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_PRETTY, nullptr);
 
                         temp_entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path;
                         temp_entities_search_results += "||||";
@@ -326,14 +323,14 @@ uint32_t entity::search(std::vector<search_item>& search_items,
                         if (search_category_strings[category] != item.category)
                             continue;
 
-                    char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_NOFLAG, NULL);
+                    char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_NOFLAG, nullptr);
                     bool found = search_value(item, temp_json);
                     free(temp_json);
 
                     if (found) {
                         item.found = true;
 
-                        temp_json = yyjson_val_write(val2, YYJSON_WRITE_PRETTY, NULL);
+                        temp_json = yyjson_val_write(val2, YYJSON_WRITE_PRETTY, nullptr);
 
                         temp_entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path;
                         temp_entities_search_results += "||||";
@@ -382,7 +379,7 @@ uint32_t entity::search(std::vector<search_item>& search_items,
                     bool found = search_value(item, key_string);
 
                     if (!found) {
-                        char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_NOFLAG, NULL);
+                        char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_NOFLAG, nullptr);
                         found = search_value(item, temp_json);
                         free(temp_json);
                     }
@@ -390,7 +387,7 @@ uint32_t entity::search(std::vector<search_item>& search_items,
                     if (found) {
                         item.found = true;
 
-                        char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_PRETTY, NULL);
+                        char* temp_json = yyjson_val_write(val2, YYJSON_WRITE_PRETTY, nullptr);
 
                         temp_entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path;
                         temp_entities_search_results += "||||";
@@ -440,7 +437,7 @@ uint32_t entity::search(std::vector<search_item>& search_items,
                 if (found) {
                     item.found = true;
 
-                    char* temp_json = yyjson_val_write(val, YYJSON_WRITE_PRETTY, NULL);
+                    char* temp_json = yyjson_val_write(val, YYJSON_WRITE_PRETTY, nullptr);
 
                     temp_entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path;
                     temp_entities_search_results += "||||";
@@ -479,12 +476,12 @@ uint32_t entity::search(std::vector<search_item>& search_items,
 
                 if (!found)
                     if (item.category == search_category::TEMPHASH || item.category == search_category::TBLUHASH)
-                        found = found || search_hash_ioi_string(std::strtoull(val_string, nullptr, 16), item);
+                        found = search_hash_ioi_string(std::strtoull(val_string, nullptr, 16), item);
 
                 if (found) {
                     item.found = true;
 
-                    char* temp_json = yyjson_val_write(val, YYJSON_WRITE_PRETTY, NULL);
+                    char* temp_json = yyjson_val_write(val, YYJSON_WRITE_PRETTY, nullptr);
 
                     temp_entities_search_results += rpkgs.at(temp_rpkg_index).rpkg_file_path;
                     temp_entities_search_results += "||||";
@@ -588,7 +585,7 @@ bool entity::search_json(yyjson_val* json, std::string& search_string)
     return false;
 }
 
-void entity::free_yyjson_doc() {
+void entity::free_yyjson_doc() const {
     yyjson_doc_free(entity_yyjson_doc);
 }
 
@@ -641,10 +638,10 @@ bool entity::search_value(const search_item& item, const char* value)
 
 bool entity::search_hash_ioi_string(const uint64_t hash_value, const search_item& item) {
     if (hash_list_loaded) {
-        std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(hash_value);
+        auto it2 = hash_list_hash_map.find(hash_value);
 
         if (it2 != hash_list_hash_map.end()) {
-            if (hash_list_hash_strings.at(it2->second) != "") {
+            if (!hash_list_hash_strings.at(it2->second).empty()) {
                 if (item.type == search_type::DEFAULT)
                     return find_ci(
                         util::to_lower_case(hash_list_hash_strings.at(it2->second)).c_str(), 

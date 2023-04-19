@@ -1,3 +1,5 @@
+#pragma ide diagnostic ignored "readability-non-const-parameter"
+
 #include "rpkg_dll.h"
 #include "../global.h"
 #include "../task.h"
@@ -20,9 +22,6 @@
 #include <regex>
 
 using json = nlohmann::ordered_json;
-
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "readability-non-const-parameter"
 
 int load_hash_list(char* path) {
     generic_function::load_hash_list(true, std::string(path));
@@ -715,7 +714,7 @@ char* get_hash_in_rpkg_data_in_hex_view(char* rpkg_file, char* hash_string) {
         if (rpkg.rpkg_file_path == rpkg_file) {
             uint64_t hash_value = std::strtoull(hash_string, nullptr, 16);
 
-            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkg.hash_map.find(hash_value);
+            auto it = rpkg.hash_map.find(hash_value);
 
             if (it != rpkg.hash_map.end()) {
                 uint64_t hash_size;
@@ -862,45 +861,45 @@ uint32_t generate_localization_line_string(char* rpkg_file, char* hash_string, c
 }
 
 uint32_t generate_json_string(char* rpkg_file, char* hash_string) {
-    for (uint64_t i = 0; i < rpkgs.size(); i++) {
-        if (rpkgs.at(i).rpkg_file_path == rpkg_file) {
+    for (auto & rpkg : rpkgs) {
+        if (rpkg.rpkg_file_path == rpkg_file) {
             uint64_t hash_value = std::strtoull(hash_string, nullptr, 16);
 
-            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(hash_value);
+            auto it = rpkg.hash_map.find(hash_value);
 
-            if (it != rpkgs.at(i).hash_map.end()) {
+            if (it != rpkg.hash_map.end()) {
                 uint64_t hash_size;
 
-                if (rpkgs.at(i).hash.at(it->second).data.lz4ed) {
-                    hash_size = rpkgs.at(i).hash.at(it->second).data.header.data_size;
+                if (rpkg.hash.at(it->second).data.lz4ed) {
+                    hash_size = rpkg.hash.at(it->second).data.header.data_size;
 
-                    if (rpkgs.at(i).hash.at(it->second).data.xored) {
+                    if (rpkg.hash.at(it->second).data.xored) {
                         hash_size &= 0x3FFFFFFF;
                     }
                 } else {
-                    hash_size = rpkgs.at(i).hash.at(it->second).data.resource.size_final;
+                    hash_size = rpkg.hash.at(it->second).data.resource.size_final;
                 }
 
                 std::vector<char> input_data(hash_size, 0);
 
-                std::ifstream file = std::ifstream(rpkgs.at(i).rpkg_file_path, std::ifstream::binary);
+                std::ifstream file = std::ifstream(rpkg.rpkg_file_path, std::ifstream::binary);
 
                 if (!file.good()) {
                     return 0;
                 }
 
-                file.seekg(rpkgs.at(i).hash.at(it->second).data.header.data_offset, file.beg);
+                file.seekg(rpkg.hash.at(it->second).data.header.data_offset, file.beg);
                 file.read(input_data.data(), hash_size);
                 file.close();
 
-                if (rpkgs.at(i).hash.at(it->second).data.xored) {
+                if (rpkg.hash.at(it->second).data.xored) {
                     crypto::xor_data(input_data.data(), (uint32_t) hash_size);
                 }
 
-                uint32_t decompressed_size = rpkgs.at(i).hash.at(it->second).data.resource.size_final;
+                uint32_t decompressed_size = rpkg.hash.at(it->second).data.resource.size_final;
                 std::vector<char> lz4_output_data(decompressed_size, 0);
 
-                if (rpkgs.at(i).hash.at(it->second).data.lz4ed) {
+                if (rpkg.hash.at(it->second).data.lz4ed) {
                     LZ4_decompress_safe(input_data.data(), lz4_output_data.data(), (int) hash_size, decompressed_size);
 
                     response_data = lz4_output_data;
@@ -943,23 +942,16 @@ int get_hashes_with_no_reverse_depends(char* rpkg_file) {
     uint64_t total_hash_count = 0;
     uint64_t hash_count = 0;
 
-    for (uint64_t i = 0; i < rpkgs.size(); i++) {
-        total_hash_count += rpkgs.at(i).hash.size();
+    for (auto & rpkg : rpkgs) {
+        total_hash_count += rpkg.hash.size();
     }
 
     /*std::unordered_map<uint64_t, uint64_t> hashes_depends_map;
-
-    std::string message = "Building " + std::string(rpkg_file) + "\'s hash dependecy map...";
 
     for (uint64_t i = 0; i < rpkgs.size(); i++)
     {
         for (uint64_t j = 0; j < rpkgs.at(i).hash.size(); j++)
         {
-            if (((hash_count * (uint64_t)100000) / (uint64_t)total_hash_count) % (uint64_t)100 == 0 && hash_count > 0)
-            {
-                stringstream_length = console::update_console(message, total_hash_count, hash_count, start_time, stringstream_length);
-            }
-
             hash_count++;
 
             uint32_t temp_hash_reference_count = rpkgs.at(i).hash.at(j).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
@@ -978,20 +970,20 @@ int get_hashes_with_no_reverse_depends(char* rpkg_file) {
 
     LOG("Scanning hash dependecy map (of all imported RPKGs) for top level hash files/resources...");
 
-    for (uint64_t i = 0; i < rpkgs.size(); i++) {
-        if (rpkgs.at(i).rpkg_file_path == rpkg_file) {
-            for (uint64_t j = 0; j < rpkgs.at(i).hash.size(); j++) {
+    for (auto & rpkg : rpkgs) {
+        if (rpkg.rpkg_file_path == rpkg_file) {
+            for (uint64_t j = 0; j < rpkg.hash.size(); j++) {
                 hash_count++;
 
                 for (uint64_t k = 0; k < hashes_depends_map.size(); k++) {
                     if (hashes_depends_map_rpkg_file_paths.at(k) == rpkg_file) {
-                        std::unordered_map<uint64_t, uint64_t>::iterator it = hashes_depends_map.at(k).find(
-                                rpkgs.at(i).hash.at(j).hash_value);
+                        auto it = hashes_depends_map.at(k).find(
+                                rpkg.hash.at(j).hash_value);
 
                         if (it == hashes_depends_map.at(k).end()) {
                             hashes_with_no_reverse_depends.append(
-                                    util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(j).hash_value) + "." +
-                                    rpkgs.at(i).hash.at(j).hash_resource_type);
+                                    util::uint64_t_to_hex_string(rpkg.hash.at(j).hash_value) + "." +
+                                    rpkg.hash.at(j).hash_resource_type);
                             hashes_with_no_reverse_depends.push_back(',');
                         }
                     }
@@ -1018,7 +1010,7 @@ int get_direct_hash_depends(char* rpkg_file, char* hash_string) {
         if (rpkgs.at(i).rpkg_file_path == rpkg_file) {
             uint64_t hash_value = std::strtoull(hash_string, nullptr, 16);
 
-            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(hash_value);
+            auto it = rpkgs.at(i).hash_map.find(hash_value);
 
             if (it != rpkgs.at(i).hash_map.end()) {
                 uint32_t temp_hash_reference_count =
@@ -1027,7 +1019,7 @@ int get_direct_hash_depends(char* rpkg_file, char* hash_string) {
                 for (uint64_t j = 0; j < temp_hash_reference_count; j++) {
                     for (uint64_t k = 0; k < rpkgs.size(); k++) {
                         if (rpkgs.at(k).rpkg_file_path == rpkg_file) {
-                            std::unordered_map<uint64_t, uint64_t>::iterator it2 = rpkgs.at(k).hash_map.find(
+                            auto it2 = rpkgs.at(k).hash_map.find(
                                     rpkgs.at(i).hash.at(it->second).hash_reference_data.hash_reference.at(j));
 
                             if (it2 != rpkgs.at(k).hash_map.end()) {
@@ -1056,26 +1048,26 @@ char* get_patch_deletion_list(char* rpkg_file) {
 
     std::stringstream ss;
 
-    for (uint64_t i = 0; i < rpkgs.size(); i++) {
-        if (rpkgs.at(i).rpkg_file_path == rpkg_file) {
-            if (rpkgs.at(i).is_patch_file) {
+    for (auto & rpkg : rpkgs) {
+        if (rpkg.rpkg_file_path == rpkg_file) {
+            if (rpkg.is_patch_file) {
                 if (1)//rpkgs.at(i).patch_entry_count > 0)
                 {
                     ss << std::endl << std::endl;
 
-                    ss << std::dec << "Patch file has " << rpkgs.at(i).header.patch_count << " deleted items:"
+                    ss << std::dec << "Patch file has " << rpkg.header.patch_count << " deleted items:"
                        << std::endl;
                 }
 
-                for (uint32_t j = 0; j < rpkgs.at(i).header.patch_count; j++) {
-                    std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(
-                            rpkgs.at(i).patch_entry_list.at(j));
+                for (uint32_t j = 0; j < rpkg.header.patch_count; j++) {
+                    auto it2 = hash_list_hash_map.find(
+                            rpkg.patch_entry_list.at(j));
 
                     if (it2 != hash_list_hash_map.end()) {
                         ss << "  - " << util::to_upper_case(hash_list_hash_file_names.at(it2->second)) << " "
                            << hash_list_hash_strings.at(it2->second) << std::endl;
                     } else {
-                        ss << "  - " << util::uint64_t_to_hex_string(rpkgs.at(i).patch_entry_list.at(j)) << std::endl;
+                        ss << "  - " << util::uint64_t_to_hex_string(rpkg.patch_entry_list.at(j)) << std::endl;
                     }
                 }
             }
@@ -1091,7 +1083,7 @@ int search_imported_hashes(char* search_str, char* rpkg_file, char* resource_typ
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
-    timing_string = "Searching for \"" + std::string(search_str) + "\" in imported RPKGs...";
+    LOG("Searching for \"" + std::string(search_str) + "\" in imported RPKGs...");
 
     std::string search_string = std::string(search_str);
 
@@ -1101,13 +1093,13 @@ int search_imported_hashes(char* search_str, char* rpkg_file, char* resource_typ
 
     search_imported_hashes_string = "";
 
-    for (uint64_t i = 0; i < rpkgs.size(); i++) {
-        if (rpkgs.at(i).rpkg_file_path == rpkg_file) {
-            for (uint64_t j = 0; j < rpkgs.at(i).hash_resource_types.size(); j++) {
-                if (rpkgs.at(i).hash_resource_types.at(j) == resource_type) {
-                    for (uint64_t k = 0; k < rpkgs.at(i).hashes_based_on_resource_types.at(j).size(); k++) {
-                        std::unordered_map<uint64_t, uint64_t>::iterator it = hash_list_hash_map.find(
-                                rpkgs.at(i).hashes_based_on_resource_types.at(j).at(k));
+    for (auto & rpkg : rpkgs) {
+        if (rpkg.rpkg_file_path == rpkg_file) {
+            for (uint64_t j = 0; j < rpkg.hash_resource_types.size(); j++) {
+                if (rpkg.hash_resource_types.at(j) == resource_type) {
+                    for (uint64_t k = 0; k < rpkg.hashes_based_on_resource_types.at(j).size(); k++) {
+                        auto it = hash_list_hash_map.find(
+                                rpkg.hashes_based_on_resource_types.at(j).at(k));
 
                         if (it != hash_list_hash_map.end()) {
                             if (hash_list_hash_strings.at(it->second).find(search_string) != std::string::npos ||
@@ -1120,8 +1112,8 @@ int search_imported_hashes(char* search_str, char* rpkg_file, char* resource_typ
                             }
                         } else {
                             std::string hash_file_name = util::uint64_t_to_hex_string(
-                                    rpkgs.at(i).hashes_based_on_resource_types.at(j).at(k)) + "." +
-                                                         rpkgs.at(i).hash_resource_types.at(j);
+                                    rpkg.hashes_based_on_resource_types.at(j).at(k)) + "." +
+                                                         rpkg.hash_resource_types.at(j);
 
                             if (hash_file_name.find(util::to_upper_case(search_string)) != std::string::npos) {
                                 search_imported_hashes_string.append(hash_file_name);
@@ -1191,13 +1183,13 @@ char* get_search_hash_list() {
 char* get_rpkg_file_paths_hash_is_in(char* hash_string) {
     rpkg_file_paths_hash_is_in = "";
 
-    for (uint64_t i = 0; i < rpkgs.size(); i++) {
+    for (auto & rpkg : rpkgs) {
         uint64_t hash_value = std::strtoull(hash_string, nullptr, 16);
 
-        std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(i).hash_map.find(hash_value);
+        auto it = rpkg.hash_map.find(hash_value);
 
-        if (it != rpkgs.at(i).hash_map.end()) {
-            rpkg_file_paths_hash_is_in.append(rpkgs.at(i).rpkg_file_path);
+        if (it != rpkg.hash_map.end()) {
+            rpkg_file_paths_hash_is_in.append(rpkg.rpkg_file_path);
             rpkg_file_paths_hash_is_in.push_back(',');
         }
     }
@@ -1309,7 +1301,7 @@ int get_temp_index(char* temp_hash_string) {
 
     uint64_t temp_hash_value = std::strtoull(hash_string.c_str(), nullptr, 16);
 
-    std::unordered_map<uint64_t, uint32_t>::iterator it = temps_map.find(temp_hash_value);
+    auto it = temps_map.find(temp_hash_value);
 
     if (it != temps_map.end()) {
         return it->second;
@@ -1336,7 +1328,7 @@ int load_recursive_temps(char* temp_hash, char* rpkg_file_path, uint32_t temp_ve
         uint32_t rpkg_index = i;
 
         if (rpkgs.at(i).rpkg_file_path == rpkg_file_path_string) {
-            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+            auto it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
             if (it != rpkgs.at(rpkg_index).hash_map.end()) {
                 std::unordered_map<uint32_t, uint32_t> parents_map;
@@ -1349,9 +1341,9 @@ int load_recursive_temps(char* temp_hash, char* rpkg_file_path, uint32_t temp_ve
                 LOG("Found " + util::uint32_t_to_string(temps.size()) +
                                 " TEMP/TBLU recursively linked file(s).\n\nLoading recursive TEMP/TBLU file data: 0% done");
 
-                for (uint64_t t = 0; t < temps.size(); t++) {
-                    if (temps.at(t).tblu_return_value == TEMP_TBLU_FOUND) {
-                        temps.at(t).load_data();
+                for (auto & temp : temps) {
+                    if (temp.tblu_return_value == TEMP_TBLU_FOUND) {
+                        temp.load_data();
                     }
                 }
 
@@ -1397,10 +1389,10 @@ int load_non_recursive_temps(char* temp_hash, char* rpkg_file_path, uint32_t tem
         uint32_t rpkg_index = i;
 
         if (rpkgs.at(i).rpkg_file_path == rpkg_file_path_string) {
-            std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
+            auto it = rpkgs.at(rpkg_index).hash_map.find(temp_hash_value);
 
             if (it != rpkgs.at(rpkg_index).hash_map.end()) {
-                temps.emplace_back(temp(rpkg_index, it->second, temp_version));
+                temps.emplace_back(rpkg_index, it->second, temp_version);
 
                 uint64_t temps_index = temps.size() - 1;
 
@@ -1412,9 +1404,9 @@ int load_non_recursive_temps(char* temp_hash, char* rpkg_file_path, uint32_t tem
 
                 percent_progress = 0;
 
-                for (uint64_t t = 0; t < temps.size(); t++) {
-                    if (temps.at(t).tblu_return_value == TEMP_TBLU_FOUND) {
-                        temps.at(t).load_data();
+                for (auto & temp : temps) {
+                    if (temp.tblu_return_value == TEMP_TBLU_FOUND) {
+                        temp.load_data();
                     }
                 }
 
@@ -1657,16 +1649,16 @@ int modify_patch_deletion_list(char* rpkg_file, char* patch_list, uint32_t patch
                 temp_file_output.write(char8, sizeof(uint64_t));
             }
 
-            for (uint64_t j = 0; j < rpkg.hash.size(); j++) {
-                std::memcpy(&char8, &rpkg.hash.at(j).hash_value, sizeof(uint64_t));
+            for (auto & j : rpkg.hash) {
+                std::memcpy(&char8, &j.hash_value, sizeof(uint64_t));
                 temp_file_output.write(char8, sizeof(uint64_t));
 
-                uint64_t new_hash_offset = rpkg.hash.at(j).data.header.data_offset + patch_offset;
+                uint64_t new_hash_offset = j.data.header.data_offset + patch_offset;
 
                 std::memcpy(&char8, &new_hash_offset, sizeof(uint64_t));
                 temp_file_output.write(char8, sizeof(uint64_t));
 
-                std::memcpy(&char4, &rpkg.hash.at(j).data.header.data_size, sizeof(uint32_t));
+                std::memcpy(&char4, &j.data.header.data_size, sizeof(uint32_t));
                 temp_file_output.write(char4, sizeof(uint32_t));
             }
 
@@ -1789,7 +1781,7 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
                 }
             }
 
-            for (uint64_t j = 0; j < rpkg.hash.size(); j++) {
+            for (auto & j : rpkg.hash) {
                 /*if (j < it->second)
                 {
                     std::memcpy(&char8, &rpkgs.at(i).hash.at(j).hash_value, sizeof(uint64_t));
@@ -1803,15 +1795,15 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
                 }
                 else
                 {*/
-                std::memcpy(&char8, &rpkg.hash.at(j).hash_value, sizeof(uint64_t));
+                std::memcpy(&char8, &j.hash_value, sizeof(uint64_t));
                 temp_file_output.write(char8, sizeof(uint64_t));
 
-                uint64_t new_hash_offset = rpkg.hash.at(j).data.header.data_offset + hash_depends_offset;
+                uint64_t new_hash_offset = j.data.header.data_offset + hash_depends_offset;
 
                 std::memcpy(&char8, &new_hash_offset, sizeof(uint64_t));
                 temp_file_output.write(char8, sizeof(uint64_t));
 
-                std::memcpy(&char4, &rpkg.hash.at(j).data.header.data_size, sizeof(uint32_t));
+                std::memcpy(&char4, &j.data.header.data_size, sizeof(uint32_t));
                 temp_file_output.write(char4, sizeof(uint32_t));
                 //}
             }
@@ -2022,11 +2014,9 @@ int import_rpkgs(char* rpkgs_path, char* rpkgs_list) {
 
     percent_progress = 0;
 
-    for (uint32_t i = 0; i < rpkg_files.size(); i++) {
-        rpkg_function::import_rpkg(rpkg_files.at(i));
+    for (auto & rpkg_file : rpkg_files) {
+        rpkg_function::import_rpkg(rpkg_file);
     }
-
-    timing_string = "Importing all RPKG file(s) from " + rpkgs_path_string + ": 100% done";
 
     percent_progress = 100;
 
@@ -2064,7 +2054,7 @@ int get_hash_name_from_hash_value(uint64_t hash_value, char* hash_name) {
 
     // search loaded rpkgs
     for (auto& rpkg : rpkgs) {
-        std::unordered_map<uint64_t, uint64_t>::iterator it = rpkg.hash_map.find(hash_value);
+        auto it = rpkg.hash_map.find(hash_value);
 
         if (it != rpkg.hash_map.end()) {
             // 16 hex chars, 1 period, 4 extension chars, 1 null-ternimator
@@ -2171,9 +2161,10 @@ char* get_entities_search_results() {
     return &entities_search_results[0];
 }
 
-uint32_t is_repo_loaded() {
-    uint64_t repo_hash_value = 0x00204D1AFD76AB13;
+constexpr uint64_t repo_hash_value = 0x00858D45F5F9E3CA;
+constexpr uint64_t ores_hash_value = 0x00858D45F5F9E3CA;
 
+uint32_t is_repo_loaded() {
     uint32_t rpkg_index = rpkg_function::get_latest_hash(repo_hash_value);
 
     if (rpkg_index != UINT32_MAX) {
@@ -2188,8 +2179,6 @@ uint32_t is_repo_loaded() {
 }
 
 uint32_t is_ores_loaded() {
-    uint64_t repo_hash_value = 0x00858D45F5F9E3CA;
-
     uint32_t rpkg_index = rpkg_function::get_latest_hash(repo_hash_value);
 
     if (rpkg_index != UINT32_MAX) {
@@ -2204,16 +2193,12 @@ uint32_t is_ores_loaded() {
 }
 
 int load_repo() {
-    uint64_t repo_hash_value = 0x00204D1AFD76AB13;
-
     uint32_t repo_rpkg_index = rpkg_function::get_latest_hash(repo_hash_value);
 
     if (repo_rpkg_index != UINT32_MAX) {
         auto it = rpkgs.at(repo_rpkg_index).hash_map.find(repo_hash_value);
 
         if (it != rpkgs.at(repo_rpkg_index).hash_map.end()) {
-            uint64_t ores_hash_value = 0x00858D45F5F9E3CA;
-
             uint32_t ores_rpkg_index = rpkg_function::get_latest_hash(ores_hash_value);
 
             if (ores_rpkg_index != UINT32_MAX) {
@@ -2242,8 +2227,6 @@ int load_repo_from_file(char* repo_path) {
     std::vector<repo>().swap(repos);
 
     repos.emplace_back(repo_path);
-
-    uint64_t ores_hash_value = 0x00858D45F5F9E3CA;
 
     uint32_t ores_rpkg_index = rpkg_function::get_latest_hash(ores_hash_value);
 
@@ -2391,7 +2374,6 @@ int load_ioi_treeview() {
     percent_progress = 0;
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
-    timing_string = "Loading IOI Treeview...";
 
     ioi_treeview.Reset();
     ioi_treeview.InitializeTreeView();
@@ -2468,5 +2450,3 @@ char* get_ioi_treeview() {
 int get_ioi_treeview_size() {
     return (int)ioi_treeview_response_data.size();
 }
-
-#pragma clang diagnostic pop

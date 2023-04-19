@@ -43,19 +43,13 @@ void rpkg_function::extract_temp_from(std::string& input_path, std::string& filt
             rpkg_function::import_rpkg(input_path);
         }
 
-        std::stringstream ss;
+        LOG("Scanning folder: Done");
 
-        ss << "Scanning folder: Done";
-
-        timing_string = ss.str();
-
-        LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
-
-        LOG("Loading Hash List...");
+        //LOG("Loading Hash List...");
 
         //generic_function::load_hash_list(true);
 
-        LOG("Loading Hash List: Done");
+        //LOG("Loading Hash List: Done");
 
         std::vector<std::string> filters = util::parse_input_filter(filter);
 

@@ -2,7 +2,6 @@
 #include "file.h"
 #include "global.h"
 #include "util.h"
-#include <iostream>
 #include <sstream>
 #include <filesystem>
 #include <set>
@@ -57,10 +56,6 @@ void rpkg_function::rebuild_text_in(std::string& input_path, std::string& output
     }
 
     LOG("Scanning folder: Done");
-
-    std::string message = "Rebuilding TEXT files...";
-
-    timing_string = message;
 
     std::set<std::string> directory_set;
 
@@ -152,11 +147,7 @@ void rpkg_function::rebuild_text_in(std::string& input_path, std::string& output
     if (generate_rpkgs) {
         for (auto it = directory_set.begin(); it != directory_set.end(); it++) {
             std::string input_path = *it;
-            std::string filter = "";
             std::string output_path_string = rpkgs_path;
-
-            //std::cout << *it << std::endl;
-            //std::cout << output_path_string << std::endl;
 
             rpkg_function::generate_rpkg_from(input_path, output_path_string, true);
         }
