@@ -1714,9 +1714,9 @@ bool map::extract_scale_from_transform(matrix43& transform, vector3& scale) {
     getM128F32(matrix.r[1])[0] = transform.y_axis.x;
     getM128F32(matrix.r[1])[1] = transform.y_axis.y;
     getM128F32(matrix.r[1])[2] = transform.y_axis.z;
-    getM128F32(matrix.r[2])[0] = transform.y_axis.x;
-    getM128F32(matrix.r[2])[1] = transform.y_axis.y;
-    getM128F32(matrix.r[2])[2] = transform.y_axis.z;
+    getM128F32(matrix.r[2])[0] = transform.z_axis.x;
+    getM128F32(matrix.r[2])[1] = transform.z_axis.y;
+    getM128F32(matrix.r[2])[2] = transform.z_axis.z;
     getM128F32(matrix.r[3])[0] = transform.transform.x;
     getM128F32(matrix.r[3])[1] = transform.transform.y;
     getM128F32(matrix.r[3])[2] = transform.transform.z;

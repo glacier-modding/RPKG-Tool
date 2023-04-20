@@ -358,7 +358,7 @@ if (WITH_DIRECTX_SUPPORT)
     target_link_libraries(rpkg-cli PUBLIC GLTFSDK DirectXTex)
     target_link_libraries(rpkg-lib PUBLIC GLTFSDK DirectXTex)
     target_compile_definitions(rpkg-cli PUBLIC WITH_DIRECTX_SUPPORT)
-    target_compile_definitions(rpkg-lbi PUBLIC WITH_DIRECTX_SUPPORT)
+    target_compile_definitions(rpkg-lib PUBLIC WITH_DIRECTX_SUPPORT)
 endif ()
 
 include_directories(${CMAKE_SOURCE_DIR})
