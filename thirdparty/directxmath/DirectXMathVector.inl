@@ -31,6 +31,10 @@
 
 #endif
 
+#ifndef _WIN32
+#define _Analysis_assume_
+#endif
+
 /****************************************************************************
  *
  * General Vector

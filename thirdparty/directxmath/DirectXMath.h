@@ -13,7 +13,7 @@
 #error DirectX Math requires C++
 #endif
 
-#define DIRECTX_MATH_VERSION 317
+#define DIRECTX_MATH_VERSION 318
 
 #if defined(_MSC_VER) && (_MSC_VER < 1910)
 #error DirectX Math requires Visual C++ 2017 or later.
@@ -147,7 +147,19 @@
 #endif
 #endif // !_XM_NO_INTRINSICS_
 
+#ifdef _WIN32
 #include "sal.h"
+#else
+#define _In_
+#define _Out_
+#define _Out_writes_(x)
+#define _Out_writes_bytes_(x)
+#define _In_reads_(x)
+#define _In_reads_bytes_(x)
+#define _Success_(x)
+#define _Out_opt_
+#endif
+
 #include <assert.h>
 
 #ifdef _MSC_VER
@@ -411,7 +423,7 @@ namespace DirectX
 #elif defined(_XM_SSE_INTRINSICS_)
         inline operator __m128i() const noexcept { return _mm_castps_si128(v); }
         inline operator __m128d() const noexcept { return _mm_castps_pd(v); }
-#elif defined(_XM_ARM_NEON_INTRINSICS_) && defined(__GNUC__)
+#elif defined(_XM_ARM_NEON_INTRINSICS_) && (defined(__GNUC__) || defined(_ARM64_DISTINCT_NEON_TYPES))
         inline operator int32x4_t() const noexcept { return vreinterpretq_s32_f32(v); }
         inline operator uint32x4_t() const noexcept { return vreinterpretq_u32_f32(v); }
 #endif
@@ -430,7 +442,7 @@ namespace DirectX
 #elif defined(_XM_SSE_INTRINSICS_)
         inline operator __m128i() const noexcept { return _mm_castps_si128(v); }
         inline operator __m128d() const noexcept { return _mm_castps_pd(v); }
-#elif defined(_XM_ARM_NEON_INTRINSICS_) && defined(__GNUC__)
+#elif defined(_XM_ARM_NEON_INTRINSICS_) && (defined(__GNUC__) || defined(_ARM64_DISTINCT_NEON_TYPES))
         inline operator int32x4_t() const noexcept { return vreinterpretq_s32_f32(v); }
         inline operator uint32x4_t() const noexcept { return vreinterpretq_u32_f32(v); }
 #endif
@@ -449,7 +461,7 @@ namespace DirectX
 #elif defined(_XM_SSE_INTRINSICS_)
         inline operator __m128i() const noexcept { return _mm_castps_si128(v); }
         inline operator __m128d() const noexcept { return _mm_castps_pd(v); }
-#elif defined(_XM_ARM_NEON_INTRINSICS_) && defined(__GNUC__)
+#elif defined(_XM_ARM_NEON_INTRINSICS_) && (defined(__GNUC__) || defined(_ARM64_DISTINCT_NEON_TYPES))
         inline operator int32x4_t() const noexcept { return vreinterpretq_s32_f32(v); }
         inline operator uint32x4_t() const noexcept { return vreinterpretq_u32_f32(v); }
 #endif
@@ -468,7 +480,7 @@ namespace DirectX
 #elif defined(_XM_SSE_INTRINSICS_)
         inline operator __m128i() const noexcept { return _mm_castps_si128(v); }
         inline operator __m128d() const noexcept { return _mm_castps_pd(v); }
-#elif defined(_XM_ARM_NEON_INTRINSICS_) && defined(__GNUC__)
+#elif defined(_XM_ARM_NEON_INTRINSICS_) && (defined(__GNUC__) || defined(_ARM64_DISTINCT_NEON_TYPES))
         inline operator int32x4_t() const noexcept { return vreinterpretq_s32_f32(v); }
         inline operator uint32x4_t() const noexcept { return vreinterpretq_u32_f32(v); }
 #endif

@@ -34,12 +34,41 @@ public:
 
     static void extract_material_to_json(std::string& input_path, std::string& filter, std::string& output_path);
 
+#ifdef WITH_DIRECTX_SUPPORT
     static void mrtr_to_json(std::string& input_path, std::string& output_path);
 
     static void json_to_mrtr(std::string& input_path, std::string& output_path);
 
     static void
     extract_mrtr_to_json(std::string& input_path, const std::string& filter, const std::string& output_path);
+
+    static void
+    extract_all_prim_model_of_temp_from(std::string& input_path, const std::string& filter, std::string& output_path);
+
+    static void extract_all_prim_model_from(std::string& input_path, std::string& filter, std::string& output_path);
+
+    static void rebuild_prim_model_in(std::string& input_path, std::string& output_path);
+
+    static void extract_prim_model_from(std::string& input_path, std::string filter, std::string& output_path);
+
+    static void rebuild_prim_in(std::string& input_path, bool generate_rpkgs);
+
+    static bool rebuild_text(std::string& text_folder, std::string& tga_file_path, std::string& text_file_name,
+                             std::string& meta_file_path, std::string& rpkg_output_file, std::string& rpkgs_path,
+                             bool generate_rpkgs);
+
+    static void rebuild_text_in(std::string& input_path, std::string& output_path, bool generate_rpkgs);
+
+    static void extract_all_text_from(std::string& input_path, std::string& filter, std::string& output_path);
+
+    static void extract_text_from(std::string& input_path, const std::string& filter, const std::string& output_path);
+
+    static void
+    extract_all_prim_of_temp_from(std::string& input_path, const std::string& filter, std::string& output_path,
+                                  int type);
+
+    static void extract_prim_textured_from(std::string& input_path, std::string& filter, std::string& output_path);
+#endif
 
     static void search_repo(std::string& input_path, std::string& search, int max_results);
 
@@ -76,8 +105,6 @@ public:
 
     static void extract_entity_to_qn(std::string& input_path, std::string& filter, std::string& output_path);
 
-    static void extract_prim_textured_from(std::string& input_path, std::string& filter, std::string& output_path);
-
     static void latest_hash(std::string& input_path, std::string& filter);
 
     static uint32_t get_latest_hash(uint64_t hash_value);
@@ -96,31 +123,6 @@ public:
     static void
     extract_all_hash_depends_from(std::string& input_path, std::string& unparsed_filters, std::string& output_path,
                                   HashExtractionStrategy strategy);
-
-    static void
-    extract_all_prim_model_of_temp_from(std::string& input_path, const std::string& filter, std::string& output_path);
-
-    static void extract_all_prim_model_from(std::string& input_path, std::string& filter, std::string& output_path);
-
-    static void rebuild_prim_model_in(std::string& input_path, std::string& output_path);
-
-    static void extract_prim_model_from(std::string& input_path, std::string filter, std::string& output_path);
-
-    static void rebuild_prim_in(std::string& input_path, bool generate_rpkgs);
-
-    static bool rebuild_text(std::string& text_folder, std::string& tga_file_path, std::string& text_file_name,
-                             std::string& meta_file_path, std::string& rpkg_output_file, std::string& rpkgs_path,
-                             bool generate_rpkgs);
-
-    static void rebuild_text_in(std::string& input_path, std::string& output_path, bool generate_rpkgs);
-
-    static void extract_all_text_from(std::string& input_path, std::string& filter, std::string& output_path);
-
-    static void extract_text_from(std::string& input_path, const std::string& filter, const std::string& output_path);
-
-    static void
-    extract_all_prim_of_temp_from(std::string& input_path, const std::string& filter, std::string& output_path,
-                                  int type);
 
     static void recursive_temp_loader(uint32_t rpkgs_index, uint32_t hash_index, uint32_t temp_version,
                                       std::unordered_map<uint32_t, uint32_t>& parents_map,

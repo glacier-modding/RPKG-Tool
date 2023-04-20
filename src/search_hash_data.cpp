@@ -3,6 +3,10 @@
 #include <regex>
 #include <iomanip>
 
+#ifndef _WIN32
+#define sprintf_s snprintf
+#endif
+
 void rpkg_function::search_hash_data(std::string& search_type, std::string& search, std::vector<char>& search_data,
                                      std::string& hash_file_name) {
     if (search_type == "text") {
@@ -96,7 +100,7 @@ void rpkg_function::search_hash_data(std::string& search_type, std::string& sear
                 data_string += k;
             } else {
                 char value[5];
-                sprintf_s(value, "\\x%02X", (int) (unsigned char) k);
+                sprintf_s(value, (size_t) "\\x%02X", "%s", reinterpret_cast<const char*>((int) (unsigned char) k));
                 data_string += value;
             }
         }

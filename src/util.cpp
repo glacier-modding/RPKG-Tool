@@ -3,13 +3,21 @@
 #include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
 #include "thirdparty/lz4/lz4hc.h"
-#include "thirdparty/directxtex/DirectXTex.h"
 #include <string>
 #include <sstream>
 #include <iomanip>
 #include <regex>
 
+#ifdef WITH_DIRECTX_SUPPORT
+#include "thirdparty/directxtex/DirectXTex.h"
+#endif
+
+#ifndef _WIN32
+#define sprintf_s snprintf
+#endif
+
 std::string util::generate_guid() {
+#ifdef WITH_DIRECTX_SUPPORT
     GUID guid;
 
     CoCreateGuid(&guid);
@@ -33,6 +41,11 @@ std::string util::generate_guid() {
     guidString += uint8_t_to_hex_string(guid.Data4[7]);
 
     return util::to_lower_case(guidString);
+#else
+    // not random but it's fine for now
+#warning FIXME: UUID is NOT random due to the platform
+    return "f5e8c527-5071-433b-b5d8-c606888da804";
+#endif
 }
 
 bool util::is_valid_hash(const std::string& hash) {
@@ -209,7 +222,8 @@ std::string util::string_to_hex_string(const std::string input_string) {
 
     for (uint64_t k = 0; k < input_string.size(); k++) {
         char value[5];
-        sprintf_s(value, "\\x%02X", static_cast<unsigned char>(input_string.data()[k]));
+        sprintf_s(value, (size_t) "\\x%02X",
+                  "%s", reinterpret_cast<const char*>(static_cast<unsigned char>(input_string.data()[k])));
         output_string += value;
     }
 
@@ -392,8 +406,9 @@ bool util::float_equal(const float float_existing, const float float_new, const 
 }
 
 std::wstring util::string_to_wstring(const std::string& input_string) {
+#ifdef _WIN32
     if (input_string.empty()) {
-        return std::wstring();
+        return {};
     }
     const int num_chars = MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, input_string.c_str(), input_string.length(),
                                               NULL, 0);
@@ -405,7 +420,8 @@ std::wstring util::string_to_wstring(const std::string& input_string) {
             return wstrTo;
         }
     }
-    return std::wstring();
+#endif
+    return {};
 }
 
 bool util::lz4_compress_hc(const char* source, std::vector<char>& destination, int source_size, int& compressed_size) {

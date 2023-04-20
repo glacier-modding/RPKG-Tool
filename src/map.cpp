@@ -1697,23 +1697,29 @@ void map::scale_transform(matrix43& transform, float x, float y, float z) {
     transform.z_axis.z *= z;
 }
 
+#ifdef _WIN32
+#define getM128F32(vec) (vec.m128_f32)
+#else
+#define getM128F32(vec) (vec)
+#endif
+
 bool map::extract_scale_from_transform(matrix43& transform, vector3& scale) {
     bool scaled = false;
 
     DirectX::XMMATRIX matrix = DirectX::XMMatrixIdentity();
 
-    matrix.r[0].m128_f32[0] = transform.x_axis.x;
-    matrix.r[0].m128_f32[1] = transform.x_axis.y;
-    matrix.r[0].m128_f32[2] = transform.x_axis.z;
-    matrix.r[1].m128_f32[0] = transform.y_axis.x;
-    matrix.r[1].m128_f32[1] = transform.y_axis.y;
-    matrix.r[1].m128_f32[2] = transform.y_axis.z;
-    matrix.r[2].m128_f32[0] = transform.z_axis.x;
-    matrix.r[2].m128_f32[1] = transform.z_axis.y;
-    matrix.r[2].m128_f32[2] = transform.z_axis.z;
-    matrix.r[3].m128_f32[0] = transform.transform.x;
-    matrix.r[3].m128_f32[1] = transform.transform.y;
-    matrix.r[3].m128_f32[2] = transform.transform.z;
+    getM128F32(matrix.r[0])[0] = transform.x_axis.x;
+    getM128F32(matrix.r[0])[1] = transform.x_axis.y;
+    getM128F32(matrix.r[0])[2] = transform.x_axis.z;
+    getM128F32(matrix.r[1])[0] = transform.y_axis.x;
+    getM128F32(matrix.r[1])[1] = transform.y_axis.y;
+    getM128F32(matrix.r[1])[2] = transform.y_axis.z;
+    getM128F32(matrix.r[2])[0] = transform.y_axis.x;
+    getM128F32(matrix.r[2])[1] = transform.y_axis.y;
+    getM128F32(matrix.r[2])[2] = transform.y_axis.z;
+    getM128F32(matrix.r[3])[0] = transform.transform.x;
+    getM128F32(matrix.r[3])[1] = transform.transform.y;
+    getM128F32(matrix.r[3])[2] = transform.transform.z;
 
     /*std::cout << "matrix.r[0].m128_f32[0]: " << matrix.r[0].m128_f32[0] << std::endl;
     std::cout << "matrix.r[0].m128_f32[1]: " << matrix.r[0].m128_f32[1] << std::endl;
@@ -1734,9 +1740,9 @@ bool map::extract_scale_from_transform(matrix43& transform, vector3& scale) {
 
     DirectX::XMMatrixDecompose(&scale_vector, &rotation_vector, &transform_vector, matrix);
 
-    scale.x = scale_vector.m128_f32[0];
-    scale.y = scale_vector.m128_f32[1];
-    scale.z = scale_vector.m128_f32[2];
+    scale.x = getM128F32(scale_vector)[0];
+    scale.y = getM128F32(scale_vector)[1];
+    scale.z = getM128F32(scale_vector)[2];
 
     /*std::cout << "scale.x: " << scale.x << std::endl;
     std::cout << "scale.y: " << scale.y << std::endl;
@@ -1747,10 +1753,10 @@ bool map::extract_scale_from_transform(matrix43& transform, vector3& scale) {
     std::cout << "scale_vector.m128_f32[2]: " << scale_vector.m128_f32[2] << std::endl;
     std::cout << "scale_vector.m128_f32[3]: " << scale_vector.m128_f32[3] << std::endl;*/
 
-    scale_vector.m128_f32[0] = 1.0f;
-    scale_vector.m128_f32[1] = 1.0f;
-    scale_vector.m128_f32[2] = 1.0f;
-    scale_vector.m128_f32[3] = 0.0f;
+    getM128F32(scale_vector)[0] = 1.0f;
+    getM128F32(scale_vector)[1] = 1.0f;
+    getM128F32(scale_vector)[2] = 1.0f;
+    getM128F32(scale_vector)[3] = 0.0f;
 
     matrix = DirectX::XMMatrixIdentity() * DirectX::XMMatrixScalingFromVector(scale_vector) *
              DirectX::XMMatrixRotationQuaternion(rotation_vector) *
@@ -3272,8 +3278,6 @@ void map::get_map_node(temp& temp_temp) {
                                                         externalScene);
                                             }
                                         }
-                                    } else {
-                                        //std::cout << "m_eidParent reference is unknown!" << std::endl;
                                     }
                                 }
                             }

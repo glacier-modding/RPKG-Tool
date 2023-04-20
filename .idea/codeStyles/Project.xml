@@ -14,5 +14,8 @@
         <pair source="cu" header="cuh" fileNamingConvention="NONE" />
       </extensions>
     </files>
+    <codeStyleSettings language="CMake">
+      <option name="ALIGN_MULTILINE_PARAMETERS_IN_CALLS" value="true" />
+    </codeStyleSettings>
   </code_scheme>
 </component>

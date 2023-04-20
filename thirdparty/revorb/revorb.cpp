@@ -22,10 +22,15 @@
  /*# CFLAGS=/D_UNICODE #*/
  /*# LFLAGS=/NODEFAULTLIB:MSVCRT /LTCG /OPT:REF /MANIFEST:NO #*/
 
-#include <stdio.h>
+#include <cstdio>
+#ifdef _WIN32
 #include <io.h>
+#else
+    #include <unistd.h>
+    #define _unlink unlink
+#endif
 #include <fcntl.h>
-#include <string.h>
+#include <cstring>
 #include <string>
 #include "../ogg/include/ogg/ogg.h"
 #include "../vorbis/include/vorbis/codec.h"
@@ -132,7 +137,9 @@ void revorb(std::string ogg_file)
     FILE* fi;
     if (!strcmp(ogg_file.c_str(), "-")) {
         fi = stdin;
+#if _WIN32
         _setmode(_fileno(stdin), _O_BINARY);
+#endif
     }
     else {
         fi = fopen(ogg_file.c_str(), "rb");

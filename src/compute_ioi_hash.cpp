@@ -1,5 +1,4 @@
 #include "generic_function.h"
-#include "global.h"
 #include <string>
 #include <iomanip>
 #include <sstream>

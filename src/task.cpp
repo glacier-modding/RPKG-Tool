@@ -5,7 +5,9 @@
 #include "generic_function.h"
 #include "rpkg_function.h"
 #include "dev_function.h"
+#ifdef WITH_DIRECTX_SUPPORT
 #include "map.h"
+#endif
 #include <string>
 #include <vector>
 
@@ -40,6 +42,7 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
         rpkg_function::extract_gfxf_from(input_path, filter, output_path);
     } else if (command == "-extract_ores_from") {
         rpkg_function::extract_ores_from(input_path, filter, output_path);
+#ifdef WITH_DIRECTX_SUPPORT
     } else if (command == "-extract_all_prim_model_from") {
         rpkg_function::extract_all_prim_model_from(input_path, filter, output_path);
     } else if (command == "-extract_prim_model_from") {
@@ -66,6 +69,27 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
         rpkg_function::extract_all_text_from(input_path, filter, output_path);
     } else if (command == "-extract_text_from") {
         rpkg_function::extract_text_from(input_path, filter, output_path);
+    } else if (command == "-rebuild_prim_model_in") {
+        rpkg_function::rebuild_prim_model_in(input_path, output_path);
+    } else if (command == "-rebuild_prim_in") {
+        rpkg_function::rebuild_prim_in(input_path, true);
+    } else if (command == "-export_map") {
+        map::export_map(input_path, filter, search, output_path, false);
+    } else if (command == "-export_map_textured") {
+        map::export_map(input_path, filter, search, output_path, true);
+    } else if (command == "-import_map") {
+        map::import_map(input_path, filter, search, output_path);
+    } else if (command == "-extract_mrtr_to_json") {
+        rpkg_function::extract_mrtr_to_json(input_path, filter, output_path);
+    } else if (command == "-json_to_mrtr") {
+        rpkg_function::json_to_mrtr(input_path, output_path);
+    } else if (command == "-mrtr_to_json") {
+        rpkg_function::mrtr_to_json(input_path, output_path);
+    } else if (command == "-rebuild_text_in") {
+        rpkg_function::rebuild_text_in(input_path, output_path, true);
+    } else if (command == "-extract_direct_hash_depends_prim_models_from") {
+        rpkg_function::extract_direct_hash_depends_from(input_path, filter, output_path, true);
+#endif
     } else if (command == "-extract_wwem_to_ogg_from") {
         rpkg_function::extract_wwem_to_ogg_from(input_path, filter, output_path);
     } else if (command == "-extract_wwes_to_ogg_from") {
@@ -97,18 +121,10 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
                                                      HashExtractionStrategy::PRIMS_ONLY);
     } else if (command == "-extract_direct_hash_depends_from") {
         rpkg_function::extract_direct_hash_depends_from(input_path, filter, output_path, false);
-    } else if (command == "-extract_direct_hash_depends_prim_models_from") {
-        rpkg_function::extract_direct_hash_depends_from(input_path, filter, output_path, true);
     } else if (command == "-hash_probe") {
         rpkg_function::hash_probe(input_path, filter);
     } else if (command == "-import_rpkg") {
         rpkg_function::import_rpkg(input_path);
-    } else if (command == "-rebuild_prim_model_in") {
-        rpkg_function::rebuild_prim_model_in(input_path, output_path);
-    } else if (command == "-rebuild_prim_in") {
-        rpkg_function::rebuild_prim_in(input_path, true);
-    } else if (command == "-rebuild_text_in") {
-        rpkg_function::rebuild_text_in(input_path, output_path, true);
     } else if (command == "-rebuild_gfxf_in") {
         rpkg_function::rebuild_gfxf_in(input_path);
     } else if (command == "-rebuild_wwev_in") {
@@ -150,12 +166,6 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
         rpkg_function::json_to_hash_meta(input_path);
     } else if (command == "-latest_hash") {
         rpkg_function::latest_hash(input_path, filter);
-    } else if (command == "-export_map") {
-        map::export_map(input_path, filter, search, output_path, false);
-    } else if (command == "-export_map_textured") {
-        map::export_map(input_path, filter, search, output_path, true);
-    } else if (command == "-import_map") {
-        map::import_map(input_path, filter, search, output_path);
     } else if (command == "-extract_entity_to_qn") {
         rpkg_function::extract_entity_to_qn(input_path, filter, output_path);
     } else if (command == "-extract_to_rt_json") {
@@ -166,17 +176,6 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
         rpkg_function::json_to_mati(input_path, output_path);
     } else if (command == "-mati_to_json") {
         rpkg_function::mati_to_json(input_path, filter, output_path);
-    } else if (command == "-search_entities") {
-        /*char* search_strings[1];
-        search_strings[0] = "transform";
-        search_strings[1] = "00";
-        int search_types[2];
-        search_types[0] = (int)entity::search_type::DEFAULT;
-        search_types[1] = (int)entity::search_type::DEFAULT;
-        int search_categories[2];
-        search_categories[0] = (int)entity::search_category::ALL;
-        search_categories[1] = (int)entity::search_category::TEMPHASH;
-        rpkg_function::search_entities(input_path, search_strings, search_types, search_categories, 2, 10, true, true);*/
     } else if (command == "-search_localization") {
         rpkg_function::search_localization(input_path, search, output_path, true, true, true, 1000);
     } else if (command == "-get_line_string") {
@@ -191,12 +190,6 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
         dev_function::dev_dlge_names(input_path, output_path);
     } else if (command == "-search_repo") {
         rpkg_function::search_repo(input_path, search, 1000);
-    } else if (command == "-extract_mrtr_to_json") {
-        rpkg_function::extract_mrtr_to_json(input_path, filter, output_path);
-    } else if (command == "-json_to_mrtr") {
-        rpkg_function::json_to_mrtr(input_path, output_path);
-    } else if (command == "-mrtr_to_json") {
-        rpkg_function::mrtr_to_json(input_path, output_path);
     } else if (command == "-extract_material_to_json") {
         rpkg_function::extract_material_to_json(input_path, filter, output_path);
     } else if (command == "-json_to_material") {

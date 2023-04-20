@@ -94,10 +94,11 @@ rpkg_function::extract_all_hash_depends_from(std::string& input_path, std::strin
             for (auto& rpkg1 : rpkgs) {
                 auto it1 = rpkg1.hash_map.find(x);
 
-                if (!(it1 != rpkg1.hash_map.end()))
+                if (it1 == rpkg1.hash_map.end())
                     continue;
 
                 if (strategy == HashExtractionStrategy::PRIMS_ONLY) {
+#ifdef WITH_DIRECTX_SUPPORT
                     if (rpkg1.hash.at(it1->second).hash_resource_type == "PRIM") {
                         std::string prim_output_dir = file::output_path_append(
                                 "ALLDEPENDS\\" + filter_hash_file_name + "\\PRIMMODELS\\", output_path);
@@ -109,6 +110,9 @@ rpkg_function::extract_all_hash_depends_from(std::string& input_path, std::strin
                     }
                     // we only want prims, either way, we're done with this item
                     continue;
+#else
+                    LOG_AND_EXIT("Unsupported strategy (built without DirectX support)");
+#endif
                 }
 
                 bool should_extract = true;

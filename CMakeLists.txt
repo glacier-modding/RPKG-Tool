@@ -3,9 +3,6 @@ project(rpkg VERSION 2.29.0)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_subdirectory(thirdparty/GLTFSDK)
-add_subdirectory(thirdparty/directxtex)
-
 option(WITH_DIRECTX_SUPPORT
         "If DirectX components and support for .PRIM, .TEXT, and .BORG should be compiled. Currently only works on Windows."
         ON
@@ -23,8 +20,12 @@ if (WITH_DIRECTX_SUPPORT)
             thirdparty/directxmath/DirectXMathVector.inl
             thirdparty/directxmath/DirectXPackedVector.h
             thirdparty/directxmath/DirectXPackedVector.inl
-    )
-endif()
+            )
+
+    add_subdirectory(thirdparty/GLTFSDK)
+    add_subdirectory(thirdparty/directxtex)
+endif ()
+
 set(lib-json
         thirdparty/json/json.hpp
 )
@@ -171,8 +172,6 @@ configure_file(src/version.h.in src/version.h)
 set(RPKG_COMMON_SOURCES
         src/asva.cpp
         src/asva.h
-        src/borg.cpp
-        src/borg.h
         src/compute_ioi_hash.cpp
         src/compute_ioi_hash_from_file.cpp
         src/console.cpp
@@ -193,11 +192,6 @@ set(RPKG_COMMON_SOURCES
         src/encrypt_packagedefinition_thumbs.cpp
         src/entity.cpp
         src/extract_all_hash_depends_from.cpp
-        src/extract_all_prim_from.cpp
-        src/extract_all_prim_model_from.cpp
-        src/extract_all_prim_model_of_temp_from.cpp
-        src/extract_all_prim_of_temp_from.cpp
-        src/extract_all_text_from.cpp
         src/extract_asva_to_json.cpp
         src/extract_direct_hash_depends_from.cpp
         src/extract_dlge_to_json_from.cpp
@@ -211,16 +205,11 @@ set(RPKG_COMMON_SOURCES
         src/extract_locr_to_json_from.cpp
         src/extract_material_to_json.cpp
         src/extract_mati_to_json.cpp
-        src/extract_mrtr_to_json.cpp
         src/extract_ores_from.cpp
         src/extract_prel_from.cpp
-        src/extract_prim_from.cpp
-        src/extract_prim_model_from.cpp
-        src/extract_prim_textured_from.cpp
         src/extract_rpkg_meta.cpp
         src/extract_rtlv_to_json_from.cpp
         src/extract_sdef_to_json.cpp
-        src/extract_text_from.cpp
         src/extract_to_rt_json.cpp
         src/extract_wwem_to_ogg_from.cpp
         src/extract_wwes_to_ogg_from.cpp
@@ -234,10 +223,6 @@ set(RPKG_COMMON_SOURCES
         src/get_line_string.cpp
         src/get_unique_name.cpp
         src/global.cpp
-        src/gltf.cpp
-        src/gltf.h
-        src/gpudevice.cpp
-        src/gpudevice.h
         src/hash.cpp
         src/hash_depends.cpp
         src/hash_meta_to_json.cpp
@@ -253,36 +238,24 @@ set(RPKG_COMMON_SOURCES
         src/json_to_hash_meta.cpp
         src/json_to_material.cpp
         src/json_to_mati.cpp
-        src/json_to_mrtr.cpp
         src/json_to_sdef.cpp
         src/latest_hash.cpp
         src/load_master_hash_list.cpp
         src/load_temp_tblu_hash_depends.cpp
-        src/map.cpp
-        src/map.h
         src/material.cpp
         src/material.h
         src/mati.cpp
         src/mati.h
         src/mati_to_json.cpp
-        src/mrtr.cpp
-        src/mrtr.h
-        src/mrtr_to_json.cpp
         src/obj.cpp
         src/obj.h
         src/ores.cpp
 #        src/pch.cpp
 #        src/pch.h
-        src/prim.cpp
-        src/prim.h
         src/rebuild_dlge_from_json_from.cpp
         src/rebuild_gfxf_in.cpp
         src/rebuild_locr_from_json_from.cpp
-        src/rebuild_prim_in.cpp
-        src/rebuild_prim_model_in.cpp
         src/rebuild_rtlv_from_json_from.cpp
-        src/rebuild_text.cpp
-        src/rebuild_text_in.cpp
         src/rebuild_wwev_in.cpp
         src/recursive_temp_loader.cpp
         src/repo.cpp
@@ -299,7 +272,6 @@ set(RPKG_COMMON_SOURCES
         src/task.cpp
         src/temp.cpp
         src/texd.cpp
-        src/text.cpp
         src/util.cpp
 )
 
@@ -314,6 +286,43 @@ set(RPKG_CLI_SOURCES
         src/cli/command_line.h
         )
 
+set(RPKG_DIRECTX_REQUIRED_SOURCES
+        src/borg.h
+        src/borg.cpp
+        src/gpudevice.cpp
+        src/gpudevice.h
+        src/gltf.cpp
+        src/gltf.h
+        src/mrtr.cpp
+        src/mrtr.h
+        src/mrtr_to_json.cpp
+        src/json_to_mrtr.cpp
+        src/extract_mrtr_to_json.cpp
+        src/extract_text_from.cpp
+        src/extract_all_text_from.cpp
+        src/extract_prim_from.cpp
+        src/extract_prim_model_from.cpp
+        src/extract_all_prim_from.cpp
+        src/extract_all_prim_model_from.cpp
+        src/extract_all_prim_model_of_temp_from.cpp
+        src/extract_all_prim_of_temp_from.cpp
+        src/extract_prim_textured_from.cpp
+        src/rebuild_text.cpp
+        src/rebuild_text_in.cpp
+        src/rebuild_prim_in.cpp
+        src/rebuild_prim_model_in.cpp
+        src/text.cpp
+        src/prim.cpp
+        src/prim.h
+        src/map.cpp
+        src/map.h
+)
+
+if (!WIN32)
+    find_package(directxmath CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE Microsoft::DirectXMath)
+endif ()
+
 add_library(rpkg-lib SHARED ${RPKG_LIB_SOURCES} ${RPKG_COMMON_SOURCES} ${thirdparty})
 add_executable(rpkg-cli ${RPKG_CLI_SOURCES} ${RPKG_COMMON_SOURCES} ${thirdparty})
 
@@ -324,13 +333,33 @@ if (MSVC)
     # C4068 - no unknown pragma
     target_compile_options(rpkg-lib PUBLIC "/bigobj" "/W3" "/wd4068")
     target_compile_options(rpkg-cli PUBLIC "/bigobj" "/W3" "/wd4068")
-endif()
+endif ()
+
+# TODO: rework this
+if (WIN32)
+    set(RESLIB_2016_PATH "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/zhmtools/ResourceLib_HM2016.lib")
+    set(RESLIB_H2_PATH "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/zhmtools/ResourceLib_HM2.lib")
+    set(RESLIB_H3_PATH "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/zhmtools/ResourceLib_HM3.lib")
+    set(QNRS_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/quickentity-rs/quickentity_rs.dll.lib")
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(RESLIB_2016_PATH "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/zhmtools/libResourceLib_HM2016.a")
+    set(RESLIB_H2_PATH "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/zhmtools/libResourceLib_HM2.a")
+    set(RESLIB_H3_PATH "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/zhmtools/libResourceLib_HM3.a")
+    set(QNRS_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/quickentity-rs/libquickentity_rs.a")
+endif ()
 
 target_link_directories(rpkg-cli PUBLIC ${PROJECT_SOURCE_DIR}/thirdparty/zhmtools ${PROJECT_SOURCE_DIR}/thirdparty/quickentity-rs)
-target_link_libraries(rpkg-cli PUBLIC GLTFSDK DirectXTex ResourceLib_HM2 ResourceLib_HM2016 ResourceLib_HM3 quickentity_rs.dll.lib)
+target_link_libraries(rpkg-cli PUBLIC ${RESLIB_2016_PATH} ${RESLIB_H2_PATH} ${RESLIB_H3_PATH} ${QNRS_LIB_PATH})
 
 target_link_directories(rpkg-lib PUBLIC ${PROJECT_SOURCE_DIR}/thirdparty/zhmtools ${PROJECT_SOURCE_DIR}/thirdparty/quickentity-rs)
-target_link_libraries(rpkg-lib PUBLIC GLTFSDK DirectXTex ResourceLib_HM2 ResourceLib_HM2016 ResourceLib_HM3 quickentity_rs.dll.lib)
+target_link_libraries(rpkg-lib PUBLIC ${RESLIB_2016_PATH} ${RESLIB_H2_PATH} ${RESLIB_H3_PATH} ${QNRS_LIB_PATH})
+
+if (WITH_DIRECTX_SUPPORT)
+    target_link_libraries(rpkg-cli PUBLIC GLTFSDK DirectXTex)
+    target_link_libraries(rpkg-lib PUBLIC GLTFSDK DirectXTex)
+    target_compile_definitions(rpkg-cli PUBLIC WITH_DIRECTX_SUPPORT)
+    target_compile_definitions(rpkg-lbi PUBLIC WITH_DIRECTX_SUPPORT)
+endif ()
 
 include_directories(${CMAKE_SOURCE_DIR})
 # Pre-processed version header file (on configure step, before build)

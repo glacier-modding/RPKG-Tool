@@ -252,17 +252,19 @@ rpkg_function::extract_direct_hash_depends_from(std::string& input_path, std::st
                     continue;
 
                 if (extract_prim_models) {
+#ifdef WITH_DIRECTX_SUPPORT
                     if (rpkg.hash.at(it->second).hash_resource_type == "PRIM") {
                         std::string prim_output_dir = file::output_path_append(
                                 "DIRECTDEPENDS\\" + filter_hash_file_name + "\\PRIMMODELS\\", output_path);
 
                         file::create_directories(prim_output_dir);
 
-                        //std::cout << "rpkg_function::extract_prim_model_from(" << rpkgs.at(i).rpkg_file_path << ", " << util::uint64_t_to_hex_string(rpkgs.at(i).hash.at(hash_index).hash_value) << ", " << prim_output_dir << ");" << std::endl;
-
                         rpkg_function::extract_prim_model_from(rpkg.rpkg_file_path, hashes_to_extract_strings.at(x),
                                                                prim_output_dir);
                     }
+#else
+                    LOG_AND_EXIT("Can't use extract_prim_models option due to build flags (No DirectX support)");
+#endif
                 } else {
                     rpkg_extraction_vars rpkg_vars;
 

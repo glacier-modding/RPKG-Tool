@@ -1,5 +1,4 @@
 #include "temp.h"
-#include "file.h"
 #include "global.h"
 #include "crypto.h"
 #include "util.h"
@@ -701,8 +700,8 @@ void temp::get_top_level_logical_parents() const {
         }
     }
 
-    for (auto it = logical_parents_set.begin(); it != logical_parents_set.end(); it++) {
-        response_string.append(*it);
+    for (const auto & it : logical_parents_set) {
+        response_string.append(it);
         response_string.push_back(',');
     }
 }
