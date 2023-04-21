@@ -47,7 +47,7 @@ void rpkg_function::extract_to_rt_json(std::string& input_path, std::string& fil
         LOG_AND_EXIT("Error: The RPKG file " + input_path + " does not exist.");
     }
 
-    rpkg_function::import_rpkg(input_path, true);
+    rpkg_function::import_rpkg(input_path);
 
     const std::vector<std::string> filters = util::parse_input_filter(filter);
 

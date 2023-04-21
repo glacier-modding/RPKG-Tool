@@ -1,5 +1,4 @@
 #include "mrtr.h"
-#include "rpkg_function.h"
 #include "global.h"
 #include "crypto.h"
 #include "util.h"
@@ -7,15 +6,12 @@
 #include "thirdparty/lz4/lz4.h"
 #include "DirectXMath.h"
 #include <iostream>
-#include <unordered_map>
 #include <fstream>
 #include <sstream>
 #include <filesystem>
 #include <typeinfo>
 
-mrtr::mrtr() {
-
-}
+mrtr::mrtr() = default;
 
 mrtr::mrtr(uint64_t rpkgs_index, uint64_t hash_index) {
     mrtr_rpkg_index = rpkgs_index;
@@ -44,7 +40,7 @@ mrtr::mrtr(uint64_t rpkgs_index, uint64_t hash_index) {
         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(mrtr_rpkg_index).rpkg_file_path + " could not be read.");
     }
 
-    file.seekg(rpkgs.at(mrtr_rpkg_index).hash.at(mrtr_hash_index).data.header.data_offset, file.beg);
+    file.seekg(rpkgs.at(mrtr_rpkg_index).hash.at(mrtr_hash_index).data.header.data_offset, std::ifstream::beg);
     file.read(mrtr_input_data.data(), mrtr_hash_size);
     file.close();
 
@@ -79,9 +75,9 @@ void mrtr::generate_json() {
 
     json["Bones"] = nlohmann::ordered_json::array();
 
-    //std::memcpy(&uint32_t_bytes, &mrtr_data.data()[0x18], 0x4);
+    //std::memcpy(&uint32_t_bytes, &mrtr_data[0x18], 0x4);
     //json["Unknown"] = uint32_t_bytes;
-    std::memcpy(&uint32_t_bytes, &mrtr_data.data()[0x80], 0x4);
+    std::memcpy(&uint32_t_bytes, &mrtr_data[0x80], 0x4);
     mrtr_entry_count = uint32_t_bytes;
     uint32_t position = 0x90;
 
@@ -89,7 +85,7 @@ void mrtr::generate_json() {
         mrtr_entry entry;
 
         entry.index = i;
-        std::memcpy(&uint32_t_bytes, &mrtr_data.data()[position], 0x4);
+        std::memcpy(&uint32_t_bytes, &mrtr_data[position], 0x4);
         entry.parent = uint32_t_bytes;
 
         mrtr_entries.push_back(entry);
@@ -97,53 +93,53 @@ void mrtr::generate_json() {
         position += 0x4;
     }
 
-    std::memcpy(&uint32_t_bytes, &mrtr_data.data()[0x30], 0x4);
+    std::memcpy(&uint32_t_bytes, &mrtr_data[0x30], 0x4);
     position = uint32_t_bytes;
 
     for (uint32_t i = 0; i < mrtr_entry_count; i++) {
-        std::memcpy(&float_bytes, &mrtr_data.data()[position], 0x4);
+        std::memcpy(&float_bytes, &mrtr_data[position], 0x4);
         mrtr_entries[i].position.x = float_bytes;
         position += 0x4;
-        std::memcpy(&float_bytes, &mrtr_data.data()[position], 0x4);
+        std::memcpy(&float_bytes, &mrtr_data[position], 0x4);
         mrtr_entries[i].position.y = float_bytes;
         position += 0x4;
-        std::memcpy(&float_bytes, &mrtr_data.data()[position], 0x4);
+        std::memcpy(&float_bytes, &mrtr_data[position], 0x4);
         mrtr_entries[i].position.z = float_bytes;
         position += 0x8;
     }
 
-    std::memcpy(&uint32_t_bytes, &mrtr_data.data()[0x28], 0x4);
+    std::memcpy(&uint32_t_bytes, &mrtr_data[0x28], 0x4);
     position = uint32_t_bytes;
 
     for (uint32_t i = 0; i < mrtr_entry_count; i++) {
-        std::memcpy(&float_bytes, &mrtr_data.data()[position], 0x4);
+        std::memcpy(&float_bytes, &mrtr_data[position], 0x4);
         mrtr_entries[i].rotation.x = float_bytes;
         position += 0x4;
-        std::memcpy(&float_bytes, &mrtr_data.data()[position], 0x4);
+        std::memcpy(&float_bytes, &mrtr_data[position], 0x4);
         mrtr_entries[i].rotation.y = float_bytes;
         position += 0x4;
-        std::memcpy(&float_bytes, &mrtr_data.data()[position], 0x4);
+        std::memcpy(&float_bytes, &mrtr_data[position], 0x4);
         mrtr_entries[i].rotation.z = float_bytes;
         position += 0x4;
-        std::memcpy(&float_bytes, &mrtr_data.data()[position], 0x4);
+        std::memcpy(&float_bytes, &mrtr_data[position], 0x4);
         mrtr_entries[i].rotation.w = float_bytes;
         position += 0x4;
     }
 
-    std::memcpy(&uint32_t_bytes, &mrtr_data.data()[0x20], 0x4);
+    std::memcpy(&uint32_t_bytes, &mrtr_data[0x20], 0x4);
     position = uint32_t_bytes + 0x20;
     uint32_t strings_offset = uint32_t_bytes;
-    std::memcpy(&uint32_t_bytes, &mrtr_data.data()[position - 0x8], 0x4);
+    std::memcpy(&uint32_t_bytes, &mrtr_data[position - 0x8], 0x4);
     strings_offset += uint32_t_bytes;
 
     for (uint32_t i = 0; i < mrtr_entry_count; i++) {
-        std::memcpy(&uint32_t_bytes, &mrtr_data.data()[position], 0x4);
+        std::memcpy(&uint32_t_bytes, &mrtr_data[position], 0x4);
         uint32_t index = uint32_t_bytes;
-        std::memcpy(&uint32_t_bytes, &mrtr_data.data()[position + mrtr_entry_count * 0x4], 0x4);
+        std::memcpy(&uint32_t_bytes, &mrtr_data[position + mrtr_entry_count * 0x4], 0x4);
         uint32_t string_position = uint32_t_bytes;
         position += 0x4;
 
-        mrtr_entries[index].name = std::string(&mrtr_data.data()[strings_offset + string_position]);
+        mrtr_entries[index].name = std::string(&mrtr_data[strings_offset + string_position]);
     }
 
     for (uint32_t i = 0; i < mrtr_entry_count; i++) {
@@ -226,8 +222,7 @@ void mrtr::generate_json() {
     }
 }
 
-
-void mrtr::write_json_to_file(std::string output_path) {
+void mrtr::write_json_to_file(const std::string& output_path) const {
     file::create_directories(output_path);
 
     std::ofstream json_file = std::ofstream(file::output_path_append(
@@ -240,13 +235,13 @@ void mrtr::write_json_to_file(std::string output_path) {
     json_file.close();
 }
 
-mrtr::mrtr(std::string mrtr_path, std::string mrtr_meta_path, uint64_t hash_value, std::string output_path,
+mrtr::mrtr(const std::string& mrtr_path, std::string mrtr_meta_path, uint64_t hash_value, const std::string& output_path,
            bool output_path_is_file) {
     std::ifstream mrtr_file(mrtr_path, std::ifstream::binary);
 
-    mrtr_file.seekg(0, mrtr_file.end);
+    mrtr_file.seekg(0, std::ifstream::end);
     uint64_t mrtr_file_size = mrtr_file.tellg();
-    mrtr_file.seekg(0, mrtr_file.beg);
+    mrtr_file.seekg(0, std::ifstream::beg);
 
     mrtr_data = std::vector<char>(mrtr_file_size, 0);
 
@@ -272,7 +267,7 @@ mrtr::mrtr(std::string mrtr_path, std::string mrtr_meta_path, uint64_t hash_valu
     json_file.close();
 }
 
-mrtr::mrtr(std::string json_path, uint64_t hash_value, std::string output_path, bool output_path_is_file) {
+mrtr::mrtr(const std::string& json_path, uint64_t hash_value, const std::string& output_path, bool output_path_is_file) {
     std::ifstream input_json_file(json_path);
 
     try {
@@ -398,7 +393,7 @@ mrtr::mrtr(std::string json_path, uint64_t hash_value, std::string output_path, 
         }
 
         temp_uint32_t = mrtr_data.size();
-        std::memcpy(&mrtr_data.data()[positions_offset], &temp_uint32_t, sizeof(temp_uint32_t));
+        std::memcpy(&mrtr_data[positions_offset], &temp_uint32_t, sizeof(temp_uint32_t));
 
         for (auto& bone : json["Bones"]) {
             vector3 position;
@@ -424,10 +419,9 @@ mrtr::mrtr(std::string json_path, uint64_t hash_value, std::string output_path, 
         }
 
         temp_uint32_t = mrtr_data.size();
-        std::memcpy(&mrtr_data.data()[rotations_offset], &temp_uint32_t, sizeof(temp_uint32_t));
+        std::memcpy(&mrtr_data[rotations_offset], &temp_uint32_t, sizeof(temp_uint32_t));
 
         for (auto& bone : json["Bones"]) {
-            doublematrix43 matrix;
             vector4 rotation;
 
             double degrees_to_radians = 3.14159265358979323846 / 180.0;
@@ -530,8 +524,8 @@ mrtr::mrtr(std::string json_path, uint64_t hash_value, std::string output_path, 
         }
 
         temp_uint32_t = mrtr_data.size();
-        std::memcpy(&mrtr_data.data()[names_offset], &temp_uint32_t, sizeof(temp_uint32_t));
-        std::memcpy(&mrtr_data.data()[names_offset + 0x18], &temp_uint32_t, sizeof(temp_uint32_t));
+        std::memcpy(&mrtr_data[names_offset], &temp_uint32_t, sizeof(temp_uint32_t));
+        std::memcpy(&mrtr_data[names_offset + 0x18], &temp_uint32_t, sizeof(temp_uint32_t));
 
         for (uint32_t k = 0; k < sizeof(bones_count); k++) {
             mrtr_data.push_back(*((char*) &bones_count + k));
@@ -605,8 +599,8 @@ mrtr::mrtr(std::string json_path, uint64_t hash_value, std::string output_path, 
                 ground_bone_index = index;
             }
 
-            for (uint32_t k = 0; k < bone_name.length(); k++) {
-                mrtr_data.push_back(bone_name[k]);
+            for (const char k : bone_name) {
+                mrtr_data.push_back(k);
             }
 
             mrtr_data.push_back(0x0);
@@ -616,7 +610,7 @@ mrtr::mrtr(std::string json_path, uint64_t hash_value, std::string output_path, 
             index++;
         }
 
-        std::memcpy(&mrtr_data.data()[ground_index_offset], &ground_bone_index, sizeof(ground_bone_index));
+        std::memcpy(&mrtr_data[ground_index_offset], &ground_bone_index, sizeof(ground_bone_index));
 
         while ((mrtr_data.size() % 0x4) != 0) {
             mrtr_data.push_back(0xCD);

@@ -5,7 +5,6 @@
 #include "util.h"
 #include "thirdparty/json/json.hpp"
 #include <iostream>
-#include <chrono>
 #include <sstream>
 #include <fstream>
 #include <regex>
@@ -29,35 +28,7 @@ void rpkg_function::rebuild_dlge_from_json_from(std::string& input_path, std::st
     std::vector<std::string> dlge_hash_strings;
     std::vector<std::string> dlge_file_names;
 
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-
-    double console_update_rate = 1.0 / 2.0;
-    int period_count = 1;
-
     for (const auto& entry : std::filesystem::recursive_directory_iterator(input_folder_path)) {
-        std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-        double time_in_seconds_from_start_time = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(
-                end_time - start_time).count());
-
-        if (time_in_seconds_from_start_time > console_update_rate) {
-            start_time = end_time;
-
-            if (period_count > 3) {
-                period_count = 0;
-            }
-
-            std::stringstream ss;
-
-            ss << "Scanning folder" << std::string(period_count, '.');
-
-            timing_string = ss.str();
-
-            LOG_NO_ENDL("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-            period_count++;
-        }
-
         if (!std::filesystem::is_regular_file(entry.path().string()))
             continue;
 
@@ -107,18 +78,7 @@ void rpkg_function::rebuild_dlge_from_json_from(std::string& input_path, std::st
         }
     }
 
-    std::stringstream ss;
-
-    ss << "Scanning folder: Done";
-
-    timing_string = ss.str();
-
-    LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-    start_time = std::chrono::high_resolution_clock::now();
-
-    console_update_rate = 1.0 / 2.0;
-    period_count = 1;
+    LOG("Scanning folder: Done");
 
     for (uint64_t p = 0; p < json_file_paths.size(); p++) {
         if (gui_control == ABORT_CURRENT_TASK) {
@@ -126,41 +86,17 @@ void rpkg_function::rebuild_dlge_from_json_from(std::string& input_path, std::st
         }
 
         if (file::path_exists(json_file_paths.at(p) + ".meta")) {
-            std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-            double time_in_seconds_from_start_time = (0.000000001 *
-                                                      std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                                              end_time - start_time).count());
-
-            if (time_in_seconds_from_start_time > console_update_rate) {
-                start_time = end_time;
-
-                if (period_count > 3) {
-                    period_count = 0;
-                }
-
-                ss.str(std::string());
-
-                ss << "Rebuilding JSON as DLGE" << std::string(period_count, '.');
-
-                timing_string = ss.str();
-
-                LOG_NO_ENDL("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-                period_count++;
-            }
-
             std::ifstream input_json_meta_file = std::ifstream(json_file_paths.at(p) + ".meta", std::ifstream::binary);
 
             if (!input_json_meta_file.good()) {
                 LOG_AND_EXIT("Error: JSON meta file " + json_file_paths.at(p) + ".meta" + " could not be read.");
             }
 
-            input_json_meta_file.seekg(0, input_json_meta_file.end);
+            input_json_meta_file.seekg(0, std::ifstream::end);
 
             uint64_t input_json_meta_file_size = input_json_meta_file.tellg();
 
-            input_json_meta_file.seekg(0, input_json_meta_file.beg);
+            input_json_meta_file.seekg(0, std::ifstream::beg);
 
             std::vector<char> input_json_meta(input_json_meta_file_size, 0);
 
@@ -272,7 +208,7 @@ void rpkg_function::rebuild_dlge_from_json_from(std::string& input_path, std::st
                 dlge_data.push_back(0x0);
                 dlge_data.push_back(0x0);
 
-                uint32_t key_range_min = static_cast<uint32_t>(i * number_of_languages);
+                auto key_range_min = static_cast<uint32_t>(i * number_of_languages);
                 uint32_t key_range_max = key_range_min + number_of_languages;
                 uint32_t key_current = 0;
 
@@ -366,11 +302,7 @@ void rpkg_function::rebuild_dlge_from_json_from(std::string& input_path, std::st
         }
     }
 
-    ss.str(std::string());
-
-    ss << "Rebuilding JSON as DLGE: Done";
-
-    LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+    LOG("Rebuilding JSON as DLGE: Done");
 
     percent_progress = static_cast<uint32_t>(100);
 

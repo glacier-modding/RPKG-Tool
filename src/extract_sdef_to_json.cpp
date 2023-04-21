@@ -4,7 +4,6 @@
 #include "global.h"
 #include "util.h"
 #include "sdef.h"
-#include <chrono>
 #include <sstream>
 #include <filesystem>
 
@@ -29,7 +28,7 @@ void rpkg_function::extract_sdef_to_json(std::string& input_path, const std::str
         LOG("Loading Hash List: Done");
     }
 
-    rpkg_function::import_rpkg(input_path, true);
+    rpkg_function::import_rpkg(input_path);
 
     const std::vector<std::string> filters = util::parse_input_filter(filter);
 
@@ -48,10 +47,6 @@ void rpkg_function::extract_sdef_to_json(std::string& input_path, const std::str
                 if (gui_control == ABORT_CURRENT_TASK) {
                     return;
                 }
-
-                timing_string = "Converting: " +
-                                util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(it->second).hash_value) +
-                                "." + rpkgs.at(rpkg_index).hash.at(it->second).hash_resource_type + " to SDEF JSON";
 
                 sdef temp_sdef(rpkg_index, it->second);
 

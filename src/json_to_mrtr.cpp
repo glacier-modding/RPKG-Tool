@@ -2,7 +2,6 @@
 #include "global.h"
 #include "file.h"
 #include "mrtr.h"
-#include <iostream>
 #include <filesystem>
 
 void rpkg_function::json_to_mrtr(std::string& input_path, std::string& output_path) {
@@ -39,9 +38,7 @@ void rpkg_function::json_to_mrtr(std::string& input_path, std::string& output_pa
         uint64_t hash_value = file::get_hash_value_from_path(file, ".MRTR.JSON");
 
         if (hash_value) {
-            timing_string = "Converting: " + file.filename().string() + " to MRTR";
-
-            LOG(timing_string);
+            LOG("Converting: " + file.filename().string() + " to MRTR");
 
             if (output_path.empty()) {
                 mrtr temp_mrtr(file.string(), hash_value, file.parent_path().string(), output_path_is_file);

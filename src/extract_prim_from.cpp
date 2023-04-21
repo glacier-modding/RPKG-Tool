@@ -29,16 +29,10 @@ void rpkg_function::extract_prim_from(std::string& input_path, std::string filte
     if (!input_path_is_rpkg_file) {
         rpkg_function::import_rpkg_files_in_folder(input_path);
     } else {
-        rpkg_function::import_rpkg(input_path, true);
+        rpkg_function::import_rpkg(input_path);
     }
 
-    std::stringstream ss;
-
-    ss << "Scanning folder: Done";
-
-    //timing_string = "Calculating Entity World Coordinate Data And Extracting Associated PRIMs to glTFs...";
-
-    //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
+    LOG("Scanning folder: Done");
 
     //std::vector<std::string>().swap(prim_asset_file_names);
 

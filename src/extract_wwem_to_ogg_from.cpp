@@ -2,7 +2,6 @@
 #include "file.h"
 #include "global.h"
 #include "crypto.h"
-#include "console.h"
 #include "util.h"
 #include "generic_function.h"
 #include "thirdparty/lz4/lz4.h"
@@ -10,7 +9,6 @@
 #include "thirdparty/ww2ogg/wwriff.h"
 #include "thirdparty/revorb/revorb.h"
 #include <unordered_map>
-#include <chrono>
 #include <sstream>
 #include <fstream>
 #include <regex>
@@ -32,23 +30,13 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
         LOG_AND_EXIT("Error: The folder " + input_path + " to with the input RPKGs does not exist.");
     }
 
-    if (!hash_list_loaded) {
-        LOG("Loading Hash List...");
-        generic_function::load_hash_list(true);
-        LOG("Loading Hash List: Done");
-    }
+    force_load_hash_list();
 
     if (!input_path_is_rpkg_file) {
         rpkg_function::import_rpkg_files_in_folder(input_path);
     }
 
-    std::stringstream ss;
-
-    ss << "Scanning folder: Done";
-
-    timing_string = ss.str();
-
-    //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
+    LOG("Scanning folder: Done");
 
     file::create_directories(file::output_path_append("WWEM", output_path));
 
@@ -65,10 +53,6 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
     uint64_t wwem_count = 0;
     uint64_t wwem_hash_size_total = 0;
 
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-    double console_update_rate = 1.0 / 2.0;
-    int period_count = 1;
-
     for (auto& rpkg : rpkgs) {
         for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++) {
             if (rpkg.hash_resource_types.at(r) != "WWEM")
@@ -84,30 +68,6 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
                 std::string hash_file_name = util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
                                              rpkg.hash.at(hash_index).hash_resource_type;
 
-                std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-                double time_in_seconds_from_start_time = (0.000000001 *
-                                                          std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                                                  end_time - start_time).count());
-
-                if (time_in_seconds_from_start_time > console_update_rate) {
-                    start_time = end_time;
-
-                    if (period_count > 3) {
-                        period_count = 0;
-                    }
-
-                    std::stringstream ss;
-
-                    ss << "Scanning RPKGs for WWEM files" << std::string(period_count, '.');
-
-                    timing_string = ss.str();
-
-                    LOG_NO_ENDL("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-                    period_count++;
-                }
-
                 wwem_hash_size_total += rpkg.hash.at(hash_index).data.resource.size_final;
 
                 wwem_count++;
@@ -115,14 +75,7 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
         }
     }
 
-    ss.str(std::string());
-
-    ss << "Scanning RPKGs for WWEM files: Done";
-
-    LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-    start_time = std::chrono::high_resolution_clock::now();
-    int stringstream_length = 80;
+    LOG("Scanning RPKGs for WWEM files: Done");
 
     uint64_t wwem_count_current = 0;
     uint64_t wwem_hash_size_current = 0;
@@ -161,13 +114,6 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
 
                     if (gui_control == ABORT_CURRENT_TASK) {
                         return;
-                    }
-
-                    if (((wwem_count_current * static_cast<uint64_t>(100000)) / wwem_count) %
-                        static_cast<uint64_t>(10) == 0 && wwem_count_current > 0) {
-                        stringstream_length = console::update_console(message, wwem_hash_size_total,
-                                                                      wwem_hash_size_current, start_time,
-                                                                      stringstream_length);
                     }
 
                     wwem_hash_size_current += rpkg.hash.at(hash_index).data.resource.size_final;
@@ -380,14 +326,7 @@ void rpkg_function::extract_wwem_to_ogg_from(std::string& input_path, std::strin
         }
     }
 
-    std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-    ss.str(std::string());
-
-    ss << message << "100% Done in "
-       << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
-
-    LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+    LOG("Done");
 
     percent_progress = static_cast<uint32_t>(100);
 

@@ -3,7 +3,6 @@
 #include "generic_function.h"
 #include "file.h"
 #include "material.h"
-#include <iostream>
 #include <filesystem>
 
 void rpkg_function::json_to_material(const std::string& input_path, const std::string& output_path) {
@@ -15,8 +14,6 @@ void rpkg_function::json_to_material(const std::string& input_path, const std::s
 
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
-
-    bool output_path_is_file = false;
 
     std::vector<std::filesystem::path> files;
 
@@ -32,9 +29,7 @@ void rpkg_function::json_to_material(const std::string& input_path, const std::s
 
     for (std::filesystem::path& file : files) {
         if (file::has_extension(file.string(), ".material.json")) {
-            timing_string = "Converting: " + file.filename().string() + " to Material files (MATI, MATT, MATB)";
-
-            LOG(timing_string);
+            LOG("Converting: " + file.filename().string() + " to Material files (MATI, MATT, MATB)");
 
             if (output_path.empty()) {
                 material temp_material(file.string(), file.parent_path().string());

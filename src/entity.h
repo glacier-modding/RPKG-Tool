@@ -64,9 +64,9 @@ public:
                     uint32_t max_results);
     bool search_json(yyjson_val* json, std::string& search_string);
     bool search_value(const search_item& item, const char* value);
-    void free_yyjson_doc();
-    bool find_ci(const char* s1, const char* s2);
-    bool search_hash_ioi_string(const uint64_t hash_value, const search_item& item);
+    void free_yyjson_doc() const;
+    static bool find_ci(const char* s1, const char* s2);
+    bool search_hash_ioi_string(uint64_t hash_value, const search_item& item);
 
     uint32_t temp_rpkg_index = 0;
     uint32_t temp_hash_index = 0;

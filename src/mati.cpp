@@ -6,7 +6,6 @@
 #include "file.h"
 #include "thirdparty/lz4/lz4.h"
 #include <iostream>
-#include <unordered_map>
 #include <fstream>
 #include <sstream>
 #include <filesystem>
@@ -43,7 +42,7 @@ mati::mati(uint64_t rpkgs_index, uint64_t hash_index) {
         LOG_AND_EXIT("Error: RPKG file " + rpkgs.at(mati_rpkg_index).rpkg_file_path + " could not be read.");
     }
 
-    file.seekg(rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).data.header.data_offset, file.beg);
+    file.seekg(rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).data.header.data_offset, std::ifstream::beg);
     file.read(mati_input_data.data(), mati_hash_size);
     file.close();
 
@@ -86,7 +85,7 @@ void mati::load_hash_depends() {
             bool mate_found = false;
 
             for (uint64_t j = 0; j < rpkgs.size(); j++) {
-                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(j).hash_map.find(
+                auto it = rpkgs.at(j).hash_map.find(
                         rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).hash_reference_data.hash_reference.at(i));
 
                 if (it != rpkgs.at(j).hash_map.end()) {
@@ -261,18 +260,18 @@ void mati::map_textures() {
     uint32_t bytes4 = 0;
     uint64_t bytes8 = 0;
 
-    std::memcpy(&header_offset, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&header_offset, &mati_data[position], sizeof(bytes4));
     position = header_offset;
 
-    std::memcpy(&type_offset, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&type_offset, &mati_data[position], sizeof(bytes4));
     position += 4;
 
-    type = std::string(&mati_data.data()[type_offset]);
+    type = std::string(&mati_data[type_offset]);
 
-    std::memcpy(&texture_count, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&texture_count, &mati_data[position], sizeof(bytes4));
     position += 0x18;
 
-    std::memcpy(&instance_offset, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&instance_offset, &mati_data[position], sizeof(bytes4));
     position = instance_offset;
 
     if (log_output) {
@@ -337,41 +336,41 @@ void mati::map_textures() {
             uint32_t temp_rpkg_index = rpkg_function::get_latest_hash(
                     rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).hash_reference_data.hash_reference.at(d));
 
-            if (temp_rpkg_index != UINT32_MAX) {
-                std::unordered_map<uint64_t, uint64_t>::iterator it = rpkgs.at(temp_rpkg_index).hash_map.find(
-                        rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).hash_reference_data.hash_reference.at(d));
+            if (!(temp_rpkg_index != UINT32_MAX)) continue;
 
-                if (it != rpkgs.at(temp_rpkg_index).hash_map.end()) {
-                    if (!has_diffuse_texture || !has_normal_texture || !has_emissive_texture) {
-                        if (rpkgs.at(temp_rpkg_index).hash.at(it->second).hash_resource_type == "TEXT") {
-                            std::unordered_map<uint64_t, uint64_t>::iterator it2 = hash_list_hash_map.find(
-                                    rpkgs.at(temp_rpkg_index).hash.at(it->second).hash_value);
+            auto it = rpkgs.at(temp_rpkg_index).hash_map.find(
+                    rpkgs.at(mati_rpkg_index).hash.at(mati_hash_index).hash_reference_data.hash_reference.at(d));
 
-                            if (it2 != hash_list_hash_map.end()) {
-                                if (!has_diffuse_texture) {
-                                    if (hash_list_hash_strings.at(it2->second).find("diffuse_") != std::string::npos) {
-                                        has_diffuse_texture = true;
+            if (!(it != rpkgs.at(temp_rpkg_index).hash_map.end())) continue;
 
-                                        diffuse_texture_hash = rpkgs.at(temp_rpkg_index).hash.at(it->second).hash_value;
-                                    }
-                                }
+            if (!has_diffuse_texture || !has_normal_texture || !has_emissive_texture) {
+                if (rpkgs.at(temp_rpkg_index).hash.at(it->second).hash_resource_type == "TEXT") {
+                    auto it2 = hash_list_hash_map.find(
+                            rpkgs.at(temp_rpkg_index).hash.at(it->second).hash_value);
 
-                                if (!has_normal_texture) {
-                                    if (hash_list_hash_strings.at(it2->second).find("normal_") != std::string::npos) {
-                                        has_normal_texture = true;
+                    if (it2 != hash_list_hash_map.end()) {
+                        if (!has_diffuse_texture) {
+                            if (hash_list_hash_strings.at(it2->second).find("diffuse_") != std::string::npos) {
+                                has_diffuse_texture = true;
 
-                                        normal_texture_hash = rpkgs.at(temp_rpkg_index).hash.at(it->second).hash_value;
-                                    }
-                                }
+                                diffuse_texture_hash = rpkgs.at(temp_rpkg_index).hash.at(it->second).hash_value;
+                            }
+                        }
 
-                                if (!has_emissive_texture) {
-                                    if (hash_list_hash_strings.at(it2->second).find("emissive_") != std::string::npos) {
-                                        has_emissive_texture = true;
+                        if (!has_normal_texture) {
+                            if (hash_list_hash_strings.at(it2->second).find("normal_") != std::string::npos) {
+                                has_normal_texture = true;
 
-                                        emissive_texture_hash = rpkgs.at(temp_rpkg_index).hash.at(
-                                                it->second).hash_value;
-                                    }
-                                }
+                                normal_texture_hash = rpkgs.at(temp_rpkg_index).hash.at(it->second).hash_value;
+                            }
+                        }
+
+                        if (!has_emissive_texture) {
+                            if (hash_list_hash_strings.at(it2->second).find("emissive_") != std::string::npos) {
+                                has_emissive_texture = true;
+
+                                emissive_texture_hash = rpkgs.at(temp_rpkg_index).hash.at(
+                                        it->second).hash_value;
                             }
                         }
                     }
@@ -390,27 +389,26 @@ void mati::read_properties(uint32_t position, uint32_t parent) {
 
     temp_mati_property.parent = parent;
 
-    temp_mati_property.name[3] = mati_data.data()[position];
+    temp_mati_property.name[3] = mati_data[position];
     position++;
-    temp_mati_property.name[2] = mati_data.data()[position];
+    temp_mati_property.name[2] = mati_data[position];
     position++;
-    temp_mati_property.name[1] = mati_data.data()[position];
+    temp_mati_property.name[1] = mati_data[position];
     position++;
-    temp_mati_property.name[0] = mati_data.data()[position];
+    temp_mati_property.name[0] = mati_data[position];
     position++;
 
-    std::memcpy(&temp_mati_property.data, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&temp_mati_property.data, &mati_data[position], sizeof(bytes4));
     position += 0x4;
 
-    std::memcpy(&temp_mati_property.size, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&temp_mati_property.size, &mati_data[position], sizeof(bytes4));
     position += 0x4;
 
-    std::memcpy(&temp_mati_property.type, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&temp_mati_property.type, &mati_data[position], sizeof(bytes4));
     position += 0x4;
 
     if (log_output) {
-        std::unordered_map<std::string, std::string>::iterator it = mati_property_name_map.find(
-                temp_mati_property.name);
+        auto it = mati_property_name_map.find(temp_mati_property.name);
 
         if (it != mati_property_name_map.end()) {
             std::cout << "MATI temp_mati_property.name: " << temp_mati_property.name << " (" << it->second << ")"
@@ -438,7 +436,7 @@ void mati::read_properties(uint32_t position, uint32_t parent) {
             for (uint32_t i = 0; i < temp_mati_property.size; i++) {
                 float temp_float = 0;
 
-                std::memcpy(&temp_float, &mati_data.data()[temp_mati_property.data + i * 0x4], sizeof(bytes4));
+                std::memcpy(&temp_float, &mati_data[temp_mati_property.data + i * 0x4], sizeof(bytes4));
 
                 if (log_output)
                     std::cout << "MATI temp_mati_property.value (" << i << "): " << temp_float << std::endl;
@@ -452,7 +450,7 @@ void mati::read_properties(uint32_t position, uint32_t parent) {
         if (log_output)
             std::cout << "MATI temp_property_type: STRING" << std::endl;
 
-        temp_mati_property.string_value = std::string(&mati_data.data()[temp_mati_property.data]);
+        temp_mati_property.string_value = std::string(&mati_data[temp_mati_property.data]);
 
         if (log_output)
             std::cout << "MATI temp_mati_property.value: " << temp_mati_property.string_value << std::endl;
@@ -481,33 +479,33 @@ void mati::read_properties(uint32_t position, uint32_t parent) {
     }
 }
 
-void mati::generate_json(std::string output_path) {
+void mati::generate_json(const std::string& output_path) {
     uint32_t position = 0;
     uint8_t bytes1 = 0;
     uint32_t bytes4 = 0;
     uint64_t bytes8 = 0;
 
-    std::memcpy(&header_offset, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&header_offset, &mati_data[position], sizeof(bytes4));
     position = header_offset;
 
-    std::memcpy(&type_offset, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&type_offset, &mati_data[position], sizeof(bytes4));
     position += 4;
 
-    type = std::string(&mati_data.data()[type_offset]);
+    type = std::string(&mati_data[type_offset]);
 
-    std::memcpy(&texture_count, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&texture_count, &mati_data[position], sizeof(bytes4));
     position += 0x4;
 
-    std::memcpy(&unknown_flag_1, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&unknown_flag_1, &mati_data[position], sizeof(bytes4));
     position += 0x4;
 
-    std::memcpy(&unknown_flag_2, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&unknown_flag_2, &mati_data[position], sizeof(bytes4));
     position += 0x4;
 
-    std::memcpy(&eres_index, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&eres_index, &mati_data[position], sizeof(bytes4));
     position += 0xC;
 
-    std::memcpy(&instance_offset, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&instance_offset, &mati_data[position], sizeof(bytes4));
     position = instance_offset;
 
     if (log_output) {
@@ -576,27 +574,26 @@ mati::read_properties_json(nlohmann::ordered_json temp_json, uint32_t position, 
 
     temp_mati_property.parent = parent;
 
-    temp_mati_property.name[3] = mati_data.data()[position];
+    temp_mati_property.name[3] = mati_data[position];
     position++;
-    temp_mati_property.name[2] = mati_data.data()[position];
+    temp_mati_property.name[2] = mati_data[position];
     position++;
-    temp_mati_property.name[1] = mati_data.data()[position];
+    temp_mati_property.name[1] = mati_data[position];
     position++;
-    temp_mati_property.name[0] = mati_data.data()[position];
+    temp_mati_property.name[0] = mati_data[position];
     position++;
 
-    std::memcpy(&temp_mati_property.data, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&temp_mati_property.data, &mati_data[position], sizeof(bytes4));
     position += 0x4;
 
-    std::memcpy(&temp_mati_property.size, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&temp_mati_property.size, &mati_data[position], sizeof(bytes4));
     position += 0x4;
 
-    std::memcpy(&temp_mati_property.type, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&temp_mati_property.type, &mati_data[position], sizeof(bytes4));
     position += 0x4;
 
     if (log_output) {
-        std::unordered_map<std::string, std::string>::iterator it = mati_property_name_map.find(
-                temp_mati_property.name);
+        auto it = mati_property_name_map.find(temp_mati_property.name);
 
         if (it != mati_property_name_map.end()) {
             std::cout << "MATI temp_mati_property.name: " << temp_mati_property.name << " (" << it->second << ")"
@@ -626,7 +623,7 @@ mati::read_properties_json(nlohmann::ordered_json temp_json, uint32_t position, 
             for (uint32_t i = 0; i < temp_mati_property.size; i++) {
                 float temp_float = 0;
 
-                std::memcpy(&temp_float, &mati_data.data()[temp_mati_property.data + i * 0x4], sizeof(bytes4));
+                std::memcpy(&temp_float, &mati_data[temp_mati_property.data + i * 0x4], sizeof(bytes4));
 
                 if (log_output)
                     std::cout << "MATI temp_mati_property.value (" << i << "): " << temp_float << std::endl;
@@ -642,7 +639,7 @@ mati::read_properties_json(nlohmann::ordered_json temp_json, uint32_t position, 
         if (log_output)
             std::cout << "MATI temp_property_type: STRING" << std::endl;
 
-        temp_mati_property.string_value = std::string(&mati_data.data()[temp_mati_property.data]);
+        temp_mati_property.string_value = std::string(&mati_data[temp_mati_property.data]);
 
         if (log_output)
             std::cout << "MATI temp_mati_property.value: " << temp_mati_property.string_value << std::endl;
@@ -702,13 +699,13 @@ mati::read_properties_json(nlohmann::ordered_json temp_json, uint32_t position, 
     return temp_json;
 }
 
-mati::mati(std::string mati_path, std::string mati_meta_path, uint64_t hash_value, std::string output_path,
+mati::mati(const std::string& mati_path, const std::string& mati_meta_path, uint64_t hash_value, const std::string& output_path,
            bool output_path_is_file) {
     std::ifstream mati_file(mati_path, std::ifstream::binary);
 
-    mati_file.seekg(0, mati_file.end);
+    mati_file.seekg(0, std::ifstream::end);
     uint64_t mati_file_size = mati_file.tellg();
-    mati_file.seekg(0, mati_file.beg);
+    mati_file.seekg(0, std::ifstream::beg);
 
     mati_data = std::vector<char>(mati_file_size, 0);
 
@@ -725,7 +722,7 @@ mati::mati(std::string mati_path, std::string mati_meta_path, uint64_t hash_valu
 
     std::string json_string = "{";
 
-    mati_meta_file.seekg(0, mati_meta_file.beg);
+    mati_meta_file.seekg(0, std::ifstream::beg);
 
     mati_meta_file.read(input, sizeof(bytes8));
     std::memcpy(&bytes8, input, sizeof(bytes8));
@@ -807,27 +804,27 @@ mati::mati(std::string mati_path, std::string mati_meta_path, uint64_t hash_valu
 
     uint32_t position = 0;
 
-    std::memcpy(&header_offset, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&header_offset, &mati_data[position], sizeof(bytes4));
     position = header_offset;
 
-    std::memcpy(&type_offset, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&type_offset, &mati_data[position], sizeof(bytes4));
     position += 4;
 
-    type = std::string(&mati_data.data()[type_offset]);
+    type = std::string(&mati_data[type_offset]);
 
-    std::memcpy(&texture_count, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&texture_count, &mati_data[position], sizeof(bytes4));
     position += 0x4;
 
-    std::memcpy(&unknown_flag_1, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&unknown_flag_1, &mati_data[position], sizeof(bytes4));
     position += 0x4;
 
-    std::memcpy(&unknown_flag_2, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&unknown_flag_2, &mati_data[position], sizeof(bytes4));
     position += 0x4;
 
-    std::memcpy(&eres_index, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&eres_index, &mati_data[position], sizeof(bytes4));
     position += 0xC;
 
-    std::memcpy(&instance_offset, &mati_data.data()[position], sizeof(bytes4));
+    std::memcpy(&instance_offset, &mati_data[position], sizeof(bytes4));
     position = instance_offset;
 
     if (log_output) {
@@ -883,7 +880,7 @@ mati::mati(std::string mati_path, std::string mati_meta_path, uint64_t hash_valu
     json_file.close();
 }
 
-mati::mati(std::string json_path, uint64_t hash_value, std::string output_path, bool output_path_is_file) {
+mati::mati(const std::string& json_path, uint64_t hash_value, const std::string& output_path, bool output_path_is_file) {
     std::ifstream input_json_file(json_path);
 
     try {
@@ -925,7 +922,7 @@ mati::mati(std::string json_path, uint64_t hash_value, std::string output_path, 
                 if (json["INST"][0]["BIND"][0]["TEXT"][i].contains("TXID")) {
                     temp_string = json["INST"][0]["BIND"][0]["TEXT"][i]["TXID"];
 
-                    if (temp_string == "") {
+                    if (temp_string.empty()) {
                         text_hash_depends_txids.push_back(0xFFFFFFFF);
                     } else {
                         text_hash_depends_txids.push_back(texture_count);
@@ -1019,9 +1016,9 @@ mati::mati(std::string json_path, uint64_t hash_value, std::string output_path, 
 
         eres_index = 0;
 
-        for (uint32_t i = 0; i < text_hash_depends.size(); i++) {
-            for (uint32_t k = 0; k < sizeof(text_hash_depends.at(i)); k++) {
-                meta_data.push_back(*((char*) &text_hash_depends.at(i) + k));
+        for (const auto& text_hash_depend : text_hash_depends) {
+            for (uint32_t k = 0; k < sizeof(text_hash_depend); k++) {
+                meta_data.push_back(*((char*) &text_hash_depend + k));
             }
 
             eres_index++;
@@ -1190,8 +1187,8 @@ mati::mati(std::string json_path, uint64_t hash_value, std::string output_path, 
 
                     std::memcpy(&mati_data[offsets_values.at(i)], &temp_offset, 0x4);
 
-                    for (uint32_t i = 0; i < temp_json.size(); i++) {
-                        write_float(temp_json[i]);
+                    for (const auto& i : temp_json) {
+                        write_float(i);
                     }
 
                     align();
@@ -1231,7 +1228,7 @@ mati::mati(std::string json_path, uint64_t hash_value, std::string output_path, 
 
         uint32_t mati_data_size = mati_data.size();
 
-        std::memcpy(&meta_data.data()[mati_size_offset], &mati_data_size, 0x4);
+        std::memcpy(&meta_data[mati_size_offset], &mati_data_size, 0x4);
 
         meta_file.write(meta_data.data(), meta_data.size());
 
@@ -1247,8 +1244,8 @@ mati::mati(std::string json_path, uint64_t hash_value, std::string output_path, 
     }
 }
 
-MATI_PROPERTY_TYPE mati::get_property_type(std::string key) {
-    std::unordered_map<std::string, MATI_PROPERTY_TYPE>::iterator it = mati_property_type_map.find(key);
+[[nodiscard]] MATI_PROPERTY_TYPE mati::get_property_type(const std::string& key) {
+    auto it = mati_property_type_map.find(key);
 
     if (it != mati_property_type_map.end()) {
         return it->second;
@@ -1274,8 +1271,8 @@ void mati::write_uint32_t(uint32_t data) {
 }
 
 void mati::write_string(std::string data) {
-    for (int i = 0; i < data.length(); i++) {
-        mati_data.push_back(data[i]);
+    for (const char i : data) {
+        mati_data.push_back(i);
     }
 
     mati_data.push_back(0x0);
@@ -1298,8 +1295,8 @@ void mati::write_name(std::string name) {
     mati_data.push_back(name[0]);
 }
 
-void mati::write_property_type(std::string name) {
-    std::unordered_map<std::string, MATI_PROPERTY_TYPE>::iterator it = mati_property_type_map.find(name);
+void mati::write_property_type(const std::string& name) {
+    auto it = mati_property_type_map.find(name);
 
     if (it != mati_property_type_map.end()) {
         write_uint32_t((uint32_t) it->second);

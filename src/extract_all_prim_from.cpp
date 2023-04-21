@@ -1,10 +1,8 @@
 #include "rpkg_function.h"
 #include "file.h"
 #include "global.h"
-#include "console.h"
 #include "util.h"
 #include <unordered_map>
-#include <chrono>
 #include <sstream>
 #include <filesystem>
 
@@ -28,16 +26,10 @@ rpkg_function::extract_all_prim_from(std::string& input_path, std::string& filte
     if (!input_path_is_rpkg_file) {
         rpkg_function::import_rpkg_files_in_folder(input_path);
     } else {
-        rpkg_function::import_rpkg(input_path, true);
+        rpkg_function::import_rpkg(input_path);
     }
 
-    std::stringstream ss;
-
-    ss << "Scanning folder: Done";
-
-    timing_string = ss.str();
-
-    //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
+    LOG("Scanning folder: Done");
 
     file::create_directories(file::output_path_append("PRIM", output_path));
 
@@ -54,10 +46,6 @@ rpkg_function::extract_all_prim_from(std::string& input_path, std::string& filte
     uint64_t prim_count = 0;
     uint64_t prim_hash_size_total = 0;
 
-    std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-    double console_update_rate = 1.0 / 2.0;
-    int period_count = 1;
-
     for (auto& rpkg : rpkgs) {
         for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++) {
             if (rpkg.hash_resource_types.at(r) != "PRIM")
@@ -73,30 +61,6 @@ rpkg_function::extract_all_prim_from(std::string& input_path, std::string& filte
                 std::string hash_file_name = util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
                                              rpkg.hash.at(hash_index).hash_resource_type;
 
-                std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-                double time_in_seconds_from_start_time = (0.000000001 *
-                                                          std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                                                  end_time - start_time).count());
-
-                if (time_in_seconds_from_start_time > console_update_rate) {
-                    start_time = end_time;
-
-                    if (period_count > 3) {
-                        period_count = 0;
-                    }
-
-                    std::stringstream ss;
-
-                    ss << "Scanning RPKGs for PRIM files" << std::string(period_count, '.');
-
-                    timing_string = ss.str();
-
-                    LOG_NO_ENDL("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-                    period_count++;
-                }
-
                 prim_hash_size_total += rpkg.hash.at(hash_index).data.resource.size_final;
 
                 prim_count++;
@@ -104,19 +68,10 @@ rpkg_function::extract_all_prim_from(std::string& input_path, std::string& filte
         }
     }
 
-    ss.str(std::string());
-
-    ss << "Scanning RPKGs for PRIM files: Done";
-
-    LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
-
-    start_time = std::chrono::high_resolution_clock::now();
-    int stringstream_length = 80;
+    LOG("Scanning RPKGs for PRIM files: Done");
 
     uint64_t prim_count_current = 0;
     uint64_t prim_hash_size_current = 0;
-
-    std::string message = "Extracting PRIM to GLB files: ";
 
     if (!filter.empty()) {
         LOG("Extracting PRIM to GLB files with filter \"" << filter << "\"");
@@ -150,13 +105,6 @@ rpkg_function::extract_all_prim_from(std::string& input_path, std::string& filte
 
                     if (gui_control == ABORT_CURRENT_TASK) {
                         return;
-                    }
-
-                    if (((prim_count_current * static_cast<uint64_t>(100000)) / prim_count) %
-                        static_cast<uint64_t>(10) == 0 && prim_count_current > 0) {
-                        stringstream_length = console::update_console(message, prim_hash_size_total,
-                                                                      prim_hash_size_current, start_time,
-                                                                      stringstream_length);
                     }
 
                     prim_hash_size_current += rpkg.hash.at(hash_index).data.resource.size_final;
@@ -199,39 +147,6 @@ rpkg_function::extract_all_prim_from(std::string& input_path, std::string& filte
 
                             rpkg_function::extract_prim_from(rpkg.rpkg_file_path, util::uint64_t_to_hex_string(
                                     rpkg.hash.at(hash_index).hash_value), prim_output_dir, type, true);
-
-                            /*std::vector<uint32_t>().swap(temp_entry_index);
-                                    std::vector<uint32_t>().swap(temp_logicalParent);
-                                    std::vector<uint32_t>().swap(temp_entityTypeResourceIndex);
-                                    std::vector<uint32_t>().swap(temp_propertyValues_start_offsets);
-                                    std::vector<uint32_t>().swap(temp_propertyValues_end_offsets);
-                                    std::vector<uint32_t>().swap(temp_postInitPropertyValues_start_offsets);
-                                    std::vector<uint32_t>().swap(temp_postInitPropertyValues_end_offsets);
-                                    std::vector<uint32_t>().swap(temp_platformSpecificPropertyValues_start_offsets);
-                                    std::vector<uint32_t>().swap(temp_platformSpecificPropertyValues_end_offsets);
-                                    std::vector<std::string>().swap(temp_property_types);
-                                    std::vector<std::vector<bool>>().swap(temp_property_types_shared);
-                                    std::vector<std::vector<uint32_t>>().swap(temp_property_types_shared_count);
-                                    std::vector<std::vector<uint32_t>>().swap(temp_property_types_offsets);
-                                    std::vector<std::vector<std::string>>().swap(temp_property_types_values);
-                                    std::vector<std::unordered_map<uint32_t, uint32_t>>().swap(temp_property_types_offsets_map);
-                                    std::vector<std::vector<uint32_t>>().swap(property_crc32_values);
-                                    std::vector<std::vector<uint32_t>>().swap(property_type_indexes);
-                                    std::vector<std::vector<uint32_t>>().swap(property_offsets);
-                                    std::vector<std::vector<uint32_t>>().swap(property_pointer_offsets);
-                                    std::vector<uint32_t>().swap(tblu_entry_index);
-                                    std::vector<uint32_t>().swap(tblu_logicalParent);
-                                    std::vector<uint32_t>().swap(tblu_entityTypeResourceIndex);
-                                    std::vector<uint64_t>().swap(tblu_entityId);
-                                    std::vector<uint32_t>().swap(tblu_editorOnly);
-                                    std::vector<std::string>().swap(tblu_entityName);
-                                    std::vector<char>().swap(temp_input_data);
-                                    std::vector<char>().swap(temp_output_data);
-                                    std::vector<char>().swap(tblu_input_data);
-                                    std::vector<char>().swap(tblu_output_data);
-                                    std::vector<matrix43>().swap(temp_world_coordinates);
-                                    std::vector<std::string>().swap(temp_world_coordinates_property_names);
-                                    std::unordered_map<uint32_t, uint32_t>().swap(temp_world_coordinates_map);*/
                         }
                     }
                 }
@@ -255,14 +170,7 @@ rpkg_function::extract_all_prim_from(std::string& input_path, std::string& filte
         }
     }
 
-    std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-
-    ss.str(std::string());
-
-    ss << message << "100% Done in "
-       << (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count()) << "s";
-
-    LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+    LOG("Done");
 
     percent_progress = static_cast<uint32_t>(100);
 

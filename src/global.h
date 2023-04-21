@@ -20,7 +20,7 @@
 #define LOG_AND_EXIT_NOP(x) std::cout << x << std::endl; if (!interative_mode) std::exit(0)
 #else
 #define LOG(x)
-#define LOG_NO_ENDL(x)
+#define LOG_NO_ENDL(x) (timing_string = (x))
 #define LOG_AND_EXIT(x) task_status_string = x; task_single_status = TASK_EXITED; task_multiple_status = TASK_EXITED; return
 #define LOG_AND_RETURN(x) task_status_string = x; task_single_status = TASK_RETURNED; task_multiple_status = TASK_RETURNED; return
 #define LOG_AND_EXIT_NOP(x)

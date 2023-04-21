@@ -1,8 +1,7 @@
 #include "rpkg_function.h"
 #include "global.h"
-#include <iostream>
-#include <iomanip>
 #include <regex>
+#include <iomanip>
 
 void rpkg_function::search_hash_data(std::string& search_type, std::string& search, std::vector<char>& search_data,
                                      std::string& hash_file_name) {
@@ -73,7 +72,7 @@ void rpkg_function::search_hash_data(std::string& search_type, std::string& sear
                     LOG_NO_ENDL("Found hex string \"");
 
                     for (char val : hex_search) {
-                        LOG_NO_ENDL(std::hex << std::setw(2) << std::setfill('0') << std::uppercase
+                        LOG(std::hex << std::setw(2) << std::setfill('0') << std::uppercase
                                              << (int) (unsigned char) val);
                     }
 

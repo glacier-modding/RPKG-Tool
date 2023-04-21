@@ -2,7 +2,6 @@
 #include "global.h"
 #include "util.h"
 #include <iostream>
-#include <chrono>
 
 uint32_t rpkg_function::get_latest_hash(uint64_t hash_value) {
     std::vector<std::string> hash_in_rpkgs;

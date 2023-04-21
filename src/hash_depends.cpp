@@ -4,7 +4,6 @@
 #include "global.h"
 #include "util.h"
 #include "hash.h"
-#include <iostream>
 #include <sstream>
 
 void rpkg_function::hash_depends(std::string& input_path, std::string& filter) {
@@ -23,11 +22,7 @@ void rpkg_function::hash_depends(std::string& input_path, std::string& filter) {
 
     rpkg_function::import_rpkg_files_in_folder(input_rpkg_folder_path);
 
-    std::stringstream ss;
-
-    ss << "Scanning folder: Done";
-
-    //LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+    LOG("Scanning folder: Done");
 
     std::vector<std::string> filters = util::parse_input_filter(filter);
 
@@ -136,18 +131,16 @@ void rpkg_function::hash_depends(std::string& input_path, std::string& filter) {
                                 }
                             }
 
-                            LOG_NO_ENDL(std::endl);
+                            LOG("");
                         } else {
                             LOG("  - Found in RPKG files: None");
                         }
                     }
                 }
 
-                LOG_NO_ENDL(std::endl);
+                LOG("");
             }
         }
-
-        ss.str(std::string());
 
         uint32_t reverse_dependency_count = 0;
 
@@ -230,7 +223,7 @@ void rpkg_function::hash_depends(std::string& input_path, std::string& filter) {
                     }
                 }
 
-                LOG_NO_ENDL(std::endl);
+                LOG("");
             } else {
                 LOG("  - Found in RPKG files: None");
             }

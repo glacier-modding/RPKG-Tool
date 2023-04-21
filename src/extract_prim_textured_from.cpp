@@ -7,7 +7,6 @@
 #include "util.h"
 #include "text.h"
 #include "generic_function.h"
-#include <chrono>
 #include <sstream>
 #include <filesystem>
 
@@ -27,7 +26,7 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
     if (!input_path_is_rpkg_file) {
         rpkg_function::import_rpkg_files_in_folder(input_path);
     } else {
-        rpkg_function::import_rpkg(input_path, false);
+        rpkg_function::import_rpkg(input_path);
 
         std::filesystem::path base_folder_path = input_path;
 
@@ -36,13 +35,7 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
         rpkg_function::import_rpkg_files_in_folder(parent_path);
     }
 
-    std::stringstream ss;
-
-    ss << "Scanning folder: Done";
-
-    //timing_string = "Calculating Entity World Coordinate Data And Extracting Associated PRIMs to glTFs...";
-
-    //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
+    LOG("Scanning folder: Done");
 
     force_load_hash_list();
 

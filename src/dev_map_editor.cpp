@@ -417,28 +417,22 @@ void dev_function::dev_map_editor(std::string& input_path, std::string& filter, 
         if (!input_path_is_rpkg_file) {
             rpkg_function::import_rpkg_files_in_folder(input_path);
         } else {
-            rpkg_function::import_rpkg(input_path, true);
+            rpkg_function::import_rpkg(input_path);
 
             std::string path = R"(C:\Program Files\Epic Games\HITMAN3\Runtime\)";
 
             rpkg_function::import_rpkg_files_in_folder(path);
 
-            path = R"(C:\Program Files\Epic Games\HITMAN3\Runtime\chunk0patch1.rpkg)";
+//            path = R"(C:\Program Files\Epic Games\HITMAN3\Runtime\chunk0patch1.rpkg)";
 
             //rpkg_function::import_rpkg(path, true);
 
-            path = R"(C:\Program Files\Epic Games\HITMAN3\Runtime\chunk1.rpkg)";
+//            path = R"(C:\Program Files\Epic Games\HITMAN3\Runtime\chunk1.rpkg)";
 
             //rpkg_function::import_rpkg(path, true);
         }
 
-        std::stringstream ss;
-
-        ss << "Scanning folder: Done";
-
-        timing_string = ss.str();
-
-        //LOG("\r" + ss.str() + std::string((80 - ss.str().length()), ' '));
+        LOG("Scanning folder: Done");
 
         //force_load_hash_list();
 

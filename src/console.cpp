@@ -1,46 +1,8 @@
 #include "console.h"
 #include "global.h"
 #include <iostream>
-#include <iomanip>
 #include <sstream>
 #include "version.h"
-
-#ifdef _WIN64
-
-#include <io.h>
-
-#else
-#include <unistd.h>
-#define _isatty isatty
-#define _fileno fileno
-#endif
-
-int console::update_console(const std::string& message, const uint64_t indexMax, const uint64_t index,
-                            const std::chrono::time_point<std::chrono::high_resolution_clock> start_time,
-                            int stringstream_length) {
-    const std::chrono::time_point end_time = std::chrono::high_resolution_clock::now();
-    const double secs_since_start = (0.000000001 * std::chrono::duration_cast<std::chrono::nanoseconds>(
-            end_time - start_time).count());
-
-    const double percent = (static_cast<double>(index) / static_cast<double>(indexMax)) * 100.0;
-    std::stringstream ss;
-    ss << message << std::fixed << std::setprecision(1) << percent << "% Done" << " in " << secs_since_start
-       << "s, estimated completion in " << (secs_since_start / static_cast<double>(index)) * (indexMax - index) << "s";
-
-    percent_progress = static_cast<uint32_t>(percent);
-
-    if (ss.str().length() > stringstream_length) {
-        stringstream_length = static_cast<int>(ss.str().length());
-    }
-
-    timing_string = ss.str();
-
-    if (_isatty(_fileno(stdout))) {
-        LOG_NO_ENDL("\r" << ss.str() << std::string((stringstream_length - ss.str().length()), ' ') << std::flush);
-    }
-
-    return stringstream_length;
-}
 
 void console::display_usage_info() {
     LOG("rpkg-cli " << RPKG_VERSION << " - Works with RPKGv1 (GKPR) and RPKGv2 (2KPR) files.");

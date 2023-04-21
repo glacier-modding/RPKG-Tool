@@ -21,14 +21,14 @@ public:
 
     mrtr(uint64_t rpkgs_index, uint64_t hash_index);
 
-    mrtr(std::string json_path, uint64_t hash_value, std::string output_path, bool output_path_is_file);
+    mrtr(const std::string& json_path, uint64_t hash_value, const std::string& output_path, bool output_path_is_file);
 
-    mrtr(std::string mrtr_path, std::string mrtr_meta_path, uint64_t hash_value, std::string output_path,
+    mrtr(const std::string& mrtr_path, std::string mrtr_meta_path, uint64_t hash_value, const std::string& output_path,
          bool output_path_is_file);
 
     void generate_json();
 
-    void write_json_to_file(std::string output_path);
+    void write_json_to_file(const std::string& output_path) const;
 
     std::string mrtr_file_name = "";
     uint32_t mrtr_rpkg_index = 0;

@@ -3,7 +3,6 @@
 #include "global.h"
 #include "util.h"
 #include "hash.h"
-#include <iostream>
 #include <sstream>
 
 void
@@ -103,7 +102,7 @@ rpkg_function::extract_direct_hash_depends_from(std::string& input_path, std::st
                 LOG(filter << "'s dependencies:");
 
                 for (uint64_t j = 0; j < i.hash_dependency_file_name.size(); j++) {
-                    LOG_NO_ENDL("Hash file/resource: " << i.hash_dependency_file_name.at(j));
+                    LOG("Hash file/resource: " << i.hash_dependency_file_name.at(j));
 
                     if (!i.hash_dependency_in_rpkg.at(j).empty()) {
                         LOG_NO_ENDL(", Found in RPKG files: ");
@@ -116,14 +115,14 @@ rpkg_function::extract_direct_hash_depends_from(std::string& input_path, std::st
                             }
                         }
 
-                        LOG_NO_ENDL(std::endl);
+                        LOG("");
                     } else {
                         LOG(", Found in RPKG files: None");
                     }
                 }
             }
 
-            LOG_NO_ENDL(std::endl);
+            LOG("");
         }
 
         uint32_t reverse_dependency_count = 0;
@@ -178,13 +177,13 @@ rpkg_function::extract_direct_hash_depends_from(std::string& input_path, std::st
             }
         }
 
-        LOG(filter << " has reverse dependencies in " << reverse_dependency.size() << " RPKG files:" << std::endl);
+        LOG(filter << " has reverse dependencies in " << reverse_dependency.size() << " RPKG files:");
 
         if (!reverse_dependency.empty()) {
             LOG(filter << "'s reverse dependencies:");
 
             for (uint64_t i = 0; i < reverse_dependency.size(); i++) {
-                LOG_NO_ENDL("Hash file/resource: " << reverse_dependency.at(i));
+                LOG("Hash file/resource: " << reverse_dependency.at(i));
 
                 if (!reverse_dependency_in_rpkg_file.at(i).empty()) {
                     LOG_NO_ENDL(", Found in RPKG files: ");
@@ -197,7 +196,7 @@ rpkg_function::extract_direct_hash_depends_from(std::string& input_path, std::st
                         }
                     }
 
-                    LOG_NO_ENDL(std::endl);
+                    LOG("");
                 } else {
                     LOG(", Found in RPKG files: None");
                 }

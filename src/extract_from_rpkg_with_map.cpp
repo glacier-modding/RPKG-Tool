@@ -8,7 +8,7 @@
 #include <fstream>
 
 void rpkg_function::extract_from_rpkg_with_map(rpkg_extraction_vars& rpkg_vars) {
-    rpkg_function::import_rpkg(rpkg_vars.input_path, true);
+    rpkg_function::import_rpkg(rpkg_vars.input_path);
 
     std::string rpkg_file_name = file::get_base_file_name(rpkg_vars.input_path);
 
