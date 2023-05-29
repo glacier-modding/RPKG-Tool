@@ -349,7 +349,7 @@ void mati::map_textures() {
 
                             if (it2 != hash_list_hash_map.end()) {
                                 if (!has_diffuse_texture) {
-                                    if (hash_list_hash_strings.at(it2->second).find("diffuse_") != std::string::npos) {
+                                    if (hash_list_hash_strings.at(it2->second).find("diffuse") != std::string::npos) {
                                         has_diffuse_texture = true;
 
                                         diffuse_texture_hash = rpkgs.at(temp_rpkg_index).hash.at(it->second).hash_value;
@@ -357,7 +357,7 @@ void mati::map_textures() {
                                 }
 
                                 if (!has_normal_texture) {
-                                    if (hash_list_hash_strings.at(it2->second).find("normal_") != std::string::npos) {
+                                    if (hash_list_hash_strings.at(it2->second).find("normal") != std::string::npos) {
                                         has_normal_texture = true;
 
                                         normal_texture_hash = rpkgs.at(temp_rpkg_index).hash.at(it->second).hash_value;
@@ -365,7 +365,7 @@ void mati::map_textures() {
                                 }
 
                                 if (!has_emissive_texture) {
-                                    if (hash_list_hash_strings.at(it2->second).find("emissive_") != std::string::npos) {
+                                    if (hash_list_hash_strings.at(it2->second).find("emissive") != std::string::npos) {
                                         has_emissive_texture = true;
 
                                         emissive_texture_hash = rpkgs.at(temp_rpkg_index).hash.at(

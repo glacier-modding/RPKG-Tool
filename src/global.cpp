@@ -96,6 +96,8 @@ int map_percent_progress_map_writing_changes_to_qn = 0;
 std::unordered_map<uint64_t, entity> deep_search_entities_map;
 nlohmann::ordered_json localization_json;
 std::string hashes_based_on_resource_type = "";
+std::string prim_lod_data = "";
+std::set<uint8_t> prim_lods_to_export;
 
 void initialize_prim_float_values() {
     if (!prim_float_values_initialized) {

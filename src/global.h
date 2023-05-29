@@ -210,6 +210,7 @@ struct asset3ds {
     std::vector<float> bones_positions;
     std::vector<float> bones_inverse_matrices;
     std::vector<uint32_t> material_ids;
+    std::vector<uint8_t> lods;
 };
 
 struct jpg_textures {
@@ -357,6 +358,8 @@ extern int map_percent_progress_map_writing_changes_to_qn;
 extern std::unordered_map<uint64_t, entity> deep_search_entities_map;
 extern nlohmann::ordered_json localization_json;
 extern std::string hashes_based_on_resource_type;
+extern std::string prim_lod_data;
+extern std::set<uint8_t> prim_lods_to_export;
 
 /**
  * uint8_t

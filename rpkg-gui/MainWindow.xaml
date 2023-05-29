@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-        xmlns:hx="http://helix-toolkit.org/wpf"
+        xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
 	    xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -758,14 +758,75 @@
             </TabItem>
             <TabItem x:Name="SixthTabRight" Header="3D Viewer" Visibility="Collapsed">
                 <Grid>
-                    <hx:HelixViewport3D x:Name="helixViewport">
-                        <hx:HelixViewport3D.Camera>
-                            <OrthographicCamera NearPlaneDistance="-1.7976931348623157E+8" FarPlaneDistance="1.7976931348623157E+8" />
-                        </hx:HelixViewport3D.Camera>
-                        <hx:SunLight/>
-                        <hx:DefaultLights></hx:DefaultLights>
-                        <ModelVisual3D x:Name="model"></ModelVisual3D>
-                    </hx:HelixViewport3D>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <CheckBox Grid.Row="0" Grid.Column="0" Margin="8" x:Name="ViewerShowWireframe" IsChecked="{Binding ShowWireframe}">Show Wireframe</CheckBox>
+                    <CheckBox Grid.Row="0" Grid.Column="1" Margin="8" x:Name="ViewerRenderFlat" IsChecked="{Binding RenderFlat}">Flat Shading</CheckBox>
+                    <CheckBox Grid.Row="0" Grid.Column="2" Margin="8" x:Name="ViewerEnableSSAO" IsChecked="{Binding ElementName=view, Path=EnableSSAO}">Enable SSAO</CheckBox>
+                    <Button Grid.Row="0" Grid.Column="3" Click="ViewerExportButton_Click" x:Name="ViewerExportButton" Content="  Export PRIM Model  " Margin="8,0,8,0"/>
+                    <Label Grid.Row="1" Grid.Column="0" Content="Display LODs:" FontFamily="Consolas" FontWeight="Bold" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="ViewerDisplayLODs"/>
+                    <mah:RangeSlider 
+                        Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4"
+                        Margin="8"
+                        x:Name="ViewerLODSlider"
+                        RangeSelectionChanged="ViewerLODSlider_RangeSelectionChanged"
+                        mah:SliderHelper.ChangeValueBy="LargeChange"
+                        mah:SliderHelper.EnableMouseWheel="MouseHover"
+                        IsSnapToTickEnabled="True"
+                        AutoToolTipPlacement="TopLeft"
+                        IsMoveToPointEnabled="True"
+                        LargeChange="1"
+                        LowerValue="0"
+                        Maximum="7"
+                        Minimum="0"
+                        Orientation="Horizontal"
+                        SmallChange="1"
+                        Style="{DynamicResource MahApps.Styles.RangeSlider.Win10}"
+                        UpperValue="7"/>
+                    <ScrollViewer Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" x:Name="ViewerScrollViewer" VerticalScrollBarVisibility="Auto">
+                        <StackPanel x:Name="ViewerStackPanel"/>
+                    </ScrollViewer>
+                    <hx:Viewport3DX
+                        Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5"
+                        x:Name="view"
+                        BackgroundColor="#252525"
+                        Camera="{Binding Camera}"
+                        EffectsManager="{Binding EffectsManager}"
+                        EnableSwapChainRendering="True"
+                        FXAALevel="Low"
+                        ZoomDistanceLimitNear="0.000001"
+                        ZoomDistanceLimitFar="999999.0"
+                        ZoomExtentsWhenLoaded="True"
+                        FixedRotationPoint="{Binding ModelCentroid}"
+                        FixedRotationPointEnabled="True">
+                        <hx:Viewport3DX.InputBindings>
+                            <KeyBinding Key="B" Command="hx:ViewportCommands.BackView" />
+                            <KeyBinding Key="F" Command="hx:ViewportCommands.FrontView" />
+                            <KeyBinding Key="U" Command="hx:ViewportCommands.TopView" />
+                            <KeyBinding Key="D" Command="hx:ViewportCommands.BottomView" />
+                            <KeyBinding Key="L" Command="hx:ViewportCommands.LeftView" />
+                            <KeyBinding Key="R" Command="hx:ViewportCommands.RightView" />
+                            <KeyBinding Command="hx:ViewportCommands.ZoomExtents" Gesture="Control+E" />
+                            <MouseBinding Command="hx:ViewportCommands.Rotate" Gesture="RightClick" />
+                            <MouseBinding Command="hx:ViewportCommands.Zoom" Gesture="MiddleClick" />
+                            <MouseBinding Command="hx:ViewportCommands.Pan" Gesture="LeftClick" />
+                        </hx:Viewport3DX.InputBindings>
+                        <hx:AmbientLight3D Color="#363636" />
+                        <hx:DirectionalLight3D Direction="{Binding Camera.LookDirection}" Color="#D6D6D6" />
+                        <hx:Element3DPresenter Content="{Binding GroupModel}" />
+                        <hx:PostEffectMeshBorderHighlight EffectName="highlight" />
+                    </hx:Viewport3DX>
                 </Grid>
             </TabItem>
         </TabControl>

@@ -183,41 +183,41 @@ void rpkg_function::extract_prim_textured_from(std::string& input_path, std::str
                 }
             }
 
-            /*if (temp_mati.has_emissive_texture)
-                            {
-                                uint32_t temp_rpkg_index2 = rpkg_function::get_latest_hash(temp_mati.emissive_texture_hash, false);
+            if (temp_mati.has_emissive_texture) {
+                uint32_t temp_rpkg_index2 = rpkg_function::get_latest_hash(temp_mati.emissive_texture_hash);
 
-                                if (temp_rpkg_index2 == UINT32_MAX)
-                                {
-                                    return;
-                                }
+                if (temp_rpkg_index2 == UINT32_MAX) {
+                    return;
+                }
 
-                                std::unordered_map<uint64_t, uint64_t>::iterator it3 = rpkgs.at(temp_rpkg_index2).hash_map.find(temp_mati.emissive_texture_hash);
+                auto it3 = rpkgs.at(temp_rpkg_index2).hash_map.find(temp_mati.emissive_texture_hash);
 
-                                if (it3 != rpkgs.at(temp_rpkg_index2).hash_map.end())
-                                {
-                                    text temp_text(temp_rpkg_index2, it3->second);
+                if (it3 != rpkgs.at(temp_rpkg_index2).hash_map.end()) {
+                    text temp_text(temp_rpkg_index2, it3->second);
 
-                                    if (temp_text.texd_found)
-                                    {
-                                        if (temp_text.save_texd_to_jpg(""))
-                                        {
-                                            temp_jpg_textures.has_emissive_texture = true;
-                                            temp_jpg_textures.texture_emissive_jpg = temp_text.texd_data_jpg;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (temp_text.save_text_to_jpg(""))
-                                        {
-                                            temp_png_textures.has_emissive_texture = true;
-                                            temp_png_textures.texture_emissive_png = temp_text.text_data_png;
-                                        }
-                                    }
-                                }
-                            }*/
+                    if (temp_text.texd_found) {
+                        if (temp_text.save_texd_to_jpg("")) {
+                            temp_jpg_textures.has_emissive_texture = true;
+                            temp_jpg_textures.texture_emissive_jpg = temp_text.texd_data_jpg;
+                        }
+                    }
+                    else {
+                        if (temp_text.save_text_to_jpg("")) {
+                            temp_jpg_textures.has_emissive_texture = true;
+                            temp_jpg_textures.texture_emissive_jpg = temp_text.texd_data_jpg;
+                        }
+                    }
+                }
+            }
 
             all_jpg_textures.push_back(temp_jpg_textures);
+        }
+
+        prim_lod_data = "";
+
+        for (auto& lod : temp_prim.asset3ds_data.lods) {
+            prim_lod_data += std::to_string(lod);
+            prim_lod_data += ",";
         }
 
         gltf::output_to_single_file_with_textures(temp_prim.asset3ds_data, asset_file_name, GLB_SINGLE, false,

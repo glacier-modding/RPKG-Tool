@@ -239,3 +239,9 @@ RPKG_EXPORT int get_ioi_treeview_children(char* parent);
 RPKG_EXPORT char* get_ioi_treeview();
 
 RPKG_EXPORT int get_ioi_treeview_size();
+
+RPKG_EXPORT char* get_prim_lod_data();
+
+RPKG_EXPORT int set_prim_lods_to_export(int* prim_lods_array, int prim_lods_array_count);
+
+RPKG_EXPORT int reset_prim_lods_to_export();

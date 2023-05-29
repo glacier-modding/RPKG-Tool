@@ -2526,4 +2526,24 @@ int get_ioi_treeview_size() {
     return (int)ioi_treeview_response_data.size();
 }
 
+char* get_prim_lod_data() {
+    return &prim_lod_data[0];
+}
+
+int set_prim_lods_to_export(int* prim_lods_array, int prim_lods_array_count) {
+    std::set<uint8_t>().swap(prim_lods_to_export);
+
+    for (int i = 0; i < prim_lods_array_count; i++) {
+        prim_lods_to_export.insert((uint8_t)prim_lods_array[i]);
+    }
+
+    return 0;
+}
+
+int reset_prim_lods_to_export() {
+    std::set<uint8_t>().swap(prim_lods_to_export);
+
+    return 0;
+}
+
 #pragma clang diagnostic pop

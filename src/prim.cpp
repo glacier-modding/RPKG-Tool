@@ -164,38 +164,41 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index) {
         if (header_type_value == (uint16_t) prim_header::header_type::MESH) {
             if (object_sub_type_value == (uint16_t) prim_object::SUBTYPE::STANDARD) {
                 prim_mesh temp_prim_mesh(prim_data, prim_position, o);
-                prim_meshes.push_back(temp_prim_mesh);
 
                 prim_position = temp_prim_mesh.sub_mesh_table_offset;
 
                 prim_sub_mesh temp_prim_sub_mesh(prim_data, prim_position, o, temp_prim_mesh, prim_meta_data,
                                                  primary_prim_object_header.flag_high_resolution, success);
-                prim_sub_meshes.push_back(temp_prim_sub_mesh);
 
-                asset3ds_data.names.push_back(prim_file_name + "_" + std::to_string(o));
-                asset3ds_data.indexes.push_back(temp_prim_sub_mesh.indexes);
-                asset3ds_data.vertexes.push_back(temp_prim_sub_mesh.vertexes);
-                asset3ds_data.normals.push_back(temp_prim_sub_mesh.vertexes_normals);
-                asset3ds_data.tangents.push_back(temp_prim_sub_mesh.vertexes_tangents);
-                asset3ds_data.uvs.push_back(temp_prim_sub_mesh.vertexes_uvs);
-                asset3ds_data.colors.push_back(temp_prim_sub_mesh.vertexes_colors);
-                asset3ds_data.vertexes_weighted_bone_ids_0.push_back(temp_prim_sub_mesh.vertexes_weighted_bone_ids_0);
-                asset3ds_data.vertexes_weighted_bone_ids_1.push_back(temp_prim_sub_mesh.vertexes_weighted_bone_ids_1);
-                asset3ds_data.vertexes_weighted_weights_0.push_back(temp_prim_sub_mesh.vertexes_weighted_weights_0);
-                asset3ds_data.vertexes_weighted_weights_1.push_back(temp_prim_sub_mesh.vertexes_weighted_weights_1);
-                asset3ds_data.bones_nodes.push_back(temp_prim_sub_mesh.bones_nodes_data);
-                asset3ds_data.bones_infos.push_back(temp_prim_sub_mesh.bones_info_data);
-                asset3ds_data.bones_indices.push_back(temp_prim_sub_mesh.bones_indices_data);
-                asset3ds_data.material_ids.push_back(temp_prim_mesh.prim_object_instance.material_id);
+                if (prim_lods_to_export.size() == 0 || prim_lods_to_export.find(temp_prim_mesh.prim_object_instance.lod) != prim_lods_to_export.end())
+                {
+                    prim_meshes.push_back(temp_prim_mesh);
+                    prim_sub_meshes.push_back(temp_prim_sub_mesh);
+                    asset3ds_data.names.push_back(prim_file_name + "_" + std::to_string(o));
+                    asset3ds_data.indexes.push_back(temp_prim_sub_mesh.indexes);
+                    asset3ds_data.vertexes.push_back(temp_prim_sub_mesh.vertexes);
+                    asset3ds_data.normals.push_back(temp_prim_sub_mesh.vertexes_normals);
+                    asset3ds_data.tangents.push_back(temp_prim_sub_mesh.vertexes_tangents);
+                    asset3ds_data.uvs.push_back(temp_prim_sub_mesh.vertexes_uvs);
+                    asset3ds_data.colors.push_back(temp_prim_sub_mesh.vertexes_colors);
+                    asset3ds_data.vertexes_weighted_bone_ids_0.push_back(temp_prim_sub_mesh.vertexes_weighted_bone_ids_0);
+                    asset3ds_data.vertexes_weighted_bone_ids_1.push_back(temp_prim_sub_mesh.vertexes_weighted_bone_ids_1);
+                    asset3ds_data.vertexes_weighted_weights_0.push_back(temp_prim_sub_mesh.vertexes_weighted_weights_0);
+                    asset3ds_data.vertexes_weighted_weights_1.push_back(temp_prim_sub_mesh.vertexes_weighted_weights_1);
+                    asset3ds_data.bones_nodes.push_back(temp_prim_sub_mesh.bones_nodes_data);
+                    asset3ds_data.bones_infos.push_back(temp_prim_sub_mesh.bones_info_data);
+                    asset3ds_data.bones_indices.push_back(temp_prim_sub_mesh.bones_indices_data);
+                    asset3ds_data.material_ids.push_back(temp_prim_mesh.prim_object_instance.material_id);
+                    asset3ds_data.lods.push_back(temp_prim_mesh.prim_object_instance.lod);
 
-                prim_weighted_mesh temp_prim_weighted_mesh;
-                prim_weighted_meshes.push_back(temp_prim_weighted_mesh);
+                    prim_weighted_mesh temp_prim_weighted_mesh;
+                    prim_weighted_meshes.push_back(temp_prim_weighted_mesh);
 
-                prim_object_is_weighted.push_back(false);
+                    prim_object_is_weighted.push_back(false);
+                }
             } else if (object_sub_type_value == (uint16_t) prim_object::SUBTYPE::WEIGHTED ||
                        object_sub_type_value == (uint16_t) prim_object::SUBTYPE::LINKED) {
                 prim_weighted_mesh temp_prim_weighted_mesh(prim_data, prim_position, o);
-                prim_weighted_meshes.push_back(temp_prim_weighted_mesh);
 
                 prim_position = temp_prim_weighted_mesh.prim_mesh_instance.sub_mesh_table_offset;
 
@@ -203,36 +206,42 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index) {
                                                                    prim_meta_data,
                                                                    primary_prim_object_header.flag_high_resolution,
                                                                    success);
-                prim_weighted_sub_meshes.push_back(temp_prim_weighted_sub_mesh);
 
-                asset3ds_data.names.push_back(prim_file_name + "_" + std::to_string(o));
-                asset3ds_data.indexes.push_back(temp_prim_weighted_sub_mesh.indexes);
-                asset3ds_data.vertexes.push_back(temp_prim_weighted_sub_mesh.vertexes);
-                asset3ds_data.normals.push_back(temp_prim_weighted_sub_mesh.vertexes_normals);
-                asset3ds_data.tangents.push_back(temp_prim_weighted_sub_mesh.vertexes_tangents);
-                asset3ds_data.uvs.push_back(temp_prim_weighted_sub_mesh.vertexes_uvs);
-                asset3ds_data.colors.push_back(temp_prim_weighted_sub_mesh.vertexes_colors);
-                asset3ds_data.vertexes_weighted_bone_ids_0.push_back(
+                if (prim_lods_to_export.size() == 0 || prim_lods_to_export.find(temp_prim_weighted_mesh.prim_mesh_instance.prim_object_instance.lod) != prim_lods_to_export.end())
+                {
+                    prim_weighted_meshes.push_back(temp_prim_weighted_mesh);
+                    prim_weighted_sub_meshes.push_back(temp_prim_weighted_sub_mesh);
+                    asset3ds_data.names.push_back(prim_file_name + "_" + std::to_string(o));
+                    asset3ds_data.indexes.push_back(temp_prim_weighted_sub_mesh.indexes);
+                    asset3ds_data.vertexes.push_back(temp_prim_weighted_sub_mesh.vertexes);
+                    asset3ds_data.normals.push_back(temp_prim_weighted_sub_mesh.vertexes_normals);
+                    asset3ds_data.tangents.push_back(temp_prim_weighted_sub_mesh.vertexes_tangents);
+                    asset3ds_data.uvs.push_back(temp_prim_weighted_sub_mesh.vertexes_uvs);
+                    asset3ds_data.colors.push_back(temp_prim_weighted_sub_mesh.vertexes_colors);
+                    asset3ds_data.vertexes_weighted_bone_ids_0.push_back(
                         temp_prim_weighted_sub_mesh.vertexes_weighted_bone_ids_0);
-                asset3ds_data.vertexes_weighted_bone_ids_1.push_back(
+                    asset3ds_data.vertexes_weighted_bone_ids_1.push_back(
                         temp_prim_weighted_sub_mesh.vertexes_weighted_bone_ids_1);
-                asset3ds_data.vertexes_weighted_weights_0.push_back(
+                    asset3ds_data.vertexes_weighted_weights_0.push_back(
                         temp_prim_weighted_sub_mesh.vertexes_weighted_weights_0);
-                asset3ds_data.vertexes_weighted_weights_1.push_back(
+                    asset3ds_data.vertexes_weighted_weights_1.push_back(
                         temp_prim_weighted_sub_mesh.vertexes_weighted_weights_1);
-                asset3ds_data.bones_nodes.push_back(temp_prim_weighted_sub_mesh.bones_nodes_data);
-                asset3ds_data.bones_infos.push_back(temp_prim_weighted_sub_mesh.bones_info_data);
-                asset3ds_data.bones_indices.push_back(temp_prim_weighted_sub_mesh.bones_indices_data);
-                asset3ds_data.material_ids.push_back(
+                    asset3ds_data.bones_nodes.push_back(temp_prim_weighted_sub_mesh.bones_nodes_data);
+                    asset3ds_data.bones_infos.push_back(temp_prim_weighted_sub_mesh.bones_info_data);
+                    asset3ds_data.bones_indices.push_back(temp_prim_weighted_sub_mesh.bones_indices_data);
+                    asset3ds_data.material_ids.push_back(
                         temp_prim_weighted_mesh.prim_mesh_instance.prim_object_instance.material_id);
+                    asset3ds_data.lods.push_back(temp_prim_weighted_mesh.prim_mesh_instance.prim_object_instance.lod);
 
-                prim_mesh temp_prim_mesh;
-                prim_meshes.push_back(temp_prim_mesh);
+                    prim_mesh temp_prim_mesh;
+                    prim_meshes.push_back(temp_prim_mesh);
 
-                if (object_sub_type_value == (uint16_t) prim_object::SUBTYPE::WEIGHTED) {
-                    prim_object_is_weighted.push_back(true);
-                } else {
-                    prim_object_is_weighted.push_back(false);
+                    if (object_sub_type_value == (uint16_t)prim_object::SUBTYPE::WEIGHTED) {
+                        prim_object_is_weighted.push_back(true);
+                    }
+                    else {
+                        prim_object_is_weighted.push_back(false);
+                    }
                 }
             } else {
                 //LOG("Error: Not supported: PRIM object type: " + util::uint32_t_to_hex_string(object_sub_type_value));
@@ -252,6 +261,8 @@ prim::prim(uint64_t rpkgs_index, uint64_t hash_index) {
     }
 
     asset3ds_data.weighted = prim_object_is_weighted;
+
+    std::set<uint8_t>().swap(prim_lods_to_export);
 }
 
 prim::prim(const std::string& prim_file_path) {
@@ -414,37 +425,40 @@ prim::prim(const std::string& prim_file_path) {
         if (header_type_value == (uint16_t) prim_header::header_type::MESH) {
             if (object_sub_type_value == (uint16_t) prim_object::SUBTYPE::STANDARD) {
                 prim_mesh temp_prim_mesh(prim_data, prim_position, o);
-                prim_meshes.push_back(temp_prim_mesh);
 
                 prim_position = temp_prim_mesh.sub_mesh_table_offset;
 
                 prim_sub_mesh temp_prim_sub_mesh(prim_data, prim_position, o, temp_prim_mesh, prim_meta_data,
                                                  primary_prim_object_header.flag_high_resolution, success);
-                prim_sub_meshes.push_back(temp_prim_sub_mesh);
 
-                asset3ds_data.names.push_back(prim_file_name + "_" + std::to_string(o));
-                asset3ds_data.indexes.push_back(temp_prim_sub_mesh.indexes);
-                asset3ds_data.vertexes.push_back(temp_prim_sub_mesh.vertexes);
-                asset3ds_data.normals.push_back(temp_prim_sub_mesh.vertexes_normals);
-                asset3ds_data.tangents.push_back(temp_prim_sub_mesh.vertexes_tangents);
-                asset3ds_data.uvs.push_back(temp_prim_sub_mesh.vertexes_uvs);
-                asset3ds_data.colors.push_back(temp_prim_sub_mesh.vertexes_colors);
-                asset3ds_data.vertexes_weighted_bone_ids_0.push_back(temp_prim_sub_mesh.vertexes_weighted_bone_ids_0);
-                asset3ds_data.vertexes_weighted_bone_ids_1.push_back(temp_prim_sub_mesh.vertexes_weighted_bone_ids_1);
-                asset3ds_data.vertexes_weighted_weights_0.push_back(temp_prim_sub_mesh.vertexes_weighted_weights_0);
-                asset3ds_data.vertexes_weighted_weights_1.push_back(temp_prim_sub_mesh.vertexes_weighted_weights_1);
-                asset3ds_data.bones_nodes.push_back(temp_prim_sub_mesh.bones_nodes_data);
-                asset3ds_data.bones_infos.push_back(temp_prim_sub_mesh.bones_info_data);
-                asset3ds_data.bones_indices.push_back(temp_prim_sub_mesh.bones_indices_data);
+                if (prim_lods_to_export.size() == 0 || prim_lods_to_export.find(temp_prim_mesh.prim_object_instance.lod) != prim_lods_to_export.end())
+                {
+                    prim_meshes.push_back(temp_prim_mesh);
+                    prim_sub_meshes.push_back(temp_prim_sub_mesh);
+                    asset3ds_data.names.push_back(prim_file_name + "_" + std::to_string(o));
+                    asset3ds_data.indexes.push_back(temp_prim_sub_mesh.indexes);
+                    asset3ds_data.vertexes.push_back(temp_prim_sub_mesh.vertexes);
+                    asset3ds_data.normals.push_back(temp_prim_sub_mesh.vertexes_normals);
+                    asset3ds_data.tangents.push_back(temp_prim_sub_mesh.vertexes_tangents);
+                    asset3ds_data.uvs.push_back(temp_prim_sub_mesh.vertexes_uvs);
+                    asset3ds_data.colors.push_back(temp_prim_sub_mesh.vertexes_colors);
+                    asset3ds_data.vertexes_weighted_bone_ids_0.push_back(temp_prim_sub_mesh.vertexes_weighted_bone_ids_0);
+                    asset3ds_data.vertexes_weighted_bone_ids_1.push_back(temp_prim_sub_mesh.vertexes_weighted_bone_ids_1);
+                    asset3ds_data.vertexes_weighted_weights_0.push_back(temp_prim_sub_mesh.vertexes_weighted_weights_0);
+                    asset3ds_data.vertexes_weighted_weights_1.push_back(temp_prim_sub_mesh.vertexes_weighted_weights_1);
+                    asset3ds_data.bones_nodes.push_back(temp_prim_sub_mesh.bones_nodes_data);
+                    asset3ds_data.bones_infos.push_back(temp_prim_sub_mesh.bones_info_data);
+                    asset3ds_data.bones_indices.push_back(temp_prim_sub_mesh.bones_indices_data);
+                    asset3ds_data.lods.push_back(temp_prim_mesh.prim_object_instance.lod);
 
-                prim_weighted_mesh temp_prim_weighted_mesh;
-                prim_weighted_meshes.push_back(temp_prim_weighted_mesh);
+                    prim_weighted_mesh temp_prim_weighted_mesh;
+                    prim_weighted_meshes.push_back(temp_prim_weighted_mesh);
 
-                prim_object_is_weighted.push_back(false);
+                    prim_object_is_weighted.push_back(false);
+                }
             } else if (object_sub_type_value == (uint16_t) prim_object::SUBTYPE::WEIGHTED ||
                        object_sub_type_value == (uint16_t) prim_object::SUBTYPE::LINKED) {
                 prim_weighted_mesh temp_prim_weighted_mesh(prim_data, prim_position, o);
-                prim_weighted_meshes.push_back(temp_prim_weighted_mesh);
 
                 prim_position = temp_prim_weighted_mesh.prim_mesh_instance.sub_mesh_table_offset;
 
@@ -452,34 +466,40 @@ prim::prim(const std::string& prim_file_path) {
                                                                    prim_meta_data,
                                                                    primary_prim_object_header.flag_high_resolution,
                                                                    success);
-                prim_weighted_sub_meshes.push_back(temp_prim_weighted_sub_mesh);
 
-                asset3ds_data.names.push_back(prim_file_name + "_" + std::to_string(o));
-                asset3ds_data.indexes.push_back(temp_prim_weighted_sub_mesh.indexes);
-                asset3ds_data.vertexes.push_back(temp_prim_weighted_sub_mesh.vertexes);
-                asset3ds_data.normals.push_back(temp_prim_weighted_sub_mesh.vertexes_normals);
-                asset3ds_data.tangents.push_back(temp_prim_weighted_sub_mesh.vertexes_tangents);
-                asset3ds_data.uvs.push_back(temp_prim_weighted_sub_mesh.vertexes_uvs);
-                asset3ds_data.colors.push_back(temp_prim_weighted_sub_mesh.vertexes_colors);
-                asset3ds_data.vertexes_weighted_bone_ids_0.push_back(
+                if (prim_lods_to_export.size() == 0 || prim_lods_to_export.find(temp_prim_weighted_mesh.prim_mesh_instance.prim_object_instance.lod) != prim_lods_to_export.end())
+                {
+                    prim_weighted_meshes.push_back(temp_prim_weighted_mesh);
+                    prim_weighted_sub_meshes.push_back(temp_prim_weighted_sub_mesh);
+                    asset3ds_data.names.push_back(prim_file_name + "_" + std::to_string(o));
+                    asset3ds_data.indexes.push_back(temp_prim_weighted_sub_mesh.indexes);
+                    asset3ds_data.vertexes.push_back(temp_prim_weighted_sub_mesh.vertexes);
+                    asset3ds_data.normals.push_back(temp_prim_weighted_sub_mesh.vertexes_normals);
+                    asset3ds_data.tangents.push_back(temp_prim_weighted_sub_mesh.vertexes_tangents);
+                    asset3ds_data.uvs.push_back(temp_prim_weighted_sub_mesh.vertexes_uvs);
+                    asset3ds_data.colors.push_back(temp_prim_weighted_sub_mesh.vertexes_colors);
+                    asset3ds_data.vertexes_weighted_bone_ids_0.push_back(
                         temp_prim_weighted_sub_mesh.vertexes_weighted_bone_ids_0);
-                asset3ds_data.vertexes_weighted_bone_ids_1.push_back(
+                    asset3ds_data.vertexes_weighted_bone_ids_1.push_back(
                         temp_prim_weighted_sub_mesh.vertexes_weighted_bone_ids_1);
-                asset3ds_data.vertexes_weighted_weights_0.push_back(
+                    asset3ds_data.vertexes_weighted_weights_0.push_back(
                         temp_prim_weighted_sub_mesh.vertexes_weighted_weights_0);
-                asset3ds_data.vertexes_weighted_weights_1.push_back(
+                    asset3ds_data.vertexes_weighted_weights_1.push_back(
                         temp_prim_weighted_sub_mesh.vertexes_weighted_weights_1);
-                asset3ds_data.bones_nodes.push_back(temp_prim_weighted_sub_mesh.bones_nodes_data);
-                asset3ds_data.bones_infos.push_back(temp_prim_weighted_sub_mesh.bones_info_data);
-                asset3ds_data.bones_indices.push_back(temp_prim_weighted_sub_mesh.bones_indices_data);
+                    asset3ds_data.bones_nodes.push_back(temp_prim_weighted_sub_mesh.bones_nodes_data);
+                    asset3ds_data.bones_infos.push_back(temp_prim_weighted_sub_mesh.bones_info_data);
+                    asset3ds_data.bones_indices.push_back(temp_prim_weighted_sub_mesh.bones_indices_data);
+                    asset3ds_data.lods.push_back(temp_prim_weighted_mesh.prim_mesh_instance.prim_object_instance.lod);
 
-                prim_mesh temp_prim_mesh;
-                prim_meshes.push_back(temp_prim_mesh);
+                    prim_mesh temp_prim_mesh;
+                    prim_meshes.push_back(temp_prim_mesh);
 
-                if (object_sub_type_value == (uint16_t) prim_object::SUBTYPE::WEIGHTED) {
-                    prim_object_is_weighted.push_back(true);
-                } else {
-                    prim_object_is_weighted.push_back(false);
+                    if (object_sub_type_value == (uint16_t)prim_object::SUBTYPE::WEIGHTED) {
+                        prim_object_is_weighted.push_back(true);
+                    }
+                    else {
+                        prim_object_is_weighted.push_back(false);
+                    }
                 }
             } else {
                 //LOG("Error: Not supported: PRIM object type: " + util::uint32_t_to_hex_string(object_sub_type_value));
@@ -498,6 +518,8 @@ prim::prim(const std::string& prim_file_path) {
 //    }
 
     asset3ds_data.weighted = prim_object_is_weighted;
+
+    std::set<uint8_t>().swap(prim_lods_to_export);
 }
 
 void prim::load_hash_depends() {

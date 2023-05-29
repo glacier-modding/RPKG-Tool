@@ -24,6 +24,13 @@ using Button = System.Windows.Controls.Button;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using System.Xml;
+using HelixToolkit.Wpf.SharpDX;
+using HelixToolkit.Wpf.SharpDX.Model.Scene;
+using Assimp;
+using Assimp.Unmanaged;
+using System.Windows.Controls.Primitives;
+using System.Web.UI.WebControls.Expressions;
+using System.Threading.Tasks;
 
 namespace rpkg
 {
@@ -114,7 +121,23 @@ namespace rpkg
 		{
 			InitializeComponent();
 
-			ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.DodgerBlue)));
+            this.DataContext = new MainViewModel(this);
+
+            view.AddHandler(Element3D.MouseDown3DEvent, new RoutedEventHandler((s, e) =>
+            {
+                var arg = e as MouseDown3DEventArgs;
+
+                if (arg.HitTestResult == null)
+                {
+                    return;
+                }
+                if (arg.HitTestResult.ModelHit is SceneNode node && node.Tag is AttachedNodeViewModel vm)
+                {
+                    vm.Selected = !vm.Selected;
+                }
+            }));
+
+            ThemeManager.Current.ChangeTheme(Application.Current, ThemeManager.Current.AddTheme(RuntimeThemeGenerator.Current.GenerateRuntimeTheme("Light", Colors.DodgerBlue)));
 
 			timestamp = Timestamps.Now;
 		}
@@ -743,7 +766,7 @@ namespace rpkg
 								SixthTabRight.Visibility = Visibility.Visible;
 								SixthTabRightSeparator.Visibility = Visibility.Visible;
 							}
-						}
+                        }
 
 						if (resourceType == "GFXI")
 						{
@@ -3271,16 +3294,67 @@ namespace rpkg
 
 		private void LoadModelViewer(string hash)
 		{
-			string command = "-extract_prim_to_obj_from";
-			string input_path = rpkgFilePath;
+			string command = "";
+
+            if (runtimeDirLoaded)
+			{
+                command = "-extract_prim_textured_from";
+
+                if (ViewerScrollViewer.Visibility == Visibility.Collapsed)
+                {
+                    ViewerLODSlider.Visibility = Visibility.Visible;
+                    ViewerScrollViewer.Visibility = Visibility.Visible;
+                    ViewerDisplayLODs.Visibility = Visibility.Visible;
+                }
+            }
+            else
+            {
+                command = "-extract_prim_to_obj_from";
+
+				if (ViewerScrollViewer.Visibility == Visibility.Visible)
+				{
+					ViewerLODSlider.Visibility = Visibility.Collapsed;
+                    ViewerScrollViewer.Visibility = Visibility.Collapsed;
+                    ViewerDisplayLODs.Visibility = Visibility.Collapsed;
+                }
+            }
+
+            string input_path = rpkgFilePath;
 			string filter = hash;
 			string search = "";
 			string search_type = "";
 			string output_path = "";
 
-			reset_task_status();
+			List<int> prim_lods = new List<int>();
 
-			task_execute(command, input_path, filter, search, search_type, output_path);
+            if (runtimeDirLoaded)
+            {
+                reset_task_status();
+
+                execute_task temp_rpkgExecute = ExtractMODEL;
+
+                int result = temp_rpkgExecute.Invoke(command, input_path, filter, search, search_type, output_path);
+
+                string prim_lod_data = Marshal.PtrToStringAnsi(get_prim_lod_data());
+
+                prim_lod_data = prim_lod_data.Trim(',');
+				//MessageBoxShow(prim_lod_data);
+				string[] lods = prim_lod_data.Split(',');
+
+				foreach (string l in lods)
+                {
+                    int lod = 0;
+                    int.TryParse(l, out lod);
+					prim_lods.Add(lod);
+					//MessageBoxShow(lod.ToString());
+                }
+            }
+            else
+            {
+                reset_task_status();
+
+                task_execute(command, input_path, filter, search, search_type, output_path);
+            }
 
 			string currentDirectory = Directory.GetCurrentDirectory();
 
@@ -3292,8 +3366,8 @@ namespace rpkg
 			int objIndexCount = 0;
 
 			foreach (var filePath in Directory.GetFiles(currentDirectory))
-			{
-				if (filePath.ToUpper().Contains(hash) && filePath.EndsWith(".obj"))
+            {
+                if (filePath.ToUpper().Contains(hash) && (filePath.EndsWith(".glb") || filePath.EndsWith(".obj")))
 				{
 					objFileNames.Add(filePath);
 
@@ -3316,7 +3390,7 @@ namespace rpkg
 					SixthTabRightSeparator.Visibility = Visibility.Visible;
 				}
 
-				ModelImporter import = new ModelImporter();
+				/*ModelImporter import = new ModelImporter();
 				System.Windows.Media.Media3D.Model3DGroup model1 = import.Load(objFileNames[objIndex]);
 				System.Windows.Media.Media3D.Material mat = MaterialHelper.CreateMaterial(new SolidColorBrush(Color.FromRgb(200, 200, 200)));
 				foreach (System.Windows.Media.Media3D.GeometryModel3D geometryModel in model1.Children)
@@ -3325,12 +3399,58 @@ namespace rpkg
 					geometryModel.BackMaterial = mat;
 				}
 				model.Content = model1;
-				CameraHelper.ZoomExtents(helixViewport.Camera, helixViewport.Viewport, 1000);
+				CameraHelper.ZoomExtents(helixViewport.Camera, helixViewport.Viewport, 1000);*/
 
-				foreach (string filePath in objFileNames)
+				ViewerExportButton.Tag = rpkgFilePath + "," + hash;
+
+                ViewerStackPanel.Children.Clear();
+
+                List<int> prim_lods_sorted = prim_lods.Distinct().ToList();
+                prim_lods_sorted.Sort();
+
+                selectedLods = new List<int>();
+
+                UniformGrid uniformGrid = new UniformGrid();
+				uniformGrid.Columns = prim_lods_sorted.Count;
+				uniformGrid.Rows = 1;
+				uniformGrid.HorizontalAlignment = HorizontalAlignment.Center;
+				uniformGrid.VerticalAlignment = VerticalAlignment.Center;
+
+                foreach (int lod in prim_lods_sorted)
 				{
-					File.Delete(filePath);
+					CheckBox checkBox = new CheckBox();
+					checkBox.Content = lod.ToString();
+					checkBox.Tag = lod;
+					checkBox.FontSize = 18;
+					checkBox.IsChecked = true;
+					checkBox.Margin = new Thickness(4.0, 0.0, 4.0, 0.0);
+					checkBox.Checked += LODCheckBox_Checked;
+                    checkBox.Unchecked += LODCheckBox_Unchecked;
+
+					if (!selectedLods.Contains(lod))
+					{
+                        selectedLods.Add(lod);
+                    }
+
+                    uniformGrid.Children.Add(checkBox);
 				}
+
+                ViewerStackPanel.Children.Add(uniformGrid);
+
+                ViewerShowWireframe.IsChecked = false;
+                ViewerEnableSSAO.IsChecked = false;
+                ViewerRenderFlat.IsChecked = false;
+
+                var viewModel = (MainViewModel)this.DataContext;
+                viewModel.path = objFileNames[objIndex];
+				viewModel.paths.AddRange(objFileNames);
+				viewModel.lods = new List<int>(prim_lods);
+                viewModel.OpenFileCommand.Execute(this);
+
+                //foreach (string filePath in objFileNames)
+				//{
+					//File.Delete(filePath);
+				//}
 			}
 			else
 			{
@@ -3398,7 +3518,7 @@ namespace rpkg
 
 		public static void ExtractMODELThread(string command, string input_path, string filter, string search, string search_type, string output_path)
 		{
-			task_execute(command, input_path, filter, search, search_type, output_path);
+			int result = task_execute(command, input_path, filter, search, search_type, output_path);
 		}
 
 		public int ExtractMODEL(string command, string input_path, string filter, string search, string search_type, string output_path)
@@ -3685,7 +3805,13 @@ namespace rpkg
 
 			oneOrMoreRPKGsHaveBeenImported = true;
 
-			runtimeDirLoaded = true;
+            if (!runtimeDirLoaded)
+            {
+				if (folderPath.EndsWith("runtime", StringComparison.OrdinalIgnoreCase))
+				{
+					runtimeDirLoaded = true;
+				}
+            }
 		}
 
 		private void OpenRPKGFile_Click(object sender, RoutedEventArgs e)
@@ -4550,6 +4676,7 @@ namespace rpkg
                 DeepSearchTextBox.SyntaxHighlighting = REPOJSONTextEditor.SyntaxHighlighting;
                 DeepSearchTextBox.Foreground = Brushes.White;
                 HexViewerTextBox.Foreground = Brushes.White;
+				view.BackgroundColor = (Color)System.Windows.Media.ColorConverter.ConvertFromString("#252525");
 			}
 			else if (brightness == "Light")
 			{
@@ -4573,7 +4700,8 @@ namespace rpkg
                 DeepSearchTextBox.SyntaxHighlighting = REPOJSONTextEditor.SyntaxHighlighting;
                 DeepSearchTextBox.Foreground = Brushes.Black;
                 HexViewerTextBox.Foreground = Brushes.Black;
-			}
+                view.BackgroundColor = (Color)System.Windows.Media.ColorConverter.ConvertFromString("#FFFFFF");
+            }
 		}
 
 		private void About_Click(object sender, RoutedEventArgs e)
@@ -4633,6 +4761,7 @@ namespace rpkg
 		bool loadingVisualEditor = false;
 		string timing_string = "";
 		public int deepSearchEntitiesValueInputCount = 0;
+		public List<int> selectedLods;
 
 		private enum OggPlayerState
 		{
@@ -5033,6 +5162,15 @@ namespace rpkg
 
         [DllImport("rpkg-lib.dll", EntryPoint = "is_valid_regex", CallingConvention = CallingConvention.Cdecl)]
         public static extern int is_valid_regex(string regex_string);
+
+		[DllImport("rpkg-lib.dll", EntryPoint = "get_prim_lod_data", CallingConvention = CallingConvention.Cdecl)]
+		public static extern IntPtr get_prim_lod_data();
+
+        [DllImport("rpkg-lib.dll", EntryPoint = "set_prim_lods_to_export", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int set_prim_lods_to_export(int[] prim_lods_array, int prim_lods_array_count);
+
+        [DllImport("rpkg-lib.dll", EntryPoint = "reset_prim_lods_to_export", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int reset_prim_lods_to_export();
 
         private void LoadResources()
 		{
@@ -10450,5 +10588,152 @@ namespace rpkg
 				}
 			}
 		}
-	}
+
+        private void ViewerExportButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = (sender as Button);
+
+            int[] selectedLodsArray = selectedLods.ToArray();
+            int result = set_prim_lods_to_export(selectedLodsArray, selectedLods.Count());
+
+            string[] hashData = ((string)button.Tag).Split(',');
+
+            string command = "-extract_prim_model_from";
+            string input_path = hashData[0];
+            string filter = hashData[1];
+            string search = "";
+            string search_type = "";
+            string output_path = userSettings.OutputFolder;
+
+			//MessageBoxShow(selectedLods.Count().ToString() + command + input_path + filter + search + search_type + output_path);
+
+            Progress progress = new Progress();
+
+            progress.operation = (int)Progress.Operation.GENERAL;
+
+            progress.message.Content = "Extracting " + filter + " To GLB/TGA File(s)...";
+
+            string temp_outputFolder = SelectFolder("output", "Select Output Folder To Extract " + filter + " To:", "");
+
+            if (temp_outputFolder == "")
+            {
+                return;
+            }
+
+            output_path = temp_outputFolder;
+
+            int temp_return_value = reset_task_status();
+
+            execute_task temp_rpkgExecute = ExtractMODEL;
+
+            IAsyncResult temp_ar = temp_rpkgExecute.BeginInvoke(command, input_path, filter, search, search_type, output_path, null, null);
+
+            progress.ShowDialog();
+
+            if (progress.task_status != (int)Progress.RPKGStatus.TASK_SUCCESSFUL)
+            {
+                return;
+            }
+        }
+
+        private void LODCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            CheckBox checkBox = (sender as CheckBox);
+
+            UpdateViewerLODVisibility((int)checkBox.Tag, (int)checkBox.Tag, true, true);
+
+			if (!selectedLods.Contains((int)checkBox.Tag))
+			{
+				selectedLods.Add((int)checkBox.Tag);
+            }
+        }
+
+        private void LODCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            CheckBox checkBox = (sender as CheckBox);
+
+            UpdateViewerLODVisibility((int)checkBox.Tag, (int)checkBox.Tag, false, true);
+
+            if (selectedLods.Contains((int)checkBox.Tag))
+            {
+                selectedLods.Remove((int)checkBox.Tag);
+            }
+        }
+
+		private void UpdateViewerLODVisibility(int lower, int upper, bool visible, bool fromCheckBox)
+        {
+            var viewModel = (MainViewModel)this.DataContext;
+
+            if (viewModel != null)
+            {
+				foreach (var n in viewModel.scene.Root.Traverse())
+				{
+					int lod = ((AttachedNodeViewModel)n.Tag).lod;
+
+					if (lod >= 0)
+					{
+						bool lodInRange = false;
+
+						for (int i = lower; i <= upper; i++)
+						{
+							int mask = (lod & (1 << i));
+
+							if (mask != 0)
+							{
+								lodInRange = true;
+							}
+						}
+
+						if (lodInRange || (fromCheckBox && lod == upper))
+						{
+							n.Visible = visible;
+						}
+						else if (!fromCheckBox)
+						{
+							n.Visible = !visible;
+						}
+					}
+				}
+            }
+        }
+
+        private void ViewerLODSlider_RangeSelectionChanged(object sender, RangeSelectionChangedEventArgs<double> e)
+        {
+			RangeSlider slider = (sender as RangeSlider);
+
+            UpdateViewerLODVisibility((int)slider.LowerValue, (int)slider.UpperValue, true, false);
+
+			if (ViewerStackPanel != null)
+			{
+				foreach (UniformGrid uniformGrid in ViewerStackPanel.Children.OfType<UniformGrid>())
+				{
+					foreach (CheckBox child in uniformGrid.Children.OfType<CheckBox>())
+					{
+						int lod = (int)child.Tag;
+
+                        bool lodInRange = false;
+
+						for (int i = (int)slider.LowerValue; i <= (int)slider.UpperValue; i++)
+						{
+							int mask = (lod & (1 << i));
+
+							if (mask != 0)
+							{
+								lodInRange = true;
+							}
+						}
+
+                        if (lodInRange)
+                        {
+                            child.IsChecked = true;
+                        }
+                        else
+                        {
+                            child.IsChecked = false;
+                        }
+                    }
+				}
+			}
+        }
+    }
 }

@@ -58,6 +58,8 @@ void rpkg_function::extract_prim_model_from(std::string& input_path, std::string
 
                 prim temp_prim(rpkg_index, it->second);
 
+                timing_string = "Extracting " + filter + " To GLB/TGA File(s)...";
+
                 if (temp_prim.asset3ds_data.vertexes.empty() || !temp_prim.success)
                     continue;
 
