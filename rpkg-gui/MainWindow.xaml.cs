@@ -3438,7 +3438,7 @@ namespace rpkg
                 ViewerStackPanel.Children.Add(uniformGrid);
 
                 ViewerShowWireframe.IsChecked = false;
-                ViewerEnableSSAO.IsChecked = false;
+                ViewerEnableSSAO.IsChecked = true;
                 ViewerRenderFlat.IsChecked = false;
 
                 var viewModel = (MainViewModel)this.DataContext;
