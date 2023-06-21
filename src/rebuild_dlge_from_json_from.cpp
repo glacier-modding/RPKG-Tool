@@ -3,7 +3,7 @@
 #include "global.h"
 #include "crypto.h"
 #include "util.h"
-#include "thirdparty/json/json.hpp"
+#include <nlohmann/json.hpp>
 #include <iostream>
 #include <chrono>
 #include <sstream>

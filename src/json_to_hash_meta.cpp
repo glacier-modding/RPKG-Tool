@@ -5,8 +5,8 @@
 #include "util.h"
 #include <fstream>
 #include <iostream>
-#include "thirdparty/rapidjson/document.h"
-#include "thirdparty/rapidjson/writer.h"
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
 
 void rpkg_function::json_to_hash_meta(std::string& input_path) {
     task_single_status = TASK_EXECUTING;

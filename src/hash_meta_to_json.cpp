@@ -4,9 +4,9 @@
 #include "file.h"
 #include "util.h"
 #include <fstream>
-#include "thirdparty/rapidjson/document.h"
-#include "thirdparty/rapidjson/prettywriter.h"
-#include "thirdparty/rapidjson/stringbuffer.h"
+#include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
 
 void rpkg_function::hash_meta_to_json(std::string& input_path) {
     task_single_status = TASK_EXECUTING;

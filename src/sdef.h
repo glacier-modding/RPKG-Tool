@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <cstdint>
 #include "hash.h"
-#include "thirdparty/json/json.hpp"
+#include <nlohmann/json.hpp>
 
 class sdef {
 public:

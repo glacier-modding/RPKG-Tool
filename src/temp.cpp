@@ -4,21 +4,18 @@
 #include "crypto.h"
 #include "util.h"
 #include "generic_function.h"
-#include "thirdparty/lz4/lz4.h"
-#include "thirdparty/rapidjson/document.h"
-#include "thirdparty/rapidjson/writer.h"
-#include "thirdparty/rapidjson/stringbuffer.h"
-#include "thirdparty/rapidjson/pointer.h"
-#include "thirdparty/directxmath/DirectXMath.h"
+#include <lz4.h>
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/pointer.h>
+#include <DirectXMath.h>
 #include <unordered_map>
 #include <fstream>
 #include <sstream>
 #include <set>
 #include <algorithm>
 #include <iomanip>
-
-#pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM2.lib")
-#pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM3.lib")
 
 temp::temp() = default;
 

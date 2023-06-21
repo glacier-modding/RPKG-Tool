@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 #include <cstdint>
-#include "thirdparty/json/json.hpp"
+#include <nlohmann/json.hpp>
 
 #ifdef RPKG_CLI
 #include <iostream>

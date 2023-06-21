@@ -6,8 +6,8 @@
 #include "console.h"
 #include "crypto.h"
 #include "global.h"
-#include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
+#include <lz4.h>
+#include <lz4hc.h>
 #include <chrono>
 #include <filesystem>
 #include <iostream>

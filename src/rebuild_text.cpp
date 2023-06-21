@@ -3,7 +3,7 @@
 #include "global.h"
 #include "util.h"
 #include "gpudevice.h"
-#include "thirdparty/directxtex/DirectXTex.h"
+#include <DirectXTex.h>
 #include <iostream>
 #include <fstream>
 #include <filesystem>

@@ -7,8 +7,8 @@
 #include <iostream>
 #include <filesystem>
 #include <sstream>
-#include "thirdparty/rapidjson/document.h"
-#include "thirdparty/rapidjson/stringbuffer.h"
+#include <rapidjson/document.h>
+#include <rapidjson/stringbuffer.h>
 
 void extract_glb_and_return_coords(uint32_t temps_index, uint32_t entry_index, std::string parent_string,
                                    std::vector<uint64_t>& entityId_temp_index,

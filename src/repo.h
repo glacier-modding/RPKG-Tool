@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <set>
 #include <cstdint>
-#include "thirdparty/json/json.hpp"
+#include <nlohmann/json.hpp>
 #include "ores.h"
 
 enum REPOCategory {

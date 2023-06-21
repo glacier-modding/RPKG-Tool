@@ -6,7 +6,7 @@
 #include "util.h"
 #include <fstream>
 #include <filesystem>
-#include "thirdparty/json/json.hpp"
+#include <nlohmann/json.hpp>
 
 void dev_function::dev_dlge_names(std::string& input_path, const std::string& output_path) {
     input_path = file::parse_input_folder_path(input_path);

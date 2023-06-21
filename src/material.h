@@ -7,7 +7,7 @@
 #include <variant>
 #include "hash.h"
 #include "global.h"
-#include "thirdparty/json/json.hpp"
+#include <nlohmann/json.hpp>
 
 struct mati_property {
     std::string name = "AAAA";

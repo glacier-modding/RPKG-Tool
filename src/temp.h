@@ -4,9 +4,9 @@
 #include <vector>
 #include <unordered_map>
 #include <cstdint>
-#include "thirdparty/rapidjson/document.h"
-#include "thirdparty/zhmtools/ResourceLib_HM3.h"
-#include "thirdparty/json/json.hpp"
+#include <rapidjson/document.h>
+#include <ResourceLib_HM3.h>
+#include <nlohmann/json.hpp>
 
 using json = nlohmann::ordered_json;
 

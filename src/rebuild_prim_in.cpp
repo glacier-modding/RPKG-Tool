@@ -4,9 +4,9 @@
 #include "console.h"
 #include "util.h"
 #include "prim.h"
-#include "thirdparty/json/json.hpp"
+#include <nlohmann/json.hpp>
 #include "thirdparty/mikktspace/mikktspace.h"
-#include "thirdparty/directxmath/DirectXMath.h"
+#include <DirectXMath.h>
 #include <GLTFSDK/GLTF.h>
 #include <GLTFSDK/GLTFResourceReader.h>
 #include <GLTFSDK/GLBResourceReader.h>
