@@ -12,6 +12,7 @@
 #include <fstream>
 #include <regex>
 #include <filesystem>
+#include <TonyTools/Languages.h>
 
 using json = nlohmann::ordered_json;
 
@@ -71,7 +72,9 @@ void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::stri
     std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
     int stringstream_length = 80;
 
-    for (auto& rpkg : rpkgs) {
+    for (uint32_t i = 0; i < rpkgs.size(); i++) {
+        auto& rpkg = rpkgs.at(i);
+
         if (rpkg.rpkg_file_path != input_path && input_path_is_rpkg_file)
             continue;
 
@@ -152,251 +155,47 @@ void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::stri
 
                     uint32_t decompressed_size = rpkg.hash.at(hash_index).data.resource.size_final;
 
-                    std::vector<char> output_data(decompressed_size, 0);
-
-                    std::vector<char>* rtlv_data;
+                    std::vector<char> rtlv_data(decompressed_size, 0);
 
                     if (rpkg.hash.at(hash_index).data.lz4ed) {
-                        LZ4_decompress_safe(input_data.data(), output_data.data(), static_cast<int>(hash_size),
+                        LZ4_decompress_safe(input_data.data(), rtlv_data.data(), static_cast<int>(hash_size),
                                             decompressed_size);
-
-                        rtlv_data = &output_data;
                     } else {
-                        rtlv_data = &input_data;
+                        rtlv_data = input_data;
                     }
 
-                    uint32_t rtlv_data_size = 0;
-                    uint64_t rtlv_header_value = 0;
-                    std::vector<char> rtlv_footer;
-                    uint32_t rtlv_header_data_size = 0;
-                    std::vector<char> rtlv_header;
-                    uint32_t languages_starting_offset = 0;
-                    uint32_t number_of_languages = 0;
-                    uint32_t check_for_languages = 0;
-                    std::vector<uint32_t> language_offsets;
-                    std::vector<std::vector<char>> language_data;
-                    std::vector<uint16_t> language_data_sizes;
-                    std::vector<uint16_t> language_unknowns;
-                    std::vector<std::vector<std::string>> language_string;
-                    std::vector<std::set<std::pair<uint32_t, std::string>>> language_string_set;
-                    std::vector<std::string> languages;
+                    std::string rtlvJson = TonyTools::Language::RTLV::Convert(
+                        TonyTools::Language::Version::H3,
+                        rtlv_data,
+                        generate_hash_meta_json(i, hash_index)
+                    );
 
-                    std::vector<char> json_meta_data;
+                    if (rtlvJson.empty()) {
+                        LOG_AND_EXIT("Failed to convert RTLV to JSON!");
+                    }
 
-                    json json_object;
+                    json parsedJson = json::parse(rtlvJson);
 
-                    uint32_t position = 0;
+                    if (output_to_string) {
+                        std::stringstream ss;
 
-                    char char4[4] = "";
+                        ss << std::setw(4) << parsedJson << std::endl;
 
-                    position = 0x58;
-                    std::memcpy(&languages_starting_offset, &(*rtlv_data)[position], BYTES4);
+                        localization_string = ss.str();
 
-                    // Quick fix for New Hitman 3 LOCR
-                    std::memcpy(&check_for_languages, &(*rtlv_data)[0xC4], BYTES4);
-                    if (check_for_languages == 9) {
-                        languages.emplace_back("xx");
-                        languages.emplace_back("en");
-                        languages.emplace_back("fr");
-                        languages.emplace_back("it");
-                        languages.emplace_back("de");
-                        languages.emplace_back("es");
-                        languages.emplace_back("ru");
-                        languages.emplace_back("cn");
-                        languages.emplace_back("tc");
+                        localization_json = parsedJson;
                     } else {
-                        languages.emplace_back("xx");
-                        languages.emplace_back("en");
-                        languages.emplace_back("fr");
-                        languages.emplace_back("it");
-                        languages.emplace_back("de");
-                        languages.emplace_back("es");
-                        languages.emplace_back("ru");
-                        languages.emplace_back("mx");
-                        languages.emplace_back("br");
-                        languages.emplace_back("pl");
-                        languages.emplace_back("cn");
-                        languages.emplace_back("jp");
-                        languages.emplace_back("tc");
-                    }
+                        std::string json_path = current_path + "\\" + hash_file_name + ".JSON";
 
-                    position = 0;
-                    std::memcpy(&rtlv_header_value, &(*rtlv_data)[position], BYTES8);
+                        std::ofstream json_file = std::ofstream(json_path, std::ofstream::binary);
 
-                    for (uint64_t k = 0; k < BYTES8; k++) {
-                        json_meta_data.push_back((*rtlv_data)[position + k]);
-                    }
-
-                    uint32_t bytes4 = 0;
-
-                    position += BYTES8;
-
-                    std::memcpy(&bytes4, &(*rtlv_data)[position], BYTES4);
-                    position += BYTES4;
-
-                    rtlv_data_size = ((bytes4 & 0x000000FF) << 0x18) + ((bytes4 & 0x0000FF00) << 0x8) +
-                                     ((bytes4 & 0x00FF0000) >> 0x8) + ((bytes4 & 0xFF000000) >> 0x18);
-
-                    if (languages_starting_offset < rtlv_data_size) {
-                        languages_starting_offset += 0xC;
-
-                        rtlv_header_data_size = languages_starting_offset - position;
-
-                        std::memcpy(&char4, &rtlv_header_data_size, BYTES4);
-
-                        for (char& k : char4) {
-                            json_meta_data.push_back(k);
+                        if (!json_file.good()) {
+                            LOG_AND_EXIT("Error: JSON file " + json_path + " could not be created.");
                         }
 
-                        for (uint64_t k = 0; k < rtlv_header_data_size; k++) {
-                            rtlv_header.push_back((*rtlv_data)[position]);
+                        json_file << std::setw(4) << parsedJson << std::endl;
 
-                            json_meta_data.push_back((*rtlv_data)[position]);
-
-                            position += 1;
-                        }
-
-                        std::memcpy(&number_of_languages, &(*rtlv_data)[position], BYTES4);
-
-                        for (uint64_t k = 0; k < BYTES4; k++) {
-                            json_meta_data.push_back((*rtlv_data)[position + k]);
-                        }
-
-                        position += BYTES4;
-
-                        uint16_t bytes2 = 0;
-
-                        for (uint64_t k = 0; k < number_of_languages; k++) {
-                            uint16_t section_length = 0;
-
-                            std::memcpy(&section_length, &(*rtlv_data)[position], BYTES2);
-                            position += BYTES2;
-
-                            std::memcpy(&bytes2, &(*rtlv_data)[position], BYTES2);
-                            position += BYTES2;
-
-                            language_unknowns.push_back(BYTES2);
-
-                            std::memcpy(&bytes4, &(*rtlv_data)[position], BYTES4);
-                            position += BYTES4;
-
-                            std::memcpy(&bytes4, &(*rtlv_data)[position], BYTES4);
-                            position += BYTES4;
-
-                            language_offsets.push_back(bytes4);
-
-                            std::memcpy(&bytes4, &(*rtlv_data)[position], BYTES4);
-                            position += BYTES4;
-                        }
-
-                        for (uint64_t k = 0; k < number_of_languages; k++) {
-                            json temp_language_json_object;
-
-                            temp_language_json_object["Language"] = languages.at(k);
-
-                            std::memcpy(&bytes4, &(*rtlv_data)[position], BYTES4);
-                            position += BYTES4;
-
-                            language_data_sizes.push_back(bytes4);
-
-                            std::vector<char> temp_string;
-
-                            if (language_data_sizes.back() == 0) {
-                                std::memcpy(&bytes4, &(*rtlv_data)[position], BYTES4);
-                                position += BYTES4;
-
-                                temp_language_json_object["String"] = "";
-                            } else {
-                                for (uint64_t l = 0; l < language_data_sizes.back(); l++) {
-                                    temp_string.push_back((*rtlv_data)[position]);
-                                    position += 1;
-                                }
-
-                                if (language_data_sizes.back() % 8 != 0) {
-                                    LOG_AND_EXIT("Error: RTLV file " + hash_file_name + " in " + rpkg.rpkg_file_name +
-                                                 " is malformed.");
-                                }
-
-                                for (uint32_t m = 0; m < static_cast<uint32_t>(language_data_sizes.back()) / 8; m++) {
-                                    uint32_t data[2];
-                                    std::memcpy(data, &temp_string[static_cast<uint64_t>(m) * static_cast<uint64_t>(8)],
-                                                sizeof(uint32_t));
-                                    std::memcpy(data + 1,
-                                                &temp_string[static_cast<uint64_t>(m) * static_cast<uint64_t>(8) +
-                                                             static_cast<uint64_t>(4)], sizeof(uint32_t));
-
-                                    crypto::xtea_decrypt_localization(data);
-
-                                    std::memcpy(&temp_string[static_cast<uint64_t>(m) * static_cast<uint64_t>(8)], data,
-                                                sizeof(uint32_t));
-                                    std::memcpy(&temp_string[static_cast<uint64_t>(m) * static_cast<uint64_t>(8) +
-                                                             static_cast<uint64_t>(4)], data + 1, sizeof(uint32_t));
-                                }
-
-                                auto last_zero_position = static_cast<uint32_t>(temp_string.size());
-
-                                if (!temp_string.empty()) {
-                                    auto m = static_cast<uint32_t>(temp_string.size() - 1);
-
-                                    while (m >= 0) {
-                                        if (temp_string.at(m) != 0) {
-                                            break;
-                                        }
-
-                                        last_zero_position--;
-                                        m--;
-                                    }
-                                }
-
-                                std::string temp_string_with_zero_pad_removed = std::string(temp_string.begin(),
-                                                                                            temp_string.end()).substr(0,
-                                                                                                                      last_zero_position);
-
-                                temp_language_json_object["String"] = temp_string_with_zero_pad_removed;
-                            }
-
-                            json_object.push_back(temp_language_json_object);
-                        }
-
-                        if ((decompressed_size - position) > 0) {
-                            for (uint64_t k = 0; k < (decompressed_size - position); k++) {
-                                json_meta_data.push_back((*rtlv_data)[position + k]);
-                            }
-                        }
-
-                        if (output_to_string) {
-                            std::stringstream ss;
-
-                            ss << std::setw(4) << json_object << std::endl;
-
-                            localization_string = ss.str();
-
-                            localization_json = json_object;
-                        } else {
-                            std::string json_path = current_path + "\\" + hash_file_name + ".JSON";
-
-                            std::ofstream json_file = std::ofstream(json_path, std::ofstream::binary);
-
-                            if (!json_file.good()) {
-                                LOG_AND_EXIT("Error: JSON file " + json_path + " could not be created.");
-                            }
-
-                            json_file << std::setw(4) << json_object << std::endl;
-
-                            json_file.close();
-
-                            std::string json_meta_path = current_path + "\\" + hash_file_name + ".JSON.meta";
-
-                            std::ofstream json_meta_file = std::ofstream(json_meta_path, std::ofstream::binary);
-
-                            if (!json_meta_file.good()) {
-                                LOG_AND_EXIT("Error: JSON meta file " + json_meta_path + " could not be created.");
-                            }
-
-                            json_meta_file.write(json_meta_data.data(), json_meta_data.size());
-
-                            json_meta_file.close();
-                        }
+                        json_file.close();
                     }
                 }
             }
