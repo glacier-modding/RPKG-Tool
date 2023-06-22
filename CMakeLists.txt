@@ -136,7 +136,14 @@ set(thirdparty
         ${lib-quickentity-rs}
 )
 
-FetchContent_MakeAvailable(rjson gltfsdk directxtex lz4 yyjson json zhmtools directxmath)
+# TonyTools
+set(TONYTOOLS_BUILD_TOOLS OFF)
+FetchContent_Declare(tonytools
+    GIT_REPOSITORY  https://github.com/AnthonyFuller/TonyTools.git
+    GIT_TAG         v1.6.0
+)
+
+FetchContent_MakeAvailable(rjson tonytools gltfsdk directxtex lz4 yyjson json zhmtools directxmath)
 
 configure_file(src/version.h.in src/version.h)
 
@@ -311,6 +318,7 @@ target_link_libraries(rpkg-cli PUBLIC
     ResourceLib_HM2016
     ResourceLib_HM3
     quickentity_rs.dll.lib
+    TonyTools::HMLanguages
 )
 
 target_link_directories(rpkg-lib PUBLIC ${PROJECT_SOURCE_DIR}/thirdparty/quickentity-rs)
@@ -326,6 +334,7 @@ target_link_libraries(rpkg-lib PUBLIC
     ResourceLib_HM2016
     ResourceLib_HM3
     quickentity_rs.dll.lib
+    TonyTools::HMLanguages
 )
 
 include_directories(${CMAKE_SOURCE_DIR})

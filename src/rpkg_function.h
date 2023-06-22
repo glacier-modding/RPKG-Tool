@@ -82,7 +82,7 @@ public:
 
     static uint32_t get_latest_hash(uint64_t hash_value);
 
-    static void json_to_hash_meta(std::string& input_path);
+    static std::vector<char> json_to_hash_meta(std::string& json_string);
 
     static void hash_meta_to_json(std::string& input_path);
 

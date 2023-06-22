@@ -8,6 +8,7 @@
 #include "map.h"
 #include <string>
 #include <vector>
+#include <fstream>
 
 void task::execute(std::string& command, std::string& input_path, std::string& filter, std::string& search,
                    std::string& search_type, std::string& output_path) {
@@ -147,7 +148,34 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     } else if (command == "-hash_meta_to_json") {
         rpkg_function::hash_meta_to_json(input_path);
     } else if (command == "-json_to_hash_meta") {
-        rpkg_function::json_to_hash_meta(input_path);
+        std::string jsonmeta = file::read_file_to_string(input_path);
+
+        std::vector<char> hashmeta = rpkg_function::json_to_hash_meta(jsonmeta);
+
+        if (hashmeta.empty()) {
+            LOG("Failed to convert json to hash meta.");
+            return;
+        }
+
+        if (input_path.length() > 11) {
+            if (util::to_upper_case(input_path.substr(input_path.length() - 10)) != ".META.JSON") {
+                LOG("Error: Input file does not end in .meta.JSON");
+
+                response_string = "Error: Input file does not end in .meta.JSON";
+
+                return;
+            }
+        }
+
+        std::ofstream meta_file = std::ofstream(input_path.substr(0, input_path.length() - 5), std::ofstream::binary);
+
+        LOG("Success: " + input_path + " has been converted.");
+
+        response_string = "Success: " + input_path + " has been converted.";
+
+        meta_file.write(hashmeta.data(), hashmeta.size());
+
+        meta_file.close();
     } else if (command == "-latest_hash") {
         rpkg_function::latest_hash(input_path, filter, output_path);
     } else if (command == "-export_map") {
