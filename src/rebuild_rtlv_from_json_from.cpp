@@ -22,11 +22,8 @@ void rpkg_function::rebuild_rtlv_from_json_from(std::string& input_path) {
         LOG_AND_EXIT("Error: The folder " + input_folder_path + " to rebuild the RTLV files from does not exist.");
     }
 
-    std::vector<std::string> json_file_names;
     std::vector<std::string> json_file_paths;
     std::vector<std::string> json_file_base_paths;
-    std::vector<uint64_t> rtlv_hashes;
-    std::vector<std::string> rtlv_hash_strings;
     std::vector<std::string> rtlv_file_names;
 
     std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
@@ -101,10 +98,7 @@ void rpkg_function::rebuild_rtlv_from_json_from(std::string& input_path) {
         if (is_rtlv_hash_file) {
             json_file_paths.push_back(entry.path().string());
             json_file_base_paths.push_back(json_file_base_path);
-            json_file_names.push_back(json_file_name);
-            rtlv_hashes.push_back(std::strtoll(hash_string.c_str(), nullptr, 16));
             rtlv_file_names.push_back(util::to_upper_case(hash_file_name));
-            rtlv_hash_strings.push_back(util::to_upper_case(hash_string));
         }
     }
 
@@ -164,7 +158,7 @@ void rpkg_function::rebuild_rtlv_from_json_from(std::string& input_path) {
         std::vector<char> outMeta = json_to_hash_meta(rebuiltRTLV.meta);
 
         if (outMeta.empty()) {
-            LOG_AND_EXIT("Failed to rebuilt JSON to RTLV (meta error)!");
+            LOG_AND_EXIT("Failed to rebuild JSON to RTLV (meta error)!");
         }
 
         std::string current_path = json_file_base_paths.at(p) + "\\RTLV.rebuilt";
