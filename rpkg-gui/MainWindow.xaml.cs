@@ -1503,7 +1503,7 @@ namespace rpkg
 						}
 						else if (hashType == "TEMP")
 						{
-							string[] buttons = { "Extract " + hashName, "Extract to QN (QuickEntity) JSON", "View " + hashName + " in Brick/Entity Viewer (Recursive)", "View " + hashName + " in Brick/Entity Viewer (Non-Recursive)", "Extract PRIM Models linked to " + hashName + " To GLB/TGA File(s)", "Extract PRIMs linked to " + hashName + " To GLB File(s)", "Cancel" };
+							string[] buttons = { "Extract " + hashName, "Extract to QuickEntity JSON (Does Not Work)", "View " + hashName + " in Brick/Entity Viewer (Recursive)", "View " + hashName + " in Brick/Entity Viewer (Non-Recursive)", "Extract PRIM Models linked to " + hashName + " To GLB/TGA File(s)", "Extract PRIMs linked to " + hashName + " To GLB File(s)", "Cancel" };
 
 							buttonCount = 7;
 
