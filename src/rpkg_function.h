@@ -32,6 +32,8 @@ public:
 
     static void json_to_material(const std::string& input_path, const std::string& output_path);
 
+    static void extract_all_materials_to_json(std::string& input_path, std::string& output_path);
+
     static void extract_material_to_json(std::string& input_path, std::string& filter, std::string& output_path);
 
     static void mrtr_to_json(std::string& input_path, std::string& filter, std::string& output_path);

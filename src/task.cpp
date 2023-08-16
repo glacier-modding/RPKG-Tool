@@ -197,6 +197,8 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
         rpkg_function::json_to_mrtr(input_path, output_path);
     } else if (command == "-mrtr_to_json") {
         rpkg_function::mrtr_to_json(input_path, filter, output_path);
+    } else if (command == "-extract_all_materials_to_json") {
+        rpkg_function::extract_all_materials_to_json(input_path, output_path);
     } else if (command == "-extract_material_to_json") {
         rpkg_function::extract_material_to_json(input_path, filter, output_path);
     } else if (command == "-json_to_material") {
@@ -271,6 +273,7 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
                                                     "-extract_mati_to_json",
                                                     "-extract_sdef_to_json",
                                                     "-extract_mrtr_to_json",
+                                                    "-extract_all_materials_to_json",
                                                     "-extract_material_to_json",
                                                     "-extract_asva_to_json",
                                                     "-extract_latest_hash",
