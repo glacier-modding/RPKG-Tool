@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(rpkg VERSION 2.29.0)
+project(rpkg VERSION 2.30.0)
 include(FetchContent)
 
 cmake_policy(SET CMP0077 NEW)
@@ -188,6 +188,7 @@ set(RPKG_COMMON_SOURCES
         src/extract_hash_meta.cpp
         src/extract_latest_hash.cpp
         src/extract_locr_to_json_from.cpp
+        src/extract_all_materials_to_json.cpp
         src/extract_material_to_json.cpp
         src/extract_mati_to_json.cpp
         src/extract_mrtr_to_json.cpp
