@@ -58,7 +58,7 @@ jobs:
         cp cmake-build-release/*.exe _rpkg
         cp cmake-build-release/*.lib _rpkg
         cp thirdparty/zhmtools/*.dll _rpkg
-        cp thirdparty/quickentity-rs/*.dll _rpkg
+        cp thirdparty/quickentity-ffi/*.dll _rpkg
         cp thirdparty/assimp/*.dll _rpkg
 
     - name: Upload build artifacts

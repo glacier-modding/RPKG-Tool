@@ -148,8 +148,8 @@ set(lib-zhmtools
         thirdparty/zhmtools/ResourceLib_HM2016.h
         thirdparty/zhmtools/ResourceLibCommon.h
 )
-set(lib-quickentity-rs
-        thirdparty/quickentity-rs/quickentity_rs.dll.h
+set(lib-quickentity-ffi
+        thirdparty/quickentity-ffi/quickentity_ffi.dll.h
 )
 set(thirdparty
 #        ${lib-directxmath}
@@ -164,7 +164,7 @@ set(thirdparty
         ${lib-ww2ogg}
         ${lib-yyjson}
         ${lib-zhmtools}
-        ${lib-quickentity-rs}
+        ${lib-quickentity-ffi}
 )
 
 configure_file(src/version.h.in src/version.h)
@@ -328,11 +328,11 @@ if (MSVC)
     target_compile_options(rpkg-cli PUBLIC "/bigobj" "/W3" "/wd4068")
 endif()
 
-target_link_directories(rpkg-cli PUBLIC ${PROJECT_SOURCE_DIR}/thirdparty/zhmtools ${PROJECT_SOURCE_DIR}/thirdparty/quickentity-rs)
-target_link_libraries(rpkg-cli PUBLIC GLTFSDK DirectXTex ResourceLib_HM2 ResourceLib_HM2016 ResourceLib_HM3 quickentity_rs.dll.lib)
+target_link_directories(rpkg-cli PUBLIC ${PROJECT_SOURCE_DIR}/thirdparty/zhmtools ${PROJECT_SOURCE_DIR}/thirdparty/quickentity-ffi)
+target_link_libraries(rpkg-cli PUBLIC GLTFSDK DirectXTex ResourceLib_HM2 ResourceLib_HM2016 ResourceLib_HM3 quickentity_ffi.dll.lib)
 
-target_link_directories(rpkg-lib PUBLIC ${PROJECT_SOURCE_DIR}/thirdparty/zhmtools ${PROJECT_SOURCE_DIR}/thirdparty/quickentity-rs)
-target_link_libraries(rpkg-lib PUBLIC GLTFSDK DirectXTex ResourceLib_HM2 ResourceLib_HM2016 ResourceLib_HM3 quickentity_rs.dll.lib)
+target_link_directories(rpkg-lib PUBLIC ${PROJECT_SOURCE_DIR}/thirdparty/zhmtools ${PROJECT_SOURCE_DIR}/thirdparty/quickentity-ffi)
+target_link_libraries(rpkg-lib PUBLIC GLTFSDK DirectXTex ResourceLib_HM2 ResourceLib_HM2016 ResourceLib_HM3 quickentity_ffi.dll.lib)
 
 include_directories(${CMAKE_SOURCE_DIR})
 # Pre-processed version header file (on configure step, before build)
