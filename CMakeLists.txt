@@ -3,6 +3,7 @@ project(rpkg VERSION 2.30.0)
 include(FetchContent)
 
 cmake_policy(SET CMP0077 NEW)
+cmake_policy(SET CMP0097 NEW)
 cmake_policy(SET CMP0135 NEW)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -13,8 +14,8 @@ set(RAPIDJSON_BUILD_EXAMPLES OFF)
 set(RAPIDJSON_BUILD_TESTS OFF)
 FetchContent_Declare(rjson
     GIT_REPOSITORY https://github.com/Tencent/rapidjson.git
-    GIT_TAG        master
-    GIT_SHALLOW    TRUE
+    GIT_TAG        516d0473949fdcf0a6dc9fbb40fa92b3b85db184
+    GIT_SUBMODULES ""
 )
 
 # GLTFSDK
@@ -120,7 +121,7 @@ FetchContent_Declare(yyjson
 set(ZHM_BUILD_TOOLS OFF)
 FetchContent_Declare(zhmtools
     GIT_REPOSITORY  https://github.com/OrfeasZ/ZHMTools.git
-    GIT_TAG         dbc3407d917e563903b329dee44feb7569b1bb87
+    GIT_TAG         v3.4.1
 )
 
 set(lib-quickentity-ffi
@@ -140,7 +141,7 @@ set(thirdparty
 set(TONYTOOLS_BUILD_TOOLS OFF)
 FetchContent_Declare(tonytools
     GIT_REPOSITORY  https://github.com/AnthonyFuller/TonyTools.git
-    GIT_TAG         v1.6.2
+    GIT_TAG         v1.7.0
 )
 
 FetchContent_MakeAvailable(rjson tonytools gltfsdk directxtex lz4 yyjson json zhmtools directxmath)
