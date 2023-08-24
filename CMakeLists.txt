@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.22)
 project(rpkg VERSION 2.30.0)
 include(FetchContent)
 
+# We need to set the defaults as setting the policy will not
+# persist when adding subdirectories.
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+set(CMAKE_POLICY_DEFAULT_CMP0097 NEW)
+set(CMAKE_POLICY_DEFAULT_CMP0135 NEW)
 cmake_policy(SET CMP0077 NEW)
 cmake_policy(SET CMP0097 NEW)
 cmake_policy(SET CMP0135 NEW)
