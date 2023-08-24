@@ -8,13 +8,13 @@
 #include <lz4.h>
 #include <rapidjson/stringbuffer.h>
 #include <DirectXMath.h>
-#include "thirdparty/quickentity-rs/quickentity_rs.dll.h"
+#include "thirdparty/quickentity-ffi/quickentity_ffi.dll.h"
 #include <unordered_map>
 #include <fstream>
 #include <iomanip>
 #include <regex>
 
-#pragma comment(lib, "../thirdparty/quickentity-rs/quickentity_rs.dll.lib")
+#pragma comment(lib, "../thirdparty/quickentity-ffi/quickentity_ffi.dll.lib")
 
 entity::entity() = default;
 

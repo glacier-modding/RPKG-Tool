@@ -123,8 +123,8 @@ FetchContent_Declare(zhmtools
     GIT_TAG         dbc3407d917e563903b329dee44feb7569b1bb87
 )
 
-set(lib-quickentity-rs
-        thirdparty/quickentity-rs/quickentity_rs.dll.h
+set(lib-quickentity-ffi
+        thirdparty/quickentity-ffi/quickentity_ffi.dll.h
 )
 set(thirdparty
         ${lib-md5}
@@ -133,7 +133,7 @@ set(thirdparty
         ${lib-revorb}
         ${lib-vorbis}
         ${lib-ww2ogg}
-        ${lib-quickentity-rs}
+        ${lib-quickentity-ffi}
 )
 
 # TonyTools
@@ -318,7 +318,7 @@ target_link_libraries(rpkg-cli PUBLIC
     ResourceLib_HM2
     ResourceLib_HM2016
     ResourceLib_HM3
-    quickentity_rs.dll.lib
+    quickentity_ffi.dll.lib
     TonyTools::HMLanguages
 )
 
@@ -334,7 +334,7 @@ target_link_libraries(rpkg-lib PUBLIC
     ResourceLib_HM2
     ResourceLib_HM2016
     ResourceLib_HM3
-    quickentity_rs.dll.lib
+    quickentity_ffi.dll.lib
     TonyTools::HMLanguages
 )
 

@@ -356,7 +356,7 @@
     <AdditionalFiles Include="ResourceLib_HM3.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AdditionalFiles>
-    <AdditionalFiles Include="quickentity_rs.dll">
+    <AdditionalFiles Include="quickentity_ffi.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AdditionalFiles>
   </ItemGroup>
