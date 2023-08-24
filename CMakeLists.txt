@@ -312,7 +312,7 @@ if (MSVC)
     target_compile_options(rpkg-cli PUBLIC "/bigobj" "/W3" "/wd4068")
 endif()
 
-target_link_directories(rpkg-cli PUBLIC ${PROJECT_SOURCE_DIR}/thirdparty/quickentity-rs)
+target_link_directories(rpkg-cli PUBLIC ${PROJECT_SOURCE_DIR}/thirdparty/quickentity-ffi)
 target_include_directories(rpkg-lib PUBLIC rapidjson)
 target_link_libraries(rpkg-cli PUBLIC
     GLTFSDK
@@ -328,7 +328,7 @@ target_link_libraries(rpkg-cli PUBLIC
     TonyTools::HMLanguages
 )
 
-target_link_directories(rpkg-lib PUBLIC ${PROJECT_SOURCE_DIR}/thirdparty/quickentity-rs)
+target_link_directories(rpkg-lib PUBLIC ${PROJECT_SOURCE_DIR}/thirdparty/quickentity-ffi)
 target_include_directories(rpkg-lib PUBLIC rapidjson)
 target_link_libraries(rpkg-lib PUBLIC
     GLTFSDK
