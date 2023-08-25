@@ -186,7 +186,7 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
             checkDLGE:
                 if (dlgeJson.empty()) {
                     // Support older versions of H3 files automatically.
-                    if (version == "HM3" && !checkedAlt) {
+                    if (ttVersion == TonyTools::Language::Version::H3 && !checkedAlt) {
                         dlgeJson = TonyTools::Language::DLGE::Convert(
                             ttVersion,
                             dlge_data,
