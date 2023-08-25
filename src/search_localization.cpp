@@ -113,7 +113,7 @@ void rpkg_function::search_localization(std::string& input_path, std::string& se
                                 localization_hash_count_current++;
 
                                 rpkg_function::extract_dlge_to_json_from(rpkg.rpkg_file_path, temp_hash_string,
-                                                                         output_path, true);
+                                                                         output_path, true, "HM3");
 
                                 try {
                                     for (const auto& it : localization_json.items()) {
@@ -179,7 +179,7 @@ void rpkg_function::search_localization(std::string& input_path, std::string& se
                                 localization_hash_count_current++;
 
                                 rpkg_function::extract_locr_to_json_from(rpkg.rpkg_file_path, temp_hash_string,
-                                                                         output_path, true);
+                                                                         output_path, true, "HM3");
 
                                 try {
                                     for (const auto& it : localization_json.items()) {
@@ -275,7 +275,7 @@ void rpkg_function::search_localization(std::string& input_path, std::string& se
                                 localization_hash_count_current++;
 
                                 rpkg_function::extract_rtlv_to_json_from(rpkg.rpkg_file_path, temp_hash_string,
-                                                                         output_path, true);
+                                                                         output_path, true, "HM3");
 
                                 try {
                                     for (const auto& it : localization_json.items()) {

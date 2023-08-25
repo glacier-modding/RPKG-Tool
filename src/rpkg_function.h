@@ -149,20 +149,20 @@ public:
 
     static void hash_depends(std::string& input_path, std::string& filter);
 
-    static void rebuild_rtlv_from_json_from(std::string& input_path);
+    static void rebuild_rtlv_from_json_from(std::string& input_path, std::string version);
 
-    static void rebuild_locr_from_json_from(std::string& input_path);
+    static void rebuild_locr_from_json_from(std::string& input_path, std::string version);
 
-    static void rebuild_dlge_from_json_from(std::string& input_path, std::string& output_path);
+    static void rebuild_dlge_from_json_from(std::string& input_path, std::string& output_path, std::string version);
 
     static void extract_rtlv_to_json_from(std::string& input_path, std::string& filter, std::string& output_path,
-                                          bool output_to_string);
+                                          bool output_to_string, std::string version);
 
     static void extract_locr_to_json_from(std::string& input_path, std::string& filter, std::string& output_path,
-                                          bool output_to_string);
+                                          bool output_to_string, std::string version);
 
     static void extract_dlge_to_json_from(std::string& input_path, std::string& filter, std::string& output_path,
-                                          bool output_to_string);
+                                          bool output_to_string, std::string version);
 
     static void generate_rpkg_from(std::string& input_path, std::string& output_path, bool increased_compression);
 

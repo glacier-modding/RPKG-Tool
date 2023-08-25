@@ -18,7 +18,15 @@
 using json = nlohmann::ordered_json;
 
 void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::string& filter, std::string& output_path,
-                                              bool output_to_string) {
+                                              bool output_to_string, std::string version) { 
+    TonyTools::Language::Version ttVersion = TonyTools::Language::Version::H3;
+    if (version == "HM2") {
+        ttVersion = TonyTools::Language::Version::H2;
+    }
+    else if (version == "HM2016") {
+        ttVersion = TonyTools::Language::Version::H2016;
+    }
+
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
@@ -68,8 +76,9 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
 
     timing_string = "Extracting DLGE as JSON...";
 
-    if (log_output)
-            LOG("Extracting DLGE as JSON...");
+    if (log_output) {
+        LOG("Extracting DLGE as JSON...");
+    }
 
     std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
     int stringstream_length = 80;
@@ -168,12 +177,30 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
                 }
 
                 std::string dlgeJson = TonyTools::Language::DLGE::Convert(
-                    TonyTools::Language::Version::H3,
+                    ttVersion,
                     dlge_data,
                     generate_hash_meta_json(i, hash_index)
                 );
 
+                bool checkedAlt = false;
+            checkDLGE:
                 if (dlgeJson.empty()) {
+                    // Support older versions of H3 files automatically.
+                    if (version == "HM3" && !checkedAlt) {
+                        dlgeJson = TonyTools::Language::DLGE::Convert(
+                            ttVersion,
+                            dlge_data,
+                            generate_hash_meta_json(i, hash_index),
+                            "en",
+                            false,
+                            "xx,en,fr,it,de,es"
+                        );
+
+                        checkedAlt = true;
+
+                        goto checkDLGE;
+                    }
+
                     LOG_AND_EXIT("Failed to convert DLGE to JSON!");
                 }
 
@@ -208,8 +235,9 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
 
     ss << "Extracting DLGE as JSON: Done";
 
-    if (log_output)
-            LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+    if (log_output) {
+        LOG("\r" << ss.str() << std::string((80 - ss.str().length()), ' '));
+    }
 
     if (!output_to_string) {
         percent_progress = static_cast<uint32_t>(100);

@@ -17,7 +17,15 @@
 using json = nlohmann::ordered_json;
 
 void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::string& filter, std::string& output_path,
-                                              bool output_to_string) {
+                                              bool output_to_string, std::string version) {
+    TonyTools::Language::Version ttVersion = TonyTools::Language::Version::H3;
+    if (version == "HM2") {
+        ttVersion = TonyTools::Language::Version::H2;
+    }
+    else if (version == "HM2016") {
+        ttVersion = TonyTools::Language::Version::H2016;
+    }
+
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
@@ -165,7 +173,7 @@ void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::stri
                     }
 
                     std::string rtlvJson = TonyTools::Language::RTLV::Convert(
-                        TonyTools::Language::Version::H3,
+                        ttVersion,
                         rtlv_data,
                         generate_hash_meta_json(i, hash_index)
                     );

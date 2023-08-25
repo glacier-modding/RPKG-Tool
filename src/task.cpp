@@ -74,11 +74,11 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     } else if (command == "-extract_wwev_to_ogg_from") {
         rpkg_function::extract_wwev_to_ogg_from(input_path, filter, output_path);
     } else if (command == "-extract_dlge_to_json_from") {
-        rpkg_function::extract_dlge_to_json_from(input_path, filter, output_path, false);
+        rpkg_function::extract_dlge_to_json_from(input_path, filter, output_path, false, search);
     } else if (command == "-extract_locr_to_json_from") {
-        rpkg_function::extract_locr_to_json_from(input_path, filter, output_path, false);
+        rpkg_function::extract_locr_to_json_from(input_path, filter, output_path, false, search);
     } else if (command == "-extract_rtlv_to_json_from") {
-        rpkg_function::extract_rtlv_to_json_from(input_path, filter, output_path, false);
+        rpkg_function::extract_rtlv_to_json_from(input_path, filter, output_path, false, search);
     } else if (command == "-generate_rpkg_from") {
         rpkg_function::generate_rpkg_from(input_path, output_path, true);
     } else if (command == "-generate_rpkg_quickly_from") {
@@ -115,11 +115,11 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     } else if (command == "-rebuild_wwev_in") {
         rpkg_function::rebuild_wwev_in(input_path);
     } else if (command == "-rebuild_dlge_from_json_from") {
-        rpkg_function::rebuild_dlge_from_json_from(input_path, output_path);
+        rpkg_function::rebuild_dlge_from_json_from(input_path, output_path, search);
     } else if (command == "-rebuild_locr_from_json_from") {
-        rpkg_function::rebuild_locr_from_json_from(input_path);
+        rpkg_function::rebuild_locr_from_json_from(input_path, search);
     } else if (command == "-rebuild_rtlv_from_json_from") {
-        rpkg_function::rebuild_rtlv_from_json_from(input_path);
+        rpkg_function::rebuild_rtlv_from_json_from(input_path, search);
     } else if (command == "-search_rpkg") {
         rpkg_extraction_vars rpkg_vars;
 

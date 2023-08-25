@@ -13,7 +13,15 @@
 
 using json = nlohmann::ordered_json;
 
-void rpkg_function::rebuild_rtlv_from_json_from(std::string& input_path) {
+void rpkg_function::rebuild_rtlv_from_json_from(std::string& input_path, std::string version) {
+    TonyTools::Language::Version ttVersion = TonyTools::Language::Version::H3;
+    if (version == "HM2") {
+        ttVersion = TonyTools::Language::Version::H2;
+    }
+    else if (version == "HM2016") {
+        ttVersion = TonyTools::Language::Version::H2016;
+    }
+
     task_single_status = TASK_EXECUTING;
 
     std::string input_folder_path = file::parse_input_folder_path(input_path);
@@ -147,7 +155,7 @@ void rpkg_function::rebuild_rtlv_from_json_from(std::string& input_path) {
         std::string inputJson = file::read_file_to_string(json_file_paths.at(p));
 
         TonyTools::Language::Rebuilt rebuiltRTLV = TonyTools::Language::RTLV::Rebuild(
-            TonyTools::Language::Version::H3,
+            ttVersion,
             inputJson
         );
 
