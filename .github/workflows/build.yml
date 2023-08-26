@@ -76,7 +76,7 @@ jobs:
           msbuild-architecture: x64
 
       - name: Restore NuGet packages
-        run: cd rpkg-gui && msbuild /t:Restore rpkg.sln
+        run: cd rpkg-gui && nuget restore rpkg.sln
 
       - name: Download rpkg-lib
         uses: actions/download-artifact@v3
