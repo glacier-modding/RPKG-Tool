@@ -14,7 +14,7 @@ on:
 jobs:
   build_windows:
     name: Build (Windows)
-    runs-on: self-hosted
+    runs-on: glacier-ptlm-runner
 
     strategy:
       matrix:
@@ -66,7 +66,7 @@ jobs:
   build_gui:
     name: "Build GUI"
     needs: [build_windows]
-    runs-on: self-hosted
+    runs-on: glacier-ptlm-runner
     steps:
       - name: Checkout
         uses: actions/checkout@v2
