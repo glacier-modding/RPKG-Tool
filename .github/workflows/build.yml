@@ -14,7 +14,7 @@ on:
 jobs:
   build_windows:
     name: Build (Windows)
-    runs-on: windows-2022
+    runs-on: ptlm-runner
 
     strategy:
       matrix:
@@ -23,10 +23,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-
-    - name: Get latest CMake and Ninja
-      run: |
-        choco install -y ninja
 
     - name: Setup VS environment
       uses: ilammy/msvc-dev-cmd@v1
@@ -69,7 +65,7 @@ jobs:
   build_gui:
     name: "Build GUI"
     needs: [build_windows]
-    runs-on: windows-2022
+    runs-on: ptlm-runner
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -79,16 +75,8 @@ jobs:
         with:
           msbuild-architecture: x64
 
-      - name: NuGet package cache
-        uses: actions/cache@v3
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
-
       - name: Restore NuGet packages
-        run: cd rpkg-gui && nuget restore rpkg.sln
+        run: cd rpkg-gui && msbuild /t:Restore rpkg.sln
 
       - name: Download rpkg-lib
         uses: actions/download-artifact@v3
