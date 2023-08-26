@@ -14,7 +14,7 @@ on:
 jobs:
   build_windows:
     name: Build (Windows)
-    runs-on: windows-2022
+    runs-on: self-hosted
 
     strategy:
       matrix:
@@ -23,10 +23,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-
-    - name: Get latest CMake and Ninja
-      run: |
-        choco install -y ninja
 
     - name: Setup VS environment
       uses: ilammy/msvc-dev-cmd@v1
@@ -70,7 +66,7 @@ jobs:
   build_gui:
     name: "Build GUI"
     needs: [build_windows]
-    runs-on: windows-2022
+    runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v2
