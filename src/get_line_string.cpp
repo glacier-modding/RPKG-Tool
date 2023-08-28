@@ -124,46 +124,18 @@ void rpkg_function::get_line_string(std::string& input_path, std::string& filter
                 rpkg_function::extract_locr_to_json_from(rpkgs.at(rpkg_index2).rpkg_file_path, hash_string, output_path,
                                                          true, "HM3");
 
-                for (const auto& it : localization_json.items()) {
-                    bool language_found = false;
+                for (const auto& [language, translations] : localization_json["languages"].items()) {
+                    auto found_translation = translations.find(util::uint32_t_to_hex_string(line_crc32));
 
-                    std::string language = "";
-
-                    for (const auto& it2 : it.value().items()) {
-                        if (it2.value().contains("Language")) {
-                            language_found = true;
-
-                            language = it2.value()["Language"];
-                        }
-                    }
-
-                    if (!language_found)
-                        continue;
-
-                    for (const auto& it2 : it.value().items()) {
-                        if (!it2.value().contains("StringHash") ||
-                            static_cast<uint32_t>(it2.value()["StringHash"]) != line_crc32)
-                            continue;
-
-                        //LOG("FOUND CRC32: " + util::uint32_t_to_hex_string(line_crc32) + " in " << hash_string);
-
-                        if (!it2.value().contains("String"))
-                            continue;
-
+                    if (found_translation != translations.end()) {
                         if (localization_line_string == "") {
-                            localization_line_string =
-                                    "\nLINE CRC32: " + util::uint32_t_to_string(line_crc32) + "\nLOCR Strings:\n";
-
-                            localization_line_string +=
-                                    "  - " + language + ": " + std::string(it2.value()["String"]) + "\n";
-                        } else {
-                            localization_line_string +=
-                                    "  - " + language + ": " + std::string(it2.value()["String"]) + "\n";
+                            localization_line_string = "\nLINE CRC32: " + util::uint32_t_to_hex_string(line_crc32) + "\nLOCR Strings:\n";
                         }
 
-                        //LOG("FOUND STRING: " + std::string(it2.value()["String"]) + " in " << hash_string);
+                        localization_line_string += "  - " + language + ": " + std::string(found_translation->get<std::string>()) + "\n";
                     }
                 }
+
             }
         }
     }
