@@ -87,6 +87,11 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
         if (rpkgs.at(i).rpkg_file_path != input_path && input_path_is_rpkg_file)
             continue;
 
+        // We do some setup here to avoid having to re-do the match everytime for this RPKG.
+        // This is a special case for H3 LOCR
+        const std::regex baseOrP1("/chunk([0-9]|1[0-9]|2[0-7])(?:patch1+)?\\.rpkg/g");
+        bool oldH3Lang = (ttVersion == TonyTools::Language::Version::H3) && std::regex_match(rpkgs.at(i).rpkg_file_name, baseOrP1);
+
         bool archive_folder_created = false;
 
         for (uint64_t r = 0; r < rpkgs.at(i).hash_resource_types.size(); r++) {
@@ -176,31 +181,27 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
                     dlge_data = input_data;
                 }
 
-                std::string dlgeJson = TonyTools::Language::DLGE::Convert(
-                    ttVersion,
-                    dlge_data,
-                    generate_hash_meta_json(i, hash_index)
-                );
+                std::string dlgeJson;
 
-                bool checkedAlt = false;
-            checkDLGE:
+                if (oldH3Lang) {
+                    // Special case for H3 DLGE in base chunks/patch1 to avoid crashing.
+                    dlgeJson = TonyTools::Language::DLGE::Convert(
+                        ttVersion,
+                        dlge_data,
+                        generate_hash_meta_json(i, hash_index),
+                        "en",
+                        false,
+                        "xx,en,fr,it,de,es"
+                    );
+                } else {
+                    dlgeJson = TonyTools::Language::DLGE::Convert(
+                        ttVersion,
+                        dlge_data,
+                        generate_hash_meta_json(i, hash_index)
+                    );
+                }
+
                 if (dlgeJson.empty()) {
-                    // Support older versions of H3 files automatically.
-                    if (ttVersion == TonyTools::Language::Version::H3 && !checkedAlt) {
-                        dlgeJson = TonyTools::Language::DLGE::Convert(
-                            ttVersion,
-                            dlge_data,
-                            generate_hash_meta_json(i, hash_index),
-                            "en",
-                            false,
-                            "xx,en,fr,it,de,es"
-                        );
-
-                        checkedAlt = true;
-
-                        goto checkDLGE;
-                    }
-
                     LOG_AND_EXIT("Failed to convert DLGE to JSON!");
                 }
 
