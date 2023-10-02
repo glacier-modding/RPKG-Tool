@@ -89,7 +89,7 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
 
         // We do some setup here to avoid having to re-do the match everytime for this RPKG.
         // This is a special case for H3 LOCR
-        const std::regex baseOrP1("/chunk([0-9]|1[0-9]|2[0-7])(?:patch1+)?\\.rpkg/g");
+        const std::regex baseOrP1("chunk([0-9]|1[0-9]|2[0-7])(?:patch1+)?\\.rpkg");
         bool oldH3Lang = (ttVersion == TonyTools::Language::Version::H3) && std::regex_match(rpkgs.at(i).rpkg_file_name, baseOrP1);
 
         bool archive_folder_created = false;
