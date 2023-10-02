@@ -15,6 +15,11 @@ bool command_line::all_args_are_paths(const int argc, char* argv[]) {
     return true;
 }
 
+// Special case for "flag" arguments
+std::vector<std::string> single_arg = {
+    "-hex_precision"
+};
+
 std::vector<std::vector<std::string>> command_line::parse(const int argc, char* argv[]) {
     std::vector<std::vector<std::string>> command_line_args;
 
@@ -25,14 +30,16 @@ std::vector<std::vector<std::string>> command_line::parse(const int argc, char* 
 
                 temp_command_line_args.push_back(argv[i]);
 
-                if (argc > (i + 1)) {
-                    if (argv[i + 1][0] != '-' && std::string(argv[i + 1]).length() > 0) {
-                        temp_command_line_args.push_back(argv[i + 1]);
+                if (std::find(single_arg.begin(), single_arg.end(), argv[i]) == single_arg.end()) {
+                    if (argc > (i + 1)) {
+                        if (argv[i + 1][0] != '-' && std::string(argv[i + 1]).length() > 0) {
+                            temp_command_line_args.push_back(argv[i + 1]);
+                        } else {
+                            LOG_AND_EXIT_NOP("Error: Invalid command line input.");
+                        }
                     } else {
                         LOG_AND_EXIT_NOP("Error: Invalid command line input.");
                     }
-                } else {
-                    LOG_AND_EXIT_NOP("Error: Invalid command line input.");
                 }
 
                 command_line_args.push_back(temp_command_line_args);

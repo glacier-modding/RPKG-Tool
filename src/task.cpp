@@ -74,7 +74,7 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     } else if (command == "-extract_wwev_to_ogg_from") {
         rpkg_function::extract_wwev_to_ogg_from(input_path, filter, output_path);
     } else if (command == "-extract_dlge_to_json_from") {
-        rpkg_function::extract_dlge_to_json_from(input_path, filter, output_path, false, search);
+        rpkg_function::extract_dlge_to_json_from(input_path, filter, output_path, false, search, search_type == "hex_precision");
     } else if (command == "-extract_locr_to_json_from") {
         rpkg_function::extract_locr_to_json_from(input_path, filter, output_path, false, search);
     } else if (command == "-extract_rtlv_to_json_from") {
@@ -380,6 +380,8 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
             search = i.at(1);
         } else if (util::to_lower_case(i.at(0)) == "-output_path") {
             output_path = i.at(1);
+        } else if (util::to_lower_case(i.at(0)) == "-hex_precision") {
+            search_type = "hex_precision";
         } else {
             LOG_AND_EXIT("Error: Invalid command in command line.");
         }

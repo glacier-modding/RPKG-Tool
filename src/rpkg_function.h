@@ -162,7 +162,7 @@ public:
                                           bool output_to_string, std::string version);
 
     static void extract_dlge_to_json_from(std::string& input_path, std::string& filter, std::string& output_path,
-                                          bool output_to_string, std::string version);
+                                          bool output_to_string, std::string version, bool hexPrecision = false);
 
     static void generate_rpkg_from(std::string& input_path, std::string& output_path, bool increased_compression);
 

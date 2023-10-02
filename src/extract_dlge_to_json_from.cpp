@@ -18,7 +18,7 @@
 using json = nlohmann::ordered_json;
 
 void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::string& filter, std::string& output_path,
-                                              bool output_to_string, std::string version) { 
+                                              bool output_to_string, std::string version, bool hexPrecision) { 
     TonyTools::Language::Version ttVersion = TonyTools::Language::Version::H3;
     if (version == "HM2") {
         ttVersion = TonyTools::Language::Version::H2;
@@ -190,14 +190,16 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
                         dlge_data,
                         generate_hash_meta_json(i, hash_index),
                         "en",
-                        false,
+                        hexPrecision,
                         "xx,en,fr,it,de,es"
                     );
                 } else {
                     dlgeJson = TonyTools::Language::DLGE::Convert(
                         ttVersion,
                         dlge_data,
-                        generate_hash_meta_json(i, hash_index)
+                        generate_hash_meta_json(i, hash_index),
+                        "en",
+                        hexPrecision
                     );
                 }
 
