@@ -169,9 +169,14 @@ jobs:
         asset_name: ${{ steps.file_name.outputs.value }}.zip
         asset_content_type: application/zip
 
-    - name: Trigger glaciermodding.org build
-      uses: peter-evans/repository-dispatch@v2
-      with:
-        token: ${{ secrets.ACTIONS_KEY }}
-        repository: glacier-modding/glaciermodding.org
-        event-type: build_site
+  trigger_website_build:
+    needs: upload_release_asset
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger glaciermodding.org build
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.ACTIONS_KEY }}
+          repository: glacier-modding/glaciermodding.org
+          event-type: build_site
