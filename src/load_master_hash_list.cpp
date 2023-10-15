@@ -18,10 +18,10 @@ void generic_function::load_hash_list(bool exit_if_no_hash_list, const std::stri
     } else {
         if (exit_if_no_hash_list) {
             LOG_AND_EXIT(
-                    "\nError: hash_list.txt not found. Download the lastest hash_list.txt from https://hitmandb.glaciermodding.org/latest-hashes.7z\n");
+                    "\nError: hash_list.txt not found. Download the lastest hash_list.txt from https://github.com/glacier-modding/Hitman-Hashes/releases/latest/download/latest-hashes.7z\n");
         } else {
             LOG_AND_RETURN(
-                    "\nError: hash_list.txt not found. Download the lastest hash_list.txt from https://hitmandb.glaciermodding.org/latest-hashes.7z\n");
+                    "\nError: hash_list.txt not found. Download the lastest hash_list.txt from https://github.com/glacier-modding/Hitman-Hashes/releases/latest/download/latest-hashes.7z\n");
         }
     }
 

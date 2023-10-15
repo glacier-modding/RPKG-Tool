@@ -45,7 +45,7 @@ jobs:
 
     - name: Fetch hash list
       run: |
-        Invoke-WebRequest -Uri "https://hitmandb.glaciermodding.org/latest-hashes.7z" -OutFile "latest-hashes.7z"
+        Invoke-WebRequest -Uri "https://github.com/glacier-modding/Hitman-Hashes/releases/latest/download/latest-hashes.7z" -OutFile "latest-hashes.7z"
 
     - name: Prepare build
       run: |

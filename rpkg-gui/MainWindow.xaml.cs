@@ -146,7 +146,7 @@ namespace rpkg
 		{
 			DownloadExtractionProgress downloadExtractionProgress1 = new DownloadExtractionProgress();
 			downloadExtractionProgress1.operation = 0;
-			downloadExtractionProgress1.message.Content = "Downloading https://hitmandb.glaciermodding.org/latest-hashes.7z...";
+			downloadExtractionProgress1.message.Content = "Downloading https://github.com/glacier-modding/Hitman-Hashes/releases/latest/download/latest-hashes.7z...";
 			downloadExtractionProgress1.ShowDialog();
 
 			DownloadExtractionProgress downloadExtractionProgress2 = new DownloadExtractionProgress();
@@ -193,7 +193,7 @@ namespace rpkg
 			if (!File.Exists("hash_list.txt"))
 			{
 				MessageQuestion messageBox = new MessageQuestion();
-				messageBox.message.Content = "Error: The hash list file (hash__list.txt) is missing.\n\nIt's necessary for several functions.\n\nClick OK to automatically download it.\n\nYou can also download it manually from https://hitmandb.glaciermodding.org/latest-hashes.7z and extract it to the same directory as this program.";
+				messageBox.message.Content = "Error: The hash list file (hash__list.txt) is missing.\n\nIt's necessary for several functions.\n\nClick OK to automatically download it.\n\nYou can also download it manually from https://github.com/glacier-modding/Hitman-Hashes/releases/latest/download/latest-hashes.7z and extract it to the same directory as this program.";
 				messageBox.ShowDialog();
 
 				if (messageBox.buttonPressed == "OKButton")
@@ -224,7 +224,7 @@ namespace rpkg
 			DownloadExtractionProgress downloadExtractionProgress = new DownloadExtractionProgress();
 			downloadExtractionProgress.operation = (int)Progress.Operation.MASS_EXTRACT;
 			downloadExtractionProgress.ProgressBar.IsIndeterminate = true;
-			downloadExtractionProgress.message.Content = "Checking https://hitmandb.glaciermodding.org/version to see if a new hash list is available...";
+			downloadExtractionProgress.message.Content = "Checking https://github.com/glacier-modding/Hitman-Hashes/releases/latest/download/version to see if a new hash list is available...";
 			downloadExtractionProgress.ShowDialog();
 
 			if (currentVersion < downloadExtractionProgress.currentVersionAvailable)
