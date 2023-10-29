@@ -45,7 +45,7 @@ jobs:
 
     - name: Fetch hash list
       run: |
-        Invoke-WebRequest -Uri "https://hitmandb.glaciermodding.org/latest-hashes.7z" -OutFile "latest-hashes.7z"
+        Invoke-WebRequest -Uri "https://github.com/glacier-modding/Hitman-Hashes/releases/latest/download/latest-hashes.7z" -OutFile "latest-hashes.7z"
 
     - name: Prepare build
       run: |
@@ -167,3 +167,15 @@ jobs:
         asset_path: ${{ matrix.artifact }}/${{ matrix.artifact }}.zip
         asset_name: ${{ steps.file_name.outputs.value }}.zip
         asset_content_type: application/zip
+
+  trigger_website_build:
+    needs: upload_release_asset
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger glaciermodding.org build
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.ACTIONS_KEY }}
+          repository: glacier-modding/glaciermodding.org
+          event-type: build_site
