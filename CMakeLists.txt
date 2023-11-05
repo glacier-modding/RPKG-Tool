@@ -146,7 +146,7 @@ set(thirdparty
 set(TONYTOOLS_BUILD_TOOLS OFF)
 FetchContent_Declare(tonytools
     GIT_REPOSITORY  https://github.com/AnthonyFuller/TonyTools.git
-    GIT_TAG         3c4eb64d59458edc9e175a0fadc45737bedc68a6
+    GIT_TAG         v1.7.2
 )
 
 FetchContent_MakeAvailable(rjson tonytools gltfsdk directxtex lz4 yyjson json zhmtools directxmath)
