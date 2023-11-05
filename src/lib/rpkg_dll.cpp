@@ -32,7 +32,7 @@ int load_hash_list(char* path) {
     return hash_list_version;
 }
 
-int load_hmla_hash_list(char* path) {
+uint32_t load_hmla_hash_list(char* path) {
     return util::load_hmla_hash_list(std::string(path));
 }
 

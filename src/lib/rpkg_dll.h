@@ -6,7 +6,7 @@
 
 RPKG_EXPORT int load_hash_list(char* path);
 
-RPKG_EXPORT int load_hmla_hash_list(char* path);
+RPKG_EXPORT uint32_t load_hmla_hash_list(char* path);
 
 RPKG_EXPORT char* get_hash_list_string(char* hash_string);
 

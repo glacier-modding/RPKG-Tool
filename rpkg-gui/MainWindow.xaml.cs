@@ -5043,7 +5043,7 @@ namespace rpkg
 		public static extern int load_hash_list(string path);
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "load_hmla_hash_list", CallingConvention = CallingConvention.Cdecl)]
-		public static extern int load_hmla_hash_list(string path);
+		public static extern uint load_hmla_hash_list(string path);
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "get_hash_list_string", CallingConvention = CallingConvention.Cdecl)]
 		public static extern IntPtr get_hash_list_string(string hash_string);
