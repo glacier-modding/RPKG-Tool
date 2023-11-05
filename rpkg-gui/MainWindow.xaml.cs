@@ -164,21 +164,6 @@ namespace rpkg
 			downloadExtractionProgress.ShowDialog();
 		}
 
-		private uint CheckHMLAHashListVersion()
-		{
-			if (!File.Exists("hash_list.hmla")) { return uint.MaxValue; }
-
-			using (var stream = File.Open("hash_list.hmla", FileMode.Open)) {
-				using (var reader = new BinaryReader(stream, Encoding.UTF8, false)) {
-					uint val = reader.ReadUInt32();
-
-                    if (val != 0x414C4D48) { return uint.MaxValue; }
-
-					return reader.ReadUInt32();
-				}
-			}
-		}
-
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
 			AddHandlers();
@@ -298,7 +283,7 @@ namespace rpkg
 				}
 			}
 
-			uint hmla_version = CheckHMLAHashListVersion();
+			uint hmla_version = load_hmla_hash_list(AppDomain.CurrentDomain.BaseDirectory + "\\hash_list.hmla");
 			if (hmla_version != uint.MaxValue) {
 				DownloadExtractionProgress downloadExtractionProgress2 = new DownloadExtractionProgress();
 				downloadExtractionProgress2.operation = 4;
@@ -5056,6 +5041,9 @@ namespace rpkg
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "load_hash_list", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int load_hash_list(string path);
+
+		[DllImport("rpkg-lib.dll", EntryPoint = "load_hmla_hash_list", CallingConvention = CallingConvention.Cdecl)]
+		public static extern int load_hmla_hash_list(string path);
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "get_hash_list_string", CallingConvention = CallingConvention.Cdecl)]
 		public static extern IntPtr get_hash_list_string(string hash_string);

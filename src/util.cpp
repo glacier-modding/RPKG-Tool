@@ -420,24 +420,26 @@ bool util::lz4_compress_hc(const char* source, std::vector<char>& destination, i
     return compressed_size != 0;
 }
 
-bool util::load_hmla_hash_list() {
+uint32_t util::load_hmla_hash_list(const std::string& path) {
+    std::string hmlaPath = path.empty() ? exe_path + std::string("\\hash_list.hmla") : path;
+
     if (!TonyTools::Language::HashList::GetStatus().loaded) {
-        if (!file::path_exists(exe_path + std::string("\\hash_list.hmla"))) {
+        if (!file::path_exists(hmlaPath)) {
             LOG("Skipping loading HMLanguages hash list. File does not exist.");
-            return false;
+            return -1;
         }
 
         if (TonyTools::Language::HashList::Load(
-            file::read_file(exe_path + std::string("\\hash_list.hmla"))
+            file::read_file(hmlaPath)
         )) {
             LOG("Successfully loaded HMLanguages hash list!");
-            return true;
+            return TonyTools::Language::HashList::GetStatus().version;
         } else {
             LOG("Failed to load HMLanguages hash list!");
-            return false;
+            return -1;
         }
     } else {
-        return true;
+        return -1;
     }
 }
 

@@ -32,6 +32,10 @@ int load_hash_list(char* path) {
     return hash_list_version;
 }
 
+int load_hmla_hash_list(char* path) {
+    return util::load_hmla_hash_list(std::string(path));
+}
+
 char* get_hash_list_string(char* hash_string) {
     uint64_t hash = std::strtoull(hash_string, nullptr, 16);
 
