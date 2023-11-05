@@ -27,6 +27,8 @@ void rpkg_function::extract_dlge_to_json_from(std::string& input_path, std::stri
         ttVersion = TonyTools::Language::Version::H2016;
     }
 
+    util::load_hmla_hash_list();
+
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 

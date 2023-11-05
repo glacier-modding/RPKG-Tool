@@ -22,6 +22,8 @@ void rpkg_function::rebuild_rtlv_from_json_from(std::string& input_path, std::st
         ttVersion = TonyTools::Language::Version::H2016;
     }
 
+    util::load_hmla_hash_list();
+
     task_single_status = TASK_EXECUTING;
 
     std::string input_folder_path = file::parse_input_folder_path(input_path);
