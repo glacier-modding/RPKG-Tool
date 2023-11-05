@@ -156,6 +156,29 @@ namespace rpkg
 			downloadExtractionProgress2.ShowDialog();
 		}
 
+		private void DownloadHMLAHashList()
+		{
+			DownloadExtractionProgress downloadExtractionProgress = new DownloadExtractionProgress();
+			downloadExtractionProgress.operation = 3;
+			downloadExtractionProgress.message.Content = "Downloading https://github.com/glacier-modding/Hitman-l10n-Hashes/releases/latest/download/hash_list.hmla...";
+			downloadExtractionProgress.ShowDialog();
+		}
+
+		private uint CheckHMLAHashListVersion()
+		{
+			if (!File.Exists("hash_list.hmla")) { return uint.MaxValue; }
+
+			using (var stream = File.Open("hash_list.hmla", FileMode.Open)) {
+				using (var reader = new BinaryReader(stream, Encoding.UTF8, false)) {
+					uint val = reader.ReadUInt32();
+
+                    if (val != 0x414C4D48) { return uint.MaxValue; }
+
+					return reader.ReadUInt32();
+				}
+			}
+		}
+
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
 			AddHandlers();
@@ -244,6 +267,63 @@ namespace rpkg
 					}
 
 					Environment.Exit(0);
+				}
+			}
+
+			if (!File.Exists("hash_list.hmla")) {
+				MessageQuestion messageBox = new MessageQuestion();
+				messageBox.message.Content = "Error: The localisation hash list file (hash__list.hmla) is missing.\n\nIt improves the localisation experience greatly.\n\nClick OK to automatically download it.\n\nYou can also download it manually from https://github.com/glacier-modding/Hitman-l10n-Hashes/releases/latest/download/hash_list.hmla and place it next to the program.";
+				messageBox.ShowDialog();
+
+				if (messageBox.buttonPressed == "OKButton")
+				{
+					DownloadHMLAHashList();
+					System.Windows.Forms.Application.Restart();
+
+					if (discordOn)
+					{
+						Client.Dispose();
+					}
+
+					Environment.Exit(0);
+				}
+				else if (messageBox.buttonPressed == "CancelButton")
+				{
+					if (discordOn)
+					{
+						Client.Dispose();
+					}
+
+					Environment.Exit(0);
+				}
+			}
+
+			uint hmla_version = CheckHMLAHashListVersion();
+			if (hmla_version != uint.MaxValue) {
+				DownloadExtractionProgress downloadExtractionProgress2 = new DownloadExtractionProgress();
+				downloadExtractionProgress2.operation = 4;
+				downloadExtractionProgress2.ProgressBar.IsIndeterminate = true;
+				downloadExtractionProgress2.message.Content = "Checking https://github.com/glacier-modding/Hitman-l10n-Hashes/releases/latest/download/version.json to see if a new hash list is available...";
+				downloadExtractionProgress2.ShowDialog();
+
+				if (hmla_version < downloadExtractionProgress2.currentVersionAvailable)
+				{
+					MessageQuestion messageBox = new MessageQuestion();
+					messageBox.message.Content = "There is a new version of the localisation hash list available.\n\nClick OK to automatically update to the latest version.";
+					messageBox.ShowDialog();
+
+					if (messageBox.buttonPressed == "OKButton")
+					{
+						DownloadHMLAHashList();
+						System.Windows.Forms.Application.Restart();
+
+						if (discordOn)
+						{
+							Client.Dispose();
+						}
+
+						Environment.Exit(0);
+					}
 				}
 			}
 
