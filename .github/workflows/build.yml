@@ -22,7 +22,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Setup VS environment
       uses: ilammy/msvc-dev-cmd@v1
@@ -68,7 +68,7 @@ jobs:
     runs-on: ptlm-runner
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.1.3
