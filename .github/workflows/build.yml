@@ -43,9 +43,10 @@ jobs:
       run: |
         cmake --build cmake-build-release --target ${{ matrix.target }}
 
-    - name: Fetch hash list
+    - name: Fetch hash lists
       run: |
         Invoke-WebRequest -Uri "https://github.com/glacier-modding/Hitman-Hashes/releases/latest/download/latest-hashes.7z" -OutFile "latest-hashes.7z"
+        Invoke-WebRequest -Uri "https://github.com/glacier-modding/Hitman-l10n-Hashes/releases/latest/download/hash_list.hmla" -OutFile "_rpkg/hash_list.hmla"
 
     - name: Prepare build
       run: |
