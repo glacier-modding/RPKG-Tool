@@ -1,6 +1,7 @@
 #include "util.h"
 #include "global.h"
 #include "generic_function.h"
+#include "file.h"
 #include <lz4.h>
 #include <lz4hc.h>
 #include <DirectXTex.h>
@@ -8,6 +9,7 @@
 #include <sstream>
 #include <iomanip>
 #include <regex>
+#include <TonyTools/Languages.h>
 
 std::string util::generate_guid() {
     GUID guid;
@@ -416,6 +418,27 @@ bool util::lz4_compress_hc(const char* source, std::vector<char>& destination, i
     compressed_size = LZ4_compress_HC(source, destination.data(), source_size, compressed_bound, LZ4HC_CLEVEL_MAX);
 
     return compressed_size != 0;
+}
+
+bool util::load_hmla_hash_list() {
+    if (!TonyTools::Language::HashList::GetStatus().loaded) {
+        if (!file::path_exists(exe_path + std::string("\\hash_list.hmla"))) {
+            LOG("Skipping loading HMLanguages hash list. File does not exist.");
+            return false;
+        }
+
+        if (TonyTools::Language::HashList::Load(
+            file::read_file(exe_path + std::string("\\hash_list.hmla"))
+        )) {
+            LOG("Successfully loaded HMLanguages hash list!");
+            return true;
+        } else {
+            LOG("Failed to load HMLanguages hash list!");
+            return false;
+        }
+    } else {
+        return true;
+    }
 }
 
 uint32_t util::uint32_t_byteswap(uint32_t input) {
