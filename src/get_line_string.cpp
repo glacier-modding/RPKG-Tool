@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <sstream>
 #include <fstream>
+#include <TonyTools/Languages.h>
 
 void rpkg_function::get_line_string(std::string& input_path, std::string& filter, std::string& output_path) {
     std::string input_rpkg_folder_path = file::parse_input_folder_path(input_path);
@@ -125,14 +126,29 @@ void rpkg_function::get_line_string(std::string& input_path, std::string& filter
                                                          true, "HM3");
 
                 for (const auto& [language, translations] : localization_json["languages"].items()) {
-                    auto found_translation = translations.find(util::uint32_t_to_hex_string(line_crc32));
+                    std::string found_translation = "";
+                    std::string plainLine = "";
+                    std::string hash = util::uint32_t_to_hex_string(line_crc32);
 
-                    if (found_translation != translations.end()) {
+                    for (const auto& [line, str] : translations.items()) {
+                        if (TonyTools::Language::HashList::GetLineHash(line) == hash) {
+                            found_translation = str.get<std::string>();
+
+                            // If line != hash, then we have an actual hash for it, display it.
+                            if (line != hash) {
+                                plainLine = "LINE: " + line + "\n";
+                            }
+
+                            break;
+                        }
+                    }
+
+                    if (found_translation != "") {
                         if (localization_line_string == "") {
-                            localization_line_string = "\nLINE CRC32: " + util::uint32_t_to_hex_string(line_crc32) + "\nLOCR Strings:\n";
+                            localization_line_string = "\n" + plainLine + "LINE hash: " + hash + "\nLOCR Strings:\n";
                         }
 
-                        localization_line_string += "  - " + language + ": " + std::string(found_translation->get<std::string>()) + "\n";
+                        localization_line_string += "  - " + language + ": " + found_translation + "\n";
                     }
                 }
 
