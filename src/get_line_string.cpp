@@ -126,26 +126,18 @@ void rpkg_function::get_line_string(std::string& input_path, std::string& filter
                                                          true, "HM3");
 
                 for (const auto& [language, translations] : localization_json["languages"].items()) {
-                    std::string found_translation = "";
-                    std::string plainLine = "";
+                    std::string locrKey = TonyTools::Language::HashList::GetLine(line_crc32);
                     std::string hash = util::uint32_t_to_hex_string(line_crc32);
 
-                    for (const auto& [line, str] : translations.items()) {
-                        if (TonyTools::Language::HashList::GetLineHash(line) == hash) {
-                            found_translation = str.get<std::string>();
-
-                            // If line != hash, then we have an actual hash for it, display it.
-                            if (line != hash) {
-                                plainLine = "LINE: " + line + "\n";
-                            }
-
-                            break;
-                        }
+                    if (!translations.contains(locrKey)) {
+                        continue;
                     }
+
+                    std::string found_translation = translations.at(locrKey).get<std::string>();
 
                     if (found_translation != "") {
                         if (localization_line_string == "") {
-                            localization_line_string = "\n" + plainLine + "LINE hash: " + hash + "\nLOCR Strings:\n";
+                            localization_line_string = "\n" + (hash != locrKey ? "LINE: " + locrKey + "\n" : "") + "Hash: " + hash + "\nLOCR Strings:\n";
                         }
 
                         localization_line_string += "  - " + language + ": " + found_translation + "\n";
