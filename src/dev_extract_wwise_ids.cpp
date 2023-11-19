@@ -15,6 +15,8 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& o
 
     uint32_t bytes4 = 0;
 
+    std::string wemids_txt = "";
+
     for (auto& rpkg : rpkgs) {
         for (uint64_t r = 0; r < rpkg.hash_resource_types.size(); r++) {
             if (rpkg.hash_resource_types.at(r) != "WWEV")
@@ -25,6 +27,9 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& o
 
                 std::string hash_file_name = util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
                                              rpkg.hash.at(hash_index).hash_resource_type;
+
+                uint32_t hash_reference_count =
+                        rpkg.hash.at(hash_index).hash_reference_data.hash_reference_count & 0x3FFFFFFF;
 
                 std::string current_path = file::output_path_append("WWEV\\" + rpkg.rpkg_file_name, output_path);
 
@@ -71,147 +76,85 @@ void dev_function::dev_extract_wwise_ids(std::string& input_path, std::string& o
                     wwev_data = &input_data;
                 }
 
-                uint32_t wwev_file_name_length = 0;
-                uint32_t wwev_file_count = 0;
-                uint32_t wwev_file_count_test = 0;
-
+                uint32_t wwev_name_length = 0;
+                uint32_t wwev_embedded_count = 0;
+                uint32_t wwev_wwem_count = 0;
+                uint32_t wwev_version_test = 0;
                 uint32_t position = 0;
 
-                char input[1024];
+                std::memcpy(&wwev_name_length, &(*wwev_data)[position], BYTES4);
+                position += wwev_name_length + 8;
 
-                std::memcpy(&wwev_file_name_length, &(*wwev_data)[position], BYTES4);
+                std::memcpy(&wwev_version_test, &(*wwev_data)[position], BYTES4);
 
-                std::vector<char> wwev_meta_data;
+                if (wwev_version_test == 0xFFFFFFFF) {
+                    position += 4;
+                }
+                
+                std::memcpy(&wwev_embedded_count, &(*wwev_data)[position], BYTES4);
 
-                char hash[8];
+                //std::cout << "Hash: " << util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) << std::endl;
+                //std::cout << "Embedded Count: " << wwev_embedded_count << std::endl;
+                position += 4;
 
-                std::memcpy(&hash, &rpkg.hash.at(hash_index).hash_value, 0x8);
-
-                std::memcpy(&input, &(*wwev_data)[position], (wwev_file_name_length + static_cast<uint64_t>(0xC)));
-
-                position += 0x4;
-
-                std::vector<char> wwev_file_name(
-                        static_cast<uint64_t>(wwev_file_name_length) + static_cast<uint64_t>(1), 0);
-                wwev_file_name[wwev_file_name_length] = 0;
-
-                std::memcpy(wwev_file_name.data(), &(*wwev_data)[position], wwev_file_name_length);
-                position += wwev_file_name_length;
-                position += 0x4;
-
-                std::memcpy(&wwev_file_count, &(*wwev_data)[position], BYTES4);
-                position += 0x4;
-
-                std::memcpy(&wwev_file_count_test, &(*wwev_data)[position], BYTES4);
-
-                current_path.append("\\");
-                current_path.append(std::string(wwev_file_name.data()));
-
-                std::string wem_path = current_path + "\\wem";
-
-                std::string ogg_path = current_path + "\\ogg";
-
-                std::string final_path =
-                        current_path + "\\" + util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
-                        rpkg.hash.at(hash_index).hash_resource_type;
-
-                std::cout << hash_file_name << "," << "[assembly:/sound/wwise/exportedwwisedata/events/unknown/"
-                          << wwev_file_name.data() << ".wwiseevent].pc_wwisebank" << std::endl;
-
-                if (wwev_file_count > 0) {
-                    for (uint64_t k = 0; k < wwev_file_count; k++) {
-                        std::memcpy(&bytes4, &(*wwev_data)[position], 0x4);
-
-                        std::cout << "WWEV file " << std::to_string(k) << ": " << std::endl;
-                        std::cout << "  - Wwise ID: " << util::uint32_t_to_hex_string(bytes4) << std::endl;
-
-                        position += 0x4;
-
-                        uint32_t wem_size;
-
-                        std::memcpy(&wem_size, &(*wwev_data)[position], BYTES4);
-                        position += 0x4;
-
-                        std::cout << "  - Length: " << util::uint32_t_to_hex_string(wem_size) << std::endl;
-
-                        std::vector<char> wwev_file_data(wem_size, 0);
-
-                        std::memcpy(wwev_file_data.data(), &(*wwev_data)[position], wem_size);
-                        position += wem_size;
-
-                        std::string wem_file = wem_path + "\\" + std::to_string(k) + ".wem";
-                    }
-                } else {
-                    std::memcpy(&bytes4, &(*wwev_data)[position], 0x4);
-
-                    if (bytes4 != 0) {
-                        return;
-                    }
-
-                    std::memcpy(&bytes4, &(*wwev_data)[position], 0x4);
-
-                    uint32_t length = bytes4;
-
-                    position += 0x4;
-
-                    for (uint64_t k = 0; k < length; k++) {
-                        position += 0x4;
-
-                        std::memcpy(&bytes4, &(*wwev_data)[position], 0x4);
-
-                        std::cout << "WWEV Link Type(0) " << std::to_string(k) << ": " << std::endl;
-                        std::cout << "  - Wwise ID: " << util::uint32_t_to_hex_string(bytes4) << std::endl;
-
-                        position += 0x4;
-
-                        uint32_t wem_size;
-
-                        std::memcpy(&wem_size, &(*wwev_data)[position], sizeof(bytes4));
-
-                        position += 0x4;
-
-                        std::cout << "  - Length: " << util::uint32_t_to_hex_string(wem_size) << std::endl;
-
-                        position += wem_size;
-                    }
+                for (uint32_t i = 0; i < wwev_embedded_count; i++) {
+                    uint32_t embedded_id = 0;
+                    uint32_t embedded_length = 0;
+                    std::memcpy(&embedded_id, &(*wwev_data)[position], BYTES4);
+                    position += 4;
+                    std::memcpy(&embedded_length, &(*wwev_data)[position], BYTES4);
+                    position += 4 + embedded_length;
+                    //std::cout << "  - Embedded Id: " << util::uint32_t_to_hex_string(embedded_id) << std::endl;
+                    //std::cout << "  - Embedded Length: " << util::uint32_t_to_hex_string(embedded_length) << std::endl; 
                 }
 
-                if (position + 0x4 > decompressed_size)
-                    continue;
+                std::memcpy(&wwev_wwem_count, &(*wwev_data)[position], BYTES4);
+                //std::cout << "WWEM Count: " << wwev_wwem_count << std::endl;
+                position += 4;
 
-                std::memcpy(&bytes4, &(*wwev_data)[position], 0x4);
+                for (uint32_t i = 0; i < wwev_wwem_count; i++) {
+                    uint32_t wwem_index = 0;
+                    uint32_t wwem_id = 0;
+                    uint32_t wwem_length = 0;
+                    std::memcpy(&wwem_index, &(*wwev_data)[position], BYTES4);
+                    position += 4;
+                    std::memcpy(&wwem_id, &(*wwev_data)[position], BYTES4);
+                    position += 4;
+                    std::memcpy(&wwem_length, &(*wwev_data)[position], BYTES4);
+                    position += 4 + wwem_length;
 
-                if (bytes4 == 0) {
-                    return;
-                }
+                    //std::cout << "  - WWEM Index: " << util::uint32_t_to_hex_string(wwem_index) << std::endl;
+                    //std::cout << "  - WWEM Id: " << util::uint32_t_to_hex_string(wwem_id) << std::endl;
+                    //std::cout << "  - WWEM Length: " << util::uint32_t_to_hex_string(wwem_length) << std::endl; 
 
-                std::memcpy(&bytes4, &(*wwev_data)[position], 0x4);
+                    if (wwem_index < hash_reference_count) {
+                        bool already_found = false;
 
-                uint32_t length = bytes4;
+                        for (uint64_t x = 0; x < rpkgs.size(); x++) {
+                            if (already_found)
+                                continue;
 
-                position += 0x4;
+                            auto it = rpkgs.at(x).hash_map.find(
+                                    rpkg.hash.at(hash_index).hash_reference_data.hash_reference.at(wwem_index));
 
-                for (uint64_t k = 0; k < length; k++) {
-                    position += 0x4;
+                            if (it == rpkgs.at(x).hash_map.end())
+                                continue;
 
-                    std::memcpy(&bytes4, &(*wwev_data)[position], 0x4);
+                            if (rpkgs.at(x).hash.at(it->second).hash_resource_type != "WWEM")
+                                continue;
 
-                    std::cout << "WWEV Link Type(1) " << std::to_string(k) << ": " << std::endl;
-                    std::cout << "  - Wwise ID: " << util::uint32_t_to_hex_string(bytes4) << std::endl;
+                            already_found = true;
 
-                    position += 0x4;
-
-                    uint32_t wem_size;
-
-                    std::memcpy(&wem_size, &(*wwev_data)[position], sizeof(bytes4));
-
-                    position += 0x4;
-
-                    std::cout << "  - Length: " << util::uint32_t_to_hex_string(wem_size) << std::endl;
-
-                    position += wem_size;
+                            wemids_txt += util::uint64_t_to_hex_string(rpkgs.at(x).hash.at(it->second).hash_value);
+                            wemids_txt += ".WWEM,";
+                            wemids_txt += util::uint32_t_to_string(wwem_id);
+                            wemids_txt += "\n";
+                        }
+                    }
                 }
             }
         }
     }
+
+    file::write_to_file("wemids.txt", wemids_txt);
 }
