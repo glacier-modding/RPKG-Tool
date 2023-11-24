@@ -6,6 +6,14 @@
 #include <chrono>
 #include <sstream>
 
+void add_search_result(rpkg rpkg, uint32_t hash_index, std::string data) {
+    localization_search_results += rpkg.rpkg_file_path + "||||" +
+        util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) +
+            "." + rpkg.hash.at(hash_index).hash_resource_type + " " +
+        util::hash_to_ioi_string(rpkg.hash.at(hash_index).hash_value, false) + "||||" +
+        data + "||||||";
+}
+
 void rpkg_function::search_localization(std::string& input_path, std::string& search, std::string& output_path,
                                         bool search_dlge, bool search_locr, bool search_rtlv, int max_results) {
     task_single_status = TASK_EXECUTING;
@@ -186,11 +194,7 @@ void rpkg_function::search_localization(std::string& input_path, std::string& se
                                                 hash.find(search_upper_case) != std::string::npos ||
                                                 util::to_lower_case(string.get<std::string>()).find(search_lower_case) != std::string::npos
                                             ) {
-                                                localization_search_results += rpkg.rpkg_file_path + "||||" +
-                                                    util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) +
-                                                        "." + rpkg.hash.at(hash_index).hash_resource_type + " " +
-                                                    util::hash_to_ioi_string(rpkg.hash.at(hash_index).hash_value, false) + "||||" +
-                                                    lang + ": " + hash + ": " + string.get<std::string>() + "||||||";
+                                                add_search_result(rpkg, hash_index, lang + ": " + hash + ": " + string.get<std::string>());
 
                                                 results_count++;
                                             }
@@ -233,11 +237,7 @@ void rpkg_function::search_localization(std::string& input_path, std::string& se
                                 try {
                                     for (const auto &[lang, string] : localization_json.at("subtitles").items()) {
                                         if (util::to_lower_case(string.get<std::string>()).find(search_lower_case) != std::string::npos) {
-                                            localization_search_results += rpkg.rpkg_file_path + "||||" +
-                                                    util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) +
-                                                        "." + rpkg.hash.at(hash_index).hash_resource_type + " " +
-                                                    util::hash_to_ioi_string(rpkg.hash.at(hash_index).hash_value, false) + "||||" +
-                                                    lang + ": " + string.get<std::string>() + "||||||";
+                                            add_search_result(rpkg, hash_index, lang + ": " + string.get<std::string>());
 
                                             results_count++;
                                         }
