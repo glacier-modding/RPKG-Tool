@@ -26,6 +26,24 @@
 #define LOG_AND_EXIT_NOP(x)
 #endif
 
+// Helps clean up l10n deep search
+enum class DLGE_Type : uint8_t
+{
+    eDEIT_WavFile = 0x01,
+    eDEIT_RandomContainer,
+    eDEIT_SwitchContainer,
+    eDEIT_SequenceContainer,
+    eDEIT_Invalid = 0x15
+};
+
+NLOHMANN_JSON_SERIALIZE_ENUM(DLGE_Type, {
+    {DLGE_Type::eDEIT_Invalid, "Invalid"},
+    {DLGE_Type::eDEIT_WavFile, "WavFile"},
+    {DLGE_Type::eDEIT_RandomContainer, "Random"},
+    {DLGE_Type::eDEIT_SwitchContainer, "Switch"},
+    {DLGE_Type::eDEIT_SequenceContainer, "Sequence"}
+});
+
 enum RPKGStatus {
     READY,
     TASK_EXECUTING,

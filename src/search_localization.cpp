@@ -14,6 +14,113 @@ void add_search_result(rpkg& rpkg, uint32_t hash_index, std::string& data) {
         data + "||||||";
 }
 
+uint32_t search_dlge_container(
+    json container,
+    rpkg& rpkg,
+    uint32_t hash_index,
+    std::string search_term
+) {
+    uint32_t results_count = 0;
+    json type = container.at("type");
+    if (util::to_lower_case(type.get<std::string>()).find(search_term) != std::string::npos) {
+        add_search_result(rpkg, hash_index, type.get<std::string>());
+        results_count++;
+    }
+
+    switch (type.get<DLGE_Type>()) {
+        case DLGE_Type::eDEIT_WavFile: {
+            // God I hate this.
+            if (util::to_lower_case(container.at("wavName").get<std::string>()).find(search_term) != std::string::npos) {
+                add_search_result(rpkg, hash_index, container.at("wavName").get<std::string>());
+                return ++results_count;
+            }
+
+            if (util::to_lower_case(container.at("soundtag").get<std::string>()).find(search_term) != std::string::npos) {
+                add_search_result(rpkg, hash_index, container.at("soundtag").get<std::string>());
+                return ++results_count;
+            }
+
+            if (util::to_lower_case(container.at("defaultWav").get<std::string>()).find(search_term) != std::string::npos) {
+                add_search_result(rpkg, hash_index, container.at("defaultWav").get<std::string>());
+                return ++results_count;
+            }
+
+            if (util::to_lower_case(container.at("defaultFfx").get<std::string>()).find(search_term) != std::string::npos) {
+                add_search_result(rpkg, hash_index, container.at("defaultFfx").get<std::string>());
+                return ++results_count;
+            }
+
+            for (const auto &[lang, entry] : container.at("languages").items()) {
+                if (entry.is_object()) {
+                    if (util::to_lower_case(entry.at("wav").get<std::string>()).find(search_term) != std::string::npos) {
+                        add_search_result(rpkg, hash_index, entry.at("wav").get<std::string>());
+                        results_count++;
+                    }
+
+                    if (util::to_lower_case(entry.at("ffx").get<std::string>()).find(search_term) != std::string::npos) {
+                        add_search_result(rpkg, hash_index, entry.at("ffx").get<std::string>());
+                        results_count++;
+                    }
+
+                    if (entry.contains("subtitle")) {
+                        if (util::to_lower_case(entry.at("subtitle").get<std::string>()).find(search_term) != std::string::npos) {
+                            add_search_result(rpkg, hash_index, lang + ": " + entry.at("subtitle").get<std::string>());
+                            results_count++;
+                        }
+                    }
+                } else {
+                    if (util::to_lower_case(entry.get<std::string>()).find(search_term) != std::string::npos) {
+                        add_search_result(rpkg, hash_index, lang + ": " + entry.get<std::string>());
+                        results_count++;
+                    }
+                }
+            }
+
+            return results_count;
+        }
+        case DLGE_Type::eDEIT_RandomContainer: {
+            // Types are already searched at the top so all we need to do is process wavfiles.
+            for (const json &childContainer : container.at("containers")) {
+                results_count += search_dlge_container(childContainer, rpkg, hash_index, search_term);
+            }
+
+            return results_count;
+        }
+        case DLGE_Type::eDEIT_SwitchContainer: {
+            if (util::to_lower_case(container.at("switchKey")).find(search_term) != std::string::npos) {
+                add_search_result(rpkg, hash_index, container.at("switchKey").get<std::string>());
+                results_count++;
+            }
+
+            if (util::to_lower_case(container.at("default")).find(search_term) != std::string::npos) {
+                add_search_result(rpkg, hash_index, container.at("default").get<std::string>());
+                results_count++;
+            }
+
+            for (const json &childContainer : container.at("containers")) {
+                for (const json &sCase : childContainer.at("cases")) {
+                    if (util::to_lower_case(sCase.get<std::string>()).find(search_term) != std::string::npos) {
+                        add_search_result(rpkg, hash_index, sCase.get<std::string>());
+                        results_count++;
+                    }
+                }
+
+                results_count += search_dlge_container(childContainer, rpkg, hash_index, search_term);
+            }
+
+            return results_count;
+        }
+        case DLGE_Type::eDEIT_SequenceContainer: {
+            // Already checked the type, now to process the containers.
+            for (const &childContainer : container.at("containers")) {
+                results_count += search_dlge_container(childContainer, rpkg, hash_index, search_term);
+            }
+
+            return results_count;
+        }
+    }
+}
+
 void rpkg_function::search_localization(std::string& input_path, std::string& search, std::string& output_path,
                                         bool search_dlge, bool search_locr, bool search_rtlv, int max_results, std::string version) {
     task_single_status = TASK_EXECUTING;
@@ -122,37 +229,12 @@ void rpkg_function::search_localization(std::string& input_path, std::string& se
                                                                          output_path, true, version);
 
                                 try {
-                                    /*for (const auto& it : localization_json.items()) {
-                                        for (const auto& it2 : it.value().items()) {
-                                            //std::cout << " RLTV3: " << it.key() << ", " << it.value() << std::endl;
-                                            //std::cout << "SEARCHING lol2: " << it.key() << std::endl;
-                                            if (it2.value().is_string()) {
-                                                //std::cout << "SEARCHING s: " << it.key() << std::endl;
-                                                if (util::to_lower_case(std::string(it2.value())).find(
-                                                        search_lower_case) != std::string::npos) {
-                                                    std::cout << "FOUND STRING: " << it2.key() << ", " << it2.value()
-                                                              << " in " << util::uint64_t_to_hex_string(
-                                                            rpkg.hash.at(hash_index).hash_value) + "." +
-                                                                           rpkg.hash.at(hash_index).hash_resource_type
-                                                              << std::endl;
-
-                                                    localization_search_results += rpkg.rpkg_file_path + "||||" +
-                                                                                   util::uint64_t_to_hex_string(
-                                                                                           rpkg.hash.at(
-                                                                                                   hash_index).hash_value) +
-                                                                                   "." + rpkg.hash.at(
-                                                            hash_index).hash_resource_type + " " +
-                                                                                   util::hash_to_ioi_string(
-                                                                                           rpkg.hash.at(
-                                                                                                   hash_index).hash_value,
-                                                                                           false) + "||||" +
-                                                                                   std::string(it2.value()) + "||||||";
-
-                                                    results_count++;
-                                                }
-                                            }
-                                        }
-                                    }*/
+                                    results_count += search_dlge_container(
+                                        localization_json.at("rootContainer"),
+                                        rpkg,
+                                        hash_index,
+                                        search_lower_case
+                                    );
                                 }
                                 catch (json::parse_error& e) {
                                     std::stringstream ss;
