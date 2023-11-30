@@ -2156,7 +2156,7 @@ char* get_entry_name(uint32_t temp_index, int entry_index) {
 }
 
 int deep_search_localization(char* input_path, char* search_value, int search_dlge, int search_locr, int search_rtlv,
-                             int max_results) {
+                             int max_results, char* version) {
     gui_control = READY;
     task_single_status = READY;
     task_multiple_status = READY;
@@ -2181,7 +2181,7 @@ int deep_search_localization(char* input_path, char* search_value, int search_dl
         search_rtlv_bool = true;
 
     rpkg_function::search_localization(input_path_string, search, output_path, search_dlge_bool,
-                                       search_locr_bool, search_rtlv_bool, max_results);
+                                       search_locr_bool, search_rtlv_bool, max_results, std::string(version));
 
     return 0;
 }

@@ -170,7 +170,7 @@ RPKG_EXPORT char* get_entry_name(uint32_t temp_index, int entry_index);
 
 RPKG_EXPORT int
 deep_search_localization(char* input_path, char* search_value, int search_dlge, int search_locr, int search_rtlv,
-                         int max_results);
+                         int max_results, char* version);
 
 RPKG_EXPORT uint32_t get_localization_search_results_size();
 

@@ -6,7 +6,7 @@
 #include <chrono>
 #include <sstream>
 
-void add_search_result(rpkg rpkg, uint32_t hash_index, std::string data) {
+void add_search_result(rpkg& rpkg, uint32_t hash_index, std::string& data) {
     localization_search_results += rpkg.rpkg_file_path + "||||" +
         util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) +
             "." + rpkg.hash.at(hash_index).hash_resource_type + " " +
@@ -15,7 +15,7 @@ void add_search_result(rpkg rpkg, uint32_t hash_index, std::string data) {
 }
 
 void rpkg_function::search_localization(std::string& input_path, std::string& search, std::string& output_path,
-                                        bool search_dlge, bool search_locr, bool search_rtlv, int max_results) {
+                                        bool search_dlge, bool search_locr, bool search_rtlv, int max_results, std::string version) {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
 
@@ -119,7 +119,7 @@ void rpkg_function::search_localization(std::string& input_path, std::string& se
                                 localization_hash_count_current++;
 
                                 rpkg_function::extract_dlge_to_json_from(rpkg.rpkg_file_path, temp_hash_string,
-                                                                         output_path, true, "HM3");
+                                                                         output_path, true, version);
 
                                 try {
                                     /*for (const auto& it : localization_json.items()) {
@@ -185,7 +185,7 @@ void rpkg_function::search_localization(std::string& input_path, std::string& se
                                 localization_hash_count_current++;
 
                                 rpkg_function::extract_locr_to_json_from(rpkg.rpkg_file_path, temp_hash_string,
-                                                                         output_path, true, "HM3");
+                                                                         output_path, true, version);
 
                                 try {
                                     for (const auto &[lang, strings] : localization_json.at("languages").items()) {
@@ -232,7 +232,7 @@ void rpkg_function::search_localization(std::string& input_path, std::string& se
                                 localization_hash_count_current++;
 
                                 rpkg_function::extract_rtlv_to_json_from(rpkg.rpkg_file_path, temp_hash_string,
-                                                                         output_path, true, "HM3");
+                                                                         output_path, true, version);
 
                                 try {
                                     for (const auto &[lang, string] : localization_json.at("subtitles").items()) {

@@ -62,7 +62,7 @@ public:
     extract_mati_to_json(std::string& input_path, const std::string& filter, const std::string& output_path);
 
     static void search_localization(std::string& input_path, std::string& search, std::string& output_path,
-                                    bool search_dlge, bool search_locr, bool search_rtlv, int max_results);
+                                    bool search_dlge, bool search_locr, bool search_rtlv, int max_results, std::string version);
 
     static void search_entities(std::string& input_path,
                                 char** search_strings,
