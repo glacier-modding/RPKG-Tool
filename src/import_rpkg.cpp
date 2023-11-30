@@ -76,6 +76,8 @@ void rpkg_function::import_rpkg(std::string& rpkg_file_path, bool with_timing) {
     // Perform tests to determine if RPKG is a patch file or not
     if (rpkgs.back().game_version == rpkg::Game::ALPHAS)
         rpkgs.back().is_patch_file = false;
+    else if (rpkgs.back().header.hash_count == 0 && rpkgs.back().header.patch_count > 0)
+        rpkgs.back().is_patch_file = true;
     else if (rpkgs.back().rpkg_file_version == 1 && (rpkgs.back().header.patch_count * 8 + 0x24) >= rpkg_file.Size())
         rpkgs.back().is_patch_file = false;
     else if (rpkgs.back().rpkg_file_version == 2 && (rpkgs.back().header.patch_count * 8 + 0x2D) >= rpkg_file.Size())
