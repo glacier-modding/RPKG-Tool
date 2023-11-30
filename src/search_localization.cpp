@@ -112,7 +112,7 @@ uint32_t search_dlge_container(
         }
         case DLGE_Type::eDEIT_SequenceContainer: {
             // Already checked the type, now to process the containers.
-            for (const &childContainer : container.at("containers")) {
+            for (const json& childContainer : container.at("containers")) {
                 results_count += search_dlge_container(childContainer, rpkg, hash_index, search_term);
             }
 
