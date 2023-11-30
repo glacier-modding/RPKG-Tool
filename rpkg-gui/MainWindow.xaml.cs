@@ -4959,7 +4959,7 @@ namespace rpkg
 		public delegate int execute_get_hashes_with_no_reverse_depends(string rpkg_file);
 		public delegate int execute_get_direct_hash_depends(string rpkg_file, string hash_string);
 		public delegate int execute_task(string csharp_command, string csharp_input_path, string csharp_filter, string search, string search_type, string csharp_output_path);
-		public delegate int execute_deep_search_localization(string input_path, string search_value, int search_dlge, int search_locr, int search_rtlv, int max_results);
+		public delegate int execute_deep_search_localization(string input_path, string search_value, int search_dlge, int search_locr, int search_rtlv, int max_results, string version);
 		public delegate int execute_deep_search_entities(string input_path, string[] search_strings, int[] search_types, int[] search_categories, int search_strings_count, int max_results, int store_jsons, int use_latest_hashes);
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "task_execute", CallingConvention = CallingConvention.Cdecl)]
@@ -5138,7 +5138,7 @@ namespace rpkg
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "deep_search_localization", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int deep_search_localization(string input_path, string search_value, int search_dlge,
-			int search_locr, int search_rtlv, int max_results);
+			int search_locr, int search_rtlv, int max_results, string version);
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "get_localization_search_results_size",
 			CallingConvention = CallingConvention.Cdecl)]
@@ -8467,7 +8467,16 @@ namespace rpkg
 						maxSearchResults = 100;
 					}
 
-					IAsyncResult ar = rpkgExecute.BeginInvoke(input_path, DeepSearchLocalizationTextBox.Text, search_dlge, search_locr, search_rtlv, maxSearchResults, null, null);
+					string version = DeepSearchLocalizationVersionComboBox.Text switch
+					{
+						"Hitman 2016" => "HM2016",
+						"Hitman 2" => "HM2",
+						"Hitman 3" => "HM3",
+						_ => "HM3"
+					};
+
+
+                    IAsyncResult ar = rpkgExecute.BeginInvoke(input_path, DeepSearchLocalizationTextBox.Text, search_dlge, search_locr, search_rtlv, maxSearchResults, version, null, null);
 
 					deepSearchLocalizationWorker = new BackgroundWorker();
 					deepSearchLocalizationWorker.WorkerReportsProgress = true;
