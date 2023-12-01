@@ -19,9 +19,14 @@ using System.Threading;
 using System.ComponentModel;
 using MahApps.Metro.Controls;
 using ControlzEx.Theming;
+using System.Text.Json;
 
 namespace rpkg
 {
+    public class HMLAVersion {
+        public int version { get; set; }
+    }
+
     /// <summary>
     /// Interaction logic for DownloadExtractionProgress.xaml
     /// </summary>
@@ -55,6 +60,18 @@ namespace rpkg
                 Uri uri = new Uri("https://github.com/glacier-modding/Hitman-Hashes/releases/latest/download/latest-hashes.7z");
 
                 webClient.DownloadFileAsync(uri, "latest-hashes.7z");
+            }
+            else if (operation == 3)
+            {
+                WebClient webClient = new WebClient();
+
+                webClient.DownloadProgressChanged += WebClient_DownloadProgressChanged;
+
+                webClient.DownloadFileCompleted += WebClient_DownloadFileCompleted;
+
+                Uri uri = new Uri("https://github.com/glacier-modding/Hitman-l10n-Hashes/releases/latest/download/hash_list.hmla");
+
+                webClient.DownloadFileAsync(uri, "hash_list.hmla");
             }
             else
             {
@@ -102,6 +119,14 @@ namespace rpkg
                 HttpClient http = new HttpClient() { Timeout = TimeSpan.FromSeconds(10) };
 
                 int.TryParse(http.GetAsync("https://github.com/glacier-modding/Hitman-Hashes/releases/latest/download/version").Result.Content.ReadAsStringAsync().Result, out currentVersionAvailable);
+            }
+            else if (operation == 4)
+            {
+                HttpClient http = new HttpClient() { Timeout = TimeSpan.FromSeconds(10) };
+
+                string data = http.GetAsync("https://github.com/glacier-modding/Hitman-l10n-Hashes/releases/latest/download/version.json").Result.Content.ReadAsStringAsync().Result;
+                dynamic json = JsonSerializer.Deserialize<HMLAVersion>(data);    
+                currentVersionAvailable = json.version;           
             }
         }
 

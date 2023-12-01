@@ -4,8 +4,8 @@
 #include "crypto.h"
 #include "util.h"
 #include "borg.h"
-#include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
+#include <lz4.h>
+#include <lz4hc.h>
 #include <fstream>
 
 prim::prim(uint64_t rpkgs_index, uint64_t hash_index) {

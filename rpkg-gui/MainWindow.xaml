@@ -615,7 +615,12 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <Label Grid.Row="0" Grid.Column="0" Content="Search in RPKG(s):" VerticalContentAlignment="Center" FontSize="14"/>
-                                <ComboBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" x:Name="DeepSearchLocalizationRPKGsComboBox" FontFamily="Consolas" Margin="15" VerticalAlignment="Center"/>
+                                <ComboBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="1" x:Name="DeepSearchLocalizationRPKGsComboBox" FontFamily="Consolas" Margin="10" VerticalAlignment="Center"/>
+                                <ComboBox Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="2" x:Name="DeepSearchLocalizationVersionComboBox" FontFamily="Consolas" Margin="15" VerticalAlignment="Center">
+                                    <ComboBoxItem Content="Hitman 2016"/>
+                                    <ComboBoxItem Content="Hitman 2"/>
+                                    <ComboBoxItem Content="Hitman 3" IsSelected="True"/>
+                                </ComboBox>
                                 <Label Grid.Row="1" Grid.Column="0" Content="Search through:" FontSize="14" VerticalAlignment="Center"/>
                                 <Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Center">
                                     <Grid.RowDefinitions>

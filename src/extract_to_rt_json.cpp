@@ -3,20 +3,16 @@
 #include "global.h"
 #include "crypto.h"
 #include "util.h"
-#include "thirdparty/lz4/lz4.h"
-#include "thirdparty/rapidjson/document.h"
-#include "thirdparty/rapidjson/prettywriter.h"
-#include "thirdparty/rapidjson/stringbuffer.h"
+#include <lz4.h>
+#include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
 #include <sstream>
 #include <fstream>
 #include <filesystem>
-#include "thirdparty/zhmtools/ResourceLib_HM2016.h"
-#include "thirdparty/zhmtools/ResourceLib_HM2.h"
-#include "thirdparty/zhmtools/ResourceLib_HM3.h"
-
-#pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM2016.lib")
-#pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM2.lib")
-#pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM3.lib")
+#include <ResourceLib_HM2016.h>
+#include <ResourceLib_HM2.h>
+#include <ResourceLib_HM3.h>
 
 const std::vector<std::string> hm2016_valid_resources = {"TEMP", "AIRG", "TBLU", "RTLV", "CRMD", "ATMD", "CBLU", "CPPT", "DSWB",
                                                          "GFXF", "GIDX", "VIDB", "WSGB"};

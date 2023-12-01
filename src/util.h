@@ -71,6 +71,8 @@ public:
 
     static std::wstring string_to_wstring(const std::string& input_string);
 
+    static uint32_t load_hmla_hash_list(const std::string &path = "");
+
     static bool
     lz4_compress_hc(const char* source, std::vector<char>& destination, int source_size, int& compressed_size);
 

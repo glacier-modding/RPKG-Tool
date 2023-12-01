@@ -7,8 +7,8 @@
 #include "../console.h"
 #include "../text.h"
 #include "../generic_function.h"
-#include "thirdparty/lz4/lz4.h"
-#include "thirdparty/json/json.hpp"
+#include <lz4.h>
+#include <nlohmann/json.hpp>
 #include "thirdparty/ww2ogg/packed_codebooks_aoTuV_603.h"
 #include "thirdparty/ww2ogg/wwriff.h"
 #include "thirdparty/revorb/revorb.h"
@@ -30,6 +30,10 @@ int load_hash_list(char* path) {
     generic_function::load_hash_list(true, std::string(path));
 
     return hash_list_version;
+}
+
+uint32_t load_hmla_hash_list(char* path) {
+    return util::load_hmla_hash_list(std::string(path));
 }
 
 char* get_hash_list_string(char* hash_string) {
@@ -828,11 +832,11 @@ uint32_t generate_localization_string(char* rpkg_file, char* hash_string, char* 
     std::string resource = std::string(resource_type);
 
     if (resource == "DLGE") {
-        rpkg_function::extract_dlge_to_json_from(input_path, filter, output_path, true);
+        rpkg_function::extract_dlge_to_json_from(input_path, filter, output_path, true, "HM3");
     } else if (resource == "LOCR") {
-        rpkg_function::extract_locr_to_json_from(input_path, filter, output_path, true);
+        rpkg_function::extract_locr_to_json_from(input_path, filter, output_path, true, "HM3");
     } else if (resource == "RTLV") {
-        rpkg_function::extract_rtlv_to_json_from(input_path, filter, output_path, true);
+        rpkg_function::extract_rtlv_to_json_from(input_path, filter, output_path, true, "HM3");
     }
 
     return (uint32_t) localization_string.length();
@@ -2152,7 +2156,7 @@ char* get_entry_name(uint32_t temp_index, int entry_index) {
 }
 
 int deep_search_localization(char* input_path, char* search_value, int search_dlge, int search_locr, int search_rtlv,
-                             int max_results) {
+                             int max_results, char* version) {
     gui_control = READY;
     task_single_status = READY;
     task_multiple_status = READY;
@@ -2177,7 +2181,7 @@ int deep_search_localization(char* input_path, char* search_value, int search_dl
         search_rtlv_bool = true;
 
     rpkg_function::search_localization(input_path_string, search, output_path, search_dlge_bool,
-                                       search_locr_bool, search_rtlv_bool, max_results);
+                                       search_locr_bool, search_rtlv_bool, max_results, std::string(version));
 
     return 0;
 }

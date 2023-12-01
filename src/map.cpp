@@ -11,10 +11,10 @@
 #include <filesystem>
 #include <regex>
 #include <sstream>
-#include "thirdparty/rapidjson/document.h"
-#include "thirdparty/rapidjson/pointer.h"
-#include "thirdparty/rapidjson/stringbuffer.h"
-#include "thirdparty/directxmath/DirectXMath.h"
+#include <rapidjson/document.h>
+#include <rapidjson/pointer.h>
+#include <rapidjson/stringbuffer.h>
+#include <DirectXMath.h>
 
 map::map() = default;
 

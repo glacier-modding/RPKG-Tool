@@ -1,9 +1,14 @@
 #include "rpkg_function.h"
+#include "generic_function.h"
 #include "global.h"
 #include "util.h"
 
 std::string rpkg_function::generate_hash_meta_json(const uint64_t rpkg_index, const uint64_t hash_index)
 {
+    if (!hash_list_loaded) {
+        generic_function::load_hash_list(false);
+    }
+
     // Output hash's meta data to JSON format
     nlohmann::ordered_json json;
     json["hash_value"] = util::uint64_t_to_hex_string(rpkgs.at(rpkg_index).hash.at(hash_index).hash_value);

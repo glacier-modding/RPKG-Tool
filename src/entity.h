@@ -3,9 +3,10 @@
 #include <string>
 #include <unordered_map>
 #include <cstdint>
-#include "thirdparty/zhmtools/ResourceLib_HM2.h"
-#include "thirdparty/zhmtools/ResourceLib_HM3.h"
-#include "thirdparty/yyjson/yyjson.h"
+
+#include <ResourceLib_HM2.h>
+#include <ResourceLib_HM3.h>
+#include <yyjson.h>
 
 class entity {
 public:

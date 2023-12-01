@@ -1,7 +1,7 @@
 #pragma once
 
 #include "global.h"
-#include "thirdparty/directxmath/DirectXMath.h"
+#include <DirectXMath.h>
 #include <string>
 #include <vector>
 #include <cstdint>

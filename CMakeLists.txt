@@ -1,45 +1,65 @@
 cmake_minimum_required(VERSION 3.22)
 project(rpkg VERSION 2.30.0)
+include(FetchContent)
+
+# We need to set the defaults as setting the policy will not
+# persist when adding subdirectories.
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+set(CMAKE_POLICY_DEFAULT_CMP0097 NEW)
+set(CMAKE_POLICY_DEFAULT_CMP0135 NEW)
+cmake_policy(SET CMP0077 NEW)
+cmake_policy(SET CMP0097 NEW)
+cmake_policy(SET CMP0135 NEW)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_subdirectory(thirdparty/GLTFSDK)
-add_subdirectory(thirdparty/directxtex)
-
-option(WITH_DIRECTX_SUPPORT
-        "If DirectX components and support for .PRIM, .TEXT, and .BORG should be compiled. Currently only works on Windows."
-        ON
+# rapidjson is here to allow GLTFSDK to use it.
+set(RAPIDJSON_BUILD_DOC OFF)
+set(RAPIDJSON_BUILD_EXAMPLES OFF)
+set(RAPIDJSON_BUILD_TESTS OFF)
+FetchContent_Declare(rjson
+    GIT_REPOSITORY https://github.com/Tencent/rapidjson.git
+    GIT_TAG        516d0473949fdcf0a6dc9fbb40fa92b3b85db184
+    GIT_SUBMODULES ""
 )
 
-if (WITH_DIRECTX_SUPPORT)
-    set(lib-directxmath
-            thirdparty/directxmath/DirectXCollision.h
-            thirdparty/directxmath/DirectXCollision.inl
-            thirdparty/directxmath/DirectXColors.h
-            thirdparty/directxmath/DirectXMath.h
-            thirdparty/directxmath/DirectXMathConvert.inl
-            thirdparty/directxmath/DirectXMathMatrix.inl
-            thirdparty/directxmath/DirectXMathMisc.inl
-            thirdparty/directxmath/DirectXMathVector.inl
-            thirdparty/directxmath/DirectXPackedVector.h
-            thirdparty/directxmath/DirectXPackedVector.inl
-    )
-endif()
-set(lib-json
-        thirdparty/json/json.hpp
+# GLTFSDK
+FetchContent_Declare(gltfsdk
+    GIT_REPOSITORY https://github.com/microsoft/glTF-SDK.git
+    GIT_TAG        r1.9.6.0
 )
-set(lib-lz4
-        thirdparty/lz4/LICENSE
-        thirdparty/lz4/lz4.c
-        thirdparty/lz4/lz4.h
-        thirdparty/lz4/lz4frame.c
-        thirdparty/lz4/lz4frame.h
-        thirdparty/lz4/lz4frame_static.h
-        thirdparty/lz4/lz4hc.c
-        thirdparty/lz4/lz4hc.h
-        thirdparty/lz4/xxhash.c
-        thirdparty/lz4/xxhash.h
+
+# DirectXTex
+set(BUILD_TOOLS OFF)
+set(BUILD_SAMPLE OFF)
+FetchContent_Declare(directxtex
+    GIT_REPOSITORY  https://github.com/microsoft/DirectXTex.git
+    GIT_TAG         jan2023
 )
+
+set(ENABLE_UNIT_TESTS OFF)
+set(ENABLE_SAMPLES OFF)
+FetchContent_Declare(directxmath
+    GIT_REPOSITORY  https://github.com/microsoft/DirectXMath.git
+    GIT_TAG         dec2022
+)
+
+# nlohmann json
+FetchContent_Declare(json
+    URL         https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz
+    URL_HASH    SHA256=8c4b26bf4b422252e13f332bc5e388ec0ab5c3443d24399acb675e68278d341f
+)
+
+# lz4
+set(LZ4_BUILD_CLI OFF)
+set(LZ4_BUILD_LEGACY_LZ4C OFF)
+set(LZ4_BUNDLED_MODE ON)
+FetchContent_Declare(lz4
+    GIT_REPOSITORY  https://github.com/lz4/lz4.git
+    GIT_TAG         v1.9.4
+    SOURCE_SUBDIR   build/cmake
+)
+
 set(lib-md5
         thirdparty/md5/md5.c
         thirdparty/md5/md5.h
@@ -54,45 +74,6 @@ set(lib-ogg
         thirdparty/ogg/src/bitwise.c
         thirdparty/ogg/src/crctable.h
         thirdparty/ogg/src/framing.c
-)
-set(lib-rapidjson
-        thirdparty/rapidjson/error/en.h
-        thirdparty/rapidjson/error/error.h
-        thirdparty/rapidjson/internal/biginteger.h
-        thirdparty/rapidjson/internal/clzll.h
-        thirdparty/rapidjson/internal/diyfp.h
-        thirdparty/rapidjson/internal/dtoa.h
-        thirdparty/rapidjson/internal/ieee754.h
-        thirdparty/rapidjson/internal/itoa.h
-        thirdparty/rapidjson/internal/meta.h
-        thirdparty/rapidjson/internal/pow10.h
-        thirdparty/rapidjson/internal/regex.h
-        thirdparty/rapidjson/internal/stack.h
-        thirdparty/rapidjson/internal/strfunc.h
-        thirdparty/rapidjson/internal/strtod.h
-        thirdparty/rapidjson/internal/swap.h
-        thirdparty/rapidjson/msinttypes/inttypes.h
-        thirdparty/rapidjson/msinttypes/stdint.h
-        thirdparty/rapidjson/allocators.h
-        thirdparty/rapidjson/cursorstreamwrapper.h
-        thirdparty/rapidjson/document.h
-        thirdparty/rapidjson/encodedstream.h
-        thirdparty/rapidjson/encodings.h
-        thirdparty/rapidjson/filereadstream.h
-        thirdparty/rapidjson/filewritestream.h
-        thirdparty/rapidjson/fwd.h
-        thirdparty/rapidjson/istreamwrapper.h
-        thirdparty/rapidjson/memorybuffer.h
-        thirdparty/rapidjson/memorystream.h
-        thirdparty/rapidjson/ostreamwrapper.h
-        thirdparty/rapidjson/pointer.h
-        thirdparty/rapidjson/prettywriter.h
-        thirdparty/rapidjson/rapidjson.h
-        thirdparty/rapidjson/reader.h
-        thirdparty/rapidjson/schema.h
-        thirdparty/rapidjson/stream.h
-        thirdparty/rapidjson/stringbuffer.h
-        thirdparty/rapidjson/writer.h
 )
 set(lib-revorb
         thirdparty/revorb/revorb.cpp
@@ -134,38 +115,41 @@ set(lib-ww2ogg
         thirdparty/ww2ogg/wwriff.cpp
         thirdparty/ww2ogg/wwriff.h
 )
-set(lib-yyjson
-        thirdparty/yyjson/yyjson.c
-        thirdparty/yyjson/yyjson.h
+
+# yyjson
+FetchContent_Declare(yyjson
+    GIT_REPOSITORY  https://github.com/ibireme/yyjson.git
+    GIT_TAG         0.7.0
 )
-set(lib-zhmtools
-        thirdparty/zhmtools/Embind.h
-        thirdparty/zhmtools/ResourceConverter.h
-        thirdparty/zhmtools/ResourceGenerator.h
-        thirdparty/zhmtools/ResourceLib.h
-        thirdparty/zhmtools/ResourceLib_HM2.h
-        thirdparty/zhmtools/ResourceLib_HM3.h
-        thirdparty/zhmtools/ResourceLib_HM2016.h
-        thirdparty/zhmtools/ResourceLibCommon.h
+
+# zhmtools/resourcelib
+set(ZHM_BUILD_TOOLS OFF)
+FetchContent_Declare(zhmtools
+    GIT_REPOSITORY  https://github.com/OrfeasZ/ZHMTools.git
+    GIT_TAG         v3.4.1
 )
+
 set(lib-quickentity-ffi
         thirdparty/quickentity-ffi/quickentity_ffi.dll.h
 )
 set(thirdparty
-#        ${lib-directxmath}
-        ${lib-json}
-        ${lib-lz4}
         ${lib-md5}
         ${lib-mikktspace}
         ${lib-ogg}
-        ${lib-rapidjson}
         ${lib-revorb}
         ${lib-vorbis}
         ${lib-ww2ogg}
-        ${lib-yyjson}
-        ${lib-zhmtools}
         ${lib-quickentity-ffi}
 )
+
+# TonyTools
+set(TONYTOOLS_BUILD_TOOLS OFF)
+FetchContent_Declare(tonytools
+    GIT_REPOSITORY  https://github.com/AnthonyFuller/TonyTools.git
+    GIT_TAG         v1.8.1
+)
+
+FetchContent_MakeAvailable(rjson tonytools gltfsdk directxtex lz4 yyjson json zhmtools directxmath)
 
 configure_file(src/version.h.in src/version.h)
 
@@ -328,11 +312,37 @@ if (MSVC)
     target_compile_options(rpkg-cli PUBLIC "/bigobj" "/W3" "/wd4068")
 endif()
 
-target_link_directories(rpkg-cli PUBLIC ${PROJECT_SOURCE_DIR}/thirdparty/zhmtools ${PROJECT_SOURCE_DIR}/thirdparty/quickentity-ffi)
-target_link_libraries(rpkg-cli PUBLIC GLTFSDK DirectXTex ResourceLib_HM2 ResourceLib_HM2016 ResourceLib_HM3 quickentity_ffi.dll.lib)
+target_link_directories(rpkg-cli PUBLIC ${PROJECT_SOURCE_DIR}/thirdparty/quickentity-ffi)
+target_include_directories(rpkg-lib PUBLIC rapidjson)
+target_link_libraries(rpkg-cli PUBLIC
+    GLTFSDK
+    DirectXTex
+    DirectXMath
+    lz4_static
+    yyjson
+    nlohmann_json::nlohmann_json
+    ResourceLib_HM2
+    ResourceLib_HM2016
+    ResourceLib_HM3
+    quickentity_ffi.dll.lib
+    TonyTools::HMLanguages
+)
 
-target_link_directories(rpkg-lib PUBLIC ${PROJECT_SOURCE_DIR}/thirdparty/zhmtools ${PROJECT_SOURCE_DIR}/thirdparty/quickentity-ffi)
-target_link_libraries(rpkg-lib PUBLIC GLTFSDK DirectXTex ResourceLib_HM2 ResourceLib_HM2016 ResourceLib_HM3 quickentity_ffi.dll.lib)
+target_link_directories(rpkg-lib PUBLIC ${PROJECT_SOURCE_DIR}/thirdparty/quickentity-ffi)
+target_include_directories(rpkg-lib PUBLIC rapidjson)
+target_link_libraries(rpkg-lib PUBLIC
+    GLTFSDK
+    DirectXTex
+    DirectXMath
+    lz4_static
+    yyjson
+    nlohmann_json::nlohmann_json
+    ResourceLib_HM2
+    ResourceLib_HM2016
+    ResourceLib_HM3
+    quickentity_ffi.dll.lib
+    TonyTools::HMLanguages
+)
 
 include_directories(${CMAKE_SOURCE_DIR})
 # Pre-processed version header file (on configure step, before build)

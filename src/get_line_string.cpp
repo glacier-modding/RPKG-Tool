@@ -4,11 +4,12 @@
 #include "global.h"
 #include "util.h"
 #include "crypto.h"
-#include "thirdparty/lz4/lz4.h"
+#include <lz4.h>
 #include <iostream>
 #include <unordered_map>
 #include <sstream>
 #include <fstream>
+#include <TonyTools/Languages.h>
 
 void rpkg_function::get_line_string(std::string& input_path, std::string& filter, std::string& output_path) {
     std::string input_rpkg_folder_path = file::parse_input_folder_path(input_path);
@@ -122,48 +123,27 @@ void rpkg_function::get_line_string(std::string& input_path, std::string& filter
 
             if (it6 != rpkgs.at(rpkg_index2).hash_map.end()) {
                 rpkg_function::extract_locr_to_json_from(rpkgs.at(rpkg_index2).rpkg_file_path, hash_string, output_path,
-                                                         true);
+                                                         true, "HM3");
 
-                for (const auto& it : localization_json.items()) {
-                    bool language_found = false;
+                for (const auto& [language, translations] : localization_json["languages"].items()) {
+                    std::string locrKey = TonyTools::Language::HashList::GetLine(line_crc32);
+                    std::string hash = util::uint32_t_to_hex_string(line_crc32);
 
-                    std::string language = "";
-
-                    for (const auto& it2 : it.value().items()) {
-                        if (it2.value().contains("Language")) {
-                            language_found = true;
-
-                            language = it2.value()["Language"];
-                        }
+                    if (!translations.contains(locrKey)) {
+                        continue;
                     }
 
-                    if (!language_found)
-                        continue;
+                    std::string found_translation = translations.at(locrKey).get<std::string>();
 
-                    for (const auto& it2 : it.value().items()) {
-                        if (!it2.value().contains("StringHash") ||
-                            static_cast<uint32_t>(it2.value()["StringHash"]) != line_crc32)
-                            continue;
-
-                        //LOG("FOUND CRC32: " + util::uint32_t_to_hex_string(line_crc32) + " in " << hash_string);
-
-                        if (!it2.value().contains("String"))
-                            continue;
-
+                    if (found_translation != "") {
                         if (localization_line_string == "") {
-                            localization_line_string =
-                                    "\nLINE CRC32: " + util::uint32_t_to_string(line_crc32) + "\nLOCR Strings:\n";
-
-                            localization_line_string +=
-                                    "  - " + language + ": " + std::string(it2.value()["String"]) + "\n";
-                        } else {
-                            localization_line_string +=
-                                    "  - " + language + ": " + std::string(it2.value()["String"]) + "\n";
+                            localization_line_string = "\n" + (hash != locrKey ? "LINE: " + locrKey + "\n" : "") + "Hash: " + hash + "\nLOCR Strings:\n";
                         }
 
-                        //LOG("FOUND STRING: " + std::string(it2.value()["String"]) + " in " << hash_string);
+                        localization_line_string += "  - " + language + ": " + found_translation + "\n";
                     }
                 }
+
             }
         }
     }

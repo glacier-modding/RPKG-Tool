@@ -4,7 +4,7 @@
 #include "global.h"
 #include "crypto.h"
 #include "console.h"
-#include "thirdparty/lz4/lz4.h"
+#include <lz4.h>
 #include <chrono>
 #include <filesystem>
 #include <sstream>

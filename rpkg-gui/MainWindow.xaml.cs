@@ -156,6 +156,14 @@ namespace rpkg
 			downloadExtractionProgress2.ShowDialog();
 		}
 
+		private void DownloadHMLAHashList()
+		{
+			DownloadExtractionProgress downloadExtractionProgress = new DownloadExtractionProgress();
+			downloadExtractionProgress.operation = 3;
+			downloadExtractionProgress.message.Content = "Downloading https://github.com/glacier-modding/Hitman-l10n-Hashes/releases/latest/download/hash_list.hmla...";
+			downloadExtractionProgress.ShowDialog();
+		}
+
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
 			AddHandlers();
@@ -244,6 +252,63 @@ namespace rpkg
 					}
 
 					Environment.Exit(0);
+				}
+			}
+
+			if (!File.Exists("hash_list.hmla")) {
+				MessageQuestion messageBox = new MessageQuestion();
+				messageBox.message.Content = "Error: The localisation hash list file (hash__list.hmla) is missing.\n\nIt improves the localisation experience greatly.\n\nClick OK to automatically download it.\n\nYou can also download it manually from https://github.com/glacier-modding/Hitman-l10n-Hashes/releases/latest/download/hash_list.hmla and place it next to the program.";
+				messageBox.ShowDialog();
+
+				if (messageBox.buttonPressed == "OKButton")
+				{
+					DownloadHMLAHashList();
+					System.Windows.Forms.Application.Restart();
+
+					if (discordOn)
+					{
+						Client.Dispose();
+					}
+
+					Environment.Exit(0);
+				}
+				else if (messageBox.buttonPressed == "CancelButton")
+				{
+					if (discordOn)
+					{
+						Client.Dispose();
+					}
+
+					Environment.Exit(0);
+				}
+			}
+
+			uint hmla_version = load_hmla_hash_list(AppDomain.CurrentDomain.BaseDirectory + "\\hash_list.hmla");
+			if (hmla_version != uint.MaxValue) {
+				DownloadExtractionProgress downloadExtractionProgress2 = new DownloadExtractionProgress();
+				downloadExtractionProgress2.operation = 4;
+				downloadExtractionProgress2.ProgressBar.IsIndeterminate = true;
+				downloadExtractionProgress2.message.Content = "Checking https://github.com/glacier-modding/Hitman-l10n-Hashes/releases/latest/download/version.json to see if a new hash list is available...";
+				downloadExtractionProgress2.ShowDialog();
+
+				if (hmla_version < downloadExtractionProgress2.currentVersionAvailable)
+				{
+					MessageQuestion messageBox = new MessageQuestion();
+					messageBox.message.Content = "There is a new version of the localisation hash list available.\n\nClick OK to automatically update to the latest version.";
+					messageBox.ShowDialog();
+
+					if (messageBox.buttonPressed == "OKButton")
+					{
+						DownloadHMLAHashList();
+						System.Windows.Forms.Application.Restart();
+
+						if (discordOn)
+						{
+							Client.Dispose();
+						}
+
+						Environment.Exit(0);
+					}
 				}
 			}
 
@@ -4894,7 +4959,7 @@ namespace rpkg
 		public delegate int execute_get_hashes_with_no_reverse_depends(string rpkg_file);
 		public delegate int execute_get_direct_hash_depends(string rpkg_file, string hash_string);
 		public delegate int execute_task(string csharp_command, string csharp_input_path, string csharp_filter, string search, string search_type, string csharp_output_path);
-		public delegate int execute_deep_search_localization(string input_path, string search_value, int search_dlge, int search_locr, int search_rtlv, int max_results);
+		public delegate int execute_deep_search_localization(string input_path, string search_value, int search_dlge, int search_locr, int search_rtlv, int max_results, string version);
 		public delegate int execute_deep_search_entities(string input_path, string[] search_strings, int[] search_types, int[] search_categories, int search_strings_count, int max_results, int store_jsons, int use_latest_hashes);
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "task_execute", CallingConvention = CallingConvention.Cdecl)]
@@ -4976,6 +5041,9 @@ namespace rpkg
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "load_hash_list", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int load_hash_list(string path);
+
+		[DllImport("rpkg-lib.dll", EntryPoint = "load_hmla_hash_list", CallingConvention = CallingConvention.Cdecl)]
+		public static extern uint load_hmla_hash_list(string path);
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "get_hash_list_string", CallingConvention = CallingConvention.Cdecl)]
 		public static extern IntPtr get_hash_list_string(string hash_string);
@@ -5070,7 +5138,7 @@ namespace rpkg
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "deep_search_localization", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int deep_search_localization(string input_path, string search_value, int search_dlge,
-			int search_locr, int search_rtlv, int max_results);
+			int search_locr, int search_rtlv, int max_results, string version);
 
 		[DllImport("rpkg-lib.dll", EntryPoint = "get_localization_search_results_size",
 			CallingConvention = CallingConvention.Cdecl)]
@@ -8399,7 +8467,16 @@ namespace rpkg
 						maxSearchResults = 100;
 					}
 
-					IAsyncResult ar = rpkgExecute.BeginInvoke(input_path, DeepSearchLocalizationTextBox.Text, search_dlge, search_locr, search_rtlv, maxSearchResults, null, null);
+					string version = DeepSearchLocalizationVersionComboBox.Text switch
+					{
+						"Hitman 2016" => "HM2016",
+						"Hitman 2" => "HM2",
+						"Hitman 3" => "HM3",
+						_ => "HM3"
+					};
+
+
+                    IAsyncResult ar = rpkgExecute.BeginInvoke(input_path, DeepSearchLocalizationTextBox.Text, search_dlge, search_locr, search_rtlv, maxSearchResults, version, null, null);
 
 					deepSearchLocalizationWorker = new BackgroundWorker();
 					deepSearchLocalizationWorker.WorkerReportsProgress = true;

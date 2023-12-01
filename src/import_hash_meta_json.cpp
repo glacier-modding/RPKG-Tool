@@ -8,9 +8,9 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-#include "thirdparty/rapidjson/document.h"
-#include "thirdparty/rapidjson/writer.h"
-#include "thirdparty/rapidjson/error/en.h"
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/error/en.h>
 
 bool rpkg_function::import_hash_meta_json(hash& meta_data, const std::string& input_path) {
     std::string input_json_string = file::read_file_to_string(input_path);

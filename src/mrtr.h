@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <cstdint>
 #include "global.h"
-#include "thirdparty/json/json.hpp"
+#include <nlohmann/json.hpp>
 
 struct mrtr_entry {
     uint32_t index = 0;

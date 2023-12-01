@@ -4,7 +4,7 @@
 #include "crypto.h"
 #include "util.h"
 #include "generic_function.h"
-#include "thirdparty/lz4/lz4.h"
+#include <lz4.h>
 #include <iostream>
 #include <sstream>
 #include <fstream>

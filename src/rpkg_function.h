@@ -62,7 +62,7 @@ public:
     extract_mati_to_json(std::string& input_path, const std::string& filter, const std::string& output_path);
 
     static void search_localization(std::string& input_path, std::string& search, std::string& output_path,
-                                    bool search_dlge, bool search_locr, bool search_rtlv, int max_results);
+                                    bool search_dlge, bool search_locr, bool search_rtlv, int max_results, std::string version);
 
     static void search_entities(std::string& input_path,
                                 char** search_strings,
@@ -84,7 +84,7 @@ public:
 
     static uint32_t get_latest_hash(uint64_t hash_value);
 
-    static void json_to_hash_meta(std::string& input_path);
+    static std::vector<char> json_to_hash_meta(std::string& json_string);
 
     static void hash_meta_to_json(std::string& input_path);
 
@@ -149,20 +149,20 @@ public:
 
     static void hash_depends(std::string& input_path, std::string& filter);
 
-    static void rebuild_rtlv_from_json_from(std::string& input_path);
+    static void rebuild_rtlv_from_json_from(std::string& input_path, std::string version);
 
-    static void rebuild_locr_from_json_from(std::string& input_path);
+    static void rebuild_locr_from_json_from(std::string& input_path, std::string version);
 
-    static void rebuild_dlge_from_json_from(std::string& input_path, std::string& output_path);
+    static void rebuild_dlge_from_json_from(std::string& input_path, std::string& output_path, std::string version);
 
     static void extract_rtlv_to_json_from(std::string& input_path, std::string& filter, std::string& output_path,
-                                          bool output_to_string);
+                                          bool output_to_string, std::string version);
 
     static void extract_locr_to_json_from(std::string& input_path, std::string& filter, std::string& output_path,
-                                          bool output_to_string);
+                                          bool output_to_string, std::string version);
 
     static void extract_dlge_to_json_from(std::string& input_path, std::string& filter, std::string& output_path,
-                                          bool output_to_string);
+                                          bool output_to_string, std::string version, bool hexPrecision = false);
 
     static void generate_rpkg_from(std::string& input_path, std::string& output_path, bool increased_compression);
 

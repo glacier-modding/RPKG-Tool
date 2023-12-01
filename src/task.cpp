@@ -8,6 +8,7 @@
 #include "map.h"
 #include <string>
 #include <vector>
+#include <fstream>
 
 void task::execute(std::string& command, std::string& input_path, std::string& filter, std::string& search,
                    std::string& search_type, std::string& output_path) {
@@ -73,11 +74,11 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     } else if (command == "-extract_wwev_to_ogg_from") {
         rpkg_function::extract_wwev_to_ogg_from(input_path, filter, output_path);
     } else if (command == "-extract_dlge_to_json_from") {
-        rpkg_function::extract_dlge_to_json_from(input_path, filter, output_path, false);
+        rpkg_function::extract_dlge_to_json_from(input_path, filter, output_path, false, search, search_type == "hex_precision");
     } else if (command == "-extract_locr_to_json_from") {
-        rpkg_function::extract_locr_to_json_from(input_path, filter, output_path, false);
+        rpkg_function::extract_locr_to_json_from(input_path, filter, output_path, false, search);
     } else if (command == "-extract_rtlv_to_json_from") {
-        rpkg_function::extract_rtlv_to_json_from(input_path, filter, output_path, false);
+        rpkg_function::extract_rtlv_to_json_from(input_path, filter, output_path, false, search);
     } else if (command == "-generate_rpkg_from") {
         rpkg_function::generate_rpkg_from(input_path, output_path, true);
     } else if (command == "-generate_rpkg_quickly_from") {
@@ -114,11 +115,11 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     } else if (command == "-rebuild_wwev_in") {
         rpkg_function::rebuild_wwev_in(input_path);
     } else if (command == "-rebuild_dlge_from_json_from") {
-        rpkg_function::rebuild_dlge_from_json_from(input_path, output_path);
+        rpkg_function::rebuild_dlge_from_json_from(input_path, output_path, search);
     } else if (command == "-rebuild_locr_from_json_from") {
-        rpkg_function::rebuild_locr_from_json_from(input_path);
+        rpkg_function::rebuild_locr_from_json_from(input_path, search);
     } else if (command == "-rebuild_rtlv_from_json_from") {
-        rpkg_function::rebuild_rtlv_from_json_from(input_path);
+        rpkg_function::rebuild_rtlv_from_json_from(input_path, search);
     } else if (command == "-search_rpkg") {
         rpkg_extraction_vars rpkg_vars;
 
@@ -147,7 +148,34 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
     } else if (command == "-hash_meta_to_json") {
         rpkg_function::hash_meta_to_json(input_path);
     } else if (command == "-json_to_hash_meta") {
-        rpkg_function::json_to_hash_meta(input_path);
+        std::string jsonmeta = file::read_file_to_string(input_path);
+
+        std::vector<char> hashmeta = rpkg_function::json_to_hash_meta(jsonmeta);
+
+        if (hashmeta.empty()) {
+            LOG("Failed to convert json to hash meta.");
+            return;
+        }
+
+        if (input_path.length() > 11) {
+            if (util::to_upper_case(input_path.substr(input_path.length() - 10)) != ".META.JSON") {
+                LOG("Error: Input file does not end in .meta.JSON");
+
+                response_string = "Error: Input file does not end in .meta.JSON";
+
+                return;
+            }
+        }
+
+        std::ofstream meta_file = std::ofstream(input_path.substr(0, input_path.length() - 5), std::ofstream::binary);
+
+        LOG("Success: " + input_path + " has been converted.");
+
+        response_string = "Success: " + input_path + " has been converted.";
+
+        meta_file.write(hashmeta.data(), hashmeta.size());
+
+        meta_file.close();
     } else if (command == "-latest_hash") {
         rpkg_function::latest_hash(input_path, filter, output_path);
     } else if (command == "-export_map") {
@@ -178,7 +206,7 @@ void task::execute(std::string& command, std::string& input_path, std::string& f
         search_categories[1] = (int)entity::search_category::TEMPHASH;
         rpkg_function::search_entities(input_path, search_strings, search_types, search_categories, 2, 10, true, true);*/
     } else if (command == "-search_localization") {
-        rpkg_function::search_localization(input_path, search, output_path, true, true, true, 1000);
+        rpkg_function::search_localization(input_path, search, output_path, true, true, true, 1000, "HM3");
     } else if (command == "-get_line_string") {
         rpkg_function::get_line_string(input_path, filter, output_path);
     } else if (command == "-extract_sdef_to_json") {
@@ -352,6 +380,8 @@ void task::process_and_execute_command_line_args(std::vector<std::vector<std::st
             search = i.at(1);
         } else if (util::to_lower_case(i.at(0)) == "-output_path") {
             output_path = i.at(1);
+        } else if (util::to_lower_case(i.at(0)) == "-hex_precision") {
+            search_type = "hex_precision";
         } else {
             LOG_AND_EXIT("Error: Invalid command in command line.");
         }

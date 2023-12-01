@@ -3,7 +3,7 @@
 #include "global.h"
 #include "console.h"
 #include "util.h"
-#include "thirdparty/directxtex/DirectXTex.h"
+#include <DirectXTex.h>
 #include <unordered_map>
 #include <chrono>
 #include <sstream>

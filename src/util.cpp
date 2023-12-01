@@ -1,13 +1,15 @@
 #include "util.h"
 #include "global.h"
 #include "generic_function.h"
-#include "thirdparty/lz4/lz4.h"
-#include "thirdparty/lz4/lz4hc.h"
-#include "thirdparty/directxtex/DirectXTex.h"
+#include "file.h"
+#include <lz4.h>
+#include <lz4hc.h>
+#include <DirectXTex.h>
 #include <string>
 #include <sstream>
 #include <iomanip>
 #include <regex>
+#include <TonyTools/Languages.h>
 
 std::string util::generate_guid() {
     GUID guid;
@@ -416,6 +418,29 @@ bool util::lz4_compress_hc(const char* source, std::vector<char>& destination, i
     compressed_size = LZ4_compress_HC(source, destination.data(), source_size, compressed_bound, LZ4HC_CLEVEL_MAX);
 
     return compressed_size != 0;
+}
+
+uint32_t util::load_hmla_hash_list(const std::string& path) {
+    std::string hmlaPath = path.empty() ? exe_path + std::string("\\hash_list.hmla") : path;
+
+    if (!TonyTools::Language::HashList::GetStatus().loaded) {
+        if (!file::path_exists(hmlaPath)) {
+            LOG("Skipping loading HMLanguages hash list. File does not exist.");
+            return -1;
+        }
+
+        if (TonyTools::Language::HashList::Load(
+            file::read_file(hmlaPath)
+        )) {
+            LOG("Successfully loaded HMLanguages hash list!");
+            return TonyTools::Language::HashList::GetStatus().version;
+        } else {
+            LOG("Failed to load HMLanguages hash list!");
+            return -1;
+        }
+    } else {
+        return -1;
+    }
 }
 
 uint32_t util::uint32_t_byteswap(uint32_t input) {

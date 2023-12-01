@@ -5,17 +5,15 @@
 #include "crypto.h"
 #include "file.h"
 #include "util.h"
-#include "thirdparty/lz4/lz4.h"
-#include "thirdparty/rapidjson/stringbuffer.h"
-#include "thirdparty/directxmath/DirectXMath.h"
+#include <lz4.h>
+#include <rapidjson/stringbuffer.h>
+#include <DirectXMath.h>
 #include "thirdparty/quickentity-ffi/quickentity_ffi.dll.h"
 #include <unordered_map>
 #include <fstream>
 #include <iomanip>
 #include <regex>
 
-#pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM2.lib")
-#pragma comment(lib, "../thirdparty/zhmtools/ResourceLib_HM3.lib")
 #pragma comment(lib, "../thirdparty/quickentity-ffi/quickentity_ffi.dll.lib")
 
 entity::entity() = default;
