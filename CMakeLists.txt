@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(rpkg VERSION 2.30.0)
+project(rpkg VERSION 2.32.0)
 include(FetchContent)
 
 # We need to set the defaults as setting the policy will not
