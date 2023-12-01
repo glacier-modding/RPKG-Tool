@@ -101,8 +101,7 @@ void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::stri
                     return;
                 }
 
-                std::string hash_file_name = util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value) + "." +
-                                             rpkg.hash.at(hash_index).hash_resource_type;
+                std::string hash_file_name = util::uint64_t_to_hex_string(rpkg.hash.at(hash_index).hash_value);
 
                 bool found = false;
 
@@ -195,7 +194,7 @@ void rpkg_function::extract_rtlv_to_json_from(std::string& input_path, std::stri
 
                         localization_json = parsedJson;
                     } else {
-                        std::string json_path = current_path + "\\" + hash_file_name + ".JSON";
+                        std::string json_path = current_path + "\\" + hash_file_name + ".rtlv.json";
 
                         std::ofstream json_file = std::ofstream(json_path, std::ofstream::binary);
 
