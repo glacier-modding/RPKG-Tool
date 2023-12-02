@@ -100,78 +100,41 @@ jobs:
             !_build/Release/rpkg.exe.config
             !_build/Release/runtimes/
 
-  create_release:
-    name: Create release
+  release:
+    name: Release
     needs: [build_windows, build_gui]
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
-
     steps:
     - name: Get version
       id: get_version
-      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
-    # TODO: This action is not maintained - migrate to suitable replacement
-    - name: Create release
-      id: release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ steps.get_version.outputs.VERSION }}
-        release_name: "RPKG ${{ steps.get_version.outputs.VERSION }}"
-        draft: true
-        prerelease: ${{ contains(github.ref, '-pre') }}
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
 
-    outputs:
-      upload_url: ${{ steps.release.outputs.upload_url }}
-
-  upload_release_asset:
-    name: Upload release asset
-    needs: [create_release]
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        artifact: [ "rpkg-cli", "rpkg-lib", "rpkg-gui" ]
-
-    steps:
-    - name: Get version
-      id: get_version
-      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
-
-    - name: Format file name
-      id: file_name
-      uses: mad9000/actions-find-and-replace-string@2
-      with:
-        source: ${{ matrix.artifact }}
-        find: "rpkg"
-        replace: "rpkg_${{ steps.get_version.outputs.VERSION }}"
-
-    - name: Download artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: ${{ matrix.artifact }}
-        path: ${{ matrix.artifact }}
-
-    - name: Package artifact for release
+    - name: Package artifacts for release
       run: |
-        cd ${{ matrix.artifact }}
-        zip -r ${{ matrix.artifact }}.zip *
+        (cd rpkg-cli && zip -r ../rpkg_${{ env.VERSION }}-cli.zip .)
+        (cd rpkg-lib && zip -r ../rpkg_${{ env.VERSION }}-lib.zip .)
+        (cd rpkg-gui && zip -r ../rpkg_${{ env.VERSION }}-gui.zip .)
 
-    - name: Upload release asset
-      uses: actions/upload-release-asset@v1
+    - name: Create release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          rpkg_${{ env.VERSION }}-cli.zip
+          rpkg_${{ env.VERSION }}-lib.zip
+          rpkg_${{ env.VERSION }}-gui.zip
+        tag_name: ${{ env.VERSION }}
+        name: RPKG ${{ env.VERSION }}
+        draft: false
+        prerelease: ${{ contains(github.ref, '-pre') }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.create_release.outputs.upload_url }}
-        asset_path: ${{ matrix.artifact }}/${{ matrix.artifact }}.zip
-        asset_name: ${{ steps.file_name.outputs.value }}.zip
-        asset_content_type: application/zip
 
   trigger_website_build:
-    needs: upload_release_asset
+    needs: release
     runs-on: ubuntu-latest
 
     steps:
