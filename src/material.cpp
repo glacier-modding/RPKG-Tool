@@ -1334,27 +1334,30 @@ std::string material::get_property_name(std::string property) {
     return property;
 }
 
-uint32_t material::encode_flags(std::vector<std::string> flags, nlohmann::ordered_json temp_json) {
+uint32_t material::encode_flags(std::map<uint32_t, std::vector<std::string>>& flags, nlohmann::ordered_json temp_json) {
     uint32_t value = 0;
 
-    for (uint32_t i = 0; i < flags.size(); i++) {
-        if (temp_json.contains(flags.at(i))) {
-            if (temp_json[flags.at(i)].get<bool>())
-                value += 1 << i;
+    for (auto& flag : flags) {
+        for (auto& flag_string : flag.second) {
+            if (temp_json.contains(flag_string)) {
+                if (temp_json[flag_string].get<bool>())
+                    value += flag.first;
+                break;
+            }
         }
     }
 
     return value;
 }
 
-nlohmann::ordered_json material::decode_flags(std::vector<std::string> flags, uint32_t value) {
+nlohmann::ordered_json material::decode_flags(std::map<uint32_t, std::vector<std::string>>& flags, uint32_t value) {
     nlohmann::ordered_json temp_json = nlohmann::ordered_json::object();
 
-    for (uint32_t i = 0; i < flags.size(); i++) {
-        if ((value >> i) & 1)
-            temp_json[flags.at(i)] = true;
+    for (auto& flag : flags) {
+        if ((value & flag.first) == flag.first)
+            temp_json[flag.second[0]] = true;
         else
-            temp_json[flags.at(i)] = false;
+            temp_json[flag.second[0]] = false;
     }
 
     return temp_json;

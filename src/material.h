@@ -61,9 +61,9 @@ public:
 
     std::string get_property_name(std::string property);
 
-    uint32_t encode_flags(std::vector<std::string> flags, nlohmann::ordered_json temp_json);
+    uint32_t encode_flags(std::map<uint32_t, std::vector<std::string>>& flags, nlohmann::ordered_json temp_json);
 
-    nlohmann::ordered_json decode_flags(std::vector<std::string> flags, uint32_t value);
+    nlohmann::ordered_json decode_flags(std::map<uint32_t, std::vector<std::string>>& flags, uint32_t value);
 
     std::string matt_file_name = "";
     uint32_t matt_rpkg_index = 0;
@@ -86,47 +86,50 @@ public:
     std::string type = "";
     std::vector<mati_property> mati_properties;
 
-    const std::vector<std::string> ClassFlags = {
-            "REFLECTION2D",
-            "REFRACTION2D",
-            "LIGHTING",
-            "EMISSIVE",
-            "DISCARD",
-            "LM_SKIN",
-            "PRIMCLASS_STANDARD",
-            "PRIMCLASS_LINKED",
-            "PRIMCLASS_WEIGHTED",
-            "DOFOVERRIDE",
-            "USES_DEFAULT_VS",
-            "USES_SPRITE_SA_VS",
-            "USES_SPRITE_AO_VS",
-            "ALPHA",
-            "USES_SIMPLE_SHADER",
-            "DISABLE_INSTANCING",
-            "LM_HAIR",
-            "UNKNOWN_1",
-            "UNKNOWN_2",
-            "UNKNOWN_3",
-            "UNKNOWN_4",
-            "UNKNOWN_5"
-    };
+    std::map<uint32_t, std::vector<std::string>> ClassFlags = {
+        {0x1, {"REFLECTION2D"}},
+        {0x2, {"REFRACTION2D"}},
+        {0x4, {"LIGHTING"}},
+        {0x8, {"EMISSIVE"}},
+        {0x10, {"DISCARD"}},
+        {0x20, {"LM_SKIN"}},
+        {0x40, {"PRIMCLASS_STANDARD"}},
+        {0x80, {"PRIMCLASS_LINKED"}},
+        {0x100, {"PRIMCLASS_WEIGHTED"}},
+        {0x200, {"DOFOVERRIDE"}},
+        {0x400, {"USES_DEFAULT_VS"}},
+        {0x800, {"USES_SPRITE_SA_VS"}},
+        {0x1000, {"USES_SPRITE_AO_VS"}},
+        {0x2000, {"ALPHA"}},
+        {0x4000, {"USES_SIMPLE_SHADER"}},
+        {0x8000, {"DISABLE_INSTANCING"}},
+        {0x10000, {"LM_HAIR"}},
+        {0x20000, {"SAMPLE_LIGHTING", "UNKNOWN_1"}},
+        {0x40000, {"HORIZONMAPPING", "UNKNOWN_2"}},
+        {0x80000, {"UNKNOWN_3"}},
+        {0x100000, {"UNKNOWN_4"}},
+        {0x200000, {"UNKNOWN_5"}}};
 
-    const std::vector<std::string> InstanceFlags = {
-            "OPAQUE_EMISSIVE",
-            "TRANS_EMISSIVE",
-            "TRANSADD_EMISSIVE",
-            "OPAQUE_LIT",
-            "TRANS_LIT",
-            "DECAL",
-            "REFRACTIVE",
-            "LM_SKIN",
-            "LM_HAIR",
-            "FORCE_EMISSIVE",
-            "DISABLE_SHADER_LOD",
-            "DISCARD",
-            "DECAL_EMISSIVE",
-            "WATER_CLIPPING"
-    };
+    std::map<uint32_t, std::vector<std::string>> InstanceFlags = {
+        {0x1, {"OPAQUE_EMISSIVE"}},
+        {0x2, {"TRANS_EMISSIVE"}},
+        {0x4, {"TRANSADD_EMISSIVE"}},
+        {0x6, {"TRANSALL"}},
+        {0x8, {"OPAQUE_LIT"}},
+        {0x10, {"TRANS_LIT"}},
+        {0x20, {"DECAL"}},
+        {0x40, {"REFRACTIVE"}},
+        {0x80, {"LM_SKIN"}},
+        {0x100, {"LM_HAIR"}},
+        {0x200, {"FORCE_EMISSIVE"}},
+        {0x400, {"DISABLE_SHADER_LOD"}},
+        {0x800, {"DISCARD"}},
+        {0x1000, {"DECAL_EMISSIVE"}},
+        {0x1020, {"DECAL_ALL"}},
+        {0x2000, {"WATER_CLIPPING"}},
+        {0x4000, {"SAMPLE_LIGHTING"}},
+        {0x8000, {"EXCLUDE_GLOBAL_SHADOWS"}},
+        {0xFFFFFFFF, {"ALL"}}};
 
     const std::unordered_map<std::string, std::string> mati_property_name_map = {
             {"AREF", "Alpha Reference"},
