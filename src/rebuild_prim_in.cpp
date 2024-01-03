@@ -817,16 +817,20 @@ void rpkg_function::rebuild_prim_in(std::string& input_path, bool generate_rpkgs
 
                                 for (uint32_t s = 0; s < temp_skin.jointIds.size(); s++) {
                                     try {
-                                        glb_bone_indexes[s] = temp_prim.borg_bone_name_map.at(
-                                                document.nodes.Get(temp_skin.jointIds[s]).name);
+                                        std::string name = document.nodes.Get(temp_skin.jointIds[s]).name;
+
+                                        if (name == "neutral_bone")
+                                            continue;
+
+                                        glb_bone_indexes[s] = temp_prim.borg_bone_name_map.at(name);
                                     }
                                     catch (...) {
                                         LOG("Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name +
-                                            " has mismatched bones compared to the original BORG file.");
+                                            " has a mismatched bone (" + document.nodes.Get(temp_skin.jointIds[s]).name + ") compared to the original BORG file.");
 
                                         task_status_string =
                                                 "Error: " + glb_file_names.at(j) + "'s mesh " + temp_mesh.name +
-                                                " has mismatched bones compared to the original BORG file.";
+                                                " has a mismatched bone (" + document.nodes.Get(temp_skin.jointIds[s]).name + ") compared to the original BORG file.";
 
                                         task_multiple_status = PRIM_REBUILD_MISMATCHED_BONES;
 
