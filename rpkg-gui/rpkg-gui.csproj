@@ -329,8 +329,8 @@
     <AdditionalFiles Include="assimp.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AdditionalFiles>
-    <EmbeddedResource Condition="'$(Configuration)' == 'Release'" Include="..\cmake-build-release\rpkg-lib.dll" LogicalName="costura64.rpkg-lib.dll" ManifestResourceName="costura64.rpkg-lib.dll" />
-    <Content Condition="'$(Configuration)' == 'Debug'" Include="..\cmake-build-debug\rpkg-lib.dll">
+    <EmbeddedResource Condition="'$(Configuration)' == 'Release'" Include="..\cmake-build-RelWithDebInfo\rpkg-lib.dll" LogicalName="costura64.rpkg-lib.dll" ManifestResourceName="costura64.rpkg-lib.dll" />
+    <Content Condition="'$(Configuration)' == 'Debug'" Include="..\cmake-build-Debug\rpkg-lib.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <TargetPath>rpkg-lib.dll</TargetPath>
     </Content>
