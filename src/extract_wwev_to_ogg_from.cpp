@@ -265,6 +265,16 @@ void rpkg_function::extract_wwev_to_ogg_from(std::string& input_path, std::strin
 
                     std::memcpy(&wwev_file_count_test, &wwev_data->data()[position], sizeof(bytes4));
 
+                    if (wwev_file_count == -1 || wwev_file_count == 1 && wwev_file_count_test < 5000) {
+                        // Hitman 2016 file format has an extra int32 here
+                        // The 2000 in the check is a bit arbitrary, but I don't know anything better to test.
+                        // Will give false negatives (2016 wwev detected as newer version) if there are more than 5000 embedded sounds
+                        // Will give false positives (newer wwev detected as 2016 version) if there is exactly one embedded sound with a wem id lower than 5000
+                        // -grappigegovert
+                        wwev_file_count = wwev_file_count_test;
+                        position += 4;
+                    }
+
                     bool found = false;
 
                     uint64_t input_filter_index = 0;
