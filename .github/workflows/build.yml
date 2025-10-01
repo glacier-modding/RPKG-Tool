@@ -134,6 +134,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   trigger_website_build:
+    if: false
     needs: release
     runs-on: ubuntu-latest
 
