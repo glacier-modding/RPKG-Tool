@@ -8,6 +8,14 @@
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
 
+inline std::string escape_json_string(std::string str) {
+    rapidjson::StringBuffer buf;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
+    writer.String(str.c_str(), static_cast<rapidjson::SizeType>(str.length()));
+
+    return std::string(buf.GetString());
+}
+
 void rpkg_function::hash_meta_to_json(std::string& input_path) {
     task_single_status = TASK_EXECUTING;
     task_multiple_status = TASK_EXECUTING;
@@ -42,7 +50,7 @@ void rpkg_function::hash_meta_to_json(std::string& input_path) {
         json_string += R"("hash_value":")" + util::uint64_t_to_hex_string(meta_data.hash_value) + "\",";
 
         if (std::string path = util::hash_to_ioi_string(meta_data.hash_value, false); path != "") {
-            json_string += R"("hash_path":")" + path + "\",";
+            json_string += R"("hash_path":)" + escape_json_string(path) + ",";
         }
 
         meta_file.read(input, sizeof(bytes8));
@@ -130,9 +138,8 @@ void rpkg_function::hash_meta_to_json(std::string& input_path) {
                 auto it2 = hash_list_hash_map.find(bytes8);
 
                 if (it2 != hash_list_hash_map.end()) {
-                    if (hash_value_string ==
-                        generic_function::compute_ioi_hash(hash_list_hash_strings.at(it2->second))) {
-                        json_string += R"({"hash":")" + hash_list_hash_strings.at(it2->second) + "\",";
+                    if (hash_value_string == generic_function::compute_ioi_hash(hash_list_hash_strings.at(it2->second))) {
+                        json_string += R"({"hash":)" + escape_json_string(hash_list_hash_strings.at(it2->second)) + ",";
                     } else {
                         json_string += R"({"hash":")" + util::uint64_t_to_hex_string(bytes8) + "\",";
                     }
