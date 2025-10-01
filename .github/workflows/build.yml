@@ -59,7 +59,7 @@ jobs:
         cp thirdparty/assimp/*.dll _rpkg
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.target }}
         path: _rpkg
@@ -81,7 +81,7 @@ jobs:
         run: cd rpkg-gui && nuget restore rpkg.sln
 
       - name: Download rpkg-lib
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v5
         with:
           name: rpkg-lib
           path: cmake-build-RelWithDebInfo
@@ -91,7 +91,7 @@ jobs:
           cd rpkg-gui && msbuild /m /p:Configuration=Release /p:Platform=x64 rpkg.sln
 
       - name: Upload GUI artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: rpkg-gui
           path: |
@@ -111,7 +111,7 @@ jobs:
       run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
     - name: Download artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v5
 
     - name: Package artifacts for release
       run: |
