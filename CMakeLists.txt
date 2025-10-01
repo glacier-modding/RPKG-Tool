@@ -19,7 +19,7 @@ set(RAPIDJSON_BUILD_EXAMPLES OFF)
 set(RAPIDJSON_BUILD_TESTS OFF)
 FetchContent_Declare(rjson
     GIT_REPOSITORY https://github.com/Tencent/rapidjson.git
-    GIT_TAG        516d0473949fdcf0a6dc9fbb40fa92b3b85db184
+    GIT_TAG        24b5e7a8b27f42fa16b96fc70aade9106cf7102f
     GIT_SUBMODULES ""
 )
 
