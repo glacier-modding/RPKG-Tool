@@ -13,11 +13,18 @@ cmake_policy(SET CMP0135 NEW)
 
 set(CMAKE_CXX_STANDARD 17)
 
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5 CACHE STRING "" FORCE)
+
+# googletest because... yeah
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_Declare(googletest
+    URL https://github.com/google/googletest/archive/5376968f6948923e2411081fd9372e71a59d8e77.zip
+)
+
 # rapidjson is here to allow GLTFSDK to use it.
 set(RAPIDJSON_BUILD_DOC OFF)
 set(RAPIDJSON_BUILD_EXAMPLES OFF)
 set(RAPIDJSON_BUILD_TESTS OFF)
-set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 FetchContent_Declare(rjson
     GIT_REPOSITORY https://github.com/Tencent/rapidjson.git
     GIT_TAG        516d0473949fdcf0a6dc9fbb40fa92b3b85db184
@@ -26,7 +33,6 @@ FetchContent_Declare(rjson
 
 # GLTFSDK
 set(ENABLE_UNIT_TESTS OFF)
-set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 FetchContent_Declare(gltfsdk
     GIT_REPOSITORY https://github.com/microsoft/glTF-SDK.git
     GIT_TAG        r1.9.6.0
@@ -152,7 +158,7 @@ FetchContent_Declare(tonytools
     GIT_TAG         v1.8.2
 )
 
-FetchContent_MakeAvailable(rjson tonytools gltfsdk directxtex lz4 yyjson json zhmtools directxmath)
+FetchContent_MakeAvailable(googletest rjson tonytools gltfsdk directxtex lz4 yyjson json zhmtools directxmath)
 
 configure_file(src/version.h.in src/version.h)
 
