@@ -135,7 +135,7 @@ FetchContent_Declare(yyjson
 set(ZHM_BUILD_TOOLS OFF)
 FetchContent_Declare(zhmtools
     GIT_REPOSITORY  https://github.com/OrfeasZ/ZHMTools.git
-    GIT_TAG         v3.6.9
+    GIT_TAG         v4.0.0
 )
 
 set(lib-quickentity-ffi
