@@ -1,8 +1,8 @@
 #include "crypto.h"
 
 constexpr unsigned int num_rounds = 32;
-constexpr uint32_t l10n_key[4] = {0x53527737, 0x7506499E, 0xBD39AEE3, 0xA59E7268};
-constexpr uint32_t thumbs_key[4] = {0x30F95282, 0x1F48C419, 0x295F8548, 0x2A78366D};
+constexpr uint32_t l10n_key[4] = {0x68AC3361, 0x562B4AA0, 0xB9F2771F, 0x28EB3CE7};
+constexpr uint32_t thumbs_key[4] = {0x71482CF0, 0x5FDC4B9F, 0x86CE569D, 0x0509FC1E};
 constexpr uint32_t thumbs_delta = 0x61C88647;
 constexpr uint32_t l10n_delta = 0x9E3779B9;
 
