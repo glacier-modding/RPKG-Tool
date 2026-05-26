@@ -28,10 +28,10 @@ void rpkg_function::extract_hash_meta(const uint64_t i, const uint64_t j, std::s
         meta_data.push_back(*(reinterpret_cast<char*>(&rpkgs.at(i).hash.at(j).data.resource.reference_table_size) + k));
     }
 
-    for (int k = 0; k < sizeof(hash::data.resource.reference_table_dummy); k++) {
-        meta_data.push_back(
-                *(reinterpret_cast<char*>(&rpkgs.at(i).hash.at(j).data.resource.reference_table_dummy) + k));
-    }
+    //for (int k = 0; k < sizeof(hash::data.resource.reference_table_dummy); k++) {
+    //    meta_data.push_back(
+    //            *(reinterpret_cast<char*>(&rpkgs.at(i).hash.at(j).data.resource.reference_table_dummy) + k));
+    //}
 
     for (int k = 0; k < sizeof(hash::data.resource.size_final); k++) {
         meta_data.push_back(*(reinterpret_cast<char*>(&rpkgs.at(i).hash.at(j).data.resource.size_final) + k));

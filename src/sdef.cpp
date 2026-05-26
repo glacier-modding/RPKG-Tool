@@ -189,9 +189,9 @@ sdef::sdef(std::string sdef_path, std::string sdef_meta_path, uint64_t hash_valu
     std::memcpy(&bytes4, input, sizeof(bytes4));
     meta_data.data.resource.reference_table_size = bytes4;
 
-    sdef_meta_file.read(input, sizeof(bytes4));
-    std::memcpy(&bytes4, input, sizeof(bytes4));
-    meta_data.data.resource.reference_table_dummy = bytes4;
+    //sdef_meta_file.read(input, sizeof(bytes4));
+    //std::memcpy(&bytes4, input, sizeof(bytes4));
+    //meta_data.data.resource.reference_table_dummy = bytes4;
 
     sdef_meta_file.read(input, sizeof(bytes4));
     std::memcpy(&bytes4, input, sizeof(bytes4));

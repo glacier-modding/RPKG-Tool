@@ -52,9 +52,9 @@ void rpkg_function::import_hash_meta(hash& meta_data, const std::string& hash_me
     std::memcpy(&bytes4, input, sizeof(bytes4));
     meta_data.data.resource.reference_table_size = bytes4;
 
-    meta_file.read(input, sizeof(bytes4));
-    std::memcpy(&bytes4, input, sizeof(bytes4));
-    meta_data.data.resource.reference_table_dummy = bytes4;
+    //meta_file.read(input, sizeof(bytes4));
+    //std::memcpy(&bytes4, input, sizeof(bytes4));
+    //meta_data.data.resource.reference_table_dummy = bytes4;
 
     meta_file.read(input, sizeof(bytes4));
     std::memcpy(&bytes4, input, sizeof(bytes4));

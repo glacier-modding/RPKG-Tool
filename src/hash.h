@@ -47,7 +47,7 @@ public:
     struct HashResource {
         char resource_type[4];
         uint32_t reference_table_size = 0;
-        uint32_t reference_table_dummy = 0;
+        //uint32_t reference_table_dummy = 0;
         uint32_t size_final = 0;
         uint32_t size_in_memory = 0;
         uint32_t size_in_video_memory = 0;

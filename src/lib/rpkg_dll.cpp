@@ -1874,8 +1874,8 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
 
                     std::memcpy(&char4, &rpkg.hash.at(j).data.resource.reference_table_size, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
-                    std::memcpy(&char4, &rpkg.hash.at(j).data.resource.reference_table_dummy, sizeof(uint32_t));
-                    temp_file_output.write(char4, sizeof(uint32_t));
+                    //std::memcpy(&char4, &rpkg.hash.at(j).data.resource.reference_table_dummy, sizeof(uint32_t));
+                    //temp_file_output.write(char4, sizeof(uint32_t));
                     std::memcpy(&char4, &rpkg.hash.at(j).data.resource.size_final, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
                     std::memcpy(&char4, &rpkg.hash.at(j).data.resource.size_in_memory, sizeof(uint32_t));
@@ -1919,8 +1919,8 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
 
                     std::memcpy(&char4, &temp_hash_reference_table_size, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
-                    std::memcpy(&char4, &rpkg.hash.at(j).data.resource.reference_table_dummy, sizeof(uint32_t));
-                    temp_file_output.write(char4, sizeof(uint32_t));
+                    //std::memcpy(&char4, &rpkg.hash.at(j).data.resource.reference_table_dummy, sizeof(uint32_t));
+                    //temp_file_output.write(char4, sizeof(uint32_t));
                     std::memcpy(&char4, &rpkg.hash.at(j).data.resource.size_final, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
                     std::memcpy(&char4, &rpkg.hash.at(j).data.resource.size_in_memory, sizeof(uint32_t));
@@ -1961,8 +1961,8 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
 
                     std::memcpy(&char4, &rpkg.hash.at(j).data.resource.reference_table_size, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
-                    std::memcpy(&char4, &rpkg.hash.at(j).data.resource.reference_table_dummy, sizeof(uint32_t));
-                    temp_file_output.write(char4, sizeof(uint32_t));
+                    //std::memcpy(&char4, &rpkg.hash.at(j).data.resource.reference_table_dummy, sizeof(uint32_t));
+                    //temp_file_output.write(char4, sizeof(uint32_t));
                     std::memcpy(&char4, &rpkg.hash.at(j).data.resource.size_final, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
                     std::memcpy(&char4, &rpkg.hash.at(j).data.resource.size_in_memory, sizeof(uint32_t));

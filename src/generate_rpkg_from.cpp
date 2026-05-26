@@ -303,7 +303,7 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
                 //temp_hash_data.hash_string = util::uint64_t_to_hex_string(meta_data.hash_value);
                 temp_hash_data.hash_resource_type = meta_data.hash_resource_type;
                 temp_hash_data.data.resource.reference_table_size = meta_data.data.resource.reference_table_size;
-                temp_hash_data.data.resource.reference_table_dummy = meta_data.data.resource.reference_table_dummy;
+                //temp_hash_data.data.resource.reference_table_dummy = meta_data.data.resource.reference_table_dummy;
                 temp_hash_data.data.resource.size_final = static_cast<uint32_t>(input_file_size);
 
                 if (meta_data.data.resource.size_in_memory == 0xFFFFFFFF) {
@@ -330,7 +330,7 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
                 //temp_hash_data.hash_string = hash_strings.at(files_index.at(i));
                 temp_hash_data.hash_resource_type = hash_resource_types.at(files_index.at(i));
                 temp_hash_data.data.resource.reference_table_size = 0x0;
-                temp_hash_data.data.resource.reference_table_dummy = 0x0;
+                //temp_hash_data.data.resource.reference_table_dummy = 0x0;
                 temp_hash_data.data.resource.size_final = static_cast<uint32_t>(input_file_size);
                 temp_hash_data.data.resource.size_in_memory = static_cast<uint32_t>(compressed_size_final);
                 temp_hash_data.data.resource.size_in_video_memory = 0x0;
@@ -359,7 +359,7 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
                 //temp_hash_data.hash_string = util::uint64_t_to_hex_string(meta_data.hash_value);
                 temp_hash_data.hash_resource_type = meta_data.hash_resource_type;
                 temp_hash_data.data.resource.reference_table_size = meta_data.data.resource.reference_table_size;
-                temp_hash_data.data.resource.reference_table_dummy = meta_data.data.resource.reference_table_dummy;
+                //temp_hash_data.data.resource.reference_table_dummy = meta_data.data.resource.reference_table_dummy;
                 temp_hash_data.data.resource.size_final = static_cast<uint32_t>(input_file_size);
 
                 if (meta_data.data.resource.size_in_memory == 0xFFFFFFFF) {
@@ -386,7 +386,7 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
                 //temp_hash_data.hash_string = hash_strings.at(files_index.at(i));
                 temp_hash_data.hash_resource_type = hash_resource_types.at(files_index.at(i));
                 temp_hash_data.data.resource.reference_table_size = 0x0;
-                temp_hash_data.data.resource.reference_table_dummy = 0x0;
+                //temp_hash_data.data.resource.reference_table_dummy = 0x0;
                 temp_hash_data.data.resource.size_final = static_cast<uint32_t>(input_file_size);
                 temp_hash_data.data.resource.size_in_memory = static_cast<uint32_t>(input_file_size);
                 temp_hash_data.data.resource.size_in_video_memory = 0x0;
@@ -565,8 +565,8 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
 
         std::memcpy(&char4, &temp_rpkg_data.hash.at(i).data.resource.reference_table_size, sizeof(uint32_t));
         file.write(char4, sizeof(uint32_t));
-        std::memcpy(&char4, &temp_rpkg_data.hash.at(i).data.resource.reference_table_dummy, sizeof(uint32_t));
-        file.write(char4, sizeof(uint32_t));
+        //std::memcpy(&char4, &temp_rpkg_data.hash.at(i).data.resource.reference_table_dummy, sizeof(uint32_t));
+        //file.write(char4, sizeof(uint32_t));
         std::memcpy(&char4, &temp_rpkg_data.hash.at(i).data.resource.size_final, sizeof(uint32_t));
         file.write(char4, sizeof(uint32_t));
         std::memcpy(&char4, &temp_rpkg_data.hash.at(i).data.resource.size_in_memory, sizeof(uint32_t));
