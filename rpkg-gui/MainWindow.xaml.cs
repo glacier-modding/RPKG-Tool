@@ -851,7 +851,7 @@ namespace rpkg
 							}
 						}
 
-						if (resourceType == "WWEM" || resourceType == "WWES")
+						/*if (resourceType == "WWEM" || resourceType == "WWES")
 						{
 							if (OGGPlayerTimer != null)
 							{
@@ -1036,7 +1036,7 @@ namespace rpkg
 
 								FirstTabRight.IsSelected = true;
 							}
-						}
+						}*/
 					}
 
 					//GC.Collect();
