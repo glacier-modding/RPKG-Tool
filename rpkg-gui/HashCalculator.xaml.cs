@@ -96,7 +96,7 @@ namespace rpkg
                     byte[] stringBytes = Encoding.UTF8.GetBytes(lineString);
                     byte[] hashBytes = md5.ComputeHash(stringBytes);
 
-                    StringBuilder ioiHashsb = new StringBuilder("00", 16);
+                    StringBuilder ioiHashsb = new StringBuilder("01", 16);
                     for (int i = 1; i < 8; i++)
                     {
                         ioiHashsb.Append(hashBytes[i].ToString("X2"));
