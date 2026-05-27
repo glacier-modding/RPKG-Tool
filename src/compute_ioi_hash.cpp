@@ -28,7 +28,7 @@ std::string generic_function::compute_ioi_hash(const std::string& input_to_ioi_h
 
     std::stringstream ss;
 
-    ss << "00";
+    ss << "01";
 
     for (uint64_t m = 1; m < 8; m++) {
         ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(signature[m]);
