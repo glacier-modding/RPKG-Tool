@@ -57,7 +57,7 @@ namespace rpkg
 
                 webClient.DownloadFileCompleted += WebClient_DownloadFileCompleted;
 
-                Uri uri = new Uri("https://github.com/glacier-modding/Hitman-Hashes/releases/latest/download/latest-hashes.7z");
+                Uri uri = new Uri("https://github.com/glacier-modding/Bond-Hashes/releases/latest/download/latest-hashes.7z");
 
                 webClient.DownloadFileAsync(uri, "latest-hashes.7z");
             }
@@ -118,7 +118,7 @@ namespace rpkg
             {
                 HttpClient http = new HttpClient() { Timeout = TimeSpan.FromSeconds(10) };
 
-                int.TryParse(http.GetAsync("https://github.com/glacier-modding/Hitman-Hashes/releases/latest/download/version").Result.Content.ReadAsStringAsync().Result, out currentVersionAvailable);
+                int.TryParse(http.GetAsync("https://github.com/glacier-modding/Bond-Hashes/releases/latest/download/version").Result.Content.ReadAsStringAsync().Result, out currentVersionAvailable);
             }
             else if (operation == 4)
             {
