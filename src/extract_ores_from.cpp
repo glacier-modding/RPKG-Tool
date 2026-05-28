@@ -62,7 +62,7 @@ void rpkg_function::extract_ores_from(std::string& input_path, std::string& filt
 
     log_output = false;
 
-    uint64_t temp_hash_value = 0x00858D45F5F9E3CA;
+    uint64_t temp_hash_value = 0x01FBE4097B698967;
 
     uint32_t rpkg_index = rpkg_function::get_latest_hash(temp_hash_value);
 
