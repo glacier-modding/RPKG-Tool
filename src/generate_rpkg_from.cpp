@@ -427,7 +427,7 @@ void rpkg_function::generate_rpkg_from(std::string& input_path, std::string& out
     table_size = 0x0;
 
     for (auto& j : temp_rpkg_data.hash) {
-        table_size += 0x18;
+        table_size += 0x14;
         table_size += j.data.resource.reference_table_size;
     }
 
