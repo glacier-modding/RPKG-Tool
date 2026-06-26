@@ -39,7 +39,7 @@ void rpkg_function::search_repo(std::string& input_path, std::string& search, in
         const auto it = rpkgs.at(repo_rpkg_index).hash_map.find(repo_hash_value);
 
         if (it != rpkgs.at(repo_rpkg_index).hash_map.end()) {
-            constexpr uint64_t ores_hash_value = 0x00858D45F5F9E3CA;
+            constexpr uint64_t ores_hash_value = 0x01FBE4097B698967;
 
             const uint32_t ores_rpkg_index = rpkg_function::get_latest_hash(ores_hash_value);
 
@@ -76,7 +76,7 @@ void rpkg_function::search_repo(std::string& input_path, std::string& search, in
                     std::cout << repo_response_data << std::endl;
                 }
             } else {
-                LOG_AND_RETURN("ORES hash 00858D45F5F9E3CA does not exist in any loaded RPKG files.");
+                LOG_AND_RETURN("ORES hash 01FBE4097B698967 does not exist in any loaded RPKG files.");
             }
         }
     } else {

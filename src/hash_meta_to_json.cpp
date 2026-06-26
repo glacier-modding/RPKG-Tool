@@ -86,11 +86,11 @@ void rpkg_function::hash_meta_to_json(std::string& input_path) {
         json_string += "\"hash_reference_table_size\":" +
                        util::uint32_t_to_string(meta_data.data.resource.reference_table_size) + ",";
 
-        meta_file.read(input, sizeof(bytes4));
-        std::memcpy(&bytes4, input, sizeof(bytes4));
-        meta_data.data.resource.reference_table_dummy = bytes4;
-        json_string += "\"hash_reference_table_dummy\":" +
-                       util::uint32_t_to_string(meta_data.data.resource.reference_table_dummy) + ",";
+        //meta_file.read(input, sizeof(bytes4));
+        //std::memcpy(&bytes4, input, sizeof(bytes4));
+        //meta_data.data.resource.reference_table_dummy = bytes4;
+        //json_string += "\"hash_reference_table_dummy\":" +
+        //               util::uint32_t_to_string(meta_data.data.resource.reference_table_dummy) + ",";
 
         meta_file.read(input, sizeof(bytes4));
         std::memcpy(&bytes4, input, sizeof(bytes4));

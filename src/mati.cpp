@@ -759,9 +759,9 @@ mati::mati(std::string mati_path, std::string mati_meta_path, uint64_t hash_valu
     std::memcpy(&bytes4, input, sizeof(bytes4));
     meta_data.data.resource.reference_table_size = bytes4;
 
-    mati_meta_file.read(input, sizeof(bytes4));
-    std::memcpy(&bytes4, input, sizeof(bytes4));
-    meta_data.data.resource.reference_table_dummy = bytes4;
+    //mati_meta_file.read(input, sizeof(bytes4));
+    //std::memcpy(&bytes4, input, sizeof(bytes4));
+    //meta_data.data.resource.reference_table_dummy = bytes4;
 
     mati_meta_file.read(input, sizeof(bytes4));
     std::memcpy(&bytes4, input, sizeof(bytes4));

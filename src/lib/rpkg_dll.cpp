@@ -1874,8 +1874,8 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
 
                     std::memcpy(&char4, &rpkg.hash.at(j).data.resource.reference_table_size, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
-                    std::memcpy(&char4, &rpkg.hash.at(j).data.resource.reference_table_dummy, sizeof(uint32_t));
-                    temp_file_output.write(char4, sizeof(uint32_t));
+                    //std::memcpy(&char4, &rpkg.hash.at(j).data.resource.reference_table_dummy, sizeof(uint32_t));
+                    //temp_file_output.write(char4, sizeof(uint32_t));
                     std::memcpy(&char4, &rpkg.hash.at(j).data.resource.size_final, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
                     std::memcpy(&char4, &rpkg.hash.at(j).data.resource.size_in_memory, sizeof(uint32_t));
@@ -1919,8 +1919,8 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
 
                     std::memcpy(&char4, &temp_hash_reference_table_size, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
-                    std::memcpy(&char4, &rpkg.hash.at(j).data.resource.reference_table_dummy, sizeof(uint32_t));
-                    temp_file_output.write(char4, sizeof(uint32_t));
+                    //std::memcpy(&char4, &rpkg.hash.at(j).data.resource.reference_table_dummy, sizeof(uint32_t));
+                    //temp_file_output.write(char4, sizeof(uint32_t));
                     std::memcpy(&char4, &rpkg.hash.at(j).data.resource.size_final, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
                     std::memcpy(&char4, &rpkg.hash.at(j).data.resource.size_in_memory, sizeof(uint32_t));
@@ -1961,8 +1961,8 @@ int modify_hash_depends(char* rpkg_file, char* hash_string, char* hash_list, cha
 
                     std::memcpy(&char4, &rpkg.hash.at(j).data.resource.reference_table_size, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
-                    std::memcpy(&char4, &rpkg.hash.at(j).data.resource.reference_table_dummy, sizeof(uint32_t));
-                    temp_file_output.write(char4, sizeof(uint32_t));
+                    //std::memcpy(&char4, &rpkg.hash.at(j).data.resource.reference_table_dummy, sizeof(uint32_t));
+                    //temp_file_output.write(char4, sizeof(uint32_t));
                     std::memcpy(&char4, &rpkg.hash.at(j).data.resource.size_final, sizeof(uint32_t));
                     temp_file_output.write(char4, sizeof(uint32_t));
                     std::memcpy(&char4, &rpkg.hash.at(j).data.resource.size_in_memory, sizeof(uint32_t));
@@ -2249,7 +2249,7 @@ uint32_t is_repo_loaded() {
 }
 
 uint32_t is_ores_loaded() {
-    uint64_t repo_hash_value = 0x00858D45F5F9E3CA;
+    uint64_t repo_hash_value = 0x01FBE4097B698967;
 
     uint32_t rpkg_index = rpkg_function::get_latest_hash(repo_hash_value);
 
@@ -2273,7 +2273,7 @@ int load_repo() {
         auto it = rpkgs.at(repo_rpkg_index).hash_map.find(repo_hash_value);
 
         if (it != rpkgs.at(repo_rpkg_index).hash_map.end()) {
-            uint64_t ores_hash_value = 0x00858D45F5F9E3CA;
+            uint64_t ores_hash_value = 0x01FBE4097B698967;
 
             uint32_t ores_rpkg_index = rpkg_function::get_latest_hash(ores_hash_value);
 
@@ -2304,7 +2304,7 @@ int load_repo_from_file(char* repo_path) {
 
     repos.emplace_back(repo_path);
 
-    uint64_t ores_hash_value = 0x00858D45F5F9E3CA;
+    uint64_t ores_hash_value = 0x01FBE4097B698967;
 
     uint32_t ores_rpkg_index = rpkg_function::get_latest_hash(ores_hash_value);
 

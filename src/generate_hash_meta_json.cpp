@@ -19,7 +19,7 @@ std::string rpkg_function::generate_hash_meta_json(const uint64_t rpkg_index, co
     json["hash_size"] = rpkgs.at(rpkg_index).hash.at(hash_index).data.header.data_size;
     json["hash_resource_type"] = std::string(rpkgs.at(rpkg_index).hash.at(hash_index).hash_resource_type.data(), 4);
     json["hash_reference_table_size"] = rpkgs.at(rpkg_index).hash.at(hash_index).data.resource.reference_table_size;
-    json["hash_reference_table_dummy"] = rpkgs.at(rpkg_index).hash.at(hash_index).data.resource.reference_table_dummy;
+    //json["hash_reference_table_dummy"] = rpkgs.at(rpkg_index).hash.at(hash_index).data.resource.reference_table_dummy;
     json["hash_size_final"] = rpkgs.at(rpkg_index).hash.at(hash_index).data.resource.size_final;
     json["hash_size_in_memory"] = rpkgs.at(rpkg_index).hash.at(hash_index).data.resource.size_in_memory;
     json["hash_size_in_video_memory"] = rpkgs.at(rpkg_index).hash.at(hash_index).data.resource.size_in_video_memory;

@@ -150,25 +150,25 @@ std::vector<char> rpkg_function::json_to_hash_meta(std::string& json_string) {
         meta_data.push_back(j);
     }
 
-    const rapidjson::Value& hash_reference_table_dummy = document["hash_reference_table_dummy"];
+    //const rapidjson::Value& hash_reference_table_dummy = document["hash_reference_table_dummy"];
 
-    if (hash_reference_table_dummy.IsNull()) {
-        LOG("Error: hash_reference_table_dummy is missing from the JSON.");
+    //if (hash_reference_table_dummy.IsNull()) {
+    //    LOG("Error: hash_reference_table_dummy is missing from the JSON.");
 
-        response_string = "Error: hash_reference_table_dummy is missing from the JSON.";
+    //    response_string = "Error: hash_reference_table_dummy is missing from the JSON.";
 
-        return {};
-    }
+    //    return {};
+    //}
 
-    std::cout << hash_reference_table_dummy.GetUint() << std::endl;
+    //std::cout << hash_reference_table_dummy.GetUint() << std::endl;
 
-    temp_uint32_t = hash_reference_table_dummy.GetUint();
+    //temp_uint32_t = hash_reference_table_dummy.GetUint();
 
-    std::memcpy(&char4, &temp_uint32_t, 0x4);
+    //std::memcpy(&char4, &temp_uint32_t, 0x4);
 
-    for (char& j : char4) {
-        meta_data.push_back(j);
-    }
+    //for (char& j : char4) {
+    //    meta_data.push_back(j);
+    //}
 
     const rapidjson::Value& hash_size_final = document["hash_size_final"];
 

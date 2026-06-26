@@ -90,12 +90,12 @@ bool rpkg_function::import_hash_meta_json(hash& meta_data, const std::string& in
     }
 
     // hash_reference_table_dummy
-    const rapidjson::Value& hash_reference_table_dummy = document["hash_reference_table_dummy"];
-    if (hash_reference_table_dummy.IsNull()) {
-        LOG("Error: hash_reference_table_dummy is missing from the JSON.");
-        return false;
-    }
-    meta_data.data.resource.reference_table_dummy = hash_reference_table_dummy.GetUint();
+    //const rapidjson::Value& hash_reference_table_dummy = document["hash_reference_table_dummy"];
+    //if (hash_reference_table_dummy.IsNull()) {
+    //    LOG("Error: hash_reference_table_dummy is missing from the JSON.");
+    //    return false;
+    //}
+    //meta_data.data.resource.reference_table_dummy = hash_reference_table_dummy.GetUint();
 
     // hash_size_final
     const rapidjson::Value& hash_size_final = document["hash_size_final"];
